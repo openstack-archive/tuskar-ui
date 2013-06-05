@@ -192,3 +192,16 @@ COMPRESS_OFFLINE_CONTEXT = {
 
 if DEBUG:
     logging.basicConfig(level=logging.DEBUG)
+
+# FIXME: configuration for dummy data
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'openstack_dashboard/dummydb.sqlite',
+    }
+}
+
+# FIXME: configuration for dummy data
+FIXTURE_DIRS = (
+    'openstack_dashboard/dashboards/infrastructure/fixtures/',
+)

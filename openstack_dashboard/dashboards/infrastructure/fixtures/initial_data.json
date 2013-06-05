@@ -1,0 +1,6 @@
+[
+  {"pk": 1, "model": "infrastructure.flavor", "fields": {"name": "flavor1"}},
+  {"pk": 1, "model": "infrastructure.resourceclass", "fields": {"service_type": "compute", "flavors": [1], "name": "rclass1"}},
+  {"pk": 2, "model": "infrastructure.resourceclass", "fields": {"service_type": "compute", "flavors": [], "name": "rclass2"}},
+  {"pk": 3, "model": "infrastructure.resourceclass", "fields": {"service_type": "storage", "flavors": [], "name": "rclass3"}}
+]

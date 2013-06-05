@@ -14,6 +14,30 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""
-Stub file to work around django bug: https://code.djangoproject.com/ticket/7198
-"""
+# FIXME: configuration for dummy data
+from django.db import models
+
+
+class Flavor(models.Model):
+    class Meta:
+        db_table = 'infrastructure_flavor'
+
+    name = models.CharField(max_length=50, unique=True)
+    # TODO: proper capacities representation
+
+    def capacities():
+        return []
+
+
+class ResourceClass(models.Model):
+    class Meta:
+        # syncdb by default creates 'openstack_dashboard_resourceclass' table,
+        # but it's better to keep models under
+        # openstack_dashboard/dashboards/infrastructure/models.py instead of
+        # openstack_dashboard/models.py since the models.py stub file is
+        # required here anyway
+        db_table = 'infrastructure_resourceclass'
+
+    name = models.CharField(max_length=50, unique=True)
+    service_type = models.CharField(max_length=50)
+    flavors = models.ManyToManyField(Flavor)
