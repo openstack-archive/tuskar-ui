@@ -1,6 +1,5 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2013 Red Hat, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -14,13 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import patterns, url, include
+from django.conf.urls.defaults import patterns, url
 
-from .flavors import urls as flavor_urls
-from .views import IndexView
+from .views import CreateView, EditView
 
 
-urlpatterns = patterns('',
-    url(r'^$', IndexView.as_view(), name='index'),
-    url(r'flavors/', include(flavor_urls, namespace='flavors')),
+VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \
+    'resource_management.flavors.views'
+
+
+urlpatterns = patterns(VIEW_MOD,
+    url(r'^create/$', CreateView.as_view(), name='create'),
+    url(r'^(?P<id>[^/]+)/edit/$', EditView.as_view(), name='edit'),
 )

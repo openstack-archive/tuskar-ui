@@ -14,25 +14,40 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from collections import namedtuple
+
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
 from horizon import messages
 from horizon import tabs
 
-# define tabs here
+#from openstack_dashboard.api import management
 
-# from .flavors.tables import FlavorsTable
+from .flavors.tables import FlavorsTable
 
 
-# class FlavorsTab(tabs.TableTab):
-#     table_classes = (FlavorsTable,)
-#     name = _("Flavors")
-#     slug = "flavors_tab"
-#     template_name = "horizon/common/_detail_table.html"
+class FlavorsTab(tabs.TableTab):
+    table_classes = (FlavorsTable,)
+    name = _("Flavors")
+    slug = "flavors_tab"
+    template_name = "horizon/common/_detail_table.html"
+
+    def get_flavors_data(self):
+        try:
+            #flavors = management.flavors_list(self.request)
+            Flavor = namedtuple('Flavor', 'id, name')
+            flavor1 = Flavor('1', 'test')
+            flavor2 = Flavor('2', 'test 2')
+            flavors = [flavor1, flavor2]
+        except:
+            flavors = []
+            exceptions.handle(self.request,
+                              _('Unable to retrieve management flavors.'))
+        return flavors
 
 
 class ResourceManagementTabs(tabs.TabGroup):
     slug = "resource_management_tabs"
-    tabs = ()
+    tabs = (FlavorsTab,)
     sticky = True

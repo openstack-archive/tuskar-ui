@@ -14,10 +14,30 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from django import http
+from django.core.urlresolvers import reverse
+
+from mox import IsA
+
+from openstack_dashboard import api
 from openstack_dashboard.test import helpers as test
 
 
-class Resource_ManagementTests(test.TestCase):
-    # Unit tests for resource_management.
-    def test_me(self):
-        self.assertTrue(1 + 1 == 2)
+class ResourceManagementTests(test.BaseAdminViewTests):
+    def setUp(self):
+        super(ResourceManagementTests, self).setUp()
+
+    def test_index(self):
+        #flavors = self.flavors.list()
+        #self.mox.StubOutWithMock(api.management, 'flavor_list')
+
+        #api.management.flavor_list(IsA(http.HttpRequest)).AndReturn(flavors)
+
+        self.mox.ReplayAll()
+
+        url = reverse('horizon:infrastructure:resource_management:index')
+        res = self.client.get(url)
+
+        self.assertTemplateUsed(
+            res, 'infrastructure/resource_management/index.html')
+        #self.assertItemsEqual(res.context['flavors_table'].data, flavors)
