@@ -17,10 +17,13 @@
 from django.conf.urls.defaults import patterns, url, include
 
 from .flavors import urls as flavor_urls
+from .resource_classes import urls as resource_classes_urls
 from .views import IndexView
 
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'flavors/', include(flavor_urls, namespace='flavors')),
+    url(r'resource_classes/', include(resource_classes_urls,
+        namespace='resource_classes')),
 )

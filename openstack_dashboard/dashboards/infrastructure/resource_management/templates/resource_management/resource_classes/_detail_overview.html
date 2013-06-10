@@ -1,0 +1,15 @@
+{% load i18n sizeformat %}
+{% load url from future %}
+
+<h3>{% trans "Resource Class Overview" %}</h3>
+
+<div class="status row-fluid detail">
+  <h4>{% trans "Info" %}</h4>
+  <hr class="header_rule">
+  <dl>
+    <dt>{% trans "Name" %}</dt>
+    <dd>{{ resource_class.name }}</dd>
+    <dt>{% trans "Service Type" %}</dt>
+    <dd>{{ resource_class.service_type }}</dd>
+  </dl>
+</div>
