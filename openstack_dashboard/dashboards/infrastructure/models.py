@@ -29,6 +29,28 @@ class Flavor(models.Model):
         return []
 
 
+class Host(models.Model):
+    class Meta:
+        db_table = 'infrastructure_host'
+
+    name = models.CharField(max_length=50, unique=True)
+    rack = models.ForeignKey('Rack')
+
+    def capacities():
+        return []
+
+
+class Rack(models.Model):
+    class Meta:
+        db_table = 'infrastructure_rack'
+
+    name = models.CharField(max_length=50, unique=True)
+    resource_class = models.ForeignKey('ResourceClass')
+
+    def capacities():
+        return []
+
+
 class ResourceClass(models.Model):
     class Meta:
         # syncdb by default creates 'openstack_dashboard_resourceclass' table,

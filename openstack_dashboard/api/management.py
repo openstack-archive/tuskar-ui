@@ -15,8 +15,10 @@
 #    under the License.
 
 import logging
+
 from openstack_dashboard.api import base
 import openstack_dashboard.dashboards.infrastructure.models as dummymodels
+
 
 LOG = logging.getLogger(__name__)
 
@@ -33,6 +35,26 @@ class StringIdAPIResourceWrapper(base.APIResourceWrapper):
         return str(self._apiresource.id)
 
 
+class Host(StringIdAPIResourceWrapper):
+    """Wrapper for the Host object  returned by the
+    dummy model.
+    """
+    _attrs = ['name']
+
+
+class Rack(StringIdAPIResourceWrapper):
+    """Wrapper for the Rack object  returned by the
+    dummy model.
+    """
+    _attrs = ['name']
+
+    @property
+    def hosts(self):
+        if "_hosts" not in self.__dict__:
+            self._hosts = [Host(h) for h in self._apiresource.host_set.all()]
+        return self.__dict__['_hosts']
+
+
 class ResourceClass(StringIdAPIResourceWrapper):
     """Wrapper for the ResourceClass object  returned by the
     dummy model.
@@ -45,6 +67,19 @@ class ResourceClass(StringIdAPIResourceWrapper):
             self._flavors = [Flavor(f) for f in
                     self._apiresource.flavors.all()]
         return self.__dict__['_flavors']
+
+    @property
+    def hosts(self):
+        if "_hosts" not in self.__dict__:
+            self._hosts = reduce(lambda x, y: x + y,
+                                 [r.hosts for r in self.racks])
+        return self.__dict__['_hosts']
+
+    @property
+    def racks(self):
+        if "_racks" not in self.__dict__:
+            self._racks = [Rack(r) for r in self._apiresource.rack_set.all()]
+        return self.__dict__['_racks']
 
 
 class Flavor(StringIdAPIResourceWrapper):

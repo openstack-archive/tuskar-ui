@@ -51,6 +51,18 @@ class ManagementApiTests(test.APITestCase):
             self.assertIsInstance(f, api.management.Flavor)
         self.assertEquals(1, len(rc.flavors))
 
+    def test_resource_class_racks(self):
+        rc = api.management.resource_class_get(self.request, self.rclass1.id)
+        for rack in rc.racks:
+            self.assertIsInstance(rack, api.management.Rack)
+        self.assertEquals(2, len(rc.racks))
+
+    def test_resource_class_hosts(self):
+        rc = api.management.resource_class_get(self.request, self.rclass1.id)
+        for host in rc.hosts:
+            self.assertIsInstance(host, api.management.Host)
+        self.assertEquals(4, len(rc.hosts))
+
     # TODO: create, delete operations
 
     def test_flavor_list(self):

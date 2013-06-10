@@ -1,6 +1,15 @@
 [
-  {"pk": 1, "model": "infrastructure.flavor", "fields": {"name": "flavor1"}},
-  {"pk": 1, "model": "infrastructure.resourceclass", "fields": {"service_type": "compute", "flavors": [1], "name": "rclass1"}},
-  {"pk": 2, "model": "infrastructure.resourceclass", "fields": {"service_type": "compute", "flavors": [], "name": "rclass2"}},
-  {"pk": 3, "model": "infrastructure.resourceclass", "fields": {"service_type": "storage", "flavors": [], "name": "rclass3"}}
+    {"pk": 1, "model": "infrastructure.flavor", "fields": {"name": "flavor1"}},
+
+    {"pk": 1, "model": "infrastructure.host", "fields": {"name": "host1", "rack": 1}},
+    {"pk": 2, "model": "infrastructure.host", "fields": {"name": "host2", "rack": 1}},
+    {"pk": 3, "model": "infrastructure.host", "fields": {"name": "host3", "rack": 2}},
+    {"pk": 4, "model": "infrastructure.host", "fields": {"name": "host4", "rack": 2}},
+
+    {"pk": 1, "model": "infrastructure.rack", "fields": {"name": "rack1", "resource_class": 1}},
+    {"pk": 2, "model": "infrastructure.rack", "fields": {"name": "rack2", "resource_class": 1}},
+
+    {"pk": 1, "model": "infrastructure.resourceclass", "fields": {"service_type": "compute", "flavors": [1], "name": "rclass1"}},
+    {"pk": 2, "model": "infrastructure.resourceclass", "fields": {"service_type": "compute", "flavors": [], "name": "rclass2"}},
+    {"pk": 3, "model": "infrastructure.resourceclass", "fields": {"service_type": "storage", "flavors": [], "name": "rclass3"}}
 ]
