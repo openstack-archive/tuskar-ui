@@ -14,18 +14,17 @@
 
 import logging
 
-from collections import namedtuple
-
+from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
 from horizon import forms
-from horizon import tables
+from horizon import tabs
 
 from openstack_dashboard import api
 from .forms import CreateRack, EditRack
-from .tables import RacksTable
+from .tabs import RackDetailTabs
 
 
 LOG = logging.getLogger(__name__)
@@ -46,16 +45,47 @@ class EditView(forms.ModalFormView):
 
     def get_context_data(self, **kwargs):
         context = super(EditView, self).get_context_data(**kwargs)
-        context['rack_id'] = self.kwargs['id']
+        context['rack_id'] = self.kwargs['rack_id']
         return context
 
     def get_initial(self):
         try:
             rack = api.management.Rack.get(self.request,
-                                           self.kwargs['id'])
+                                           self.kwargs['rack_id'])
         except:
             exceptions.handle(self.request,
                               _("Unable to retrieve rack data."))
         return {'rack_id': rack.id,
                 'name': rack.name,
                 'resource_class_id': rack.resource_class_id}
+
+
+class DetailView(tabs.TabView):
+    tab_group_class = RackDetailTabs
+    template_name = 'infrastructure/resource_management/racks/detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        context["rack"] = self.get_data()
+        return context
+
+    def get_data(self):
+        if not hasattr(self, "_rack"):
+            try:
+                rack_id = self.kwargs['rack_id']
+                rack = api.management.Rack.get(self.request, rack_id)
+            except:
+                redirect = reverse('horizon:infrastructure:'
+                                   'resource_management:index')
+                exceptions.handle(self.request,
+                                  _('Unable to retrieve details for '
+                                    'rack "%s".')
+                                    % rack_id,
+                                    redirect=redirect)
+            self._rack = rack
+        return self._rack
+
+    def get_tabs(self, request, *args, **kwargs):
+        rack = self.get_data()
+        return self.tab_group_class(request, rack=rack,
+                                    **kwargs)

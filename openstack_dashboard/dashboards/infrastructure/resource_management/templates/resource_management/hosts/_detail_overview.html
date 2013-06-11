@@ -1,0 +1,21 @@
+{% load i18n sizeformat %}
+{% load url from future %}
+
+<h3>{% trans "Host Overview" %}</h3>
+
+<div class="info row-fluid detail">
+  <h4>{% trans "Info" %}</h4>
+  <hr class="header_rule">
+  <dl>
+    <dt>{% trans "Name" %}</dt>
+    <dd>{{ host.name|default:_("None") }}</dd>
+    <dt>{% trans "MAC Address" %}</dt>
+    <dd>{{ host.mac_address|default:_("None") }}</dd>
+    <dt>{% trans "IP Address" %}</dt>
+    <dd>{{ host.ip_address|default:_("None") }}</dd>
+    <dt>{% trans "Status" %}</dt>
+    <dd>{{ host.status|default:_("None") }}</dd>
+    <dt>{% trans "Usage" %}</dt>
+    <dd>{{ host.usage|default:_("None") }}</dd>
+  </dl>
+</div>

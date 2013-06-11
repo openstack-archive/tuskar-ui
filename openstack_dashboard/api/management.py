@@ -51,7 +51,11 @@ class Host(StringIdAPIResourceWrapper):
     """Wrapper for the Host object  returned by the
     dummy model.
     """
-    _attrs = ['name']
+    _attrs = ['name', 'mac_address', 'ip_address', 'status', 'usage']
+
+    @classmethod
+    def get(cls, request, host_id):
+        return cls(dummymodels.Host.objects.get(id=host_id))
 
     @property
     def capacities(self):

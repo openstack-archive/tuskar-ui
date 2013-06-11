@@ -48,15 +48,18 @@ class EditRack(tables.LinkAction):
 
 class RacksFilterAction(tables.FilterAction):
 
-    def filter(self, table, flavors, filter_string):
+    def filter(self, table, racks, filter_string):
         """ Naive case-insensitive search. """
         q = filter_string.lower()
-        return [flavor for flavor in instances
-                if q in flavor.name.lower()]
+        return [rack for rack in racks
+                if q in rack.name.lower()]
 
 
 class RacksTable(tables.DataTable):
-    name = tables.Column('name', verbose_name=_("Rack Name"))
+    name = tables.Column('name',
+                         link=("horizon:infrastructure:resource_management"
+                               ":racks:detail"),
+                         verbose_name=_("Rack Name"))
 
     class Meta:
         name = "racks"

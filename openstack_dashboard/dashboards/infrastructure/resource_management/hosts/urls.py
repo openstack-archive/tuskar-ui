@@ -12,18 +12,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import patterns, url, include
+from django.conf.urls.defaults import patterns, url
 
-from .views import CreateView, EditView, DetailView
+from .views import DetailView
 
 
-RACKS = r'^(?P<rack_id>[^/]+)/%s$'
+HOSTS = r'^(?P<host_id>[^/]+)/%s$'
 VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \
-    'resource_management.racks.views'
+           'resource_management.hosts.views'
 
 
 urlpatterns = patterns(VIEW_MOD,
-    url(r'^create/$', CreateView.as_view(), name='create'),
-    url(RACKS % 'edit/', EditView.as_view(), name='edit'),
-    url(RACKS % 'detail', DetailView.as_view(), name='detail'),
+    url(HOSTS % 'detail', DetailView.as_view(), name='detail'),
 )

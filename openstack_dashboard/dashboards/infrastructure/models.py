@@ -43,6 +43,10 @@ class Host(models.Model):
         db_table = 'infrastructure_host'
 
     name = models.CharField(max_length=50, unique=True)
+    mac_address = models.CharField(max_length=50, unique=True)
+    ip_address = models.CharField(max_length=50, unique=True)
+    status = models.CharField(max_length=50)
+    usage = models.IntegerField(max_length=50)
     rack = models.ForeignKey('Rack')
     capacities = generic.GenericRelation(Capacity)
 

@@ -12,18 +12,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import patterns, url, include
+from django.utils.translation import ugettext_lazy as _
 
-from .views import CreateView, EditView, DetailView
-
-
-RACKS = r'^(?P<rack_id>[^/]+)/%s$'
-VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \
-    'resource_management.racks.views'
+from horizon import tabs
 
 
-urlpatterns = patterns(VIEW_MOD,
-    url(r'^create/$', CreateView.as_view(), name='create'),
-    url(RACKS % 'edit/', EditView.as_view(), name='edit'),
-    url(RACKS % 'detail', DetailView.as_view(), name='detail'),
-)
+class OverviewTab(tabs.Tab):
+    name = _("Overview")
+    slug = "host_overview_tab"
+    template_name = ("infrastructure/resource_management/hosts/"
+                     "_detail_overview.html")
+    preload = False
+
+    def get_context_data(self, request):
+        return {"host": self.tab_group.kwargs['host']}
+
+
+class HostDetailTabs(tabs.TabGroup):
+    slug = "host_detail_tabs"
+    tabs = (OverviewTab,)
+    sticky = True
