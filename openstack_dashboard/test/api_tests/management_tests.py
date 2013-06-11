@@ -45,11 +45,11 @@ class ManagementApiTests(test.APITestCase):
         self.assertIsInstance(rc, api.management.ResourceClass)
         self.assertEquals(rc.name, self.rclass1.name)
 
-    def test_resource_class_flavors(self):
+    def test_resource_class_flavor_counts(self):
         rc = api.management.ResourceClass.get(self.request, self.rclass1.id)
-        for f in rc.flavors:
-            self.assertIsInstance(f, api.management.Flavor)
-        self.assertEquals(1, len(rc.flavors))
+        for f in rc.resource_class_flavors:
+            self.assertIsInstance(f, api.management.ResourceClassFlavor)
+        self.assertEquals(3, len(rc.resource_class_flavors))
 
     def test_resource_class_racks(self):
         rc = api.management.ResourceClass.get(self.request, self.rclass1.id)

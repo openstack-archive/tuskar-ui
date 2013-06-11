@@ -33,11 +33,39 @@ class StringIdAPIResourceWrapper(base.APIResourceWrapper):
         return str(self._apiresource.id)
 
 
+class Capacity(StringIdAPIResourceWrapper):
+    """Wrapper for the Capacity object returned by the
+    dummy model.
+    """
+    _attrs = ['name', 'value', 'unit']
+
+
+class Flavor(StringIdAPIResourceWrapper):
+    """Wrapper for the Flavor object returned by the
+    dummy model.
+    """
+    _attrs = ['name']
+
+    @property
+    def capacities(self):
+        if "_capacities" not in self.__dict__:
+            self._capacities = [Capacity(c) for c in
+                                self._apiresource.capacities.all()]
+        return self.__dict__['_capacities']
+
+
 class Host(StringIdAPIResourceWrapper):
     """Wrapper for the Host object  returned by the
     dummy model.
     """
     _attrs = ['name']
+
+    @property
+    def capacities(self):
+        if "_capacities" not in self.__dict__:
+            self._capacities = [Capacity(c) for c in
+                                self._apiresource.capacities.all()]
+        return self.__dict__['_capacities']
 
 
 class Rack(StringIdAPIResourceWrapper):
@@ -51,6 +79,13 @@ class Rack(StringIdAPIResourceWrapper):
         if "_hosts" not in self.__dict__:
             self._hosts = [Host(h) for h in self._apiresource.host_set.all()]
         return self.__dict__['_hosts']
+
+    @property
+    def capacities(self):
+        if "_capacities" not in self.__dict__:
+            self._capacities = [Capacity(c) for c in
+                                self._apiresource.capacities.all()]
+        return self.__dict__['_capacities']
 
 
 class ResourceClass(StringIdAPIResourceWrapper):
@@ -86,11 +121,11 @@ class ResourceClass(StringIdAPIResourceWrapper):
     # ResourceClass Properties
     ##########################################################################
     @property
-    def flavors(self):
-        if "_flavors" not in self.__dict__:
-            self._flavors = [
-                Flavor(f) for f in self._apiresource.flavors.all()]
-        return self.__dict__['_flavors']
+    def resource_class_flavors(self):
+        if "_resource_class_flavors" not in self.__dict__:
+            self._resource_class_flavors = [ResourceClassFlavor(fc) for fc in
+                    self._apiresource.resourceclassflavor_set.all()]
+        return self.__dict__['_resource_class_flavors']
 
     @property
     def hosts(self):
@@ -125,37 +160,24 @@ class ResourceClass(StringIdAPIResourceWrapper):
     def delete(self, request):
         self._apiresource.delete()
 
-    # Resource class flavors management
-    def set_flavors(self, request, flavors_ids):
-        added_flavor_ids = [flavor.id for flavor in self.flavors] or []
 
-        ids_to_add = flavors_ids or []
-        ids_to_delete = list(set(added_flavor_ids) - set(ids_to_add))
-        ids_to_add = list(set(ids_to_add) - set(added_flavor_ids))
-
-        self.remove_flavors(request, ids_to_delete)
-        self.add_flavors(request, ids_to_add)
-
-    def remove_flavors(self, request, flavors_ids):
-        flavors = []
-        for flavor_id in flavors_ids:
-            # todo lsmola should be Flavor.get
-            flavors.append(flavor_get(request, flavor_id)._apiresource)
-        self._apiresource.flavors.remove(*flavors)
-
-    def add_flavors(self, request, flavors_ids):
-        flavors = []
-        for flavor_id in flavors_ids:
-            # todo lsmola should be Flavor.get
-            flavors.append(flavor_get(request, flavor_id)._apiresource)
-        self._apiresource.flavors.add(*flavors)
-
-
-class Flavor(StringIdAPIResourceWrapper):
-    """Wrapper for the Flavor object  returned by the
+class ResourceClassFlavor(StringIdAPIResourceWrapper):
+    """Wrapper for the FlavorCount object  returned by the
     dummy model.
     """
-    _attrs = ['name']
+    _attrs = ['max_vms']
+
+    @property
+    def flavor(self):
+        if '_flavor' not in self.__dict__:
+            self._flavor = self._apiresource.flavor
+        return self.__dict__['_flavor']
+
+    @property
+    def resource_class(self):
+        if '_resource_class' not in self.__dict__:
+            self._resource_class = self._apiresource.resource_class
+        return self.__dict__['_resource_class']
 
 
 def flavor_list(request):

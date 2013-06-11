@@ -16,6 +16,18 @@
 
 # FIXME: configuration for dummy data
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
+
+
+class Capacity(models.Model):
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey('content_type', 'object_id')
+
+    name = models.CharField(max_length=50)
+    value = models.PositiveIntegerField()
+    unit = models.CharField(max_length=10)
 
 
 class Flavor(models.Model):
@@ -23,10 +35,7 @@ class Flavor(models.Model):
         db_table = 'infrastructure_flavor'
 
     name = models.CharField(max_length=50, unique=True)
-    # TODO: proper capacities representation
-
-    def capacities():
-        return []
+    capacities = generic.GenericRelation(Capacity)
 
 
 class Host(models.Model):
@@ -35,9 +44,7 @@ class Host(models.Model):
 
     name = models.CharField(max_length=50, unique=True)
     rack = models.ForeignKey('Rack')
-
-    def capacities():
-        return []
+    capacities = generic.GenericRelation(Capacity)
 
 
 class Rack(models.Model):
@@ -46,9 +53,7 @@ class Rack(models.Model):
 
     name = models.CharField(max_length=50, unique=True)
     resource_class = models.ForeignKey('ResourceClass')
-
-    def capacities():
-        return []
+    capacities = generic.GenericRelation(Capacity)
 
 
 class ResourceClass(models.Model):
@@ -62,4 +67,12 @@ class ResourceClass(models.Model):
 
     name = models.CharField(max_length=50, unique=True)
     service_type = models.CharField(max_length=50)
-    flavors = models.ManyToManyField(Flavor)
+
+
+class ResourceClassFlavor(models.Model):
+    class Meta:
+        db_table = 'infrastructure_resourceclass_flavors'
+
+    flavor = models.ForeignKey('Flavor')
+    resource_class = models.ForeignKey('ResourceClass')
+    max_vms = models.PositiveIntegerField()

@@ -14,7 +14,12 @@
   {"pk": 1, "model": "infrastructure.rack", "fields": {"name": "rack1", "resource_class": 1}},
   {"pk": 2, "model": "infrastructure.rack", "fields": {"name": "rack2", "resource_class": 1}},
 
-  {"pk": 1, "model": "infrastructure.resourceclass", "fields": {"service_type": "compute", "flavors": [1], "name": "rclass1"}},
-  {"pk": 2, "model": "infrastructure.resourceclass", "fields": {"service_type": "compute", "flavors": [], "name": "rclass2"}},
-  {"pk": 3, "model": "infrastructure.resourceclass", "fields": {"service_type": "storage", "flavors": [], "name": "rclass3"}}
+  {"pk": 1, "model": "infrastructure.resourceclass", "fields": {"service_type": "compute", "name": "rclass1"}},
+  {"pk": 2, "model": "infrastructure.resourceclass", "fields": {"service_type": "compute", "name": "rclass2"}},
+  {"pk": 3, "model": "infrastructure.resourceclass", "fields": {"service_type": "storage", "name": "rclass3"}},
+
+  {"pk": 1, "model": "infrastructure.resourceclassflavor", "fields": {"flavor": 1, "resource_class": 1, "max_vms": 16}},
+  {"pk": 2, "model": "infrastructure.resourceclassflavor", "fields": {"flavor": 2, "resource_class": 1, "max_vms": 8}},
+  {"pk": 3, "model": "infrastructure.resourceclassflavor", "fields": {"flavor": 3, "resource_class": 1, "max_vms": 4}},
+  {"pk": 4, "model": "infrastructure.resourceclassflavor", "fields": {"flavor": 4, "resource_class": 2, "max_vms": 2}}
 ]
