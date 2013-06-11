@@ -1,7 +1,5 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2013 Red Hat, Inc.
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -46,7 +44,7 @@ class Rack(StringIdAPIResourceWrapper):
     """Wrapper for the Rack object  returned by the
     dummy model.
     """
-    _attrs = ['name']
+    _attrs = ['name', 'resource_class_id']
 
     @property
     def hosts(self):
@@ -126,3 +124,21 @@ def flavor_create(request, name):
 
 def flavor_delete(request, flavor_id):
     dummymodels.Flavor.objects.get(id=flavor_id).delete()
+
+
+def rack_create(request, name, resource_class_id):
+    rack = dummymodels.Rack(name=name,
+                            resource_class_id=resource_class_id)
+    rack.save()
+
+
+def rack_list(request):
+    return [Rack(r) for r in dummymodels.Rack.objects.all()]
+
+
+def rack_get(request, rack_id):
+    return Rack(dummymodels.Rack.objects.get(id=rack_id))
+
+
+def rack_delete(request, rack_id):
+    dummymodels.Rack.objects.get(id=rack_id).delete()

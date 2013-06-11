@@ -22,9 +22,26 @@ from horizon import exceptions
 from horizon import messages
 from horizon import tabs
 
-#from openstack_dashboard.api import management
+from openstack_dashboard.api import management
 
 from .flavors.tables import FlavorsTable
+from .racks.tables import RacksTable
+
+
+class RacksTab(tabs.TableTab):
+    table_classes = (RacksTable,)
+    name = _("Resources")
+    slug = "racks_tab"
+    template_name = "horizon/common/_detail_table.html"
+
+    def get_racks_data(self):
+        try:
+            racks = management.rack_list(self.request)
+        except:
+            racks = []
+            exceptions.handle(self.request,
+                              _('Unable to retrieve racks.'))
+        return racks
 
 
 class FlavorsTab(tabs.TableTab):
@@ -49,5 +66,5 @@ class FlavorsTab(tabs.TableTab):
 
 class ResourceManagementTabs(tabs.TabGroup):
     slug = "resource_management_tabs"
-    tabs = (FlavorsTab,)
+    tabs = (FlavorsTab, RacksTab,)
     sticky = True
