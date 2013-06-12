@@ -12,7 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
 import logging
+
+from django.db.models import Sum
+from django.utils.translation import ugettext_lazy as _
 
 from openstack_dashboard.api import base
 import openstack_dashboard.dashboards.infrastructure.models as dummymodels
@@ -110,7 +114,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
     """Wrapper for the ResourceClass object  returned by the
     dummy model.
     """
-    _attrs = ['name', 'service_type']
+    _attrs = ['name', 'service_type', 'status']
 
     ##########################################################################
     # ResourceClass Class methods
@@ -173,6 +177,72 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @property
     def racks_count(self):
         return len(self.racks)
+
+    @property
+    def running_virtual_machines(self):
+        if "_running_virtual_machines" not in self.__dict__:
+            self._running_virtual_machines =\
+                                    copy.deepcopy(self.resource_class_flavors)
+            for vm in self._running_virtual_machines:
+                vm.max_vms /= (vm.max_vms % 7) + 1
+        return self.__dict__['_running_virtual_machines']
+
+    @property
+    def total_cpu(self):
+        if "_total_cpu" not in self.__dict__:
+            try:
+                attrs = dummymodels.Capacity.objects\
+                        .filter(host__rack__resource_class=self._apiresource)\
+                        .values('name', 'unit').annotate(value=Sum('value'))\
+                        .filter(name='cpu')[0]
+            except:
+                attrs = {'name': 'cpu',
+                         'value': _('Unable to retrieve '
+                                    '(Are the hosts configured properly?)'),
+                         'unit': ''}
+            total_cpu = dummymodels.Capacity(name=attrs['name'],
+                                             value=attrs['value'],
+                                             unit=attrs['unit'])
+            self._total_cpu = Capacity(total_cpu)
+        return self.__dict__['_total_cpu']
+
+    @property
+    def total_ram(self):
+        if "_total_ram" not in self.__dict__:
+            try:
+                attrs = dummymodels.Capacity.objects\
+                        .filter(host__rack__resource_class=self._apiresource)\
+                        .values('name', 'unit').annotate(value=Sum('value'))\
+                        .filter(name='ram')[0]
+            except:
+                attrs = {'name': 'ram',
+                         'value': _('Unable to retrieve '
+                                    '(Are the hosts configured properly?)'),
+                         'unit': ''}
+            total_ram = dummymodels.Capacity(name=attrs['name'],
+                                             value=attrs['value'],
+                                             unit=attrs['unit'])
+            self._total_ram = Capacity(total_ram)
+        return self.__dict__['_total_ram']
+
+    @property
+    def total_storage(self):
+        if "_total_storage" not in self.__dict__:
+            try:
+                attrs = dummymodels.Capacity.objects\
+                        .filter(host__rack__resource_class=self._apiresource)\
+                        .values('name', 'unit').annotate(value=Sum('value'))\
+                        .filter(name='storage')[0]
+            except:
+                attrs = {'name': 'storage',
+                         'value': _('Unable to retrieve '
+                                    '(Are the hosts configured properly?)'),
+                         'unit': ''}
+            total_storage = dummymodels.Capacity(name=attrs['name'],
+                                                 value=attrs['value'],
+                                                 unit=attrs['unit'])
+            self._total_storage = Capacity(total_storage)
+        return self.__dict__['_total_storage']
 
     ##########################################################################
     # ResourceClass Instance methods

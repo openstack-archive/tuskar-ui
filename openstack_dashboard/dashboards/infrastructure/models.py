@@ -67,6 +67,7 @@ class ResourceClass(models.Model):
 
     name = models.CharField(max_length=50, unique=True)
     service_type = models.CharField(max_length=50)
+    status = models.CharField(max_length=10, null=True, blank=True)
 
 
 class ResourceClassFlavor(models.Model):

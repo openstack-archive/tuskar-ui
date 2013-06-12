@@ -11,5 +11,46 @@
     <dd>{{ resource_class.name }}</dd>
     <dt>{% trans "Service Type" %}</dt>
     <dd>{{ resource_class.service_type }}</dd>
+    <dt>{% trans "Status" %}</dt>
+    <dd>{{ resource_class.status|default:_("normal") }}</dd>
+  </dl>
+</div>
+
+<div class="status row-fluid detail">
+  <h4>{% trans "Compute Power" %}</h4>
+  <hr class="header_rule">
+  <dl>
+    <dt>{% trans "Racks" %}</dt>
+    <dd>{{ resource_class.racks|length }}</dd>
+    <dt>{% trans "Hosts" %}</dt>
+    <dd>{{ resource_class.hosts|length }}</dd>
+    <dt>{% trans "Total CPU" %}</dt>
+    <dd>{{ resource_class.total_cpu.value }} {{ resource_class.total_cpu.unit }}</dd>
+    <dt>{% trans "Total RAM" %}</dt>
+    <dd>{{ resource_class.total_ram.value }} {{ resource_class.total_ram.unit }}</dd>
+    <dt>{% trans "Total Storage" %}</dt>
+    <dd>{{ resource_class.total_storage.value }} {{ resource_class.total_storage.unit }}</dd>
+  </dl>
+</div>
+
+<div class="status row-fluid detail">
+  <h4>{% trans "Running Virtual Machines" %}</h4>
+  <hr class="header_rule">
+  <dl>
+    {% for flavor_count in resource_class.running_virtual_machines %}
+      <dt>{{ flavor_count.flavor.name }}</dt>
+      <dd>{{ flavor_count.max_vms }}</dd>
+    {% endfor %}
+  </dl>
+</div>
+
+<div class="status row-fluid detail">
+  <h4>{% trans "Virtual Capacity" %}</h4>
+  <hr class="header_rule">
+  <dl>
+    {% for flavor_count in resource_class.resource_class_flavors %}
+      <dt>{{ flavor_count.flavor.name }}</dt>
+      <dd>{{ flavor_count.max_vms }}</dd>
+    {% endfor %}
   </dl>
 </div>
