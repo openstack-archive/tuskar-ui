@@ -84,3 +84,59 @@ class ResourceClassesTable(tables.DataTable):
         table_actions = (ResourcesClassFilterAction, CreateResourceClass,
                          DeleteResourceClass)
         row_actions = (UpdateResourceClass, DeleteResourceClass)
+
+
+class FlavorsTable(tables.DataTable):
+    name = tables.Column("name",
+                         verbose_name=_("Name"))
+    vcpus = tables.Column("vcpus",
+                          verbose_name=_("Vcpus"))
+    ram = tables.Column("ram",
+                        verbose_name=_("RAM (MB)"))
+    root_disk = tables.Column("root_disk",
+                              verbose_name=_("Root Disk (GB)"))
+    ephem_d = tables.Column("ephem_d",
+                            verbose_name=_("Ephem. D. (GB)"))
+    swap_disk = tables.Column("swap_disk",
+                              verbose_name=_("Swap Disk (GB)"))
+    max_vms = tables.Column("max_vms",
+                            auto='form_widget',
+                            verbose_name=_("Max. VMs"),
+                            form_widget=forms.NumberInput(),
+                            form_widget_attributes={
+                                'class': "test_class"})
+
+    class Meta:
+        name = "flavors"
+        verbose_name = _("Flavors")
+        multi_select = True
+        multi_select_name = "flavors_object_ids"
+
+
+class ResourcesFilterAction(tables.FilterAction):
+    def filter(self, table, instances, filter_string):
+        pass
+
+
+class ResourcesTable(tables.DataTable):
+    name = tables.Column("name",
+                         verbose_name=_("Name"))
+    subnet = tables.Column("subnets",
+                           verbose_name=_("Subnet"))
+    region = tables.Column("region",
+                           verbose_name=_("Region"))
+    hosts_count = tables.Column("hosts_count",
+                          verbose_name=_("Hosts"))
+    total_cpu = tables.Column("total_cpu",
+                              verbose_name=_("Total CPU"))
+    total_ram = tables.Column("total_ram",
+                              verbose_name=_("Total RAM"))
+    total_disk = tables.Column("total_disk",
+                               verbose_name=_("Total DISK"))
+
+    class Meta:
+        name = "resources"
+        verbose_name = _("Resources")
+        multi_select = True
+        multi_select_name = "resources_object_ids"
+        table_actions = (ResourcesFilterAction,)

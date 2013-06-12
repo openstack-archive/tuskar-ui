@@ -22,6 +22,10 @@ from horizon import forms
 
 from openstack_dashboard import api
 
+import re
+
+from .tables import FlavorsTable, ResourcesTable
+
 INDEX_URL = "horizon:infrastructure:resource_management:index"
 
 
@@ -48,25 +52,98 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                       "settings and add flavors to class.")
 
 
-class CreateResourceClassInfoAndFlavors(workflows.Step):
+class CreateResourceClassInfoAndFlavors(workflows.TableStep):
+    table_classes = (FlavorsTable,)
+
     action_class = ResourceClassInfoAndFlavorsAction
     template_name = 'infrastructure/resource_management/resource_classes/'\
                     '_resource_class_info_and_flavors_step.html'
     contributes = ("name", "service_type", "flavors_object_ids",
-                   'flavors_object_ids_max_vms')
+                   'max_vms')
+
+    def contribute(self, data, context):
+        request = self.workflow.request
+        if data:
+            context["flavors_object_ids"] =\
+                request.POST.getlist("flavors_object_ids")
+
+            # todo: lsmola django can't parse dictionaruy from POST
+            # this should be rewritten to django formset
+            context["max_vms"] = {}
+            for index, value in request.POST.items():
+                match = re.match(
+                    '^(flavors_object_ids__max_vms__(.*?))$',
+                    index)
+                if match:
+                    context["max_vms"][match.groups()[1]] = value
+
+        context.update(data)
+        return context
+
+    def get_flavors_data(self):
+        try:
+            resource_class_id = self.workflow.context.get("resource_class_id")
+            if resource_class_id:
+                resource_class = api.management.ResourceClass.get(
+                    self.workflow.request,
+                    resource_class_id)
+
+                # TODO: lsmola ugly interface, rewrite
+                self._tables['flavors'].active_multi_select_values = \
+                    resource_class.flavors_ids
+
+                all_flavors = resource_class.all_flavors
+            else:
+                all_flavors = api.management.Flavor.list(self.workflow.request)
+        except:
+            flavors = []
+            exceptions.handle(self.workflow.request,
+                              _('Unable to retrieve resource flavors list.'))
+        return all_flavors
 
 
 class ResourcesAction(workflows.Action):
-
     class Meta:
         name = _("Resources")
 
 
-class CreateResources(workflows.Step):
+class CreateResources(workflows.TableStep):
+    table_classes = (ResourcesTable,)
+
     action_class = ResourcesAction
     contributes = ("resources_object_ids")
     template_name = 'infrastructure/resource_management/'\
                     'resource_classes/_resources_step.html'
+
+    def contribute(self, data, context):
+        request = self.workflow.request
+        context["resources_object_ids"] =\
+            request.POST.getlist("resources_object_ids")
+
+        context.update(data)
+        return context
+
+    def get_resources_data(self):
+        try:
+            resource_class_id = self.workflow.context.get("resource_class_id")
+            if resource_class_id:
+                resource_class = api.management.ResourceClass.get(
+                    self.workflow.request,
+                    resource_class_id)
+                # TODO: lsmola ugly interface, rewrite
+                self._tables['resources'].active_multi_select_values = \
+                    resource_class.resources_ids
+                resources = \
+                    resource_class.all_resources
+            else:
+                resources = \
+                    api.management.Rack.list(self.workflow.request, True)
+        except:
+            resources = []
+            exceptions.handle(self.workflow.request,
+                              _('Unable to retrieve resources list.'))
+
+        return resources
 
 
 class ResourceClassWorkflowMixin:
@@ -81,10 +158,13 @@ class ResourceClassWorkflowMixin:
         return message % name
 
     def _add_flavors(self, request, data, resource_class):
-        pass
+        ids_to_add = data.get('flavors_object_ids') or []
+        max_vms = data.get('max_vms')
+        resource_class.set_flavors(request, ids_to_add, max_vms)
 
     def _add_resources(self, request, data, resource_class):
-        pass
+        ids_to_add = data.get('resources_object_ids') or []
+        resource_class.set_resources(request, ids_to_add)
 
 
 class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):

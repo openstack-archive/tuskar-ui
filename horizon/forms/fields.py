@@ -69,3 +69,12 @@ class DynamicChoiceField(fields.ChoiceField):
 class DynamicTypedChoiceField(DynamicChoiceField, fields.TypedChoiceField):
     """ Simple mix of ``DynamicChoiceField`` and ``TypedChoiceField``. """
     pass
+
+
+"""FIXME: TableStep"""
+#should be in django 1.5.1 forms.widgets
+
+
+class NumberInput(widgets.TextInput):
+    input_type = 'number'
+"""FIXME: TableStep end"""

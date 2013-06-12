@@ -35,3 +35,7 @@ assert ModalFormView
 assert ModalFormMixin
 assert DynamicTypedChoiceField
 assert DynamicChoiceField
+
+# FIXME: TableStep hack adding NumberInput
+from horizon.forms.fields import NumberInput
+

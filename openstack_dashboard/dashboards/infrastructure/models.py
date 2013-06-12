@@ -52,7 +52,7 @@ class Rack(models.Model):
         db_table = 'infrastructure_rack'
 
     name = models.CharField(max_length=50, unique=True)
-    resource_class = models.ForeignKey('ResourceClass')
+    resource_class = models.ForeignKey('ResourceClass', blank=True, null=True)
     capacities = generic.GenericRelation(Capacity)
 
 
@@ -76,4 +76,4 @@ class ResourceClassFlavor(models.Model):
 
     flavor = models.ForeignKey('Flavor')
     resource_class = models.ForeignKey('ResourceClass')
-    max_vms = models.PositiveIntegerField()
+    max_vms = models.CharField(max_length=50)

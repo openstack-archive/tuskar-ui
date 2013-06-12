@@ -199,7 +199,12 @@ class Column(html.HTMLElement):
                  link=None, allowed_data_types=[], hidden=False, attrs=None,
                  status=False, status_choices=None, display_choices=None,
                  empty_value=None, filters=None, classes=None, summation=None,
-                 auto=None, truncate=None, link_classes=None):
+                 auto=None, truncate=None, link_classes=None, form_widget=None,
+                 form_widget_attributes=None):
+        """FIXME: TableStep"""
+        # form_widget=None, form_widget_attributes=None added in parameters
+        """FIXME: TableStep end"""
+
         self.classes = list(classes or getattr(self, "classes", []))
         super(Column, self).__init__()
         self.attrs.update(attrs or {})
@@ -228,6 +233,10 @@ class Column(html.HTMLElement):
         self.filters = filters or []
         self.truncate = truncate
         self.link_classes = link_classes or []
+        """FIXME: TableStep"""
+        self.form_widget = form_widget
+        self.form_widget_attributes = form_widget_attributes or {}
+        """FIXME: TableStep end"""
 
         if status_choices:
             self.status_choices = status_choices
@@ -452,11 +461,45 @@ class Row(html.HTMLElement):
         cells = []
         for column in table.columns.values():
             if column.auto == "multi_select":
-                widget = forms.CheckboxInput(check_test=lambda value: False)
+
+                """FIXME: TableStep code modified"""
+                # multi_select fields in the table must be checked after
+                # a server action
+                # TODO remove this ugly code and create proper TableFormWidget
+                multi_select_values = []
+                if getattr(table, 'request', False) and \
+                   getattr(table.request, 'POST', False):
+                    multi_select_values = table.request.POST.getlist(
+                        self.table._meta.multi_select_name)
+
+                multi_select_values +=\
+                    getattr(table, 'active_multi_select_values', [])
+
+                if unicode(table.get_object_id(datum)) in multi_select_values:
+                    multi_select_value = lambda value: True
+                else:
+                    multi_select_value = lambda value: False
+                widget = forms.CheckboxInput(check_test=multi_select_value)
+
                 # Convert value to string to avoid accidental type conversion
-                data = widget.render('object_ids',
+                data = widget.render(self.table._meta.multi_select_name,
                                      unicode(table.get_object_id(datum)))
+                """FIXME: TableStep code modified end"""
+
                 table._data_cache[column][table.get_object_id(datum)] = data
+            elif column.auto == "form_widget":
+                """FIXME: TableStep whole condition added"""
+                widget = column.form_widget
+                widget_name = "%s__%s__%s" % \
+                    (self.table._meta.multi_select_name,
+                     column.name,
+                     unicode(table.get_object_id(datum)))
+
+                data = widget.render(widget_name,
+                                     column.get_data(datum),
+                                     column.form_widget_attributes)
+                table._data_cache[column][table.get_object_id(datum)] = data
+                """FIXME: TableStep whole condition added end"""
             elif column.auto == "actions":
                 data = table.render_row_actions(datum)
                 table._data_cache[column][table.get_object_id(datum)] = data
@@ -464,6 +507,7 @@ class Row(html.HTMLElement):
                 data = column.get_data(datum)
             cell = Cell(datum, data, column, self)
             cells.append((column.name or column.auto, cell))
+
         self.cells = SortedDict(cells)
 
         if self.ajax:
@@ -777,6 +821,11 @@ class DataTableOptions(object):
         self.actions_column = getattr(options,
                                      'actions_column',
                                      len(self.row_actions) > 0)
+        """FIXME: TableStep"""
+        self.multi_select_name = getattr(options,
+                                         'multi_select_name',
+                                         'object_ids')
+        """FIXME: TableStep end"""
         self.multi_select = getattr(options,
                                     'multi_select',
                                     len(self.table_actions) > 0)

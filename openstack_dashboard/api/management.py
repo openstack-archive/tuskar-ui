@@ -36,26 +36,15 @@ class StringIdAPIResourceWrapper(base.APIResourceWrapper):
     def id(self):
         return str(self._apiresource.id)
 
+    def set_request(self, request):
+        self.request = request
+
 
 class Capacity(StringIdAPIResourceWrapper):
     """Wrapper for the Capacity object returned by the
     dummy model.
     """
     _attrs = ['name', 'value', 'unit']
-
-
-class Flavor(StringIdAPIResourceWrapper):
-    """Wrapper for the Flavor object returned by the
-    dummy model.
-    """
-    _attrs = ['name']
-
-    @property
-    def capacities(self):
-        if "_capacities" not in self.__dict__:
-            self._capacities = [Capacity(c) for c in
-                                self._apiresource.capacities.all()]
-        return self.__dict__['_capacities']
 
 
 class Host(StringIdAPIResourceWrapper):
@@ -85,8 +74,12 @@ class Rack(StringIdAPIResourceWrapper):
         rack.save()
 
     @classmethod
-    def list(cls, request):
-        return [cls(r) for r in dummymodels.Rack.objects.all()]
+    def list(cls, request, only_free_racks=False):
+        if only_free_racks:
+            return [cls(r) for r in dummymodels.Rack.objects.all() if (
+                r.resource_class is None)]
+        else:
+            return [cls(r) for r in dummymodels.Rack.objects.all()]
 
     @classmethod
     def get(cls, request, rack_id):
@@ -109,7 +102,13 @@ class Rack(StringIdAPIResourceWrapper):
             self._hosts = [Host(h) for h in self._apiresource.host_set.all()]
         return self.__dict__['_hosts']
 
+    def hosts_count(self):
+        return len(self.hosts)
 
+
+##########################################################################
+# ResourceClass
+##########################################################################
 class ResourceClass(StringIdAPIResourceWrapper):
     """Wrapper for the ResourceClass object  returned by the
     dummy model.
@@ -121,14 +120,16 @@ class ResourceClass(StringIdAPIResourceWrapper):
     ##########################################################################
     @classmethod
     def get(cls, request, resource_class_id):
-        return cls(dummymodels.ResourceClass.objects.get(
+        obj = cls(dummymodels.ResourceClass.objects.get(
             id=resource_class_id))
+        obj.set_request(request)
+        return obj
 
     @classmethod
-    def create(self, request, **kwargs):
+    def create(self, request, name, service_type):
         rc = dummymodels.ResourceClass(
-            name=kwargs['name'],
-            service_type=kwargs['service_type'])
+            name=name,
+            service_type=service_type)
 
         rc.save()
         return ResourceClass(rc)
@@ -147,15 +148,90 @@ class ResourceClass(StringIdAPIResourceWrapper):
         rc.save()
         return cls(rc)
 
+    @classmethod
+    def delete(cls, request, flavor_id):
+        dummymodels.Flavor.objects.get(id=flavor_id).delete()
+
+    """FIXME: instance methods, shoud they stay?"""
     ##########################################################################
     # ResourceClass Properties
     ##########################################################################
     @property
+    def resources_ids(self):
+        """ List of unicode ids of resources added to resource class """
+        return [
+            unicode(resource.id) for resource in (
+                self.resources)]
+
+    @property
+    def resources(self):
+        """ List of resources added to ResourceClass """
+        if "_resources" not in self.__dict__:
+            self._resources =\
+                [Rack(r) for r in (
+                    self._apiresource.rack_set.all())]
+        return self.__dict__['_resources']
+
+    @property
+    def all_resources(self):
+        """ List of resources added to ResourceClass """
+        if "_all_resources" not in self.__dict__:
+            self._all_resources =\
+                [r for r in (
+                    Rack.list(self.request)) if (
+                        r.resource_class_id is None or
+                        r._apiresource.resource_class == self._apiresource)]
+        return self.__dict__['_all_resources']
+
+    @property
     def resource_class_flavors(self):
+        """ Relation table resourceclassflavor """
         if "_resource_class_flavors" not in self.__dict__:
-            self._resource_class_flavors = [ResourceClassFlavor(fc) for fc in
-                    self._apiresource.resourceclassflavor_set.all()]
+            self._resource_class_flavors = [ResourceClassFlavor(r) for r in (
+                self._apiresource.resourceclassflavor_set.all())]
         return self.__dict__['_resource_class_flavors']
+
+    @property
+    def flavors_ids(self):
+        """ List of unicode ids of flavors added to resource class """
+        return [
+            unicode(flavor.flavor.id) for flavor in (
+                self.resource_class_flavors)]
+
+    @property
+    def flavors(self):
+        """ Joined relation table resourceclassflavor and flavor together """
+        if "_flavors" not in self.__dict__:
+            added_flavors = self.resource_class_flavors
+            self._flavors = []
+            for f in added_flavors:
+                flavor_obj = Flavor(Flavor.get(self.request, f.flavor.id))
+                flavor_obj.set_max_vms(f.max_vms)
+                self._flavors.append(flavor_obj)
+
+        return self.__dict__['_flavors']
+
+    @property
+    def all_flavors(self):
+        """ all global flavors with filled data of flavor added to resource
+        class """
+        if "_all_flavors" not in self.__dict__:
+            all_flavors = Flavor.list(self.request)
+
+            added_resourceclassflavors = \
+                self._apiresource.resourceclassflavor_set.all()
+            added_flavors = {}
+            for added_flavor in added_resourceclassflavors:
+                added_flavors[str(added_flavor.flavor_id)] = added_flavor
+
+            self._all_flavors = []
+            for f in all_flavors:
+                added_flavor = added_flavors.get(f.id)
+                if added_flavor:
+                    f.set_max_vms(added_flavor.max_vms)
+                self._all_flavors.append(f)
+
+        return self.__dict__['_all_flavors']
 
     @property
     def hosts(self):
@@ -247,9 +323,70 @@ class ResourceClass(StringIdAPIResourceWrapper):
     ##########################################################################
     # ResourceClass Instance methods
     ##########################################################################
-    @classmethod
-    def delete(cls, request, resource_class_id):
-        dummymodels.ResourceClass.objects.get(id=resource_class_id).delete()
+    def get_resource_class_flavor(self, request, flavor_id):
+        obj = ResourceClassFlavor(dummymodels.ResourceClassFlavor.objects.get(
+            resource_class=self.id,
+            flavor=flavor_id))
+        return obj
+
+    """FIXME: add this later when using instance methods"""
+    """def update_attributes(self, request, **kwargs):
+        self._apiresource.name = kwargs['name']
+        self._apiresource.service_type = kwargs['service_type']
+        self._apiresource.save()
+        return True
+
+    def delete(self, request):
+        self._apiresource.delete()"""
+
+    #Resource class flavors management
+    def set_flavors(self, request, flavors_ids, max_vms):
+        # simply delete all and create new flavors, that'is
+        # how the horizon flavors work
+        added_flavor_ids = self.flavors_ids
+
+        self.remove_flavors(request, added_flavor_ids)
+        self.add_flavors(request, flavors_ids, max_vms)
+
+    def remove_flavors(self, request, flavors_ids):
+        flavors = []
+        for flavor_id in flavors_ids:
+            self.get_resource_class_flavor(
+                request,
+                flavor_id).delete()
+
+    def add_flavors(self, request, flavors_ids, max_vms):
+        max_vms = max_vms or {}
+
+        flavors = []
+        for flavor_id in flavors_ids:
+            flavor = Flavor.get(request, flavor_id)
+            ResourceClassFlavor.create(
+                request,
+                max_vms=max_vms.get(flavor.id),
+                flavor=flavor._apiresource,
+                resource_class=self._apiresource)
+
+    #ResourceClass resources management
+    def set_resources(self, request, resources_ids):
+        # simply delete all and create new resources, that'is
+        # how the horizon resources work
+        added_resource_ids = self.resources_ids
+
+        self.remove_resources(request, added_resource_ids)
+        self.add_resources(request, resources_ids)
+
+    def remove_resources(self, request, resources_ids):
+        for resource_id in resources_ids:
+            resource = Rack.get(request, resource_id)
+            resource._apiresource.resource_class = None
+            resource._apiresource.save()
+
+    def add_resources(self, request, resources_ids):
+        for resource_id in resources_ids:
+            resource = Rack.get(request, resource_id)
+            resource._apiresource.resource_class = self._apiresource
+            resource._apiresource.save()
 
 
 class Flavor(StringIdAPIResourceWrapper):
@@ -258,8 +395,15 @@ class Flavor(StringIdAPIResourceWrapper):
     """
     _attrs = ['name']
 
+    @property
+    def max_vms(self):
+        return getattr(self, '_max_vms', '0')
+
+    def set_max_vms(self, value='0'):
+        self._max_vms = value
+
     @classmethod
-    def list(cls, request):
+    def list(cls, request, only_free_racks=False):
         return [cls(f) for f in dummymodels.Flavor.objects.all()]
 
     @classmethod
@@ -291,10 +435,11 @@ class Flavor(StringIdAPIResourceWrapper):
 
 
 class ResourceClassFlavor(StringIdAPIResourceWrapper):
-    """Wrapper for the FlavorCount object  returned by the
+    """Wrapper for the ResourceClassFlavor object  returned by the
     dummy model.
     """
-    _attrs = ['max_vms']
+
+    _attrs = ['max_vms', 'flavor', 'resource_class']
 
     @property
     def flavor(self):
@@ -307,3 +452,19 @@ class ResourceClassFlavor(StringIdAPIResourceWrapper):
         if '_resource_class' not in self.__dict__:
             self._resource_class = self._apiresource.resource_class
         return self.__dict__['_resource_class']
+
+    """FIXME: should not have kwargs"""
+    @classmethod
+    def create(self, request, **kwargs):
+        max_vms = kwargs.get('max_vms') or 0
+
+        rc = dummymodels.ResourceClassFlavor(
+            max_vms=max_vms,
+            resource_class=kwargs['resource_class'],
+            flavor=kwargs['flavor'])
+        rc.save()
+        return ResourceClass(rc)
+
+    """FIXME: should be class method probably, takes 2 ids, no primary key"""
+    def delete(self):
+        self._apiresource.delete()

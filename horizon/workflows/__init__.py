@@ -9,3 +9,6 @@ assert Step
 assert UpdateMembersStep
 assert Workflow
 assert WorkflowView
+
+# FIXME: TableStep adding UpdateMembersStep
+from horizon.workflows.base import UpdateMembersStep
