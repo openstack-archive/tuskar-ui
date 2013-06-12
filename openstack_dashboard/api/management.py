@@ -171,6 +171,13 @@ def flavor_create(request, name):
     flavor.save()
 
 
+def flavor_update(request, flavor_id, name):
+    flavor = dummymodels.Flavor.objects.get(id=flavor_id)
+    flavor.name = name
+    flavor.save()
+    return Flavor(flavor)
+
+
 def flavor_delete(request, flavor_id):
     dummymodels.Flavor.objects.get(id=flavor_id).delete()
 

@@ -15,8 +15,6 @@
 
 import logging
 
-from collections import namedtuple
-
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
@@ -52,11 +50,8 @@ class EditView(forms.ModalFormView):
 
     def get_initial(self):
         try:
-            Flavor = namedtuple('Flavor', 'id, name')
-            flavor = Flavor('1', 'test')
-
-            #flavor = api.management.flavor_get(
-            #    self.request, self.kwargs['id'])
+            flavor = api.management.flavor_get(
+                self.request, self.kwargs['id'])
         except:
             exceptions.handle(self.request,
                               _("Unable to retrieve flavor data."))

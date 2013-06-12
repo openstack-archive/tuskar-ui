@@ -25,9 +25,6 @@ from horizon import messages
 from openstack_dashboard import api
 
 
-NEW_LINES = re.compile(r"\r|\n")
-
-
 class CreateFlavor(forms.SelfHandlingForm):
     name = forms.RegexField(label=_("Name"),
                             max_length=25,
@@ -39,8 +36,7 @@ class CreateFlavor(forms.SelfHandlingForm):
     def clean_name(self):
         name = self.cleaned_data.get('name')
         try:
-            #flavors = api.management.flavor_list(self.request)
-            flavors = []
+            flavors = api.management.flavor_list(self.request)
         except:
             flavors = []
             msg = _('Unable to get flavor list')
@@ -57,9 +53,8 @@ class CreateFlavor(forms.SelfHandlingForm):
 
     def handle(self, request, data):
         try:
-            #flavor = api.management.flavor_create(request,
-            #                                data['name'])
-            flavor = 0
+            flavor = api.management.flavor_create(request,
+                                                  data['name'])
             msg = _('Created flavor "%s".') % data['name']
             messages.success(request, msg)
             return True
@@ -78,8 +73,7 @@ class EditFlavor(CreateFlavor):
         name = cleaned_data.get('name')
         flavor_id = cleaned_data.get('flavor_id')
         try:
-            #flavors = api.management.flavor_list(self.request)
-            flavors = []
+            flavors = api.management.flavor_list(self.request)
         except:
             flavors = []
             msg = _('Unable to get flavor list')
@@ -98,8 +92,8 @@ class EditFlavor(CreateFlavor):
     def handle(self, request, data):
         try:
             flavor_id = data['flavor_id']
-            # flavor = api.management.flavor_edit?
-            flavor = 0
+            flavor = api.management.flavor_update(
+                request, flavor_id, data['name'])
             msg = _('Updated flavor "%s".') % data['name']
             messages.success(request, msg)
             return True

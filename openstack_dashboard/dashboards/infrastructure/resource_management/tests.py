@@ -28,10 +28,10 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         super(ResourceManagementTests, self).setUp()
 
     def test_index(self):
-        #flavors = self.flavors.list()
-        #self.mox.StubOutWithMock(api.management, 'flavor_list')
+        flavors = self.flavors.list()
+        self.mox.StubOutWithMock(api.management, 'flavor_list')
 
-        #api.management.flavor_list(IsA(http.HttpRequest)).AndReturn(flavors)
+        api.management.flavor_list(IsA(http.HttpRequest)).AndReturn(flavors)
 
         self.mox.ReplayAll()
 
@@ -40,4 +40,4 @@ class ResourceManagementTests(test.BaseAdminViewTests):
 
         self.assertTemplateUsed(
             res, 'infrastructure/resource_management/index.html')
-        #self.assertItemsEqual(res.context['flavors_table'].data, flavors)
+        self.assertItemsEqual(res.context['flavors_table'].data, flavors)

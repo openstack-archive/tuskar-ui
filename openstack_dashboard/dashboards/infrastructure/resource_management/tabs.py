@@ -14,8 +14,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from collections import namedtuple
-
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
@@ -53,11 +51,7 @@ class FlavorsTab(tabs.TableTab):
 
     def get_flavors_data(self):
         try:
-            #flavors = management.flavors_list(self.request)
-            Flavor = namedtuple('Flavor', 'id, name')
-            flavor1 = Flavor('1', 'test')
-            flavor2 = Flavor('2', 'test 2')
-            flavors = [flavor1, flavor2]
+            flavors = management.flavor_list(self.request)
         except:
             flavors = []
             exceptions.handle(self.request,
