@@ -10,7 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from openstack_dashboard.api.management import Flavor
+from openstack_dashboard.api.management import Flavor, ResourceClass
 
 import openstack_dashboard.dashboards.infrastructure.models as dummymodels
 
@@ -26,3 +26,22 @@ def data(TEST):
     flavor_2 = Flavor({'id': "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                        'name': 'm1.massive'})
     TEST.management_flavors.add(flavor_1, flavor_2)
+
+    # Resource Classes
+    TEST.management_resource_classes = TestDataContainer()
+
+    resource_class_1 = ResourceClass({
+        "id": "1",
+        "model": "infrastructure.resourceclass",
+        "fields": {"service_type": "compute",
+        "flavors": ["aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"],
+        "name": "rclass1"}})
+
+    resource_class_2 = ResourceClass({
+        "id": "2",
+        "model": "infrastructure.resourceclass",
+        "fields": {"service_type": "compute",
+        "flavors": [],
+        "name": "rclass2"}})
+
+    TEST.management_resource_classes.add(resource_class_1, resource_class_2)

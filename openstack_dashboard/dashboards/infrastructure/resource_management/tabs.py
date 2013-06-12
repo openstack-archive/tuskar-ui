@@ -26,6 +26,7 @@ from openstack_dashboard.api import management
 
 from .flavors.tables import FlavorsTable
 from .racks.tables import RacksTable
+from .resource_classes.tables import ResourceClassesTable
 
 
 class RacksTab(tabs.TableTab):
@@ -64,7 +65,24 @@ class FlavorsTab(tabs.TableTab):
         return flavors
 
 
+class ResourceClassesTab(tabs.TableTab):
+    table_classes = (ResourceClassesTable,)
+    name = _("Classes")
+    slug = "resource_classes_tab"
+    template_name = "horizon/common/_detail_table.html"
+    #preload = False buggy, checkboxes doesn't work wit table actions
+
+    def get_resource_classes_data(self):
+        try:
+            resource_classes = management.ResourceClass.list(self.request)
+        except:
+            resource_classes = []
+            exceptions.handle(self.request,
+                              _('Unable to retrieve resource classes list.'))
+        return resource_classes
+
+
 class ResourceManagementTabs(tabs.TabGroup):
     slug = "resource_management_tabs"
-    tabs = (FlavorsTab, RacksTab,)
+    tabs = (FlavorsTab, RacksTab, ResourceClassesTab, )
     sticky = True

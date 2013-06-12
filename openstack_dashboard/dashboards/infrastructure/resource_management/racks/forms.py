@@ -24,7 +24,7 @@ class CreateRack(forms.SelfHandlingForm):
     def __init__(self, request, *args, **kwargs):
         super(CreateRack, self).__init__(request, *args, **kwargs)
         resource_class_id_choices = [('', _("Select a Resource Class"))]
-        for rc in api.management.resource_class_list(request):
+        for rc in api.management.ResourceClass.list(request):
             resource_class_id_choices.append((rc.id, rc.name))
         self.fields['resource_class_id'].choices = resource_class_id_choices
 

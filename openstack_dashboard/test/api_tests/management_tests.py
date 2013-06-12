@@ -35,30 +35,30 @@ class ManagementApiTests(test.APITestCase):
         self.flavor1 = dummymodels.Flavor.objects.get(name='flavor1')
 
     def test_resource_class_list(self):
-        rc_list = api.management.resource_class_list(self.request)
+        rc_list = api.management.ResourceClass.list(self.request)
         self.assertEquals(3, len(rc_list))
         for rc in rc_list:
             self.assertIsInstance(rc, api.management.ResourceClass)
 
     def test_resource_class_get(self):
-        rc = api.management.resource_class_get(self.request, self.rclass1.id)
+        rc = api.management.ResourceClass.get(self.request, self.rclass1.id)
         self.assertIsInstance(rc, api.management.ResourceClass)
         self.assertEquals(rc.name, self.rclass1.name)
 
     def test_resource_class_flavors(self):
-        rc = api.management.resource_class_get(self.request, self.rclass1.id)
+        rc = api.management.ResourceClass.get(self.request, self.rclass1.id)
         for f in rc.flavors:
             self.assertIsInstance(f, api.management.Flavor)
         self.assertEquals(1, len(rc.flavors))
 
     def test_resource_class_racks(self):
-        rc = api.management.resource_class_get(self.request, self.rclass1.id)
+        rc = api.management.ResourceClass.get(self.request, self.rclass1.id)
         for rack in rc.racks:
             self.assertIsInstance(rack, api.management.Rack)
         self.assertEquals(2, len(rc.racks))
 
     def test_resource_class_hosts(self):
-        rc = api.management.resource_class_get(self.request, self.rclass1.id)
+        rc = api.management.ResourceClass.get(self.request, self.rclass1.id)
         for host in rc.hosts:
             self.assertIsInstance(host, api.management.Host)
         self.assertEquals(4, len(rc.hosts))
@@ -67,7 +67,7 @@ class ManagementApiTests(test.APITestCase):
 
     def test_flavor_list(self):
         flist = api.management.flavor_list(self.request)
-        self.assertEquals(1, len(flist))
+        self.assertEquals(6, len(flist))
         for f in flist:
             self.assertIsInstance(f, api.management.Flavor)
 
