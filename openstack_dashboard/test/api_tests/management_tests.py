@@ -66,12 +66,12 @@ class ManagementApiTests(test.APITestCase):
     # TODO: create, delete operations
 
     def test_flavor_list(self):
-        flist = api.management.flavor_list(self.request)
+        flist = api.management.Flavor.list(self.request)
         self.assertEquals(6, len(flist))
         for f in flist:
             self.assertIsInstance(f, api.management.Flavor)
 
     def test_flavor_get(self):
-        flavor = api.management.flavor_get(self.request, self.flavor1.id)
+        flavor = api.management.Flavor.get(self.request, self.flavor1.id)
         self.assertIsInstance(flavor, api.management.Flavor)
         self.assertEquals(flavor.name, self.flavor1.name)

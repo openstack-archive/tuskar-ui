@@ -74,11 +74,19 @@ class Rack(StringIdAPIResourceWrapper):
     """
     _attrs = ['name', 'resource_class_id']
 
-    @property
-    def hosts(self):
-        if "_hosts" not in self.__dict__:
-            self._hosts = [Host(h) for h in self._apiresource.host_set.all()]
-        return self.__dict__['_hosts']
+    @classmethod
+    def create(cls, request, name, resource_class_id):
+        rack = dummymodels.Rack(name=name,
+                                resource_class_id=resource_class_id)
+        rack.save()
+
+    @classmethod
+    def list(cls, request):
+        return [cls(r) for r in dummymodels.Rack.objects.all()]
+
+    @classmethod
+    def get(cls, request, rack_id):
+        return cls(dummymodels.Rack.objects.get(id=rack_id))
 
     @property
     def capacities(self):
@@ -86,6 +94,16 @@ class Rack(StringIdAPIResourceWrapper):
             self._capacities = [Capacity(c) for c in
                                 self._apiresource.capacities.all()]
         return self.__dict__['_capacities']
+
+    @classmethod
+    def delete(cls, request, rack_id):
+        dummymodels.Rack.objects.get(id=rack_id).delete()
+
+    @property
+    def hosts(self):
+        if "_hosts" not in self.__dict__:
+            self._hosts = [Host(h) for h in self._apiresource.host_set.all()]
+        return self.__dict__['_hosts']
 
 
 class ResourceClass(StringIdAPIResourceWrapper):
@@ -116,6 +134,14 @@ class ResourceClass(StringIdAPIResourceWrapper):
         return [
             ResourceClass(rc) for rc in (
                 dummymodels.ResourceClass.objects.all())]
+
+    @classmethod
+    def update(cls, request, resource_class_id, **kwargs):
+        rc = dummymodels.ResourceClass.objects.get(id=resource_class_id)
+        rc.name = kwargs['name']
+        rc.service_type = kwargs['service_type']
+        rc.save()
+        return cls(rc)
 
     ##########################################################################
     # ResourceClass Properties
@@ -151,14 +177,47 @@ class ResourceClass(StringIdAPIResourceWrapper):
     ##########################################################################
     # ResourceClass Instance methods
     ##########################################################################
-    def update_attributes(self, request, **kwargs):
-        self._apiresource.name = kwargs['name']
-        self._apiresource.service_type = kwargs['service_type']
-        self._apiresource.save()
-        return self
+    @classmethod
+    def delete(cls, request, resource_class_id):
+        dummymodels.ResourceClass.objects.get(id=resource_class_id).delete()
 
-    def delete(self, request):
-        self._apiresource.delete()
+
+class Flavor(StringIdAPIResourceWrapper):
+    """Wrapper for the Flavor object returned by the
+    dummy model.
+    """
+    _attrs = ['name']
+
+    @classmethod
+    def list(cls, request):
+        return [cls(f) for f in dummymodels.Flavor.objects.all()]
+
+    @classmethod
+    def get(cls, request, flavor_id):
+        return cls(dummymodels.Flavor.objects.get(id=flavor_id))
+
+    @classmethod
+    def create(cls, request, name):
+        flavor = dummymodels.Flavor(name=name)
+        flavor.save()
+
+    @property
+    def capacities(self):
+        if "_capacities" not in self.__dict__:
+            self._capacities = [Capacity(c) for c in
+                                self._apiresource.capacities.all()]
+        return self.__dict__['_capacities']
+
+    @classmethod
+    def update(cls, request, flavor_id, **kwargs):
+        flavor = dummymodels.Flavor.objects.get(id=flavor_id)
+        flavor.name = kwargs['name']
+        flavor.save()
+        return cls(flavor)
+
+    @classmethod
+    def delete(cls, request, flavor_id):
+        dummymodels.Flavor.objects.get(id=flavor_id).delete()
 
 
 class ResourceClassFlavor(StringIdAPIResourceWrapper):
@@ -178,45 +237,3 @@ class ResourceClassFlavor(StringIdAPIResourceWrapper):
         if '_resource_class' not in self.__dict__:
             self._resource_class = self._apiresource.resource_class
         return self.__dict__['_resource_class']
-
-
-def flavor_list(request):
-    return [Flavor(f) for f in dummymodels.Flavor.objects.all()]
-
-
-def flavor_get(request, flavor_id):
-    return Flavor(dummymodels.Flavor.objects.get(id=flavor_id))
-
-
-def flavor_create(request, name):
-    flavor = dummymodels.Flavor(name=name)
-    flavor.save()
-
-
-def flavor_update(request, flavor_id, name):
-    flavor = dummymodels.Flavor.objects.get(id=flavor_id)
-    flavor.name = name
-    flavor.save()
-    return Flavor(flavor)
-
-
-def flavor_delete(request, flavor_id):
-    dummymodels.Flavor.objects.get(id=flavor_id).delete()
-
-
-def rack_create(request, name, resource_class_id):
-    rack = dummymodels.Rack(name=name,
-                            resource_class_id=resource_class_id)
-    rack.save()
-
-
-def rack_list(request):
-    return [Rack(r) for r in dummymodels.Rack.objects.all()]
-
-
-def rack_get(request, rack_id):
-    return Rack(dummymodels.Rack.objects.get(id=rack_id))
-
-
-def rack_delete(request, rack_id):
-    dummymodels.Rack.objects.get(id=rack_id).delete()

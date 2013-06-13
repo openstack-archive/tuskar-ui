@@ -29,9 +29,9 @@ class ResourceManagementTests(test.BaseAdminViewTests):
 
     def test_index(self):
         flavors = self.flavors.list()
-        self.mox.StubOutWithMock(api.management, 'flavor_list')
+        self.mox.StubOutWithMock(api.management.Flavor, 'list')
 
-        api.management.flavor_list(IsA(http.HttpRequest)).AndReturn(flavors)
+        api.management.Flavor.list(IsA(http.HttpRequest)).AndReturn(flavors)
 
         self.mox.ReplayAll()
 

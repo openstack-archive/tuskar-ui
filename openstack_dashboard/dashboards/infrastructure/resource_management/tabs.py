@@ -35,7 +35,7 @@ class RacksTab(tabs.TableTab):
 
     def get_racks_data(self):
         try:
-            racks = management.rack_list(self.request)
+            racks = management.Rack.list(self.request)
         except:
             racks = []
             exceptions.handle(self.request,
@@ -51,7 +51,7 @@ class FlavorsTab(tabs.TableTab):
 
     def get_flavors_data(self):
         try:
-            flavors = management.flavor_list(self.request)
+            flavors = management.Flavor.list(self.request)
         except:
             flavors = []
             exceptions.handle(self.request,

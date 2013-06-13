@@ -51,8 +51,8 @@ class EditView(forms.ModalFormView):
 
     def get_initial(self):
         try:
-            rack = api.management.rack_get(self.request,
-                                             self.kwargs['id'])
+            rack = api.management.Rack.get(self.request,
+                                           self.kwargs['id'])
         except:
             exceptions.handle(self.request,
                               _("Unable to retrieve rack data."))

@@ -8,12 +8,12 @@ from openstack_dashboard.test import helpers as test
 
 class FlavorsTests(test.BaseAdminViewTests):
 
-    @test.create_stubs({api.management: ('flavor_list', 'flavor_create'), })
+    @test.create_stubs({api.management.Flavor: ('list', 'create'), })
     def test_create_flavor(self):
         flavor = self.flavors.first()
 
-        api.management.flavor_list(IsA(http.HttpRequest))
-        api.management.flavor_create(IsA(http.HttpRequest),
+        api.management.Flavor.list(IsA(http.HttpRequest))
+        api.management.Flavor.create(IsA(http.HttpRequest),
                                      flavor.name).AndReturn(flavor)
         self.mox.ReplayAll()
 
@@ -29,22 +29,20 @@ class FlavorsTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(
             resp, reverse('horizon:infrastructure:resource_management:index'))
 
-    @test.create_stubs({api.management: ('flavor_list',
-                                         'flavor_update',
-                                         'flavor_get'), })
+    @test.create_stubs({api.management.Flavor: ('list', 'update', 'get'), })
     def test_edit_flavor(self):
         flavor = self.flavors.first()  # has no extra spec
 
         # GET
-        api.management.flavor_get(IsA(http.HttpRequest),
+        api.management.Flavor.get(IsA(http.HttpRequest),
                                   flavor.id).AndReturn(flavor)
 
         # POST
-        api.management.flavor_list(IsA(http.HttpRequest))
-        api.management.flavor_update(IsA(http.HttpRequest),
+        api.management.Flavor.list(IsA(http.HttpRequest))
+        api.management.Flavor.update(IsA(http.HttpRequest),
                                      flavor.id,
-                                     flavor.name).AndReturn(flavor)
-        api.management.flavor_get(IsA(http.HttpRequest),
+                                     name=flavor.name).AndReturn(flavor)
+        api.management.Flavor.get(IsA(http.HttpRequest),
                                   flavor.id).AndReturn(flavor)
         self.mox.ReplayAll()
 
@@ -66,14 +64,13 @@ class FlavorsTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(
             resp, reverse('horizon:infrastructure:resource_management:index'))
 
-    @test.create_stubs({api.management: ('flavor_list',
-                                         'flavor_delete'), })
+    @test.create_stubs({api.management.Flavor: ('list', 'delete'), })
     def test_delete_flavor(self):
         flavor = self.flavors.first()
 
-        api.management.flavor_list(IsA(http.HttpRequest)).\
+        api.management.Flavor.list(IsA(http.HttpRequest)).\
             AndReturn(self.flavors.list())
-        api.management.flavor_delete(IsA(http.HttpRequest), flavor.id)
+        api.management.Flavor.delete(IsA(http.HttpRequest), flavor.id)
         self.mox.ReplayAll()
 
         form_data = {'action': 'flavors__delete__%s' % flavor.id}

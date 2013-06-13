@@ -50,7 +50,7 @@ class EditView(forms.ModalFormView):
 
     def get_initial(self):
         try:
-            flavor = api.management.flavor_get(
+            flavor = api.management.Flavor.get(
                 self.request, self.kwargs['id'])
         except:
             exceptions.handle(self.request,

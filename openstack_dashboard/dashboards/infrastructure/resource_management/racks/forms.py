@@ -30,7 +30,7 @@ class CreateRack(forms.SelfHandlingForm):
 
     def handle(self, request, data):
         try:
-            rack = api.management.rack_create(request, data['name'],
+            rack = api.management.Rack.create(request, data['name'],
                                               data['resource_class_id'])
             msg = _('Created rack "%s".') % data['name']
             messages.success(request, msg)

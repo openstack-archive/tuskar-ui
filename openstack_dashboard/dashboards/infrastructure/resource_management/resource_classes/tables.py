@@ -50,7 +50,7 @@ class DeleteResourceClass(tables.DeleteAction):
 
     def delete(self, request, obj_id):
         try:
-            api.management.ResourceClass.get(request, obj_id).delete(request)
+            api.management.ResourceClass.delete(request, obj_id)
         except:
             msg = _('Failed to delete resource class %s') % obj_id
             LOG.info(msg)

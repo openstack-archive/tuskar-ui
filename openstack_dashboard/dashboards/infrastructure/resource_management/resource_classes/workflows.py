@@ -137,14 +137,11 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
 
     def _update_resource_class_info(self, request, data):
         try:
-            resource_class = api.management.ResourceClass.get(
+            return api.management.ResourceClass.update(
                 request,
-                data['resource_class_id'])
-            resource_class.update_attributes(
-                request,
+                data['resource_class_id'],
                 name=data['name'],
                 service_type=data['service_type'])
-            return resource_class
         except:
             redirect = reverse(INDEX_URL)
             exceptions.handle(request,

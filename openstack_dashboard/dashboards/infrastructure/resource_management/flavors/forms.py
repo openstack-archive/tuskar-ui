@@ -36,7 +36,7 @@ class CreateFlavor(forms.SelfHandlingForm):
     def clean_name(self):
         name = self.cleaned_data.get('name')
         try:
-            flavors = api.management.flavor_list(self.request)
+            flavors = api.management.Flavor.list(self.request)
         except:
             flavors = []
             msg = _('Unable to get flavor list')
@@ -53,7 +53,7 @@ class CreateFlavor(forms.SelfHandlingForm):
 
     def handle(self, request, data):
         try:
-            flavor = api.management.flavor_create(request,
+            flavor = api.management.Flavor.create(request,
                                                   data['name'])
             msg = _('Created flavor "%s".') % data['name']
             messages.success(request, msg)
@@ -73,7 +73,7 @@ class EditFlavor(CreateFlavor):
         name = cleaned_data.get('name')
         flavor_id = cleaned_data.get('flavor_id')
         try:
-            flavors = api.management.flavor_list(self.request)
+            flavors = api.management.Flavor.list(self.request)
         except:
             flavors = []
             msg = _('Unable to get flavor list')
@@ -91,9 +91,8 @@ class EditFlavor(CreateFlavor):
 
     def handle(self, request, data):
         try:
-            flavor_id = data['flavor_id']
-            flavor = api.management.flavor_update(
-                request, flavor_id, data['name'])
+            flavor = api.management.Flavor.update(
+                    self.request, data['flavor_id'], name=data['name'])
             msg = _('Updated flavor "%s".') % data['name']
             messages.success(request, msg)
             return True
