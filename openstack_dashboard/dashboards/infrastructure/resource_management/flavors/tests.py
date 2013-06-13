@@ -10,7 +10,7 @@ class FlavorsTests(test.BaseAdminViewTests):
 
     @test.create_stubs({api.management.Flavor: ('list', 'create'), })
     def test_create_flavor(self):
-        flavor = self.flavors.first()
+        flavor = self.management_flavors.first()
 
         api.management.Flavor.list(IsA(http.HttpRequest))
         api.management.Flavor.create(IsA(http.HttpRequest),
@@ -31,7 +31,7 @@ class FlavorsTests(test.BaseAdminViewTests):
 
     @test.create_stubs({api.management.Flavor: ('list', 'update', 'get'), })
     def test_edit_flavor(self):
-        flavor = self.flavors.first()  # has no extra spec
+        flavor = self.management_flavors.first()  # has no extra spec
 
         # GET
         api.management.Flavor.get(IsA(http.HttpRequest),
@@ -66,10 +66,10 @@ class FlavorsTests(test.BaseAdminViewTests):
 
     @test.create_stubs({api.management.Flavor: ('list', 'delete'), })
     def test_delete_flavor(self):
-        flavor = self.flavors.first()
+        flavor = self.management_flavors.first()
 
         api.management.Flavor.list(IsA(http.HttpRequest)).\
-            AndReturn(self.flavors.list())
+            AndReturn(self.management_flavors.list())
         api.management.Flavor.delete(IsA(http.HttpRequest), flavor.id)
         self.mox.ReplayAll()
 

@@ -21,10 +21,12 @@ def data(TEST):
     TEST.management_flavors = TestDataContainer()
 
     # Flavors
-    flavor_1 = Flavor({'id': "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-                       'name': 'm1.tiny'})
-    flavor_2 = Flavor({'id': "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-                       'name': 'm1.massive'})
+    flavor_1 = Flavor(dummymodels.Flavor(
+            id="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            name='m1.tiny'))
+    flavor_2 = Flavor(dummymodels.Flavor(
+            id="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            name='m1.massive'))
     TEST.management_flavors.add(flavor_1, flavor_2)
 
     # Resource Classes
