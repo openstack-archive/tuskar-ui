@@ -18,7 +18,7 @@ from .views import CreateView, EditView
 
 
 VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \
-    'resource_management.flavors.views'
+    'resource_management.racks.views'
 
 
 urlpatterns = patterns(VIEW_MOD,
