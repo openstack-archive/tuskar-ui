@@ -96,7 +96,7 @@ class CreateResourceClassInfoAndFlavors(workflows.TableStep):
             else:
                 all_flavors = api.management.Flavor.list(self.workflow.request)
         except:
-            flavors = []
+            all_flavors = []
             exceptions.handle(self.workflow.request,
                               _('Unable to retrieve resource flavors list.'))
         return all_flavors

@@ -27,17 +27,45 @@ class ResourceManagementTests(test.BaseAdminViewTests):
     def setUp(self):
         super(ResourceManagementTests, self).setUp()
 
+    @test.create_stubs({
+        api.management.ResourceClass: (
+            'list',
+            'racks',
+            'hosts'),
+        api.management.Flavor: (
+            'list',)})
     def test_index(self):
+        # Flavor stubs
         flavors = self.management_flavors.list()
-        self.mox.StubOutWithMock(api.management.Flavor, 'list')
 
         api.management.Flavor.list(IsA(http.HttpRequest)).AndReturn(flavors)
+        # Flavor stubs end
+
+        # ResourceClass stubs
+        all_resource_classes = self.management_resource_classes.list()
+        hosts = []
+        racks = []
+
+        api.management.ResourceClass.hosts = hosts
+        api.management.ResourceClass.racks = racks
+
+        api.management.ResourceClass.list(
+            IsA(http.HttpRequest)).\
+            AndReturn(all_resource_classes)
+        # ResourceClass stubs end
 
         self.mox.ReplayAll()
 
         url = reverse('horizon:infrastructure:resource_management:index')
         res = self.client.get(url)
-
         self.assertTemplateUsed(
             res, 'infrastructure/resource_management/index.html')
+
+        # Flavor asserts
         self.assertItemsEqual(res.context['flavors_table'].data, flavors)
+        # Flavor asserts end
+
+        # ResourceClass asserts
+        self.assertItemsEqual(res.context['resource_classes_table'].data,
+                              all_resource_classes)
+        # ResourceClass asserts end
