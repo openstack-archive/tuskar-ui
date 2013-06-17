@@ -33,6 +33,8 @@ class ResourceManagementTests(test.BaseAdminViewTests):
             'racks',
             'hosts'),
         api.management.Flavor: (
+            'list',),
+        api.management.Rack: (
             'list',)})
     def test_index(self):
         # Flavor stubs
@@ -54,6 +56,12 @@ class ResourceManagementTests(test.BaseAdminViewTests):
             AndReturn(all_resource_classes)
         # ResourceClass stubs end
 
+        # Rack stubs
+        racks = self.management_racks.list()
+
+        api.management.Rack.list(IsA(http.HttpRequest)).AndReturn(racks)
+        # Rack stubs end
+
         self.mox.ReplayAll()
 
         url = reverse('horizon:infrastructure:resource_management:index')
@@ -69,3 +77,7 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         self.assertItemsEqual(res.context['resource_classes_table'].data,
                               all_resource_classes)
         # ResourceClass asserts end
+
+        # Rack asserts
+        self.assertItemsEqual(res.context['racks_table'].data, racks)
+        # Rack asserts end

@@ -57,3 +57,12 @@ class HostsTable(tables.DataTable):
         verbose_name = _("Hosts")
         table_actions = (DeleteHosts, HostsFilterAction)
         row_actions = (DeleteHosts,)
+
+
+class UnrackedHostsTable(HostsTable):
+
+    class Meta:
+        name = "unracked_hosts"
+        verbose_name = _("Unracked Hosts")
+        table_actions = ()
+        row_actions = ()

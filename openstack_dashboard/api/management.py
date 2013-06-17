@@ -77,6 +77,11 @@ class Host(StringIdAPIResourceWrapper):
     def get(cls, request, host_id):
         return cls(dummymodels.Host.objects.get(id=host_id))
 
+    @classmethod
+    def list_unracked(cls, request):
+        return [cls(h) for h in dummymodels.Host.objects.all() if (
+            h.rack is None)]
+
     @property
     def capacities(self):
         if "_capacities" not in self.__dict__:

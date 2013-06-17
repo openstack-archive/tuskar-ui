@@ -44,10 +44,10 @@ class Host(models.Model):
 
     name = models.CharField(max_length=50, unique=True)
     mac_address = models.CharField(max_length=50, unique=True)
-    ip_address = models.CharField(max_length=50, unique=True)
-    status = models.CharField(max_length=50)
-    usage = models.IntegerField(max_length=50)
-    rack = models.ForeignKey('Rack')
+    ip_address = models.CharField(max_length=50, unique=True, null=True)
+    status = models.CharField(max_length=50, null=True)
+    usage = models.IntegerField(max_length=50, null=True)
+    rack = models.ForeignKey('Rack', null=True)
     capacities = generic.GenericRelation(Capacity)
 
 

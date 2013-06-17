@@ -15,6 +15,7 @@
 from django.conf.urls.defaults import patterns, url
 
 from .views import DetailView
+from .views import UnrackedView
 
 
 HOSTS = r'^(?P<host_id>[^/]+)/%s$'
@@ -24,4 +25,5 @@ VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \
 
 urlpatterns = patterns(VIEW_MOD,
     url(HOSTS % 'detail', DetailView.as_view(), name='detail'),
+    url(r'^unracked/$', UnrackedView.as_view(), name='unracked'),
 )

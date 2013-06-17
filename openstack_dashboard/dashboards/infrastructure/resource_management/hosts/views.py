@@ -16,11 +16,27 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
+from horizon import tables
 from horizon import tabs
 
 from openstack_dashboard import api
 
 from .tabs import HostDetailTabs
+from .tables import UnrackedHostsTable
+
+
+class UnrackedView(tables.DataTableView):
+    table_class = UnrackedHostsTable
+    template_name = 'infrastructure/resource_management/hosts/unracked.html'
+
+    def get_data(self):
+        try:
+            hosts = api.management.Host.list_unracked(self.request)
+        except:
+            hosts = []
+            exceptions.handle(self.request,
+                              _('Unable to retrieve hosts.'))
+        return hosts
 
 
 class DetailView(tabs.TabView):

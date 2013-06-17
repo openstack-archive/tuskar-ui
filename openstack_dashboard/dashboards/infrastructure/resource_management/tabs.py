@@ -31,7 +31,8 @@ class RacksTab(tabs.TableTab):
     table_classes = (RacksTable,)
     name = _("Resources")
     slug = "racks_tab"
-    template_name = "horizon/common/_detail_table.html"
+    template_name = ("infrastructure/resource_management/"
+                    "racks/_index_table.html")
 
     def get_racks_data(self):
         try:
@@ -41,6 +42,16 @@ class RacksTab(tabs.TableTab):
             exceptions.handle(self.request,
                               _('Unable to retrieve racks.'))
         return racks
+
+    def get_context_data(self, request):
+        context = super(RacksTab, self).get_context_data(request)
+        try:
+            context["hosts"] = management.Host.list_unracked(self.request)
+        except:
+            context["hosts"] = []
+            exceptions.handle(request,
+                              _('Unable to retrieve hosts.'))
+        return context
 
 
 class FlavorsTab(tabs.TableTab):

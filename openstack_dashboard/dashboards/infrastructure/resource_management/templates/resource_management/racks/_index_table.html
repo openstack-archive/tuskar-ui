@@ -1,0 +1,3 @@
+{% load i18n %}
+{{ racks_table.render }}
+<a href="{% url 'horizon:infrastructure:resource_management:hosts:unracked' %}">{% trans "View Unracked Hosts"%} ({{hosts|length}})</a>
