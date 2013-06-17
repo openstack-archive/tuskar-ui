@@ -156,7 +156,6 @@ class ResourceClass(StringIdAPIResourceWrapper):
     def delete(cls, request, flavor_id):
         dummymodels.Flavor.objects.get(id=flavor_id).delete()
 
-    """FIXME: instance methods, shoud they stay?"""
     ##########################################################################
     # ResourceClass Properties
     ##########################################################################
@@ -178,7 +177,8 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @property
     def all_resources(self):
-        """ List of resources added to ResourceClass """
+        """ List of resources added to ResourceClass + list of free resources,
+        meaning resources that don't belong to any ResourceClass"""
         if "_all_resources" not in self.__dict__:
             self._all_resources =\
                 [r for r in (
@@ -217,8 +217,8 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @property
     def all_flavors(self):
-        """ all global flavors with filled data of flavor added to resource
-        class """
+        """ Joined relation table resourceclassflavor with all global flavors
+        """
         if "_all_flavors" not in self.__dict__:
             all_flavors = Flavor.list(self.request)
 
@@ -327,42 +327,16 @@ class ResourceClass(StringIdAPIResourceWrapper):
     ##########################################################################
     # ResourceClass Instance methods
     ##########################################################################
-    def get_resource_class_flavor(self, request, flavor_id):
-        obj = ResourceClassFlavor(dummymodels.ResourceClassFlavor.objects.get(
-            resource_class=self.id,
-            flavor=flavor_id))
-        return obj
-
-    """FIXME: add this later when using instance methods"""
-    """def update_attributes(self, request, **kwargs):
-        self._apiresource.name = kwargs['name']
-        self._apiresource.service_type = kwargs['service_type']
-        self._apiresource.save()
-        return True
-
-    def delete(self, request):
-        self._apiresource.delete()"""
-
-    #Resource class flavors management
-    def set_flavors(self, request, flavors_ids, max_vms):
+    def set_flavors(self, request, flavors_ids, max_vms=None):
         # simply delete all and create new flavors, that'is
         # how the horizon flavors work
-        added_flavor_ids = self.flavors_ids
-
-        self.remove_flavors(request, added_flavor_ids)
-        self.add_flavors(request, flavors_ids, max_vms)
-
-    def remove_flavors(self, request, flavors_ids):
-        flavors = []
-        for flavor_id in flavors_ids:
-            self.get_resource_class_flavor(
-                request,
-                flavor_id).delete()
-
-    def add_flavors(self, request, flavors_ids, max_vms):
         max_vms = max_vms or {}
 
-        flavors = []
+        for flavor_id in self.flavors_ids:
+            ResourceClassFlavor.delete(request,
+                                       self.id,
+                                       flavor_id)
+
         for flavor_id in flavors_ids:
             flavor = Flavor.get(request, flavor_id)
             ResourceClassFlavor.create(
@@ -371,22 +345,13 @@ class ResourceClass(StringIdAPIResourceWrapper):
                 flavor=flavor._apiresource,
                 resource_class=self._apiresource)
 
-    #ResourceClass resources management
     def set_resources(self, request, resources_ids):
-        # simply delete all and create new resources, that'is
-        # how the horizon resources work
-        added_resource_ids = self.resources_ids
-
-        self.remove_resources(request, added_resource_ids)
-        self.add_resources(request, resources_ids)
-
-    def remove_resources(self, request, resources_ids):
-        for resource_id in resources_ids:
+        # simply delete all and create new resources
+        for resource_id in self.resources_ids:
             resource = Rack.get(request, resource_id)
             resource._apiresource.resource_class = None
             resource._apiresource.save()
 
-    def add_resources(self, request, resources_ids):
         for resource_id in resources_ids:
             resource = Rack.get(request, resource_id)
             resource._apiresource.resource_class = self._apiresource
@@ -439,6 +404,9 @@ class Flavor(StringIdAPIResourceWrapper):
 
 
 class ResourceClassFlavor(StringIdAPIResourceWrapper):
+    """ FIXME this class will probably go away when connected to real API,
+    real API doesn't have this realtion Table as separate entity"""
+
     """Wrapper for the ResourceClassFlavor object  returned by the
     dummy model.
     """
@@ -457,18 +425,17 @@ class ResourceClassFlavor(StringIdAPIResourceWrapper):
             self._resource_class = self._apiresource.resource_class
         return self.__dict__['_resource_class']
 
-    """FIXME: should not have kwargs"""
     @classmethod
-    def create(self, request, **kwargs):
-        max_vms = kwargs.get('max_vms') or 0
-
+    def create(cls, request, resource_class, flavor, max_vms=0):
         rc = dummymodels.ResourceClassFlavor(
             max_vms=max_vms,
-            resource_class=kwargs['resource_class'],
-            flavor=kwargs['flavor'])
+            resource_class=resource_class,
+            flavor=flavor)
         rc.save()
-        return ResourceClass(rc)
+        return ResourceClassFlavor(rc)
 
-    """FIXME: should be class method probably, takes 2 ids, no primary key"""
-    def delete(self):
-        self._apiresource.delete()
+    @classmethod
+    def delete(cls, request, resource_class_id, flavor_id):
+        dummymodels.ResourceClassFlavor.objects.filter(
+            resource_class_id=resource_class_id,
+            flavor_id=flavor_id).delete()
