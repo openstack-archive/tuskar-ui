@@ -21,5 +21,18 @@
   {"pk": 1, "model": "infrastructure.resourceclassflavor", "fields": {"flavor": 1, "resource_class": 1, "max_vms": 16}},
   {"pk": 2, "model": "infrastructure.resourceclassflavor", "fields": {"flavor": 2, "resource_class": 1, "max_vms": 8}},
   {"pk": 3, "model": "infrastructure.resourceclassflavor", "fields": {"flavor": 3, "resource_class": 1, "max_vms": 4}},
-  {"pk": 4, "model": "infrastructure.resourceclassflavor", "fields": {"flavor": 4, "resource_class": 2, "max_vms": 2}}
+  {"pk": 4, "model": "infrastructure.resourceclassflavor", "fields": {"flavor": 4, "resource_class": 2, "max_vms": 2}},
+
+  {"pk": 1, "model": "infrastructure.capacity", "fields": {"value": 4, "unit": "GHz", "object_id": 1, "content_type": ["infrastructure", "host"], "name": "cpu"}},
+  {"pk": 2, "model": "infrastructure.capacity", "fields": {"value": 4, "unit": "GHz", "object_id": 2, "content_type": ["infrastructure", "host"], "name": "cpu"}},
+  {"pk": 3, "model": "infrastructure.capacity", "fields": {"value": 4, "unit": "GHz", "object_id": 3, "content_type": ["infrastructure", "host"], "name": "cpu"}},
+  {"pk": 4, "model": "infrastructure.capacity", "fields": {"value": 4, "unit": "GHz", "object_id": 4, "content_type": ["infrastructure", "host"], "name": "cpu"}},
+  {"pk": 5, "model": "infrastructure.capacity", "fields": {"value": 32, "unit": "GB", "object_id": 1, "content_type": ["infrastructure", "host"], "name": "ram"}},
+  {"pk": 6, "model": "infrastructure.capacity", "fields": {"value": 32, "unit": "GB", "object_id": 2, "content_type": ["infrastructure", "host"], "name": "ram"}},
+  {"pk": 7, "model": "infrastructure.capacity", "fields": {"value": 32, "unit": "GB", "object_id": 3, "content_type": ["infrastructure", "host"], "name": "ram"}},
+  {"pk": 8, "model": "infrastructure.capacity", "fields": {"value": 32, "unit": "GB", "object_id": 4, "content_type": ["infrastructure", "host"], "name": "ram"}},
+  {"pk": 9, "model": "infrastructure.capacity", "fields": {"value": 12, "unit": "TB", "object_id": 1, "content_type": ["infrastructure", "host"], "name": "storage"}},
+  {"pk": 10, "model": "infrastructure.capacity", "fields": {"value": 12, "unit": "TB", "object_id": 2, "content_type": ["infrastructure", "host"], "name": "storage"}},
+  {"pk": 11, "model": "infrastructure.capacity", "fields": {"value": 12, "unit": "TB", "object_id": 3, "content_type": ["infrastructure", "host"], "name": "storage"}},
+  {"pk": 12, "model": "infrastructure.capacity", "fields": {"value": 12, "unit": "TB", "object_id": 4, "content_type": ["infrastructure", "host"], "name": "storage"}}
 ]
