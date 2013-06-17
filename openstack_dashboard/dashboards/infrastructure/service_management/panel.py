@@ -26,4 +26,4 @@ class Service_Management(horizon.Panel):
     slug = "service_management"
 
 
-dashboard.Infrastructure.register(Service_Management)
+#dashboard.Infrastructure.register(Service_Management)

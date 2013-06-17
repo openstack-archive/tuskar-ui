@@ -26,4 +26,4 @@ class Overview(horizon.Panel):
     slug = "overview"
 
 
-dashboard.Infrastructure.register(Overview)
+#dashboard.Infrastructure.register(Overview)

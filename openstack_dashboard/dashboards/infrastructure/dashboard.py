@@ -22,8 +22,8 @@ import horizon
 class Infrastructure(horizon.Dashboard):
     name = _("Infrastructure")
     slug = "infrastructure"
-    panels = ('overview', 'service_management', 'resource_management',)
-    default_panel = 'overview'
+    panels = ('resource_management',)
+    default_panel = 'resource_management'
     permissions = ('openstack.roles.admin',)
 
 
