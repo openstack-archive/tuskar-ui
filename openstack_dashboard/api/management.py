@@ -391,10 +391,45 @@ class Flavor(StringIdAPIResourceWrapper):
                                 self._apiresource.capacities.all()]
         return self.__dict__['_capacities']
 
+    def capacity(self, capacity_name):
+        key = "_%s" % capacity_name
+        if key not in self.__dict__:
+            try:
+                capacity = [c for c in self.capacities if (
+                    c.name == capacity_name)][0]
+            except:
+                capacity = dummymodels.Capacity(
+                    name=capacity_name,
+                    value=_('Unable to retrieve '
+                            '(Is the flavor configured properly?)'),
+                    unit='')
+            self.__dict__[key] = capacity
+        return self.__dict__[key]
+
+    @property
+    def vcpu(self):
+        return self.capacity('vcpu')
+
+    @property
+    def ram(self):
+        return self.capacity('ram')
+
+    @property
+    def root_disk(self):
+        return self.capacity('root_disk')
+
+    @property
+    def ephemeral_disk(self):
+        return self.capacity('ephemeral_disk')
+
+    @property
+    def swap_disk(self):
+        return self.capacity('swap_disk')
+
     @classmethod
-    def update(cls, request, flavor_id, **kwargs):
+    def update(cls, request, flavor_id, name):
         flavor = dummymodels.Flavor.objects.get(id=flavor_id)
-        flavor.name = kwargs['name']
+        flavor.name = name
         flavor.save()
         return cls(flavor)
 
