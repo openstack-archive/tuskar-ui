@@ -20,10 +20,10 @@ from django import http
 class ResourceViewTests(test.BaseAdminViewTests):
     index_page = reverse('horizon:infrastructure:resource_management:index')
 
-    @test.create_stubs({api.management.Rack: ('create',), })
+    @test.create_stubs({api.management.Rack: ('create',)})
     def test_create_rack(self):
         api.management.Rack.create(IsA(http.request.HttpRequest), 'New Rack',
-                                   u'2').AndReturn(None)
+                                   u'2', 'Tokyo', '1.2.3.4').AndReturn(None)
         self.mox.ReplayAll()
 
         url = reverse('horizon:infrastructure:resource_management:'
@@ -35,12 +35,20 @@ class ResourceViewTests(test.BaseAdminViewTests):
                                 'infrastructure/resource_management/racks/' +
                                 'create.html')
 
-        data = {'name': 'New Rack', 'resource_class_id': u'2'}
+        data = {'name': 'New Rack', 'resource_class_id': u'2',
+                'location': 'Tokyo', 'subnet': '1.2.3.4'}
         resp = self.client.post(url, data)
         self.assertRedirectsNoFollow(resp, self.index_page)
 
-    # FIXME: The 'edit' action currently has no API call
+    @test.create_stubs({api.management.Rack: ('update',)})
     def test_edit_rack(self):
+        api.management.Rack.update(IsA(http.request.HttpRequest),
+                                   u'1', name='Updated Rack',
+                                   subnet='127.10.10.0/24',
+                                   location='New Location',
+                                   resource_class_id='1')
+        self.mox.ReplayAll()
+
         url = reverse('horizon:infrastructure:resource_management:' +
                       'racks:edit', args=[1])
         resource = self.client.get(url)
@@ -49,7 +57,8 @@ class ResourceViewTests(test.BaseAdminViewTests):
                                 'infrastructure/resource_management/racks/' +
                                 'edit.html')
 
-        data = {'name': 'Updated Rack', 'resource_class_id': 1, 'rack_id': 1}
+        data = {'name': 'Updated Rack', 'resource_class_id': 1, 'rack_id': 1,
+                'location': 'New Location', 'subnet': '127.10.10.0/24'}
         response = self.client.post(url, data)
         self.assertNoFormErrors(response)
         self.assertMessageCount(success=1)

@@ -20,6 +20,37 @@ class CreateRack(forms.SelfHandlingForm):
                                 'contain letters, numbers, underscores, '
                                 'periods and hyphens.')})
     resource_class_id = forms.ChoiceField(label=_("Resource Class"))
+    location = forms.CharField(label=_("Location"))
+    subnet = forms.CharField(label=_("IP Subnet"))
+
+    def clean(self):
+        cleaned_data = super(CreateRack, self).clean()
+        name = cleaned_data.get('name')
+        rack_id = self.initial.get('rack_id', None)
+        resource_class_id = cleaned_data.get('resource_class_id')
+        location = cleaned_data.get('location')
+        subnet = cleaned_data.get('subnet')
+        try:
+            racks = api.management.Rack.list(self.request)
+        except:
+            racks = []
+            exceptions.check_message(['Connection', 'refused'],
+                _("Unable to retrieve rack list."))
+            raise
+
+        # Validations: detect duplicates
+        for rack in racks:
+            other_record = rack_id != rack.id
+            if rack.name == name and other_record:
+                raise forms.ValidationError(
+                    _('The name %s is already used by another rack.')
+                    % name)
+            if rack.subnet == subnet and other_record:
+                raise forms.ValidationError(
+                    _('The subnet %s is already assigned to rack %s.')
+                    % (subnet, rack.name))
+
+        return cleaned_data
 
     def __init__(self, request, *args, **kwargs):
         super(CreateRack, self).__init__(request, *args, **kwargs)
@@ -31,7 +62,9 @@ class CreateRack(forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
             rack = api.management.Rack.create(request, data['name'],
-                                              data['resource_class_id'])
+                                              data['resource_class_id'],
+                                              data['location'],
+                                              data['subnet'])
             msg = _('Created rack "%s".') % data['name']
             messages.success(request, msg)
             return True
@@ -44,9 +77,12 @@ class EditRack(CreateRack):
 
     def handle(self, request, data):
         try:
-            # FIXME: This method needs implementation
-            # api.management.rack_edit(request, data['rack_id'],
-            #                          data['name'], data['resource_class_id'])
+            api.management.Rack.update(request, data['rack_id'],
+                                     name=data['name'],
+                                     subnet=data['subnet'],
+                                     resource_class_id=
+                                        data['resource_class_id'],
+                                     location=data['location'])
             msg = _('Updated rack "%s".') % data["name"]
             messages.success(request, msg)
             return True

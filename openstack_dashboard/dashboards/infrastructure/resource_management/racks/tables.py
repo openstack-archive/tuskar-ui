@@ -60,6 +60,9 @@ class RacksTable(tables.DataTable):
                          link=("horizon:infrastructure:resource_management"
                                ":racks:detail"),
                          verbose_name=_("Rack Name"))
+    location = tables.Column('location', verbose_name=_("Location"))
+    subnet = tables.Column('subnet', verbose_name=_("IP Subnet"))
+    host_count = tables.Column('hosts_count', verbose_name=_("Hosts"))
 
     class Meta:
         name = "racks"

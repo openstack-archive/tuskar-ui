@@ -89,12 +89,13 @@ class Rack(StringIdAPIResourceWrapper):
     """Wrapper for the Rack object  returned by the
     dummy model.
     """
-    _attrs = ['name', 'resource_class_id']
+    _attrs = ['name', 'resource_class_id', 'location', 'subnet']
 
     @classmethod
-    def create(cls, request, name, resource_class_id):
+    def create(cls, request, name, resource_class_id, location, subnet):
         rack = dummymodels.Rack(name=name,
-                                resource_class_id=resource_class_id)
+                                resource_class_id=resource_class_id,
+                                location=location, subnet=subnet)
         rack.save()
 
     @classmethod
@@ -128,6 +129,16 @@ class Rack(StringIdAPIResourceWrapper):
 
     def hosts_count(self):
         return len(self.hosts)
+
+    @classmethod
+    def update(self, request, rack_id, **kwargs):
+        rack = dummymodels.Rack.objects.get(id=rack_id)
+        rack.name = kwargs['name']
+        rack.location = kwargs['location']
+        rack.subnet = kwargs['subnet']
+        rack.resource_class_id = kwargs['resource_class_id']
+        rack.save()
+        return self(rack)
 
 
 ##########################################################################

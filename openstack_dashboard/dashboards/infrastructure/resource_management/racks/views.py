@@ -57,7 +57,9 @@ class EditView(forms.ModalFormView):
                               _("Unable to retrieve rack data."))
         return {'rack_id': rack.id,
                 'name': rack.name,
-                'resource_class_id': rack.resource_class_id}
+                'resource_class_id': rack.resource_class_id,
+                'location': rack.location,
+                'subnet': rack.subnet}
 
 
 class DetailView(tabs.TabView):

@@ -58,6 +58,8 @@ class Rack(models.Model):
     name = models.CharField(max_length=50, unique=True)
     resource_class = models.ForeignKey('ResourceClass', blank=True, null=True)
     capacities = generic.GenericRelation(Capacity)
+    location = models.CharField(max_length=50)
+    subnet = models.CharField(max_length=50, unique=True)
 
 
 class ResourceClass(models.Model):
