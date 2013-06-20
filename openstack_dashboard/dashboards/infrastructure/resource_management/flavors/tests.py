@@ -14,7 +14,8 @@ class FlavorsTests(test.BaseAdminViewTests):
 
         api.management.Flavor.list(IsA(http.HttpRequest))
         api.management.Flavor.create(IsA(http.HttpRequest),
-                                     flavor.name).AndReturn(flavor)
+                                     flavor.name,
+                                     0, 0, 0, 0, 0).AndReturn(flavor)
         self.mox.ReplayAll()
 
         url = reverse(
@@ -24,7 +25,12 @@ class FlavorsTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(
             resp, "infrastructure/resource_management/flavors/create.html")
 
-        data = {'name': flavor.name}
+        data = {'name': flavor.name,
+                'vcpu': 0,
+                'ram': 0,
+                'root_disk': 0,
+                'ephemeral_disk': 0,
+                'swap_disk': 0}
         resp = self.client.post(url, data)
         self.assertRedirectsNoFollow(
             resp, reverse('horizon:infrastructure:resource_management:index'))
@@ -41,7 +47,8 @@ class FlavorsTests(test.BaseAdminViewTests):
         api.management.Flavor.list(IsA(http.HttpRequest))
         api.management.Flavor.update(IsA(http.HttpRequest),
                                      flavor.id,
-                                     name=flavor.name).AndReturn(flavor)
+                                     flavor.name,
+                                     0, 0, 0, 0, 0).AndReturn(flavor)
         api.management.Flavor.get(IsA(http.HttpRequest),
                                   flavor.id).AndReturn(flavor)
         self.mox.ReplayAll()
@@ -57,7 +64,12 @@ class FlavorsTests(test.BaseAdminViewTests):
 
         # post test
         data = {'flavor_id': flavor.id,
-                'name': flavor.name}
+                'name': flavor.name,
+                'vcpu': 0,
+                'ram': 0,
+                'root_disk': 0,
+                'ephemeral_disk': 0,
+                'swap_disk': 0}
         resp = self.client.post(url, data)
         self.assertNoFormErrors(resp)
         self.assertMessageCount(success=1)

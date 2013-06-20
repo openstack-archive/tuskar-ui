@@ -32,6 +32,21 @@ class CreateFlavor(forms.SelfHandlingForm):
                             error_messages={'invalid': _('Name may only '
                                 'contain letters, numbers, underscores, '
                                 'periods and hyphens.')})
+    vcpu = forms.IntegerField(label=_("VCPU"),
+                              min_value=0,
+                              initial=0)
+    ram = forms.IntegerField(label=_("RAM (MB)"),
+                             min_value=0,
+                             initial=0)
+    root_disk = forms.IntegerField(label=_("Root Disk (GB)"),
+                                   min_value=0,
+                                   initial=0)
+    ephemeral_disk = forms.IntegerField(label=_("Ephemeral Disk (GB)"),
+                                        min_value=0,
+                                        initial=0)
+    swap_disk = forms.IntegerField(label=_("Swap Disk (MB)"),
+                                   min_value=0,
+                                   initial=0)
 
     def clean_name(self):
         name = self.cleaned_data.get('name')
@@ -53,8 +68,15 @@ class CreateFlavor(forms.SelfHandlingForm):
 
     def handle(self, request, data):
         try:
-            flavor = api.management.Flavor.create(request,
-                                                  data['name'])
+            flavor = api.management.Flavor.create(
+                request,
+                data['name'],
+                data['vcpu'],
+                data['ram'],
+                data['root_disk'],
+                data['ephemeral_disk'],
+                data['swap_disk']
+            )
             msg = _('Created flavor "%s".') % data['name']
             messages.success(request, msg)
             return True
@@ -92,7 +114,15 @@ class EditFlavor(CreateFlavor):
     def handle(self, request, data):
         try:
             flavor = api.management.Flavor.update(
-                    self.request, data['flavor_id'], name=data['name'])
+                self.request,
+                data['flavor_id'],
+                data['name'],
+                data['vcpu'],
+                data['ram'],
+                data['root_disk'],
+                data['ephemeral_disk'],
+                data['swap_disk']
+            )
             msg = _('Updated flavor "%s".') % data['name']
             messages.success(request, msg)
             return True

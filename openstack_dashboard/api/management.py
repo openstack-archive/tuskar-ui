@@ -46,6 +46,26 @@ class Capacity(StringIdAPIResourceWrapper):
     """
     _attrs = ['name', 'value', 'unit']
 
+    @classmethod
+    def create(cls, request, content_object, name, value, unit):
+        c = dummymodels.Capacity(
+            content_object=content_object,
+            name=name,
+            value=value,
+            unit=unit)
+        c.save()
+        return Capacity(c)
+
+    @classmethod
+    def update(cls, request, capacity_id, content_object, name, value, unit):
+        c = dummymodels.Capacity.objects.get(id=capacity_id)
+        c.content_object = content_object
+        c.name = name
+        c.value = value
+        c.unit = unit
+        c.save()
+        return cls(c)
+
 
 class Host(StringIdAPIResourceWrapper):
     """Wrapper for the Host object  returned by the
@@ -380,9 +400,16 @@ class Flavor(StringIdAPIResourceWrapper):
         return cls(dummymodels.Flavor.objects.get(id=flavor_id))
 
     @classmethod
-    def create(cls, request, name):
+    def create(cls, request,
+               name, vcpu, ram, root_disk, ephemeral_disk, swap_disk):
         flavor = dummymodels.Flavor(name=name)
         flavor.save()
+        Capacity.create(request, flavor, 'vcpu', vcpu, '')
+        Capacity.create(request, flavor, 'ram', ram, 'MB')
+        Capacity.create(request, flavor, 'root_disk', root_disk, 'GB')
+        Capacity.create(request,
+                        flavor, 'ephemeral_disk', ephemeral_disk, 'GB')
+        Capacity.create(request, flavor, 'swap_disk', swap_disk, 'MB')
 
     @property
     def capacities(self):
@@ -427,11 +454,23 @@ class Flavor(StringIdAPIResourceWrapper):
         return self.capacity('swap_disk')
 
     @classmethod
-    def update(cls, request, flavor_id, name):
-        flavor = dummymodels.Flavor.objects.get(id=flavor_id)
-        flavor.name = name
-        flavor.save()
-        return cls(flavor)
+    def update(cls, request, flavor_id, name, vcpu, ram, root_disk,
+               ephemeral_disk, swap_disk):
+        f = dummymodels.Flavor.objects.get(id=flavor_id)
+        f.name = name
+        f.save()
+        flavor = cls(f)
+        Capacity.update(request, flavor.vcpu.id, flavor._apiresource,
+                        'vcpu', vcpu, '')
+        Capacity.update(request, flavor.ram.id, flavor._apiresource,
+                        'ram', ram, 'MB')
+        Capacity.update(request, flavor.root_disk.id, flavor._apiresource,
+                        'root_disk', root_disk, 'GB')
+        Capacity.update(request, flavor.ephemeral_disk.id, flavor._apiresource,
+                        'ephemeral_disk', ephemeral_disk, 'GB')
+        Capacity.update(request, flavor.swap_disk.id, flavor._apiresource,
+                        'swap_disk', swap_disk, 'MB')
+        return flavor
 
     @classmethod
     def delete(cls, request, flavor_id):
