@@ -34,6 +34,7 @@ class ResourceClassesTests(test.BaseAdminViewTests):
         )})
     def test_create_resource_class(self):
         new_resource_class = self.management_resource_classes.first()
+        new_unique_name = "unique_name_for_sure"
 
         all_flavors = self.management_flavors.list()
         all_racks = self.management_racks.list()
@@ -54,7 +55,7 @@ class ResourceClassesTests(test.BaseAdminViewTests):
         # post
         api.management.ResourceClass.create(
             IsA(http.HttpRequest),
-            name=new_resource_class.name,
+            name=new_unique_name,
             service_type=new_resource_class.service_type).\
             AndReturn(new_resource_class)
         api.management.ResourceClass.set_resources(
@@ -72,7 +73,7 @@ class ResourceClassesTests(test.BaseAdminViewTests):
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
 
-        form_data = {'name': new_resource_class.name,
+        form_data = {'name': new_unique_name,
                      'service_type': new_resource_class.service_type}
         res = self.client.post(url, form_data)
         self.assertNoFormErrors(res)

@@ -46,6 +46,32 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                                          attrs={'class': 'switchable'})
                                      )
 
+    def clean(self):
+        cleaned_data = super(ResourceClassInfoAndFlavorsAction,
+                             self).clean()
+
+        name = cleaned_data.get('name')
+        resource_class_id = self.initial.get('resource_class_id', None)
+        try:
+            resource_classes = api.management.ResourceClass.list(self.request)
+        except:
+            resource_classes = []
+            msg = _('Unable to get resource class list')
+            exceptions.check_message(["Connection", "refused"], msg)
+            raise
+        if resource_classes is not None:
+            for resource_class in resource_classes:
+                if resource_class.name == name and (
+                        resource_class_id is None or
+                        resource_class_id != resource_class.id):
+                    raise forms.ValidationError(
+                        _('The name "%s" is already used by'
+                          ' another resource class.')
+                        % name
+                    )
+
+        return cleaned_data
+
     class Meta:
         name = _("Class Settings")
         help_text = _("From here you can fill the class "

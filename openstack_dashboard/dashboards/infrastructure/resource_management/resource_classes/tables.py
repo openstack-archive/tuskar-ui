@@ -89,16 +89,31 @@ class ResourceClassesTable(tables.DataTable):
 class FlavorsTable(tables.DataTable):
     name = tables.Column("name",
                          verbose_name=_("Name"))
-    vcpus = tables.Column("vcpus",
-                          verbose_name=_("Vcpus"))
-    ram = tables.Column("ram",
-                        verbose_name=_("RAM (MB)"))
-    root_disk = tables.Column("root_disk",
-                              verbose_name=_("Root Disk (GB)"))
-    ephem_d = tables.Column("ephem_d",
-                            verbose_name=_("Ephem. D. (GB)"))
-    swap_disk = tables.Column("swap_disk",
-                              verbose_name=_("Swap Disk (GB)"))
+    vcpu = tables.Column(
+        "vcpu",
+        verbose_name=_('VCPU'),
+        filters=(lambda x: getattr(x, 'value', ''),)
+    )
+    ram = tables.Column(
+        "ram",
+        verbose_name=_('RAM (MB)'),
+        filters=(lambda x: getattr(x, 'value', ''),)
+    )
+    root_disk = tables.Column(
+        "root_disk",
+        verbose_name=_('Root Disk (GB)'),
+        filters=(lambda x: getattr(x, 'value', ''),)
+    )
+    ephemeral_disk = tables.Column(
+        "ephemeral_disk",
+        verbose_name=_('Ephemeral Disk (GB)'),
+        filters=(lambda x: getattr(x, 'value', ''),)
+    )
+    swap_disk = tables.Column(
+        "swap_disk",
+        verbose_name=_('Swap Disk (MB)'),
+        filters=(lambda x: getattr(x, 'value', ''),)
+    )
     max_vms = tables.Column("max_vms",
                             auto='form_widget',
                             verbose_name=_("Max. VMs"),
