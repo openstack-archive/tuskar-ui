@@ -17,6 +17,8 @@ from django.core.urlresolvers import reverse
 from mox import IsA
 from openstack_dashboard import api
 from openstack_dashboard.test import helpers as test
+from openstack_dashboard.dashboards.infrastructure.resource_management.\
+    resource_classes import workflows
 
 
 class ResourceClassesTests(test.BaseAdminViewTests):
@@ -80,7 +82,7 @@ class ResourceClassesTests(test.BaseAdminViewTests):
         self.assertMessageCount(success=1)
 
         self.assertRedirectsNoFollow(
-            res, reverse('horizon:infrastructure:resource_management:index'))
+            res, workflows.get_index_url())
 
     @test.create_stubs({
         api.management.ResourceClass: (
@@ -154,7 +156,7 @@ class ResourceClassesTests(test.BaseAdminViewTests):
         self.assertMessageCount(success=1)
 
         self.assertRedirectsNoFollow(
-            res, reverse('horizon:infrastructure:resource_management:index'))
+            res, workflows.get_index_url())
 
     @test.create_stubs({api.management.ResourceClass: ('delete', 'list'), })
     def test_delete_resource_class(self):

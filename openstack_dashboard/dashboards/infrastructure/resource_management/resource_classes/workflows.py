@@ -26,7 +26,16 @@ import re
 
 from .tables import FlavorsTable, ResourcesTable
 
-INDEX_URL = "horizon:infrastructure:resource_management:index"
+
+# FIXME active tabs coflict
+# When on page with tabs, the workflow with more steps is used,
+# there is a conflict of active tabs and it always shows the
+# first tab after an action. So I explicitly specify to what
+# tab it should redirect after action, until the coflict will
+# be fixed in Horizon.
+def get_index_url():
+    return "%s?tab=resource_management_tabs__resource_classes_tab" %\
+        reverse("horizon:infrastructure:resource_management:index")
 
 
 class ResourceClassInfoAndFlavorsAction(workflows.Action):
@@ -174,10 +183,10 @@ class CreateResources(workflows.TableStep):
 
 class ResourceClassWorkflowMixin:
     def get_success_url(self):
-        return reverse(INDEX_URL)
+        return get_index_url()
 
     def get_failure_url(self):
-        return reverse(INDEX_URL)
+        return get_index_url()
 
     def format_status_message(self, message):
         name = self.context.get('name')
@@ -210,7 +219,7 @@ class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
                 name=data['name'],
                 service_type=data['service_type'])
         except:
-            redirect = reverse(INDEX_URL)
+            redirect = get_index_url()
             exceptions.handle(request,
                               _('Unable to create resource class.'),
                               redirect=redirect)
@@ -249,7 +258,7 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
                 name=data['name'],
                 service_type=data['service_type'])
         except:
-            redirect = reverse(INDEX_URL)
+            redirect = get_index_url()
             exceptions.handle(request,
                               _('Unable to create resource class.'),
                               redirect=redirect)
