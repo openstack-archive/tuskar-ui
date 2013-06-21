@@ -48,8 +48,10 @@ class CreateFlavor(forms.SelfHandlingForm):
                                    min_value=0,
                                    initial=0)
 
-    def clean_name(self):
-        name = self.cleaned_data.get('name')
+    def clean(self):
+        cleaned_data = super(CreateFlavor, self).clean()
+        name = cleaned_data.get('name')
+        flavor_id = self.initial.get('flavor_id', None)
         try:
             flavors = api.management.Flavor.list(self.request)
         except:
@@ -57,14 +59,17 @@ class CreateFlavor(forms.SelfHandlingForm):
             msg = _('Unable to get flavor list')
             exceptions.check_message(["Connection", "refused"], msg)
             raise
+        # Check if there is no flavor with the same name
         if flavors is not None:
             for flavor in flavors:
-                if flavor.name == name:
+                if flavor.name == name and (
+                        flavor_id is None or
+                        flavor.id != flavor_id):
                     raise forms.ValidationError(
                       _('The name "%s" is already used by another flavor.')
                       % name
                     )
-        return name
+        return cleaned_data
 
     def handle(self, request, data):
         try:
@@ -85,37 +90,12 @@ class CreateFlavor(forms.SelfHandlingForm):
 
 
 class EditFlavor(CreateFlavor):
-    flavor_id = forms.CharField(widget=forms.widgets.HiddenInput)
-
-    def clean_name(self):
-        return self.cleaned_data['name']
-
-    def clean(self):
-        cleaned_data = super(EditFlavor, self).clean()
-        name = cleaned_data.get('name')
-        flavor_id = cleaned_data.get('flavor_id')
-        try:
-            flavors = api.management.Flavor.list(self.request)
-        except:
-            flavors = []
-            msg = _('Unable to get flavor list')
-            exceptions.check_message(["Connection", "refused"], msg)
-            raise
-        # Check if there is no flavor with the same name
-        if flavors is not None:
-            for flavor in flavors:
-                if flavor.name == name and flavor.id != flavor_id:
-                    raise forms.ValidationError(
-                      _('The name "%s" is already used by another flavor.')
-                      % name
-                    )
-        return cleaned_data
 
     def handle(self, request, data):
         try:
             flavor = api.management.Flavor.update(
                 self.request,
-                data['flavor_id'],
+                self.initial['flavor_id'],
                 data['name'],
                 data['vcpu'],
                 data['ram'],
@@ -123,6 +103,7 @@ class EditFlavor(CreateFlavor):
                 data['ephemeral_disk'],
                 data['swap_disk']
             )
+
             msg = _('Updated flavor "%s".') % data['name']
             messages.success(request, msg)
             return True
