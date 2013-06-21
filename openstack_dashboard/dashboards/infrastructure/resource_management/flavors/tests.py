@@ -92,3 +92,19 @@ class FlavorsTests(test.BaseAdminViewTests):
 
         self.assertRedirectsNoFollow(
             res, reverse('horizon:infrastructure:resource_management:index'))
+
+    @test.create_stubs({api.management.Flavor: ('get',), })
+    def test_detail_flavor(self):
+        flavor = self.management_flavors.first()
+
+        api.management.Flavor.get(IsA(http.HttpRequest),
+                                  flavor.id).AndReturn(flavor)
+
+        self.mox.ReplayAll()
+
+        url = reverse(
+            'horizon:infrastructure:resource_management:flavors:detail',
+            args=[flavor.id])
+        res = self.client.get(url)
+        self.assertTemplateUsed(
+            res, "infrastructure/resource_management/flavors/detail.html")

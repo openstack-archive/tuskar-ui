@@ -21,10 +21,12 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import forms
 from horizon import tables
+from horizon import tabs
 
 from openstack_dashboard import api
 from .forms import CreateFlavor, EditFlavor
 from .tables import FlavorsTable
+from .tabs import FlavorDetailTabs
 
 
 LOG = logging.getLogger(__name__)
@@ -45,13 +47,13 @@ class EditView(forms.ModalFormView):
 
     def get_context_data(self, **kwargs):
         context = super(EditView, self).get_context_data(**kwargs)
-        context['flavor_id'] = self.kwargs['id']
+        context['flavor_id'] = self.kwargs['flavor_id']
         return context
 
     def get_initial(self):
         try:
             flavor = api.management.Flavor.get(
-                self.request, self.kwargs['id'])
+                self.request, self.kwargs['flavor_id'])
         except:
             exceptions.handle(self.request,
                               _("Unable to retrieve flavor data."))
@@ -62,3 +64,34 @@ class EditView(forms.ModalFormView):
                 'root_disk': flavor.root_disk.value,
                 'ephemeral_disk': flavor.ephemeral_disk.value,
                 'swap_disk': flavor.swap_disk.value}
+
+
+class DetailView(tabs.TabView):
+    tab_group_class = FlavorDetailTabs
+    template_name = 'infrastructure/resource_management/flavors/detail.html'
+
+    def get_context_data(self, **kwargs):
+            context = super(DetailView, self).get_context_data(**kwargs)
+            context["flavor"] = self.get_data()
+            return context
+
+    def get_data(self):
+        if not hasattr(self, "_flavor"):
+            try:
+                flavor_id = self.kwargs['flavor_id']
+                flavor = api.management.Flavor.get(self.request, flavor_id)
+            except:
+                redirect = reverse('horizon:infrastructure:'
+                                   'resource_management:index')
+                exceptions.handle(self.request,
+                                  _('Unable to retrieve details for '
+                                    'flavor "%s".')
+                                    % flavor_id,
+                                    redirect=redirect)
+            self._flavor = flavor
+        return self._flavor
+
+    def get_tabs(self, request, *args, **kwargs):
+        flavor = self.get_data()
+        return self.tab_group_class(request, flavor=flavor,
+                                    **kwargs)

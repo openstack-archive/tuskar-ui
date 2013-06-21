@@ -1,6 +1,5 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -13,17 +12,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import patterns, url
+from django.utils.translation import ugettext_lazy as _
 
-from .views import CreateView, DetailView, EditView
+from horizon import tabs
 
 
-FLAVORS = r'^(?P<flavor_id>[^/]+)/%s$'
-VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \
-    'resource_management.flavors.views'
+class OverviewTab(tabs.Tab):
+    name = _("Overview")
+    slug = "flavor_overview_tab"
+    template_name = ("infrastructure/resource_management/flavors/"
+                     "_detail_overview.html")
+    preload = False
 
-urlpatterns = patterns(VIEW_MOD,
-    url(r'^create/$', CreateView.as_view(), name='create'),
-    url(FLAVORS % '/edit/$', EditView.as_view(), name='edit'),
-    url(FLAVORS % 'detail', DetailView.as_view(), name='detail')
-)
+    def get_context_data(self, request):
+        return {"flavor": self.tab_group.kwargs['flavor']}
+
+
+class FlavorDetailTabs(tabs.TabGroup):
+    slug = "flavor_detail_tabs"
+    tabs = (OverviewTab,)
+    sticky = True

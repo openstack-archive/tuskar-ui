@@ -57,7 +57,10 @@ class FlavorsFilterAction(tables.FilterAction):
 
 
 class FlavorsTable(tables.DataTable):
-    name = tables.Column('name', verbose_name=_('Flavor Name'))
+    name = tables.Column('name',
+                         link=("horizon:infrastructure:"
+                               "resource_management:flavors:detail"),
+                         verbose_name=_('Flavor Name'))
     vcpu = tables.Column(
         "vcpu",
         verbose_name=_('VCPU'),
