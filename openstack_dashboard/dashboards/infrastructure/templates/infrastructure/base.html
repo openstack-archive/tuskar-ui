@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
 
-{% block sidebar %}
-  {% include 'horizon/common/_sidebar.html' %}
-{% endblock %}
+{% block css %}
+  {% include "_stylesheets.html" %}
 
-{% block main %}
-    {% include "horizon/_messages.html" %}
-    {% block infrastructure_main %}{% endblock %}
+  {% load compress %}
+  {% compress css %}
+  <link href='{{ STATIC_URL }}infrastructure/less/infrastructure.less' type='text/less' media='screen' rel='stylesheet' />
+  {% endcompress %}
 {% endblock %}
-

@@ -4,7 +4,7 @@
 <h3>{% trans "Rack Overview" %}</h3>
 
 <div class="info row-fluid detail">
-  <h4>{% trans "Info" %}</h4>
+  <h4>{% trans "About" %}</h4>
   <hr class="header_rule">
   <dl>
     <dt>{% trans "Name" %}</dt>
@@ -12,7 +12,7 @@
     <dt>{% trans "ID" %}</dt>
     <dd>{{ rack.id|default:_("None") }}</dd>
   </dl>
-  <h4>{% trans "Compute Power" %}</h4>
+  <h4>{% trans "Resource Assignment" %}</h4>
   <hr class="header_rule">
   <dl>
     <dt>{% trans "Name" %}</dt>
@@ -20,12 +20,64 @@
     <dt>{% trans "ID" %}</dt>
     <dd>{{ rack.id|default:_("None") }}</dd>
   </dl>
-  <h4>{% trans "Virtual Capacity" %}</h4>
+  <h4>{% trans "Capacities" %}</h4>
   <hr class="header_rule">
-  <dl>
-    <dt>{% trans "Name" %}</dt>
-    <dd>{{ rack.name|default:_("None") }}</dd>
-    <dt>{% trans "ID" %}</dt>
-    <dd>{{ rack.id|default:_("None") }}</dd>
-  </dl>
+  <table class="capacities">
+    <tr>
+      <td class="capacity_label">{% trans "CPU" %}:</td>
+      <td>
+        <div id="cpu_capacity_usage"
+             class="capacity_bar"
+             data-capacity-limit="{{ 100 }}"
+             data-capacity-used="{{ 100 }}"
+             data-average-capacity-used="{{ 47 }}">
+        </div>
+      </td>
+      <td>
+        90/100 GHz
+      </td>
+    </tr>
+    <tr>
+      <td class="capacity_label">{% trans "RAM" %}:</td>
+      <td>
+        <div id="ram_capacity_usage"
+             class="capacity_bar"
+             data-capacity-limit="{{ 100 }}"
+             data-capacity-used="{{ 79 }}"
+             data-average-capacity-used="{{ 47 }}">
+        </div>
+      </td>
+      <td>
+        90/100
+      </td>
+    </tr>
+    <tr>
+      <td class="capacity_label">{% trans "Storage" %}:</td>
+      <td>
+        <div id="storage_capacity_usage"
+             class="capacity_bar"
+             data-capacity-limit="{{ 100 }}"
+             data-capacity-used="{{ 50 }}"
+             data-average-capacity-used="{{ 70 }}">
+        </div>
+      </td>
+      <td>
+        90/100
+      </td>
+    </tr>
+    <tr>
+      <td class="capacity_label">{% trans "Network" %}:</td>
+      <td>
+        <div id="network_capacity_usage"
+             class="capacity_bar"
+             data-capacity-limit="{{ 100 }}"
+             data-capacity-used="{{ 60 }}"
+             data-average-capacity-used="{{ 70 }}">
+        </div>
+      </td>
+      <td>
+        90/100
+      </td>
+    </tr>
+  </table>
 </div>

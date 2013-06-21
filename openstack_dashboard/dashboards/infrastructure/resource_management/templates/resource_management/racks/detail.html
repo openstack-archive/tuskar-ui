@@ -1,15 +1,43 @@
-{% extends 'base.html' %}
+{% extends 'infrastructure/base.html' %}
 {% load i18n %}
 {% block title %}{% trans "Rack Detail"%}{% endblock %}
 
 {% block page_header %}
-  {% include "horizon/common/_page_header.html" with title=_("Rack Detail: ")|add:rack.name %}
+  {% include "horizon/common/_page_header.html" with title=_("Rack Detail") %}
 {% endblock page_header %}
 
 {% block main %}
+<h3>{{ rack.name }}</h3>
+
 <div class="row-fluid">
   <div class="span12">
+    <table class="capacities overall_usage">
+      <tr>
+        <td class="capacity_label">{% trans "Usage" %}:</td>
+        <td>
+          <div id="rack_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ 100 }}"
+               data-capacity-used="{{ 95 }}"
+               data-average-capacity-used="{{ 47 }}">
+          </div>
+        </td>
+      </tr>
+    </table>
+
     {{ tab_group.render }}
   </div>
 </div>
+
+<script type="text/javascript" charset="utf-8">
+  if(typeof horizon.Capacity !== 'undefined') {
+    horizon.Capacity.init();
+  } else {
+    addHorizonLoadEvent(function() {
+      horizon.Capacity.init();
+    });
+  }
+</script>
+
 {% endblock %}
+
