@@ -14,7 +14,11 @@
 
 from django.utils.translation import ugettext_lazy as _
 
+from horizon import exceptions
 from horizon import tabs
+
+from tables import (ResourceClassDetailResourcesTable,
+                    ResourceClassDetailFlavorsTable)
 
 
 class OverviewTab(tabs.Tab):
@@ -28,26 +32,40 @@ class OverviewTab(tabs.Tab):
         return {"resource_class": self.tab_group.kwargs['resource_class']}
 
 
-class ResourcesTab(tabs.Tab):
+class ResourcesTab(tabs.TableTab):
+    table_classes = (ResourceClassDetailResourcesTable,)
     name = _("Resources")
     slug = "resources"
     template_name = ("infrastructure/resource_management/resource_classes/"
                      "_detail_resources.html")
-    preload = False
 
-    def get_context_data(self, request):
-        pass
+    def get_resources_data(self):
+        try:
+            resource_class = self.tab_group.kwargs['resource_class']
+            racks = resource_class.racks
+        except:
+            racks = []
+            exceptions.handle(self.tab_group.request,
+                              _('Unable to retrieve rack list.'))
+        return racks
 
 
-class FlavorsTab(tabs.Tab):
+class FlavorsTab(tabs.TableTab):
+    table_classes = (ResourceClassDetailFlavorsTable,)
     name = _("Flavors")
     slug = "flavors"
     template_name = ("infrastructure/resource_management/resource_classes/"
                      "_detail_flavors.html")
-    preload = False
 
-    def get_context_data(self, request):
-        pass
+    def get_flavors_data(self):
+        try:
+            resource_class = self.tab_group.kwargs['resource_class']
+            racks = resource_class.flavors
+        except:
+            racks = []
+            exceptions.handle(self.tab_group.request,
+                              _('Unable to retrieve flavor list.'))
+        return racks
 
 
 class ResourceClassDetailTabs(tabs.TabGroup):

@@ -26,6 +26,9 @@ from horizon import forms
 
 from openstack_dashboard import api
 
+from ..flavors import tables as flavors_tables
+from ..racks import tables as racks_tables
+
 
 LOG = logging.getLogger(__name__)
 
@@ -86,40 +89,18 @@ class ResourceClassesTable(tables.DataTable):
         row_actions = (UpdateResourceClass, DeleteResourceClass)
 
 
-class FlavorsTable(tables.DataTable):
-    name = tables.Column("name",
-                         verbose_name=_("Name"))
-    vcpu = tables.Column(
-        "vcpu",
-        verbose_name=_('VCPU'),
-        filters=(lambda x: getattr(x, 'value', ''),)
-    )
-    ram = tables.Column(
-        "ram",
-        verbose_name=_('RAM (MB)'),
-        filters=(lambda x: getattr(x, 'value', ''),)
-    )
-    root_disk = tables.Column(
-        "root_disk",
-        verbose_name=_('Root Disk (GB)'),
-        filters=(lambda x: getattr(x, 'value', ''),)
-    )
-    ephemeral_disk = tables.Column(
-        "ephemeral_disk",
-        verbose_name=_('Ephemeral Disk (GB)'),
-        filters=(lambda x: getattr(x, 'value', ''),)
-    )
-    swap_disk = tables.Column(
-        "swap_disk",
-        verbose_name=_('Swap Disk (MB)'),
-        filters=(lambda x: getattr(x, 'value', ''),)
-    )
+class FlavorsFilterAction(tables.FilterAction):
+    def filter(self, table, instances, filter_string):
+        pass
+
+
+class FlavorsTable(flavors_tables.FlavorsTable):
     max_vms = tables.Column("max_vms",
                             auto='form_widget',
                             verbose_name=_("Max. VMs"),
                             form_widget=forms.NumberInput(),
                             form_widget_attributes={
-                                'class': "test_class"})
+                                'class': "number_input_slim"})
 
     class Meta:
         name = "flavors"
@@ -133,25 +114,39 @@ class ResourcesFilterAction(tables.FilterAction):
         pass
 
 
-class ResourcesTable(tables.DataTable):
-    name = tables.Column("name",
-                         verbose_name=_("Name"))
-    subnet = tables.Column("subnets",
-                           verbose_name=_("Subnet"))
-    region = tables.Column("region",
-                           verbose_name=_("Region"))
-    hosts_count = tables.Column("hosts_count",
-                          verbose_name=_("Hosts"))
-    total_cpu = tables.Column("total_cpu",
-                              verbose_name=_("Total CPU"))
-    total_ram = tables.Column("total_ram",
-                              verbose_name=_("Total RAM"))
-    total_disk = tables.Column("total_disk",
-                               verbose_name=_("Total DISK"))
-
+class ResourcesTable(racks_tables.RacksTable):
     class Meta:
         name = "resources"
         verbose_name = _("Resources")
         multi_select = True
         multi_select_name = "resources_object_ids"
         table_actions = (ResourcesFilterAction,)
+
+
+class ResourceClassDetailResourcesTable(ResourcesTable):
+    total_cpu = tables.Column("total_cpu",
+                              verbose_name=_("Total CPU"))
+    total_ram = tables.Column("total_ram",
+                              verbose_name=_("Total RAM"))
+    total_disk = tables.Column("total_disk",
+                               verbose_name=_("Total DISK"))
+    usage = tables.Column("usage",
+                          verbose_name=_("Usage"))
+
+    class Meta:
+        name = "resources"
+        verbose_name = _("Resources")
+        table_actions = (ResourcesFilterAction,)
+        columns = (
+            'name', 'subnet', 'location', 'host_count',
+            'total_cpu', 'total_ram', 'total_disk', 'usage')
+
+
+class ResourceClassDetailFlavorsTable(flavors_tables.FlavorsTable):
+    max_vms = tables.Column("max_vms",
+                            verbose_name=_("Max. VMs"))
+
+    class Meta:
+        name = "flavors"
+        verbose_name = _("Flavors")
+        table_actions = (FlavorsFilterAction,)

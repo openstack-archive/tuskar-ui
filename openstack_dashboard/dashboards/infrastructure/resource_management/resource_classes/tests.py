@@ -183,7 +183,8 @@ class ResourceClassesTests(test.BaseAdminViewTests):
 
 class ResourceClassViewTests(test.BaseAdminViewTests):
     @test.create_stubs({
-        api.management.ResourceClass: ('get',), })
+        api.management.ResourceClass: (
+            'get', 'flavors', 'resources'), })
     def test_detail_get(self):
         resource_class = self.management_resource_classes.first()
 
@@ -191,6 +192,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             IsA(http.HttpRequest),
             resource_class.id).\
             MultipleTimes().AndReturn(resource_class)
+
+        api.management.ResourceClass.flavors = []
+        api.management.ResourceClass.resources = []
 
         self.mox.ReplayAll()
 

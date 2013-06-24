@@ -245,7 +245,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
             added_flavors = self.resource_class_flavors
             self._flavors = []
             for f in added_flavors:
-                flavor_obj = Flavor(Flavor.get(self.request, f.flavor.id))
+                flavor_obj = Flavor.get(self.request, f.flavor.id)
                 flavor_obj.set_max_vms(f.max_vms)
                 self._flavors.append(flavor_obj)
 
