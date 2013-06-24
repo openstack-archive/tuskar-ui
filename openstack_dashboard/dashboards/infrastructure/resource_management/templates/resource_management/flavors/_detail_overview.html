@@ -10,9 +10,13 @@
     <dt>{% trans "Name" %}</dt>
     <dd>{{ flavor.name|default:_("None") }}</dd>
     <dt>{% trans "Classes" %}</dt>
-    <dd>TBD</dd>
+    <dd>
+      {% for resource_class in flavor.resource_classes %}
+        <dd><a href="{% url 'horizon:infrastructure:resource_management:resource_classes:detail' resource_class.id%}">{{ resource_class.name }}</a></dd>
+      {% endfor %}
+    </dd>
     <dt>{% trans "Instances" %}</dt>
-    <dd>TBD</dd>
+    <dd>{{ flavor.running_virtual_machines }}</dd>
   </dl>
   <h4>{% trans "Specification" %}</h4>
   <hr class="header_rule">

@@ -469,6 +469,28 @@ class Flavor(StringIdAPIResourceWrapper):
     def swap_disk(self):
         return self.capacity('swap_disk')
 
+    @property
+    def resource_class_flavors(self):
+        if "_resource_class_flavors" not in self.__dict__:
+            self._resource_class_flavors = [ResourceClassFlavor(r) for r in (
+                self._apiresource.resourceclassflavor_set.all())]
+        return self.__dict__['_resource_class_flavors']
+
+    @property
+    def resource_classes(self):
+        if "_resource_classes" not in self.__dict__:
+            added_flavors = self.resource_class_flavors
+            self._resource_classes = []
+            for f in added_flavors:
+                self._resource_classes.append(ResourceClass(f.resource_class))
+
+        return self.__dict__['_resource_classes']
+
+    @property
+    def running_virtual_machines(self):
+        # arbitrary number
+        return len(self.resource_classes) * 2
+
     @classmethod
     def update(cls, request, flavor_id, name, vcpu, ram, root_disk,
                ephemeral_disk, swap_disk):

@@ -99,6 +99,8 @@ class FlavorsTests(test.BaseAdminViewTests):
 
         api.management.Flavor.get(IsA(http.HttpRequest),
                                   flavor.id).AndReturn(flavor)
+        api.management.Flavor.resource_classes = self. \
+            management_resource_classes
 
         self.mox.ReplayAll()
 
