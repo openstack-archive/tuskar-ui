@@ -31,7 +31,8 @@ from horizon import workflows
 
 from openstack_dashboard import api
 
-from .workflows import CreateResourceClass, UpdateResourceClass
+from .workflows import (CreateResourceClass, UpdateResourceClass,
+                        UpdateResourcesWorkflow, UpdateFlavorsWorkflow)
 from .tables import ResourceClassesTable
 from .tabs import ResourceClassDetailTabs
 
@@ -73,6 +74,14 @@ class UpdateView(workflows.WorkflowView):
         return {'resource_class_id': resource_class.id,
                 'name': resource_class.name,
                 'service_type': resource_class.service_type}
+
+
+class UpdateResourcesView(UpdateView):
+    workflow_class = UpdateResourcesWorkflow
+
+
+class UpdateFlavorsView(UpdateView):
+    workflow_class = UpdateFlavorsWorkflow
 
 
 class DetailView(tabs.TabView):

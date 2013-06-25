@@ -67,6 +67,10 @@ class FlavorsTab(tabs.TableTab):
                               _('Unable to retrieve flavor list.'))
         return racks
 
+    def allowed(self, request):
+        resource_class = self.tab_group.kwargs['resource_class']
+        return resource_class.service_type == "compute"
+
 
 class ResourceClassDetailTabs(tabs.TabGroup):
     slug = "resource_class_details"

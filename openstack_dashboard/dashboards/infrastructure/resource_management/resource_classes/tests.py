@@ -82,7 +82,9 @@ class ResourceClassesTests(test.BaseAdminViewTests):
         self.assertMessageCount(success=1)
 
         self.assertRedirectsNoFollow(
-            res, workflows.get_index_url())
+            res,
+            ("%s?tab=resource_management_tabs__resource_classes_tab" %
+             reverse("horizon:infrastructure:resource_management:index")))
 
     @test.create_stubs({
         api.management.ResourceClass: (
@@ -156,7 +158,9 @@ class ResourceClassesTests(test.BaseAdminViewTests):
         self.assertMessageCount(success=1)
 
         self.assertRedirectsNoFollow(
-            res, workflows.get_index_url())
+            res,
+            ("%s?tab=resource_management_tabs__resource_classes_tab" %
+             reverse("horizon:infrastructure:resource_management:index")))
 
     @test.create_stubs({api.management.ResourceClass: ('delete', 'list'), })
     def test_delete_resource_class(self):

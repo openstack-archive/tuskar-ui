@@ -26,6 +26,8 @@ from horizon import forms
 
 from openstack_dashboard import api
 
+import workflows
+
 from ..flavors import tables as flavors_tables
 from ..racks import tables as racks_tables
 
@@ -95,6 +97,8 @@ class FlavorsFilterAction(tables.FilterAction):
 
 
 class FlavorsTable(flavors_tables.FlavorsTable):
+    name = tables.Column('name',
+                         verbose_name=_('Flavor Name'))
     max_vms = tables.Column("max_vms",
                             auto='form_widget',
                             verbose_name=_("Max. VMs"),
@@ -115,6 +119,9 @@ class ResourcesFilterAction(tables.FilterAction):
 
 
 class ResourcesTable(racks_tables.RacksTable):
+    name = tables.Column('name',
+                         verbose_name=_("Rack Name"))
+
     class Meta:
         name = "resources"
         verbose_name = _("Resources")
@@ -123,7 +130,38 @@ class ResourcesTable(racks_tables.RacksTable):
         table_actions = (ResourcesFilterAction,)
 
 
-class ResourceClassDetailResourcesTable(ResourcesTable):
+class UpdateResourcesClass(tables.LinkAction):
+    name = "edit_flavors"
+    verbose_name = _("Edit Resources")
+
+    classes = ("ajax-modal", "btn-edit")
+
+    def get_link_url(self, datum=None):
+        url = "horizon:infrastructure:resource_management:resource_classes:"\
+              "update_resources"
+        return "%s?step=%s" % (
+            urlresolvers.reverse(
+                url,
+                args=(self.table.kwargs['resource_class_id'],)),
+            workflows.ResourcesAction.slug)
+
+
+class UpdateFlavorsClass(tables.LinkAction):
+    name = "edit_flavors"
+    verbose_name = _("Edit Flavors")
+    classes = ("ajax-modal", "btn-edit")
+
+    def get_link_url(self, datum=None):
+        url = "horizon:infrastructure:resource_management:resource_classes:"\
+              "update_flavors"
+        return "%s?step=%s" % (
+            urlresolvers.reverse(
+                url,
+                args=(self.table.kwargs['resource_class_id'],)),
+            workflows.ResourceClassInfoAndFlavorsAction.slug)
+
+
+class ResourceClassDetailResourcesTable(racks_tables.RacksTable):
     total_cpu = tables.Column("total_cpu",
                               verbose_name=_("Total CPU"))
     total_ram = tables.Column("total_ram",
@@ -136,7 +174,7 @@ class ResourceClassDetailResourcesTable(ResourcesTable):
     class Meta:
         name = "resources"
         verbose_name = _("Resources")
-        table_actions = (ResourcesFilterAction,)
+        table_actions = (ResourcesFilterAction, UpdateResourcesClass)
         columns = (
             'name', 'subnet', 'location', 'host_count',
             'total_cpu', 'total_ram', 'total_disk', 'usage')
@@ -149,4 +187,4 @@ class ResourceClassDetailFlavorsTable(flavors_tables.FlavorsTable):
     class Meta:
         name = "flavors"
         verbose_name = _("Flavors")
-        table_actions = (FlavorsFilterAction,)
+        table_actions = (FlavorsFilterAction, UpdateFlavorsClass)

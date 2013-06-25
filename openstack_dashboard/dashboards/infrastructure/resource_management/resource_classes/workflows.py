@@ -27,17 +27,6 @@ import re
 from .tables import FlavorsTable, ResourcesTable
 
 
-# FIXME active tabs coflict
-# When on page with tabs, the workflow with more steps is used,
-# there is a conflict of active tabs and it always shows the
-# first tab after an action. So I explicitly specify to what
-# tab it should redirect after action, until the coflict will
-# be fixed in Horizon.
-def get_index_url():
-    return "%s?tab=resource_management_tabs__resource_classes_tab" %\
-        reverse("horizon:infrastructure:resource_management:index")
-
-
 class ResourceClassInfoAndFlavorsAction(workflows.Action):
     name = forms.CharField(max_length=255,
                            label=_("Class Name"),
@@ -182,11 +171,22 @@ class CreateResources(workflows.TableStep):
 
 
 class ResourceClassWorkflowMixin:
+    # FIXME active tabs coflict
+    # When on page with tabs, the workflow with more steps is used,
+    # there is a conflict of active tabs and it always shows the
+    # first tab after an action. So I explicitly specify to what
+    # tab it should redirect after action, until the coflict will
+    # be fixed in Horizon.
+    def get_index_url(self):
+        """This url is used both as success and failure url"""
+        return "%s?tab=resource_management_tabs__resource_classes_tab" %\
+            reverse("horizon:infrastructure:resource_management:index")
+
     def get_success_url(self):
-        return get_index_url()
+        return self.get_index_url()
 
     def get_failure_url(self):
-        return get_index_url()
+        return self.get_index_url()
 
     def format_status_message(self, message):
         name = self.context.get('name')
@@ -219,7 +219,7 @@ class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
                 name=data['name'],
                 service_type=data['service_type'])
         except:
-            redirect = get_index_url()
+            redirect = self.get_failure_url()
             exceptions.handle(request,
                               _('Unable to create resource class.'),
                               redirect=redirect)
@@ -258,7 +258,7 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
                 name=data['name'],
                 service_type=data['service_type'])
         except:
-            redirect = get_index_url()
+            redirect = self.get_failure_url()
             exceptions.handle(request,
                               _('Unable to create resource class.'),
                               redirect=redirect)
@@ -269,3 +269,21 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
         self._add_resources(request, data, resource_class)
         self._add_flavors(request, data, resource_class)
         return True
+
+
+class UpdateResourcesWorkflow(UpdateResourceClass):
+    def get_index_url(self):
+        """This url is used both as success and failure url"""
+        url = "horizon:infrastructure:resource_management:resource_classes:"\
+              "detail"
+        return "%s?tab=resource_class_details__resources" % (
+            reverse(url, args=(self.context["resource_class_id"])))
+
+
+class UpdateFlavorsWorkflow(UpdateResourceClass):
+    def get_index_url(self):
+        """This url is used both as success and failure url"""
+        url = "horizon:infrastructure:resource_management:resource_classes:"\
+              "detail"
+        return "%s?tab=resource_class_details__flavors" % (
+            reverse(url, args=(self.context["resource_class_id"])))
