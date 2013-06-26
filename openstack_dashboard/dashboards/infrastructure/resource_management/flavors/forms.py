@@ -60,15 +60,12 @@ class CreateFlavor(forms.SelfHandlingForm):
             exceptions.check_message(["Connection", "refused"], msg)
             raise
         # Check if there is no flavor with the same name
-        if flavors is not None:
-            for flavor in flavors:
-                if flavor.name == name and (
-                        flavor_id is None or
-                        flavor.id != flavor_id):
-                    raise forms.ValidationError(
-                      _('The name "%s" is already used by another flavor.')
-                      % name
-                    )
+        for flavor in flavors:
+            if flavor.name == name and flavor.id != flavor_id:
+                raise forms.ValidationError(
+                    _('The name "%s" is already used by another flavor.')
+                    % name
+                )
         return cleaned_data
 
     def handle(self, request, data):

@@ -57,16 +57,14 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
             msg = _('Unable to get resource class list')
             exceptions.check_message(["Connection", "refused"], msg)
             raise
-        if resource_classes is not None:
-            for resource_class in resource_classes:
-                if resource_class.name == name and (
-                        resource_class_id is None or
-                        resource_class_id != resource_class.id):
-                    raise forms.ValidationError(
-                        _('The name "%s" is already used by'
-                          ' another resource class.')
-                        % name
-                    )
+        for resource_class in resource_classes:
+            if resource_class.name == name and \
+                    resource_class_id != resource_class.id:
+                raise forms.ValidationError(
+                    _('The name "%s" is already used by'
+                      ' another resource class.')
+                    % name
+                )
 
         return cleaned_data
 

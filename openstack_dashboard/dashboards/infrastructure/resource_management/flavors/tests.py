@@ -12,7 +12,8 @@ class FlavorsTests(test.BaseAdminViewTests):
     def test_create_flavor(self):
         flavor = self.management_flavors.first()
 
-        api.management.Flavor.list(IsA(http.HttpRequest))
+        api.management.Flavor.list(
+            IsA(http.HttpRequest)).AndReturn([])
         api.management.Flavor.create(IsA(http.HttpRequest),
                                      flavor.name,
                                      0, 0, 0, 0, 0).AndReturn(flavor)
@@ -44,7 +45,8 @@ class FlavorsTests(test.BaseAdminViewTests):
                                   flavor.id).AndReturn(flavor)
 
         # POST
-        api.management.Flavor.list(IsA(http.HttpRequest))
+        api.management.Flavor.list(
+            IsA(http.HttpRequest)).AndReturn(self.management_flavors.list())
         api.management.Flavor.update(IsA(http.HttpRequest),
                                      flavor.id,
                                      flavor.name,
