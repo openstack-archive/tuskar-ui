@@ -11,19 +11,21 @@
 
 <div class="row-fluid">
   <div class="span12">
-    <table class="capacities overall_usage">
-      <tr>
-        <td class="capacity_label">{% trans "Usage" %}:</td>
-        <td>
-          <div id="rack_usage"
-               class="capacity_bar"
-               data-capacity-limit="{{ 100 }}"
-               data-capacity-used="{{ 95 }}"
-               data-average-capacity-used="{{ 47 }}">
-          </div>
-        </td>
-      </tr>
-    </table>
+    <div class="pull-right">
+      <table class="capacities overall_usage">
+        <tr>
+          <td class="capacity_label">{% trans "Usage" %}:</td>
+          <td>
+            <div id="rack_usage"
+                 class="capacity_bar"
+                 data-capacity-limit="{{ rack.vm_capacity.value }}"
+                 data-capacity-used="{{ rack.vm_capacity.usage }}"
+                 data-average-capacity-used="{{ 4 }}">
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
 
     {{ tab_group.render }}
   </div>

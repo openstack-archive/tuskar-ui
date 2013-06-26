@@ -136,7 +136,7 @@ horizon.Capacity = {
       }
 
       if (!isNaN(capacity_limit) && !isNaN(capacity_used)) {
-        var percentage_used = ((capacity_used / capacity_limit) * 100);
+        var percentage_used = Math.round((capacity_used / capacity_limit) * 100);
         var used_px = progress_element.width() / 100 * percentage_used
 
       } else { // If NaN percentage_used is 0

@@ -14,8 +14,9 @@
 
 import copy
 import logging
+from random import randint
 
-from django.db.models import Sum
+from django.db.models import Sum, Max
 from django.utils.translation import ugettext_lazy as _
 
 from openstack_dashboard.api import base
@@ -65,6 +66,14 @@ class Capacity(StringIdAPIResourceWrapper):
         c.unit = unit
         c.save()
         return cls(c)
+
+    # defines a random usage of capacity - API should probably be able to
+    # determine usage of capacity based on capacity value and obejct_id
+    @property
+    def usage(self):
+        if "_usage" not in self.__dict__:
+            self._usage = randint(0, self.value)
+        return self.__dict__['_usage']
 
 
 class Host(StringIdAPIResourceWrapper):
@@ -122,6 +131,98 @@ class Rack(StringIdAPIResourceWrapper):
                                 self._apiresource.capacities.all()]
         return self.__dict__['_capacities']
 
+    @property
+    def cpu(self):
+        if "_cpu" not in self.__dict__:
+            try:
+                attrs = dummymodels.Capacity.objects\
+                        .filter(host__rack=self._apiresource)\
+                        .values('name', 'unit').annotate(value=Sum('value'))\
+                        .filter(name='cpu')[0]
+            except:
+                attrs = {'name': 'cpu',
+                         'value': _('Unable to retrieve '
+                                    '(Are the hosts configured properly?)'),
+                         'unit': ''}
+            cpu = dummymodels.Capacity(name=attrs['name'],
+                                       value=attrs['value'],
+                                       unit=attrs['unit'])
+            self._cpu = Capacity(cpu)
+        return self.__dict__['_cpu']
+
+    @property
+    def ram(self):
+        if "_ram" not in self.__dict__:
+            try:
+                attrs = dummymodels.Capacity.objects\
+                        .filter(host__rack=self._apiresource)\
+                        .values('name', 'unit').annotate(value=Sum('value'))\
+                        .filter(name='ram')[0]
+            except:
+                attrs = {'name': 'ram',
+                         'value': _('Unable to retrieve '
+                                    '(Are the hosts configured properly?)'),
+                         'unit': ''}
+            ram = dummymodels.Capacity(name=attrs['name'],
+                                       value=attrs['value'],
+                                       unit=attrs['unit'])
+            self._ram = Capacity(ram)
+        return self.__dict__['_ram']
+
+    @property
+    def storage(self):
+        if "_storage" not in self.__dict__:
+            try:
+                attrs = dummymodels.Capacity.objects\
+                        .filter(host__rack=self._apiresource)\
+                        .values('name', 'unit').annotate(value=Sum('value'))\
+                        .filter(name='storage')[0]
+            except:
+                attrs = {'name': 'storage',
+                         'value': _('Unable to retrieve '
+                                    '(Are the hosts configured properly?)'),
+                         'unit': ''}
+            storage = dummymodels.Capacity(name=attrs['name'],
+                                           value=attrs['value'],
+                                           unit=attrs['unit'])
+            self._storage = Capacity(storage)
+        return self.__dict__['_storage']
+
+    @property
+    def network(self):
+        if "_network" not in self.__dict__:
+            try:
+                attrs = dummymodels.Capacity.objects\
+                        .filter(host__rack=self._apiresource)\
+                        .values('name', 'unit').annotate(value=Sum('value'))\
+                        .filter(name='network')[0]
+            except:
+                attrs = {'name': 'network',
+                         'value': _('Unable to retrieve '
+                                    '(Are the hosts configured properly?)'),
+                         'unit': ''}
+            network = dummymodels.Capacity(name=attrs['name'],
+                                           value=attrs['value'],
+                                           unit=attrs['unit'])
+            self._network = Capacity(network)
+        return self.__dict__['_network']
+
+    @property
+    def vm_capacity(self):
+        if "_vm_capacity" not in self.__dict__:
+            try:
+                value = dummymodels.ResourceClassFlavor.objects\
+                            .filter(resource_class__rack=self._apiresource)\
+                            .aggregate(Max("max_vms"))['max_vms__max']
+            except:
+                value = _("Unable to retrieve vm capacity")
+
+            vm_capacity = dummymodels.Capacity(name=_("Max VMs"),
+                                               value=value,
+                                               unit=_("VMs"))
+            self._vm_capacity = Capacity(vm_capacity)
+        return self.__dict__['_vm_capacity']
+
     @classmethod
     def delete(cls, request, rack_id):
         dummymodels.Rack.objects.get(id=rack_id).delete()
@@ -134,6 +235,12 @@ class Rack(StringIdAPIResourceWrapper):
 
     def hosts_count(self):
         return len(self.hosts)
+
+    @property
+    def resource_class(self):
+        if "_resource_class" not in self.__dict__:
+            self._resource_class = self._apiresource.resource_class
+        return self.__dict__['_resource_class']
 
     @classmethod
     def update(self, request, rack_id, **kwargs):

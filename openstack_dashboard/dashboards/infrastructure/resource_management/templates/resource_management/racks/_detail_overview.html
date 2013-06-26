@@ -4,82 +4,94 @@
 <h3>{% trans "Rack Overview" %}</h3>
 
 <div class="info row-fluid detail">
-  <h4>{% trans "About" %}</h4>
-  <hr class="header_rule">
-  <dl>
-    <dt>{% trans "Name" %}</dt>
-    <dd>{{ rack.name|default:_("None") }}</dd>
-    <dt>{% trans "ID" %}</dt>
-    <dd>{{ rack.id|default:_("None") }}</dd>
-  </dl>
-  <h4>{% trans "Resource Assignment" %}</h4>
-  <hr class="header_rule">
-  <dl>
-    <dt>{% trans "Name" %}</dt>
-    <dd>{{ rack.name|default:_("None") }}</dd>
-    <dt>{% trans "ID" %}</dt>
-    <dd>{{ rack.id|default:_("None") }}</dd>
-  </dl>
-  <h4>{% trans "Capacities" %}</h4>
-  <hr class="header_rule">
-  <table class="capacities">
-    <tr>
-      <td class="capacity_label">{% trans "CPU" %}:</td>
-      <td>
-        <div id="cpu_capacity_usage"
-             class="capacity_bar"
-             data-capacity-limit="{{ 100 }}"
-             data-capacity-used="{{ 100 }}"
-             data-average-capacity-used="{{ 47 }}">
-        </div>
-      </td>
-      <td>
-        <a href="#" class="modal_chart">90/100 GHz</a>
-      </td>
-    </tr>
-    <tr>
-      <td class="capacity_label">{% trans "RAM" %}:</td>
-      <td>
-        <div id="ram_capacity_usage"
-             class="capacity_bar"
-             data-capacity-limit="{{ 100 }}"
-             data-capacity-used="{{ 79 }}"
-             data-average-capacity-used="{{ 47 }}">
-        </div>
-      </td>
-      <td>
-        <a href="#" class="modal_chart">90/100</a>
-      </td>
-    </tr>
-    <tr>
-      <td class="capacity_label">{% trans "Storage" %}:</td>
-      <td>
-        <div id="storage_capacity_usage"
-             class="capacity_bar"
-             data-capacity-limit="{{ 100 }}"
-             data-capacity-used="{{ 50 }}"
-             data-average-capacity-used="{{ 70 }}">
-        </div>
-      </td>
-      <td>
-        <a href="#" class="modal_chart">90/100</a>
-      </td>
-    </tr>
-    <tr>
-      <td class="capacity_label">{% trans "Network" %}:</td>
-      <td>
-        <div id="network_capacity_usage"
-             class="capacity_bar"
-             data-capacity-limit="{{ 100 }}"
-             data-capacity-used="{{ 60 }}"
-             data-average-capacity-used="{{ 70 }}">
-        </div>
-      </td>
-      <td>
-        <a href="#" class="modal_chart">90/100</a>
-      </td>
-    </tr>
-  </table>
+  <div class="span4">
+    <h4>{% trans "About" %}</h4>
+    <hr class="header_rule">
+    <dl>
+      <dt>{% trans "IP Subnet" %}</dt>
+      <dd>{{ rack.subnet|default:_("None") }}</dd>
+      <dt>{% trans "Switch IPs" %}</dt>
+      <dd>{{ rack.switch_ips|default:_("None") }}</dd>
+      <dt>{% trans "Location" %}</dt>
+      <dd>{{ rack.location|default:_("None") }}</dd>
+      <dt>{% trans "Status" %}</dt>
+      <dd>{{ rack.status|default:_("None") }}</dd>
+    </dl>
+  </div>
+  <div class="span4">
+    <h4>{% trans "Resource Assignment" %}</h4>
+    <hr class="header_rule">
+    <dl>
+      <dt>{% trans "Region" %}</dt>
+      <dd>{{ rack.region|default:_("None") }}</dd>
+      <dt>{% trans "Class" %}</dt>
+      <dd>{{ rack.resource_class.name|default:_("None") }}</dd>
+      <dt>{% trans "Hosts" %}</dt>
+      <dd>{{ rack.hosts_count|default:_("None") }}</dd>
+    </dl>
+  </div>
+  <div class="span4">
+    <h4>{% trans "Capacities" %}</h4>
+    <hr class="header_rule">
+    <table class="capacities">
+      <tr>
+        <td class="capacity_label">{% trans "CPU" %}:</td>
+        <td>
+          <div id="cpu_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ rack.cpu.value }}"
+               data-capacity-used="{{ rack.cpu.usage }}"
+               data-average-capacity-used="{{ 12 }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ rack.cpu.usage }}/{{ rack.cpu.value }} {{ rack.cpu.unit }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="capacity_label">{% trans "RAM" %}:</td>
+        <td>
+          <div id="ram_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ rack.ram.value }}"
+               data-capacity-used="{{ rack.ram.usage }}"
+               data-average-capacity-used="{{ 12 }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ rack.ram.usage }}/{{ rack.ram.value }} {{ rack.ram.unit }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="capacity_label">{% trans "Storage" %}:</td>
+        <td>
+          <div id="storage_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ rack.storage.value }}"
+               data-capacity-used="{{ rack.storage.usage }}"
+               data-average-capacity-used="{{ 12 }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ rack.storage.usage }}/{{ rack.storage.value }} {{ rack.storage.unit }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="capacity_label">{% trans "Network" %}:</td>
+        <td>
+          <div id="network_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ rack.network.value }}"
+               data-capacity-used="{{ rack.network.usage }}"
+               data-average-capacity-used="{{ 12 }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ rack.network.usage }}/{{ rack.network.value }} {{ rack.network.unit }}</a>
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>
 
 <div class="row-fluid">

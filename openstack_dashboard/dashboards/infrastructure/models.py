@@ -82,4 +82,4 @@ class ResourceClassFlavor(models.Model):
 
     flavor = models.ForeignKey('Flavor')
     resource_class = models.ForeignKey('ResourceClass')
-    max_vms = models.CharField(max_length=50)
+    max_vms = models.PositiveIntegerField(max_length=50, null=True)
