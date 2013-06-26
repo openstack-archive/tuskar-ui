@@ -17,11 +17,9 @@ from django.core.urlresolvers import reverse
 from mox import IsA
 from openstack_dashboard import api
 from openstack_dashboard.test import helpers as test
-from openstack_dashboard.dashboards.infrastructure.resource_management.\
-    resource_classes import workflows
 
 
-class ResourceClassesTests(test.BaseAdminViewTests):
+class ResourceClassViewTests(test.BaseAdminViewTests):
     @test.create_stubs({
         api.management.ResourceClass: (
             'create',
@@ -86,7 +84,7 @@ class ResourceClassesTests(test.BaseAdminViewTests):
             ("%s?tab=resource_management_tabs__resource_classes_tab" %
              reverse("horizon:infrastructure:resource_management:index")))
 
-    @test.create_stubs({
+    edit_resource_class_stubs = {
         api.management.ResourceClass: (
             'get',
             'flavors',
@@ -95,7 +93,9 @@ class ResourceClassesTests(test.BaseAdminViewTests):
             'all_resources',
             'update',
             'set_flavors',
-            'set_resources'), })
+            'set_resources'), }
+
+    @test.create_stubs(edit_resource_class_stubs)
     def test_edit_resource_class(self):
         resource_class = self.management_resource_classes.first()
 
@@ -184,21 +184,21 @@ class ResourceClassesTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(
             res, reverse('horizon:infrastructure:resource_management:index'))
 
-
-class ResourceClassViewTests(test.BaseAdminViewTests):
     @test.create_stubs({
         api.management.ResourceClass: (
-            'get', 'flavors', 'resources'), })
+            'get', 'flavors', 'racks'), })
     def test_detail_get(self):
         resource_class = self.management_resource_classes.first()
+        flavors = []
+        racks = []
 
         api.management.ResourceClass.get(
             IsA(http.HttpRequest),
             resource_class.id).\
             MultipleTimes().AndReturn(resource_class)
 
-        api.management.ResourceClass.flavors = []
-        api.management.ResourceClass.resources = []
+        api.management.ResourceClass.flavors = flavors
+        api.management.ResourceClass.racks = racks
 
         self.mox.ReplayAll()
 
@@ -206,10 +206,155 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                       'resource_classes:detail', args=[resource_class.id])
         res = self.client.get(url)
 
+        self.assertItemsEqual(res.context['flavors_table'].data,
+                              flavors)
+        self.assertItemsEqual(res.context['resources_table'].data,
+                              racks)
+
         self.assertEqual(res.status_code, 200)
         self.assertTemplateUsed(
             res, 'infrastructure/resource_management/resource_classes/'
                  'detail.html')
+
+    @test.create_stubs(edit_resource_class_stubs)
+    def test_detail_edit_resources(self):
+        resource_class = self.management_resource_classes.first()
+
+        flavors = []
+        all_flavors = []
+        resources = []
+        all_resources = []
+
+        add_flavors_ids = []
+        add_max_vms = {}
+        add_resources_ids = []
+
+        # FIXME I should probably track the resources and flavors methods
+        # so maybe they shouldn't be a @property
+
+        # properties set
+        api.management.ResourceClass.resources = resources
+        api.management.ResourceClass.all_resources = all_resources
+
+        api.management.ResourceClass.flavors = flavors
+        api.management.ResourceClass.all_flavors = all_flavors
+
+        # get
+        api.management.ResourceClass.get(
+            IsA(http.HttpRequest),
+            resource_class.id).\
+            MultipleTimes().AndReturn(resource_class)
+
+        # post
+        api.management.ResourceClass.update(
+            IsA(http.HttpRequest),
+            resource_class.id,
+            name=resource_class.name,
+            service_type=resource_class.service_type).\
+            AndReturn(resource_class)
+        api.management.ResourceClass.set_resources(
+            IsA(http.HttpRequest),
+            add_resources_ids)
+        api.management.ResourceClass.set_flavors(
+            IsA(http.HttpRequest),
+            add_flavors_ids,
+            add_max_vms)
+
+        self.mox.ReplayAll()
+
+        # get_test
+        url = reverse(
+            'horizon:infrastructure:resource_management:'
+            'resource_classes:update_resources',
+            args=[resource_class.id])
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+
+        # post test
+        form_data = {'resource_class_id': resource_class.id,
+                     'name': resource_class.name,
+                     'service_type': resource_class.service_type}
+        res = self.client.post(url, form_data)
+        self.assertNoFormErrors(res)
+        self.assertMessageCount(success=1)
+
+        redirect_url = "horizon:infrastructure:resource_management:"\
+                       "resource_classes:detail"
+        redirect_url = "%s?tab=resource_class_details__resources" % (
+            reverse(redirect_url, args=(resource_class.id,)))
+        self.assertRedirectsNoFollow(
+            res,
+            redirect_url)
+
+    @test.create_stubs(edit_resource_class_stubs)
+    def test_detail_edit_flavors(self):
+        resource_class = self.management_resource_classes.first()
+
+        flavors = []
+        all_flavors = []
+        resources = []
+        all_resources = []
+
+        add_flavors_ids = []
+        add_max_vms = {}
+        add_resources_ids = []
+
+        # FIXME I should probably track the resources and flavors methods
+        # so maybe they shouldn't be a @property
+
+        # properties set
+        api.management.ResourceClass.resources = resources
+        api.management.ResourceClass.all_resources = all_resources
+
+        api.management.ResourceClass.flavors = flavors
+        api.management.ResourceClass.all_flavors = all_flavors
+
+        # get
+        api.management.ResourceClass.get(
+            IsA(http.HttpRequest),
+            resource_class.id).\
+            MultipleTimes().AndReturn(resource_class)
+
+        # post
+        api.management.ResourceClass.update(
+            IsA(http.HttpRequest),
+            resource_class.id,
+            name=resource_class.name,
+            service_type=resource_class.service_type).\
+            AndReturn(resource_class)
+        api.management.ResourceClass.set_resources(
+            IsA(http.HttpRequest),
+            add_resources_ids)
+        api.management.ResourceClass.set_flavors(
+            IsA(http.HttpRequest),
+            add_flavors_ids,
+            add_max_vms)
+
+        self.mox.ReplayAll()
+
+        # get_test
+        url = reverse(
+            'horizon:infrastructure:resource_management:'
+            'resource_classes:update_flavors',
+            args=[resource_class.id])
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+
+        # post test
+        form_data = {'resource_class_id': resource_class.id,
+                     'name': resource_class.name,
+                     'service_type': resource_class.service_type}
+        res = self.client.post(url, form_data)
+        self.assertNoFormErrors(res)
+        self.assertMessageCount(success=1)
+
+        redirect_url = "horizon:infrastructure:resource_management:"\
+                       "resource_classes:detail"
+        redirect_url = "%s?tab=resource_class_details__flavors" % (
+            reverse(redirect_url, args=(resource_class.id,)))
+        self.assertRedirectsNoFollow(
+            res,
+            redirect_url)
 
     # def test_detail_get_exception(self):
     #     index_url = reverse('horizon:infractructure:resource_management:'
