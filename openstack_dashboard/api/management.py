@@ -276,8 +276,8 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @property
     def hosts(self):
         if "_hosts" not in self.__dict__:
-            self._hosts = reduce(lambda x, y: x + y,
-                                 [r.hosts for r in self.racks])
+            hosts_array = [rack.hosts for rack in self.racks]
+            self._hosts = [host for hosts in hosts_array for host in hosts]
         return self.__dict__['_hosts']
 
     @property
