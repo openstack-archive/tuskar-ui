@@ -21,6 +21,8 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse
+
+from django.utils import simplejson
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import View
 
@@ -109,3 +111,34 @@ class UsageDataView(View):
 
         return HttpResponse(json.dumps(values, cls=DjangoJSONEncoder),
                             mimetype='application/json')
+
+
+def top_communicating(request, rack_id=None):
+    random.seed()
+    data = []
+    statuses = ["OFF", "Good", "Something is wrong", "Disaster"]
+
+    number_of_elements = random.randint(50, 60)
+    for index in range(number_of_elements):
+        status = random.randint(0, 3)
+        percentage = random.randint(0, 100)
+
+        # count black/white color depending to percentage
+        # FIXME encapsulate the algoritm of getting color to the library,
+        # If the algorithm will be used in multiple places. Then pass the
+        # alghoritm name and parameters.
+        # If it will be used only in one place, pass the color directly.
+        color_n = 255 / 100 * percentage
+        color = "rgb(%s, %s, %s)" % (color_n, color_n, color_n)
+
+        data.append({'color': color,
+                     'status': statuses[status],
+                     'percentage': percentage,
+                     'id': "FIXME_RACK id",
+                     'name': "FIXME name",
+                     'url': "FIXME url"})
+
+        data.sort(key=lambda x: x['percentage'])
+
+    return HttpResponse(simplejson.dumps(data),
+        mimetype="application/json")
