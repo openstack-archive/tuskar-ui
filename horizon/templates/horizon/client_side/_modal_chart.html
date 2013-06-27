@@ -1,0 +1,12 @@
+{% extends "horizon/client_side/template.html" %}
+{% load horizon %}
+
+{% block id %}modal_chart_template{% endblock %}
+
+{% block template %}
+{% jstemplate %}
+<div class="modal" style="top: 80px; display: block;">
+    <div id="modal_chart"></div>
+</div>
+{% endjstemplate %}
+{% endblock %}

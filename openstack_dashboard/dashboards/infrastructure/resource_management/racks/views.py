@@ -12,11 +12,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from datetime import datetime, timedelta
+import json
 import logging
+import random
 
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
+from django.views.generic import View
 
 from horizon import exceptions
 from horizon import forms
@@ -91,3 +97,15 @@ class DetailView(tabs.TabView):
         rack = self.get_data()
         return self.tab_group_class(request, rack=rack,
                                     **kwargs)
+
+
+class UsageDataView(View):
+
+    def get(self, request, *args, **kwargs):
+        values = []
+        for i in range(10):
+            values.append({'date': datetime.now() + timedelta(days=i),
+                           'ram': random.randint(1, 9)})
+
+        return HttpResponse(json.dumps(values, cls=DjangoJSONEncoder),
+                            mimetype='application/json')

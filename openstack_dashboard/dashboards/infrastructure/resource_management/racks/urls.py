@@ -14,7 +14,7 @@
 
 from django.conf.urls.defaults import patterns, url, include
 
-from .views import CreateView, EditView, DetailView
+from .views import CreateView, EditView, DetailView, UsageDataView
 
 
 RACKS = r'^(?P<rack_id>[^/]+)/%s$'
@@ -24,6 +24,7 @@ VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \
 
 urlpatterns = patterns(VIEW_MOD,
     url(r'^create/$', CreateView.as_view(), name='create'),
+    url(r'^usage_data$', UsageDataView.as_view(), name='usage_data'),
     url(RACKS % 'edit/', EditView.as_view(), name='edit'),
     url(RACKS % 'detail', DetailView.as_view(), name='detail'),
 )
