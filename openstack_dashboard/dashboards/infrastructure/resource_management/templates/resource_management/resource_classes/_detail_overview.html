@@ -54,3 +54,68 @@
     {% endfor %}
   </dl>
 </div>
+
+<div class="row-fluid">
+  <div class="span6">
+    <div class="span3">
+      <h4>Summary of instances and usage</h4>
+    </div>
+  </div>
+  <div class="span6">
+    <div class="span3">
+      <h4>Rack health</h4>
+    </div>
+    <div class="span3 circles_chart_time_picker">
+      <select data-circles-chart-command="change_time"
+              data-receiver=".rack_health_chart">
+        <option value="now">Now</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="last_week">Last Week</option>
+        <option value="last_month">Last Month</option>
+      </select>
+    </div>
+    <div class="clear"></div>
+
+    <ul class="nav nav-tabs"
+        data-circles-chart-command="change_url"
+        data-receiver=".rack_health_chart">
+      <li class="active">
+        <a data-url="/infrastructure/racks/1/top_communicating.json?type=overall_health" href="#">
+          Overall Health</a>
+      </li>
+      <li>
+        <a data-url="/infrastructure/racks/1/top_communicating.json?type=alerts" href="#">
+          Alerts</a>
+      </li>
+      <li>
+        <a data-url="/infrastructure/racks/1/top_communicating.json?type=capacities" href="#">
+          Capacities</a>
+      </li>
+      <li>
+        <a data-url="/infrastructure/racks/1/top_communicating.json?type=status" href="#">
+          Status</a>
+      </li>
+    </ul>
+    <h5>Region 1<h5>
+    <div class="rack_health_chart"
+         data-chart-type="circles_chart"
+         data-url="/infrastructure/racks/1/top_communicating.json?region=1"
+         data-time="now"
+         data-size="10">
+    </div>
+    <h5>Region 2<h5>
+    <div class="rack_health_chart"
+         data-chart-type="circles_chart"
+         data-url="/infrastructure/racks/1/top_communicating.json?region=2"
+         data-time="now"
+         data-size="10">
+    </div>
+    <h5>Region 3<h5>
+    <div class="rack_health_chart"
+         data-chart-type="circles_chart"
+         data-url="/infrastructure/racks/1/top_communicating.json?region=3"
+         data-time="now"
+         data-size="10">
+    </div>
+  </div>
+</div>
