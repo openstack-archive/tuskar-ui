@@ -95,6 +95,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'set_flavors',
             'set_resources'), }
 
+    # FIXME: we should separate out get/post portions of this test
     @test.create_stubs(edit_resource_class_stubs)
     def test_edit_resource_class(self):
         resource_class = self.management_resource_classes.first()

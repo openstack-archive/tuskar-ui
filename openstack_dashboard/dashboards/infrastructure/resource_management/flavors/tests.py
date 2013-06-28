@@ -36,6 +36,7 @@ class FlavorsTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(
             resp, reverse('horizon:infrastructure:resource_management:index'))
 
+    # FIXME: we should separate out get/post portions of this test
     @test.create_stubs({api.management.Flavor: ('list', 'update', 'get'), })
     def test_edit_flavor(self):
         flavor = self.management_flavors.first()  # has no extra spec
