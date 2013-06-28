@@ -80,7 +80,7 @@ class Host(StringIdAPIResourceWrapper):
     """Wrapper for the Host object  returned by the
     dummy model.
     """
-    _attrs = ['name', 'mac_address', 'ip_address', 'status', 'usage']
+    _attrs = ['name', 'mac_address', 'ip_address', 'status', 'usage', 'rack']
 
     @classmethod
     def get(cls, request, host_id):
@@ -90,6 +90,14 @@ class Host(StringIdAPIResourceWrapper):
     def list_unracked(cls, request):
         return [cls(h) for h in dummymodels.Host.objects.all() if (
             h.rack is None)]
+
+    @classmethod
+    def create(cls, request, name, mac_address, ip_address, status,
+               usage, rack):
+        host = dummymodels.Host(name=name, mac_address=mac_address,
+                                ip_address=ip_address, status=status,
+                                usage=usage, rack=rack)
+        host.save()
 
     @property
     def capacities(self):
@@ -198,6 +206,7 @@ class Rack(StringIdAPIResourceWrapper):
                                 resource_class_id=resource_class_id,
                                 location=location, subnet=subnet)
         rack.save()
+        return rack
 
     @classmethod
     def list(cls, request, only_free_racks=False):
@@ -322,6 +331,28 @@ class Rack(StringIdAPIResourceWrapper):
 
     def hosts_count(self):
         return len(self.hosts)
+
+    # The idea here is to take a list of MAC addresses and assign them to
+    # our rack. I'm attaching this here so that we can take one list, versus
+    # potentially making a long series of API calls.
+    # The present implementation makes no attempt at optimization since this
+    # is likely short-lived until a real API is implemented.
+    @classmethod
+    def register_hosts(cls, rack_id, hosts_list):
+        for mac in hosts_list:
+            # search for MAC
+            try:
+                host = dummymodels.Host.objects.get(mac_address=mac)
+                if host is not None:
+                    host.rack_id = rack_id
+                    host.save()
+            except:
+                # FIXME: It is unclear what we're supposed to do in this case.
+                # I create a new Host, but it's possible we should not
+                # allow new entries here.
+                # FIXME: If this stays, we should probably add Capabilities
+                # here so that graphs work as expected.
+                Host.create(None, mac, mac, None, None, None, rack_id)
 
     @property
     def resource_class(self):

@@ -1,18 +1,40 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-import re
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
 
-from django.core import validators
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
+from django.forms import widgets
 
 from horizon import exceptions
+from horizon import workflows
 from horizon import forms
-from horizon import messages
 
 from openstack_dashboard import api
 
+import re
 
-class CreateRack(forms.SelfHandlingForm):
+
+class HostCreateAction(workflows.Action):
+    host_macs = forms.CharField(label=_("MAC Addresses"),
+        widget=forms.Textarea(attrs={'rows': 12, 'cols': 20}),
+        required=False)
+
+    class Meta:
+        name = _("Nodes")
+
+
+class RackCreateInfoAction(workflows.Action):
     name = forms.RegexField(label=_("Name"),
                             max_length=25,
                             regex=r'^[\w\.\- ]+$',
@@ -21,10 +43,11 @@ class CreateRack(forms.SelfHandlingForm):
                                 'periods and hyphens.')})
     resource_class_id = forms.ChoiceField(label=_("Resource Class"))
     location = forms.CharField(label=_("Location"))
+    # see GenericIPAddressField, but not for subnets:
     subnet = forms.CharField(label=_("IP Subnet"))
 
     def clean(self):
-        cleaned_data = super(CreateRack, self).clean()
+        cleaned_data = super(RackCreateInfoAction, self).clean()
         name = cleaned_data.get('name')
         rack_id = self.initial.get('rack_id', None)
         resource_class_id = cleaned_data.get('resource_class_id')
@@ -53,38 +76,63 @@ class CreateRack(forms.SelfHandlingForm):
         return cleaned_data
 
     def __init__(self, request, *args, **kwargs):
-        super(CreateRack, self).__init__(request, *args, **kwargs)
+        super(RackCreateInfoAction, self).__init__(request, *args, **kwargs)
         resource_class_id_choices = [('', _("Select a Resource Class"))]
         for rc in api.management.ResourceClass.list(request):
             resource_class_id_choices.append((rc.id, rc.name))
         self.fields['resource_class_id'].choices = resource_class_id_choices
 
+    class Meta:
+        name = _("Rack Settings")
+
+
+class CreateRackInfo(workflows.Step):
+    action_class = RackCreateInfoAction
+
+    contributes = ('name', 'resource_class_id', 'subnet', 'location')
+
+    def get_racks_data():
+        pass
+
+
+class CreateHosts(workflows.Step):
+    action_class = HostCreateAction
+    contributes = ('host_macs',)
+
+    def get_hosts_data():
+        pass
+
+
+class CreateRack(workflows.Workflow):
+    default_steps = (CreateRackInfo, CreateHosts)
+    slug = "create_rack"
+    name = _("Add Rack")
+    success_url = 'horizon:infrastructure:resource_management:index'
+    success_message = _("Rack created.")
+    failure_message = _("Unable to create rack.")
+
     def handle(self, request, data):
+
         try:
             rack = api.management.Rack.create(request, data['name'],
                                               data['resource_class_id'],
                                               data['location'],
                                               data['subnet'])
-            msg = _('Created rack "%s".') % data['name']
-            messages.success(request, msg)
+
+            if data['host_macs'] is not None:
+                hosts = data['host_macs'].splitlines(False)
+                api.management.Rack.register_hosts(rack, hosts)
+
             return True
         except:
             exceptions.handle(request, _("Unable to create rack."))
 
 
 class EditRack(CreateRack):
-    rack_id = forms.CharField(widget=forms.widgets.HiddenInput)
-
-    def handle(self, request, data):
-        try:
-            api.management.Rack.update(request, data['rack_id'],
-                                     name=data['name'],
-                                     subnet=data['subnet'],
-                                     resource_class_id=
-                                        data['resource_class_id'],
-                                     location=data['location'])
-            msg = _('Updated rack "%s".') % data["name"]
-            messages.success(request, msg)
-            return True
-        except:
-            exceptions.handle(request, _("Unable to update rack."))
+    # FIXME: Build out these methods
+    # default_steps = (EditRackInfo, EditHosts)
+    slug = "edit_rack"
+    name = _("Edit Rack")
+    success_url = 'horizon:infrastructure:resource_management:index'
+    success_message = _("Rack updated.")
+    failure_message = _("Unable to update rack.")

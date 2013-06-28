@@ -27,47 +27,30 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic import View
 
 from horizon import exceptions
-from horizon import forms
 from horizon import tabs
+from horizon import workflows
+from .workflows import (CreateRack, EditRack)
 
 from openstack_dashboard import api
-from .forms import CreateRack, EditRack
 from .tabs import RackDetailTabs
 
 
 LOG = logging.getLogger(__name__)
 
 
-class CreateView(forms.ModalFormView):
-    form_class = CreateRack
-    template_name = 'infrastructure/resource_management/racks/create.html'
-    success_url = reverse_lazy(
-        'horizon:infrastructure:resource_management:index')
-
-
-class EditView(forms.ModalFormView):
-    form_class = EditRack
-    template_name = 'infrastructure/resource_management/racks/edit.html'
-    success_url = reverse_lazy(
-        'horizon:infrastructure:resource_management:index')
-
-    def get_context_data(self, **kwargs):
-        context = super(EditView, self).get_context_data(**kwargs)
-        context['rack_id'] = self.kwargs['rack_id']
-        return context
+class CreateView(workflows.WorkflowView):
+    workflow_class = CreateRack
 
     def get_initial(self):
-        try:
-            rack = api.management.Rack.get(self.request,
-                                           self.kwargs['rack_id'])
-        except:
-            exceptions.handle(self.request,
-                              _("Unable to retrieve rack data."))
-        return {'rack_id': rack.id,
-                'name': rack.name,
-                'resource_class_id': rack.resource_class_id,
-                'location': rack.location,
-                'subnet': rack.subnet}
+        pass
+
+
+class EditView(CreateView):
+    workflow_class = EditRack
+
+    # FIXME: Fill this in
+    def get_intial(self):
+        pass
 
 
 class DetailView(tabs.TabView):

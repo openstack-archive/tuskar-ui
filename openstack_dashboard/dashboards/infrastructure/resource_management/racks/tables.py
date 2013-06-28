@@ -20,7 +20,6 @@ from horizon import tables
 
 from openstack_dashboard import api
 
-
 LOG = logging.getLogger(__name__)
 
 
