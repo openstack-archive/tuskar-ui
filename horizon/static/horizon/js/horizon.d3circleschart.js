@@ -252,7 +252,7 @@ horizon.d3_circles_chart = {
 }
 
 /* init the graphs */
-addHorizonLoadEvent(function() {
+horizon.addInitFunction(function () {
     horizon.d3_circles_chart.init('div[data-chart-type="circles_chart"]');
 });
 
