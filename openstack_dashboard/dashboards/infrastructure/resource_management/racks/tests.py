@@ -13,8 +13,11 @@
 from django.core.urlresolvers import reverse
 from openstack_dashboard.test import helpers as test
 from openstack_dashboard import api
-from mox import IsA
+from mox import IsA, IgnoreArg
 from django import http
+import tempfile
+import base64
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
 class ResourceViewTests(test.BaseAdminViewTests):
@@ -79,3 +82,63 @@ class ResourceViewTests(test.BaseAdminViewTests):
         url = reverse('horizon:infrastructure:resource_management:index')
         result = self.client.post(url, data)
         self.assertRedirectsNoFollow(result, self.index_page)
+
+    def test_upload_rack_get(self):
+        url = reverse('horizon:infrastructure:resource_management:'
+                      'racks:upload')
+        resource = self.client.get(url)
+
+        self.assertEqual(resource.status_code, 200)
+        self.assertTemplateUsed(resource,
+            'infrastructure/resource_management/racks/upload.html')
+
+    def test_upload_rack_upload(self):
+        csv_data = 'Rack1,rclass1,192.168.111.0/24,regionX,f0:dd:f1:da:f9:b5 '\
+                   'f2:de:f1:da:f9:66 f2:de:ff:da:f9:67'
+        temp_file = tempfile.TemporaryFile()
+        temp_file.write(csv_data)
+        temp_file.flush()
+        temp_file.seek(0)
+
+        data = {'csv_file': temp_file, 'upload': '1'}
+        url = reverse('horizon:infrastructure:resource_management:'
+                      'racks:upload')
+        resp = self.client.post(url, data)
+        self.assertTemplateUsed(resp,
+            'infrastructure/resource_management/racks/upload.html')
+        self.assertNoFormErrors(resp)
+        self.assertEqual(resp.context['form']['uploaded_data'].value(),
+            base64.b64encode(csv_data))
+
+    def test_upload_rack_upload_with_error(self):
+        data = {'upload': '1'}
+        url = reverse('horizon:infrastructure:resource_management:'
+                      'racks:upload')
+        resp = self.client.post(url, data)
+        self.assertTemplateUsed(resp,
+            'infrastructure/resource_management/racks/upload.html')
+        self.assertFormErrors(resp, 1)
+        self.assertEqual(resp.context['form']['uploaded_data'].value(),
+            None)
+
+    @test.create_stubs({api.management.Rack: ('create', 'register_nodes'),
+                        api.management.ResourceClass: ('list',)})
+    def test_upload_rack_create(self):
+        api.management.Rack.create(IsA(http.request.HttpRequest), 'Rack1',
+            '1', 'regionX', '192.168.111.0/24').AndReturn(None)
+        api.management.Rack.register_nodes(IgnoreArg(),
+            IgnoreArg()).AndReturn(None)
+        api.management.ResourceClass.list(
+            IsA(http.request.HttpRequest)).AndReturn(
+                self.management_resource_classes.list())
+        self.mox.ReplayAll()
+        csv_data = 'Rack1,rclass1,192.168.111.0/24,regionX,f0:dd:f1:da:f9:b5 '\
+                   'f2:de:f1:da:f9:66 f2:de:ff:da:f9:67'
+
+        data = {'uploaded_data': base64.b64encode(csv_data), 'add_racks': '1'}
+        url = reverse('horizon:infrastructure:resource_management:'
+                      'racks:upload')
+        resp = self.client.post(url, data)
+        self.assertRedirectsNoFollow(resp, self.index_page)
+        self.assertMessageCount(success=1)
+        self.assertMessageCount(error=0)

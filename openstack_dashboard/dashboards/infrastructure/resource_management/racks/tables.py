@@ -38,6 +38,13 @@ class CreateRack(tables.LinkAction):
     classes = ("ajax-modal", "btn-create")
 
 
+class UploadRack(tables.LinkAction):
+    name = "upload"
+    verbose_name = _("Upload Rack")
+    url = "horizon:infrastructure:resource_management:racks:upload"
+    classes = ("ajax-modal", "btn-upload")
+
+
 class EditRack(tables.LinkAction):
     name = "edit"
     verbose_name = _("Edit Rack")
@@ -66,5 +73,17 @@ class RacksTable(tables.DataTable):
     class Meta:
         name = "racks"
         verbose_name = _("Racks")
-        table_actions = (CreateRack, DeleteRacks, RacksFilterAction)
+        table_actions = (UploadRack, CreateRack, DeleteRacks,
+                         RacksFilterAction)
         row_actions = (EditRack, DeleteRacks)
+
+
+class UploadRacksTable(tables.DataTable):
+    name = tables.Column("name")
+    subnet = tables.Column("subnet")
+    nodes_count = tables.Column("nodes_count")
+    #region = tables.Column("region")
+
+    class Meta:
+        name = "uploaded_racks"
+        verbose_name = " "

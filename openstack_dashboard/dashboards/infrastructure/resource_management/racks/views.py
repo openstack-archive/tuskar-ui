@@ -28,11 +28,15 @@ from django.views.generic import View
 
 from horizon import exceptions
 from horizon import tabs
+from horizon import forms
 from horizon import workflows
 from .workflows import (CreateRack, EditRack)
 
 from openstack_dashboard import api
+
+from .forms import UploadRack
 from .tabs import RackDetailTabs
+from .tables import UploadRacksTable
 
 
 LOG = logging.getLogger(__name__)
@@ -43,6 +47,19 @@ class CreateView(workflows.WorkflowView):
 
     def get_initial(self):
         pass
+
+
+class UploadView(forms.ModalFormView):
+    form_class = UploadRack
+    template_name = 'infrastructure/resource_management/racks/upload.html'
+    success_url = reverse_lazy(
+        'horizon:infrastructure:resource_management:index')
+
+    def get_context_data(self, **kwargs):
+        context = super(UploadView, self).get_context_data(**kwargs)
+        context['racks_table'] = UploadRacksTable(
+                self.request, kwargs['form'].initial.get('racks', []))
+        return context
 
 
 class EditView(workflows.WorkflowView):
