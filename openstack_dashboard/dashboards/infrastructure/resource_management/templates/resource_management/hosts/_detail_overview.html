@@ -4,18 +4,96 @@
 <h3>{% trans "Host Overview" %}</h3>
 
 <div class="info row-fluid detail">
-  <h4>{% trans "Info" %}</h4>
-  <hr class="header_rule">
-  <dl>
-    <dt>{% trans "Name" %}</dt>
-    <dd>{{ host.name|default:_("None") }}</dd>
-    <dt>{% trans "MAC Address" %}</dt>
-    <dd>{{ host.mac_address|default:_("None") }}</dd>
-    <dt>{% trans "IP Address" %}</dt>
-    <dd>{{ host.ip_address|default:_("None") }}</dd>
-    <dt>{% trans "Status" %}</dt>
-    <dd>{{ host.status|default:_("None") }}</dd>
-    <dt>{% trans "Usage" %}</dt>
-    <dd>{{ host.usage|default:_("None") }}</dd>
-  </dl>
+  <div class="span4">
+    <h4>{% trans "About" %}</h4>
+    <hr class="header_rule">
+    <dl>
+      <dt>{% trans "MAC Address" %}</dt>
+      <dd>{{ host.mac_address|default:_("None") }}</dd>
+      <dt>{% trans "IP Address (Manag.)" %}</dt>
+      <dd>{{ host.ip_address|default:_("None") }}</dd>
+      <dt>{% trans "IP Address (Other)" %}</dt>
+      <dd>{{ host.ip_address_other|default:_("None") }}</dd>
+      <dt>{% trans "Location" %}</dt>
+      <dd>{{ host.rack.location|default:_("None") }}</dd>
+      <dt>{% trans "Status" %}</dt>
+      <dd>{{ host.status|default:_("None") }}</dd>
+    </dl>
+  </div>
+  <div class="span4">
+    <h4>{% trans "Resource Assignment" %}</h4>
+    <hr class="header_rule">
+    <dl>
+      <dt>{% trans "Rack" %}</dt>
+      <dd><a href="{% url 'horizon:infrastructure:resource_management:racks:detail' host.rack.id %}">{{ host.rack.name|default:_("None") }}</a></dd>
+      <dt>{% trans "Region" %}</dt>
+      <dd>{{ host.region|default:_("None") }}</dd>
+      <dt>{% trans "Host Type" %}</dt>
+      <dd>{{ host.type|default:_("none") }}</dd>
+      <dt>{% trans "Provisioned Image" %}</dt>
+      <dd>{{ host.image|default:_("None") }}</dd>
+    </dl>
+  </div>
+  <div class="span4">
+    <h4>{% trans "Capacities" %}</h4>
+    <hr class="header_rule">
+    <table class="capacities">
+      <tr>
+        <td class="capacity_label">{% trans "CPU" %}:</td>
+        <td>
+          <div id="cpu_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ host.cpu.value }}"
+               data-capacity-used="{{ host.cpu.usage }}"
+               data-average-capacity-used="{{ 2 }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ host.cpu.usage }}/{{ host.cpu.value }} {{ host.cpu.unit }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="capacity_label">{% trans "RAM" %}:</td>
+        <td>
+          <div id="ram_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ host.ram.value }}"
+               data-capacity-used="{{ host.ram.usage }}"
+               data-average-capacity-used="{{ 12 }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ host.ram.usage }}/{{ host.ram.value }} {{ host.ram.unit }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="capacity_label">{% trans "Storage" %}:</td>
+        <td>
+          <div id="storage_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ host.storage.value }}"
+               data-capacity-used="{{ host.storage.usage }}"
+               data-average-capacity-used="{{ 6 }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ host.storage.usage }}/{{ host.storage.value }} {{ host.storage.unit }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="capacity_label">{% trans "Network" %}:</td>
+        <td>
+          <div id="network_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ host.network.value }}"
+               data-capacity-used="{{ host.network.usage }}"
+               data-average-capacity-used="{{ 40 }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ host.network.usage }}/{{ host.network.value }} {{ host.network.unit }}</a>
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>
