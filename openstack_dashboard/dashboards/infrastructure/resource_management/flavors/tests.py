@@ -8,7 +8,7 @@ from openstack_dashboard.test import helpers as test
 
 class FlavorsTests(test.BaseAdminViewTests):
 
-    @test.create_stubs({api.management.Flavor: ('list', 'create'), })
+    @test.create_stubs({api.management.Flavor: ('list', 'create')})
     def test_create_flavor(self):
         flavor = self.management_flavors.first()
 
@@ -36,16 +36,26 @@ class FlavorsTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(
             resp, reverse('horizon:infrastructure:resource_management:index'))
 
-    # FIXME: we should separate out get/post portions of this test
-    @test.create_stubs({api.management.Flavor: ('list', 'update', 'get'), })
-    def test_edit_flavor(self):
+    @test.create_stubs({api.management.Flavor: ('list', 'update', 'get')})
+    def test_edit_flavor_get(self):
         flavor = self.management_flavors.first()  # has no extra spec
 
-        # GET
         api.management.Flavor.get(IsA(http.HttpRequest),
                                   flavor.id).AndReturn(flavor)
+        self.mox.ReplayAll()
 
-        # POST
+        url = reverse(
+            'horizon:infrastructure:resource_management:flavors:edit',
+            args=[flavor.id])
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(
+            resp, "infrastructure/resource_management/flavors/edit.html")
+
+    @test.create_stubs({api.management.Flavor: ('list', 'update', 'get')})
+    def test_edit_flavor_post(self):
+        flavor = self.management_flavors.first()  # has no extra spec
+
         api.management.Flavor.list(
             IsA(http.HttpRequest)).AndReturn(self.management_flavors.list())
         api.management.Flavor.update(IsA(http.HttpRequest),
@@ -56,16 +66,6 @@ class FlavorsTests(test.BaseAdminViewTests):
                                   flavor.id).AndReturn(flavor)
         self.mox.ReplayAll()
 
-        # get_test
-        url = reverse(
-            'horizon:infrastructure:resource_management:flavors:edit',
-            args=[flavor.id])
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assertTemplateUsed(
-            resp, "infrastructure/resource_management/flavors/edit.html")
-
-        # post test
         data = {'flavor_id': flavor.id,
                 'name': flavor.name,
                 'vcpu': 0,
@@ -73,13 +73,16 @@ class FlavorsTests(test.BaseAdminViewTests):
                 'root_disk': 0,
                 'ephemeral_disk': 0,
                 'swap_disk': 0}
+        url = reverse(
+            'horizon:infrastructure:resource_management:flavors:edit',
+            args=[flavor.id])
         resp = self.client.post(url, data)
         self.assertNoFormErrors(resp)
         self.assertMessageCount(success=1)
         self.assertRedirectsNoFollow(
             resp, reverse('horizon:infrastructure:resource_management:index'))
 
-    @test.create_stubs({api.management.Flavor: ('list', 'delete'), })
+    @test.create_stubs({api.management.Flavor: ('list', 'delete')})
     def test_delete_flavor(self):
         flavor = self.management_flavors.first()
 
@@ -96,7 +99,7 @@ class FlavorsTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(
             res, reverse('horizon:infrastructure:resource_management:index'))
 
-    @test.create_stubs({api.management.Flavor: ('get',), })
+    @test.create_stubs({api.management.Flavor: ('get',)})
     def test_detail_flavor(self):
         flavor = self.management_flavors.first()
 

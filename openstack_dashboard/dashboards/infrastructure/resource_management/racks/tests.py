@@ -20,12 +20,7 @@ from django import http
 class ResourceViewTests(test.BaseAdminViewTests):
     index_page = reverse('horizon:infrastructure:resource_management:index')
 
-    @test.create_stubs({api.management.Rack: ('create',)})
-    def test_create_rack(self):
-        api.management.Rack.create(IsA(http.request.HttpRequest), 'New Rack',
-                                   u'2', 'Tokyo', '1.2.3.4').AndReturn(None)
-        self.mox.ReplayAll()
-
+    def test_create_rack_get(self):
         url = reverse('horizon:infrastructure:resource_management:'
                       'racks:create')
         resource = self.client.get(url)
@@ -35,20 +30,20 @@ class ResourceViewTests(test.BaseAdminViewTests):
                                 'infrastructure/resource_management/racks/' +
                                 'create.html')
 
+    @test.create_stubs({api.management.Rack: ('create',)})
+    def test_create_rack_post(self):
+        api.management.Rack.create(IsA(http.request.HttpRequest), 'New Rack',
+                                   u'2', 'Tokyo', '1.2.3.4').AndReturn(None)
+        self.mox.ReplayAll()
+
         data = {'name': 'New Rack', 'resource_class_id': u'2',
                 'location': 'Tokyo', 'subnet': '1.2.3.4'}
+        url = reverse('horizon:infrastructure:resource_management:'
+                      'racks:create')
         resp = self.client.post(url, data)
         self.assertRedirectsNoFollow(resp, self.index_page)
 
-    @test.create_stubs({api.management.Rack: ('update',)})
-    def test_edit_rack(self):
-        api.management.Rack.update(IsA(http.request.HttpRequest),
-                                   u'1', name='Updated Rack',
-                                   subnet='127.10.10.0/24',
-                                   location='New Location',
-                                   resource_class_id='1')
-        self.mox.ReplayAll()
-
+    def test_edit_rack_get(self):
         url = reverse('horizon:infrastructure:resource_management:' +
                       'racks:edit', args=[1])
         resource = self.client.get(url)
@@ -57,8 +52,19 @@ class ResourceViewTests(test.BaseAdminViewTests):
                                 'infrastructure/resource_management/racks/' +
                                 'edit.html')
 
+    @test.create_stubs({api.management.Rack: ('update',)})
+    def test_edit_rack_post(self):
+        api.management.Rack.update(IsA(http.request.HttpRequest),
+                                   u'1', name='Updated Rack',
+                                   subnet='127.10.10.0/24',
+                                   location='New Location',
+                                   resource_class_id='1')
+        self.mox.ReplayAll()
+
         data = {'name': 'Updated Rack', 'resource_class_id': 1, 'rack_id': 1,
                 'location': 'New Location', 'subnet': '127.10.10.0/24'}
+        url = reverse('horizon:infrastructure:resource_management:' +
+                      'racks:edit', args=[1])
         response = self.client.post(url, data)
         self.assertNoFormErrors(response)
         self.assertMessageCount(success=1)
