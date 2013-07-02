@@ -34,6 +34,21 @@ class HostCreateAction(workflows.Action):
         name = _("Nodes")
 
 
+# mawagner FIXME - We presently disable this box, but leave the form.
+# We need to decide if this should be supported, or whether users should
+# be required to use the table view (to be implemented).
+# NOTE: The form input is disabled, but the input is also ignored
+# even if it were present.
+class HostEditAction(workflows.Action):
+    host_macs = forms.CharField(label=_("MAC Addresses"),
+        widget=forms.Textarea(attrs={'rows': 12, 'cols': 20,
+                                     'readonly': 'readonly'}),
+                              required=False)
+
+    class Meta:
+        name = _("Nodes")
+
+
 class RackCreateInfoAction(workflows.Action):
     name = forms.RegexField(label=_("Name"),
                             max_length=25,
@@ -86,6 +101,11 @@ class RackCreateInfoAction(workflows.Action):
         name = _("Rack Settings")
 
 
+class RackEditInfoAction(RackCreateInfoAction):
+    def clean(self):
+        cleaned_data = super(RackCreateInfoAction, self).clean()
+
+
 class CreateRackInfo(workflows.Step):
     action_class = RackCreateInfoAction
 
@@ -95,12 +115,23 @@ class CreateRackInfo(workflows.Step):
         pass
 
 
+class EditRackInfo(CreateRackInfo):
+    depends_on = ('rack_id',)
+
+
 class CreateHosts(workflows.Step):
     action_class = HostCreateAction
     contributes = ('host_macs',)
 
     def get_hosts_data():
         pass
+
+
+class EditHosts(workflows.Step):
+    action_class = HostEditAction
+    depends_on = ('rack_id',)
+    contributes = ('host_macs',)
+    help_text = _("Editing hosts via textbox is not presently supported.")
 
 
 class CreateRack(workflows.Workflow):
@@ -112,7 +143,6 @@ class CreateRack(workflows.Workflow):
     failure_message = _("Unable to create rack.")
 
     def handle(self, request, data):
-
         try:
             rack = api.management.Rack.create(request, data['name'],
                                               data['resource_class_id'],
@@ -129,10 +159,18 @@ class CreateRack(workflows.Workflow):
 
 
 class EditRack(CreateRack):
-    # FIXME: Build out these methods
-    # default_steps = (EditRackInfo, EditHosts)
+    default_steps = (EditRackInfo, EditHosts)
     slug = "edit_rack"
     name = _("Edit Rack")
     success_url = 'horizon:infrastructure:resource_management:index'
     success_message = _("Rack updated.")
     failure_message = _("Unable to update rack.")
+
+    def handle(self, request, data):
+        try:
+            rack_id = self.context['rack_id']
+            rack = api.management.Rack.update(rack_id, data)
+
+            return True
+        except:
+            exceptions.handle(request, _("Unable to create rack."))

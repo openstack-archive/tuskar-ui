@@ -45,12 +45,16 @@ class CreateView(workflows.WorkflowView):
         pass
 
 
-class EditView(CreateView):
+class EditView(workflows.WorkflowView):
     workflow_class = EditRack
 
-    # FIXME: Fill this in
-    def get_intial(self):
-        pass
+    def get_initial(self):
+        obj = api.management.Rack.get(None,
+                                      rack_id=self.kwargs['rack_id'])
+        mac_str = "\n".join([x.mac_address for x in obj.hosts])
+        return {'name': obj.name, 'resource_class_id': obj.resource_class_id,
+                'location': obj.location, 'subnet': obj.subnet,
+                'host_macs': mac_str, 'rack_id': self.kwargs['rack_id']}
 
 
 class DetailView(tabs.TabView):

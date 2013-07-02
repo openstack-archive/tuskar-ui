@@ -361,14 +361,14 @@ class Rack(StringIdAPIResourceWrapper):
         return self.__dict__['_resource_class']
 
     @classmethod
-    def update(self, request, rack_id, **kwargs):
+    def update(cls, rack_id, kwargs):
         rack = dummymodels.Rack.objects.get(id=rack_id)
         rack.name = kwargs['name']
         rack.location = kwargs['location']
         rack.subnet = kwargs['subnet']
         rack.resource_class_id = kwargs['resource_class_id']
         rack.save()
-        return self(rack)
+        return cls(rack)
 
 
 ##########################################################################

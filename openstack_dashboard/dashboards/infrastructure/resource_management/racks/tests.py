@@ -44,33 +44,30 @@ class ResourceViewTests(test.BaseAdminViewTests):
                       'racks:create')
         resp = self.client.post(url, data)
         self.assertRedirectsNoFollow(resp, self.index_page)
-    #
-    # def test_edit_rack_get(self):
-    #     url = reverse('horizon:infrastructure:resource_management:' +
-    #                   'racks:edit', args=[1])
-    #     resource = self.client.get(url)
-    #     self.assertEqual(resource.status_code, 200)
-    #     self.assertTemplateUsed(resource,
-    #                             'infrastructure/resource_management/racks/' +
-    #                             'edit.html')
 
-    # @test.create_stubs({api.management.Rack: ('update',)})
-    # def test_edit_rack_post(self):
-    #     api.management.Rack.update(IsA(http.request.HttpRequest),
-    #                                u'1', name='Updated Rack',
-    #                                subnet='127.10.10.0/24',
-    #                                location='New Location',
-    #                                resource_class_id='1')
-    #     self.mox.ReplayAll()
-    #
-    #     data = {'name': 'Updated Rack', 'resource_class_id': 1, 'rack_id': 1,
-    #             'location': 'New Location', 'subnet': '127.10.10.0/24'}
-    #     url = reverse('horizon:infrastructure:resource_management:' +
-    #                   'racks:edit', args=[1])
-    #     response = self.client.post(url, data)
-    #     self.assertNoFormErrors(response)
-    #     self.assertMessageCount(success=1)
-    #     self.assertRedirectsNoFollow(response, self.index_page)
+    def test_edit_rack_get(self):
+        url = reverse('horizon:infrastructure:resource_management:' +
+                      'racks:edit', args=[1])
+        resource = self.client.get(url)
+        self.assertEqual(resource.status_code, 200)
+        self.assertTemplateUsed(resource,
+                                'horizon/common/_workflow_base.html')
+
+    @test.create_stubs({api.management.Rack: ('update',)})
+    def test_edit_rack_post(self):
+        data = {'name': 'Updated Rack', 'resource_class_id': u'1',
+                'rack_id': u'1', 'location': 'New Location',
+                'subnet': '127.10.10.0/24', 'host_macs': 'foo'}
+
+        api.management.Rack.update(u'1', data)
+        self.mox.ReplayAll()
+
+        url = reverse('horizon:infrastructure:resource_management:' +
+                      'racks:edit', args=[1])
+        response = self.client.post(url, data)
+        self.assertNoFormErrors(response)
+        self.assertMessageCount(success=1)
+        self.assertRedirectsNoFollow(response, self.index_page)
 
     @test.create_stubs({api.management.Rack: ('delete',)})
     def test_delete_rack(self):
