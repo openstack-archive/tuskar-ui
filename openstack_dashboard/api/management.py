@@ -14,6 +14,7 @@
 
 import copy
 import logging
+from datetime import timedelta
 from random import randint
 
 from django.db.models import Sum, Max
@@ -74,6 +75,14 @@ class Capacity(StringIdAPIResourceWrapper):
         if "_usage" not in self.__dict__:
             self._usage = randint(0, self.value)
         return self.__dict__['_usage']
+
+    # defines a random average of capacity - API should probably be able to
+    # determine average of capacity based on capacity value and obejct_id
+    @property
+    def average(self):
+        if "_average" not in self.__dict__:
+            self._average = randint(0, self.value)
+        return self.__dict__['_average']
 
 
 class Host(StringIdAPIResourceWrapper):
@@ -715,6 +724,18 @@ class Flavor(StringIdAPIResourceWrapper):
     def running_virtual_machines(self):
         # arbitrary number
         return len(self.resource_classes) * 2
+
+    # defines a random average of capacity - API should probably be able to
+    # determine average of capacity based on capacity value and obejct_id
+    def vms_over_time(self, start_time, end_time):
+        values = []
+        current_time = start_time
+        while current_time <= end_time:
+            values.append({'date': current_time,
+                           'value': randint(0, self.running_virtual_machines)})
+            current_time += timedelta(hours=1)
+
+        return values
 
     @classmethod
     def update(cls, request, flavor_id, name, vcpu, ram, root_disk,

@@ -15,7 +15,7 @@
 
 from django.conf.urls.defaults import patterns, url
 
-from .views import CreateView, DetailView, EditView
+from .views import CreateView, DetailView, EditView, ActiveInstancesDataView
 
 
 FLAVORS = r'^(?P<flavor_id>[^/]+)/%s$'
@@ -25,5 +25,7 @@ VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \
 urlpatterns = patterns(VIEW_MOD,
     url(r'^create/$', CreateView.as_view(), name='create'),
     url(FLAVORS % '/edit/$', EditView.as_view(), name='edit'),
-    url(FLAVORS % 'detail', DetailView.as_view(), name='detail')
+    url(FLAVORS % 'detail', DetailView.as_view(), name='detail'),
+    url(FLAVORS % 'active_instances_data',
+        ActiveInstancesDataView.as_view(), name='active_instances_data')
 )

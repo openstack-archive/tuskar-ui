@@ -13,10 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from datetime import datetime, timedelta
+import json
 import logging
 
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
+from django.views.generic import View
 
 from horizon import exceptions
 from horizon import forms
@@ -95,3 +100,18 @@ class DetailView(tabs.TabView):
         flavor = self.get_data()
         return self.tab_group_class(request, flavor=flavor,
                                     **kwargs)
+
+
+class ActiveInstancesDataView(View):
+
+    def get(self, request, *args, **kwargs):
+        try:
+            flavor = api.management.Flavor.get(
+                self.request, self.kwargs['flavor_id'])
+            values = flavor.vms_over_time(
+                datetime.now() - timedelta(days=7), datetime.now())
+            return HttpResponse(json.dumps(values, cls=DjangoJSONEncoder),
+                                mimetype='application/json')
+        except:
+            exceptions.handle(self.request,
+                              _("Unable to retrieve flavor data."))
