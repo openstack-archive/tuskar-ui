@@ -25,7 +25,11 @@
     <hr class="header_rule">
     <dl>
       <dt>{% trans "Rack" %}</dt>
+      {% if host.rack %}
       <dd><a href="{% url 'horizon:infrastructure:resource_management:racks:detail' host.rack.id %}">{{ host.rack.name|default:_("None") }}</a></dd>
+      {% else %}
+      <dd>{% trans "None" %}</dd>
+      {% endif %}
       <dt>{% trans "Region" %}</dt>
       <dd>{{ host.region|default:_("None") }}</dd>
       <dt>{% trans "Host Type" %}</dt>
