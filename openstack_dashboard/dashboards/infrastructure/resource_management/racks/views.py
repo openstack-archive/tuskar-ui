@@ -108,9 +108,29 @@ class DetailView(tabs.TabView):
 class UsageDataView(View):
 
     def get(self, request, *args, **kwargs):
+        interval = request.GET.get('interval', '1w')
+
+        if interval == '12h':
+            data_count = 12
+            timedelta_param = 'hours'
+        elif interval == '24h':
+            data_count = 24
+            timedelta_param = 'hours'
+        elif interval == '1m':
+            data_count = 30
+            timedelta_param = 'days'
+        elif interval == '1y':
+            data_count = 52
+            timedelta_param = 'weeks'
+        else:
+            # default is 1 week
+            data_count = 7
+            timedelta_param = 'days'
+
         values = []
-        for i in range(10):
-            values.append({'date': datetime.now() + timedelta(days=i),
+        for i in range(data_count):
+            timediff = timedelta(**{timedelta_param: i})
+            values.append({'date': datetime.now() - timediff,
                            'ram': random.randint(1, 9)})
 
         return HttpResponse(json.dumps(values, cls=DjangoJSONEncoder),
