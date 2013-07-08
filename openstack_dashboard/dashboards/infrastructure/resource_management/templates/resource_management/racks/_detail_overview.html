@@ -13,7 +13,7 @@
       <dt>{% trans "Location" %}</dt>
       <dd>{{ rack.location|default:_("None") }}</dd>
       <dt>{% trans "Status" %}</dt>
-      <dd>{{ rack.status|default:_("None") }}</dd>
+      <dd>{{ rack.state|default:_("None") }}</dd>
     </dl>
   </div>
   <div class="span4">

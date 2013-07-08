@@ -218,7 +218,7 @@ class Rack(StringIdAPIResourceWrapper):
     """Wrapper for the Rack object  returned by the
     dummy model.
     """
-    _attrs = ['id', 'name', 'location', 'subnet', 'nodes']
+    _attrs = ['id', 'name', 'location', 'subnet', 'nodes', 'state']
 
     @classmethod
     def create(cls, request, name, resource_class_id, location, subnet,
@@ -236,14 +236,15 @@ class Rack(StringIdAPIResourceWrapper):
     @classmethod
     def update(cls, request, rack_id, kwargs):
         ## FIXME: set nodes here
-        rack = tuskarclient(request).racks.update(rack_id,
-                name=kwargs['name'],
-                location=kwargs['location'],
-                subnet=kwargs['subnet'],
-                # FIXME: set nodes
-                #nodes=kwargs['nodes'],
-                resource_class={'id': kwargs['resource_class_id']},
-                slots=0)
+        correct_kwargs = copy.copy(kwargs)
+        # remove rack_id from kwargs (othervise it is duplicated)
+        correct_kwargs.pop('rack_id', None)
+        # correct data mapping for resource_class
+        if 'resource_class_id' in correct_kwargs:
+            correct_kwargs['resource_class'] = {
+                'id': correct_kwargs.pop('resource_class_id', None)}
+
+        rack = tuskarclient(request).racks.update(rack_id, **correct_kwargs)
         return cls(rack)
 
     @classmethod

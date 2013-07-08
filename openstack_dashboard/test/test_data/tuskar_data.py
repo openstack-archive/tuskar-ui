@@ -79,12 +79,13 @@ def data(TEST):
     # FIXME: Struct is used to provide similar object-like behaviour
     # as is provided by tuskarclient
     RackStruct = namedtuple('RackStruct', 'id name nodes resource_class\
-        location subnet')
+        location subnet state')
     rack_1 = Rack(RackStruct(
         id="1",
         name='rack1',
         location='location',
         subnet='192.168.1.0/24',
+        state='provisioned',
         nodes=[{'id': 1}, {'id': 2}, {'id': 3}, {'id': 4}],
         resource_class={'id': '1'}))
 

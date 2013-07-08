@@ -30,11 +30,11 @@ from horizon import exceptions
 from horizon import tabs
 from horizon import forms
 from horizon import workflows
-from .workflows import (CreateRack, EditRack)
+from .workflows import (CreateRack, EditRack, DetailEditRack)
 
 from openstack_dashboard import api
 
-from .forms import UploadRack
+from .forms import UploadRack, UpdateRackStatus
 from .tabs import RackDetailTabs
 from .tables import UploadRacksTable
 
@@ -70,7 +70,38 @@ class EditView(workflows.WorkflowView):
         mac_str = "\n".join([x.mac_address for x in obj.list_nodes])
         return {'name': obj.name, 'resource_class_id': obj.resource_class_id,
                 'location': obj.location, 'subnet': obj.subnet,
-                'node_macs': mac_str, 'rack_id': self.kwargs['rack_id']}
+                'state': obj.state, 'node_macs': mac_str,
+                'rack_id': self.kwargs['rack_id']}
+
+
+class DetailEditView(EditView):
+    workflow_class = DetailEditRack
+
+
+class EditRackStatusView(forms.ModalFormView):
+    form_class = UpdateRackStatus
+    template_name = 'infrastructure/resource_management/racks/edit_status.html'
+
+    def get_success_url(self):
+        # Redirect to previous url
+        return self.request.META.get('HTTP_REFERER', None)
+
+    def get_context_data(self, **kwargs):
+        context = super(EditRackStatusView, self).get_context_data(**kwargs)
+        context['rack_id'] = self.kwargs['rack_id']
+        context['action'] = context['form'].initial.get('action', None)
+        return context
+
+    def get_initial(self):
+        try:
+            rack = api.tuskar.Rack.get(
+                self.request, self.kwargs['rack_id'])
+            action = self.request.GET.get('action')
+        except:
+            exceptions.handle(self.request,
+                              _("Unable to retrieve rack data."))
+        return {'rack': rack,
+                'action': action}
 
 
 class DetailView(tabs.TabView):

@@ -14,7 +14,8 @@
 
 from django.conf.urls import patterns, url, include
 
-from .views import CreateView, UploadView, EditView, DetailView, UsageDataView
+from .views import (CreateView, UploadView, EditView, DetailEditView,
+                    EditRackStatusView, DetailView, UsageDataView)
 
 
 RACKS = r'^(?P<rack_id>[^/]+)/%s$'
@@ -27,6 +28,9 @@ urlpatterns = patterns(VIEW_MOD,
     url(r'^upload/$', UploadView.as_view(), name='upload'),
     url(r'^usage_data$', UsageDataView.as_view(), name='usage_data'),
     url(RACKS % 'edit/', EditView.as_view(), name='edit'),
+    url(RACKS % 'detail_edit/', DetailEditView.as_view(), name='detail_edit'),
+    url(RACKS % 'edit_status/', EditRackStatusView.as_view(),
+                                name='edit_status'),
     url(RACKS % 'detail', DetailView.as_view(), name='detail'),
     url(RACKS % 'top_communicating.json', 'top_communicating'),
 )

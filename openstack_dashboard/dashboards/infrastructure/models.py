@@ -60,6 +60,7 @@ class Rack(models.Model):
     capacities = generic.GenericRelation(Capacity)
     location = models.CharField(max_length=50)
     subnet = models.CharField(max_length=50, unique=True)
+    status = models.CharField(max_length=50)
 
 
 class ResourceClass(models.Model):

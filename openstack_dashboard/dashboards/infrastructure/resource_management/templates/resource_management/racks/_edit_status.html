@@ -1,0 +1,23 @@
+{% extends "horizon/common/_modal_form.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block form_id %}edit_rack_status_form{% endblock %}
+{% block form_action %}{% url 'horizon:infrastructure:resource_management:racks:edit_status' rack_id %}?action={{ action }}{% endblock %}
+
+{% block modal_id %}edit_rack_status_modal{% endblock %}
+{% block modal-header %}{% trans "Rack Action Confirmation" %}{% endblock %}
+
+{% block modal-body %}
+<div>
+  {% trans "Are you sure?" %}
+  <fieldset>
+  {% include "horizon/common/_form_fields.html" %}
+  </fieldset>
+</div>
+{% endblock %}
+
+{% block modal-footer %}
+  <input class="btn btn-primary" type="submit" value="{% trans "Yes" %}" />
+  <a href="{% url 'horizon:infrastructure:resource_management:racks:detail' rack_id %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
+{% endblock %}

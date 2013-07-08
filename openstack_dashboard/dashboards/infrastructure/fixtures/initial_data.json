@@ -13,8 +13,8 @@
   {"pk": 4, "model": "infrastructure.node", "fields": {"name": "node4", "rack": 2, "mac_address": "00-B0-D0-86-AB-F0", "ip_address": "192.168.191.14", "status": "active", "usage": "50"}},
   {"pk": 5, "model": "infrastructure.node", "fields": {"name": "Unracked Node", "mac_address": "00-B0-D0-86-AB-F1"}},
 
-  {"pk": 1, "model": "infrastructure.rack", "fields": {"name": "rack1", "resource_class": 1, "location": "Boston DC 1", "subnet": "10.16.25.0/24"}},
-  {"pk": 2, "model": "infrastructure.rack", "fields": {"name": "rack2", "resource_class": 1, "location": "Toronto - 151 Front St.", "subnet": "24.50.60.0/22"}},
+  {"pk": 1, "model": "infrastructure.rack", "fields": {"name": "rack1", "resource_class": 1, "location": "Boston DC 1", "subnet": "10.16.25.0/24", "status": "active"}},
+  {"pk": 2, "model": "infrastructure.rack", "fields": {"name": "rack2", "resource_class": 1, "location": "Toronto - 151 Front St.", "subnet": "24.50.60.0/22", "status": "active"}},
 
   {"pk": 1, "model": "infrastructure.resourceclass", "fields": {"service_type": "compute", "name": "m1"}},
 

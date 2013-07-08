@@ -170,7 +170,18 @@ class EditRack(CreateRack):
         try:
             rack_id = self.context['rack_id']
             rack = api.tuskar.Rack.update(request, rack_id, data)
-
             return True
         except:
-            exceptions.handle(request, _("Unable to edit rack."))
+            exceptions.handle(request, _("Unable to update rack."))
+
+
+class DetailEditRack(EditRack):
+    success_url = 'horizon:infrastructure:resource_management:racks:detail'
+
+    def get_success_url(self):
+        rack_id = self.context['rack_id']
+        return reverse(self.success_url, args=(rack_id,))
+
+    def get_failure_url(self):
+        rack_id = self.context['rack_id']
+        return reverse(self.success_url, args=(rack_id,))

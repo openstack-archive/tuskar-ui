@@ -116,3 +116,30 @@ class CSVRack:
 
     def nodes_count(self):
         return len(self.nodes)
+
+
+class UpdateRackStatus(forms.SelfHandlingForm):
+
+    def handle(self, request, data):
+        try:
+            rack = self.initial.get('rack', None)
+            action = request.GET.get('action')
+
+            if action == "start":
+                rack.state = "active"
+            elif action == "reboot":
+                rack.state = "active"
+            elif action == "shutdown":
+                rack.state = "off"
+
+            rack = api.tuskar.Rack.update(
+                request,
+                rack.id,
+                {'state': rack.state}
+            )
+
+            msg = _('Updated rack "%s" status.') % rack.name
+            messages.success(request, msg)
+            return True
+        except:
+            exceptions.handle(request, _("Unable to update Rack status."))
