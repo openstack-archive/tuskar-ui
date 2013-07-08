@@ -162,14 +162,18 @@ class UpdateFlavorsClass(tables.LinkAction):
 
 
 class ResourceClassDetailResourcesTable(racks_tables.RacksTable):
-    total_cpu = tables.Column("total_cpu",
-                              verbose_name=_("Total CPU"))
-    total_ram = tables.Column("total_ram",
-                              verbose_name=_("Total RAM"))
-    total_disk = tables.Column("total_disk",
-                               verbose_name=_("Total DISK"))
-    usage = tables.Column("usage",
-                          verbose_name=_("Usage"))
+    cpu = tables.Column("cpu",
+                        verbose_name=_("Total CPU"),
+                        filters=(lambda x: getattr(x, 'value', ''),))
+    ram = tables.Column("ram",
+                        verbose_name=_("Total RAM"),
+                        filters=(lambda x: getattr(x, 'value', ''),))
+    storage = tables.Column("storage",
+                            verbose_name=_("Total Disk"),
+                            filters=(lambda x: getattr(x, 'value', ''),))
+    vm_capacity = tables.Column("vm_capacity",
+                                verbose_name=_("VM Capacity"),
+                                filters=(lambda x: getattr(x, 'value', ''),))
 
     class Meta:
         name = "resources"
@@ -177,7 +181,7 @@ class ResourceClassDetailResourcesTable(racks_tables.RacksTable):
         table_actions = (ResourcesFilterAction, UpdateResourcesClass)
         columns = (
             'name', 'subnet', 'location', 'node_count',
-            'total_cpu', 'total_ram', 'total_disk', 'usage')
+            'cpu', 'ram', 'storage', 'vm_capacity')
 
 
 class ResourceClassDetailFlavorsTable(flavors_tables.FlavorsTable):

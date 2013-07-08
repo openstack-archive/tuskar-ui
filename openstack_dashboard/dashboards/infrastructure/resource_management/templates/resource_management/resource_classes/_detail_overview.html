@@ -4,68 +4,127 @@
 <h3>{% trans "Resource Class Overview" %}</h3>
 
 <div class="status row-fluid detail">
-  <h4>{% trans "Info" %}</h4>
-  <hr class="header_rule">
-  <dl>
-    <dt>{% trans "Name" %}</dt>
-    <dd>{{ resource_class.name }}</dd>
-    <dt>{% trans "Service Type" %}</dt>
-    <dd>{{ resource_class.service_type }}</dd>
-    <dt>{% trans "Status" %}</dt>
-    <dd>{{ resource_class.status|default:_("normal") }}</dd>
-  </dl>
-</div>
-
-<div class="status row-fluid detail">
-  <h4>{% trans "Compute Power" %}</h4>
-  <hr class="header_rule">
-  <dl>
-    <dt>{% trans "Racks" %}</dt>
-    <dd>{{ resource_class.racks|length }}</dd>
-    <dt>{% trans "Nodes" %}</dt>
-    <dd>{{ resource_class.nodes|length }}</dd>
-    <dt>{% trans "Total CPU" %}</dt>
-    <dd>{{ resource_class.total_cpu.value }} {{ resource_class.total_cpu.unit }}</dd>
-    <dt>{% trans "Total RAM" %}</dt>
-    <dd>{{ resource_class.total_ram.value }} {{ resource_class.total_ram.unit }}</dd>
-    <dt>{% trans "Total Storage" %}</dt>
-    <dd>{{ resource_class.total_storage.value }} {{ resource_class.total_storage.unit }}</dd>
-  </dl>
-</div>
-
-<div class="status row-fluid detail">
-  <h4>{% trans "Running Virtual Machines" %}</h4>
-  <hr class="header_rule">
-  <dl>
-    {% for flavor_count in resource_class.running_virtual_machines %}
-      <dt>{{ flavor_count.flavor.name }}</dt>
-      <dd>{{ flavor_count.max_vms }}</dd>
-    {% endfor %}
-  </dl>
-</div>
-
-<div class="status row-fluid detail">
-  <h4>{% trans "Virtual Capacity" %}</h4>
-  <hr class="header_rule">
-  <dl>
-    {% for flavor_count in resource_class.resource_class_flavors %}
-      <dt>{{ flavor_count.flavor.name }}</dt>
-      <dd>{{ flavor_count.max_vms }}</dd>
-    {% endfor %}
-  </dl>
-</div>
-
-<div class="row-fluid">
-  <div class="span6">
-    <div class="span3">
-      <h4>Summary of instances and usage</h4>
-    </div>
+  <div class="span4">
+    <h4>{% trans "About" %}</h4>
+    <hr class="header_rule">
+    <dl>
+      <dt>{% trans "Racks" %}</dt>
+      <dd>{{ resource_class.racks|length }}</dd>
+      <dt>{% trans "Nodes" %}</dt>
+      <dd>{{ resource_class.nodes|length }}</dd>
+    </dl>
   </div>
+
+  <div class="span4">
+    <h4>{% trans "Provided Service" %}</h4>
+    <hr class="header_rule">
+    <dl>
+      <dt>{% trans "Type" %}</dt>
+      <dd>{{ resource_class.service_type }}</dd>
+      <dt>{% trans "Flavors" %}</dt>
+      <dd>{{ resource_class.flavors|length }}</dd>
+      <dt>{% trans "Active Instances" %}</dt>
+      <dd>{{ resource_class.running_virtual_machines|length }}</dd>
+    </dl>
+    </dl>
+  </div>
+
+  <div class="span4">
+    <h4>{% trans "Capacities" %}</h4>
+    <hr class="header_rule">
+    <table class="capacities">
+      <tr>
+        <td class="capacity_label">{% trans "CPU" %}:</td>
+        <td>
+          <div id="cpu_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ resource_class.cpu.value }}"
+               data-capacity-used="{{ resource_class.cpu.usage }}"
+               data-average-capacity-used="{{ 12 }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ resource_class.cpu.usage }}/{{ resource_class.cpu.value }} {{ resource_class.cpu.unit }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="capacity_label">{% trans "RAM" %}:</td>
+        <td>
+          <div id="ram_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ resource_class.ram.value }}"
+               data-capacity-used="{{ resource_class.ram.usage }}"
+               data-average-capacity-used="{{ 12 }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ resource_class.ram.usage }}/{{ resource_class.ram.value }} {{ resource_class.ram.unit }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="capacity_label">{% trans "Storage" %}:</td>
+        <td>
+          <div id="storage_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ resource_class.storage.value }}"
+               data-capacity-used="{{ resource_class.storage.usage }}"
+               data-average-capacity-used="{{ 12 }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ resource_class.storage.usage }}/{{ resource_class.storage.value }} {{ resource_class.storage.unit }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="capacity_label">{% trans "Network" %}:</td>
+        <td>
+          <div id="network_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ resource_class.network.value }}"
+               data-capacity-used="{{ resource_class.network.usage }}"
+               data-average-capacity-used="{{ 12 }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ resource_class.network.usage }}/{{ resource_class.network.value }} {{ resource_class.network.unit }}</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="status row-fluid detail">
   <div class="span6">
-    <div class="span3">
-      <h4>Rack health</h4>
-    </div>
-    <div class="span3 circles_chart_time_picker">
+    <h4>{% trans "Running Virtual Machines" %}</h4>
+    <hr class="header_rule">
+    <dl>
+      {% for flavor_count in resource_class.running_virtual_machines %}
+        <dt>{{ flavor_count.flavor.name }}</dt>
+        <dd>{{ flavor_count.max_vms }}</dd>
+      {% endfor %}
+    </dl>
+  </div>
+
+  <div class="span6">
+    <h4>{% trans "Virtual Capacity" %}</h4>
+    <hr class="header_rule">
+    <dl>
+      {% for flavor_count in resource_class.resource_class_flavors %}
+        <dt>{{ flavor_count.flavor.name }}</dt>
+        <dd>{{ flavor_count.max_vms }}</dd>
+      {% endfor %}
+    </dl>
+  </div>
+</div>
+
+<div class="row-fluid detail">
+  <div class="span6">
+      <h4>Summary of instances and usage</h4>
+      <hr class="header_rule">
+  </div>
+
+  <div class="span6">
+    <div class="circles_chart_time_picker">
       <select data-circles-chart-command="change_time"
               data-receiver=".rack_health_chart">
         <option value="now">Now</option>
@@ -74,6 +133,8 @@
         <option value="last_month">Last Month</option>
       </select>
     </div>
+    <h4>Rack health</h4>
+    <hr class="header_rule">
     <div class="clear"></div>
 
     <ul class="nav nav-tabs"

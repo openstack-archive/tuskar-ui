@@ -538,8 +538,8 @@ class ResourceClass(StringIdAPIResourceWrapper):
         return self.__dict__['_running_virtual_machines']
 
     @property
-    def total_cpu(self):
-        if "_total_cpu" not in self.__dict__:
+    def cpu(self):
+        if "_cpu" not in self.__dict__:
             try:
                 attrs = dummymodels.Capacity.objects\
                         .filter(node__rack__resource_class=self._apiresource)\
@@ -550,15 +550,15 @@ class ResourceClass(StringIdAPIResourceWrapper):
                          'value': _('Unable to retrieve '
                                     '(Are the nodes configured properly?)'),
                          'unit': ''}
-            total_cpu = dummymodels.Capacity(name=attrs['name'],
+            cpu = dummymodels.Capacity(name=attrs['name'],
                                              value=attrs['value'],
                                              unit=attrs['unit'])
-            self._total_cpu = Capacity(total_cpu)
-        return self.__dict__['_total_cpu']
+            self._cpu = Capacity(cpu)
+        return self.__dict__['_cpu']
 
     @property
-    def total_ram(self):
-        if "_total_ram" not in self.__dict__:
+    def ram(self):
+        if "_ram" not in self.__dict__:
             try:
                 attrs = dummymodels.Capacity.objects\
                         .filter(node__rack__resource_class=self._apiresource)\
@@ -569,15 +569,15 @@ class ResourceClass(StringIdAPIResourceWrapper):
                          'value': _('Unable to retrieve '
                                     '(Are the nodes configured properly?)'),
                          'unit': ''}
-            total_ram = dummymodels.Capacity(name=attrs['name'],
+            ram = dummymodels.Capacity(name=attrs['name'],
                                              value=attrs['value'],
                                              unit=attrs['unit'])
-            self._total_ram = Capacity(total_ram)
-        return self.__dict__['_total_ram']
+            self._ram = Capacity(ram)
+        return self.__dict__['_ram']
 
     @property
-    def total_storage(self):
-        if "_total_storage" not in self.__dict__:
+    def storage(self):
+        if "_storage" not in self.__dict__:
             try:
                 attrs = dummymodels.Capacity.objects\
                         .filter(node__rack__resource_class=self._apiresource)\
@@ -588,11 +588,46 @@ class ResourceClass(StringIdAPIResourceWrapper):
                          'value': _('Unable to retrieve '
                                     '(Are the nodes configured properly?)'),
                          'unit': ''}
-            total_storage = dummymodels.Capacity(name=attrs['name'],
+            storage = dummymodels.Capacity(name=attrs['name'],
                                                  value=attrs['value'],
                                                  unit=attrs['unit'])
-            self._total_storage = Capacity(total_storage)
-        return self.__dict__['_total_storage']
+            self._storage = Capacity(storage)
+        return self.__dict__['_storage']
+
+    @property
+    def network(self):
+        if "_network" not in self.__dict__:
+            try:
+                attrs = dummymodels.Capacity.objects\
+                        .filter(node__rack__resource_class=self._apiresource)\
+                        .values('name', 'unit').annotate(value=Sum('value'))\
+                        .filter(name='network')[0]
+            except:
+                attrs = {'name': 'network',
+                         'value': _('Unable to retrieve '
+                                    '(Are the nodes configured properly?)'),
+                         'unit': ''}
+            network = dummymodels.Capacity(name=attrs['name'],
+                                           value=attrs['value'],
+                                           unit=attrs['unit'])
+            self._network = Capacity(network)
+        return self.__dict__['_network']
+
+    @property
+    def vm_capacity(self):
+        if "_vm_capacity" not in self.__dict__:
+            try:
+                value = dummymodels.ResourceClassFlavor.objects\
+                            .filter(resource_class=self._apiresource)\
+                            .aggregate(Max("max_vms"))['max_vms__max']
+            except:
+                value = _("Unable to retrieve vm capacity")
+
+            vm_capacity = dummymodels.Capacity(name=_("Max VMs"),
+                                               value=value,
+                                               unit=_("VMs"))
+            self._vm_capacity = Capacity(vm_capacity)
+        return self.__dict__['_vm_capacity']
 
     ##########################################################################
     # ResourceClass Instance methods
