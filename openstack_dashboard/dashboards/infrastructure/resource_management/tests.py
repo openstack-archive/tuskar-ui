@@ -31,7 +31,7 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         api.management.ResourceClass: (
             'list',
             'racks',
-            'hosts'),
+            'nodes'),
         api.management.Flavor: (
             'list',),
         api.management.Rack: (
@@ -45,10 +45,10 @@ class ResourceManagementTests(test.BaseAdminViewTests):
 
         # ResourceClass stubs
         all_resource_classes = self.management_resource_classes.list()
-        hosts = []
+        nodes = []
         racks = []
 
-        api.management.ResourceClass.hosts = hosts
+        api.management.ResourceClass.nodes = nodes
         api.management.ResourceClass.racks = racks
 
         api.management.ResourceClass.list(

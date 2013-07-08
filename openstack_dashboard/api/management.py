@@ -85,28 +85,28 @@ class Capacity(StringIdAPIResourceWrapper):
         return self.__dict__['_average']
 
 
-class Host(StringIdAPIResourceWrapper):
-    """Wrapper for the Host object  returned by the
+class Node(StringIdAPIResourceWrapper):
+    """Wrapper for the Node object  returned by the
     dummy model.
     """
     _attrs = ['name', 'mac_address', 'ip_address', 'status', 'usage', 'rack']
 
     @classmethod
-    def get(cls, request, host_id):
-        return cls(dummymodels.Host.objects.get(id=host_id))
+    def get(cls, request, node_id):
+        return cls(dummymodels.Node.objects.get(id=node_id))
 
     @classmethod
     def list_unracked(cls, request):
-        return [cls(h) for h in dummymodels.Host.objects.all() if (
+        return [cls(h) for h in dummymodels.Node.objects.all() if (
             h.rack is None)]
 
     @classmethod
     def create(cls, request, name, mac_address, ip_address, status,
                usage, rack):
-        host = dummymodels.Host(name=name, mac_address=mac_address,
+        node = dummymodels.Node(name=name, mac_address=mac_address,
                                 ip_address=ip_address, status=status,
                                 usage=usage, rack=rack)
-        host.save()
+        node.save()
 
     @property
     def capacities(self):
@@ -126,13 +126,13 @@ class Host(StringIdAPIResourceWrapper):
         if "_cpu" not in self.__dict__:
             try:
                 cpu = dummymodels.Capacity.objects\
-                            .filter(host=self._apiresource)\
+                            .filter(node=self._apiresource)\
                             .filter(name='cpu')[0]
             except:
                 cpu = dummymodels.Capacity(
                             name='cpu',
                             value=_('Unable to retrieve '
-                                    '(Is the host configured properly?)'),
+                                    '(Is the node configured properly?)'),
                             unit='')
             self._cpu = Capacity(cpu)
         return self.__dict__['_cpu']
@@ -142,13 +142,13 @@ class Host(StringIdAPIResourceWrapper):
         if "_ram" not in self.__dict__:
             try:
                 ram = dummymodels.Capacity.objects\
-                            .filter(host=self._apiresource)\
+                            .filter(node=self._apiresource)\
                             .filter(name='ram')[0]
             except:
                 ram = dummymodels.Capacity(
                             name='ram',
                             value=_('Unable to retrieve '
-                                    '(Is the host configured properly?)'),
+                                    '(Is the node configured properly?)'),
                             unit='')
             self._ram = Capacity(ram)
         return self.__dict__['_ram']
@@ -158,13 +158,13 @@ class Host(StringIdAPIResourceWrapper):
         if "_storage" not in self.__dict__:
             try:
                 storage = dummymodels.Capacity.objects\
-                                .filter(host=self._apiresource)\
+                                .filter(node=self._apiresource)\
                                 .filter(name='storage')[0]
             except:
                 storage = dummymodels.Capacity(
                                 name='storage',
                                 value=_('Unable to retrieve '
-                                        '(Is the host configured properly?)'),
+                                        '(Is the node configured properly?)'),
                                 unit='')
             self._storage = Capacity(storage)
         return self.__dict__['_storage']
@@ -174,13 +174,13 @@ class Host(StringIdAPIResourceWrapper):
         if "_network" not in self.__dict__:
             try:
                 network = dummymodels.Capacity.objects\
-                                .filter(host=self._apiresource)\
+                                .filter(node=self._apiresource)\
                                 .filter(name='network')[0]
             except:
                 network = dummymodels.Capacity(
                                 name='network',
                                 value=_('Unable to retrieve '
-                                        '(Is the host configured properly?)'),
+                                        '(Is the node configured properly?)'),
                                 unit='')
             self._network = Capacity(network)
         return self.__dict__['_network']
@@ -191,7 +191,7 @@ class Host(StringIdAPIResourceWrapper):
             try:
                 value = dummymodels.ResourceClassFlavor.objects\
                             .filter(
-                                resource_class__rack__host=self._apiresource)\
+                                resource_class__rack__node=self._apiresource)\
                             .aggregate(Max("max_vms"))['max_vms__max']
             except:
                 value = _("Unable to retrieve vm capacity")
@@ -241,13 +241,13 @@ class Rack(StringIdAPIResourceWrapper):
         if "_cpu" not in self.__dict__:
             try:
                 attrs = dummymodels.Capacity.objects\
-                        .filter(host__rack=self._apiresource)\
+                        .filter(node__rack=self._apiresource)\
                         .values('name', 'unit').annotate(value=Sum('value'))\
                         .filter(name='cpu')[0]
             except:
                 attrs = {'name': 'cpu',
                          'value': _('Unable to retrieve '
-                                    '(Are the hosts configured properly?)'),
+                                    '(Are the nodes configured properly?)'),
                          'unit': ''}
             cpu = dummymodels.Capacity(name=attrs['name'],
                                        value=attrs['value'],
@@ -260,13 +260,13 @@ class Rack(StringIdAPIResourceWrapper):
         if "_ram" not in self.__dict__:
             try:
                 attrs = dummymodels.Capacity.objects\
-                        .filter(host__rack=self._apiresource)\
+                        .filter(node__rack=self._apiresource)\
                         .values('name', 'unit').annotate(value=Sum('value'))\
                         .filter(name='ram')[0]
             except:
                 attrs = {'name': 'ram',
                          'value': _('Unable to retrieve '
-                                    '(Are the hosts configured properly?)'),
+                                    '(Are the nodes configured properly?)'),
                          'unit': ''}
             ram = dummymodels.Capacity(name=attrs['name'],
                                        value=attrs['value'],
@@ -279,13 +279,13 @@ class Rack(StringIdAPIResourceWrapper):
         if "_storage" not in self.__dict__:
             try:
                 attrs = dummymodels.Capacity.objects\
-                        .filter(host__rack=self._apiresource)\
+                        .filter(node__rack=self._apiresource)\
                         .values('name', 'unit').annotate(value=Sum('value'))\
                         .filter(name='storage')[0]
             except:
                 attrs = {'name': 'storage',
                          'value': _('Unable to retrieve '
-                                    '(Are the hosts configured properly?)'),
+                                    '(Are the nodes configured properly?)'),
                          'unit': ''}
             storage = dummymodels.Capacity(name=attrs['name'],
                                            value=attrs['value'],
@@ -298,13 +298,13 @@ class Rack(StringIdAPIResourceWrapper):
         if "_network" not in self.__dict__:
             try:
                 attrs = dummymodels.Capacity.objects\
-                        .filter(host__rack=self._apiresource)\
+                        .filter(node__rack=self._apiresource)\
                         .values('name', 'unit').annotate(value=Sum('value'))\
                         .filter(name='network')[0]
             except:
                 attrs = {'name': 'network',
                          'value': _('Unable to retrieve '
-                                    '(Are the hosts configured properly?)'),
+                                    '(Are the nodes configured properly?)'),
                          'unit': ''}
             network = dummymodels.Capacity(name=attrs['name'],
                                            value=attrs['value'],
@@ -333,13 +333,13 @@ class Rack(StringIdAPIResourceWrapper):
         dummymodels.Rack.objects.get(id=rack_id).delete()
 
     @property
-    def hosts(self):
-        if "_hosts" not in self.__dict__:
-            self._hosts = [Host(h) for h in self._apiresource.host_set.all()]
-        return self.__dict__['_hosts']
+    def nodes(self):
+        if "_nodes" not in self.__dict__:
+            self._nodes = [Node(h) for h in self._apiresource.node_set.all()]
+        return self.__dict__['_nodes']
 
-    def hosts_count(self):
-        return len(self.hosts)
+    def nodes_count(self):
+        return len(self.nodes)
 
     # The idea here is to take a list of MAC addresses and assign them to
     # our rack. I'm attaching this here so that we can take one list, versus
@@ -347,21 +347,21 @@ class Rack(StringIdAPIResourceWrapper):
     # The present implementation makes no attempt at optimization since this
     # is likely short-lived until a real API is implemented.
     @classmethod
-    def register_hosts(cls, rack_id, hosts_list):
-        for mac in hosts_list:
+    def register_nodes(cls, rack_id, nodes_list):
+        for mac in nodes_list:
             # search for MAC
             try:
-                host = dummymodels.Host.objects.get(mac_address=mac)
-                if host is not None:
-                    host.rack_id = rack_id
-                    host.save()
+                node = dummymodels.Node.objects.get(mac_address=mac)
+                if node is not None:
+                    node.rack_id = rack_id
+                    node.save()
             except:
                 # FIXME: It is unclear what we're supposed to do in this case.
-                # I create a new Host, but it's possible we should not
+                # I create a new Node, but it's possible we should not
                 # allow new entries here.
                 # FIXME: If this stays, we should probably add Capabilities
                 # here so that graphs work as expected.
-                Host.create(None, mac, mac, None, None, None, rack_id)
+                Node.create(None, mac, mac, None, None, None, rack_id)
 
     @property
     def resource_class(self):
@@ -508,15 +508,15 @@ class ResourceClass(StringIdAPIResourceWrapper):
         return self.__dict__['_all_flavors']
 
     @property
-    def hosts(self):
-        if "_hosts" not in self.__dict__:
-            hosts_array = [rack.hosts for rack in self.racks]
-            self._hosts = [host for hosts in hosts_array for host in hosts]
-        return self.__dict__['_hosts']
+    def nodes(self):
+        if "_nodes" not in self.__dict__:
+            nodes_array = [rack.nodes for rack in self.racks]
+            self._nodes = [node for nodes in nodes_array for node in nodes]
+        return self.__dict__['_nodes']
 
     @property
-    def hosts_count(self):
-        return len(self.hosts)
+    def nodes_count(self):
+        return len(self.nodes)
 
     @property
     def racks(self):
@@ -542,13 +542,13 @@ class ResourceClass(StringIdAPIResourceWrapper):
         if "_total_cpu" not in self.__dict__:
             try:
                 attrs = dummymodels.Capacity.objects\
-                        .filter(host__rack__resource_class=self._apiresource)\
+                        .filter(node__rack__resource_class=self._apiresource)\
                         .values('name', 'unit').annotate(value=Sum('value'))\
                         .filter(name='cpu')[0]
             except:
                 attrs = {'name': 'cpu',
                          'value': _('Unable to retrieve '
-                                    '(Are the hosts configured properly?)'),
+                                    '(Are the nodes configured properly?)'),
                          'unit': ''}
             total_cpu = dummymodels.Capacity(name=attrs['name'],
                                              value=attrs['value'],
@@ -561,13 +561,13 @@ class ResourceClass(StringIdAPIResourceWrapper):
         if "_total_ram" not in self.__dict__:
             try:
                 attrs = dummymodels.Capacity.objects\
-                        .filter(host__rack__resource_class=self._apiresource)\
+                        .filter(node__rack__resource_class=self._apiresource)\
                         .values('name', 'unit').annotate(value=Sum('value'))\
                         .filter(name='ram')[0]
             except:
                 attrs = {'name': 'ram',
                          'value': _('Unable to retrieve '
-                                    '(Are the hosts configured properly?)'),
+                                    '(Are the nodes configured properly?)'),
                          'unit': ''}
             total_ram = dummymodels.Capacity(name=attrs['name'],
                                              value=attrs['value'],
@@ -580,13 +580,13 @@ class ResourceClass(StringIdAPIResourceWrapper):
         if "_total_storage" not in self.__dict__:
             try:
                 attrs = dummymodels.Capacity.objects\
-                        .filter(host__rack__resource_class=self._apiresource)\
+                        .filter(node__rack__resource_class=self._apiresource)\
                         .values('name', 'unit').annotate(value=Sum('value'))\
                         .filter(name='storage')[0]
             except:
                 attrs = {'name': 'storage',
                          'value': _('Unable to retrieve '
-                                    '(Are the hosts configured properly?)'),
+                                    '(Are the nodes configured properly?)'),
                          'unit': ''}
             total_storage = dummymodels.Capacity(name=attrs['name'],
                                                  value=attrs['value'],

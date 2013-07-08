@@ -79,8 +79,8 @@ class ResourceClassesTable(tables.DataTable):
     racks_count = tables.Column("racks_count",
                                 verbose_name=_("Racks"),
                                 empty_value="0")
-    hosts_count = tables.Column("hosts_count",
-                                verbose_name=_("Hosts"),
+    nodes_count = tables.Column("nodes_count",
+                                verbose_name=_("Nodes"),
                                 empty_value="0")
 
     class Meta:
@@ -176,7 +176,7 @@ class ResourceClassDetailResourcesTable(racks_tables.RacksTable):
         verbose_name = _("Resources")
         table_actions = (ResourcesFilterAction, UpdateResourcesClass)
         columns = (
-            'name', 'subnet', 'location', 'host_count',
+            'name', 'subnet', 'location', 'node_count',
             'total_cpu', 'total_ram', 'total_disk', 'usage')
 
 

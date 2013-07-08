@@ -46,11 +46,11 @@ class RacksTab(tabs.TableTab):
     def get_context_data(self, request):
         context = super(RacksTab, self).get_context_data(request)
         try:
-            context["hosts"] = management.Host.list_unracked(self.request)
+            context["nodes"] = management.Node.list_unracked(self.request)
         except:
-            context["hosts"] = []
+            context["nodes"] = []
             exceptions.handle(request,
-                              _('Unable to retrieve hosts.'))
+                              _('Unable to retrieve nodes.'))
         return context
 
 

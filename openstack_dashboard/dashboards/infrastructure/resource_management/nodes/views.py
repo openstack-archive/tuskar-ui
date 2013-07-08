@@ -21,50 +21,50 @@ from horizon import tabs
 
 from openstack_dashboard import api
 
-from .tabs import HostDetailTabs
-from .tables import UnrackedHostsTable
+from .tabs import NodeDetailTabs
+from .tables import UnrackedNodesTable
 
 
 class UnrackedView(tables.DataTableView):
-    table_class = UnrackedHostsTable
-    template_name = 'infrastructure/resource_management/hosts/unracked.html'
+    table_class = UnrackedNodesTable
+    template_name = 'infrastructure/resource_management/nodes/unracked.html'
 
     def get_data(self):
         try:
-            hosts = api.management.Host.list_unracked(self.request)
+            nodes = api.management.Node.list_unracked(self.request)
         except:
-            hosts = []
+            nodes = []
             exceptions.handle(self.request,
-                              _('Unable to retrieve hosts.'))
-        return hosts
+                              _('Unable to retrieve nodes.'))
+        return nodes
 
 
 class DetailView(tabs.TabView):
-    tab_group_class = HostDetailTabs
-    template_name = 'infrastructure/resource_management/hosts/detail.html'
+    tab_group_class = NodeDetailTabs
+    template_name = 'infrastructure/resource_management/nodes/detail.html'
 
     def get_context_data(self, **kwargs):
             context = super(DetailView, self).get_context_data(**kwargs)
-            context["host"] = self.get_data()
+            context["node"] = self.get_data()
             return context
 
     def get_data(self):
-        if not hasattr(self, "_host"):
+        if not hasattr(self, "_node"):
             try:
-                host_id = self.kwargs['host_id']
-                host = api.management.Host.get(self.request, host_id)
+                node_id = self.kwargs['node_id']
+                node = api.management.Node.get(self.request, node_id)
             except:
                 redirect = reverse('horizon:infrastructure:'
                                    'resource_management:index')
                 exceptions.handle(self.request,
                                   _('Unable to retrieve details for '
-                                    'host "%s".')
-                                    % host_id,
+                                    'node "%s".')
+                                    % node_id,
                                     redirect=redirect)
-            self._host = host
-        return self._host
+            self._node = node
+        return self._node
 
     def get_tabs(self, request, *args, **kwargs):
-        host = self.get_data()
-        return self.tab_group_class(request, host=host,
+        node = self.get_data()
+        return self.tab_group_class(request, node=node,
                                     **kwargs)

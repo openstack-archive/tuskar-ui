@@ -25,8 +25,8 @@ from openstack_dashboard import api
 import re
 
 
-class HostCreateAction(workflows.Action):
-    host_macs = forms.CharField(label=_("MAC Addresses"),
+class NodeCreateAction(workflows.Action):
+    node_macs = forms.CharField(label=_("MAC Addresses"),
         widget=forms.Textarea(attrs={'rows': 12, 'cols': 20}),
         required=False)
 
@@ -39,8 +39,8 @@ class HostCreateAction(workflows.Action):
 # be required to use the table view (to be implemented).
 # NOTE: The form input is disabled, but the input is also ignored
 # even if it were present.
-class HostEditAction(workflows.Action):
-    host_macs = forms.CharField(label=_("MAC Addresses"),
+class NodeEditAction(workflows.Action):
+    node_macs = forms.CharField(label=_("MAC Addresses"),
         widget=forms.Textarea(attrs={'rows': 12, 'cols': 20,
                                      'readonly': 'readonly'}),
                               required=False)
@@ -119,23 +119,23 @@ class EditRackInfo(CreateRackInfo):
     depends_on = ('rack_id',)
 
 
-class CreateHosts(workflows.Step):
-    action_class = HostCreateAction
-    contributes = ('host_macs',)
+class CreateNodes(workflows.Step):
+    action_class = NodeCreateAction
+    contributes = ('node_macs',)
 
-    def get_hosts_data():
+    def get_nodes_data():
         pass
 
 
-class EditHosts(workflows.Step):
-    action_class = HostEditAction
+class EditNodes(workflows.Step):
+    action_class = NodeEditAction
     depends_on = ('rack_id',)
-    contributes = ('host_macs',)
-    help_text = _("Editing hosts via textbox is not presently supported.")
+    contributes = ('node_macs',)
+    help_text = _("Editing nodes via textbox is not presently supported.")
 
 
 class CreateRack(workflows.Workflow):
-    default_steps = (CreateRackInfo, CreateHosts)
+    default_steps = (CreateRackInfo, CreateNodes)
     slug = "create_rack"
     name = _("Add Rack")
     success_url = 'horizon:infrastructure:resource_management:index'
@@ -149,9 +149,9 @@ class CreateRack(workflows.Workflow):
                                               data['location'],
                                               data['subnet'])
 
-            if data['host_macs'] is not None:
-                hosts = data['host_macs'].splitlines(False)
-                api.management.Rack.register_hosts(rack, hosts)
+            if data['node_macs'] is not None:
+                nodes = data['node_macs'].splitlines(False)
+                api.management.Rack.register_nodes(rack, nodes)
 
             return True
         except:
@@ -159,7 +159,7 @@ class CreateRack(workflows.Workflow):
 
 
 class EditRack(CreateRack):
-    default_steps = (EditRackInfo, EditHosts)
+    default_steps = (EditRackInfo, EditNodes)
     slug = "edit_rack"
     name = _("Edit Rack")
     success_url = 'horizon:infrastructure:resource_management:index'

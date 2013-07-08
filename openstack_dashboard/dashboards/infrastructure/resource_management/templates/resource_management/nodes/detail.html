@@ -1,13 +1,13 @@
 {% extends 'infrastructure/base.html' %}
 {% load i18n %}
-{% block title %}{% trans "Host Detail"%}{% endblock %}
+{% block title %}{% trans "Node Detail"%}{% endblock %}
 
 {% block page_header %}
-  {% include "horizon/common/_page_header.html" with title=_("Host Detail") %}
+  {% include "horizon/common/_page_header.html" with title=_("Node Detail") %}
 {% endblock page_header %}
 
 {% block main %}
-<h3>{{ host.name }}</h3>
+<h3>{{ node.name }}</h3>
 
 <div class="row-fluid">
   <div class="span12">
@@ -16,10 +16,10 @@
         <tr>
           <td class="capacity_label">{% trans "Usage" %}:</td>
           <td>
-            <div id="host_usage"
+            <div id="node_usage"
                  class="capacity_bar"
-                 data-capacity-limit="{{ host.vm_capacity.value }}"
-                 data-capacity-used="{{ host.vm_capacity.usage }}"
+                 data-capacity-limit="{{ node.vm_capacity.value }}"
+                 data-capacity-used="{{ node.vm_capacity.usage }}"
                  data-average-capacity-used="{{ 4 }}">
             </div>
           </td>

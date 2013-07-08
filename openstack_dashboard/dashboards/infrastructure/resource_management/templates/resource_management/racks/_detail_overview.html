@@ -26,8 +26,8 @@
       <dd>{{ rack.region|default:_("None") }}</dd>
       <dt>{% trans "Class" %}</dt>
       <dd>{{ rack.resource_class.name|default:_("None") }}</dd>
-      <dt>{% trans "Hosts" %}</dt>
-      <dd>{{ rack.hosts_count|default:_("None") }}</dd>
+      <dt>{% trans "Nodes" %}</dt>
+      <dd>{{ rack.nodes_count|default:_("None") }}</dd>
     </dl>
   </div>
   <div class="span4">
@@ -136,7 +136,7 @@
   </div>
   <div class="span6">
     <div class="span3">
-      <h4>Host health</h4>
+      <h4>Node health</h4>
     </div>
     <div class="span3 circles_chart_time_picker">
       <select data-circles-chart-command="change_time"

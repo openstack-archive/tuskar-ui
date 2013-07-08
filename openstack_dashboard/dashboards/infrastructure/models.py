@@ -38,9 +38,9 @@ class Flavor(models.Model):
     capacities = generic.GenericRelation(Capacity)
 
 
-class Host(models.Model):
+class Node(models.Model):
     class Meta:
-        db_table = 'infrastructure_host'
+        db_table = 'infrastructure_node'
 
     name = models.CharField(max_length=50, unique=True)
     mac_address = models.CharField(max_length=50, unique=True)

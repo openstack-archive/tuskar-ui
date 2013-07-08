@@ -61,7 +61,7 @@ class RacksTable(tables.DataTable):
                          verbose_name=_("Rack Name"))
     location = tables.Column('location', verbose_name=_("Location"))
     subnet = tables.Column('subnet', verbose_name=_("IP Subnet"))
-    host_count = tables.Column('hosts_count', verbose_name=_("Hosts"))
+    node_count = tables.Column('nodes_count', verbose_name=_("Nodes"))
 
     class Meta:
         name = "racks"

@@ -11,7 +11,7 @@
 #    under the License.
 
 from openstack_dashboard.api.management import (
-    Flavor, ResourceClass, Host,
+    Flavor, ResourceClass, Node,
     Rack, ResourceClassFlavor)
 
 import openstack_dashboard.dashboards.infrastructure.models as dummymodels
@@ -89,41 +89,41 @@ def data(TEST):
 
     TEST.management_resource_class_flavors.add(resource_class_flavor_1)
 
-    # Hosts
-    TEST.hosts = TestDataContainer()
-    TEST.unracked_hosts = TestDataContainer()
+    # Nodes
+    TEST.nodes = TestDataContainer()
+    TEST.unracked_nodes = TestDataContainer()
 
-    host_1 = Host(dummymodels.Host(id="1",
-                                   name="host1",
+    node_1 = Node(dummymodels.Node(id="1",
+                                   name="node1",
                                    rack_id=1,
                                    mac_address="00-B0-D0-86-AB-F7",
                                    ip_address="192.168.191.11",
                                    status="active",
                                    usage="20"))
-    host_2 = Host(dummymodels.Host(id="2",
-                                   name="host2",
+    node_2 = Node(dummymodels.Node(id="2",
+                                   name="node2",
                                    rack_id=1,
                                    mac_address="00-B0-D0-86-AB-F8",
                                    ip_address="192.168.191.12",
                                    status="active",
                                    usage="20"))
-    host_3 = Host(dummymodels.Host(id="3",
-                                   name="host3",
+    node_3 = Node(dummymodels.Node(id="3",
+                                   name="node3",
                                    rack_id=1,
                                    mac_address="00-B0-D0-86-AB-F9",
                                    ip_address="192.168.191.13",
                                    status="active",
                                    usage="20"))
-    host_4 = Host(dummymodels.Host(id="4",
-                                   name="host4",
+    node_4 = Node(dummymodels.Node(id="4",
+                                   name="node4",
                                    rack_id=1,
                                    mac_address="00-B0-D0-86-AB-F0",
                                    ip_address="192.168.191.14",
                                    status="active",
                                    usage="20"))
-    host_5 = Host(dummymodels.Host(id="5",
-                                   name="host5",
+    node_5 = Node(dummymodels.Node(id="5",
+                                   name="node5",
                                    mac_address="00-B0-D0-86-AB-F1"))
 
-    TEST.hosts.add(host_1, host_2, host_3, host_4)
-    TEST.unracked_hosts.add(host_5)
+    TEST.nodes.add(node_1, node_2, node_3, node_4)
+    TEST.unracked_nodes.add(node_5)

@@ -17,7 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import tabs
 
-from ..hosts.tables import HostsTable
+from ..nodes.tables import NodesTable
 
 
 class OverviewTab(tabs.Tab):
@@ -31,24 +31,24 @@ class OverviewTab(tabs.Tab):
         return {"rack": self.tab_group.kwargs['rack']}
 
 
-class HostsTab(tabs.TableTab):
-    table_classes = (HostsTable,)
-    name = _("Hosts")
-    slug = "hosts"
+class NodesTab(tabs.TableTab):
+    table_classes = (NodesTable,)
+    name = _("Nodes")
+    slug = "nodes"
     template_name = "horizon/common/_detail_table.html"
 
-    def get_hosts_data(self):
+    def get_nodes_data(self):
         try:
             rack = self.tab_group.kwargs['rack']
-            hosts = rack.hosts
+            nodes = rack.nodes
         except:
-            hosts = []
+            nodes = []
             exceptions.handle(self.tab_group.request,
-                              _('Unable to retrieve host list.'))
-        return hosts
+                              _('Unable to retrieve node list.'))
+        return nodes
 
 
 class RackDetailTabs(tabs.TabGroup):
     slug = "rack_detail_tabs"
-    tabs = (OverviewTab, HostsTab)
+    tabs = (OverviewTab, NodesTab)
     sticky = True

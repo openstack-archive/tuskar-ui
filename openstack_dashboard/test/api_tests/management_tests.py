@@ -57,11 +57,11 @@ class ManagementApiTests(test.APITestCase):
             self.assertIsInstance(rack, api.management.Rack)
         self.assertEquals(2, len(rc.racks))
 
-    def test_resource_class_hosts(self):
+    def test_resource_class_nodes(self):
         rc = api.management.ResourceClass.get(self.request, self.rclass1.id)
-        for host in rc.hosts:
-            self.assertIsInstance(host, api.management.Host)
-        self.assertEquals(4, len(rc.hosts))
+        for node in rc.nodes:
+            self.assertIsInstance(node, api.management.Node)
+        self.assertEquals(4, len(rc.nodes))
 
     # TODO: create, delete operations
 

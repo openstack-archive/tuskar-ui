@@ -18,12 +18,12 @@ from .views import DetailView
 from .views import UnrackedView
 
 
-HOSTS = r'^(?P<host_id>[^/]+)/%s$'
+NODES = r'^(?P<node_id>[^/]+)/%s$'
 VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \
-           'resource_management.hosts.views'
+           'resource_management.nodes.views'
 
 
 urlpatterns = patterns(VIEW_MOD,
-    url(HOSTS % 'detail', DetailView.as_view(), name='detail'),
+    url(NODES % 'detail', DetailView.as_view(), name='detail'),
     url(r'^unracked/$', UnrackedView.as_view(), name='unracked'),
 )

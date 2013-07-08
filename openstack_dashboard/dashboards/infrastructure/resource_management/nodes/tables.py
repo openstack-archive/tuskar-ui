@@ -19,29 +19,29 @@ from horizon import tables
 from openstack_dashboard import api
 
 
-class DeleteHosts(tables.DeleteAction):
-    data_type_singular = _("Host")
-    data_type_plural = _("Hosts")
+class DeleteNodes(tables.DeleteAction):
+    data_type_singular = _("Node")
+    data_type_plural = _("Nodes")
 
     def delete(self, request, obj_id):
-        api.management.host_delete(request, obj_id)
+        api.management.node_delete(request, obj_id)
 
 
-class HostsFilterAction(tables.FilterAction):
-    def filter(self, table, hosts, filter_string):
+class NodesFilterAction(tables.FilterAction):
+    def filter(self, table, nodes, filter_string):
         """ Naive case-insensitive search. """
         q = filter_string.lower()
-        return [host for host in hosts if q in host.name.lower()]
+        return [node for node in nodes if q in node.name.lower()]
 
 
-class HostsTable(tables.DataTable):
+class NodesTable(tables.DataTable):
     STATUS_CHOICES = (
         ("active", True),
         ("error", False),
     )
     name = tables.Column("name",
                          link=("horizon:infrastructure:"
-                               "resource_management:hosts:detail"),
+                               "resource_management:nodes:detail"),
                          verbose_name=_("Name"))
     mac_address = tables.Column("mac_address", verbose_name=_("MAC Address"))
     ip_address = tables.Column("ip_address", verbose_name=_("IP Address"))
@@ -53,16 +53,16 @@ class HostsTable(tables.DataTable):
                           verbose_name=_("Usage"))
 
     class Meta:
-        name = "hosts"
-        verbose_name = _("Hosts")
-        table_actions = (DeleteHosts, HostsFilterAction)
-        row_actions = (DeleteHosts,)
+        name = "nodes"
+        verbose_name = _("Nodes")
+        table_actions = (DeleteNodes, NodesFilterAction)
+        row_actions = (DeleteNodes,)
 
 
-class UnrackedHostsTable(HostsTable):
+class UnrackedNodesTable(NodesTable):
 
     class Meta:
-        name = "unracked_hosts"
-        verbose_name = _("Unracked Hosts")
+        name = "unracked_nodes"
+        verbose_name = _("Unracked Nodes")
         table_actions = ()
         row_actions = ()

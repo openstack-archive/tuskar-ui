@@ -57,7 +57,7 @@ class ResourceViewTests(test.BaseAdminViewTests):
     def test_edit_rack_post(self):
         data = {'name': 'Updated Rack', 'resource_class_id': u'1',
                 'rack_id': u'1', 'location': 'New Location',
-                'subnet': '127.10.10.0/24', 'host_macs': 'foo'}
+                'subnet': '127.10.10.0/24', 'node_macs': 'foo'}
 
         api.management.Rack.update(u'1', data)
         self.mox.ReplayAll()
