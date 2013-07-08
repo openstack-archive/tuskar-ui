@@ -4,122 +4,133 @@
 <h3>{% trans "Flavor Overview" %}</h3>
 
 <div class="info row-fluid detail">
-  <h4>{% trans "About" %}</h4>
-  <hr class="header_rule">
-  <dl>
-    <dt>{% trans "Name" %}</dt>
-    <dd>{{ flavor.name|default:_("None") }}</dd>
-    <dt>{% trans "Classes" %}</dt>
-    <dd>
-      {% for resource_class in flavor.resource_classes %}
-        <dd><a href="{% url 'horizon:infrastructure:resource_management:resource_classes:detail' resource_class.id%}">{{ resource_class.name }}</a></dd>
-      {% endfor %}
-    </dd>
-    <dt>{% trans "Instances" %}</dt>
-    <dd>{{ flavor.running_virtual_machines }}</dd>
-  </dl>
-  <h4>{% trans "Specification" %}</h4>
-  <hr class="header_rule">
-  <dl>
-    <dt>{% trans "VCPU" %}</dt>
-    <dd>{{ flavor.vcpu.value }}</dd>
-    <dt>{% trans "RAM" %}</dt>
-    <dd>{{ flavor.ram.value }} {{ flavor.ram.unit }}</dd>
-    <dt>{% trans "Root Disk" %}</dt>
-    <dd>{{ flavor.root_disk.value }} {{ flavor.root_disk.unit }}</dd>
-    <dt>{% trans "Ephemeral Disk" %}</dt>
-    <dd>{{ flavor.ephemeral_disk.value }} {{ flavor.ephemeral_disk.unit }}</dd>
-    <dt>{% trans "Swap Disk" %}</dt>
-    <dd>{{ flavor.swap_disk.value }} {{ flavor.swap_disk.unit }}</dd>
-  </dl>
+  <div class="span4">
+    <h4>{% trans "About" %}</h4>
+    <hr class="header_rule">
+    <dl>
+      <dt>{% trans "Name" %}</dt>
+      <dd>{{ flavor.name|default:_("None") }}</dd>
+      <dt>{% trans "Classes" %}</dt>
+      <dd>
+        {% for resource_class in flavor.resource_classes %}
+          <dd><a href="{% url 'horizon:infrastructure:resource_management:resource_classes:detail' resource_class.id%}">{{ resource_class.name }}</a></dd>
+        {% endfor %}
+      </dd>
+      <dt>{% trans "Instances" %}</dt>
+      <dd>{{ flavor.running_virtual_machines }}</dd>
+    </dl>
+  </div>
 
-  <h4>{% trans "Capacities" %}</h4>
-  <hr class="header_rule">
-  <table class="capacities">
-    <tr>
-      <td class="capacity_label">{% trans "CPU" %}:</td>
-      <td>
-        <div id="cpu_capacity_usage"
-             class="capacity_bar"
-             data-capacity-limit="{{ flavor.vcpu.value }}"
-             data-capacity-used="{{ flavor.vcpu.usage }}"
-             data-average-capacity-used="{{ flavor.vcpu.average }}">
-        </div>
-      </td>
-      <td>
-        <a href="#" class="modal_chart">{{ flavor.vcpu.usage }}/{{ flavor.vcpu.value }} {{ flavor.vcpu.unit }}</a>
-      </td>
-    </tr>
-    <tr>
-      <td class="capacity_label">{% trans "RAM" %}:</td>
-      <td>
-        <div id="ram_capacity_usage"
-             class="capacity_bar"
-             data-capacity-limit="{{ flavor.ram.value }}"
-             data-capacity-used="{{ flavor.ram.usage }}"
-             data-average-capacity-used="{{ flavor.ram.average }}">
-        </div>
-      </td>
-      <td>
-        <a href="#" class="modal_chart">{{ flavor.ram.usage }}/{{ flavor.ram.value }} {{ flavor.ram.unit }}</a>
-      </td>
-    </tr>
-    <tr>
-      <td class="capacity_label">{% trans "Root Disk" %}:</td>
-      <td>
-        <div id="root_disk_capacity_usage"
-             class="capacity_bar"
-             data-capacity-limit="{{ flavor.root_disk.value }}"
-             data-capacity-used="{{ flavor.root_disk.usage }}"
-             data-average-capacity-used="{{ flavor.root_disk.average }}">
-        </div>
-      </td>
-      <td>
-        <a href="#" class="modal_chart">{{ flavor.root_disk.usage }}/{{ flavor.root_disk.value }} {{ flavor.root_disk.unit }}</a>
-      </td>
-    </tr>
-    <tr>
-      <td class="capacity_label">{% trans "Ephemeral Disk" %}:</td>
-      <td>
-        <div id="ephemeral_disk_capacity_usage"
-             class="capacity_bar"
-             data-capacity-limit="{{ flavor.ephemeral_disk.value }}"
-             data-capacity-used="{{ flavor.ephemeral_disk.usage }}"
-             data-average-capacity-used="{{ flavor.ephemeral_disk.average }}">
-        </div>
-      </td>
-      <td>
-        <a href="#" class="modal_chart">{{ flavor.ephemeral_disk.usage }}/{{ flavor.ephemeral_disk.value }} {{ flavor.ephemeral_disk.unit }}</a>
-      </td>
-    </tr>
-    <tr>
-      <td class="capacity_label">{% trans "Swap Disk" %}:</td>
-      <td>
-        <div id="swap_disk_capacity_usage"
-             class="capacity_bar"
-             data-capacity-limit="{{ flavor.swap_disk.value }}"
-             data-capacity-used="{{ flavor.swap_disk.usage }}"
-             data-average-capacity-used="{{ flavor.swap_disk.average }}">
-        </div>
-      </td>
-      <td>
-        <a href="#" class="modal_chart">{{ flavor.swap_disk.usage }}/{{ flavor.swap_disk.value }} {{ flavor.swap_disk.unit }}</a>
-      </td>
-    </tr>
-  </table>
+  <div class="span4">
+    <h4>{% trans "Specification" %}</h4>
+    <hr class="header_rule">
+    <dl>
+      <dt>{% trans "VCPU" %}</dt>
+      <dd>{{ flavor.vcpu.value }}</dd>
+      <dt>{% trans "RAM" %}</dt>
+      <dd>{{ flavor.ram.value }} {{ flavor.ram.unit }}</dd>
+      <dt>{% trans "Root Disk" %}</dt>
+      <dd>{{ flavor.root_disk.value }} {{ flavor.root_disk.unit }}</dd>
+      <dt>{% trans "Ephemeral Disk" %}</dt>
+      <dd>{{ flavor.ephemeral_disk.value }} {{ flavor.ephemeral_disk.unit }}</dd>
+      <dt>{% trans "Swap Disk" %}</dt>
+      <dd>{{ flavor.swap_disk.value }} {{ flavor.swap_disk.unit }}</dd>
+    </dl>
+  </div>
 
-  <h4>{% trans "Active Instances" %}</h4>
-  <hr class="header_rule">
-  <table class="chart">
-    <tr>
-      <td>
-        <div id="active_instances"
-             class="line_chart"
-             data-line-url="{% url 'horizon:infrastructure:resource_management:flavors:active_instances_data' flavor.id%}">
-        </div>
-      </td>
-    </tr>
-  </table>
+  <div class="span4">
+    <h4>{% trans "Capacities" %}</h4>
+    <hr class="header_rule">
+    <table class="capacities">
+      <tr>
+        <td class="capacity_label">{% trans "CPU" %}:</td>
+        <td>
+          <div id="cpu_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ flavor.vcpu.value }}"
+               data-capacity-used="{{ flavor.vcpu.usage }}"
+               data-average-capacity-used="{{ flavor.vcpu.average }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ flavor.vcpu.usage }}/{{ flavor.vcpu.value }} {{ flavor.vcpu.unit }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="capacity_label">{% trans "RAM" %}:</td>
+        <td>
+          <div id="ram_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ flavor.ram.value }}"
+               data-capacity-used="{{ flavor.ram.usage }}"
+               data-average-capacity-used="{{ flavor.ram.average }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ flavor.ram.usage }}/{{ flavor.ram.value }} {{ flavor.ram.unit }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="capacity_label">{% trans "Root Disk" %}:</td>
+        <td>
+          <div id="root_disk_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ flavor.root_disk.value }}"
+               data-capacity-used="{{ flavor.root_disk.usage }}"
+               data-average-capacity-used="{{ flavor.root_disk.average }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ flavor.root_disk.usage }}/{{ flavor.root_disk.value }} {{ flavor.root_disk.unit }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="capacity_label">{% trans "Ephemeral Disk" %}:</td>
+        <td>
+          <div id="ephemeral_disk_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ flavor.ephemeral_disk.value }}"
+               data-capacity-used="{{ flavor.ephemeral_disk.usage }}"
+               data-average-capacity-used="{{ flavor.ephemeral_disk.average }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ flavor.ephemeral_disk.usage }}/{{ flavor.ephemeral_disk.value }} {{ flavor.ephemeral_disk.unit }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="capacity_label">{% trans "Swap Disk" %}:</td>
+        <td>
+          <div id="swap_disk_capacity_usage"
+               class="capacity_bar"
+               data-capacity-limit="{{ flavor.swap_disk.value }}"
+               data-capacity-used="{{ flavor.swap_disk.usage }}"
+               data-average-capacity-used="{{ flavor.swap_disk.average }}">
+          </div>
+        </td>
+        <td>
+          <a href="#" class="modal_chart">{{ flavor.swap_disk.usage }}/{{ flavor.swap_disk.value }} {{ flavor.swap_disk.unit }}</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="info row-fluid detail">
+  <div class="span12">
+    <h4>{% trans "Active Instances" %}</h4>
+    <hr class="header_rule">
+    <table class="chart">
+      <tr>
+        <td>
+          <div id="active_instances"
+               class="line_chart"
+               data-line-url="{% url 'horizon:infrastructure:resource_management:flavors:active_instances_data' flavor.id%}">
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>
 
 <script type="text/javascript" charset="utf-8">
