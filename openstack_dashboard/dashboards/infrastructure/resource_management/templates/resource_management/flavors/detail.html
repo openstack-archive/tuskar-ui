@@ -1,15 +1,9 @@
-{% extends 'infrastructure/base.html' %}
+{% extends 'infrastructure/base_detail.html' %}
 {% load i18n %}
 {% block title %}{% trans "Flavor Detail"%}{% endblock %}
 
 {% block page_header %}
-  {% include "horizon/common/_page_header.html" with title=_("Flavor Detail: ")|add:flavor.name %}
+  {% include "horizon/common/_page_header.html" with title=_("Flavor Detail") %}
 {% endblock page_header %}
 
-{% block main %}
-<div class="row-fluid">
-  <div class="span12">
-    {{ tab_group.render }}
-  </div>
-</div>
-{% endblock %}
+{% block name %}{{ flavor.name }}{% endblock %}

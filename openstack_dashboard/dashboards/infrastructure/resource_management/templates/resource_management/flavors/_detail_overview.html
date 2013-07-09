@@ -134,14 +134,6 @@
 </div>
 
 <script type="text/javascript" charset="utf-8">
-  if(typeof horizon.Capacity !== 'undefined') {
-    horizon.Capacity.init();
-  } else {
-    addHorizonLoadEvent(function() {
-      horizon.Capacity.init();
-    });
-  }
-
   if(typeof horizon.d3_line_chart !== 'undefined') {
     horizon.d3_line_chart.init();
   } else {

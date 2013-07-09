@@ -1,4 +1,4 @@
-{% extends 'infrastructure/base.html' %}
+{% extends 'infrastructure/base_detail.html' %}
 {% load i18n sizeformat %}
 {% block title %}{% trans "Resource Class Detail" %}{% endblock %}
 
@@ -6,38 +6,20 @@
   {% include "horizon/common/_page_header.html" with title="Resource Class Detail" %}
 {% endblock page_header %}
 
-{% block main %}
-<h3>{{ resource_class.name }}</h3>
+{% block name %}{{ resource_class.name }}{% endblock %}
 
-<div class="row-fluid">
-  <div class="span12">
-    <div class="pull-right">
-      <table class="capacities overall_usage">
-        <tr>
-          <td class="capacity_label">{% trans "Usage" %}:</td>
-          <td>
-            <div id="resource_class_usage"
-                 class="capacity_bar"
-                 data-capacity-limit="{{ resource_class.vm_capacity.value }}"
-                 data-capacity-used="{{ resource_class.vm_capacity.usage }}"
-                 data-average-capacity-used="{{ 4 }}">
-            </div>
-          </td>
-        </tr>
-      </table>
-    </div>
-
-    {{ tab_group.render }}
-  </div>
-</div>
-
-<script type="text/javascript" charset="utf-8">
-  if(typeof horizon.Capacity !== 'undefined') {
-    horizon.Capacity.init();
-  } else {
-    addHorizonLoadEvent(function() {
-      horizon.Capacity.init();
-    });
-  }
-</script>
+{% block overall_usage %}
+  <table class="capacities overall_usage">
+    <tr>
+      <td class="capacity_label">{% trans "Usage" %}:</td>
+      <td>
+        <div id="resource_class_usage"
+             class="capacity_bar"
+             data-capacity-limit="{{ resource_class.vm_capacity.value }}"
+             data-capacity-used="{{ resource_class.vm_capacity.usage }}"
+             data-average-capacity-used="{{ 4 }}">
+        </div>
+      </td>
+    </tr>
+  </table>
 {% endblock %}
