@@ -113,37 +113,37 @@ class FlavorsTable(flavors_tables.FlavorsTable):
         multi_select_name = "flavors_object_ids"
 
 
-class ResourcesFilterAction(tables.FilterAction):
+class RacksFilterAction(tables.FilterAction):
     def filter(self, table, instances, filter_string):
         pass
 
 
-class ResourcesTable(racks_tables.RacksTable):
+class RacksTable(racks_tables.RacksTable):
     name = tables.Column('name',
                          verbose_name=_("Rack Name"))
 
     class Meta:
-        name = "resources"
-        verbose_name = _("Resources")
+        name = "racks"
+        verbose_name = _("Racks")
         multi_select = True
-        multi_select_name = "resources_object_ids"
-        table_actions = (ResourcesFilterAction,)
+        multi_select_name = "racks_object_ids"
+        table_actions = (RacksFilterAction,)
 
 
-class UpdateResourcesClass(tables.LinkAction):
+class UpdateRacksClass(tables.LinkAction):
     name = "edit_flavors"
-    verbose_name = _("Edit Resources")
+    verbose_name = _("Edit Racks")
 
     classes = ("ajax-modal", "btn-edit")
 
     def get_link_url(self, datum=None):
         url = "horizon:infrastructure:resource_management:resource_classes:"\
-              "update_resources"
+              "update_racks"
         return "%s?step=%s" % (
             urlresolvers.reverse(
                 url,
                 args=(self.table.kwargs['resource_class_id'],)),
-            workflows.ResourcesAction.slug)
+            workflows.RacksAction.slug)
 
 
 class UpdateFlavorsClass(tables.LinkAction):
@@ -161,7 +161,7 @@ class UpdateFlavorsClass(tables.LinkAction):
             workflows.ResourceClassInfoAndFlavorsAction.slug)
 
 
-class ResourceClassDetailResourcesTable(racks_tables.RacksTable):
+class ResourceClassDetailRacksTable(racks_tables.RacksTable):
     cpu = tables.Column("cpu",
                         verbose_name=_("Total CPU"),
                         filters=(lambda x: getattr(x, 'value', ''),))
@@ -176,9 +176,9 @@ class ResourceClassDetailResourcesTable(racks_tables.RacksTable):
                                 filters=(lambda x: getattr(x, 'value', ''),))
 
     class Meta:
-        name = "resources"
-        verbose_name = _("Resources")
-        table_actions = (ResourcesFilterAction, UpdateResourcesClass)
+        name = "racks"
+        verbose_name = _("Racks")
+        table_actions = (RacksFilterAction, UpdateRacksClass)
         columns = (
             'name', 'subnet', 'location', 'node_count',
             'cpu', 'ram', 'storage', 'vm_capacity')

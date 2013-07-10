@@ -14,7 +14,7 @@
 
 from django.conf.urls.defaults import patterns, url, include
 
-from .views import (CreateView, UpdateView, DetailView, UpdateResourcesView,
+from .views import (CreateView, UpdateView, DetailView, UpdateRacksView,
                     UpdateFlavorsView)
 
 RESOURCE_CLASS = r'^(?P<resource_class_id>[^/]+)/%s$'
@@ -25,7 +25,7 @@ urlpatterns = patterns(
     url(r'^(?P<resource_class_id>[^/]+)/$',
         DetailView.as_view(), name='detail'),
     url(RESOURCE_CLASS % 'update', UpdateView.as_view(), name='update'),
-    url(RESOURCE_CLASS % 'update_resources', UpdateResourcesView.as_view(),
-        name='update_resources'),
+    url(RESOURCE_CLASS % 'update_racks', UpdateRacksView.as_view(),
+        name='update_racks'),
     url(RESOURCE_CLASS % 'update_flavors', UpdateFlavorsView.as_view(),
         name='update_flavors'))

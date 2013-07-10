@@ -423,39 +423,39 @@ class ResourceClass(StringIdAPIResourceWrapper):
         return cls(rc)
 
     @classmethod
-    def delete(cls, request, flavor_id):
-        dummymodels.Flavor.objects.get(id=flavor_id).delete()
+    def delete(cls, request, resource_class_id):
+        dummymodels.ResourceClass.objects.get(id=resource_class_id).delete()
 
     ##########################################################################
     # ResourceClass Properties
     ##########################################################################
     @property
-    def resources_ids(self):
-        """ List of unicode ids of resources added to resource class """
+    def racks_ids(self):
+        """ List of unicode ids of racks added to resource class """
         return [
-            unicode(resource.id) for resource in (
-                self.resources)]
+            unicode(rack.id) for rack in (
+                self.racks)]
 
     @property
-    def resources(self):
-        """ List of resources added to ResourceClass """
-        if "_resources" not in self.__dict__:
-            self._resources =\
+    def racks(self):
+        """ List of racks added to ResourceClass """
+        if "_racks" not in self.__dict__:
+            self._racks =\
                 [Rack(r) for r in (
                     self._apiresource.rack_set.all())]
-        return self.__dict__['_resources']
+        return self.__dict__['_racks']
 
     @property
-    def all_resources(self):
-        """ List of resources added to ResourceClass + list of free resources,
-        meaning resources that don't belong to any ResourceClass"""
-        if "_all_resources" not in self.__dict__:
-            self._all_resources =\
+    def all_racks(self):
+        """ List of racks added to ResourceClass + list of free racks,
+        meaning racks that don't belong to any ResourceClass"""
+        if "_all_racks" not in self.__dict__:
+            self._all_racks =\
                 [r for r in (
                     Rack.list(self.request)) if (
                         r.resource_class_id is None or
                         r._apiresource.resource_class == self._apiresource)]
-        return self.__dict__['_all_resources']
+        return self.__dict__['_all_racks']
 
     @property
     def resource_class_flavors(self):
@@ -517,12 +517,6 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @property
     def nodes_count(self):
         return len(self.nodes)
-
-    @property
-    def racks(self):
-        if "_racks" not in self.__dict__:
-            self._racks = [Rack(r) for r in self._apiresource.rack_set.all()]
-        return self.__dict__['_racks']
 
     @property
     def racks_count(self):
@@ -650,17 +644,17 @@ class ResourceClass(StringIdAPIResourceWrapper):
                 flavor=flavor._apiresource,
                 resource_class=self._apiresource)
 
-    def set_resources(self, request, resources_ids):
-        # simply delete all and create new resources
-        for resource_id in self.resources_ids:
-            resource = Rack.get(request, resource_id)
-            resource._apiresource.resource_class = None
-            resource._apiresource.save()
+    def set_racks(self, request, racks_ids):
+        # simply delete all and create new racks
+        for rack_id in self.racks_ids:
+            rack = Rack.get(request, rack_id)
+            rack._apiresource.resource_class = None
+            rack._apiresource.save()
 
-        for resource_id in resources_ids:
-            resource = Rack.get(request, resource_id)
-            resource._apiresource.resource_class = self._apiresource
-            resource._apiresource.save()
+        for rack_id in racks_ids:
+            rack = Rack.get(request, rack_id)
+            rack._apiresource.resource_class = self._apiresource
+            rack._apiresource.save()
 
 
 class Flavor(StringIdAPIResourceWrapper):

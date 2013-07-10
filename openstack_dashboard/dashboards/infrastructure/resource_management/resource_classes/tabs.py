@@ -17,7 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import tabs
 
-from tables import (ResourceClassDetailResourcesTable,
+from tables import (ResourceClassDetailRacksTable,
                     ResourceClassDetailFlavorsTable)
 
 
@@ -32,14 +32,14 @@ class OverviewTab(tabs.Tab):
         return {"resource_class": self.tab_group.kwargs['resource_class']}
 
 
-class ResourcesTab(tabs.TableTab):
-    table_classes = (ResourceClassDetailResourcesTable,)
-    name = _("Resources")
-    slug = "resources"
+class RacksTab(tabs.TableTab):
+    table_classes = (ResourceClassDetailRacksTable,)
+    name = _("Racks")
+    slug = "racks"
     template_name = ("infrastructure/resource_management/resource_classes/"
-                     "_detail_resources.html")
+                     "_detail_racks.html")
 
-    def get_resources_data(self):
+    def get_racks_data(self):
         try:
             resource_class = self.tab_group.kwargs['resource_class']
             racks = resource_class.racks
@@ -74,5 +74,5 @@ class FlavorsTab(tabs.TableTab):
 
 class ResourceClassDetailTabs(tabs.TabGroup):
     slug = "resource_class_details"
-    tabs = (OverviewTab, ResourcesTab, FlavorsTab)
+    tabs = (OverviewTab, RacksTab, FlavorsTab)
     sticky = True

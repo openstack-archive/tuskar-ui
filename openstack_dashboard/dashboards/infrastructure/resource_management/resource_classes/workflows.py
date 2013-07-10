@@ -24,7 +24,7 @@ from openstack_dashboard import api
 
 import re
 
-from .tables import FlavorsTable, ResourcesTable
+from .tables import FlavorsTable, RacksTable
 
 
 class ResourceClassInfoAndFlavorsAction(workflows.Action):
@@ -124,28 +124,28 @@ class CreateResourceClassInfoAndFlavors(workflows.TableStep):
         return all_flavors
 
 
-class ResourcesAction(workflows.Action):
+class RacksAction(workflows.Action):
     class Meta:
         name = _("Resources")
 
 
-class CreateResources(workflows.TableStep):
-    table_classes = (ResourcesTable,)
+class CreateRacks(workflows.TableStep):
+    table_classes = (RacksTable,)
 
-    action_class = ResourcesAction
-    contributes = ("resources_object_ids")
+    action_class = RacksAction
+    contributes = ("racks_object_ids")
     template_name = 'infrastructure/resource_management/'\
-                    'resource_classes/_resources_step.html'
+                    'resource_classes/_racks_step.html'
 
     def contribute(self, data, context):
         request = self.workflow.request
-        context["resources_object_ids"] =\
-            request.POST.getlist("resources_object_ids")
+        context["racks_object_ids"] =\
+            request.POST.getlist("racks_object_ids")
 
         context.update(data)
         return context
 
-    def get_resources_data(self):
+    def get_racks_data(self):
         try:
             resource_class_id = self.workflow.context.get("resource_class_id")
             if resource_class_id:
@@ -153,19 +153,19 @@ class CreateResources(workflows.TableStep):
                     self.workflow.request,
                     resource_class_id)
                 # TODO: lsmola ugly interface, rewrite
-                self._tables['resources'].active_multi_select_values = \
-                    resource_class.resources_ids
-                resources = \
-                    resource_class.all_resources
+                self._tables['racks'].active_multi_select_values = \
+                    resource_class.racks_ids
+                racks = \
+                    resource_class.all_racks
             else:
-                resources = \
+                racks = \
                     api.management.Rack.list(self.workflow.request, True)
         except:
-            resources = []
+            racks = []
             exceptions.handle(self.workflow.request,
-                              _('Unable to retrieve resources list.'))
+                              _('Unable to retrieve racks list.'))
 
-        return resources
+        return racks
 
 
 class ResourceClassWorkflowMixin:
@@ -195,14 +195,14 @@ class ResourceClassWorkflowMixin:
         max_vms = data.get('max_vms')
         resource_class.set_flavors(request, ids_to_add, max_vms)
 
-    def _add_resources(self, request, data, resource_class):
-        ids_to_add = data.get('resources_object_ids') or []
-        resource_class.set_resources(request, ids_to_add)
+    def _add_racks(self, request, data, resource_class):
+        ids_to_add = data.get('racks_object_ids') or []
+        resource_class.set_racks(request, ids_to_add)
 
 
 class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
     default_steps = (CreateResourceClassInfoAndFlavors,
-                     CreateResources)
+                     CreateRacks)
 
     slug = "create_resource_class"
     name = _("Create Class")
@@ -225,7 +225,7 @@ class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
 
     def handle(self, request, data):
         resource_class = self._create_resource_class_info(request, data)
-        self._add_resources(request, data, resource_class)
+        self._add_racks(request, data, resource_class)
         self._add_flavors(request, data, resource_class)
         return True
 
@@ -234,13 +234,13 @@ class UpdateResourceClassInfoAndFlavors(CreateResourceClassInfoAndFlavors):
     depends_on = ("resource_class_id",)
 
 
-class UpdateResources(CreateResources):
+class UpdateRacks(CreateRacks):
     depends_on = ("resource_class_id",)
 
 
 class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
     default_steps = (UpdateResourceClassInfoAndFlavors,
-                     UpdateResources)
+                     UpdateRacks)
 
     slug = "update_resource_class"
     name = _("Update Class")
@@ -264,17 +264,17 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
 
     def handle(self, request, data):
         resource_class = self._update_resource_class_info(request, data)
-        self._add_resources(request, data, resource_class)
+        self._add_racks(request, data, resource_class)
         self._add_flavors(request, data, resource_class)
         return True
 
 
-class UpdateResourcesWorkflow(UpdateResourceClass):
+class UpdateRacksWorkflow(UpdateResourceClass):
     def get_index_url(self):
         """This url is used both as success and failure url"""
         url = "horizon:infrastructure:resource_management:resource_classes:"\
               "detail"
-        return "%s?tab=resource_class_details__resources" % (
+        return "%s?tab=resource_class_details__racks" % (
             reverse(url, args=(self.context["resource_class_id"])))
 
 

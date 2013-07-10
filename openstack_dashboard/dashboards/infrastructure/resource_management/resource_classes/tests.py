@@ -43,7 +43,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         api.management.ResourceClass: ('create', 'set_flavors',
-                                       'set_resources'),
+                                       'set_racks'),
         api.management.Flavor: ('list',),
         api.management.Rack: ('list',)
     })
@@ -53,14 +53,14 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         add_flavors_ids = []
         add_max_vms = {}
-        add_resources_ids = []
+        add_racks_ids = []
 
         api.management.ResourceClass.\
             create(IsA(http.HttpRequest), name=new_unique_name,
                    service_type=new_resource_class.service_type).\
             AndReturn(new_resource_class)
         api.management.ResourceClass.\
-            set_resources(IsA(http.HttpRequest), add_resources_ids)
+            set_racks(IsA(http.HttpRequest), add_racks_ids)
         api.management.ResourceClass.\
             set_flavors(IsA(http.HttpRequest), add_flavors_ids, add_max_vms)
         self.mox.ReplayAll()
@@ -80,17 +80,17 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
     def test_edit_resource_class_get(self):
         resource_class = self.management_resource_classes.first()
         all_flavors = []
-        all_resources = []
+        all_racks = []
 
         api.management.ResourceClass.\
             get(IsA(http.HttpRequest), resource_class.id).MultipleTimes().\
             AndReturn(resource_class)
         self.mox.ReplayAll()
 
-        # FIXME I should probably track the resources and flavors methods
+        # FIXME I should probably track the racks and flavors methods
         # so maybe they shouldn't be a @property
         # properties set
-        api.management.ResourceClass.all_resources = all_resources
+        api.management.ResourceClass.all_racks = all_racks
         api.management.ResourceClass.all_flavors = all_flavors
 
         url = reverse(
@@ -101,7 +101,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertEqual(res.status_code, 200)
 
     @test.create_stubs({
-        api.management.ResourceClass: ('update', 'set_resources',
+        api.management.ResourceClass: ('update', 'set_racks',
                                        'set_flavors')
     })
     def test_edit_resource_class_post(self):
@@ -109,7 +109,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         add_flavors_ids = []
         add_max_vms = {}
-        add_resources_ids = []
+        add_racks_ids = []
 
         api.management.ResourceClass.\
             update(IsA(http.HttpRequest), resource_class.id,
@@ -117,7 +117,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                    service_type=resource_class.service_type).\
             AndReturn(resource_class)
         api.management.ResourceClass.\
-            set_resources(IsA(http.HttpRequest), add_resources_ids)
+            set_racks(IsA(http.HttpRequest), add_racks_ids)
         api.management.ResourceClass.\
             set_flavors(IsA(http.HttpRequest), add_flavors_ids, add_max_vms)
         self.mox.ReplayAll()
@@ -177,46 +177,46 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         res = self.client.get(url)
         self.assertItemsEqual(res.context['flavors_table'].data,
                               flavors)
-        self.assertItemsEqual(res.context['resources_table'].data,
+        self.assertItemsEqual(res.context['racks_table'].data,
                               racks)
         self.assertEqual(res.status_code, 200)
         self.assertTemplateUsed(res,
             'infrastructure/resource_management/resource_classes/detail.html')
 
     @test.create_stubs({api.management.ResourceClass: ('get',)})
-    def test_detail_edit_resources_get(self):
+    def test_detail_edit_racks_get(self):
         resource_class = self.management_resource_classes.first()
         all_flavors = []
-        all_resources = []
+        all_racks = []
 
         api.management.ResourceClass.\
             get(IsA(http.HttpRequest), resource_class.id).\
             MultipleTimes().AndReturn(resource_class)
         self.mox.ReplayAll()
 
-        # FIXME I should probably track the resources and flavors methods
+        # FIXME I should probably track the racks and flavors methods
         # so maybe they shouldn't be a @property
         # properties set
-        api.management.ResourceClass.all_resources = all_resources
+        api.management.ResourceClass.all_racks = all_racks
         api.management.ResourceClass.all_flavors = all_flavors
 
         url = reverse(
             'horizon:infrastructure:resource_management:'
-            'resource_classes:update_resources',
+            'resource_classes:update_racks',
             args=[resource_class.id])
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
 
     @test.create_stubs({
-        api.management.ResourceClass: ('update', 'set_resources',
+        api.management.ResourceClass: ('update', 'set_racks',
                                        'set_flavors')
     })
-    def test_detail_edit_resources_post(self):
+    def test_detail_edit_racks_post(self):
         resource_class = self.management_resource_classes.first()
 
         add_flavors_ids = []
         add_max_vms = {}
-        add_resources_ids = []
+        add_racks_ids = []
 
         api.management.ResourceClass.\
             update(IsA(http.HttpRequest), resource_class.id,
@@ -224,7 +224,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                    service_type=resource_class.service_type).\
             AndReturn(resource_class)
         api.management.ResourceClass.\
-            set_resources(IsA(http.HttpRequest), add_resources_ids)
+            set_racks(IsA(http.HttpRequest), add_racks_ids)
         api.management.ResourceClass.\
             set_flavors(IsA(http.HttpRequest), add_flavors_ids, add_max_vms)
         self.mox.ReplayAll()
@@ -233,7 +233,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                      'name': resource_class.name,
                      'service_type': resource_class.service_type}
         url = reverse('horizon:infrastructure:resource_management:'
-                      'resource_classes:update_resources',
+                      'resource_classes:update_racks',
                       args=[resource_class.id])
         res = self.client.post(url, form_data)
         self.assertNoFormErrors(res)
@@ -241,7 +241,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         detail_url = "horizon:infrastructure:resource_management:"\
                      "resource_classes:detail"
-        redirect_url = "%s?tab=resource_class_details__resources" % (
+        redirect_url = "%s?tab=resource_class_details__racks" % (
             reverse(detail_url, args=(resource_class.id,)))
         self.assertRedirectsNoFollow(res, redirect_url)
 
@@ -249,17 +249,17 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
     def test_detail_edit_flavors_get(self):
         resource_class = self.management_resource_classes.first()
         all_flavors = []
-        all_resources = []
+        all_racks = []
 
         api.management.ResourceClass.\
             get(IsA(http.HttpRequest), resource_class.id).\
             MultipleTimes().AndReturn(resource_class)
         self.mox.ReplayAll()
 
-        # FIXME I should probably track the resources and flavors methods
+        # FIXME I should probably track the racks and flavors methods
         # so maybe they shouldn't be a @property
         # properties set
-        api.management.ResourceClass.all_resources = all_resources
+        api.management.ResourceClass.all_racks = all_racks
         api.management.ResourceClass.all_flavors = all_flavors
 
         url = reverse(
@@ -270,7 +270,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertEqual(res.status_code, 200)
 
     @test.create_stubs({
-        api.management.ResourceClass: ('update', 'set_resources',
+        api.management.ResourceClass: ('update', 'set_racks',
                                        'set_flavors')
     })
     def test_detail_edit_flavors_post(self):
@@ -278,7 +278,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         add_flavors_ids = []
         add_max_vms = {}
-        add_resources_ids = []
+        add_racks_ids = []
 
         api.management.ResourceClass.\
             update(IsA(http.HttpRequest), resource_class.id,
@@ -286,7 +286,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                    service_type=resource_class.service_type).\
             AndReturn(resource_class)
         api.management.ResourceClass.\
-            set_resources(IsA(http.HttpRequest), add_resources_ids)
+            set_racks(IsA(http.HttpRequest), add_racks_ids)
         api.management.ResourceClass.\
             set_flavors(IsA(http.HttpRequest), add_flavors_ids, add_max_vms)
         self.mox.ReplayAll()

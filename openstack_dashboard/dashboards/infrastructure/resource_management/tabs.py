@@ -29,7 +29,7 @@ from .resource_classes.tables import ResourceClassesTable
 
 class RacksTab(tabs.TableTab):
     table_classes = (RacksTable,)
-    name = _("Resources")
+    name = _("Racks")
     slug = "racks_tab"
     template_name = ("infrastructure/resource_management/"
                     "racks/_index_table.html")
