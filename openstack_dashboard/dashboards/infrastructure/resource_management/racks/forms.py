@@ -67,8 +67,8 @@ class UploadRack(forms.SelfHandlingForm):
             racks_str = self.cleaned_data['uploaded_data']
             racks = CSVRack.from_str(base64.b64decode(racks_str))
             # get the resource class ids by resource class names
-            rclass_ids = {rc.name: rc.id for rc in
-                    api.management.ResourceClass.list(request)}
+            rclass_ids = dict((rc.name, rc.id) for rc in
+                    api.management.ResourceClass.list(request))
             for rack in racks:
                 try:
                     r = api.management.Rack.create(request, rack.name,
