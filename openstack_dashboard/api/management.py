@@ -72,17 +72,17 @@ class Capacity(StringIdAPIResourceWrapper):
     # determine usage of capacity based on capacity value and obejct_id
     @property
     def usage(self):
-        if "_usage" not in self.__dict__:
+        if not hasattr(self, '_usage'):
             self._usage = randint(0, self.value)
-        return self.__dict__['_usage']
+        return self._usage
 
     # defines a random average of capacity - API should probably be able to
     # determine average of capacity based on capacity value and obejct_id
     @property
     def average(self):
-        if "_average" not in self.__dict__:
+        if not hasattr(self, '_average'):
             self._average = randint(0, self.value)
-        return self.__dict__['_average']
+        return self._average
 
 
 class Node(StringIdAPIResourceWrapper):
@@ -110,20 +110,20 @@ class Node(StringIdAPIResourceWrapper):
 
     @property
     def capacities(self):
-        if "_capacities" not in self.__dict__:
+        if not hasattr(self, '_capacities'):
             self._capacities = [Capacity(c) for c in
                                 self._apiresource.capacities.all()]
-        return self.__dict__['_capacities']
+        return self._capacities
 
     @property
     def rack(self):
-        if "_rack" not in self.__dict__:
+        if not hasattr(self, '_rack'):
             self._rack = self._apiresource.rack
-        return self.__dict__['_rack']
+        return self._rack
 
     @property
     def cpu(self):
-        if "_cpu" not in self.__dict__:
+        if not hasattr(self, '_cpu'):
             try:
                 cpu = dummymodels.Capacity.objects\
                             .filter(node=self._apiresource)\
@@ -135,11 +135,11 @@ class Node(StringIdAPIResourceWrapper):
                                     '(Is the node configured properly?)'),
                             unit='')
             self._cpu = Capacity(cpu)
-        return self.__dict__['_cpu']
+        return self._cpu
 
     @property
     def ram(self):
-        if "_ram" not in self.__dict__:
+        if not hasattr(self, '_ram'):
             try:
                 ram = dummymodels.Capacity.objects\
                             .filter(node=self._apiresource)\
@@ -151,11 +151,11 @@ class Node(StringIdAPIResourceWrapper):
                                     '(Is the node configured properly?)'),
                             unit='')
             self._ram = Capacity(ram)
-        return self.__dict__['_ram']
+        return self._ram
 
     @property
     def storage(self):
-        if "_storage" not in self.__dict__:
+        if not hasattr(self, '_storage'):
             try:
                 storage = dummymodels.Capacity.objects\
                                 .filter(node=self._apiresource)\
@@ -167,11 +167,11 @@ class Node(StringIdAPIResourceWrapper):
                                         '(Is the node configured properly?)'),
                                 unit='')
             self._storage = Capacity(storage)
-        return self.__dict__['_storage']
+        return self._storage
 
     @property
     def network(self):
-        if "_network" not in self.__dict__:
+        if not hasattr(self, '_network'):
             try:
                 network = dummymodels.Capacity.objects\
                                 .filter(node=self._apiresource)\
@@ -183,11 +183,11 @@ class Node(StringIdAPIResourceWrapper):
                                         '(Is the node configured properly?)'),
                                 unit='')
             self._network = Capacity(network)
-        return self.__dict__['_network']
+        return self._network
 
     @property
     def vm_capacity(self):
-        if "_vm_capacity" not in self.__dict__:
+        if not hasattr(self, '_vm_capacity'):
             try:
                 value = dummymodels.ResourceClassFlavor.objects\
                             .filter(
@@ -200,7 +200,7 @@ class Node(StringIdAPIResourceWrapper):
                                                value=value,
                                                unit=_("VMs"))
             self._vm_capacity = Capacity(vm_capacity)
-        return self.__dict__['_vm_capacity']
+        return self._vm_capacity
 
 
 class Rack(StringIdAPIResourceWrapper):
@@ -231,14 +231,14 @@ class Rack(StringIdAPIResourceWrapper):
 
     @property
     def capacities(self):
-        if "_capacities" not in self.__dict__:
+        if not hasattr(self, '_capacities'):
             self._capacities = [Capacity(c) for c in
                                 self._apiresource.capacities.all()]
-        return self.__dict__['_capacities']
+        return self._capacities
 
     @property
     def cpu(self):
-        if "_cpu" not in self.__dict__:
+        if not hasattr(self, '_cpu'):
             try:
                 attrs = dummymodels.Capacity.objects\
                         .filter(node__rack=self._apiresource)\
@@ -253,11 +253,11 @@ class Rack(StringIdAPIResourceWrapper):
                                        value=attrs['value'],
                                        unit=attrs['unit'])
             self._cpu = Capacity(cpu)
-        return self.__dict__['_cpu']
+        return self._cpu
 
     @property
     def ram(self):
-        if "_ram" not in self.__dict__:
+        if not hasattr(self, '_ram'):
             try:
                 attrs = dummymodels.Capacity.objects\
                         .filter(node__rack=self._apiresource)\
@@ -272,11 +272,11 @@ class Rack(StringIdAPIResourceWrapper):
                                        value=attrs['value'],
                                        unit=attrs['unit'])
             self._ram = Capacity(ram)
-        return self.__dict__['_ram']
+        return self._ram
 
     @property
     def storage(self):
-        if "_storage" not in self.__dict__:
+        if not hasattr(self, '_storage'):
             try:
                 attrs = dummymodels.Capacity.objects\
                         .filter(node__rack=self._apiresource)\
@@ -291,11 +291,11 @@ class Rack(StringIdAPIResourceWrapper):
                                            value=attrs['value'],
                                            unit=attrs['unit'])
             self._storage = Capacity(storage)
-        return self.__dict__['_storage']
+        return self._storage
 
     @property
     def network(self):
-        if "_network" not in self.__dict__:
+        if not hasattr(self, '_network'):
             try:
                 attrs = dummymodels.Capacity.objects\
                         .filter(node__rack=self._apiresource)\
@@ -310,11 +310,11 @@ class Rack(StringIdAPIResourceWrapper):
                                            value=attrs['value'],
                                            unit=attrs['unit'])
             self._network = Capacity(network)
-        return self.__dict__['_network']
+        return self._network
 
     @property
     def vm_capacity(self):
-        if "_vm_capacity" not in self.__dict__:
+        if not hasattr(self, '_vm_capacity'):
             try:
                 value = dummymodels.ResourceClassFlavor.objects\
                             .filter(resource_class__rack=self._apiresource)\
@@ -326,7 +326,7 @@ class Rack(StringIdAPIResourceWrapper):
                                                value=value,
                                                unit=_("VMs"))
             self._vm_capacity = Capacity(vm_capacity)
-        return self.__dict__['_vm_capacity']
+        return self._vm_capacity
 
     @classmethod
     def delete(cls, request, rack_id):
@@ -334,9 +334,9 @@ class Rack(StringIdAPIResourceWrapper):
 
     @property
     def nodes(self):
-        if "_nodes" not in self.__dict__:
+        if not hasattr(self, '_nodes'):
             self._nodes = [Node(h) for h in self._apiresource.node_set.all()]
-        return self.__dict__['_nodes']
+        return self._nodes
 
     def nodes_count(self):
         return len(self.nodes)
@@ -365,9 +365,9 @@ class Rack(StringIdAPIResourceWrapper):
 
     @property
     def resource_class(self):
-        if "_resource_class" not in self.__dict__:
+        if not hasattr(self, '_resource_class'):
             self._resource_class = self._apiresource.resource_class
-        return self.__dict__['_resource_class']
+        return self._resource_class
 
     @classmethod
     def update(cls, rack_id, kwargs):
@@ -439,31 +439,31 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @property
     def racks(self):
         """ List of racks added to ResourceClass """
-        if "_racks" not in self.__dict__:
+        if not hasattr(self, '_racks'):
             self._racks =\
                 [Rack(r) for r in (
                     self._apiresource.rack_set.all())]
-        return self.__dict__['_racks']
+        return self._racks
 
     @property
     def all_racks(self):
         """ List of racks added to ResourceClass + list of free racks,
         meaning racks that don't belong to any ResourceClass"""
-        if "_all_racks" not in self.__dict__:
+        if not hasattr(self, '_all_racks'):
             self._all_racks =\
                 [r for r in (
                     Rack.list(self.request)) if (
                         r.resource_class_id is None or
                         r._apiresource.resource_class == self._apiresource)]
-        return self.__dict__['_all_racks']
+        return self._all_racks
 
     @property
     def resource_class_flavors(self):
         """ Relation table resourceclassflavor """
-        if "_resource_class_flavors" not in self.__dict__:
+        if not hasattr(self, '_resource_class_flavors'):
             self._resource_class_flavors = [ResourceClassFlavor(r) for r in (
                 self._apiresource.resourceclassflavor_set.all())]
-        return self.__dict__['_resource_class_flavors']
+        return self._resource_class_flavors
 
     @property
     def flavors_ids(self):
@@ -475,7 +475,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @property
     def flavors(self):
         """ Joined relation table resourceclassflavor and flavor together """
-        if "_flavors" not in self.__dict__:
+        if not hasattr(self, '_flavors'):
             added_flavors = self.resource_class_flavors
             self._flavors = []
             for f in added_flavors:
@@ -483,13 +483,13 @@ class ResourceClass(StringIdAPIResourceWrapper):
                 flavor_obj.set_max_vms(f.max_vms)
                 self._flavors.append(flavor_obj)
 
-        return self.__dict__['_flavors']
+        return self._flavors
 
     @property
     def all_flavors(self):
         """ Joined relation table resourceclassflavor with all global flavors
         """
-        if "_all_flavors" not in self.__dict__:
+        if not hasattr(self, '_all_flavors'):
             all_flavors = Flavor.list(self.request)
 
             added_resourceclassflavors = \
@@ -505,14 +505,14 @@ class ResourceClass(StringIdAPIResourceWrapper):
                     f.set_max_vms(added_flavor.max_vms)
                 self._all_flavors.append(f)
 
-        return self.__dict__['_all_flavors']
+        return self._all_flavors
 
     @property
     def nodes(self):
-        if "_nodes" not in self.__dict__:
+        if not hasattr(self, '_nodes'):
             nodes_array = [rack.nodes for rack in self.racks]
             self._nodes = [node for nodes in nodes_array for node in nodes]
-        return self.__dict__['_nodes']
+        return self._nodes
 
     @property
     def nodes_count(self):
@@ -524,16 +524,16 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @property
     def running_virtual_machines(self):
-        if "_running_virtual_machines" not in self.__dict__:
+        if not hasattr(self, '_running_virtual_machines'):
             self._running_virtual_machines =\
                                     copy.deepcopy(self.resource_class_flavors)
             for vm in self._running_virtual_machines:
                 vm.max_vms /= (vm.max_vms % 7) + 1
-        return self.__dict__['_running_virtual_machines']
+        return self._running_virtual_machines
 
     @property
     def cpu(self):
-        if "_cpu" not in self.__dict__:
+        if not hasattr(self, '_cpu'):
             try:
                 attrs = dummymodels.Capacity.objects\
                         .filter(node__rack__resource_class=self._apiresource)\
@@ -548,11 +548,11 @@ class ResourceClass(StringIdAPIResourceWrapper):
                                              value=attrs['value'],
                                              unit=attrs['unit'])
             self._cpu = Capacity(cpu)
-        return self.__dict__['_cpu']
+        return self._cpu
 
     @property
     def ram(self):
-        if "_ram" not in self.__dict__:
+        if not hasattr(self, '_ram'):
             try:
                 attrs = dummymodels.Capacity.objects\
                         .filter(node__rack__resource_class=self._apiresource)\
@@ -567,11 +567,11 @@ class ResourceClass(StringIdAPIResourceWrapper):
                                              value=attrs['value'],
                                              unit=attrs['unit'])
             self._ram = Capacity(ram)
-        return self.__dict__['_ram']
+        return self._ram
 
     @property
     def storage(self):
-        if "_storage" not in self.__dict__:
+        if not hasattr(self, '_storage'):
             try:
                 attrs = dummymodels.Capacity.objects\
                         .filter(node__rack__resource_class=self._apiresource)\
@@ -586,11 +586,11 @@ class ResourceClass(StringIdAPIResourceWrapper):
                                                  value=attrs['value'],
                                                  unit=attrs['unit'])
             self._storage = Capacity(storage)
-        return self.__dict__['_storage']
+        return self._storage
 
     @property
     def network(self):
-        if "_network" not in self.__dict__:
+        if not hasattr(self, '_network'):
             try:
                 attrs = dummymodels.Capacity.objects\
                         .filter(node__rack__resource_class=self._apiresource)\
@@ -605,11 +605,11 @@ class ResourceClass(StringIdAPIResourceWrapper):
                                            value=attrs['value'],
                                            unit=attrs['unit'])
             self._network = Capacity(network)
-        return self.__dict__['_network']
+        return self._network
 
     @property
     def vm_capacity(self):
-        if "_vm_capacity" not in self.__dict__:
+        if not hasattr(self, '_vm_capacity'):
             try:
                 value = dummymodels.ResourceClassFlavor.objects\
                             .filter(resource_class=self._apiresource)\
@@ -621,7 +621,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
                                                value=value,
                                                unit=_("VMs"))
             self._vm_capacity = Capacity(vm_capacity)
-        return self.__dict__['_vm_capacity']
+        return self._vm_capacity
 
     ##########################################################################
     # ResourceClass Instance methods
@@ -692,14 +692,14 @@ class Flavor(StringIdAPIResourceWrapper):
 
     @property
     def capacities(self):
-        if "_capacities" not in self.__dict__:
+        if not hasattr(self, '_capacities'):
             self._capacities = [Capacity(c) for c in
                                 self._apiresource.capacities.all()]
-        return self.__dict__['_capacities']
+        return self._capacities
 
     def capacity(self, capacity_name):
         key = "_%s" % capacity_name
-        if key not in self.__dict__:
+        if not hasattr(self, key):
             try:
                 capacity = [c for c in self.capacities if (
                     c.name == capacity_name)][0]
@@ -709,8 +709,8 @@ class Flavor(StringIdAPIResourceWrapper):
                     value=_('Unable to retrieve '
                             '(Is the flavor configured properly?)'),
                     unit='')
-            self.__dict__[key] = capacity
-        return self.__dict__[key]
+            setattr(self, key, capacity)
+        return getattr(self, key)
 
     @property
     def vcpu(self):
@@ -734,20 +734,20 @@ class Flavor(StringIdAPIResourceWrapper):
 
     @property
     def resource_class_flavors(self):
-        if "_resource_class_flavors" not in self.__dict__:
+        if not hasattr(self, '_resource_class_flavors'):
             self._resource_class_flavors = [ResourceClassFlavor(r) for r in (
                 self._apiresource.resourceclassflavor_set.all())]
-        return self.__dict__['_resource_class_flavors']
+        return self._resource_class_flavors
 
     @property
     def resource_classes(self):
-        if "_resource_classes" not in self.__dict__:
+        if not hasattr(self, '_resource_classes'):
             added_flavors = self.resource_class_flavors
             self._resource_classes = []
             for f in added_flavors:
                 self._resource_classes.append(ResourceClass(f.resource_class))
 
-        return self.__dict__['_resource_classes']
+        return self._resource_classes
 
     @property
     def running_virtual_machines(self):
@@ -802,15 +802,15 @@ class ResourceClassFlavor(StringIdAPIResourceWrapper):
 
     @property
     def flavor(self):
-        if '_flavor' not in self.__dict__:
+        if not hasattr(self, '_flavor'):
             self._flavor = self._apiresource.flavor
-        return self.__dict__['_flavor']
+        return self._flavor
 
     @property
     def resource_class(self):
-        if '_resource_class' not in self.__dict__:
+        if not hasattr(self, '_resource_class'):
             self._resource_class = self._apiresource.resource_class
-        return self.__dict__['_resource_class']
+        return self._resource_class
 
     @classmethod
     def create(cls, request, resource_class, flavor, max_vms=0):
