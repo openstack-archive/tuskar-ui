@@ -126,7 +126,7 @@ class CreateResourceClassInfoAndFlavors(workflows.TableStep):
 
 class RacksAction(workflows.Action):
     class Meta:
-        name = _("Resources")
+        name = _("Racks")
 
 
 class CreateRacks(workflows.TableStep):

@@ -20,16 +20,16 @@ import base64
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
-class ResourceViewTests(test.BaseAdminViewTests):
+class RackViewTests(test.BaseAdminViewTests):
     index_page = reverse('horizon:infrastructure:resource_management:index')
 
     def test_create_rack_get(self):
         url = reverse('horizon:infrastructure:resource_management:'
                       'racks:create')
-        resource = self.client.get(url)
+        rack = self.client.get(url)
 
-        self.assertEqual(resource.status_code, 200)
-        self.assertTemplateUsed(resource,
+        self.assertEqual(rack.status_code, 200)
+        self.assertTemplateUsed(rack,
                                 'horizon/common/_workflow_base.html')
 
     # FIXME (mawagner) - After moving EditRack to use workflows, we need
@@ -51,9 +51,9 @@ class ResourceViewTests(test.BaseAdminViewTests):
     def test_edit_rack_get(self):
         url = reverse('horizon:infrastructure:resource_management:' +
                       'racks:edit', args=[1])
-        resource = self.client.get(url)
-        self.assertEqual(resource.status_code, 200)
-        self.assertTemplateUsed(resource,
+        rack = self.client.get(url)
+        self.assertEqual(rack.status_code, 200)
+        self.assertTemplateUsed(rack,
                                 'horizon/common/_workflow_base.html')
 
     @test.create_stubs({api.management.Rack: ('update',)})
@@ -86,10 +86,10 @@ class ResourceViewTests(test.BaseAdminViewTests):
     def test_upload_rack_get(self):
         url = reverse('horizon:infrastructure:resource_management:'
                       'racks:upload')
-        resource = self.client.get(url)
+        rack = self.client.get(url)
 
-        self.assertEqual(resource.status_code, 200)
-        self.assertTemplateUsed(resource,
+        self.assertEqual(rack.status_code, 200)
+        self.assertTemplateUsed(rack,
             'infrastructure/resource_management/racks/upload.html')
 
     def test_upload_rack_upload(self):
