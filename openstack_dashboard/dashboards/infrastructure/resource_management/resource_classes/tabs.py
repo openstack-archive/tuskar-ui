@@ -24,8 +24,9 @@ class OverviewTab(tabs.Tab):
     name = _("Overview")
     slug = "overview"
     template_name = ("infrastructure/resource_management/resource_classes/"
-                    "_detail_overview.html")
-    preload = False
+                     "_detail_overview.html")
+    # FIXME charts doesnt work if uncommented
+    #preload = False
 
     def get_context_data(self, request):
         return {"resource_class": self.tab_group.kwargs['resource_class']}

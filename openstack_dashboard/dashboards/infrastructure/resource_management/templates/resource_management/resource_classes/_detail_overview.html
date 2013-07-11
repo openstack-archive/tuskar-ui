@@ -1,5 +1,6 @@
 {% load i18n sizeformat %}
 {% load url from future %}
+{% load chart_helpers %}
 
 <div class="status row-fluid detail">
   <div class="span4">
@@ -118,12 +119,70 @@
   <div class="span6">
     <h4>{% trans "Summary of Instances and Usage" %}</h4>
     <hr class="header_rule">
+    <!--
     <dl>
       {% for flavor_count in resource_class.running_virtual_machines %}
         <dt>{{ flavor_count.flavor.name }}</dt>
         <dd>{{ flavor_count.max_vms }}</dd>
       {% endfor %}
     </dl>
+    -->
+
+    <div class="clear"></div>
+      <div><strong>{{ resource_class.total_instances }}</strong> instances
+       <strong>{{resource_class.remaining_capacity}}%</strong>  capacity remaining</div>
+      <div class="flavor_usage_bar"
+           data-popup-free='{{resource_class|remaining_capacity_by_flavors}}'
+           data-single-bar-orientation="horizontal"
+           data-single-bar-height="50"
+           data-single-bar-width="100%"
+           data-single-bar-used="{{ resource_class|all_used_instances }}"
+           data-single-bar-auto-scale-selector=".flavors_scale_selector"
+           data-single-bar-color-scale-range='["#000060", "#99FFFF"]'
+           >
+      </div>
+
+    <table class="flavor_usages">
+      <tr>
+        {% for flavor in resource_class.list_flavors %}
+          <td class="flavor_usage_label">
+            <a href="{% url 'horizon:infrastructure:resource_management:flavors:detail' flavor.id %}">{{ flavor.name }}</a>
+          </td>
+        {% endfor %}
+      </tr>
+      <tr>
+        {% for flavor in resource_class.list_flavors %}
+          <td>
+            <div
+                 class="flavor_usage_bar flavors_scale_selector"
+                 data-popup-average='
+                 <p>Average capacity consumed by instances of {{flavor.name}} flavor in {{resource_class.name}} class.</p>
+                 <p>{{ flavor.used_instances }}%, <strong>{{ flavor.used_instances }} instances</strong></p>
+                 '
+                 data-single-bar-orientation="vertical"
+                 data-single-bar-height="100%"
+                 data-single-bar-width="40"
+                 data-single-bar-used="{{ flavor.used_instances }}"
+                 data-single-bar-average-used="{{ 50 }}"
+                 data-single-bar-auto-scale-selector=".flavors_scale_selector"
+                 data-single-bar-color-scale-range='["#000060", "#99FFFF"]'
+                 >
+            </div>
+          </td>
+        {% endfor %}
+      </tr>
+      <tr>
+        {% for flavor in resource_class.list_flavors %}
+          <td class="modal_chart flavor_usage_text"><a href="{{ "#" }}">{{ flavor.used_instances }}%</a></td>
+        {% endfor %}
+      </tr>
+      <tr>
+        {% for flavor in resource_class.list_flavors %}
+          <td class="flavor_usage_text">{{ flavor.used_instances }} inst.</td>
+        {% endfor %}
+      </tr>
+    </table>
+
   </div>
 
   <div class="span6">

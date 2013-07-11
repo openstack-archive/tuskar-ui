@@ -457,9 +457,35 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @property
     def list_flavors(self):
         if not hasattr(self, '_flavors'):
-            self._flavors = [Flavor(f) for f in (
-                tuskarclient(self.request).flavors.list(self.id))]
+            # FIXME just a mock of used instances, add real values
+            used_instances = 0
+
+            added_flavors = tuskarclient(self.request).flavors.list(self.id)
+            self._flavors = []
+            for f in added_flavors:
+                flavor_obj = Flavor(f)
+                #flavor_obj.max_vms = f.max_vms
+
+                # FIXME just a mock of used instances, add real values
+                used_instances += 5
+                flavor_obj.used_instances = used_instances
+                self._flavors.append(flavor_obj)
+
         return self._flavors
+
+    @property
+    def all_used_instances(self):
+        return [flavor.used_instances for flavor in self.list_flavors]
+
+    @property
+    def total_instances(self):
+        # FIXME just mock implementation, add proper one
+        return sum(self.all_used_instances)
+
+    @property
+    def remaining_capacity(self):
+        # FIXME just mock implementation, add proper one
+        return 100 - self.total_instances
 
     @property
     def all_flavors(self):
@@ -472,7 +498,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
                 fname = "%s.%s" % (self.name, flavor.name)
                 f = next((f for f in my_flavors if f.name == fname), None)
                 if f:
-                    flavor.set_max_vms(f.max_vms)
+                    flavor.max_vms = f.max_vms
                 self._all_flavors.append(flavor)
         return self._all_flavors
 
@@ -611,8 +637,17 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
     def max_vms(self):
         return getattr(self, '_max_vms', '0')
 
-    def set_max_vms(self, value='0'):
+    @max_vms.setter
+    def max_vms(self, value='0'):
         self._max_vms = value
+
+    @property
+    def used_instances(self):
+        return getattr(self, '_used_instances', 0)
+
+    @used_instances.setter
+    def used_instances(self, value=0):
+        self._used_instances = value
 
     @classmethod
     def list(cls, request, only_free_racks=False):
