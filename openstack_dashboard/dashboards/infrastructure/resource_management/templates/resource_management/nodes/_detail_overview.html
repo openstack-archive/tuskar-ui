@@ -159,7 +159,11 @@
     <h4>{% trans "Active alerts" %}</h4>
     <hr class="header_rule">
     {% if node.is_provisioned %}
-
+      <ul>
+       {% for alert in node.alerts %}
+         <li><i class="icon-warning-sign"></i>{{ alert.message }}</li>
+       {% endfor %}
+      </ul>
     {% else %}
     <p>{% trans "No data available yet." %}</p>
     {% endif %}

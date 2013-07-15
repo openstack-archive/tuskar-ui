@@ -30,6 +30,16 @@ class Capacity(models.Model):
     unit = models.CharField(max_length=10)
 
 
+class Alert(models.Model):
+    class Meta:
+        db_table = 'infrastructure_alerts'
+
+    object_id = models.PositiveIntegerField()
+    object_type = models.CharField(max_length=20)
+    message = models.CharField(max_length=250)
+    time = models.DateTimeField()
+
+
 class FlavorTemplate(models.Model):
     class Meta:
         db_table = 'infrastructure_flavortemplate'

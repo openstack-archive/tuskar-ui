@@ -87,5 +87,8 @@
   {"pk": 52, "model": "infrastructure.capacity", "fields": {"value": 16384, "unit": "MB", "object_id": 7, "content_type": ["infrastructure", "flavortemplate"], "name": "memory"}},
   {"pk": 53, "model": "infrastructure.capacity", "fields": {"value": 160, "unit": "GB", "object_id": 7, "content_type": ["infrastructure", "flavortemplate"], "name": "storage"}},
   {"pk": 54, "model": "infrastructure.capacity", "fields": {"value": 0, "unit": "GB", "object_id": 7, "content_type": ["infrastructure", "flavortemplate"], "name": "ephemeral_disk"}},
-  {"pk": 55, "model": "infrastructure.capacity", "fields": {"value": 0, "unit": "MB", "object_id": 7, "content_type": ["infrastructure", "flavortemplate"], "name": "swap_disk"}}
+  {"pk": 55, "model": "infrastructure.capacity", "fields": {"value": 0, "unit": "MB", "object_id": 7, "content_type": ["infrastructure", "flavortemplate"], "name": "swap_disk"}},
+  {"pk": 1, "model": "infrastructure.alert", "fields": {"message": "Switch is not accessible.", "object_id": 1, "object_type": "rack", "time": "2011-09-01T13:20:30+03:00"}},
+  {"pk": 2, "model": "infrastructure.alert", "fields": {"message": "Nova service is not running.", "object_id": 1, "object_type": "node", "time": "2011-09-01T13:20:30+03:00"}},
+  {"pk": 3, "model": "infrastructure.alert", "fields": {"message": "Disk usage is over 90%.", "object_id": 1, "object_type": "node", "time": "2011-09-01T13:20:30+03:00"}}
 ]

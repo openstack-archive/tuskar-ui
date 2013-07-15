@@ -82,6 +82,13 @@ class StringIdAPIResourceWrapper(base.APIResourceWrapper):
         setattr(self, '_request', value)
 
 
+class Alert(StringIdAPIResourceWrapper):
+    """Wrapper for the Alert object returned by the
+    dummy model.
+    """
+    _attrs = ['message', 'time']
+
+
 class Capacity(StringIdAPIResourceWrapper):
     """Wrapper for the Capacity object returned by the
     dummy model.
@@ -246,6 +253,15 @@ class Node(StringIdAPIResourceWrapper):
     def is_provisioned(self):
         return False
 
+    @property
+    def alerts(self):
+        if not hasattr(self, '_alerts'):
+            self._alerts = [Alert(a) for a in
+                dummymodels.Alert.objects
+                    .filter(object_type='node')
+                    .filter(object_id=int(self.id))]
+        return self._alerts
+
 
 class Rack(StringIdAPIResourceWrapper):
     """Wrapper for the Rack object  returned by the
@@ -303,6 +319,13 @@ class Rack(StringIdAPIResourceWrapper):
     @classmethod
     def delete(cls, request, rack_id):
         tuskarclient(request).racks.delete(rack_id)
+
+    @property
+    def node_ids(self):
+        """ List of unicode ids of nodes added to rack"""
+        return [
+            unicode(node['id']) for node in (
+                self._apiresource.nodes)]
 
     ## FIXME: this will have to be rewritten to ultimately
     ## fetch nodes from nova baremetal
@@ -371,6 +394,21 @@ class Rack(StringIdAPIResourceWrapper):
                                                unit=_("VMs"))
             self._vm_capacity = Capacity(vm_capacity)
         return self._vm_capacity
+
+    @property
+    def alerts(self):
+        if not hasattr(self, '_alerts'):
+            self._alerts = [Alert(a) for a in
+                dummymodels.Alert.objects
+                    .filter(object_type='rack')
+                    .filter(object_id=int(self.id))]
+        return self._alerts
+
+    @property
+    def aggregated_alerts(self):
+        # FIXME: for now return only list of nodes (particular alerts are not
+        # used)
+        return [node for node in self.list_nodes if node.alerts]
 
 
 class ResourceClass(StringIdAPIResourceWrapper):
@@ -625,6 +663,13 @@ class ResourceClass(StringIdAPIResourceWrapper):
         tuskarclient(request).resource_classes.update(self.id, racks=[])
         racks = [{'id': rid} for rid in racks_ids]
         tuskarclient(request).resource_classes.update(self.id, racks=racks)
+
+    @property
+    def aggregated_alerts(self):
+        # FIXME: for now return only list of racks (particular alerts are not
+        # used)
+        return [rack for rack in self.list_racks if (rack.alerts +
+            rack.aggregated_alerts)]
 
 
 class FlavorTemplate(StringIdAPIResourceWrapper):

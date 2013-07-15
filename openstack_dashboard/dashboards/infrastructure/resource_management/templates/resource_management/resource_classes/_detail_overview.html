@@ -103,15 +103,17 @@
     <div data-chart-type="line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="cpu,ram,storage,network"></div>
   </div>
 
-  <div class="span6">
-    <h4>{% trans "Virtual Capacity" %}</h4>
+  <div class="span6 alerts">
+    <h4>{% trans "Active Alerts" %}</h4>
     <hr class="header_rule">
-    <dl>
-      {% for flavor_count in resource_class.list_flavors %}
-        <dt>{{ flavor_count.flavor.name }}</dt>
-        <dd>{{ flavor_count.max_vms }}</dd>
-      {% endfor %}
-    </dl>
+    <ul>
+     {% for rack in resource_class.aggregated_alerts %}
+         <li>
+           <i class="icon-warning-sign"></i>
+           Rack <a href="{% url 'horizon:infrastructure:resource_management:racks:detail' rack.id %}">{{ rack.name }}</a> has some problems
+         </li>
+     {% endfor %}
+    </ul>
   </div>
 </div>
 
