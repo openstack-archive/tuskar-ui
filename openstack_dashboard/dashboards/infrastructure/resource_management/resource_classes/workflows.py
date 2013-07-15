@@ -51,7 +51,7 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
         name = cleaned_data.get('name')
         resource_class_id = self.initial.get('resource_class_id', None)
         try:
-            resource_classes = api.management.ResourceClass.list(self.request)
+            resource_classes = api.tuskar.ResourceClass.list(self.request)
         except:
             resource_classes = []
             msg = _('Unable to get resource class list')
@@ -106,7 +106,7 @@ class CreateResourceClassInfoAndFlavors(workflows.TableStep):
         try:
             resource_class_id = self.workflow.context.get("resource_class_id")
             if resource_class_id:
-                resource_class = api.management.ResourceClass.get(
+                resource_class = api.tuskar.ResourceClass.get(
                     self.workflow.request,
                     resource_class_id)
 
@@ -116,7 +116,7 @@ class CreateResourceClassInfoAndFlavors(workflows.TableStep):
 
                 all_flavors = resource_class.all_flavors
             else:
-                all_flavors = api.management.Flavor.list(self.workflow.request)
+                all_flavors = api.tuskar.Flavor.list(self.workflow.request)
         except:
             all_flavors = []
             exceptions.handle(self.workflow.request,
@@ -149,7 +149,7 @@ class CreateRacks(workflows.TableStep):
         try:
             resource_class_id = self.workflow.context.get("resource_class_id")
             if resource_class_id:
-                resource_class = api.management.ResourceClass.get(
+                resource_class = api.tuskar.ResourceClass.get(
                     self.workflow.request,
                     resource_class_id)
                 # TODO: lsmola ugly interface, rewrite
@@ -159,7 +159,7 @@ class CreateRacks(workflows.TableStep):
                     resource_class.all_racks
             else:
                 racks = \
-                    api.management.Rack.list(self.workflow.request, True)
+                    api.tuskar.Rack.list(self.workflow.request, True)
         except:
             racks = []
             exceptions.handle(self.workflow.request,
@@ -212,7 +212,7 @@ class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
 
     def _create_resource_class_info(self, request, data):
         try:
-            return api.management.ResourceClass.create(
+            return api.tuskar.ResourceClass.create(
                 request,
                 name=data['name'],
                 service_type=data['service_type'])
@@ -250,7 +250,7 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
 
     def _update_resource_class_info(self, request, data):
         try:
-            return api.management.ResourceClass.update(
+            return api.tuskar.ResourceClass.update(
                 request,
                 data['resource_class_id'],
                 name=data['name'],

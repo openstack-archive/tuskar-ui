@@ -69,7 +69,7 @@ class RackCreateInfoAction(workflows.Action):
         location = cleaned_data.get('location')
         subnet = cleaned_data.get('subnet')
         try:
-            racks = api.management.Rack.list(self.request)
+            racks = api.tuskar.Rack.list(self.request)
         except:
             racks = []
             exceptions.check_message(['Connection', 'refused'],
@@ -93,7 +93,7 @@ class RackCreateInfoAction(workflows.Action):
     def __init__(self, request, *args, **kwargs):
         super(RackCreateInfoAction, self).__init__(request, *args, **kwargs)
         resource_class_id_choices = [('', _("Select a Resource Class"))]
-        for rc in api.management.ResourceClass.list(request):
+        for rc in api.tuskar.ResourceClass.list(request):
             resource_class_id_choices.append((rc.id, rc.name))
         self.fields['resource_class_id'].choices = resource_class_id_choices
 
@@ -144,14 +144,14 @@ class CreateRack(workflows.Workflow):
 
     def handle(self, request, data):
         try:
-            rack = api.management.Rack.create(request, data['name'],
+            rack = api.tuskar.Rack.create(request, data['name'],
                                               data['resource_class_id'],
                                               data['location'],
                                               data['subnet'])
 
             if data['node_macs'] is not None:
                 nodes = data['node_macs'].splitlines(False)
-                api.management.Rack.register_nodes(rack, nodes)
+                api.tuskar.Rack.register_nodes(rack, nodes)
 
             return True
         except:
@@ -169,7 +169,7 @@ class EditRack(CreateRack):
     def handle(self, request, data):
         try:
             rack_id = self.context['rack_id']
-            rack = api.management.Rack.update(rack_id, data)
+            rack = api.tuskar.Rack.update(rack_id, data)
 
             return True
         except:

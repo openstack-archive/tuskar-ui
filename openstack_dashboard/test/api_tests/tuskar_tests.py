@@ -27,51 +27,51 @@ from openstack_dashboard.test import helpers as test
 import openstack_dashboard.dashboards.infrastructure.models as dummymodels
 
 
-class ManagementApiTests(test.APITestCase):
+class TuskarApiTests(test.APITestCase):
     def setUp(self):
-        super(ManagementApiTests, self).setUp()
+        super(TuskarApiTests, self).setUp()
         # dummy data are seeded from fixtures
         self.rclass1 = dummymodels.ResourceClass.objects.get(name='rclass1')
         self.flavor1 = dummymodels.Flavor.objects.get(name='flavor1')
 
     def test_resource_class_list(self):
-        rc_list = api.management.ResourceClass.list(self.request)
+        rc_list = api.tuskar.ResourceClass.list(self.request)
         self.assertEquals(3, len(rc_list))
         for rc in rc_list:
-            self.assertIsInstance(rc, api.management.ResourceClass)
+            self.assertIsInstance(rc, api.tuskar.ResourceClass)
 
     def test_resource_class_get(self):
-        rc = api.management.ResourceClass.get(self.request, self.rclass1.id)
-        self.assertIsInstance(rc, api.management.ResourceClass)
+        rc = api.tuskar.ResourceClass.get(self.request, self.rclass1.id)
+        self.assertIsInstance(rc, api.tuskar.ResourceClass)
         self.assertEquals(rc.name, self.rclass1.name)
 
     def test_resource_class_flavor_counts(self):
-        rc = api.management.ResourceClass.get(self.request, self.rclass1.id)
+        rc = api.tuskar.ResourceClass.get(self.request, self.rclass1.id)
         for f in rc.resource_class_flavors:
-            self.assertIsInstance(f, api.management.ResourceClassFlavor)
+            self.assertIsInstance(f, api.tuskar.ResourceClassFlavor)
         self.assertEquals(3, len(rc.resource_class_flavors))
 
     def test_resource_class_racks(self):
-        rc = api.management.ResourceClass.get(self.request, self.rclass1.id)
+        rc = api.tuskar.ResourceClass.get(self.request, self.rclass1.id)
         for rack in rc.racks:
-            self.assertIsInstance(rack, api.management.Rack)
+            self.assertIsInstance(rack, api.tuskar.Rack)
         self.assertEquals(2, len(rc.racks))
 
     def test_resource_class_nodes(self):
-        rc = api.management.ResourceClass.get(self.request, self.rclass1.id)
+        rc = api.tuskar.ResourceClass.get(self.request, self.rclass1.id)
         for node in rc.nodes:
-            self.assertIsInstance(node, api.management.Node)
+            self.assertIsInstance(node, api.tuskar.Node)
         self.assertEquals(4, len(rc.nodes))
 
     # TODO: create, delete operations
 
     def test_flavor_list(self):
-        flist = api.management.Flavor.list(self.request)
+        flist = api.tuskar.Flavor.list(self.request)
         self.assertEquals(6, len(flist))
         for f in flist:
-            self.assertIsInstance(f, api.management.Flavor)
+            self.assertIsInstance(f, api.tuskar.Flavor)
 
     def test_flavor_get(self):
-        flavor = api.management.Flavor.get(self.request, self.flavor1.id)
-        self.assertIsInstance(flavor, api.management.Flavor)
+        flavor = api.tuskar.Flavor.get(self.request, self.flavor1.id)
+        self.assertIsInstance(flavor, api.tuskar.Flavor)
         self.assertEquals(flavor.name, self.flavor1.name)

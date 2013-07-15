@@ -68,13 +68,13 @@ class UploadRack(forms.SelfHandlingForm):
             racks = CSVRack.from_str(base64.b64decode(racks_str))
             # get the resource class ids by resource class names
             rclass_ids = dict((rc.name, rc.id) for rc in
-                    api.management.ResourceClass.list(request))
+                    api.tuskar.ResourceClass.list(request))
             for rack in racks:
                 try:
-                    r = api.management.Rack.create(request, rack.name,
+                    r = api.tuskar.Rack.create(request, rack.name,
                             rclass_ids[rack.resource_class], rack.region,
                             rack.subnet)
-                    api.management.Rack.register_nodes(r, rack.nodes)
+                    api.tuskar.Rack.register_nodes(r, rack.nodes)
                     successes.append(rack.name)
                 except:
                     LOG.exception("Exception in processing rack CSV file.")

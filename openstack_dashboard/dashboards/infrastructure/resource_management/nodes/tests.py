@@ -9,11 +9,11 @@ class ResourceViewTests(test.BaseAdminViewTests):
     unracked_page = reverse('horizon:infrastructure:'
                             'resource_management:nodes:unracked')
 
-    @test.create_stubs({api.management.Node: ('list_unracked',), })
+    @test.create_stubs({api.tuskar.Node: ('list_unracked',), })
     def test_unracked(self):
-        unracked_nodes = self.management_racks.list()
+        unracked_nodes = self.tuskar_racks.list()
 
-        api.management.Node.list_unracked(IsA(http.HttpRequest)) \
+        api.tuskar.Node.list_unracked(IsA(http.HttpRequest)) \
             .AndReturn(unracked_nodes)
 
         self.mox.ReplayAll()

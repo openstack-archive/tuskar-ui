@@ -8,13 +8,13 @@ from openstack_dashboard.test import helpers as test
 
 class FlavorsTests(test.BaseAdminViewTests):
 
-    @test.create_stubs({api.management.Flavor: ('list', 'create')})
+    @test.create_stubs({api.tuskar.Flavor: ('list', 'create')})
     def test_create_flavor(self):
-        flavor = self.management_flavors.first()
+        flavor = self.tuskar_flavors.first()
 
-        api.management.Flavor.list(
+        api.tuskar.Flavor.list(
             IsA(http.HttpRequest)).AndReturn([])
-        api.management.Flavor.create(IsA(http.HttpRequest),
+        api.tuskar.Flavor.create(IsA(http.HttpRequest),
                                      flavor.name,
                                      0, 0, 0, 0, 0).AndReturn(flavor)
         self.mox.ReplayAll()
@@ -36,11 +36,11 @@ class FlavorsTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(
             resp, reverse('horizon:infrastructure:resource_management:index'))
 
-    @test.create_stubs({api.management.Flavor: ('list', 'update', 'get')})
+    @test.create_stubs({api.tuskar.Flavor: ('list', 'update', 'get')})
     def test_edit_flavor_get(self):
-        flavor = self.management_flavors.first()  # has no extra spec
+        flavor = self.tuskar_flavors.first()  # has no extra spec
 
-        api.management.Flavor.get(IsA(http.HttpRequest),
+        api.tuskar.Flavor.get(IsA(http.HttpRequest),
                                   flavor.id).AndReturn(flavor)
         self.mox.ReplayAll()
 
@@ -52,17 +52,17 @@ class FlavorsTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(
             resp, "infrastructure/resource_management/flavors/edit.html")
 
-    @test.create_stubs({api.management.Flavor: ('list', 'update', 'get')})
+    @test.create_stubs({api.tuskar.Flavor: ('list', 'update', 'get')})
     def test_edit_flavor_post(self):
-        flavor = self.management_flavors.first()  # has no extra spec
+        flavor = self.tuskar_flavors.first()  # has no extra spec
 
-        api.management.Flavor.list(
-            IsA(http.HttpRequest)).AndReturn(self.management_flavors.list())
-        api.management.Flavor.update(IsA(http.HttpRequest),
+        api.tuskar.Flavor.list(
+            IsA(http.HttpRequest)).AndReturn(self.tuskar_flavors.list())
+        api.tuskar.Flavor.update(IsA(http.HttpRequest),
                                      flavor.id,
                                      flavor.name,
                                      0, 0, 0, 0, 0).AndReturn(flavor)
-        api.management.Flavor.get(IsA(http.HttpRequest),
+        api.tuskar.Flavor.get(IsA(http.HttpRequest),
                                   flavor.id).AndReturn(flavor)
         self.mox.ReplayAll()
 
@@ -82,13 +82,13 @@ class FlavorsTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(
             resp, reverse('horizon:infrastructure:resource_management:index'))
 
-    @test.create_stubs({api.management.Flavor: ('list', 'delete')})
+    @test.create_stubs({api.tuskar.Flavor: ('list', 'delete')})
     def test_delete_flavor(self):
-        flavor = self.management_flavors.first()
+        flavor = self.tuskar_flavors.first()
 
-        api.management.Flavor.list(IsA(http.HttpRequest)).\
-            AndReturn(self.management_flavors.list())
-        api.management.Flavor.delete(IsA(http.HttpRequest), flavor.id)
+        api.tuskar.Flavor.list(IsA(http.HttpRequest)).\
+            AndReturn(self.tuskar_flavors.list())
+        api.tuskar.Flavor.delete(IsA(http.HttpRequest), flavor.id)
         self.mox.ReplayAll()
 
         form_data = {'action': 'flavors__delete__%s' % flavor.id}
@@ -99,14 +99,14 @@ class FlavorsTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(
             res, reverse('horizon:infrastructure:resource_management:index'))
 
-    @test.create_stubs({api.management.Flavor: ('get',)})
+    @test.create_stubs({api.tuskar.Flavor: ('get',)})
     def test_detail_flavor(self):
-        flavor = self.management_flavors.first()
+        flavor = self.tuskar_flavors.first()
 
-        api.management.Flavor.get(IsA(http.HttpRequest),
+        api.tuskar.Flavor.get(IsA(http.HttpRequest),
                                   flavor.id).AndReturn(flavor)
-        api.management.Flavor.resource_classes = self. \
-            management_resource_classes
+        api.tuskar.Flavor.resource_classes = self. \
+            tuskar_resource_classes
 
         self.mox.ReplayAll()
 

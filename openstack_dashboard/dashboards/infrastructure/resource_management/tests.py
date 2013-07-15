@@ -28,38 +28,38 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         super(ResourceManagementTests, self).setUp()
 
     @test.create_stubs({
-        api.management.ResourceClass: (
+        api.tuskar.ResourceClass: (
             'list',
             'racks',
             'nodes'),
-        api.management.Flavor: (
+        api.tuskar.Flavor: (
             'list',),
-        api.management.Rack: (
+        api.tuskar.Rack: (
             'list',)})
     def test_index(self):
         # Flavor stubs
-        flavors = self.management_flavors.list()
+        flavors = self.tuskar_flavors.list()
 
-        api.management.Flavor.list(IsA(http.HttpRequest)).AndReturn(flavors)
+        api.tuskar.Flavor.list(IsA(http.HttpRequest)).AndReturn(flavors)
         # Flavor stubs end
 
         # ResourceClass stubs
-        all_resource_classes = self.management_resource_classes.list()
+        all_resource_classes = self.tuskar_resource_classes.list()
         nodes = []
         racks = []
 
-        api.management.ResourceClass.nodes = nodes
-        api.management.ResourceClass.racks = racks
+        api.tuskar.ResourceClass.nodes = nodes
+        api.tuskar.ResourceClass.racks = racks
 
-        api.management.ResourceClass.list(
+        api.tuskar.ResourceClass.list(
             IsA(http.HttpRequest)).\
             AndReturn(all_resource_classes)
         # ResourceClass stubs end
 
         # Rack stubs
-        racks = self.management_racks.list()
+        racks = self.tuskar_racks.list()
 
-        api.management.Rack.list(IsA(http.HttpRequest)).AndReturn(racks)
+        api.tuskar.Rack.list(IsA(http.HttpRequest)).AndReturn(racks)
         # Rack stubs end
 
         self.mox.ReplayAll()

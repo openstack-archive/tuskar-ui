@@ -31,7 +31,7 @@ class UnrackedView(tables.DataTableView):
 
     def get_data(self):
         try:
-            nodes = api.management.Node.list_unracked(self.request)
+            nodes = api.tuskar.Node.list_unracked(self.request)
         except:
             nodes = []
             exceptions.handle(self.request,
@@ -52,7 +52,7 @@ class DetailView(tabs.TabView):
         if not hasattr(self, "_node"):
             try:
                 node_id = self.kwargs['node_id']
-                node = api.management.Node.get(self.request, node_id)
+                node = api.tuskar.Node.get(self.request, node_id)
             except:
                 redirect = reverse('horizon:infrastructure:'
                                    'resource_management:index')

@@ -66,7 +66,7 @@ class EditView(workflows.WorkflowView):
     workflow_class = EditRack
 
     def get_initial(self):
-        obj = api.management.Rack.get(None,
+        obj = api.tuskar.Rack.get(None,
                                       rack_id=self.kwargs['rack_id'])
         mac_str = "\n".join([x.mac_address for x in obj.nodes])
         return {'name': obj.name, 'resource_class_id': obj.resource_class_id,
@@ -87,7 +87,7 @@ class DetailView(tabs.TabView):
         if not hasattr(self, "_rack"):
             try:
                 rack_id = self.kwargs['rack_id']
-                rack = api.management.Rack.get(self.request, rack_id)
+                rack = api.tuskar.Rack.get(self.request, rack_id)
             except:
                 redirect = reverse('horizon:infrastructure:'
                                    'resource_management:index')

@@ -10,7 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from openstack_dashboard.api.management import (
+from openstack_dashboard.api.tuskar import (
     Flavor, ResourceClass, Node,
     Rack, ResourceClassFlavor)
 
@@ -21,17 +21,17 @@ from .utils import TestDataContainer
 
 def data(TEST):
     # Flavors
-    TEST.management_flavors = TestDataContainer()
+    TEST.tuskar_flavors = TestDataContainer()
     flavor_1 = Flavor(dummymodels.Flavor(
             id="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
             name='m1.tiny'))
     flavor_2 = Flavor(dummymodels.Flavor(
             id="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
             name='m1.massive'))
-    TEST.management_flavors.add(flavor_1, flavor_2)
+    TEST.tuskar_flavors.add(flavor_1, flavor_2)
 
     # Resource Classes
-    TEST.management_resource_classes = TestDataContainer()
+    TEST.tuskar_resource_classes = TestDataContainer()
 
     resource_class_1 = ResourceClass(dummymodels.ResourceClass(
         id="1",
@@ -67,19 +67,19 @@ def data(TEST):
     resource_class_2.all_flavors = all_flavors
     """
 
-    TEST.management_resource_classes.add(resource_class_1, resource_class_2)
+    TEST.tuskar_resource_classes.add(resource_class_1, resource_class_2)
 
     #Racks
-    TEST.management_racks = TestDataContainer()
+    TEST.tuskar_racks = TestDataContainer()
     rack_1 = Rack(dummymodels.Rack(
         id="1",
         name='rack1',
         resource_class_id='1'))
 
-    TEST.management_racks.add(rack_1)
+    TEST.tuskar_racks.add(rack_1)
 
     #ResourceClassFlavors
-    TEST.management_resource_class_flavors = TestDataContainer()
+    TEST.tuskar_resource_class_flavors = TestDataContainer()
     resource_class_flavor_1 = ResourceClassFlavor(
         dummymodels.ResourceClassFlavor(
             id="1",
@@ -87,7 +87,7 @@ def data(TEST):
             resource_class_id=1,
             flavor_id=1))
 
-    TEST.management_resource_class_flavors.add(resource_class_flavor_1)
+    TEST.tuskar_resource_class_flavors.add(resource_class_flavor_1)
 
     # Nodes
     TEST.nodes = TestDataContainer()

@@ -20,7 +20,7 @@ from horizon import exceptions
 from horizon import messages
 from horizon import tabs
 
-from openstack_dashboard.api import management
+from openstack_dashboard.api import tuskar
 
 from .flavors.tables import FlavorsTable
 from .racks.tables import RacksTable
@@ -36,7 +36,7 @@ class RacksTab(tabs.TableTab):
 
     def get_racks_data(self):
         try:
-            racks = management.Rack.list(self.request)
+            racks = tuskar.Rack.list(self.request)
         except:
             racks = []
             exceptions.handle(self.request,
@@ -46,7 +46,7 @@ class RacksTab(tabs.TableTab):
     def get_context_data(self, request):
         context = super(RacksTab, self).get_context_data(request)
         try:
-            context["nodes"] = management.Node.list_unracked(self.request)
+            context["nodes"] = tuskar.Node.list_unracked(self.request)
         except:
             context["nodes"] = []
             exceptions.handle(request,
@@ -62,11 +62,11 @@ class FlavorsTab(tabs.TableTab):
 
     def get_flavors_data(self):
         try:
-            flavors = management.Flavor.list(self.request)
+            flavors = tuskar.Flavor.list(self.request)
         except:
             flavors = []
             exceptions.handle(self.request,
-                              _('Unable to retrieve management flavors.'))
+                              _('Unable to retrieve tuskar flavors.'))
         return flavors
 
 
@@ -79,7 +79,7 @@ class ResourceClassesTab(tabs.TableTab):
 
     def get_resource_classes_data(self):
         try:
-            resource_classes = management.ResourceClass.list(self.request)
+            resource_classes = tuskar.ResourceClass.list(self.request)
         except:
             resource_classes = []
             exceptions.handle(self.request,

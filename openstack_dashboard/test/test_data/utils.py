@@ -33,7 +33,7 @@ def load_test_data(load_onto=None):
                neutron_data.data,
                swift_data.data,
                heat_data.data,
-               management_data.data)
+               tuskar_data.data)
     if load_onto:
         for data_func in loaders:
             data_func(load_onto)

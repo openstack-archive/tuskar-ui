@@ -24,7 +24,7 @@ class DeleteNodes(tables.DeleteAction):
     data_type_plural = _("Nodes")
 
     def delete(self, request, obj_id):
-        api.management.node_delete(request, obj_id)
+        api.tuskar.node_delete(request, obj_id)
 
 
 class NodesFilterAction(tables.FilterAction):

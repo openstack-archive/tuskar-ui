@@ -59,7 +59,7 @@ class UpdateView(workflows.WorkflowView):
             resource_class_id = self.kwargs['resource_class_id']
             try:
                 self._object = \
-                    api.management.ResourceClass.get(self.request,
+                    api.tuskar.ResourceClass.get(self.request,
                                                      resource_class_id)
             except:
                 redirect = self.success_url
@@ -98,7 +98,7 @@ class DetailView(tabs.TabView):
         if not hasattr(self, "_resource_class"):
             try:
                 resource_class_id = self.kwargs['resource_class_id']
-                resource_class = api.management.\
+                resource_class = api.tuskar.\
                                      ResourceClass.get(self.request,
                                                        resource_class_id)
             except:

@@ -28,7 +28,7 @@ class DeleteRacks(tables.DeleteAction):
     data_type_plural = _("Racks")
 
     def delete(self, request, obj_id):
-        api.management.Rack.delete(request, obj_id)
+        api.tuskar.Rack.delete(request, obj_id)
 
 
 class CreateRack(tables.LinkAction):

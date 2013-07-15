@@ -30,7 +30,7 @@ class DeleteFlavors(tables.DeleteAction):
     data_type_plural = _("Flavors")
 
     def delete(self, request, obj_id):
-        api.management.Flavor.delete(request, obj_id)
+        api.tuskar.Flavor.delete(request, obj_id)
 
 
 class CreateFlavor(tables.LinkAction):
