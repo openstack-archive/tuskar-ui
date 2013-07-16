@@ -448,6 +448,10 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
         return resource_class
 
+    @property
+    def deletable(self):
+        return (len(self.list_racks) <= 0)
+
     @classmethod
     def delete(cls, request, resource_class_id):
         tuskarclient(request).resource_classes.delete(resource_class_id)

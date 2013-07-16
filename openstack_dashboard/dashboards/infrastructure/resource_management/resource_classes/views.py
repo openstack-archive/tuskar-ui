@@ -34,8 +34,10 @@ from horizon import workflows
 
 from openstack_dashboard import api
 
+from .forms import DeleteForm
 from .workflows import (CreateResourceClass, UpdateResourceClass,
-                        UpdateRacksWorkflow, UpdateFlavorsWorkflow)
+                        UpdateRacksWorkflow, UpdateFlavorsWorkflow,
+                        DetailUpdateWorkflow)
 from .tables import ResourceClassesTable
 from .tabs import ResourceClassDetailTabs
 
@@ -79,6 +81,10 @@ class UpdateView(workflows.WorkflowView):
                 'service_type': resource_class.service_type}
 
 
+class DetailUpdateView(UpdateView):
+    workflow_class = DetailUpdateWorkflow
+
+
 class UpdateRacksView(UpdateView):
     workflow_class = UpdateRacksWorkflow
 
@@ -119,6 +125,46 @@ class DetailView(tabs.TabView):
         resource_class = self.get_data()
         return self.tab_group_class(request, resource_class=resource_class,
                                     **kwargs)
+
+
+class DetailActionView(forms.ModalFormView):
+    template_name = ('infrastructure/resource_management/'
+                     'resource_classes/action.html')
+
+    def get_form(self, form_class):
+        """
+        Returns an instance of the form to be used in this view.
+        """
+        try:
+            action = self.request.GET.get('action')
+            if action == "delete":
+                form_class = DeleteForm
+
+            return form_class(self.request, **self.get_form_kwargs())
+        except:
+            exceptions.handle(self.request, _("Unable to build an Action."))
+
+    def get_success_url(self):
+        # FIXME this should be set on form level
+        return reverse("horizon:infrastructure:resource_management:index")
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailActionView, self).get_context_data(**kwargs)
+        context['resource_class_id'] = self.kwargs['resource_class_id']
+        context['action'] = context['form'].initial.get('action', None)
+        context['header'] = context['form'].command.header
+        return context
+
+    def get_initial(self):
+        try:
+            resource_class = api.tuskar.ResourceClass.get(
+                self.request, self.kwargs['resource_class_id'])
+            action = self.request.GET.get('action')
+        except:
+            exceptions.handle(self.request,
+                              _("Unable to retrieve resource class data."))
+        return {'resource_class': resource_class,
+                'action': action}
 
 
 def rack_health(request, resource_class_id=None):

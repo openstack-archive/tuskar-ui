@@ -1,0 +1,9 @@
+{% extends 'infrastructure/base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Resource Class Action Confirmation" %}{% endblock %}
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Resource Class Action") %}
+{% endblock page_header %}
+{% block infrastructure_main %}
+    {% include "infrastructure/resource_management/resource_classes/_edit_status.html" %}
+{% endblock %}

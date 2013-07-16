@@ -293,6 +293,15 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
         return True
 
 
+class DetailUpdateWorkflow(UpdateResourceClass):
+    def get_index_url(self):
+        """This url is used both as success and failure url"""
+        url = "horizon:infrastructure:resource_management:resource_classes:"\
+              "detail"
+        return "%s?tab=resource_class_details__overview" % (
+            reverse(url, args=(self.context["resource_class_id"])))
+
+
 class UpdateRacksWorkflow(UpdateResourceClass):
     def get_index_url(self):
         """This url is used both as success and failure url"""

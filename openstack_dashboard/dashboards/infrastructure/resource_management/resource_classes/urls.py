@@ -15,7 +15,7 @@
 from django.conf.urls.defaults import patterns, url, include
 
 from .views import (CreateView, UpdateView, DetailView, UpdateRacksView,
-                    UpdateFlavorsView)
+                    UpdateFlavorsView, DetailUpdateView, DetailActionView)
 
 RESOURCE_CLASS = r'^(?P<resource_class_id>[^/]+)/%s$'
 VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \
@@ -27,6 +27,10 @@ urlpatterns = patterns(
     url(r'^(?P<resource_class_id>[^/]+)/$',
         DetailView.as_view(), name='detail'),
     url(RESOURCE_CLASS % 'update', UpdateView.as_view(), name='update'),
+    url(RESOURCE_CLASS % 'detail_action', DetailActionView.as_view(),
+        name='detail_action'),
+    url(RESOURCE_CLASS % 'detail_update', DetailUpdateView.as_view(),
+        name='detail_update'),
     url(RESOURCE_CLASS % 'update_racks', UpdateRacksView.as_view(),
         name='update_racks'),
     url(RESOURCE_CLASS % 'update_flavors', UpdateFlavorsView.as_view(),
