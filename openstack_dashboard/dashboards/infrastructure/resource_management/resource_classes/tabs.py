@@ -42,7 +42,7 @@ class RacksTab(tabs.TableTab):
     def get_racks_data(self):
         try:
             resource_class = self.tab_group.kwargs['resource_class']
-            racks = resource_class.racks
+            racks = resource_class.list_racks
         except:
             racks = []
             exceptions.handle(self.tab_group.request,
@@ -60,7 +60,7 @@ class FlavorsTab(tabs.TableTab):
     def get_flavors_data(self):
         try:
             resource_class = self.tab_group.kwargs['resource_class']
-            racks = resource_class.flavors
+            racks = resource_class.list_flavors
         except:
             racks = []
             exceptions.handle(self.tab_group.request,

@@ -169,8 +169,8 @@ class EditRack(CreateRack):
     def handle(self, request, data):
         try:
             rack_id = self.context['rack_id']
-            rack = api.tuskar.Rack.update(rack_id, data)
+            rack = api.tuskar.Rack.update(request, rack_id, data)
 
             return True
         except:
-            exceptions.handle(request, _("Unable to create rack."))
+            exceptions.handle(request, _("Unable to edit rack."))

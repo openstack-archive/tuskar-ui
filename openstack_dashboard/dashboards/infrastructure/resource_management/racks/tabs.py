@@ -40,7 +40,7 @@ class NodesTab(tabs.TableTab):
     def get_nodes_data(self):
         try:
             rack = self.tab_group.kwargs['rack']
-            nodes = rack.nodes
+            nodes = rack.list_nodes
         except:
             nodes = []
             exceptions.handle(self.tab_group.request,

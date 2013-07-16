@@ -37,6 +37,7 @@ from keystoneclient.v2_0 import client as keystone_client
 from neutronclient.v2_0 import client as neutron_client
 from novaclient.v1_1 import client as nova_client
 from swiftclient import client as swift_client
+from tuskarclient.v1 import client as tuskar_client
 
 import httplib2
 import mox
@@ -261,6 +262,7 @@ class APITestCase(TestCase):
         self._original_neutronclient = api.neutron.neutronclient
         self._original_cinderclient = api.cinder.cinderclient
         self._original_heatclient = api.heat.heatclient
+        self._original_tuskarclient = api.tuskar.tuskarclient
 
         # Replace the clients with our stubs.
         api.glance.glanceclient = lambda request: self.stub_glanceclient()
@@ -269,6 +271,7 @@ class APITestCase(TestCase):
         api.neutron.neutronclient = lambda request: self.stub_neutronclient()
         api.cinder.cinderclient = lambda request: self.stub_cinderclient()
         api.heat.heatclient = lambda request: self.stub_heatclient()
+        api.tuskar.tuskarclient = lambda request: self.stub_tuskarclient()
 
     def tearDown(self):
         super(APITestCase, self).tearDown()
@@ -278,6 +281,7 @@ class APITestCase(TestCase):
         api.neutron.neutronclient = self._original_neutronclient
         api.cinder.cinderclient = self._original_cinderclient
         api.heat.heatclient = self._original_heatclient
+        api.tuskar.tuskarclient = self._original_tuskarclient
 
     def stub_novaclient(self):
         if not hasattr(self, "novaclient"):
@@ -334,6 +338,12 @@ class APITestCase(TestCase):
             self.mox.StubOutWithMock(heat_client, 'Client')
             self.heatclient = self.mox.CreateMock(heat_client.Client)
         return self.heatclient
+
+    def stub_tuskarclient(self):
+        if not hasattr(self, "tuskarclient"):
+            self.mox.StubOutWithMock(tuskar_client, 'Client')
+            self.tuskarclient = self.mox.CreateMock(tuskar_client.Client)
+        return self.tuskarclient
 
 
 @unittest.skipUnless(os.environ.get('WITH_SELENIUM', False),

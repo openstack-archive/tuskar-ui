@@ -17,14 +17,25 @@ import logging
 from datetime import timedelta
 from random import randint
 
+from django.conf import settings
 from django.db.models import Sum, Max
 from django.utils.translation import ugettext_lazy as _
+
+from tuskarclient.v1 import client as tuskar_client
 
 from openstack_dashboard.api import base
 import openstack_dashboard.dashboards.infrastructure.models as dummymodels
 
 
 LOG = logging.getLogger(__name__)
+TUSKAR_ENDPOINT_URL = getattr(settings, 'TUSKAR_ENDPOINT_URL')
+
+
+# FIXME: request isn't used right in the tuskar client right now, but looking
+# at other clients, it seems like it will be in the future
+def tuskarclient(request):
+    c = tuskar_client.Client(TUSKAR_ENDPOINT_URL)
+    return c
 
 
 class StringIdAPIResourceWrapper(base.APIResourceWrapper):
@@ -207,27 +218,64 @@ class Rack(StringIdAPIResourceWrapper):
     """Wrapper for the Rack object  returned by the
     dummy model.
     """
-    _attrs = ['name', 'resource_class_id', 'location', 'subnet']
+    _attrs = ['id', 'name', 'location', 'subnet', 'nodes']
 
     @classmethod
     def create(cls, request, name, resource_class_id, location, subnet):
-        rack = dummymodels.Rack(name=name,
-                                resource_class_id=resource_class_id,
-                                location=location, subnet=subnet)
-        rack.save()
-        return rack
+        ## FIXME: Where is the location attribute??  Also, set nodes
+        ## here
+        rack = tuskarclient(request).racks.create(
+                name=name,
+                #location=location,
+                subnet=subnet,
+                nodes=[],
+                slots=0)
+
+        ## FIXME: it would be optimal if we didn't have to make a separate
+        ## call for this.  racks= also needs to be fixed
+        ## ALSO it doesn't seem to work, I can't get it to work using curl
+        ## from the command line
+        #rc = ResourceClass.get(request, resource_class_id)
+        #ResourceClass.update(request, resource_class_id,
+        #        name=rc.name,
+        #        service_type=rc.service_type,
+        #        racks={"id": rack.id})
+
+        return cls(rack)
+
+    @classmethod
+    def update(cls, request, rack_id, kwargs):
+        return cls(tuskarclient(request).racks.update(rack_id,
+                name=kwargs['name'],
+                #location=location,
+                subnet=kwargs['subnet'],
+                nodes=[],
+                slots=0))
 
     @classmethod
     def list(cls, request, only_free_racks=False):
+        ## FIXME: currently resource_class is not an attribute of a rack; can
+        ## that be changed?  If so, we can do free_racks much more easily
         if only_free_racks:
-            return [cls(r) for r in dummymodels.Rack.objects.all() if (
-                r.resource_class is None)]
+            return [Rack(r) for r in
+                    tuskarclient(request).racks.list()]
         else:
-            return [cls(r) for r in dummymodels.Rack.objects.all()]
+            return [Rack(r) for r in
+                    tuskarclient(request).racks.list()]
 
     @classmethod
     def get(cls, request, rack_id):
-        return cls(dummymodels.Rack.objects.get(id=rack_id))
+        return cls(tuskarclient(request).racks.get(rack_id))
+
+    ## FIXME: this is temporary
+    @property
+    def resource_class_id(self):
+        return 1
+
+    ## FIXME: as is this
+    @property
+    def location(self):
+        return "somewhere"
 
     @property
     def capacities(self):
@@ -330,16 +378,19 @@ class Rack(StringIdAPIResourceWrapper):
 
     @classmethod
     def delete(cls, request, rack_id):
-        dummymodels.Rack.objects.get(id=rack_id).delete()
+        tuskarclient(request).racks.delete(rack_id)
 
+    ## FIXME: this will have to be rewritten to ultimately
+    ## fetch nodes from nova baremetal
     @property
-    def nodes(self):
-        if not hasattr(self, '_nodes'):
-            self._nodes = [Node(h) for h in self._apiresource.node_set.all()]
-        return self._nodes
+    def list_nodes(self):
+        return []
+        #if not hasattr(self, '_nodes'):
+        #    self._nodes = [Node(h) for h in self._apiresource.node_set.all()]
+        #return self._nodes
 
     def nodes_count(self):
-        return len(self.nodes)
+        return len(self.list_nodes)
 
     # The idea here is to take a list of MAC addresses and assign them to
     # our rack. I'm attaching this here so that we can take one list, versus
@@ -369,16 +420,6 @@ class Rack(StringIdAPIResourceWrapper):
             self._resource_class = self._apiresource.resource_class
         return self._resource_class
 
-    @classmethod
-    def update(cls, rack_id, kwargs):
-        rack = dummymodels.Rack.objects.get(id=rack_id)
-        rack.name = kwargs['name']
-        rack.location = kwargs['location']
-        rack.subnet = kwargs['subnet']
-        rack.resource_class_id = kwargs['resource_class_id']
-        rack.save()
-        return cls(rack)
-
 
 ##########################################################################
 # ResourceClass
@@ -387,44 +428,37 @@ class ResourceClass(StringIdAPIResourceWrapper):
     """Wrapper for the ResourceClass object  returned by the
     dummy model.
     """
-    _attrs = ['name', 'service_type', 'status']
+    _attrs = ['name', 'service_type', 'racks']
 
     ##########################################################################
     # ResourceClass Class methods
     ##########################################################################
     @classmethod
     def get(cls, request, resource_class_id):
-        obj = cls(dummymodels.ResourceClass.objects.get(
-            id=resource_class_id))
-        obj.set_request(request)
-        return obj
+        rc = cls(tuskarclient(request).resource_classes.get(resource_class_id))
+        rc.set_request(request)
+        return rc
 
     @classmethod
     def create(self, request, name, service_type):
-        rc = dummymodels.ResourceClass(
-            name=name,
-            service_type=service_type)
-
-        rc.save()
-        return ResourceClass(rc)
+        return ResourceClass(
+            tuskarclient(request).resource_classes.create(
+                name=name,
+                service_type=service_type))
 
     @classmethod
     def list(self, request):
-        return [
-            ResourceClass(rc) for rc in (
-                dummymodels.ResourceClass.objects.all())]
+        return [ResourceClass(rc) for rc in
+                tuskarclient(request).resource_classes.list()]
 
     @classmethod
     def update(cls, request, resource_class_id, **kwargs):
-        rc = dummymodels.ResourceClass.objects.get(id=resource_class_id)
-        rc.name = kwargs['name']
-        rc.service_type = kwargs['service_type']
-        rc.save()
-        return cls(rc)
+        return cls(tuskarclient(request).resource_classes.update(
+                resource_class_id, **kwargs))
 
     @classmethod
     def delete(cls, request, resource_class_id):
-        dummymodels.ResourceClass.objects.get(id=resource_class_id).delete()
+        tuskarclient(request).resource_classes.delete(resource_class_id)
 
     ##########################################################################
     # ResourceClass Properties
@@ -437,12 +471,10 @@ class ResourceClass(StringIdAPIResourceWrapper):
                 self.racks)]
 
     @property
-    def racks(self):
+    def list_racks(self):
         """ List of racks added to ResourceClass """
         if not hasattr(self, '_racks'):
-            self._racks =\
-                [Rack(r) for r in (
-                    self._apiresource.rack_set.all())]
+            self._racks = [Rack(r) for r in self.racks]
         return self._racks
 
     @property
@@ -454,7 +486,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
                 [r for r in (
                     Rack.list(self.request)) if (
                         r.resource_class_id is None or
-                        r._apiresource.resource_class == self._apiresource)]
+                        r.resource_class_id == self.id)]
         return self._all_racks
 
     @property
@@ -465,47 +497,55 @@ class ResourceClass(StringIdAPIResourceWrapper):
                 self._apiresource.resourceclassflavor_set.all())]
         return self._resource_class_flavors
 
+    ## FIXME: this isn't currently supported by the client library, so would
+    ## have to be done through curl
     @property
     def flavors_ids(self):
         """ List of unicode ids of flavors added to resource class """
-        return [
-            unicode(flavor.flavor.id) for flavor in (
-                self.resource_class_flavors)]
+        #return [
+        #    unicode(flavor.flavor.id) for flavor in (
+        #        self.resource_class_flavors)]
+        return []
 
+    ## FIXME: this isn't currently supported by the client library, so would
+    ## have to be done through curl
     @property
-    def flavors(self):
+    def list_flavors(self):
         """ Joined relation table resourceclassflavor and flavor together """
-        if not hasattr(self, '_flavors'):
-            added_flavors = self.resource_class_flavors
-            self._flavors = []
-            for f in added_flavors:
-                flavor_obj = Flavor.get(self.request, f.flavor.id)
-                flavor_obj.set_max_vms(f.max_vms)
-                self._flavors.append(flavor_obj)
+        #if not hasattr(self, '_flavors'):
+        #    added_flavors = self.resource_class_flavors
+        #    self._flavors = []
+        #    for f in added_flavors:
+        #        flavor_obj = Flavor.get(self.request, f.flavor.id)
+        #        flavor_obj.set_max_vms(f.max_vms)
+        #        self._flavors.append(flavor_obj)
+        #return self._flavors
+        return []
 
-        return self._flavors
-
+    ## FIXME: this isn't currently supported by the client library, so would
+    ## have to be done through curl
     @property
     def all_flavors(self):
         """ Joined relation table resourceclassflavor with all global flavors
         """
-        if not hasattr(self, '_all_flavors'):
-            all_flavors = Flavor.list(self.request)
+        #if not hasattr(self, '_all_flavors'):
+        #    all_flavors = Flavor.list(self.request)
 
-            added_resourceclassflavors = \
-                self._apiresource.resourceclassflavor_set.all()
-            added_flavors = {}
-            for added_flavor in added_resourceclassflavors:
-                added_flavors[str(added_flavor.flavor_id)] = added_flavor
+        #    added_resourceclassflavors = \
+        #        self._apiresource.resourceclassflavor_set.all()
+        #    added_flavors = {}
+        #    for added_flavor in added_resourceclassflavors:
+        #        added_flavors[str(added_flavor.flavor_id)] = added_flavor
 
-            self._all_flavors = []
-            for f in all_flavors:
-                added_flavor = added_flavors.get(f.id)
-                if added_flavor:
-                    f.set_max_vms(added_flavor.max_vms)
-                self._all_flavors.append(f)
+        #    self._all_flavors = []
+        #    for f in all_flavors:
+        #        added_flavor = added_flavors.get(f.id)
+        #        if added_flavor:
+        #            f.set_max_vms(added_flavor.max_vms)
+        #        self._all_flavors.append(f)
 
-        return self._all_flavors
+        #return self._all_flavors
+        return []
 
     @property
     def nodes(self):
@@ -626,35 +666,40 @@ class ResourceClass(StringIdAPIResourceWrapper):
     ##########################################################################
     # ResourceClass Instance methods
     ##########################################################################
+
+    ## FIXME: this will have to be done some other way
     def set_flavors(self, request, flavors_ids, max_vms=None):
+        return
         # simply delete all and create new flavors, that'is
         # how the horizon flavors work
-        max_vms = max_vms or {}
+        #max_vms = max_vms or {}
 
-        for flavor_id in self.flavors_ids:
-            ResourceClassFlavor.delete(request,
-                                       self.id,
-                                       flavor_id)
+        #for flavor_id in self.flavors_ids:
+        #    ResourceClassFlavor.delete(request,
+        #                               self.id,
+        #                               flavor_id)
 
-        for flavor_id in flavors_ids:
-            flavor = Flavor.get(request, flavor_id)
-            ResourceClassFlavor.create(
-                request,
-                max_vms=max_vms.get(flavor.id),
-                flavor=flavor._apiresource,
-                resource_class=self._apiresource)
+        #for flavor_id in flavors_ids:
+        #    flavor = Flavor.get(request, flavor_id)
+        #    ResourceClassFlavor.create(
+        #        request,
+        #        max_vms=max_vms.get(flavor.id),
+        #        flavor=flavor._apiresource,
+        #        resource_class=self._apiresource)
 
+    ## FIXME: this will have to be done some other way
     def set_racks(self, request, racks_ids):
+        return
         # simply delete all and create new racks
-        for rack_id in self.racks_ids:
-            rack = Rack.get(request, rack_id)
-            rack._apiresource.resource_class = None
-            rack._apiresource.save()
+        #for rack_id in self.racks_ids:
+        #    rack = Rack.get(request, rack_id)
+        #    rack._apiresource.resource_class = None
+        #    rack._apiresource.save()
 
-        for rack_id in racks_ids:
-            rack = Rack.get(request, rack_id)
-            rack._apiresource.resource_class = self._apiresource
-            rack._apiresource.save()
+        #for rack_id in racks_ids:
+        #    rack = Rack.get(request, rack_id)
+        #    rack._apiresource.resource_class = self._apiresource
+        #    rack._apiresource.save()
 
 
 class Flavor(StringIdAPIResourceWrapper):

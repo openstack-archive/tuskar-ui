@@ -42,10 +42,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertEqual(res.status_code, 200)
 
     @test.create_stubs({
-        api.tuskar.ResourceClass: ('create', 'set_flavors',
-                                       'set_racks'),
-        api.tuskar.Flavor: ('list',),
-        api.tuskar.Rack: ('list',)
+        api.tuskar.ResourceClass: ('list', 'create',
+                                   'set_flavors', 'set_racks'),
     })
     def test_create_resource_class_post(self):
         new_resource_class = self.tuskar_resource_classes.first()
@@ -55,6 +53,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         add_max_vms = {}
         add_racks_ids = []
 
+        api.tuskar.ResourceClass.list(
+            IsA(http.request.HttpRequest)).AndReturn(
+                self.tuskar_resource_classes.list())
         api.tuskar.ResourceClass.\
             create(IsA(http.HttpRequest), name=new_unique_name,
                    service_type=new_resource_class.service_type).\
@@ -76,7 +77,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             ("%s?tab=resource_management_tabs__resource_classes_tab" %
              reverse("horizon:infrastructure:resource_management:index")))
 
-    @test.create_stubs({api.tuskar.ResourceClass: ('get',)})
+    @test.create_stubs({api.tuskar.ResourceClass: ('get', 'racks_ids')})
     def test_edit_resource_class_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
@@ -85,6 +86,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         api.tuskar.ResourceClass.\
             get(IsA(http.HttpRequest), resource_class.id).MultipleTimes().\
             AndReturn(resource_class)
+
         self.mox.ReplayAll()
 
         # FIXME I should probably track the racks and flavors methods
@@ -101,7 +103,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertEqual(res.status_code, 200)
 
     @test.create_stubs({
-        api.tuskar.ResourceClass: ('update', 'set_racks',
+        api.tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
                                        'set_flavors')
     })
     def test_edit_resource_class_post(self):
@@ -111,6 +113,13 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         add_max_vms = {}
         add_racks_ids = []
 
+        api.tuskar.ResourceClass.get(
+            IsA(http.HttpRequest),
+            resource_class.id).\
+            AndReturn(resource_class)
+        api.tuskar.ResourceClass.list(
+            IsA(http.request.HttpRequest)).AndReturn(
+                self.tuskar_resource_classes.list())
         api.tuskar.ResourceClass.\
             update(IsA(http.HttpRequest), resource_class.id,
                    name=resource_class.name,
@@ -156,7 +165,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             res, reverse('horizon:infrastructure:resource_management:index'))
 
     @test.create_stubs({
-        api.tuskar.ResourceClass: ('get', 'flavors', 'racks')
+        api.tuskar.ResourceClass: ('get', 'list_flavors', 'list_racks')
     })
     def test_detail_get(self):
         resource_class = self.tuskar_resource_classes.first()
@@ -169,8 +178,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             MultipleTimes().AndReturn(resource_class)
         self.mox.ReplayAll()
 
-        api.tuskar.ResourceClass.flavors = flavors
-        api.tuskar.ResourceClass.racks = racks
+        api.tuskar.ResourceClass.list_flavors = flavors
+        api.tuskar.ResourceClass.list_racks = racks
 
         url = reverse('horizon:infrastructure:resource_management:'
                       'resource_classes:detail', args=[resource_class.id])
@@ -183,7 +192,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(res,
             'infrastructure/resource_management/resource_classes/detail.html')
 
-    @test.create_stubs({api.tuskar.ResourceClass: ('get',)})
+    @test.create_stubs({api.tuskar.ResourceClass: ('get', 'racks_ids')})
     def test_detail_edit_racks_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
@@ -208,7 +217,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertEqual(res.status_code, 200)
 
     @test.create_stubs({
-        api.tuskar.ResourceClass: ('update', 'set_racks',
+        api.tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
                                        'set_flavors')
     })
     def test_detail_edit_racks_post(self):
@@ -218,6 +227,13 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         add_max_vms = {}
         add_racks_ids = []
 
+        api.tuskar.ResourceClass.get(
+            IsA(http.HttpRequest),
+            resource_class.id).\
+            AndReturn(resource_class)
+        api.tuskar.ResourceClass.list(
+            IsA(http.request.HttpRequest)).AndReturn(
+                self.tuskar_resource_classes.list())
         api.tuskar.ResourceClass.\
             update(IsA(http.HttpRequest), resource_class.id,
                    name=resource_class.name,
@@ -245,7 +261,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             reverse(detail_url, args=(resource_class.id,)))
         self.assertRedirectsNoFollow(res, redirect_url)
 
-    @test.create_stubs({api.tuskar.ResourceClass: ('get',)})
+    @test.create_stubs({api.tuskar.ResourceClass: ('get', 'racks_ids')})
     def test_detail_edit_flavors_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
@@ -270,7 +286,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertEqual(res.status_code, 200)
 
     @test.create_stubs({
-        api.tuskar.ResourceClass: ('update', 'set_racks',
+        api.tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
                                        'set_flavors')
     })
     def test_detail_edit_flavors_post(self):
@@ -280,6 +296,13 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         add_max_vms = {}
         add_racks_ids = []
 
+        api.tuskar.ResourceClass.get(
+            IsA(http.HttpRequest),
+            resource_class.id).\
+            AndReturn(resource_class)
+        api.tuskar.ResourceClass.list(
+            IsA(http.request.HttpRequest)).AndReturn(
+                self.tuskar_resource_classes.list())
         api.tuskar.ResourceClass.\
             update(IsA(http.HttpRequest), resource_class.id,
                    name=resource_class.name,

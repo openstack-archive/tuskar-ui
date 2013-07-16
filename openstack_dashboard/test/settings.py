@@ -122,3 +122,7 @@ NOSE_ARGS = ['--nocapture',
              '--cover-package=openstack_dashboard',
              '--cover-inclusive',
              '--all-modules']
+
+# FIXME: this will eventually be unneeded when the parameter is removed
+# from local settings and api/tuskar.py
+TUSKAR_ENDPOINT_URL = "http://127.0.0.1:6385"

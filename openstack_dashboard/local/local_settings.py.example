@@ -352,3 +352,7 @@ SECURITY_GROUP_RULES = {
         'to_port': '3389',
     },
 }
+
+# FIXME: this will eventually be unneeded, as it will be retrieved from Keystone
+#TUSKAR_ENDPOINT_URL = "http://127.0.0.1:6385"
+

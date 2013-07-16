@@ -20,3 +20,5 @@ pytz>=2010h
 # Horizon Utility Requirements
 # for SECURE_KEY generation
 lockfile>=0.8
+
+-e git://github.com/tuskar/python-tuskarclient.git#egg=python-tuskarclient

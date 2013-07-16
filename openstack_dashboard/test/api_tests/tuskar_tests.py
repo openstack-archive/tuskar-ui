@@ -30,20 +30,33 @@ import openstack_dashboard.dashboards.infrastructure.models as dummymodels
 class TuskarApiTests(test.APITestCase):
     def setUp(self):
         super(TuskarApiTests, self).setUp()
+        # FIXME: I'm not sure this is sustainable
         # dummy data are seeded from fixtures
         self.rclass1 = dummymodels.ResourceClass.objects.get(name='rclass1')
         self.flavor1 = dummymodels.Flavor.objects.get(name='flavor1')
 
     def test_resource_class_list(self):
-        rc_list = api.tuskar.ResourceClass.list(self.request)
-        self.assertEquals(3, len(rc_list))
-        for rc in rc_list:
+        rcs = self.tuskar_resource_classes.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.resource_classes = self.mox.CreateMockAnything()
+        tuskarclient.resource_classes.list().AndReturn(rcs)
+        self.mox.ReplayAll()
+
+        ret_val = api.tuskar.ResourceClass.list(self.request)
+        for rc in ret_val:
             self.assertIsInstance(rc, api.tuskar.ResourceClass)
 
     def test_resource_class_get(self):
-        rc = api.tuskar.ResourceClass.get(self.request, self.rclass1.id)
-        self.assertIsInstance(rc, api.tuskar.ResourceClass)
-        self.assertEquals(rc.name, self.rclass1.name)
+        rc = self.tuskar_resource_classes.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.resource_classes = self.mox.CreateMockAnything()
+        tuskarclient.resource_classes.get(rc.id).AndReturn(rc)
+        self.mox.ReplayAll()
+
+        ret_val = api.tuskar.ResourceClass.get(self.request, rc.id)
+        self.assertIsInstance(ret_val, api.tuskar.ResourceClass)
 
     def test_resource_class_flavor_counts(self):
         rc = api.tuskar.ResourceClass.get(self.request, self.rclass1.id)

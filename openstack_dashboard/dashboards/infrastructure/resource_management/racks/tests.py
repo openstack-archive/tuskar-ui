@@ -23,7 +23,14 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 class RackViewTests(test.BaseAdminViewTests):
     index_page = reverse('horizon:infrastructure:resource_management:index')
 
+    @test.create_stubs({api.tuskar.ResourceClass: ('list',)})
     def test_create_rack_get(self):
+        api.tuskar.ResourceClass.list(
+            IsA(http.request.HttpRequest)).AndReturn(
+                self.tuskar_resource_classes.list())
+
+        self.mox.ReplayAll()
+
         url = reverse('horizon:infrastructure:resource_management:'
                       'racks:create')
         rack = self.client.get(url)
@@ -35,10 +42,18 @@ class RackViewTests(test.BaseAdminViewTests):
     # FIXME (mawagner) - After moving EditRack to use workflows, we need
     # to circle back and fix these tests.
     #
-    @test.create_stubs({api.tuskar.Rack: ('create',)})
+    @test.create_stubs({api.tuskar.Rack: ('list', 'create',),
+                        api.tuskar.ResourceClass: ('list',)})
     def test_create_rack_post(self):
+        api.tuskar.Rack.list(
+            IsA(http.request.HttpRequest)).AndReturn(
+                self.tuskar_racks.list())
         api.tuskar.Rack.create(IsA(http.request.HttpRequest), 'New Rack',
                                    u'2', 'Tokyo', '1.2.3.4').AndReturn(None)
+        api.tuskar.ResourceClass.list(
+            IsA(http.request.HttpRequest)).AndReturn(
+                self.tuskar_resource_classes.list())
+
         self.mox.ReplayAll()
 
         data = {'name': 'New Rack', 'resource_class_id': u'2',
@@ -48,35 +63,66 @@ class RackViewTests(test.BaseAdminViewTests):
         resp = self.client.post(url, data)
         self.assertRedirectsNoFollow(resp, self.index_page)
 
+    @test.create_stubs({api.tuskar.Rack: ('get',),
+                        api.tuskar.ResourceClass: ('list',)})
     def test_edit_rack_get(self):
-        url = reverse('horizon:infrastructure:resource_management:' +
-                      'racks:edit', args=[1])
-        rack = self.client.get(url)
-        self.assertEqual(rack.status_code, 200)
-        self.assertTemplateUsed(rack,
-                                'horizon/common/_workflow_base.html')
+        rack = self.tuskar_racks.first()
 
-    @test.create_stubs({api.tuskar.Rack: ('update',)})
-    def test_edit_rack_post(self):
-        data = {'name': 'Updated Rack', 'resource_class_id': u'1',
-                'rack_id': u'1', 'location': 'New Location',
-                'subnet': '127.10.10.0/24', 'node_macs': 'foo'}
+        api.tuskar.Rack.\
+            get(IsA(http.HttpRequest), rack.id).\
+            AndReturn(rack)
+        api.tuskar.ResourceClass.list(
+            IsA(http.request.HttpRequest)).AndReturn(
+                self.tuskar_resource_classes.list())
 
-        api.tuskar.Rack.update(u'1', data)
         self.mox.ReplayAll()
 
         url = reverse('horizon:infrastructure:resource_management:' +
                       'racks:edit', args=[1])
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res,
+                                'horizon/common/_workflow_base.html')
+
+    @test.create_stubs({api.tuskar.Rack: ('get', 'list', 'update',),
+                        api.tuskar.ResourceClass: ('list',)})
+    def test_edit_rack_post(self):
+        rack = self.tuskar_racks.first()
+
+        data = {'name': 'Updated Rack', 'resource_class_id': u'1',
+                'rack_id': u'1', 'location': 'New Location',
+                'subnet': '127.10.10.0/24', 'node_macs': 'foo'}
+
+        api.tuskar.Rack.get(
+            IsA(http.HttpRequest),
+            rack.id).\
+            AndReturn(rack)
+        api.tuskar.Rack.list(
+            IsA(http.request.HttpRequest)).AndReturn(
+                self.tuskar_racks.list())
+        api.tuskar.Rack.update(IsA(http.HttpRequest), rack.id, data)
+        api.tuskar.ResourceClass.list(
+            IsA(http.request.HttpRequest)).AndReturn(
+                self.tuskar_resource_classes.list())
+
+        self.mox.ReplayAll()
+
+        url = reverse('horizon:infrastructure:resource_management:' +
+                      'racks:edit', args=[rack.id])
         response = self.client.post(url, data)
         self.assertNoFormErrors(response)
         self.assertMessageCount(success=1)
         self.assertRedirectsNoFollow(response, self.index_page)
 
-    @test.create_stubs({api.tuskar.Rack: ('delete',)})
+    @test.create_stubs({api.tuskar.Rack: ('delete', 'list')})
     def test_delete_rack(self):
         rack_id = u'1'
         api.tuskar.Rack.delete(IsA(http.request.HttpRequest), rack_id) \
                                    .AndReturn(None)
+        api.tuskar.Rack.list(
+            IsA(http.request.HttpRequest)).AndReturn(
+                self.tuskar_racks.list())
+
         self.mox.ReplayAll()
         data = {'action': 'racks__delete__%s' % rack_id}
         url = reverse('horizon:infrastructure:resource_management:index')

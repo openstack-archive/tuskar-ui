@@ -30,7 +30,7 @@ class ResourceManagementTests(test.BaseAdminViewTests):
     @test.create_stubs({
         api.tuskar.ResourceClass: (
             'list',
-            'racks',
+            'list_racks',
             'nodes'),
         api.tuskar.Flavor: (
             'list',),
@@ -49,7 +49,7 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         racks = []
 
         api.tuskar.ResourceClass.nodes = nodes
-        api.tuskar.ResourceClass.racks = racks
+        api.tuskar.ResourceClass.list_racks = racks
 
         api.tuskar.ResourceClass.list(
             IsA(http.HttpRequest)).\
