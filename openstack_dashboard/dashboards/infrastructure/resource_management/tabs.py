@@ -89,5 +89,5 @@ class ResourceClassesTab(tabs.TableTab):
 
 class ResourceManagementTabs(tabs.TabGroup):
     slug = "resource_management_tabs"
-    tabs = (RacksTab, ResourceClassesTab, FlavorsTab,)
+    tabs = (ResourceClassesTab, RacksTab, FlavorsTab)
     sticky = True
