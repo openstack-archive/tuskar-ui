@@ -6,7 +6,16 @@
   {% include "horizon/common/_page_header.html" with title=_("Resource Management") %}
 {% endblock page_header %}
 
+
 {% block main %}
+
+<div class="breadcrumbs">
+  <a href="{% url 'horizon:infrastructure:resource_management:index' %}?tab=resource_management_tabs__resource_classes_tab" >Home</a>
+  <span class="separator"></span>
+  <a href="{% url 'horizon:infrastructure:resource_management:index' %}?tab=resource_management_tabs__racks_tab" >Racks</a>
+  <span class="separator"></span>
+</div>
+
 <h3>{% trans "Unracked Nodes" %}</h3>
 
 <div class="row-fluid">

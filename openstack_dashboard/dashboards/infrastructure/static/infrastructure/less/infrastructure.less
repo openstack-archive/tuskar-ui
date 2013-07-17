@@ -62,7 +62,7 @@ body {
   // topbar
   .topbar {
     padding: 5px 30px;
-    margin: 0 0 30px 0;
+    margin: 0 0 10px 0;
     background: rgb(244,244,244);
 
     h2 {
@@ -172,6 +172,26 @@ table.table {
 
   tr td {
     padding: 5px;
+  }
+
+  .table_search input {
+    padding-left: 10px;
+  }
+
+  .table-bordered tr.table_caption + tr th:first-child {
+    border-top-left-radius: 2px;
+  }
+
+  .table-bordered tr.table_caption + tr th:last-child {
+    border-top-right-radius: 2px;
+  }
+
+  .table-bordered tfoot tr td:first-child {
+    border-bottom-left-radius: 2px;
+  }
+
+  .table-bordered tfoot tr td:last-child {
+    border-bottom-right-radius: 2px;
   }
 }
 
@@ -291,27 +311,40 @@ svg {
   padding-top: 40px;
 }
 
+// breadcrumbs
+
+.breadcrumbs {
+  font-size: 85%;
+  margin: 0 30px 20px 30px;
+
+  a {
+    color: rgb(180, 180, 180);
+    text-decoration: underline;
+
+    &:hover {
+      text-decoration: none;
+      color: rgb(100, 100, 100);
+    }
+  }
+
+  .separator {
+    color: rgb(200, 200, 200);
+
+    &:before {
+      display: inline;
+      content: ">>";
+      margin: 0 7px;
+    }
+
+    &:last-child:after {
+      display: inline;
+      content: "...";
+    }
+  }
+}
+
+// others
 .btn,
 input {
   border-radius: 2px;
-}
-
-.table_search input {
-  padding-left: 10px;
-}
-
-.table-bordered tr.table_caption + tr th:first-child {
-  border-top-left-radius: 2px;
-}
-
-.table-bordered tr.table_caption + tr th:last-child {
-  border-top-right-radius: 2px;
-}
-
-.table-bordered tfoot tr td:first-child {
-  border-bottom-left-radius: 2px;
-}
-
-.table-bordered tfoot tr td:last-child {
-  border-bottom-right-radius: 2px;
 }

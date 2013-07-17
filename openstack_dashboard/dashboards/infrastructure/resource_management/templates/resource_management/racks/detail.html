@@ -6,6 +6,15 @@
   {% include "horizon/common/_page_header.html" with title=_("Rack Detail") %}
 {% endblock page_header %}
 
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'horizon:infrastructure:resource_management:index' %}?tab=resource_management_tabs__resource_classes_tab" >Home</a>
+    <span class="separator"></span>
+    <a href="{% url 'horizon:infrastructure:resource_management:index' %}?tab=resource_management_tabs__racks_tab" >Racks</a>
+    <span class="separator"></span>
+  </div>
+{% endblock breadcrumbs %}
+
 {% block name %}{{ rack.name }}{% endblock %}
 
 {% block overall_usage %}
