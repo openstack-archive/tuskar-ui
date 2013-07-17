@@ -32,8 +32,8 @@ class TuskarApiTests(test.APITestCase):
         super(TuskarApiTests, self).setUp()
         # FIXME: I'm not sure this is sustainable
         # dummy data are seeded from fixtures
-        self.rclass1 = dummymodels.ResourceClass.objects.get(name='rclass1')
-        self.flavor1 = dummymodels.Flavor.objects.get(name='flavor1')
+        self.rclass1 = dummymodels.ResourceClass.objects.get(name='m1')
+        self.flavor1 = dummymodels.Flavor.objects.get(name='nano')
 
     def test_resource_class_list(self):
         rcs = self.tuskar_resource_classes.list()
@@ -62,7 +62,7 @@ class TuskarApiTests(test.APITestCase):
         rc = api.tuskar.ResourceClass.get(self.request, self.rclass1.id)
         for f in rc.resource_class_flavors:
             self.assertIsInstance(f, api.tuskar.ResourceClassFlavor)
-        self.assertEquals(3, len(rc.resource_class_flavors))
+        self.assertEquals(7, len(rc.resource_class_flavors))
 
     def test_resource_class_racks(self):
         rc = api.tuskar.ResourceClass.get(self.request, self.rclass1.id)
@@ -80,7 +80,7 @@ class TuskarApiTests(test.APITestCase):
 
     def test_flavor_list(self):
         flist = api.tuskar.Flavor.list(self.request)
-        self.assertEquals(6, len(flist))
+        self.assertEquals(7, len(flist))
         for f in flist:
             self.assertIsInstance(f, api.tuskar.Flavor)
 

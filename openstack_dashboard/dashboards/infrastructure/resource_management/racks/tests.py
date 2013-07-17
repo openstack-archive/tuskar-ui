@@ -49,14 +49,14 @@ class RackViewTests(test.BaseAdminViewTests):
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_racks.list())
         api.tuskar.Rack.create(IsA(http.request.HttpRequest), 'New Rack',
-                                   u'2', 'Tokyo', '1.2.3.4').AndReturn(None)
+                                   u'1', 'Tokyo', '1.2.3.4').AndReturn(None)
         api.tuskar.ResourceClass.list(
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
 
         self.mox.ReplayAll()
 
-        data = {'name': 'New Rack', 'resource_class_id': u'2',
+        data = {'name': 'New Rack', 'resource_class_id': u'1',
                 'location': 'Tokyo', 'subnet': '1.2.3.4'}
         url = reverse('horizon:infrastructure:resource_management:'
                       'racks:create')
