@@ -340,7 +340,7 @@ class Rack(StringIdAPIResourceWrapper):
             rclass = getattr(self._apiresource, 'resource_class', None)
             if rclass:
                 self._resource_class = ResourceClass.get(self.request,
-                        rclass['id'])
+                                                         rclass['id'])
             else:
                 self._resource_class = None
         return self._resource_class

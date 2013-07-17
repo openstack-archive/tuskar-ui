@@ -17,8 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import tabs
 
-from tables import (ResourceClassDetailRacksTable,
-                    ResourceClassDetailFlavorsTable)
+from tables import ResourceClassDetailFlavorsTable, RacksTable
 
 
 class OverviewTab(tabs.Tab):
@@ -33,7 +32,7 @@ class OverviewTab(tabs.Tab):
 
 
 class RacksTab(tabs.TableTab):
-    table_classes = (ResourceClassDetailRacksTable,)
+    table_classes = (RacksTable,)
     name = _("Racks")
     slug = "racks"
     template_name = ("infrastructure/resource_management/resource_classes/"

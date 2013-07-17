@@ -161,29 +161,6 @@ class UpdateFlavorsClass(tables.LinkAction):
             workflows.ResourceClassInfoAndFlavorsAction.slug)
 
 
-class ResourceClassDetailRacksTable(racks_tables.RacksTable):
-    cpu = tables.Column("cpu",
-                        verbose_name=_("Total CPU"),
-                        filters=(lambda x: getattr(x, 'value', ''),))
-    ram = tables.Column("ram",
-                        verbose_name=_("Total RAM"),
-                        filters=(lambda x: getattr(x, 'value', ''),))
-    storage = tables.Column("storage",
-                            verbose_name=_("Total Disk"),
-                            filters=(lambda x: getattr(x, 'value', ''),))
-    vm_capacity = tables.Column("vm_capacity",
-                                verbose_name=_("VM Capacity"),
-                                filters=(lambda x: getattr(x, 'value', ''),))
-
-    class Meta:
-        name = "racks"
-        verbose_name = _("Racks")
-        table_actions = (RacksFilterAction, UpdateRacksClass)
-        columns = (
-            'name', 'subnet', 'location', 'node_count',
-            'cpu', 'ram', 'storage', 'vm_capacity')
-
-
 class ResourceClassDetailFlavorsTable(flavors_tables.FlavorsTable):
     max_vms = tables.Column("max_vms",
                             verbose_name=_("Max. VMs"))
