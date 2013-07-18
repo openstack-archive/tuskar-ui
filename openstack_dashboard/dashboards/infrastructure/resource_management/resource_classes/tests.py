@@ -69,7 +69,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         url = reverse('horizon:infrastructure:resource_management:'
                       'resource_classes:create')
         form_data = {'name': new_unique_name,
-                     'service_type': new_resource_class.service_type}
+                     'service_type': new_resource_class.service_type,
+                     'image': 'compute-img'}
         res = self.client.post(url, form_data)
         self.assertNoFormErrors(res)
         self.assertMessageCount(success=1)
@@ -133,7 +134,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         form_data = {'resource_class_id': resource_class.id,
                      'name': resource_class.name,
-                     'service_type': resource_class.service_type}
+                     'service_type': resource_class.service_type,
+                     'image': 'compute-img'}
         url = reverse('horizon:infrastructure:resource_management:'
                      'resource_classes:update', args=[resource_class.id])
         res = self.client.post(url, form_data)
@@ -247,7 +249,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         form_data = {'resource_class_id': resource_class.id,
                      'name': resource_class.name,
-                     'service_type': resource_class.service_type}
+                     'service_type': resource_class.service_type,
+                     'image': 'compute-img'}
         url = reverse('horizon:infrastructure:resource_management:'
                       'resource_classes:update_racks',
                       args=[resource_class.id])
@@ -316,7 +319,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         form_data = {'resource_class_id': resource_class.id,
                      'name': resource_class.name,
-                     'service_type': resource_class.service_type}
+                     'service_type': resource_class.service_type,
+                     'image': 'compute-img'}
         url = reverse('horizon:infrastructure:resource_management:'
                       'resource_classes:update_flavors',
                       args=[resource_class.id])

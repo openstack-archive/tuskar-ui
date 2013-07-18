@@ -43,6 +43,13 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                                      widget=forms.Select(
                                          attrs={'class': 'switchable'})
                                      )
+    image = forms.ChoiceField(label=_('Provisioning Image'),
+                              required=True,
+                              choices=[('compute-img', ('Compute-Fedora19'))
+                                      ],
+                              widget=forms.Select(
+                                attrs={'class': 'switchable'})
+                              )
 
     def clean(self):
         cleaned_data = super(ResourceClassInfoAndFlavorsAction,
