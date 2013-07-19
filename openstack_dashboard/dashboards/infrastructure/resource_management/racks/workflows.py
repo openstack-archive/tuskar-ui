@@ -26,27 +26,51 @@ import re
 
 
 class NodeCreateAction(workflows.Action):
-    node_macs = forms.CharField(label=_("MAC Addresses"),
-        widget=forms.Textarea(attrs={'rows': 12, 'cols': 20}),
-        required=False)
+    # node_macs = forms.CharField(label=_("MAC Addresses"),
+    #     widget=forms.Textarea(attrs={'rows': 12, 'cols': 20}),
+    #     required=False)
+
+    node_name = forms.CharField(label="Name", required=True)
+    prov_mac_address = forms.CharField(label=("MAC Address"),
+                                  required=True)
+
+    # Hardware Specifications
+    cpus = forms.CharField(label="CPUs", required=True)
+    memory_mb = forms.CharField(label="Memory", required=True)
+    local_gb = forms.CharField(label="Local Disk (GB)", required=True)
+
+    # Power Management
+    pm_address = forms.CharField(label="IP Address", required=True)
+    pm_user = forms.CharField(label="User", required=True)
+    pm_password = forms.CharField(label="Password",
+                                      required=True,
+                                      widget=forms.PasswordInput(
+                                          render_value=False))
+
+    # Access
+    terminal_port = forms.CharField(label="Terminal Port", required=False)
 
     class Meta:
         name = _("Nodes")
 
 
-# mawagner FIXME - We presently disable this box, but leave the form.
-# We need to decide if this should be supported, or whether users should
-# be required to use the table view (to be implemented).
-# NOTE: The form input is disabled, but the input is also ignored
-# even if it were present.
-class NodeEditAction(workflows.Action):
-    node_macs = forms.CharField(label=_("MAC Addresses"),
-        widget=forms.Textarea(attrs={'rows': 12, 'cols': 20,
-                                     'readonly': 'readonly'}),
-                              required=False)
+# mawagner FIXME - For the demo, all we can really do is edit the one
+# associated node. That's very much _not_ what this form is actually
+# about, though.
+class NodeEditAction(NodeCreateAction):
 
     class Meta:
         name = _("Nodes")
+
+    # FIXME: mawagner - This is all for debugging. The idea is to fetch
+    # the first node and display it in the form; the latter part needs
+    # implementation. This also needs error handling; right now for testing
+    # I want to let it fail, but don't commit like that! :)
+    def __init__(self, request, *args, **kwargs):
+        super(NodeEditAction, self).__init__(request, *args, **kwargs)
+        rack_id = self.initial['rack_id']
+        rack = api.tuskar.Rack.get(request, rack_id)
+        nodes = rack.list_nodes
 
 
 class RackCreateInfoAction(workflows.Action):
@@ -121,17 +145,19 @@ class EditRackInfo(CreateRackInfo):
 
 class CreateNodes(workflows.Step):
     action_class = NodeCreateAction
-    contributes = ('node_macs',)
+    contributes = ('node_name', 'prov_mac_address', 'cpus', 'memory_mb',
+                   'local_gb', 'pm_address', 'pm_user', 'pm_password',
+                   'terminal_port')
 
     def get_nodes_data():
         pass
 
 
-class EditNodes(workflows.Step):
+class EditNodes(CreateNodes):
     action_class = NodeEditAction
     depends_on = ('rack_id',)
     contributes = ('node_macs',)
-    help_text = _("Editing nodes via textbox is not presently supported.")
+    # help_text = _("Editing nodes via textbox is not presently supported.")
 
 
 class CreateRack(workflows.Workflow):
@@ -144,17 +170,28 @@ class CreateRack(workflows.Workflow):
 
     def handle(self, request, data):
         try:
+            if data['node_name'] is not None:
+                node = api
+                node = api.tuskar.Node.manager().create(data['node_name'],
+                                   data['cpus'], data['memory_mb'],
+                                   data['local_gb'], data['prov_mac_address'],
+                                   data['pm_address'], data['pm_user'],
+                                   data['pm_password'], data['terminal_port'])
+
+            if node:
+                node_id = node.id
+            else:
+                node_id = None
+
+            # Then, register the Rack, including the node if it exists
             rack = api.tuskar.Rack.create(request, data['name'],
                                               data['resource_class_id'],
                                               data['location'],
-                                              data['subnet'])
-
-            if data['node_macs'] is not None:
-                nodes = data['node_macs'].splitlines(False)
-                api.tuskar.Rack.register_nodes(rack, nodes)
+                                              data['subnet'],
+                                              [{'id': node_id}])
 
             return True
-        except:
+        except Exception as ex:
             exceptions.handle(request, _("Unable to create rack."))
 
 

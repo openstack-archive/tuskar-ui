@@ -34,7 +34,7 @@ class Alert(models.Model):
     class Meta:
         db_table = 'infrastructure_alerts'
 
-    object_id = models.PositiveIntegerField()
+    object_id = models.CharField(max_length=50)
     object_type = models.CharField(max_length=20)
     message = models.CharField(max_length=250)
     time = models.DateTimeField()

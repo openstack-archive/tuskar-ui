@@ -27,12 +27,13 @@ from horizon import exceptions
 
 from tuskarclient.v1 import client as tuskar_client
 
-from openstack_dashboard.api import base
+from openstack_dashboard.api import base, nova
 import openstack_dashboard.dashboards.infrastructure.models as dummymodels
 
 
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(settings, 'TUSKAR_ENDPOINT_URL')
+NOVA_BAREMETAL_CREDS = getattr(settings, 'NOVA_BAREMETAL_CREDS')
 
 
 # FIXME: request isn't used right in the tuskar client right now, but looking
@@ -137,11 +138,26 @@ class Node(StringIdAPIResourceWrapper):
     """Wrapper for the Node object  returned by the
     dummy model.
     """
-    _attrs = ['name', 'mac_address', 'ip_address', 'status', 'usage', 'rack']
+    _attrs = ['id', 'pm_address', 'cpus', 'memory_mb', 'service_host',
+        'local_gb']
+
+    @classmethod
+    def manager(cls):
+        nc = nova.nova_client.Client(
+                NOVA_BAREMETAL_CREDS['user'],
+                NOVA_BAREMETAL_CREDS['password'],
+                NOVA_BAREMETAL_CREDS['tenant'],
+                auth_url=NOVA_BAREMETAL_CREDS['auth_url'],
+                bypass_url=NOVA_BAREMETAL_CREDS['bypass_url'])
+        return nova.baremetal.BareMetalNodeManager(nc)
 
     @classmethod
     def get(cls, request, node_id):
-        return cls(dummymodels.Node.objects.get(id=node_id))
+        return cls(cls.manager().get(node_id))
+
+    @classmethod
+    def list(cls, request):
+        return cls.manager().list()
 
     @classmethod
     def list_unracked(cls, request):
@@ -292,8 +308,15 @@ class Node(StringIdAPIResourceWrapper):
             self._alerts = [Alert(a) for a in
                 dummymodels.Alert.objects
                     .filter(object_type='node')
-                    .filter(object_id=int(self.id))]
+                    .filter(object_id=str(self.id))]
         return self._alerts
+
+    @property
+    def mac_address(self):
+        try:
+            return self._apiresource.interfaces[0]['address']
+        except:
+            return None
 
 
 class Rack(StringIdAPIResourceWrapper):
@@ -364,10 +387,10 @@ class Rack(StringIdAPIResourceWrapper):
     ## fetch nodes from nova baremetal
     @property
     def list_nodes(self):
-        return []
-        #if not hasattr(self, '_nodes'):
-        #    self._nodes = [Node(h) for h in self._apiresource.node_set.all()]
-        #return self._nodes
+        if not hasattr(self, '_nodes'):
+            self._nodes = [Node.get(None, node['id']) for node in (
+                self._apiresource.nodes)]
+        return self._nodes
 
     def nodes_count(self):
         return len(self._apiresource.nodes)
