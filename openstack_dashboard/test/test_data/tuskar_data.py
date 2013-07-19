@@ -13,6 +13,7 @@
 from openstack_dashboard.api.tuskar import (
     Flavor, ResourceClass, Node,
     Rack, ResourceClassFlavor)
+from collections import namedtuple
 
 import openstack_dashboard.dashboards.infrastructure.models as dummymodels
 
@@ -33,14 +34,18 @@ def data(TEST):
     # Resource Classes
     TEST.tuskar_resource_classes = TestDataContainer()
 
-    resource_class_1 = ResourceClass(dummymodels.ResourceClass(
+    ResourceClassStruct = namedtuple('ResourceClassStruct', 'id service_type\
+        name racks')
+    resource_class_1 = ResourceClass(ResourceClassStruct(
         id="1",
         service_type="compute",
+        racks=[{'id': 1}],
         name="rclass1"))
 
-    resource_class_2 = ResourceClass(dummymodels.ResourceClass(
+    resource_class_2 = ResourceClass(ResourceClassStruct(
         id="2",
         service_type="compute",
+        racks=[],
         name="rclass2"))
 
     """
@@ -71,10 +76,17 @@ def data(TEST):
 
     #Racks
     TEST.tuskar_racks = TestDataContainer()
-    rack_1 = Rack(dummymodels.Rack(
+    # FIXME: Struct is used to provide similar object-like behaviour
+    # as is provided by tuskarclient
+    RackStruct = namedtuple('RackStruct', 'id name nodes resource_class\
+        location subnet')
+    rack_1 = Rack(RackStruct(
         id="1",
         name='rack1',
-        resource_class_id='1'))
+        location='location',
+        subnet='192.168.1.0/24',
+        nodes=[{'id': 1}, {'id': 2}, {'id': 3}, {'id': 4}],
+        resource_class={'id': '1'}))
 
     TEST.tuskar_racks.add(rack_1)
 

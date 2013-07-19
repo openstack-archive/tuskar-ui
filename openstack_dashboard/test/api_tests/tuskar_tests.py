@@ -59,19 +59,19 @@ class TuskarApiTests(test.APITestCase):
         self.assertIsInstance(ret_val, api.tuskar.ResourceClass)
 
     def test_resource_class_flavor_counts(self):
-        rc = api.tuskar.ResourceClass.get(self.request, self.rclass1.id)
+        rc = self.tuskar_resource_classes.first()
         for f in rc.resource_class_flavors:
             self.assertIsInstance(f, api.tuskar.ResourceClassFlavor)
         self.assertEquals(7, len(rc.resource_class_flavors))
 
     def test_resource_class_racks(self):
-        rc = api.tuskar.ResourceClass.get(self.request, self.rclass1.id)
-        for rack in rc.racks:
+        rc = self.tuskar_resource_classes.first()
+        for rack in rc.list_racks:
             self.assertIsInstance(rack, api.tuskar.Rack)
-        self.assertEquals(2, len(rc.racks))
+        self.assertEquals(2, len(rc.list_racks))
 
     def test_resource_class_nodes(self):
-        rc = api.tuskar.ResourceClass.get(self.request, self.rclass1.id)
+        rc = self.tuskar_resource_classes.first()
         for node in rc.nodes:
             self.assertIsInstance(node, api.tuskar.Node)
         self.assertEquals(4, len(rc.nodes))

@@ -221,61 +221,51 @@ class Rack(StringIdAPIResourceWrapper):
     _attrs = ['id', 'name', 'location', 'subnet', 'nodes']
 
     @classmethod
-    def create(cls, request, name, resource_class_id, location, subnet):
-        ## FIXME: Where is the location attribute??  Also, set nodes
-        ## here
+    def create(cls, request, name, resource_class_id, location, subnet,
+               nodes=[]):
+        ## FIXME: set nodes here
         rack = tuskarclient(request).racks.create(
                 name=name,
-                #location=location,
+                location=location,
                 subnet=subnet,
-                nodes=[],
+                nodes=nodes,
+                resource_class={'id': resource_class_id},
                 slots=0)
-
-        ## FIXME: it would be optimal if we didn't have to make a separate
-        ## call for this.  racks= also needs to be fixed
-        ## ALSO it doesn't seem to work, I can't get it to work using curl
-        ## from the command line
-        #rc = ResourceClass.get(request, resource_class_id)
-        #ResourceClass.update(request, resource_class_id,
-        #        name=rc.name,
-        #        service_type=rc.service_type,
-        #        racks={"id": rack.id})
-
         return cls(rack)
 
     @classmethod
     def update(cls, request, rack_id, kwargs):
-        return cls(tuskarclient(request).racks.update(rack_id,
+        ## FIXME: set nodes here
+        rack = tuskarclient(request).racks.update(rack_id,
                 name=kwargs['name'],
-                #location=location,
+                location=kwargs['location'],
                 subnet=kwargs['subnet'],
-                nodes=[],
-                slots=0))
+                # FIXME: set nodes
+                #nodes=kwargs['nodes'],
+                resource_class={'id': kwargs['resource_class_id']},
+                slots=0)
+        return cls(rack)
 
     @classmethod
     def list(cls, request, only_free_racks=False):
-        ## FIXME: currently resource_class is not an attribute of a rack; can
-        ## that be changed?  If so, we can do free_racks much more easily
         if only_free_racks:
             return [Rack(r) for r in
-                    tuskarclient(request).racks.list()]
+                    tuskarclient(request).racks.list() if (
+                        r.resource_class is None)]
         else:
             return [Rack(r) for r in
                     tuskarclient(request).racks.list()]
 
     @classmethod
     def get(cls, request, rack_id):
-        return cls(tuskarclient(request).racks.get(rack_id))
+        rack = cls(tuskarclient(request).racks.get(rack_id))
+        rack.set_request(request)
+        return rack
 
-    ## FIXME: this is temporary
     @property
     def resource_class_id(self):
-        return 1
-
-    ## FIXME: as is this
-    @property
-    def location(self):
-        return "somewhere"
+        rclass = getattr(self._apiresource, 'resource_class', None)
+        return rclass['id'] if rclass else None
 
     @property
     def capacities(self):
@@ -390,7 +380,7 @@ class Rack(StringIdAPIResourceWrapper):
         #return self._nodes
 
     def nodes_count(self):
-        return len(self.list_nodes)
+        return len(self._apiresource.nodes)
 
     # The idea here is to take a list of MAC addresses and assign them to
     # our rack. I'm attaching this here so that we can take one list, versus
@@ -417,22 +407,21 @@ class Rack(StringIdAPIResourceWrapper):
     @property
     def resource_class(self):
         if not hasattr(self, '_resource_class'):
-            self._resource_class = self._apiresource.resource_class
+            rclass = getattr(self._apiresource, 'resource_class', None)
+            if rclass:
+                self._resource_class = ResourceClass.get(self.request,
+                        rclass['id'])
+            else:
+                self._resource_class = None
         return self._resource_class
 
 
-##########################################################################
-# ResourceClass
-##########################################################################
 class ResourceClass(StringIdAPIResourceWrapper):
     """Wrapper for the ResourceClass object  returned by the
     dummy model.
     """
-    _attrs = ['name', 'service_type', 'racks']
+    _attrs = ['id', 'name', 'service_type', 'racks']
 
-    ##########################################################################
-    # ResourceClass Class methods
-    ##########################################################################
     @classmethod
     def get(cls, request, resource_class_id):
         rc = cls(tuskarclient(request).resource_classes.get(resource_class_id))
@@ -460,21 +449,19 @@ class ResourceClass(StringIdAPIResourceWrapper):
     def delete(cls, request, resource_class_id):
         tuskarclient(request).resource_classes.delete(resource_class_id)
 
-    ##########################################################################
-    # ResourceClass Properties
-    ##########################################################################
     @property
     def racks_ids(self):
         """ List of unicode ids of racks added to resource class """
         return [
-            unicode(rack.id) for rack in (
-                self.racks)]
+            unicode(rack['id']) for rack in (
+                self._apiresource.racks)]
 
     @property
     def list_racks(self):
         """ List of racks added to ResourceClass """
         if not hasattr(self, '_racks'):
-            self._racks = [Rack(r) for r in self.racks]
+            self._racks = [Rack.get(self.request, rid) for rid in (
+                self.racks_ids)]
         return self._racks
 
     @property
@@ -486,7 +473,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
                 [r for r in (
                     Rack.list(self.request)) if (
                         r.resource_class_id is None or
-                        r.resource_class_id == self.id)]
+                        str(r.resource_class_id) == self.id)]
         return self._all_racks
 
     @property
@@ -663,10 +650,6 @@ class ResourceClass(StringIdAPIResourceWrapper):
             self._vm_capacity = Capacity(vm_capacity)
         return self._vm_capacity
 
-    ##########################################################################
-    # ResourceClass Instance methods
-    ##########################################################################
-
     ## FIXME: this will have to be done some other way
     def set_flavors(self, request, flavors_ids, max_vms=None):
         return
@@ -687,19 +670,13 @@ class ResourceClass(StringIdAPIResourceWrapper):
         #        flavor=flavor._apiresource,
         #        resource_class=self._apiresource)
 
-    ## FIXME: this will have to be done some other way
     def set_racks(self, request, racks_ids):
-        return
-        # simply delete all and create new racks
-        #for rack_id in self.racks_ids:
-        #    rack = Rack.get(request, rack_id)
-        #    rack._apiresource.resource_class = None
-        #    rack._apiresource.save()
-
-        #for rack_id in racks_ids:
-        #    rack = Rack.get(request, rack_id)
-        #    rack._apiresource.resource_class = self._apiresource
-        #    rack._apiresource.save()
+        # FIXME: there is a bug now in tuskar, we have to remove all racks at
+        # first and then add new ones:
+        # https://github.com/tuskar/tuskar/issues/37
+        tuskarclient(request).resource_classes.update(self.id, racks=[])
+        racks = [{'id': rid} for rid in racks_ids]
+        tuskarclient(request).resource_classes.update(self.id, racks=racks)
 
 
 class Flavor(StringIdAPIResourceWrapper):

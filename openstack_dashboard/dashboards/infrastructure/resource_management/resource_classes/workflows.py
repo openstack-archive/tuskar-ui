@@ -45,8 +45,7 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                                      )
     image = forms.ChoiceField(label=_('Provisioning Image'),
                               required=True,
-                              choices=[('compute-img', ('Compute-Fedora19'))
-                                      ],
+                              choices=[('compute-img', ('Compute-Fedora19'))],
                               widget=forms.Select(
                                 attrs={'class': 'switchable'})
                               )
