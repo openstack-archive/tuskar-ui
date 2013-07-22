@@ -42,7 +42,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ resource_class.cpu.usage }}/{{ resource_class.cpu.value }} {{ resource_class.cpu.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="cpu">{{ resource_class.cpu.usage }}/{{ resource_class.cpu.value }} {{ resource_class.cpu.unit }}</a>
         </td>
       </tr>
       <tr>
@@ -56,7 +56,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ resource_class.ram.usage }}/{{ resource_class.ram.value }} {{ resource_class.ram.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="ram">{{ resource_class.ram.usage }}/{{ resource_class.ram.value }} {{ resource_class.ram.unit }}</a>
         </td>
       </tr>
       <tr>
@@ -70,7 +70,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ resource_class.storage.usage }}/{{ resource_class.storage.value }} {{ resource_class.storage.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="storage">{{ resource_class.storage.usage }}/{{ resource_class.storage.value }} {{ resource_class.storage.unit }}</a>
         </td>
       </tr>
       <tr>
@@ -84,7 +84,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ resource_class.network.usage }}/{{ resource_class.network.value }} {{ resource_class.network.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="network">{{ resource_class.network.usage }}/{{ resource_class.network.value }} {{ resource_class.network.unit }}</a>
         </td>
       </tr>
     </table>
@@ -93,14 +93,9 @@
 
 <div class="status row-fluid detail">
   <div class="span6">
-    <h4>{% trans "Running Virtual Machines" %}</h4>
+    <h4>{% trans "Capacity Usage" %}</h4>
     <hr class="header_rule">
-    <dl>
-      {% for flavor_count in resource_class.running_virtual_machines %}
-        <dt>{{ flavor_count.flavor.name }}</dt>
-        <dd>{{ flavor_count.max_vms }}</dd>
-      {% endfor %}
-    </dl>
+    <div data-chart-type="line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="cpu,ram,storage,network"></div>
   </div>
 
   <div class="span6">
@@ -117,8 +112,14 @@
 
 <div class="row-fluid detail">
   <div class="span6">
-    <h4>Summary of instances and usage</h4>
+    <h4>{% trans "Summary of Instances and Usage" %}</h4>
     <hr class="header_rule">
+    <dl>
+      {% for flavor_count in resource_class.running_virtual_machines %}
+        <dt>{{ flavor_count.flavor.name }}</dt>
+        <dd>{{ flavor_count.max_vms }}</dd>
+      {% endfor %}
+    </dl>
   </div>
 
   <div class="span6">

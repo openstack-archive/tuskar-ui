@@ -695,8 +695,9 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
         values = []
         current_time = start_time
         while current_time <= end_time:
-            values.append({'date': current_time,
-                           'value': randint(0, self.running_virtual_machines)})
+            values.append(
+                {'date': current_time,
+                 'active_vms': randint(0, self.running_virtual_machines)})
             current_time += timedelta(hours=1)
 
         return values

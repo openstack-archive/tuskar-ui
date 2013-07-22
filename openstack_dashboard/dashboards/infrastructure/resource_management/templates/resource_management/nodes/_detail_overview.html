@@ -51,7 +51,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ node.cpu.usage }}/{{ node.cpu.value }} {{ node.cpu.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data">{{ node.cpu.usage }}/{{ node.cpu.value }} {{ node.cpu.unit }}</a>
         </td>
       </tr>
       <tr>
@@ -65,7 +65,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ node.ram.usage }}/{{ node.ram.value }} {{ node.ram.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data">{{ node.ram.usage }}/{{ node.ram.value }} {{ node.ram.unit }}</a>
         </td>
       </tr>
       <tr>
@@ -79,7 +79,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ node.storage.usage }}/{{ node.storage.value }} {{ node.storage.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data">{{ node.storage.usage }}/{{ node.storage.value }} {{ node.storage.unit }}</a>
         </td>
       </tr>
       <tr>
@@ -93,7 +93,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ node.network.usage }}/{{ node.network.value }} {{ node.network.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data">{{ node.network.usage }}/{{ node.network.value }} {{ node.network.unit }}</a>
         </td>
       </tr>
     </table>

@@ -51,7 +51,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ flavor.vcpu.usage }}/{{ flavor.vcpu.value }} {{ flavor.vcpu.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="cpu">{{ flavor.vcpu.usage }}/{{ flavor.vcpu.value }} {{ flavor.vcpu.unit }}</a>
         </td>
       </tr>
       <tr>
@@ -65,7 +65,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ flavor.ram.usage }}/{{ flavor.ram.value }} {{ flavor.ram.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="ram">{{ flavor.ram.usage }}/{{ flavor.ram.value }} {{ flavor.ram.unit }}</a>
         </td>
       </tr>
       <tr>
@@ -79,7 +79,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ flavor.root_disk.usage }}/{{ flavor.root_disk.value }} {{ flavor.root_disk.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="root_disk">{{ flavor.root_disk.usage }}/{{ flavor.root_disk.value }} {{ flavor.root_disk.unit }}</a>
         </td>
       </tr>
       <tr>
@@ -93,7 +93,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ flavor.ephemeral_disk.usage }}/{{ flavor.ephemeral_disk.value }} {{ flavor.ephemeral_disk.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="ephemeral_disk">{{ flavor.ephemeral_disk.usage }}/{{ flavor.ephemeral_disk.value }} {{ flavor.ephemeral_disk.unit }}</a>
         </td>
       </tr>
       <tr>
@@ -107,7 +107,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ flavor.swap_disk.usage }}/{{ flavor.swap_disk.value }} {{ flavor.swap_disk.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="ephemeral_disk">{{ flavor.swap_disk.usage }}/{{ flavor.swap_disk.value }} {{ flavor.swap_disk.unit }}</a>
         </td>
       </tr>
     </table>
@@ -121,22 +121,9 @@
     <table class="chart">
       <tr>
         <td>
-          <div id="active_instances"
-               class="line_chart"
-               data-line-url="{% url 'horizon:infrastructure:resource_management:flavors:active_instances_data' flavor.id%}">
-          </div>
+          <div data-chart-type="line_chart" data-url="{% url 'horizon:infrastructure:resource_management:flavors:active_instances_data' flavor.id%}" data-series="active_instances"></div>
         </td>
       </tr>
     </table>
   </div>
 </div>
-
-<script type="text/javascript" charset="utf-8">
-  if(typeof horizon.d3_line_chart !== 'undefined') {
-    horizon.d3_line_chart.init();
-  } else {
-    addHorizonLoadEvent(function() {
-      horizon.d3_line_chart.init();
-    });
-  }
-</script>

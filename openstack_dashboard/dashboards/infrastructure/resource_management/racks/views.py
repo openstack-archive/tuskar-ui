@@ -139,6 +139,8 @@ class UsageDataView(View):
 
     def get(self, request, *args, **kwargs):
         interval = request.GET.get('interval', '1w')
+        series = request.GET.get('series', "")
+        series = series.split(',')
 
         if interval == '12h':
             data_count = 12
@@ -160,8 +162,12 @@ class UsageDataView(View):
         values = []
         for i in range(data_count):
             timediff = timedelta(**{timedelta_param: i})
-            values.append({'date': datetime.now() - timediff,
-                           'ram': random.randint(1, 9)})
+            current_value = {'date': datetime.now() - timediff}
+
+            for usage_type in series:
+                current_value[usage_type] = random.randint(1, 9)
+
+            values.append(current_value)
 
         return HttpResponse(json.dumps(values, cls=DjangoJSONEncoder),
                             mimetype='application/json')
