@@ -14,6 +14,7 @@
 
 import copy
 import logging
+import re
 from datetime import timedelta
 from random import randint
 
@@ -49,8 +50,16 @@ class StringIdAPIResourceWrapper(base.APIResourceWrapper):
     def id(self):
         return str(self._apiresource.id)
 
-    def set_request(self, request):
-        self.request = request
+    # FIXME: self.request is required when calling some instance
+    # methods (e.g. list_flavors), once we really start using this request
+    # param (if ever), a proper request value should be set
+    @property
+    def request(self):
+        return getattr(self, '_request', None)
+
+    @request.setter
+    def request(self, value):
+        setattr(self, '_request', value)
 
 
 class Capacity(StringIdAPIResourceWrapper):
@@ -260,7 +269,6 @@ class Rack(StringIdAPIResourceWrapper):
     @classmethod
     def get(cls, request, rack_id):
         rack = cls(tuskarclient(request).racks.get(rack_id))
-        rack.set_request(request)
         return rack
 
     @property
@@ -426,7 +434,6 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @classmethod
     def get(cls, request, resource_class_id):
         rc = cls(tuskarclient(request).resource_classes.get(resource_class_id))
-        rc.set_request(request)
         return rc
 
     @classmethod
@@ -437,9 +444,9 @@ class ResourceClass(StringIdAPIResourceWrapper):
                 service_type=service_type))
 
     @classmethod
-    def list(self, request):
-        return [ResourceClass(rc) for rc in
-                tuskarclient(request).resource_classes.list()]
+    def list(cls, request):
+        return [cls(rc) for rc in (
+            tuskarclient(request).resource_classes.list())]
 
     @classmethod
     def update(cls, request, resource_class_id, **kwargs):
@@ -478,62 +485,39 @@ class ResourceClass(StringIdAPIResourceWrapper):
         return self._all_racks
 
     @property
-    def resource_class_flavors(self):
-        """ Relation table resourceclassflavor """
-        if not hasattr(self, '_resource_class_flavors'):
-            self._resource_class_flavors = [ResourceClassFlavor(r) for r in (
-                self._apiresource.resourceclassflavor_set.all())]
-        return self._resource_class_flavors
-
-    ## FIXME: this isn't currently supported by the client library, so would
-    ## have to be done through curl
-    @property
     def flavors_ids(self):
         """ List of unicode ids of flavors added to resource class """
-        #return [
-        #    unicode(flavor.flavor.id) for flavor in (
-        #        self.resource_class_flavors)]
-        return []
+        return [unicode(flavor.id) for flavor in self.list_flavors]
 
-    ## FIXME: this isn't currently supported by the client library, so would
-    ## have to be done through curl
+    # FIXME: for now, we display list of flavor templates when
+    # editing a resource class - we have to set id of flavor template, not
+    # flavor
+    @property
+    def flavortemplates_ids(self):
+        """ List of unicode ids of flavor templates added to resource class """
+        return [unicode(ft.flavor_template.id) for ft in self.list_flavors]
+
     @property
     def list_flavors(self):
-        """ Joined relation table resourceclassflavor and flavor together """
-        #if not hasattr(self, '_flavors'):
-        #    added_flavors = self.resource_class_flavors
-        #    self._flavors = []
-        #    for f in added_flavors:
-        #        flavor_obj = Flavor.get(self.request, f.flavor.id)
-        #        flavor_obj.set_max_vms(f.max_vms)
-        #        self._flavors.append(flavor_obj)
-        #return self._flavors
-        return []
+        if not hasattr(self, '_flavors'):
+            self._flavors = [Flavor(f) for f in (
+                tuskarclient(self.request).flavors.list(self.id))]
+        return self._flavors
 
-    ## FIXME: this isn't currently supported by the client library, so would
-    ## have to be done through curl
     @property
     def all_flavors(self):
         """ Joined relation table resourceclassflavor with all global flavors
         """
-        #if not hasattr(self, '_all_flavors'):
-        #    all_flavors = Flavor.list(self.request)
-
-        #    added_resourceclassflavors = \
-        #        self._apiresource.resourceclassflavor_set.all()
-        #    added_flavors = {}
-        #    for added_flavor in added_resourceclassflavors:
-        #        added_flavors[str(added_flavor.flavor_id)] = added_flavor
-
-        #    self._all_flavors = []
-        #    for f in all_flavors:
-        #        added_flavor = added_flavors.get(f.id)
-        #        if added_flavor:
-        #            f.set_max_vms(added_flavor.max_vms)
-        #        self._all_flavors.append(f)
-
-        #return self._all_flavors
-        return []
+        if not hasattr(self, '_all_flavors'):
+            my_flavors = self.list_flavors
+            self._all_flavors = []
+            for flavor in FlavorTemplate.list(self.request):
+                fname = "%s.%s" % (self.name, flavor.name)
+                f = next((f for f in my_flavors if f.name == fname), None)
+                if f:
+                    flavor.set_max_vms(f.max_vms)
+                self._all_flavors.append(flavor)
+        return self._all_flavors
 
     @property
     def nodes(self):
@@ -554,7 +538,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
     def running_virtual_machines(self):
         if not hasattr(self, '_running_virtual_machines'):
             self._running_virtual_machines =\
-                                    copy.deepcopy(self.resource_class_flavors)
+                                    copy.deepcopy(self.list_flavors)
             for vm in self._running_virtual_machines:
                 vm.max_vms /= (vm.max_vms % 7) + 1
         return self._running_virtual_machines
@@ -651,25 +635,26 @@ class ResourceClass(StringIdAPIResourceWrapper):
             self._vm_capacity = Capacity(vm_capacity)
         return self._vm_capacity
 
-    ## FIXME: this will have to be done some other way
     def set_flavors(self, request, flavors_ids, max_vms=None):
-        return
-        # simply delete all and create new flavors, that'is
-        # how the horizon flavors work
-        #max_vms = max_vms or {}
+        # FIXME: tuskar currently doesn't support setting flavors through
+        # resource class update (as it's done with set_racks), we have to
+        # delete/create them one by one
+        for fid in self.flavors_ids:
+            Flavor.delete(self.request, self.id, fid)
 
-        #for flavor_id in self.flavors_ids:
-        #    ResourceClassFlavor.delete(request,
-        #                               self.id,
-        #                               flavor_id)
-
-        #for flavor_id in flavors_ids:
-        #    flavor = Flavor.get(request, flavor_id)
-        #    ResourceClassFlavor.create(
-        #        request,
-        #        max_vms=max_vms.get(flavor.id),
-        #        flavor=flavor._apiresource,
-        #        resource_class=self._apiresource)
+        # FIXME: for now, we just generate flavors from flavor templates
+        for ftemplate_id in flavors_ids:
+            ftemplate = FlavorTemplate.get(request, ftemplate_id)
+            capacities = []
+            for c in ftemplate.capacities:
+                capacities.append({'name': c.name,
+                                   'value': str(c.value),
+                                   'unit': c.unit})
+            # FIXME: tuskar uses resrouce-class-name prefix for flavors,
+            # e.g. m1.large, we add rc name to the template name:
+            tpl_name = "%s.%s" % (self.name, ftemplate.name)
+            Flavor.create(self.request, self.id, tpl_name,
+                    max_vms.get(ftemplate.id, None), capacities)
 
     def set_racks(self, request, racks_ids):
         # FIXME: there is a bug now in tuskar, we have to remove all racks at
@@ -680,7 +665,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
         tuskarclient(request).resource_classes.update(self.id, racks=racks)
 
 
-class Flavor(StringIdAPIResourceWrapper):
+class FlavorTemplate(StringIdAPIResourceWrapper):
     """Wrapper for the Flavor object returned by the
     dummy model.
     """
@@ -695,16 +680,16 @@ class Flavor(StringIdAPIResourceWrapper):
 
     @classmethod
     def list(cls, request, only_free_racks=False):
-        return [cls(f) for f in dummymodels.Flavor.objects.all()]
+        return [cls(f) for f in dummymodels.FlavorTemplate.objects.all()]
 
     @classmethod
     def get(cls, request, flavor_id):
-        return cls(dummymodels.Flavor.objects.get(id=flavor_id))
+        return cls(dummymodels.FlavorTemplate.objects.get(id=flavor_id))
 
     @classmethod
     def create(cls, request,
                name, vcpu, ram, root_disk, ephemeral_disk, swap_disk):
-        flavor = dummymodels.Flavor(name=name)
+        flavor = dummymodels.FlavorTemplate(name=name)
         flavor.save()
         Capacity.create(request, flavor, 'vcpu', vcpu, '')
         Capacity.create(request, flavor, 'ram', ram, 'MB')
@@ -756,23 +741,6 @@ class Flavor(StringIdAPIResourceWrapper):
         return self.capacity('swap_disk')
 
     @property
-    def resource_class_flavors(self):
-        if not hasattr(self, '_resource_class_flavors'):
-            self._resource_class_flavors = [ResourceClassFlavor(r) for r in (
-                self._apiresource.resourceclassflavor_set.all())]
-        return self._resource_class_flavors
-
-    @property
-    def resource_classes(self):
-        if not hasattr(self, '_resource_classes'):
-            added_flavors = self.resource_class_flavors
-            self._resource_classes = []
-            for f in added_flavors:
-                self._resource_classes.append(ResourceClass(f.resource_class))
-
-        return self._resource_classes
-
-    @property
     def running_virtual_machines(self):
         # arbitrary number
         return len(self.resource_classes) * 2
@@ -792,7 +760,7 @@ class Flavor(StringIdAPIResourceWrapper):
     @classmethod
     def update(cls, request, flavor_id, name, vcpu, ram, root_disk,
                ephemeral_disk, swap_disk):
-        f = dummymodels.Flavor.objects.get(id=flavor_id)
+        f = dummymodels.FlavorTemplate.objects.get(id=flavor_id)
         f.name = name
         f.save()
         flavor = cls(f)
@@ -810,42 +778,93 @@ class Flavor(StringIdAPIResourceWrapper):
 
     @classmethod
     def delete(cls, request, flavor_id):
-        dummymodels.Flavor.objects.get(id=flavor_id).delete()
+        dummymodels.FlavorTemplate.objects.get(id=flavor_id).delete()
 
 
-class ResourceClassFlavor(StringIdAPIResourceWrapper):
-    """ FIXME this class will probably go away when connected to real API,
-    real API doesn't have this realtion Table as separate entity"""
-
-    """Wrapper for the ResourceClassFlavor object  returned by the
-    dummy model.
+class Flavor(StringIdAPIResourceWrapper):
+    """Wrapper for the Flavor object returned by Tuskar.
     """
-
-    _attrs = ['max_vms', 'flavor', 'resource_class']
-
-    @property
-    def flavor(self):
-        if not hasattr(self, '_flavor'):
-            self._flavor = self._apiresource.flavor
-        return self._flavor
-
-    @property
-    def resource_class(self):
-        if not hasattr(self, '_resource_class'):
-            self._resource_class = self._apiresource.resource_class
-        return self._resource_class
+    _attrs = ['name']
 
     @classmethod
-    def create(cls, request, resource_class, flavor, max_vms=0):
-        rc = dummymodels.ResourceClassFlavor(
-            max_vms=max_vms,
-            resource_class=resource_class,
-            flavor=flavor)
-        rc.save()
-        return ResourceClassFlavor(rc)
+    def create(cls, request, resource_class_id, name, max_vms, capacities):
+        return cls(tuskarclient(request).flavors.create(
+            resource_class_id, name=name, capacities=capacities))
 
     @classmethod
     def delete(cls, request, resource_class_id, flavor_id):
-        dummymodels.ResourceClassFlavor.objects.filter(
-            resource_class_id=resource_class_id,
-            flavor_id=flavor_id).delete()
+        tuskarclient(request).flavors.delete(resource_class_id, flavor_id)
+
+    # FIXME: has to be implemented in API
+    # https://github.com/tuskar/tuskar/issues/43
+    @property
+    def max_vms(self):
+        return 2
+
+    # FIXME: returns flavor template for this flavor
+    @property
+    def flavor_template(self):
+        # strip resource class prefix from flavor name before comparing:
+        fname = re.sub(r'^.*\.', '', self.name)
+        return next(f for f in FlavorTemplate.list(None) if (
+            f.name == fname))
+
+    @property
+    def capacities(self):
+        if not hasattr(self, '_capacities'):
+            self._capacities = [Capacity(c) for c in
+                                self._apiresource.capacities]
+        return self._capacities
+
+    def capacity(self, capacity_name):
+        key = "_%s" % capacity_name
+        if not hasattr(self, key):
+            try:
+                capacity = [c for c in self.capacities if (
+                    c.name == capacity_name)][0]
+            except:
+                # FIXME: test this
+                capacity = Capacity(
+                    name=capacity_name,
+                    value=_('Unable to retrieve '
+                            '(Is the flavor configured properly?)'),
+                    unit='')
+            setattr(self, key, capacity)
+        return getattr(self, key)
+
+    @property
+    def vcpu(self):
+        return self.capacity('vcpu')
+
+    @property
+    def ram(self):
+        return self.capacity('ram')
+
+    @property
+    def root_disk(self):
+        return self.capacity('root_disk')
+
+    @property
+    def ephemeral_disk(self):
+        return self.capacity('ephemeral_disk')
+
+    @property
+    def swap_disk(self):
+        return self.capacity('swap_disk')
+
+    @property
+    def running_virtual_machines(self):
+        # arbitrary number
+        return len(self.resource_classes) * 2
+
+    # defines a random average of capacity - API should probably be able to
+    # determine average of capacity based on capacity value and obejct_id
+    def vms_over_time(self, start_time, end_time):
+        values = []
+        current_time = start_time
+        while current_time <= end_time:
+            values.append({'date': current_time,
+                           'value': randint(0, self.running_virtual_machines)})
+            current_time += timedelta(hours=1)
+
+        return values

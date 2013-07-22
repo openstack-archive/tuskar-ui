@@ -118,12 +118,13 @@ class CreateResourceClassInfoAndFlavors(workflows.TableStep):
 
                 # TODO: lsmola ugly interface, rewrite
                 self._tables['flavors'].active_multi_select_values = \
-                    resource_class.flavors_ids
+                    resource_class.flavortemplates_ids
 
                 all_flavors = resource_class.all_flavors
             else:
-                all_flavors = api.tuskar.Flavor.list(self.workflow.request)
-        except:
+                all_flavors = api.tuskar.FlavorTemplate.list(
+                        self.workflow.request)
+        except Exception, ex:
             all_flavors = []
             exceptions.handle(self.workflow.request,
                               _('Unable to retrieve resource flavors list.'))
@@ -257,10 +258,10 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
     def _update_resource_class_info(self, request, data):
         try:
             return api.tuskar.ResourceClass.update(
-                request,
-                data['resource_class_id'],
-                name=data['name'],
-                service_type=data['service_type'])
+                    request,
+                    data['resource_class_id'],
+                    name=data['name'],
+                    service_type=data['service_type'])
         except:
             redirect = self.get_failure_url()
             exceptions.handle(request,

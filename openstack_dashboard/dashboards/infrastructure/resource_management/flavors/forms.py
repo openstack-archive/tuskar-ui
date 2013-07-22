@@ -53,7 +53,7 @@ class CreateFlavor(forms.SelfHandlingForm):
         name = cleaned_data.get('name')
         flavor_id = self.initial.get('flavor_id', None)
         try:
-            flavors = api.tuskar.Flavor.list(self.request)
+            flavors = api.tuskar.FlavorTemplate.list(self.request)
         except:
             flavors = []
             msg = _('Unable to get flavor list')
@@ -70,7 +70,7 @@ class CreateFlavor(forms.SelfHandlingForm):
 
     def handle(self, request, data):
         try:
-            flavor = api.tuskar.Flavor.create(
+            flavor = api.tuskar.FlavorTemplate.create(
                 request,
                 data['name'],
                 data['vcpu'],
@@ -90,7 +90,7 @@ class EditFlavor(CreateFlavor):
 
     def handle(self, request, data):
         try:
-            flavor = api.tuskar.Flavor.update(
+            flavor = api.tuskar.FlavorTemplate.update(
                 self.request,
                 self.initial['flavor_id'],
                 data['name'],

@@ -30,9 +30,9 @@ class Capacity(models.Model):
     unit = models.CharField(max_length=10)
 
 
-class Flavor(models.Model):
+class FlavorTemplate(models.Model):
     class Meta:
-        db_table = 'infrastructure_flavor'
+        db_table = 'infrastructure_flavortemplate'
 
     name = models.CharField(max_length=50, unique=True)
     capacities = generic.GenericRelation(Capacity)
@@ -81,6 +81,7 @@ class ResourceClassFlavor(models.Model):
     class Meta:
         db_table = 'infrastructure_resourceclass_flavors'
 
-    flavor = models.ForeignKey('Flavor')
+    # ResourceClass db model is not used anymore
+    flavortemplate = models.ForeignKey('FlavorTemplate')
     resource_class = models.ForeignKey('ResourceClass')
     max_vms = models.PositiveIntegerField(max_length=50, null=True)

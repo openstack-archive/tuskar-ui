@@ -28,13 +28,6 @@ import openstack_dashboard.dashboards.infrastructure.models as dummymodels
 
 
 class TuskarApiTests(test.APITestCase):
-    def setUp(self):
-        super(TuskarApiTests, self).setUp()
-        # FIXME: I'm not sure this is sustainable
-        # dummy data are seeded from fixtures
-        self.rclass1 = dummymodels.ResourceClass.objects.get(name='m1')
-        self.flavor1 = dummymodels.Flavor.objects.get(name='nano')
-
     def test_resource_class_list(self):
         rcs = self.tuskar_resource_classes.list()
 
@@ -85,6 +78,7 @@ class TuskarApiTests(test.APITestCase):
             self.assertIsInstance(f, api.tuskar.Flavor)
 
     def test_flavor_get(self):
-        flavor = api.tuskar.Flavor.get(self.request, self.flavor1.id)
+        test_flavor = self.tuskar_flavors.first()
+        flavor = api.tuskar.Flavor.get(self.request, test_flavor.id)
         self.assertIsInstance(flavor, api.tuskar.Flavor)
-        self.assertEquals(flavor.name, self.flavor1.name)
+        self.assertEquals(flavor.name, test_flavor.name)

@@ -107,7 +107,7 @@
     <h4>{% trans "Virtual Capacity" %}</h4>
     <hr class="header_rule">
     <dl>
-      {% for flavor_count in resource_class.resource_class_flavors %}
+      {% for flavor_count in resource_class.list_flavors %}
         <dt>{{ flavor_count.flavor.name }}</dt>
         <dd>{{ flavor_count.max_vms }}</dd>
       {% endfor %}

@@ -12,7 +12,7 @@
 
 from openstack_dashboard.api.tuskar import (
     Flavor, ResourceClass, Node,
-    Rack, ResourceClassFlavor)
+    Rack, Capacity)
 from collections import namedtuple
 
 import openstack_dashboard.dashboards.infrastructure.models as dummymodels
@@ -21,14 +21,50 @@ from .utils import TestDataContainer
 
 
 def data(TEST):
+    FlavorStruct = namedtuple('FlavorStruct', 'id name\
+        capacities')
+    CapacityStruct = namedtuple('CapacityStruct', 'name value unit')
+    TEST.tuskar_flavors = TestDataContainer()
+    flavor_1 = Flavor(FlavorStruct(
+            id="1",
+            name='m1.tiny',
+            capacities=[
+              Capacity(CapacityStruct(
+                name='vcpu',
+                unit='',
+                value='1')),
+              Capacity(CapacityStruct(
+                name='ram',
+                unit='MB',
+                value='64')),
+              Capacity(CapacityStruct(
+                name='root_disk',
+                unit='MB',
+                value='128')),
+              Capacity(CapacityStruct(
+                name='ephemeral_disk',
+                unit='GB',
+                value='0')),
+              Capacity(CapacityStruct(
+                name='swap_disk',
+                unit='GB',
+                value='0'))]))
+    flavor_2 = Flavor(FlavorStruct(
+            id="2",
+            name='m1.large',
+            capacities=[]))
+    TEST.tuskar_flavors.add(flavor_1, flavor_2)
+
     # Flavors
     TEST.tuskar_flavors = TestDataContainer()
-    flavor_1 = Flavor(dummymodels.Flavor(
-            id="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-            name='m1.tiny'))
-    flavor_2 = Flavor(dummymodels.Flavor(
-            id="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-            name='m1.massive'))
+    flavor_1 = Flavor(FlavorStruct(
+            id="1",
+            name='m1.tiny',
+            capacities=[]))
+    flavor_2 = Flavor(FlavorStruct(
+            id="2",
+            name='m1.large',
+            capacities=[]))
     TEST.tuskar_flavors.add(flavor_1, flavor_2)
 
     # Resource Classes
@@ -90,17 +126,6 @@ def data(TEST):
         resource_class={'id': '1'}))
 
     TEST.tuskar_racks.add(rack_1)
-
-    #ResourceClassFlavors
-    TEST.tuskar_resource_class_flavors = TestDataContainer()
-    resource_class_flavor_1 = ResourceClassFlavor(
-        dummymodels.ResourceClassFlavor(
-            id="1",
-            max_vms='16',
-            resource_class_id=1,
-            flavor_id=1))
-
-    TEST.tuskar_resource_class_flavors.add(resource_class_flavor_1)
 
     # Nodes
     TEST.nodes = TestDataContainer()

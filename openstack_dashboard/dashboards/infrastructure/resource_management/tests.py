@@ -32,16 +32,17 @@ class ResourceManagementTests(test.BaseAdminViewTests):
             'list',
             'list_racks',
             'nodes'),
-        api.tuskar.Flavor: (
+        api.tuskar.FlavorTemplate: (
             'list',),
         api.tuskar.Rack: (
             'list',)})
     def test_index(self):
-        # Flavor stubs
+        # FlavorTemplate stubs
         flavors = self.tuskar_flavors.list()
 
-        api.tuskar.Flavor.list(IsA(http.HttpRequest)).AndReturn(flavors)
-        # Flavor stubs end
+        api.tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).AndReturn(
+                flavors)
+        # FlavorTemplate stubs end
 
         # ResourceClass stubs
         all_resource_classes = self.tuskar_resource_classes.list()
@@ -69,9 +70,9 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(
             res, 'infrastructure/resource_management/index.html')
 
-        # Flavor asserts
+        # FlavorTemplate asserts
         self.assertItemsEqual(res.context['flavors_table'].data, flavors)
-        # Flavor asserts end
+        # FlavorTemplate asserts end
 
         # ResourceClass asserts
         self.assertItemsEqual(res.context['resource_classes_table'].data,

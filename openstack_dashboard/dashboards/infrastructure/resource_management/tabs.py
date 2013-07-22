@@ -62,7 +62,7 @@ class FlavorsTab(tabs.TableTab):
 
     def get_flavors_data(self):
         try:
-            flavors = tuskar.Flavor.list(self.request)
+            flavors = tuskar.FlavorTemplate.list(self.request)
         except:
             flavors = []
             exceptions.handle(self.request,
