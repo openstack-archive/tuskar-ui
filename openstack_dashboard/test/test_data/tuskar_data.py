@@ -11,7 +11,7 @@
 #    under the License.
 
 from openstack_dashboard.api.tuskar import (
-    Flavor, ResourceClass, Node,
+    Flavor, FlavorTemplate, ResourceClass, Node,
     Rack, Capacity)
 from collections import namedtuple
 
@@ -24,8 +24,8 @@ def data(TEST):
     FlavorStruct = namedtuple('FlavorStruct', 'id name\
         capacities')
     CapacityStruct = namedtuple('CapacityStruct', 'name value unit')
-    TEST.tuskar_flavors = TestDataContainer()
-    flavor_1 = Flavor(FlavorStruct(
+    TEST.tuskar_flavor_templates = TestDataContainer()
+    flavor_template_1 = FlavorTemplate(FlavorStruct(
             id="1",
             name='m1.tiny',
             capacities=[
@@ -49,11 +49,11 @@ def data(TEST):
                 name='swap_disk',
                 unit='GB',
                 value='0'))]))
-    flavor_2 = Flavor(FlavorStruct(
+    flavor_template_2 = FlavorTemplate(FlavorStruct(
             id="2",
             name='m1.large',
             capacities=[]))
-    TEST.tuskar_flavors.add(flavor_1, flavor_2)
+    TEST.tuskar_flavor_templates.add(flavor_template_1, flavor_template_2)
 
     # Flavors
     TEST.tuskar_flavors = TestDataContainer()

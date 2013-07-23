@@ -53,7 +53,7 @@ class TuskarApiTests(test.APITestCase):
 
     def test_resource_class_flavor_counts(self):
         rc = self.tuskar_resource_classes.first()
-        for f in rc.resource_class_flavors:
+        for f in rc.list_flavors:
             self.assertIsInstance(f, api.tuskar.ResourceClassFlavor)
         self.assertEquals(7, len(rc.resource_class_flavors))
 
@@ -65,20 +65,21 @@ class TuskarApiTests(test.APITestCase):
 
     def test_resource_class_nodes(self):
         rc = self.tuskar_resource_classes.first()
-        for node in rc.nodes:
+        for node in rc.list_nodes:
             self.assertIsInstance(node, api.tuskar.Node)
         self.assertEquals(4, len(rc.nodes))
 
     # TODO: create, delete operations
 
-    def test_flavor_list(self):
-        flist = api.tuskar.Flavor.list(self.request)
-        self.assertEquals(7, len(flist))
-        for f in flist:
-            self.assertIsInstance(f, api.tuskar.Flavor)
+    def test_flavor_template_list(self):
+        templates = api.tuskar.FlavorTemplate.list(self.request)
+        self.assertEquals(7, len(templates))
+        for t in templates:
+            self.assertIsInstance(t, api.tuskar.FlavorTemplate)
 
-    def test_flavor_get(self):
-        test_flavor = self.tuskar_flavors.first()
-        flavor = api.tuskar.Flavor.get(self.request, test_flavor.id)
-        self.assertIsInstance(flavor, api.tuskar.Flavor)
-        self.assertEquals(flavor.name, test_flavor.name)
+    def test_flavor_template_get(self):
+        test_template = self.tuskar_flavor_templates.first()
+        template = api.tuskar.FlavorTemplate.get(self.request,
+                                                 test_template.id)
+        self.assertIsInstance(template, api.tuskar.FlavorTemplate)
+        self.assertEquals(template.name, test_template.name)

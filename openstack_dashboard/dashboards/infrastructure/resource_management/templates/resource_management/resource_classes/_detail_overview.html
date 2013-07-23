@@ -20,7 +20,7 @@
       <dt>{% trans "Type" %}</dt>
       <dd>{{ resource_class.service_type }}</dd>
       <dt>{% trans "Flavors" %}</dt>
-      <dd>{{ resource_class.flavors|length }}</dd>
+      <dd>{{ resource_class.list_flavors|length }}</dd>
       <dt>{% trans "Active Instances" %}</dt>
       <dd>{{ resource_class.running_virtual_machines|length }}</dd>
     </dl>

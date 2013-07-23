@@ -15,6 +15,7 @@
 import copy
 import logging
 import re
+from collections import namedtuple
 from datetime import timedelta
 from random import randint
 
@@ -784,22 +785,19 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
 class Flavor(StringIdAPIResourceWrapper):
     """Wrapper for the Flavor object returned by Tuskar.
     """
-    _attrs = ['name']
+    _attrs = ['name', 'max_vms']
 
     @classmethod
     def create(cls, request, resource_class_id, name, max_vms, capacities):
         return cls(tuskarclient(request).flavors.create(
-            resource_class_id, name=name, capacities=capacities))
+                resource_class_id,
+                name=name,
+                max_vms=max_vms,
+                capacities=capacities))
 
     @classmethod
     def delete(cls, request, resource_class_id, flavor_id):
         tuskarclient(request).flavors.delete(resource_class_id, flavor_id)
-
-    # FIXME: has to be implemented in API
-    # https://github.com/tuskar/tuskar/issues/43
-    @property
-    def max_vms(self):
-        return 2
 
     # FIXME: returns flavor template for this flavor
     @property
@@ -812,8 +810,13 @@ class Flavor(StringIdAPIResourceWrapper):
     @property
     def capacities(self):
         if not hasattr(self, '_capacities'):
-            self._capacities = [Capacity(c) for c in
-                                self._apiresource.capacities]
+            ## FIXME: should we distinguish between tuskar
+            ## capacities and our internal capacities?
+            CapacityStruct = namedtuple('CapacityStruct', 'name value unit')
+            self._capacities = [Capacity(CapacityStruct(
+                        name=c['name'],
+                        value=c['value'],
+                        unit=c['unit'])) for c in self._apiresource.capacities]
         return self._capacities
 
     def capacity(self, capacity_name):

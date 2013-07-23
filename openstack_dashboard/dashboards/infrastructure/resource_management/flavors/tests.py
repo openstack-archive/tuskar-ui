@@ -9,14 +9,14 @@ from openstack_dashboard.test import helpers as test
 class FlavorTemplatesTests(test.BaseAdminViewTests):
 
     @test.create_stubs({api.tuskar.FlavorTemplate: ('list', 'create')})
-    def test_create_flavor(self):
-        flavor = self.tuskar_flavors.first()
+    def test_create_flavor_template(self):
+        template = self.tuskar_flavor_templates.first()
 
         api.tuskar.FlavorTemplate.list(
             IsA(http.HttpRequest)).AndReturn([])
         api.tuskar.FlavorTemplate.create(IsA(http.HttpRequest),
-                                     flavor.name,
-                                     0, 0, 0, 0, 0).AndReturn(flavor)
+                                     template.name,
+                                     0, 0, 0, 0, 0).AndReturn(template)
         self.mox.ReplayAll()
 
         url = reverse(
@@ -26,7 +26,7 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(
             resp, "infrastructure/resource_management/flavors/create.html")
 
-        data = {'name': flavor.name,
+        data = {'name': template.name,
                 'vcpu': 0,
                 'ram': 0,
                 'root_disk': 0,
@@ -37,37 +37,37 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
             resp, reverse('horizon:infrastructure:resource_management:index'))
 
     @test.create_stubs({api.tuskar.FlavorTemplate: ('list', 'update', 'get')})
-    def test_edit_flavor_get(self):
-        flavor = self.tuskar_flavors.first()  # has no extra spec
+    def test_edit_flavor_template_get(self):
+        template = self.tuskar_flavor_templates.first()  # has no extra spec
 
         api.tuskar.FlavorTemplate.get(IsA(http.HttpRequest),
-                                  flavor.id).AndReturn(flavor)
+                                  template.id).AndReturn(template)
         self.mox.ReplayAll()
 
         url = reverse(
             'horizon:infrastructure:resource_management:flavors:edit',
-            args=[flavor.id])
+            args=[template.id])
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(
             resp, "infrastructure/resource_management/flavors/edit.html")
 
     @test.create_stubs({api.tuskar.FlavorTemplate: ('list', 'update', 'get')})
-    def test_edit_flavor_post(self):
-        flavor = self.tuskar_flavors.first()  # has no extra spec
+    def test_edit_flavor_template_post(self):
+        template = self.tuskar_flavor_templates.first()  # has no extra spec
 
-        api.tuskar.FlavorTemplate.list(
-            IsA(http.HttpRequest)).AndReturn(self.tuskar_flavors.list())
+        api.tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).AndReturn(
+            self.tuskar_flavor_templates.list())
         api.tuskar.FlavorTemplate.update(IsA(http.HttpRequest),
-                                     flavor.id,
-                                     flavor.name,
-                                     0, 0, 0, 0, 0).AndReturn(flavor)
+                                     template.id,
+                                     template.name,
+                                     0, 0, 0, 0, 0).AndReturn(template)
         api.tuskar.FlavorTemplate.get(IsA(http.HttpRequest),
-                                  flavor.id).AndReturn(flavor)
+                                  template.id).AndReturn(template)
         self.mox.ReplayAll()
 
-        data = {'flavor_id': flavor.id,
-                'name': flavor.name,
+        data = {'flavor_id': template.id,
+                'name': template.name,
                 'vcpu': 0,
                 'ram': 0,
                 'root_disk': 0,
@@ -75,7 +75,7 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
                 'swap_disk': 0}
         url = reverse(
             'horizon:infrastructure:resource_management:flavors:edit',
-            args=[flavor.id])
+            args=[template.id])
         resp = self.client.post(url, data)
         self.assertNoFormErrors(resp)
         self.assertMessageCount(success=1)
@@ -83,15 +83,15 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
             resp, reverse('horizon:infrastructure:resource_management:index'))
 
     @test.create_stubs({api.tuskar.FlavorTemplate: ('list', 'delete')})
-    def test_delete_flavor(self):
-        flavor = self.tuskar_flavors.first()
+    def test_delete_flavor_template(self):
+        template = self.tuskar_flavor_templates.first()
 
         api.tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).\
-            AndReturn(self.tuskar_flavors.list())
-        api.tuskar.FlavorTemplate.delete(IsA(http.HttpRequest), flavor.id)
+            AndReturn(self.tuskar_flavor_templates.list())
+        api.tuskar.FlavorTemplate.delete(IsA(http.HttpRequest), template.id)
         self.mox.ReplayAll()
 
-        form_data = {'action': 'flavors__delete__%s' % flavor.id}
+        form_data = {'action': 'flavors__delete__%s' % template.id}
         res = self.client.post(
             reverse('horizon:infrastructure:resource_management:index'),
             form_data)
@@ -100,11 +100,11 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
             res, reverse('horizon:infrastructure:resource_management:index'))
 
     @test.create_stubs({api.tuskar.FlavorTemplate: ('get',)})
-    def test_detail_flavor(self):
-        flavor = self.tuskar_flavors.first()
+    def test_detail_flavor_template(self):
+        template = self.tuskar_flavor_templates.first()
 
         api.tuskar.FlavorTemplate.get(IsA(http.HttpRequest),
-                                  flavor.id).AndReturn(flavor)
+                                  template.id).AndReturn(template)
         api.tuskar.FlavorTemplate.resource_classes = self. \
             tuskar_resource_classes
 
@@ -112,7 +112,7 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
 
         url = reverse(
             'horizon:infrastructure:resource_management:flavors:detail',
-            args=[flavor.id])
+            args=[template.id])
         res = self.client.get(url)
         self.assertTemplateUsed(
             res, "infrastructure/resource_management/flavors/detail.html")

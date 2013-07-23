@@ -22,15 +22,15 @@ from openstack_dashboard.test import helpers as test
 class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
-        api.tuskar.Flavor: ('list',),
+        api.tuskar.FlavorTemplate: ('list',),
         api.tuskar.Rack: ('list',)
     })
     def test_create_resource_class_get(self):
-        all_flavors = self.tuskar_flavors.list()
+        all_templates = self.tuskar_flavor_templates.list()
         all_racks = self.tuskar_racks.list()
 
-        api.tuskar.Flavor.\
-            list(IsA(http.HttpRequest)).AndReturn(all_flavors)
+        api.tuskar.FlavorTemplate.\
+            list(IsA(http.HttpRequest)).AndReturn(all_templates)
         api.tuskar.Rack.\
             list(IsA(http.HttpRequest), True).AndReturn(all_racks)
         self.mox.ReplayAll()
@@ -78,7 +78,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             ("%s?tab=resource_management_tabs__resource_classes_tab" %
              reverse("horizon:infrastructure:resource_management:index")))
 
-    @test.create_stubs({api.tuskar.ResourceClass: ('get', 'racks_ids')})
+    @test.create_stubs({api.tuskar.ResourceClass: ('get', 'list_flavors',
+                                                   'racks_ids')})
     def test_edit_resource_class_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
@@ -95,6 +96,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         # properties set
         api.tuskar.ResourceClass.all_racks = all_racks
         api.tuskar.ResourceClass.all_flavors = all_flavors
+        api.tuskar.ResourceClass.list_flavors = all_flavors
 
         url = reverse(
             'horizon:infrastructure:resource_management:'
@@ -194,7 +196,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(res,
             'infrastructure/resource_management/resource_classes/detail.html')
 
-    @test.create_stubs({api.tuskar.ResourceClass: ('get', 'racks_ids')})
+    @test.create_stubs({api.tuskar.ResourceClass: ('get', 'list_flavors',
+                                                   'racks_ids')})
     def test_detail_edit_racks_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
@@ -210,6 +213,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         # properties set
         api.tuskar.ResourceClass.all_racks = all_racks
         api.tuskar.ResourceClass.all_flavors = all_flavors
+        api.tuskar.ResourceClass.list_flavors = all_flavors
 
         url = reverse(
             'horizon:infrastructure:resource_management:'
@@ -264,7 +268,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             reverse(detail_url, args=(resource_class.id,)))
         self.assertRedirectsNoFollow(res, redirect_url)
 
-    @test.create_stubs({api.tuskar.ResourceClass: ('get', 'racks_ids')})
+    @test.create_stubs({api.tuskar.ResourceClass: ('get', 'list_flavors',
+                                                   'racks_ids')})
     def test_detail_edit_flavors_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
@@ -280,6 +285,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         # properties set
         api.tuskar.ResourceClass.all_racks = all_racks
         api.tuskar.ResourceClass.all_flavors = all_flavors
+        api.tuskar.ResourceClass.list_flavors = all_flavors
 
         url = reverse(
             'horizon:infrastructure:resource_management:'
