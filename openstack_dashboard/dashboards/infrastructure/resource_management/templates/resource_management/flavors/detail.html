@@ -6,6 +6,12 @@
   {% include "horizon/common/_page_header.html" with title=_("Flavor Detail") %}
 {% endblock page_header %}
 
+{% block actions %}
+  <div class="btn-group">
+    <a class="btn ajax-modal" href="{% url 'horizon:infrastructure:resource_management:flavors:detail_edit' flavor.id %}">{% trans "Edit" %}</a>
+  </div>
+{% endblock %}
+
 {% block breadcrumbs %}
   <div class="breadcrumbs">
     <a href="{% url 'horizon:infrastructure:resource_management:index' %}?tab=resource_management_tabs__resource_classes_tab" >Home</a>

@@ -18,7 +18,7 @@ import json
 import logging
 
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import View
@@ -47,12 +47,15 @@ class CreateView(forms.ModalFormView):
 class EditView(forms.ModalFormView):
     form_class = EditFlavor
     template_name = 'infrastructure/resource_management/flavors/edit.html'
+    form_url = 'horizon:infrastructure:resource_management:flavors:edit'
     success_url = reverse_lazy(
         'horizon:infrastructure:resource_management:index')
 
     def get_context_data(self, **kwargs):
         context = super(EditView, self).get_context_data(**kwargs)
         context['flavor_id'] = self.kwargs['flavor_id']
+        context['form_url'] = self.form_url
+        context['success_url'] = self.get_success_url()
         return context
 
     def get_initial(self):
@@ -69,6 +72,15 @@ class EditView(forms.ModalFormView):
                 'storage': flavor.storage.value,
                 'ephemeral_disk': flavor.ephemeral_disk.value,
                 'swap_disk': flavor.swap_disk.value}
+
+
+class DetailEditView(EditView):
+    form_url = 'horizon:infrastructure:resource_management:flavors:detail_edit'
+    success_url = 'horizon:infrastructure:resource_management:flavors:detail'
+
+    def get_success_url(self):
+        return reverse(self.success_url,
+                       args=(self.kwargs['flavor_id'],))
 
 
 class DetailView(tabs.TabView):
