@@ -140,26 +140,27 @@
         data-circles-chart-command="change_url"
         data-receiver=".rack_health_chart">
       <li class="active">
-        <a data-url="/infrastructure/racks/1/top_communicating.json?type=overall_health" href="#">
+        <a data-url="{% url 'horizon:infrastructure:resource_management:resource_classes:rack_health' resource_class.id %}?type=overall_health" href="#">
           Overall Health</a>
       </li>
       <li>
-        <a data-url="/infrastructure/racks/1/top_communicating.json?type=alerts" href="#">
+        <a data-url="{% url 'horizon:infrastructure:resource_management:resource_classes:rack_health' resource_class.id %}?type=alerts" href="#">
           Alerts</a>
       </li>
       <li>
-        <a data-url="/infrastructure/racks/1/top_communicating.json?type=capacities" href="#">
+        <a data-url="{% url 'horizon:infrastructure:resource_management:resource_classes:rack_health' resource_class.id %}?type=capacities" href="#">
           Capacities</a>
       </li>
       <li>
-        <a data-url="/infrastructure/racks/1/top_communicating.json?type=status" href="#">
+        <a data-url="{% url 'horizon:infrastructure:resource_management:resource_classes:rack_health' resource_class.id %}?type=status" href="#">
           Status</a>
       </li>
     </ul>
-    <h5>Region 1<h5>
+    <!--<h5>Region 1<h5>
     <div class="rack_health_chart"
          data-chart-type="circles_chart"
          data-url="/infrastructure/racks/1/top_communicating.json?region=1"
+         data-region=1 //// implement region parameter
          data-time="now"
          data-size="10">
     </div>
@@ -167,15 +168,16 @@
     <div class="rack_health_chart"
          data-chart-type="circles_chart"
          data-url="/infrastructure/racks/1/top_communicating.json?region=2"
+         data-region=1 //// implement region parameter
          data-time="now"
          data-size="10">
     </div>
-    <h5>Region 3<h5>
+    <h5>Region 3<h5>-->
     <div class="rack_health_chart"
          data-chart-type="circles_chart"
-         data-url="/infrastructure/racks/1/top_communicating.json?region=3"
+         data-url="{% url 'horizon:infrastructure:resource_management:resource_classes:rack_health' resource_class.id %}"
          data-time="now"
-         data-size="10">
+         data-size="22">
     </div>
   </div>
 </div>

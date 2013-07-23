@@ -18,9 +18,11 @@ from .views import (CreateView, UpdateView, DetailView, UpdateRacksView,
                     UpdateFlavorsView)
 
 RESOURCE_CLASS = r'^(?P<resource_class_id>[^/]+)/%s$'
+VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \
+           'resource_management.resource_classes.views'
 
 urlpatterns = patterns(
-    '',
+    VIEW_MOD,
     url(r'^create$', CreateView.as_view(), name='create'),
     url(r'^(?P<resource_class_id>[^/]+)/$',
         DetailView.as_view(), name='detail'),
@@ -28,4 +30,7 @@ urlpatterns = patterns(
     url(RESOURCE_CLASS % 'update_racks', UpdateRacksView.as_view(),
         name='update_racks'),
     url(RESOURCE_CLASS % 'update_flavors', UpdateFlavorsView.as_view(),
-        name='update_flavors'))
+        name='update_flavors'),
+    url(RESOURCE_CLASS % 'rack_health.json', 'rack_health',
+        name='rack_health'),
+)

@@ -20,8 +20,11 @@
 Views for managing resource classes
 """
 import logging
+import random
 
 from django.core.urlresolvers import reverse_lazy, reverse
+from django.http import HttpResponse
+from django.utils import simplejson
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import tabs
@@ -116,3 +119,38 @@ class DetailView(tabs.TabView):
         resource_class = self.get_data()
         return self.tab_group_class(request, resource_class=resource_class,
                                     **kwargs)
+
+
+def rack_health(request, resource_class_id=None):
+    # FIXME replace mock data
+    random.seed()
+    data = []
+    statuses = ["Good", "Warnings", "Disaster"]
+    colors = ["rgb(244,244,244)", "rgb(240,170,0)", "rgb(200,0,0)"]
+
+    resource_class = (api.tuskar.
+                      ResourceClass.get(request,
+                                        resource_class_id))
+
+    for rack in resource_class.list_racks:
+        rand_index = random.randint(0, 2)
+        percentage = (2 - rand_index) * 50
+        color = colors[rand_index]
+
+        tooltip = ("<p>Rack: <strong>{0}</strong></p><p>{1}</p>").format(
+            rack.name,
+            statuses[rand_index])
+
+        data.append({'tooltip': tooltip,
+                     'color': color,
+                     'status': statuses[rand_index],
+                     'percentage': percentage,
+                     'id': rack.id,
+                     'name': rack.name,
+                     'url': "FIXME url"})
+
+        data.sort(key=lambda x: x['percentage'])
+
+    res = {'data': data}
+    return HttpResponse(simplejson.dumps(res),
+        mimetype="application/json")

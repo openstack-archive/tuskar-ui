@@ -174,25 +174,26 @@ class UsageDataView(View):
 
 
 def top_communicating(request, rack_id=None):
+    # FIXME replace mock data
     random.seed()
     data = []
-    statuses = ["OFF", "Good", "Something is wrong", "Disaster"]
+    statuses = ["Insane level of communication",
+                "High level of communication",
+                "Normal level of communication",
+                "Low level of communication"]
 
-    number_of_elements = random.randint(50, 60)
-    for index in range(number_of_elements):
+    rack = api.tuskar.Rack.get(request, rack_id)
+    for node in rack.nodes:
         status = random.randint(0, 3)
         percentage = random.randint(0, 100)
 
-        # count black/white color depending to percentage
-        # FIXME encapsulate the algoritm of getting color to the library,
-        # If the algorithm will be used in multiple places. Then pass the
-        # alghoritm name and parameters.
-        # If it will be used only in one place, pass the color directly.
-        color_n = 255 / 100 * percentage
-        color = "rgb(%s, %s, %s)" % (color_n, color_n, color_n)
+        tooltip = ("<p>Node: <strong>{0}</strong></p><p>{1}</p>").format(
+            node['id'],
+            statuses[status])
 
-        data.append({'color': color,
+        data.append({'tooltip': tooltip,
                      'status': statuses[status],
+                     'scale': 'linear_color_scale',
                      'percentage': percentage,
                      'id': "FIXME_RACK id",
                      'name': "FIXME name",
@@ -200,5 +201,44 @@ def top_communicating(request, rack_id=None):
 
         data.sort(key=lambda x: x['percentage'])
 
-    return HttpResponse(simplejson.dumps(data),
+    # FIXME dynamically set the max domain, based on data
+    settings = {'scale': 'linear_color_scale',
+                'domain': [0, max([datum['percentage'] for datum in data])],
+                'range': ["#000060", "#99FFFF"]}
+    res = {'data': data,
+           'settings': settings}
+    return HttpResponse(simplejson.dumps(res),
+        mimetype="application/json")
+
+
+def node_health(request, rack_id=None):
+    # FIXME replace mock data
+    random.seed()
+    data = []
+    statuses = ["Good", "Warnings", "Disaster"]
+    colors = ["rgb(244,244,244)", "rgb(240,170,0)", "rgb(200,0,0)"]
+
+    rack = api.tuskar.Rack.get(request, rack_id)
+
+    for node in rack.nodes:
+        rand_index = random.randint(0, 2)
+        percentage = (2 - rand_index) * 50
+        color = colors[rand_index]
+
+        tooltip = ("<p>Node: <strong>{0}</strong></p><p>{1}</p>").format(
+            node['id'],
+            statuses[rand_index])
+
+        data.append({'tooltip': tooltip,
+                     'color': color,
+                     'status': statuses[rand_index],
+                     'percentage': percentage,
+                     'id': node['id'],
+                     'name': node['id'],
+                     'url': "FIXME url"})
+
+        data.sort(key=lambda x: x['percentage'])
+
+    res = {'data': data}
+    return HttpResponse(simplejson.dumps(res),
         mimetype="application/json")

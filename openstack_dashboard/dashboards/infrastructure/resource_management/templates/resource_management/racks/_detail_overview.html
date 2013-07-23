@@ -73,7 +73,7 @@
         <div id="most_contacting_racks"
              class="communication_chart"
              data-chart-type="circles_chart"
-             data-url="/infrastructure/racks/1/top_communicating.json?cond=from"
+             data-url="{% url 'horizon:infrastructure:resource_management:racks:top_communicating' rack.id %}?cond=from"
              data-time="now"
              data-size="22">
         </div>
@@ -84,7 +84,7 @@
         <div id="most_contacted_racks"
              class="communication_chart"
              data-chart-type="circles_chart"
-             data-url="/infrastructure/racks/1/top_communicating.json?cond=to"
+             data-url="{% url 'horizon:infrastructure:resource_management:racks:top_communicating' rack.id %}?cond=to"
              data-time="now"
              data-size="22">
         </div>
@@ -109,28 +109,28 @@
         data-circles-chart-command="change_url"
         data-receiver="#rack_health_chart">
       <li class="active">
-        <a data-url="/infrastructure/racks/1/top_communicating.json?type=overall_health" href="#">
+        <a data-url="{% url 'horizon:infrastructure:resource_management:racks:node_health' rack.id %}?type=overall_health" href="#">
           Overall Health</a>
       </li>
       <li>
-        <a data-url="/infrastructure/racks/1/top_communicating.json?type=alerts" href="#">
+        <a data-url="{% url 'horizon:infrastructure:resource_management:racks:node_health' rack.id %}?type=alerts" href="#">
           Alerts</a>
       </li>
       <li>
-        <a data-url="/infrastructure/racks/1/top_communicating.json?type=capacities" href="#">
+        <a data-url="{% url 'horizon:infrastructure:resource_management:racks:node_health' rack.id %}?type=capacities" href="#">
           Capacities</a>
       </li>
       <li>
-        <a data-url="/infrastructure/racks/1/top_communicating.json?type=status" href="#">
+        <a data-url="{% url 'horizon:infrastructure:resource_management:racks:node_health' rack.id %}?type=status" href="#">
           Status</a>
       </li>
     </ul>
     <div id ="rack_health_chart"
          class="health_chart"
          data-chart-type="circles_chart"
-         data-url="/infrastructure/racks/1/top_communicating.json?cond=health"
+         data-url="{% url 'horizon:infrastructure:resource_management:racks:node_health' rack.id %}"
          data-time="now"
-         data-size="40">
+         data-size="22">
     </div>
   </div>
 </div>

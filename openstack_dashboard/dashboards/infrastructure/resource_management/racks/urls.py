@@ -32,5 +32,7 @@ urlpatterns = patterns(VIEW_MOD,
     url(RACKS % 'edit_status/', EditRackStatusView.as_view(),
                                 name='edit_status'),
     url(RACKS % 'detail', DetailView.as_view(), name='detail'),
-    url(RACKS % 'top_communicating.json', 'top_communicating'),
+    url(RACKS % 'top_communicating.json', 'top_communicating',
+        name='top_communicating'),
+    url(RACKS % 'node_health.json', 'node_health', name='node_health'),
 )

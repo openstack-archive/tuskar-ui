@@ -88,6 +88,7 @@ horizon.d3_circles_chart = {
     this.size = jquery_element.data('size');
     this.time = jquery_element.data('time');
     this.url = jquery_element.data('url');
+
     this.final_url = this.url;
     if (this.final_url.indexOf('?') > -1){
       this.final_url += '&time=' + this.time;
@@ -109,8 +110,9 @@ horizon.d3_circles_chart = {
             // not delete and create
             $(self.html_element).html("");
 
-            self.data = data
-            self.chart_class.render(self.html_element, self.size, self.data);
+            self.data = data.data;
+            self.settings = data.settings;
+            self.chart_class.render(self.html_element, self.size, self.data, self.settings);
           })
           .fail(function() {
             // FIXME add proper fail message
@@ -135,7 +137,8 @@ horizon.d3_circles_chart = {
     // this.charts.add_or_update(chart)
     chart.refresh();
   },
-  render: function(html_element, size, data){
+  render: function(html_element, size, data, settings){
+    var self = this;
     // FIXME rewrite to scatter plot once we have some cool D3 chart
     // library
     var width = size + 4,
@@ -167,13 +170,25 @@ horizon.d3_circles_chart = {
         .attr("r", round)//function(d) { return d.r; })// can be sent form server
         .attr("cx", center_x)
         .attr("cy", center_y)
-        .attr("stroke", "black")
+        .attr("stroke", "grey")
         .attr("stroke-width", function(d) {
           return 1;
         })
-        .style("fill", function(d) {return d.color; })
-        .on("mouseover", function(d){tooltip.html("Rack XY <br/>" + d.status);
-                                     tooltip.style("visibility", "visible");})
+        .style("fill", function(d) {
+          if (d.color){
+            return d.color;
+          } else if (settings.scale == "linear_color_scale"){
+            return self.linear_color_scale(d.percentage, settings.domain, settings.range)
+
+          }
+        })
+        .on("mouseover", function(d){
+          if (d.tooltip) {
+            tooltip.html(d.tooltip);
+          } else {
+            tooltip.html(d.name + "<br/>" + d.status);
+          }
+          tooltip.style("visibility", "visible");})
         .on("mousemove", function(d){tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
         .on("mouseout", function(d){tooltip.style("visibility", "hidden");});
         ;
@@ -184,6 +199,12 @@ horizon.d3_circles_chart = {
       .text(function(d) { return d.x; });
 
     */
+  },
+  linear_color_scale: function(percentage, domain, range){
+    usage_color = d3.scale.linear()
+      .domain(domain)
+      .range(range);
+    return usage_color(percentage);
   },
   bind_commands: function (){
     var change_time_command_selector = 'select[data-circles-chart-command="change_time"]';
@@ -218,14 +239,14 @@ horizon.d3_circles_chart = {
       // Invoker of the command should know about it's receiver.
       // Also invoker brings all parameters of the command.
       this.receiver_selector = invoker.data('receiver');
-      this.new_time = invoker.val();
+      this.new_time = invoker.find("option:selected").val();
 
       this.execute = execute;
       function execute(){
           var self = this;
           $(this.receiver_selector).each(function(){
             // change time of the chart
-            $(this).data('time', this.new_time);
+            $(this).data('time', self.new_time);
             // refresh the chart
             chart_class.refresh(this)
           });
@@ -242,7 +263,7 @@ horizon.d3_circles_chart = {
         var self = this;
         $(this.receiver_selector).each(function(){
           // change time of the chart
-          $(this).data('url', this.new_url);
+          $(this).data('url', self.new_url);
           // refresh the chart
           chart_class.refresh(this)
         });
