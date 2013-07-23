@@ -7,10 +7,13 @@
 {% endblock page_header %}
 
 {% block main %}
-
-<div class="breadcrumbs">
-  <a href="{% url 'horizon:infrastructure:resource_management:index' %}?tab=resource_management_tabs__resource_classes_tab" >Home</a>
-  <span class="separator"></span>
+<div class="row-fluid">
+  <div class="span12">
+    <div class="breadcrumbs">
+      <a href="{% url 'horizon:infrastructure:resource_management:index' %}?tab=resource_management_tabs__resource_classes_tab" >Home</a>
+      <span class="separator"></span>
+    </div>
+  </div>
 </div>
 
 <div class="row-fluid">

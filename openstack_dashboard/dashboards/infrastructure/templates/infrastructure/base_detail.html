@@ -2,14 +2,17 @@
 
 {% block main %}
 
-{% block breadcrumbs %}{% endblock %}
+<div class="row-fluid">
+  <div class="span12">
+    {% block breadcrumbs %}{% endblock %}
 
-<div class="pull-right btn-toolbar">
-  {% block actions %}{% endblock %}
+    <div class="pull-right btn-toolbar">
+      {% block actions %}{% endblock %}
+    </div>
+
+    <h3>{% block name %}{% endblock %}</h3>
+  </div>
 </div>
-
-<h3>{% block name %}{% endblock %}</h3>
-
 
 <div class="row-fluid">
   <div class="span12">

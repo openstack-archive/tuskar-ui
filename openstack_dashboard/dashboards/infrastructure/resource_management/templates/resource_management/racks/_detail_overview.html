@@ -12,7 +12,7 @@
       <dd>{{ rack.switch_ips|default:_("None") }}</dd>
       <dt>{% trans "Location" %}</dt>
       <dd>{{ rack.location|default:_("None") }}</dd>
-      <dt>{% trans "Status" %}</dt>
+      <dt>{% trans "State" %}</dt>
       <dd>{{ rack.state|default:_("None") }}</dd>
     </dl>
   </div>
@@ -32,62 +32,22 @@
     <h4>{% trans "Capacities" %}</h4>
     <hr class="header_rule">
     <table class="capacities">
+      {% for capacity in rack.capacities %}
       <tr>
-        <td class="capacity_label">{% trans "CPU" %}:</td>
+        <td class="capacity_label">{{ capacity.name }}:</td>
         <td>
-          <div id="cpu_capacity_usage"
+          <div id="{{ capacity.name }}_capacity_usage"
                class="capacity_bar"
-               data-capacity-limit="{{ rack.cpu.value }}"
-               data-capacity-used="{{ rack.cpu.usage }}"
-               data-average-capacity-used="{{ 12 }}">
+               data-capacity-limit="{{ capacity.value }}"
+               data-capacity-used="{{ capacity.usage }}"
+               data-average-capacity-used="{{ capacity.average }}">
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ rack.cpu.usage }}/{{ rack.cpu.value }} {{ rack.cpu.unit }}</a>
+          <a href="#" class="modal_chart">{{ capacity.usage|default:_(" - ") }}/{{ capacity.value|default:_(" - ") }} {{ capacity.unit }}</a>
         </td>
       </tr>
-      <tr>
-        <td class="capacity_label">{% trans "RAM" %}:</td>
-        <td>
-          <div id="ram_capacity_usage"
-               class="capacity_bar"
-               data-capacity-limit="{{ rack.ram.value }}"
-               data-capacity-used="{{ rack.ram.usage }}"
-               data-average-capacity-used="{{ 12 }}">
-          </div>
-        </td>
-        <td>
-          <a href="#" class="modal_chart">{{ rack.ram.usage }}/{{ rack.ram.value }} {{ rack.ram.unit }}</a>
-        </td>
-      </tr>
-      <tr>
-        <td class="capacity_label">{% trans "Storage" %}:</td>
-        <td>
-          <div id="storage_capacity_usage"
-               class="capacity_bar"
-               data-capacity-limit="{{ rack.storage.value }}"
-               data-capacity-used="{{ rack.storage.usage }}"
-               data-average-capacity-used="{{ 12 }}">
-          </div>
-        </td>
-        <td>
-          <a href="#" class="modal_chart">{{ rack.storage.usage }}/{{ rack.storage.value }} {{ rack.storage.unit }}</a>
-        </td>
-      </tr>
-      <tr>
-        <td class="capacity_label">{% trans "Network" %}:</td>
-        <td>
-          <div id="network_capacity_usage"
-               class="capacity_bar"
-               data-capacity-limit="{{ rack.network.value }}"
-               data-capacity-used="{{ rack.network.usage }}"
-               data-average-capacity-used="{{ 12 }}">
-          </div>
-        </td>
-        <td>
-          <a href="#" class="modal_chart">{{ rack.network.usage }}/{{ rack.network.value }} {{ rack.network.unit }}</a>
-        </td>
-      </tr>
+      {% endfor %}
     </table>
   </div>
 </div>

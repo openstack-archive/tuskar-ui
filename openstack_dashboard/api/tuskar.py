@@ -22,6 +22,7 @@ from random import randint
 from django.conf import settings
 from django.db.models import Sum, Max
 from django.utils.translation import ugettext_lazy as _
+from horizon import exceptions
 
 from tuskarclient.v1 import client as tuskar_client
 
@@ -47,6 +48,24 @@ class StringIdAPIResourceWrapper(base.APIResourceWrapper):
     # Because of this, ids returned from dummy api are converted to string
     # (luckily django autoconverts strings to integers when passing string to
     # django model id)
+
+    # FIXME
+    # this is redefined from base.APIResourceWrapper,
+    # remove this when tuskarclient returns object instead of dict
+    def __getattr__(self, attr):
+        if attr in self._attrs:
+            if issubclass(self._apiresource.__class__, dict):
+                return self._apiresource.get(attr)
+            else:
+                return self._apiresource.__getattribute__(attr)
+        else:
+            msg = ('Attempted to access unknown attribute "%s" on '
+                   'APIResource object of type "%s" wrapping resource of '
+                   'type "%s".') % (attr, self.__class__,
+                                    self._apiresource.__class__)
+            LOG.debug(exceptions.error_color(msg))
+            raise AttributeError(attr)
+
     @property
     def id(self):
         return str(self._apiresource.id)
@@ -94,7 +113,7 @@ class Capacity(StringIdAPIResourceWrapper):
     @property
     def usage(self):
         if not hasattr(self, '_usage'):
-            self._usage = randint(0, self.value)
+            self._usage = randint(0, int(self.value))
         return self._usage
 
     # defines a random average of capacity - API should probably be able to
@@ -102,7 +121,7 @@ class Capacity(StringIdAPIResourceWrapper):
     @property
     def average(self):
         if not hasattr(self, '_average'):
-            self._average = randint(0, self.value)
+            self._average = randint(0, int(self.value))
         return self._average
 
 
@@ -277,105 +296,6 @@ class Rack(StringIdAPIResourceWrapper):
         rclass = getattr(self._apiresource, 'resource_class', None)
         return rclass['id'] if rclass else None
 
-    @property
-    def capacities(self):
-        if not hasattr(self, '_capacities'):
-            self._capacities = [Capacity(c) for c in
-                                self._apiresource.capacities.all()]
-        return self._capacities
-
-    @property
-    def cpu(self):
-        if not hasattr(self, '_cpu'):
-            try:
-                attrs = dummymodels.Capacity.objects\
-                        .filter(node__rack=self._apiresource)\
-                        .values('name', 'unit').annotate(value=Sum('value'))\
-                        .filter(name='cpu')[0]
-            except:
-                attrs = {'name': 'cpu',
-                         'value': _('Unable to retrieve '
-                                    '(Are the nodes configured properly?)'),
-                         'unit': ''}
-            cpu = dummymodels.Capacity(name=attrs['name'],
-                                       value=attrs['value'],
-                                       unit=attrs['unit'])
-            self._cpu = Capacity(cpu)
-        return self._cpu
-
-    @property
-    def ram(self):
-        if not hasattr(self, '_ram'):
-            try:
-                attrs = dummymodels.Capacity.objects\
-                        .filter(node__rack=self._apiresource)\
-                        .values('name', 'unit').annotate(value=Sum('value'))\
-                        .filter(name='ram')[0]
-            except:
-                attrs = {'name': 'ram',
-                         'value': _('Unable to retrieve '
-                                    '(Are the nodes configured properly?)'),
-                         'unit': ''}
-            ram = dummymodels.Capacity(name=attrs['name'],
-                                       value=attrs['value'],
-                                       unit=attrs['unit'])
-            self._ram = Capacity(ram)
-        return self._ram
-
-    @property
-    def storage(self):
-        if not hasattr(self, '_storage'):
-            try:
-                attrs = dummymodels.Capacity.objects\
-                        .filter(node__rack=self._apiresource)\
-                        .values('name', 'unit').annotate(value=Sum('value'))\
-                        .filter(name='storage')[0]
-            except:
-                attrs = {'name': 'storage',
-                         'value': _('Unable to retrieve '
-                                    '(Are the nodes configured properly?)'),
-                         'unit': ''}
-            storage = dummymodels.Capacity(name=attrs['name'],
-                                           value=attrs['value'],
-                                           unit=attrs['unit'])
-            self._storage = Capacity(storage)
-        return self._storage
-
-    @property
-    def network(self):
-        if not hasattr(self, '_network'):
-            try:
-                attrs = dummymodels.Capacity.objects\
-                        .filter(node__rack=self._apiresource)\
-                        .values('name', 'unit').annotate(value=Sum('value'))\
-                        .filter(name='network')[0]
-            except:
-                attrs = {'name': 'network',
-                         'value': _('Unable to retrieve '
-                                    '(Are the nodes configured properly?)'),
-                         'unit': ''}
-            network = dummymodels.Capacity(name=attrs['name'],
-                                           value=attrs['value'],
-                                           unit=attrs['unit'])
-            self._network = Capacity(network)
-        return self._network
-
-    @property
-    def vm_capacity(self):
-        if not hasattr(self, '_vm_capacity'):
-            try:
-                value = dummymodels.ResourceClassFlavor.objects\
-                            .filter(resource_class__rack=self._apiresource)\
-                            .aggregate(Max("max_vms"))['max_vms__max']
-            except:
-                value = _("Unable to retrieve vm capacity")
-
-            vm_capacity = dummymodels.Capacity(name=_("Max VMs"),
-                                               value=value,
-                                               unit=_("VMs"))
-            self._vm_capacity = Capacity(vm_capacity)
-        return self._vm_capacity
-
     @classmethod
     def delete(cls, request, rack_id):
         tuskarclient(request).racks.delete(rack_id)
@@ -424,6 +344,29 @@ class Rack(StringIdAPIResourceWrapper):
             else:
                 self._resource_class = None
         return self._resource_class
+
+    @property
+    def capacities(self):
+        if not hasattr(self, '_capacities'):
+            self._capacities = [Capacity(c) for c in
+                                self._apiresource.capacities]
+        return self._capacities
+
+    @property
+    def vm_capacity(self):
+        if not hasattr(self, '_vm_capacity'):
+            try:
+                value = dummymodels.ResourceClassFlavor.objects\
+                            .filter(resource_class__rack=self._apiresource)\
+                            .aggregate(Max("max_vms"))['max_vms__max']
+            except:
+                value = _("Unable to retrieve vm capacity")
+
+            vm_capacity = dummymodels.Capacity(name=_("Max VMs"),
+                                               value=value,
+                                               unit=_("VMs"))
+            self._vm_capacity = Capacity(vm_capacity)
+        return self._vm_capacity
 
 
 class ResourceClass(StringIdAPIResourceWrapper):
