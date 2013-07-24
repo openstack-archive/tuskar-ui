@@ -31,68 +31,29 @@
   <div class="span4">
     <h4>{% trans "Capacities" %}</h4>
     <hr class="header_rule">
+    {% if resource_class.capacities %}
     <table class="capacities">
+      {% for capacity in resource_class.capacities %}
       <tr>
-        <td class="capacity_label">{% trans "CPU" %}:</td>
+        <td class="capacity_label">{{ capacity.name }}:</td>
         <td>
-          <div id="cpu_capacity_usage"
+          <div id="{{ capacity.name }}_capacity_usage"
                class="capacity_bar"
                data-chart-type="capacity_bar_chart"
-               data-capacity-limit="{{ resource_class.cpu.value }}"
-               data-capacity-used="{{ resource_class.cpu.usage }}"
-               data-average-capacity-used="{{ 12 }}">
+               data-capacity-limit="{{ capacity.value }}"
+               data-capacity-used="{{ capacity.usage }}"
+               data-average-capacity-used="{{ capacity.average }}">
           </div>
         </td>
         <td>
-          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="cpu">{{ resource_class.cpu.usage }}/{{ resource_class.cpu.value }} {{ resource_class.cpu.unit }}</a>
+          <a href="#" class="modal_chart">{{ capacity.usage|default:_(" - ") }}/{{ capacity.value|default:_(" - ") }} {{ capacity.unit }}</a>
         </td>
       </tr>
-      <tr>
-        <td class="capacity_label">{% trans "RAM" %}:</td>
-        <td>
-          <div id="ram_capacity_usage"
-               class="capacity_bar"
-               data-chart-type="capacity_bar_chart"
-               data-capacity-limit="{{ resource_class.ram.value }}"
-               data-capacity-used="{{ resource_class.ram.usage }}"
-               data-average-capacity-used="{{ 12 }}">
-          </div>
-        </td>
-        <td>
-          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="ram">{{ resource_class.ram.usage }}/{{ resource_class.ram.value }} {{ resource_class.ram.unit }}</a>
-        </td>
-      </tr>
-      <tr>
-        <td class="capacity_label">{% trans "Storage" %}:</td>
-        <td>
-          <div id="storage_capacity_usage"
-               class="capacity_bar"
-               data-chart-type="capacity_bar_chart"
-               data-capacity-limit="{{ resource_class.storage.value }}"
-               data-capacity-used="{{ resource_class.storage.usage }}"
-               data-average-capacity-used="{{ 12 }}">
-          </div>
-        </td>
-        <td>
-          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="storage">{{ resource_class.storage.usage }}/{{ resource_class.storage.value }} {{ resource_class.storage.unit }}</a>
-        </td>
-      </tr>
-      <tr>
-        <td class="capacity_label">{% trans "Network" %}:</td>
-        <td>
-          <div id="network_capacity_usage"
-               class="capacity_bar"
-               data-chart-type="capacity_bar_chart"
-               data-capacity-limit="{{ resource_class.network.value }}"
-               data-capacity-used="{{ resource_class.network.usage }}"
-               data-average-capacity-used="{{ 12 }}">
-          </div>
-        </td>
-        <td>
-          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="network">{{ resource_class.network.usage }}/{{ resource_class.network.value }} {{ resource_class.network.unit }}</a>
-        </td>
-      </tr>
+      {% endfor %}
     </table>
+    {% else %}
+      <p>No data available yet.</p>
+    {% endif %}
   </div>
 </div>
 

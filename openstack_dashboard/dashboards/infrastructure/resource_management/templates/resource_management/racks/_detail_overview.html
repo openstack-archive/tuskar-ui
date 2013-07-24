@@ -31,6 +31,7 @@
   <div class="span4">
     <h4>{% trans "Capacities" %}</h4>
     <hr class="header_rule">
+    {% if rack.capacities %}
     <table class="capacities">
       {% for capacity in rack.capacities %}
       <tr>
@@ -50,6 +51,9 @@
       </tr>
       {% endfor %}
     </table>
+    {% else %}
+      <p>No data available yet.</p>
+    {% endif %}
   </div>
 </div>
 
@@ -91,7 +95,7 @@
     <h4>Top Communicating Racks</h4>
     <hr class="header_rule">
     <div class="clear"></div>
-
+    {% if rack.nodes_count %}
     <div class="communication_charts_wrapper">
       <div class="communication_chart_wrapper">
         <h5>The most contacting</h5>
@@ -115,6 +119,9 @@
         </div>
       </div>
     </div>
+    {% else %}
+      <p>No data available yet.</p>
+    {% endif %}
   </div>
   <div class="span6">
     <div class="circles_chart_time_picker">

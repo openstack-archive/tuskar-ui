@@ -16,6 +16,7 @@ import copy
 import logging
 import re
 from collections import namedtuple
+import itertools
 from datetime import timedelta
 from random import randint
 
@@ -472,6 +473,21 @@ class ResourceClass(StringIdAPIResourceWrapper):
         return self._racks
 
     @property
+    def capacities(self):
+        """Aggregates Rack capacities values
+        """
+        if not hasattr(self, '_capacities'):
+            capacities = [rack.capacities for rack in self.list_racks]
+
+            def add_capacities(c1, c2):
+                return [Capacity({'name': a.name,
+                                 'value': int(a.value) + int(b.value),
+                                 'unit': a.unit}) for a, b in zip(c1, c2)]
+
+            self._capacities = reduce(add_capacities, capacities)
+        return self._capacities
+
+    @property
     def all_racks(self):
         """ List of racks added to ResourceClass + list of free racks,
         meaning racks that don't belong to any ResourceClass"""
@@ -558,91 +574,6 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @property
     def racks_count(self):
         return len(self.racks)
-
-    @property
-    def running_virtual_machines(self):
-        if not hasattr(self, '_running_virtual_machines'):
-            self._running_virtual_machines =\
-                                    copy.deepcopy(self.list_flavors)
-            for vm in self._running_virtual_machines:
-                vm.max_vms /= (vm.max_vms % 7) + 1
-        return self._running_virtual_machines
-
-    @property
-    def cpu(self):
-        if not hasattr(self, '_cpu'):
-            try:
-                attrs = dummymodels.Capacity.objects\
-                        .filter(node__rack__resource_class=self._apiresource)\
-                        .values('name', 'unit').annotate(value=Sum('value'))\
-                        .filter(name='cpu')[0]
-            except:
-                attrs = {'name': 'cpu',
-                         'value': _('Unable to retrieve '
-                                    '(Are the nodes configured properly?)'),
-                         'unit': ''}
-            cpu = dummymodels.Capacity(name=attrs['name'],
-                                             value=attrs['value'],
-                                             unit=attrs['unit'])
-            self._cpu = Capacity(cpu)
-        return self._cpu
-
-    @property
-    def ram(self):
-        if not hasattr(self, '_ram'):
-            try:
-                attrs = dummymodels.Capacity.objects\
-                        .filter(node__rack__resource_class=self._apiresource)\
-                        .values('name', 'unit').annotate(value=Sum('value'))\
-                        .filter(name='ram')[0]
-            except:
-                attrs = {'name': 'ram',
-                         'value': _('Unable to retrieve '
-                                    '(Are the nodes configured properly?)'),
-                         'unit': ''}
-            ram = dummymodels.Capacity(name=attrs['name'],
-                                             value=attrs['value'],
-                                             unit=attrs['unit'])
-            self._ram = Capacity(ram)
-        return self._ram
-
-    @property
-    def storage(self):
-        if not hasattr(self, '_storage'):
-            try:
-                attrs = dummymodels.Capacity.objects\
-                        .filter(node__rack__resource_class=self._apiresource)\
-                        .values('name', 'unit').annotate(value=Sum('value'))\
-                        .filter(name='storage')[0]
-            except:
-                attrs = {'name': 'storage',
-                         'value': _('Unable to retrieve '
-                                    '(Are the nodes configured properly?)'),
-                         'unit': ''}
-            storage = dummymodels.Capacity(name=attrs['name'],
-                                                 value=attrs['value'],
-                                                 unit=attrs['unit'])
-            self._storage = Capacity(storage)
-        return self._storage
-
-    @property
-    def network(self):
-        if not hasattr(self, '_network'):
-            try:
-                attrs = dummymodels.Capacity.objects\
-                        .filter(node__rack__resource_class=self._apiresource)\
-                        .values('name', 'unit').annotate(value=Sum('value'))\
-                        .filter(name='network')[0]
-            except:
-                attrs = {'name': 'network',
-                         'value': _('Unable to retrieve '
-                                    '(Are the nodes configured properly?)'),
-                         'unit': ''}
-            network = dummymodels.Capacity(name=attrs['name'],
-                                           value=attrs['value'],
-                                           unit=attrs['unit'])
-            self._network = Capacity(network)
-        return self._network
 
     @property
     def vm_capacity(self):
