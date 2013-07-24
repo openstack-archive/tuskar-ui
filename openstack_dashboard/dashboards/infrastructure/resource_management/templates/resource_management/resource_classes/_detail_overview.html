@@ -123,9 +123,9 @@
     <hr class="header_rule">
     <!--
     <dl>
-      {% for flavor_count in resource_class.running_virtual_machines %}
-        <dt>{{ flavor_count.flavor.name }}</dt>
-        <dd>{{ flavor_count.max_vms }}</dd>
+      {% for flavor in resource_class.running_virtual_machines %}
+        <dt>{{ flavor.name }}</dt>
+        <dd>{{ flavor.max_vms|default:_(" - ") }}</dd>
       {% endfor %}
     </dl>
     -->

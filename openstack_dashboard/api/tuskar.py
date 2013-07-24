@@ -381,18 +381,18 @@ class Rack(StringIdAPIResourceWrapper):
 
     @property
     def vm_capacity(self):
+        """ Rack VM Capacity is maximum value from It's Resource Class's
+            Flavors max_vms (considering flavor sizes are multiples).
+        """
         if not hasattr(self, '_vm_capacity'):
             try:
-                value = dummymodels.ResourceClassFlavor.objects\
-                            .filter(resource_class__rack=self._apiresource)\
-                            .aggregate(Max("max_vms"))['max_vms__max']
+                value = max([flavor.max_vms for flavor in
+                             self.resource_class.list_flavors])
             except:
-                value = _("Unable to retrieve vm capacity")
-
-            vm_capacity = dummymodels.Capacity(name=_("Max VMs"),
-                                               value=value,
-                                               unit=_("VMs"))
-            self._vm_capacity = Capacity(vm_capacity)
+                value = None
+            self._vm_capacity = Capacity({'name': "VM Capacity",
+                                          'value': value,
+                                          'unit': 'VMs'})
         return self._vm_capacity
 
     @property
@@ -642,18 +642,19 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @property
     def vm_capacity(self):
+        """ Resource Class VM Capacity is maximum value from It's Flavors
+            max_vms (considering flavor sizes are multiples), multipled by
+            number of Racks in Resource Class.
+        """
         if not hasattr(self, '_vm_capacity'):
             try:
-                value = dummymodels.ResourceClassFlavor.objects\
-                            .filter(resource_class=self._apiresource)\
-                            .aggregate(Max("max_vms"))['max_vms__max']
+                value = self.racks_count * max([flavor.max_vms for flavor in
+                                                self.list_flavors])
             except:
                 value = _("Unable to retrieve vm capacity")
-
-            vm_capacity = dummymodels.Capacity(name=_("Max VMs"),
-                                               value=value,
-                                               unit=_("VMs"))
-            self._vm_capacity = Capacity(vm_capacity)
+            self._vm_capacity = Capacity({'name': _("VM Capacity"),
+                                          'value': value,
+                                          'unit': _('VMs')})
         return self._vm_capacity
 
     def set_racks(self, request, racks_ids):

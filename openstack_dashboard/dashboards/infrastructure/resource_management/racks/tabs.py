@@ -25,7 +25,6 @@ class OverviewTab(tabs.Tab):
     slug = "rack_overview_tab"
     template_name = ("infrastructure/resource_management/racks/"
                      "_detail_overview.html")
-    preload = False
 
     def get_context_data(self, request):
         return {"rack": self.tab_group.kwargs['rack']}
