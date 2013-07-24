@@ -12,10 +12,13 @@
     With this capacity bar, you then need to add some data- HTML attributes
     to the div #your_capacity_bar_id. The available data- attributes are:
 
-      data-capacity-used="integer" REQUIRED
+      data-chart-type="capacity_bar_chart" REQUIRED
+          Must be "capacity_bar_chart".
+
+      data-capacity-used="integer" OPTIONAL
           Integer representing the total number used by the user.
 
-      data-capacity-limit="integer" REQUIRED
+      data-capacity-limit="integer" OPTIONAL
           Integer representing the total quota limit the user has. Note this IS
           NOT the amount remaining they can use, but the total original capacity.
 
@@ -28,7 +31,7 @@ horizon.Capacity = {
 
   //  Determines the capacity bars to be used for capacity display.
   init: function() {
-    this.capacity_bars = $('div[data-capacity-used]');
+    this.capacity_bars = $('div[data-chart-type="capacity_bar_chart"]');
 
     // Draw the capacity bars
     this._initialCreation(this.capacity_bars);
@@ -55,7 +58,7 @@ horizon.Capacity = {
         .attr("width", w)
         .attr("height", h)
         .style("background-color", "white")
-        .append("g")
+        .append("g");
 
     // background - unused resources
     bar.append("rect")
@@ -66,56 +69,62 @@ horizon.Capacity = {
       .attr("ry", lvl_curve)
       .style("fill", bkgrnd)
       .style("stroke", "#000000")
-      .style("stroke-width", 1)
+      .style("stroke-width", 1);
 
     // used resources
-    bar.append("rect")
-      .attr("class", "usedbar")
-      .attr("y", 0)
-      .attr("id", "test")
-      .attr("width", 0)
-      .attr("height", h)
-      .attr("rx", lvl_curve)
-      .attr("ry", lvl_curve)
-      .style("fill", usage_color(used_perc))
-      .style("stroke", "#000000")
-      .style("stroke-width", 1)
-      .attr("d", used_perc)
-      .transition()
-        .duration(500)
-        .attr("width", used_perc + "%")
+    if (used_perc) {
+      bar.append("rect")
+         .attr("class", "usedbar")
+         .attr("y", 0)
+         .attr("id", "test")
+         .attr("width", 0)
+         .attr("height", h)
+         .attr("rx", lvl_curve)
+         .attr("ry", lvl_curve)
+         .style("fill", usage_color(used_perc))
+         .style("stroke", "#000000")
+         .style("stroke-width", 1)
+         .attr("d", used_perc)
+         .transition()
+            .duration(500)
+            .attr("width", used_perc + "%");
+      }
 
     // average
-    bar.append("rect")
-      .attr("y",1)
-      .attr("x", 0)
-      .attr("class", "average")
-      .attr("height", h-2)
-      .attr("width", 1)
-      .style("fill", "black")
-      .transition()
-        .duration(500)
-        .attr("x", average_perc + "%")
+    if (average_perc) {
+      bar.append("rect")
+         .attr("y",1)
+         .attr("x", 0)
+         .attr("class", "average")
+         .attr("height", h-2)
+         .attr("width", 1)
+         .style("fill", "black")
+         .transition()
+            .duration(500)
+            .attr("x", average_perc + "%");
+    }
 
     // used text
-    bar.append("text")
-      .text(used_perc + "%")
-      .attr("y", 8)
-      .attr("x", 3)
-      .attr("dominant-baseline", "middle")
-      .attr("font-size", 10)
-      .transition()
-        .duration(500)
-        .attr("x", function() {
-          // position the percentage label
-          if (used_perc > 99 && used_px > 25){
-            return used_px - 30;
-          } else if (used_px > 25) {
-            return used_px - 25;
-          } else {
-            return used_px + 3;
-          }
-        })
+    if (used_perc) {
+      bar.append("text")
+         .text(used_perc + "%")
+         .attr("y", 8)
+         .attr("x", 3)
+         .attr("dominant-baseline", "middle")
+         .attr("font-size", 10)
+         .transition()
+            .duration(500)
+            .attr("x", function() {
+              // position the percentage label
+              if (used_perc > 99 && used_px > 25){
+                return used_px - 30;
+              } else if (used_px > 25) {
+                return used_px - 25;
+              } else {
+                return used_px + 3;
+              }
+            });
+    }
   },
 
 
@@ -137,7 +146,7 @@ horizon.Capacity = {
 
       if (!isNaN(capacity_limit) && !isNaN(capacity_used)) {
         var percentage_used = Math.round((capacity_used / capacity_limit) * 100);
-        var used_px = progress_element.width() / 100 * percentage_used
+        var used_px = progress_element.width() / 100 * percentage_used;
 
       } else { // If NaN percentage_used is 0
         var percentage_used = 0;
@@ -148,3 +157,7 @@ horizon.Capacity = {
     });
   }
 };
+
+horizon.addInitFunction(function () {
+  horizon.Capacity.init();
+});

@@ -242,6 +242,10 @@ class Node(StringIdAPIResourceWrapper):
             self._vm_capacity = Capacity(vm_capacity)
         return self._vm_capacity
 
+    @property
+    def is_provisioned(self):
+        return False
+
 
 class Rack(StringIdAPIResourceWrapper):
     """Wrapper for the Rack object  returned by the

@@ -42,9 +42,11 @@
     <table class="capacities">
       <tr>
         <td class="capacity_label">{% trans "CPU" %}:</td>
+        {% if node.is_provisioned %}
         <td>
           <div id="cpu_capacity_usage"
                class="capacity_bar"
+               data-chart-type="capacity_bar_chart"
                data-capacity-limit="{{ node.cpu.value }}"
                data-capacity-used="{{ node.cpu.usage }}"
                data-average-capacity-used="{{ 2 }}">
@@ -53,12 +55,23 @@
         <td>
           <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data">{{ node.cpu.usage }}/{{ node.cpu.value }} {{ node.cpu.unit }}</a>
         </td>
+        {% else %}
+        <td>
+          <div id="cpu_capacity_usage"
+               class="capacity_bar"
+               data-chart-type="capacity_bar_chart">
+          </div>
+        </td>
+        <td></td>
+        {% endif %}
       </tr>
       <tr>
         <td class="capacity_label">{% trans "RAM" %}:</td>
+        {% if node.is_provisioned %}
         <td>
           <div id="ram_capacity_usage"
                class="capacity_bar"
+               data-chart-type="capacity_bar_chart"
                data-capacity-limit="{{ node.ram.value }}"
                data-capacity-used="{{ node.ram.usage }}"
                data-average-capacity-used="{{ 12 }}">
@@ -67,12 +80,23 @@
         <td>
           <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data">{{ node.ram.usage }}/{{ node.ram.value }} {{ node.ram.unit }}</a>
         </td>
+        {% else %}
+        <td>
+          <div id="ram_capacity_usage"
+               class="capacity_bar"
+               data-chart-type="capacity_bar_chart">
+          </div>
+        </td>
+        <td></td>
+        {% endif %}
       </tr>
       <tr>
         <td class="capacity_label">{% trans "Storage" %}:</td>
+        {% if node.is_provisioned %}
         <td>
           <div id="storage_capacity_usage"
                class="capacity_bar"
+               data-chart-type="capacity_bar_chart"
                data-capacity-limit="{{ node.storage.value }}"
                data-capacity-used="{{ node.storage.usage }}"
                data-average-capacity-used="{{ 6 }}">
@@ -81,12 +105,23 @@
         <td>
           <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data">{{ node.storage.usage }}/{{ node.storage.value }} {{ node.storage.unit }}</a>
         </td>
+        {% else %}
+        <td>
+          <div id="storage_capacity_usage"
+               class="capacity_bar"
+               data-chart-type="capacity_bar_chart">
+          </div>
+        </td>
+        <td></td>
+        {% endif %}
       </tr>
       <tr>
         <td class="capacity_label">{% trans "Network" %}:</td>
+        {% if node.is_provisioned %}
         <td>
           <div id="network_capacity_usage"
                class="capacity_bar"
+               data-chart-type="capacity_bar_chart"
                data-capacity-limit="{{ node.network.value }}"
                data-capacity-used="{{ node.network.usage }}"
                data-average-capacity-used="{{ 40 }}">
@@ -95,7 +130,50 @@
         <td>
           <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data">{{ node.network.usage }}/{{ node.network.value }} {{ node.network.unit }}</a>
         </td>
+        {% else %}
+        <td>
+          <div id="network_capacity_usage"
+               class="capacity_bar"
+               data-chart-type="capacity_bar_chart">
+          </div>
+        </td>
+        <td></td>
+        {% endif %}
       </tr>
     </table>
+  </div>
+</div>
+
+<div class="row-fluid detail">
+  <div class="span6">
+    <h4>{% trans "Summary of Instances and Usage" %}</h4>
+    <hr class="header_rule">
+    {% if node.is_provisioned %}
+
+    {% else %}
+    <p>{% trans "No data available yet." %}</p>
+    {% endif %}
+  </div>
+
+  <div class="span6">
+    <h4>{% trans "Active alerts" %}</h4>
+    <hr class="header_rule">
+    {% if node.is_provisioned %}
+
+    {% else %}
+    <p>{% trans "No data available yet." %}</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row-fluid detail">
+  <div class="span6">
+    <h4>{% trans "Top Communicating Nodes" %}</h4>
+    <hr class="header_rule">
+    {% if node.is_provisioned %}
+
+    {% else %}
+    <p>{% trans "No data available yet." %}</p>
+    {% endif %}
   </div>
 </div>

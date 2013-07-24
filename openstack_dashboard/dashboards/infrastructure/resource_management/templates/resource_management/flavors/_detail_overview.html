@@ -45,6 +45,7 @@
         <td>
           <div id="cpu_capacity_usage"
                class="capacity_bar"
+               data-chart-type="capacity_bar_chart"
                data-capacity-limit="{{ flavor.vcpu.value }}"
                data-capacity-used="{{ flavor.vcpu.usage }}"
                data-average-capacity-used="{{ flavor.vcpu.average }}">
@@ -59,6 +60,7 @@
         <td>
           <div id="ram_capacity_usage"
                class="capacity_bar"
+               data-chart-type="capacity_bar_chart"
                data-capacity-limit="{{ flavor.ram.value }}"
                data-capacity-used="{{ flavor.ram.usage }}"
                data-average-capacity-used="{{ flavor.ram.average }}">
@@ -73,6 +75,7 @@
         <td>
           <div id="root_disk_capacity_usage"
                class="capacity_bar"
+               data-chart-type="capacity_bar_chart"
                data-capacity-limit="{{ flavor.root_disk.value }}"
                data-capacity-used="{{ flavor.root_disk.usage }}"
                data-average-capacity-used="{{ flavor.root_disk.average }}">
@@ -87,6 +90,7 @@
         <td>
           <div id="ephemeral_disk_capacity_usage"
                class="capacity_bar"
+               data-chart-type="capacity_bar_chart"
                data-capacity-limit="{{ flavor.ephemeral_disk.value }}"
                data-capacity-used="{{ flavor.ephemeral_disk.usage }}"
                data-average-capacity-used="{{ flavor.ephemeral_disk.average }}">
@@ -101,6 +105,7 @@
         <td>
           <div id="swap_disk_capacity_usage"
                class="capacity_bar"
+               data-chart-type="capacity_bar_chart"
                data-capacity-limit="{{ flavor.swap_disk.value }}"
                data-capacity-used="{{ flavor.swap_disk.usage }}"
                data-average-capacity-used="{{ flavor.swap_disk.average }}">
