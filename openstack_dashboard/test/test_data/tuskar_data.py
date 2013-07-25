@@ -27,7 +27,7 @@ def data(TEST):
     TEST.tuskar_flavor_templates = TestDataContainer()
     flavor_template_1 = FlavorTemplate(FlavorStruct(
             id="1",
-            name='m1.tiny',
+            name='nano',
             capacities=[
               Capacity(CapacityStruct(
                 name='cpu',
@@ -51,7 +51,7 @@ def data(TEST):
                 value='0'))]))
     flavor_template_2 = FlavorTemplate(FlavorStruct(
             id="2",
-            name='m1.large',
+            name='large',
             capacities=[]))
     TEST.tuskar_flavor_templates.add(flavor_template_1, flavor_template_2)
 
@@ -59,11 +59,11 @@ def data(TEST):
     TEST.tuskar_flavors = TestDataContainer()
     flavor_1 = Flavor(FlavorStruct(
             id="1",
-            name='m1.tiny',
+            name='nano',
             capacities=[]))
     flavor_2 = Flavor(FlavorStruct(
             id="2",
-            name='m1.large',
+            name='large',
             capacities=[]))
     TEST.tuskar_flavors.add(flavor_1, flavor_2)
 

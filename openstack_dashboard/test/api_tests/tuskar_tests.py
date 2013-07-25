@@ -53,15 +53,29 @@ class TuskarApiTests(test.APITestCase):
 
     def test_resource_class_flavor_counts(self):
         rc = self.tuskar_resource_classes.first()
+        flavors = self.tuskar_flavors.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.flavors = self.mox.CreateMockAnything()
+        tuskarclient.flavors.list(rc.id).AndReturn(flavors)
+        self.mox.ReplayAll()
+
         for f in rc.list_flavors:
-            self.assertIsInstance(f, api.tuskar.ResourceClassFlavor)
-        self.assertEquals(7, len(rc.resource_class_flavors))
+            self.assertIsInstance(f, api.tuskar.Flavor)
+        self.assertEquals(2, len(rc.list_flavors))
 
     def test_resource_class_racks(self):
         rc = self.tuskar_resource_classes.first()
+        r = self.tuskar_racks.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.get(r.id).AndReturn(r)
+        self.mox.ReplayAll()
+
         for rack in rc.list_racks:
             self.assertIsInstance(rack, api.tuskar.Rack)
-        self.assertEquals(2, len(rc.list_racks))
+        self.assertEquals(1, len(rc.list_racks))
 
     def test_resource_class_nodes(self):
         rc = self.tuskar_resource_classes.first()
