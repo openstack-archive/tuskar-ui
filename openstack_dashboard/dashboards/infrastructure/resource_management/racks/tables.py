@@ -61,7 +61,21 @@ class RacksFilterAction(tables.FilterAction):
                 if q in rack.name.lower()]
 
 
+class UpdateRow(tables.Row):
+    ajax = True
+
+    def get_data(self, request, rack_id):
+        rack = api.tuskar.Rack.get(request, rack_id)
+        return rack
+
+
 class RacksTable(tables.DataTable):
+    STATUS_CHOICES = (
+        ("unprovisioned", False),
+        ("provisioning", None),
+        ("active", True),
+        ("error", False),
+    )
     name = tables.Column('name',
                          link=("horizon:infrastructure:resource_management"
                                ":racks:detail"),
@@ -73,7 +87,10 @@ class RacksTable(tables.DataTable):
                                         (resource_class and
                                             resource_class.name) or None,))
     node_count = tables.Column('nodes_count', verbose_name=_("Nodes"))
-    state = tables.Column('state', verbose_name=_("State"))
+    state = tables.Column('state',
+                          verbose_name=_("State"),
+                          status=True,
+                          status_choices=STATUS_CHOICES)
     usage = tables.Column(
               'vm_capacity',
               verbose_name=_("Usage"),
@@ -84,6 +101,8 @@ class RacksTable(tables.DataTable):
 
     class Meta:
         name = "racks"
+        row_class = UpdateRow
+        status_columns = ["state"]
         verbose_name = _("Racks")
         table_actions = (UploadRack, CreateRack, DeleteRacks,
                          RacksFilterAction)
