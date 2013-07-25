@@ -795,8 +795,8 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
 
     @property
     def running_virtual_machines(self):
-        # arbitrary number
-        return len(self.resource_classes) * 2
+        # FIXME: arbitrary number
+        return randint(0, int(self.cpu.value))
 
     # defines a random average of capacity - API should probably be able to
     # determine average of capacity based on capacity value and obejct_id
@@ -821,7 +821,7 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
         Capacity.update(request, template.cpu.id, template._apiresource,
                         'cpu', cpu, '')
         Capacity.update(request, template.memory.id, template._apiresource,
-                        'ram', ram, 'MB')
+                        'memory', memory, 'MB')
         Capacity.update(request, template.storage.id, template._apiresource,
                         'storage', storage, 'GB')
         Capacity.update(request, template.ephemeral_disk.id,
@@ -911,8 +911,8 @@ class Flavor(StringIdAPIResourceWrapper):
 
     @property
     def running_virtual_machines(self):
-        # arbitrary number
-        return len(self.resource_classes) * 2
+        # FIXME: arbitrary number
+        return randint(0, int(self.cpu.value))
 
     # defines a random average of capacity - API should probably be able to
     # determine average of capacity based on capacity value and obejct_id
