@@ -157,6 +157,27 @@ class Node(StringIdAPIResourceWrapper):
         node.save()
 
     @property
+    def list_flavors(self):
+        if not hasattr(self, '_flavors'):
+            # FIXME: just a mock of used instances, add real values
+            used_instances = 0
+
+            resource_class = self.rack.resource_class
+            added_flavors = tuskarclient(self.request).flavors\
+                                                      .list(resource_class.id)
+            self._flavors = []
+            for f in added_flavors:
+                flavor_obj = Flavor(f)
+                #flavor_obj.max_vms = f.max_vms
+
+                # FIXME just a mock of used instances, add real values
+                used_instances += 5
+                flavor_obj.used_instances = used_instances
+                self._flavors.append(flavor_obj)
+
+        return self._flavors
+
+    @property
     def capacities(self):
         if not hasattr(self, '_capacities'):
             self._capacities = [Capacity(c) for c in
@@ -251,8 +272,19 @@ class Node(StringIdAPIResourceWrapper):
         return self._vm_capacity
 
     @property
+    # FIXME: just mock implementation, add proper one
+    def running_instances(self):
+        return 4
+
+    @property
+    # FIXME: just mock implementation, add proper one
+    def remaining_capacity(self):
+        return 100 - self.running_instances
+
+    @property
+    # FIXME: just mock implementation, add proper one
     def is_provisioned(self):
-        return False
+        return self.rack is not None
 
     @property
     def alerts(self):

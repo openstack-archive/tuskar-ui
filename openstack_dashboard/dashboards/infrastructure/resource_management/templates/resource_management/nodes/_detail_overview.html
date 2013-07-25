@@ -1,5 +1,6 @@
 {% load i18n sizeformat %}
 {% load url from future %}
+{% load chart_helpers %}
 
 <div class="info row-fluid detail">
   <div class="span4">
@@ -53,7 +54,7 @@
           </div>
         </td>
         <td>
-          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data">{{ node.cpu.usage }}/{{ node.cpu.value }} {{ node.cpu.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="cpu">{{ node.cpu.usage }}/{{ node.cpu.value }} {{ node.cpu.unit }}</a>
         </td>
         {% else %}
         <td>
@@ -78,7 +79,7 @@
           </div>
         </td>
         <td>
-          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data">{{ node.ram.usage }}/{{ node.ram.value }} {{ node.ram.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="ram">{{ node.ram.usage }}/{{ node.ram.value }} {{ node.ram.unit }}</a>
         </td>
         {% else %}
         <td>
@@ -103,7 +104,7 @@
           </div>
         </td>
         <td>
-          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data">{{ node.storage.usage }}/{{ node.storage.value }} {{ node.storage.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="storage">{{ node.storage.usage }}/{{ node.storage.value }} {{ node.storage.unit }}</a>
         </td>
         {% else %}
         <td>
@@ -128,7 +129,7 @@
           </div>
         </td>
         <td>
-          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data">{{ node.network.usage }}/{{ node.network.value }} {{ node.network.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="network">{{ node.network.usage }}/{{ node.network.value }} {{ node.network.unit }}</a>
         </td>
         {% else %}
         <td>
@@ -149,6 +150,56 @@
     <h4>{% trans "Summary of Instances and Usage" %}</h4>
     <hr class="header_rule">
     {% if node.is_provisioned %}
+    <div>
+      <strong>{{ node.running_instances }}</strong> instances
+      <strong>{{ node.remaining_capacity }}%</strong>  capacity remaining
+    </div>
+    <div class="flavor_usage_bar"
+         data-popup-free='{{ node|remaining_capacity_by_flavors }}'
+         data-single-bar-orientation="horizontal"
+         data-single-bar-height="50"
+         data-single-bar-width="100%"
+         data-single-bar-used="{{ node|all_used_instances }}"
+         data-single-bar-auto-scale-selector=".flavors_scale_selector"
+         data-single-bar-color-scale-range='["#000060", "#99FFFF"]'>
+    </div>
+
+    <table class="flavor_usages">
+      <tr>
+        {% for flavor in node.list_flavors %}
+          <td class="flavor_usage_label">
+            <a href="{% url 'horizon:infrastructure:resource_management:flavors:detail' flavor.id %}">{{ flavor.name }}</a>
+          </td>
+        {% endfor %}
+      </tr>
+      <tr>
+        {% for flavor in node.list_flavors %}
+          <td>
+            <div class="flavor_usage_bar flavors_scale_selector"
+                 data-popup-average='<p>Average capacity consumed by instances of {{flavor.name}} flavor in {{node.name}} class.</p>
+                                     <p>{{ flavor.used_instances }}%, <strong>{{ flavor.used_instances }} instances</strong></p>'
+                 data-single-bar-orientation="vertical"
+                 data-single-bar-height="100%"
+                 data-single-bar-width="40"
+                 data-single-bar-used="{{ flavor.used_instances }}"
+                 data-single-bar-average-used="{{ 50 }}"
+                 data-single-bar-auto-scale-selector=".flavors_scale_selector"
+                 data-single-bar-color-scale-range='["#000060", "#99FFFF"]'>
+            </div>
+          </td>
+        {% endfor %}
+      </tr>
+      <tr>
+        {% for flavor in resource_class.list_flavors %}
+          <td class="modal_chart flavor_usage_text"><a href="{{ "#" }}">{{ flavor.used_instances }}%</a></td>
+        {% endfor %}
+      </tr>
+      <tr>
+        {% for flavor in resource_class.list_flavors %}
+          <td class="flavor_usage_text">{{ flavor.used_instances }} inst.</td>
+        {% endfor %}
+      </tr>
+    </table>
 
     {% else %}
     <p>{% trans "No data available yet." %}</p>
@@ -175,7 +226,29 @@
     <h4>{% trans "Top Communicating Nodes" %}</h4>
     <hr class="header_rule">
     {% if node.is_provisioned %}
-
+    <div class="communication_charts_wrapper">
+      <div class="communication_chart_wrapper">
+        <h5>The most contacting</h5>
+        <div id="most_contacting_racks"
+             class="communication_chart"
+             data-chart-type="circles_chart"
+             data-url="{% url 'horizon:infrastructure:resource_management:racks:top_communicating' node.rack.id %}?cond=from"
+             data-time="now"
+             data-size="22">
+        </div>
+      </div>
+      <div class="communication_chart_connection">-->BG-IMG--></div>
+      <div class="communication_chart_wrapper">
+        <h5>The most contacted</h5>
+        <div id="most_contacted_racks"
+             class="communication_chart"
+             data-chart-type="circles_chart"
+             data-url="{% url 'horizon:infrastructure:resource_management:racks:top_communicating' node.rack.id %}?cond=to"
+             data-time="now"
+             data-size="22">
+        </div>
+      </div>
+    </div>
     {% else %}
     <p>{% trans "No data available yet." %}</p>
     {% endif %}
