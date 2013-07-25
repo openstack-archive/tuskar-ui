@@ -125,20 +125,29 @@ class UpdateRackStatus(forms.SelfHandlingForm):
             rack = self.initial.get('rack', None)
             action = request.GET.get('action')
 
-            if action == "start":
-                rack.state = "active"
-            elif action == "reboot":
-                rack.state = "active"
-            elif action == "shutdown":
-                rack.state = "off"
+            if action == "provision":
+                rack = api.tuskar.Rack.provision(
+                    request,
+                    rack.id)
 
-            rack = api.tuskar.Rack.update(
-                request,
-                rack.id,
-                {'state': rack.state}
-            )
+                msg = _('Rack "%s" is being provisioned.') % rack.name
+            else:
+                if action == "start":
+                    rack.state = "active"
+                elif action == "unprovision":
+                    rack.state = "unprovisioned"
+                elif action == "reboot":
+                    rack.state = "active"
+                elif action == "shutdown":
+                    rack.state = "off"
 
-            msg = _('Updated rack "%s" status.') % rack.name
+                rack = api.tuskar.Rack.update(
+                    request,
+                    rack.id,
+                    {'state': rack.state}
+                )
+
+                msg = _('Updated rack "%s" status.') % rack.name
             messages.success(request, msg)
             return True
         except:

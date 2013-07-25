@@ -500,6 +500,14 @@ class Rack(StringIdAPIResourceWrapper):
         # FIXME just mock implementation, add proper one
         return 100 - self.total_instances
 
+    def is_provisioned(self):
+        return (self.state == 'provisioned')
+
+    @classmethod
+    def provision(cls, request, rack_id):
+        tuskarclient(request).data_centers.provision_all()
+
+
 
 class ResourceClass(StringIdAPIResourceWrapper):
     """Wrapper for the ResourceClass object  returned by the

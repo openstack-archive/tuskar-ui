@@ -2,6 +2,15 @@
 {% load url from future %}
 {% load chart_helpers %}
 
+{% if not rack.is_provisioned %}
+  <div class="info row-fluid detail">
+    <div class="span12">
+      <div class="well provision-block" style="text-align: center; margin: 2px;">
+          <a class="btn btn-large btn-block btn-primary ajax-modal" href="{% url 'horizon:infrastructure:resource_management:racks:edit_status' rack.id %}?action=provision">{% trans "Provision Rack" %}</a>
+      </div>
+    </div>
+  </div>
+{% endif %}
 <div class="info row-fluid detail">
   <div class="span4">
     <h4>{% trans "About" %}</h4>
