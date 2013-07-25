@@ -38,7 +38,7 @@
           1. Integer
             Integer representing the percent used.
           2. Array
-            Aray of following structure:
+            Array of following structure:
             [{"popup_used": "Popup html 1", "used_instances": "5"},
              {"popup_used": "Popup html 2", "used_instances": "15"},....]
 
@@ -56,12 +56,12 @@
           values as 100% of the liner scale of the colors.
           So the array representing linear scale interval is set
           automatically.This then maps to data-single-bar-color-scale-range.
-          (arays must have the same structure)
+          (arrays must have the same structure)
 
       single-bar-color-scale-range OPTIONAL
           Array representing linear scale interval that is set manually.
           E.g "[0,10]". This then maps to data-single-bar-color-scale-range.
-          (arays must have the same structure)
+          (arrays must have the same structure)
 
       data-single-bar-color-scale-range OPTIONAL
           Array representing linear scale of colors.
@@ -133,7 +133,7 @@ horizon.d3_single_bar_chart = {
       return self.auto_scale_selector();
     };
     self.auto_scale = function () {
-      max_scale = 0;
+      var max_scale = 0;
       $(self.auto_scale_selector()).each(function() {
         var scale = parseInt($(this).data('single-bar-used'));
         if (scale > max_scale)
@@ -211,8 +211,7 @@ horizon.d3_single_bar_chart = {
     self.tooltip_used_value = function (){
       if (self.used_multi()){
         return self.tooltip_used_contents[self.used_multi_iterator];
-      } else
-      {
+      } else {
         return "";
       }
     };
@@ -236,8 +235,7 @@ horizon.d3_single_bar_chart = {
       self.height = base_component.h;
       self.trasition_attr = "width";
       self.trasition_value = base_component.percentage_used_value() + "%";
-    } else
-    { // Vertical Bars
+    } else { // Vertical Bars
       self.y = base_component.h;
       self.x = 0;
       self.width = base_component.w;
@@ -289,8 +287,7 @@ horizon.d3_single_bar_chart = {
       self.height = base_component.h;
       self.trasition_attr = "x";
       self.trasition_value = base_component.percentage_average + "%";
-    } else
-    { // Vertical Bars
+    } else { // Vertical Bars
       self.y = 0;
       self.x = 0;
       self.width = base_component.w;
@@ -470,3 +467,8 @@ horizon.d3_single_bar_chart = {
     this.append_border(bar);
   },
 };
+
+
+horizon.addInitFunction(function () {
+  horizon.d3_single_bar_chart.init();
+});
