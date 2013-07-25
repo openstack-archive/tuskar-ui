@@ -61,18 +61,18 @@ class FlavorsTable(tables.DataTable):
                          link=("horizon:infrastructure:"
                                "resource_management:flavors:detail"),
                          verbose_name=_('Flavor Name'))
-    vcpu = tables.Column(
-        "vcpu",
+    cpu = tables.Column(
+        "cpu",
         verbose_name=_('VCPU'),
         filters=(lambda x: getattr(x, 'value', ''),)
     )
-    ram = tables.Column(
-        "ram",
+    memory = tables.Column(
+        "memory",
         verbose_name=_('RAM (MB)'),
         filters=(lambda x: getattr(x, 'value', ''),)
     )
-    root_disk = tables.Column(
-        "root_disk",
+    storage = tables.Column(
+        "storage",
         verbose_name=_('Root Disk (GB)'),
         filters=(lambda x: getattr(x, 'value', ''),)
     )

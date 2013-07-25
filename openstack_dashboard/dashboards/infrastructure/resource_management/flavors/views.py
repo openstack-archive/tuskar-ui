@@ -64,9 +64,9 @@ class EditView(forms.ModalFormView):
                               _("Unable to retrieve flavor data."))
         return {'flavor_id': flavor.id,
                 'name': flavor.name,
-                'vcpu': flavor.vcpu.value,
-                'ram': flavor.ram.value,
-                'root_disk': flavor.root_disk.value,
+                'cpu': flavor.cpu.value,
+                'memory': flavor.memory.value,
+                'storage': flavor.storage.value,
                 'ephemeral_disk': flavor.ephemeral_disk.value,
                 'swap_disk': flavor.swap_disk.value}
 

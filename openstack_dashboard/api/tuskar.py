@@ -385,11 +385,12 @@ class ResourceClass(StringIdAPIResourceWrapper):
         return rc
 
     @classmethod
-    def create(self, request, name, service_type):
+    def create(self, request, name, service_type, flavors):
         return ResourceClass(
             tuskarclient(request).resource_classes.create(
                 name=name,
-                service_type=service_type))
+                service_type=service_type,
+                flavors=flavors))
 
     @classmethod
     def list(cls, request):
@@ -398,8 +399,16 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @classmethod
     def update(cls, request, resource_class_id, **kwargs):
-        return cls(tuskarclient(request).resource_classes.update(
+        resource_class = cls(tuskarclient(request).resource_classes.update(
                 resource_class_id, **kwargs))
+
+        ## FIXME: flavors have to be updated separately, seems less than ideal
+        for flavor_id in resource_class.flavors_ids:
+            Flavor.delete(request, resource_class.id, flavor_id)
+        for flavor in kwargs['flavors']:
+            Flavor.create(request, resource_class.id, **flavor)
+
+        return resource_class
 
     @classmethod
     def delete(cls, request, resource_class_id):
@@ -583,27 +592,6 @@ class ResourceClass(StringIdAPIResourceWrapper):
             self._vm_capacity = Capacity(vm_capacity)
         return self._vm_capacity
 
-    def set_flavors(self, request, flavors_ids, max_vms=None):
-        # FIXME: tuskar currently doesn't support setting flavors through
-        # resource class update (as it's done with set_racks), we have to
-        # delete/create them one by one
-        for fid in self.flavors_ids:
-            Flavor.delete(self.request, self.id, fid)
-
-        # FIXME: for now, we just generate flavors from flavor templates
-        for ftemplate_id in flavors_ids:
-            ftemplate = FlavorTemplate.get(request, ftemplate_id)
-            capacities = []
-            for c in ftemplate.capacities:
-                capacities.append({'name': c.name,
-                                   'value': str(c.value),
-                                   'unit': c.unit})
-            # FIXME: tuskar uses resrouce-class-name prefix for flavors,
-            # e.g. m1.large, we add rc name to the template name:
-            tpl_name = "%s.%s" % (self.name, ftemplate.name)
-            Flavor.create(self.request, self.id, tpl_name,
-                    max_vms.get(ftemplate.id, None), capacities)
-
     def set_racks(self, request, racks_ids):
         # FIXME: there is a bug now in tuskar, we have to remove all racks at
         # first and then add new ones:
@@ -636,15 +624,15 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
 
     @classmethod
     def create(cls, request,
-               name, vcpu, ram, root_disk, ephemeral_disk, swap_disk):
-        flavor = dummymodels.FlavorTemplate(name=name)
-        flavor.save()
-        Capacity.create(request, flavor, 'vcpu', vcpu, '')
-        Capacity.create(request, flavor, 'ram', ram, 'MB')
-        Capacity.create(request, flavor, 'root_disk', root_disk, 'GB')
+               name, cpu, memory, storage, ephemeral_disk, swap_disk):
+        template = dummymodels.FlavorTemplate(name=name)
+        template.save()
+        Capacity.create(request, template, 'cpu', cpu, '')
+        Capacity.create(request, template, 'memory', memory, 'MB')
+        Capacity.create(request, template, 'storage', storage, 'GB')
         Capacity.create(request,
-                        flavor, 'ephemeral_disk', ephemeral_disk, 'GB')
-        Capacity.create(request, flavor, 'swap_disk', swap_disk, 'MB')
+                        template, 'ephemeral_disk', ephemeral_disk, 'GB')
+        Capacity.create(request, template, 'swap_disk', swap_disk, 'MB')
 
     @property
     def capacities(self):
@@ -669,16 +657,16 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
         return getattr(self, key)
 
     @property
-    def vcpu(self):
-        return self.capacity('vcpu')
+    def cpu(self):
+        return self.capacity('cpu')
 
     @property
-    def ram(self):
-        return self.capacity('ram')
+    def memory(self):
+        return self.capacity('memory')
 
     @property
-    def root_disk(self):
-        return self.capacity('root_disk')
+    def storage(self):
+        return self.capacity('storage')
 
     @property
     def ephemeral_disk(self):
@@ -707,27 +695,28 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
         return values
 
     @classmethod
-    def update(cls, request, flavor_id, name, vcpu, ram, root_disk,
+    def update(cls, request, template_id, name, cpu, memory, storage,
                ephemeral_disk, swap_disk):
-        f = dummymodels.FlavorTemplate.objects.get(id=flavor_id)
-        f.name = name
-        f.save()
-        flavor = cls(f)
-        Capacity.update(request, flavor.vcpu.id, flavor._apiresource,
-                        'vcpu', vcpu, '')
-        Capacity.update(request, flavor.ram.id, flavor._apiresource,
+        t = dummymodels.FlavorTemplate.objects.get(id=template_id)
+        t.name = name
+        t.save()
+        template = cls(t)
+        Capacity.update(request, template.cpu.id, template._apiresource,
+                        'cpu', cpu, '')
+        Capacity.update(request, template.memory.id, template._apiresource,
                         'ram', ram, 'MB')
-        Capacity.update(request, flavor.root_disk.id, flavor._apiresource,
-                        'root_disk', root_disk, 'GB')
-        Capacity.update(request, flavor.ephemeral_disk.id, flavor._apiresource,
-                        'ephemeral_disk', ephemeral_disk, 'GB')
-        Capacity.update(request, flavor.swap_disk.id, flavor._apiresource,
+        Capacity.update(request, template.storage.id, template._apiresource,
+                        'storage', storage, 'GB')
+        Capacity.update(request, template.ephemeral_disk.id,
+                        template._apiresource, 'ephemeral_disk',
+                        ephemeral_disk, 'GB')
+        Capacity.update(request, template.swap_disk.id, template._apiresource,
                         'swap_disk', swap_disk, 'MB')
-        return flavor
+        return template
 
     @classmethod
-    def delete(cls, request, flavor_id):
-        dummymodels.FlavorTemplate.objects.get(id=flavor_id).delete()
+    def delete(cls, request, template_id):
+        dummymodels.FlavorTemplate.objects.get(id=template_id).delete()
 
 
 class Flavor(StringIdAPIResourceWrapper):
@@ -784,16 +773,16 @@ class Flavor(StringIdAPIResourceWrapper):
         return getattr(self, key)
 
     @property
-    def vcpu(self):
-        return self.capacity('vcpu')
+    def cpu(self):
+        return self.capacity('cpu')
 
     @property
-    def ram(self):
-        return self.capacity('ram')
+    def memory(self):
+        return self.capacity('memory')
 
     @property
-    def root_disk(self):
-        return self.capacity('root_disk')
+    def storage(self):
+        return self.capacity('storage')
 
     @property
     def ephemeral_disk(self):

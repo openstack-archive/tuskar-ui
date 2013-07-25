@@ -42,15 +42,13 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertEqual(res.status_code, 200)
 
     @test.create_stubs({
-        api.tuskar.ResourceClass: ('list', 'create',
-                                   'set_flavors', 'set_racks'),
+        api.tuskar.ResourceClass: ('list', 'create', 'set_racks'),
     })
     def test_create_resource_class_post(self):
         new_resource_class = self.tuskar_resource_classes.first()
         new_unique_name = "unique_name_for_sure"
+        new_flavors = []
 
-        add_flavors_ids = []
-        add_max_vms = {}
         add_racks_ids = []
 
         api.tuskar.ResourceClass.list(
@@ -58,12 +56,11 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                 self.tuskar_resource_classes.list())
         api.tuskar.ResourceClass.\
             create(IsA(http.HttpRequest), name=new_unique_name,
-                   service_type=new_resource_class.service_type).\
+                   service_type=new_resource_class.service_type,
+                   flavors=new_flavors).\
             AndReturn(new_resource_class)
         api.tuskar.ResourceClass.\
             set_racks(IsA(http.HttpRequest), add_racks_ids)
-        api.tuskar.ResourceClass.\
-            set_flavors(IsA(http.HttpRequest), add_flavors_ids, add_max_vms)
         self.mox.ReplayAll()
 
         url = reverse('horizon:infrastructure:resource_management:'
@@ -106,14 +103,11 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertEqual(res.status_code, 200)
 
     @test.create_stubs({
-        api.tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
-                                       'set_flavors')
+        api.tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks')
     })
     def test_edit_resource_class_post(self):
         resource_class = self.tuskar_resource_classes.first()
 
-        add_flavors_ids = []
-        add_max_vms = {}
         add_racks_ids = []
 
         api.tuskar.ResourceClass.get(
@@ -126,12 +120,11 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         api.tuskar.ResourceClass.\
             update(IsA(http.HttpRequest), resource_class.id,
                    name=resource_class.name,
-                   service_type=resource_class.service_type).\
+                   service_type=resource_class.service_type,
+                   flavors=[]).\
             AndReturn(resource_class)
         api.tuskar.ResourceClass.\
             set_racks(IsA(http.HttpRequest), add_racks_ids)
-        api.tuskar.ResourceClass.\
-            set_flavors(IsA(http.HttpRequest), add_flavors_ids, add_max_vms)
         self.mox.ReplayAll()
 
         form_data = {'resource_class_id': resource_class.id,
@@ -223,14 +216,11 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertEqual(res.status_code, 200)
 
     @test.create_stubs({
-        api.tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
-                                       'set_flavors')
+        api.tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks')
     })
     def test_detail_edit_racks_post(self):
         resource_class = self.tuskar_resource_classes.first()
 
-        add_flavors_ids = []
-        add_max_vms = {}
         add_racks_ids = []
 
         api.tuskar.ResourceClass.get(
@@ -243,12 +233,11 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         api.tuskar.ResourceClass.\
             update(IsA(http.HttpRequest), resource_class.id,
                    name=resource_class.name,
-                   service_type=resource_class.service_type).\
+                   service_type=resource_class.service_type,
+                   flavors=[]).\
             AndReturn(resource_class)
         api.tuskar.ResourceClass.\
             set_racks(IsA(http.HttpRequest), add_racks_ids)
-        api.tuskar.ResourceClass.\
-            set_flavors(IsA(http.HttpRequest), add_flavors_ids, add_max_vms)
         self.mox.ReplayAll()
 
         form_data = {'resource_class_id': resource_class.id,
@@ -295,14 +284,11 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertEqual(res.status_code, 200)
 
     @test.create_stubs({
-        api.tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
-                                       'set_flavors')
+        api.tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks')
     })
     def test_detail_edit_flavors_post(self):
         resource_class = self.tuskar_resource_classes.first()
 
-        add_flavors_ids = []
-        add_max_vms = {}
         add_racks_ids = []
 
         api.tuskar.ResourceClass.get(
@@ -315,12 +301,11 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         api.tuskar.ResourceClass.\
             update(IsA(http.HttpRequest), resource_class.id,
                    name=resource_class.name,
-                   service_type=resource_class.service_type).\
+                   service_type=resource_class.service_type,
+                   flavors=[]).\
             AndReturn(resource_class)
         api.tuskar.ResourceClass.\
             set_racks(IsA(http.HttpRequest), add_racks_ids)
-        api.tuskar.ResourceClass.\
-            set_flavors(IsA(http.HttpRequest), add_flavors_ids, add_max_vms)
         self.mox.ReplayAll()
 
         form_data = {'resource_class_id': resource_class.id,

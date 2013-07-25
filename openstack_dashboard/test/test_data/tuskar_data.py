@@ -30,15 +30,15 @@ def data(TEST):
             name='m1.tiny',
             capacities=[
               Capacity(CapacityStruct(
-                name='vcpu',
+                name='cpu',
                 unit='',
                 value='1')),
               Capacity(CapacityStruct(
-                name='ram',
+                name='memory',
                 unit='MB',
                 value='64')),
               Capacity(CapacityStruct(
-                name='root_disk',
+                name='storage',
                 unit='MB',
                 value='128')),
               Capacity(CapacityStruct(

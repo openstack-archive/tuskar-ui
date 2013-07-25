@@ -24,11 +24,11 @@
     <hr class="header_rule">
     <dl>
       <dt>{% trans "VCPU" %}</dt>
-      <dd>{{ flavor.vcpu.value }}</dd>
+      <dd>{{ flavor.cpu.value }}</dd>
       <dt>{% trans "RAM" %}</dt>
-      <dd>{{ flavor.ram.value }} {{ flavor.ram.unit }}</dd>
+      <dd>{{ flavor.memory.value }} {{ flavor.memory.unit }}</dd>
       <dt>{% trans "Root Disk" %}</dt>
-      <dd>{{ flavor.root_disk.value }} {{ flavor.root_disk.unit }}</dd>
+      <dd>{{ flavor.storage.value }} {{ flavor.storage.unit }}</dd>
       <dt>{% trans "Ephemeral Disk" %}</dt>
       <dd>{{ flavor.ephemeral_disk.value }} {{ flavor.ephemeral_disk.unit }}</dd>
       <dt>{% trans "Swap Disk" %}</dt>
@@ -46,13 +46,13 @@
           <div id="cpu_capacity_usage"
                class="capacity_bar"
                data-chart-type="capacity_bar_chart"
-               data-capacity-limit="{{ flavor.vcpu.value }}"
-               data-capacity-used="{{ flavor.vcpu.usage }}"
-               data-average-capacity-used="{{ flavor.vcpu.average }}">
+               data-capacity-limit="{{ flavor.cpu.value }}"
+               data-capacity-used="{{ flavor.cpu.usage }}"
+               data-average-capacity-used="{{ flavor.cpu.average }}">
           </div>
         </td>
         <td>
-          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="cpu">{{ flavor.vcpu.usage }}/{{ flavor.vcpu.value }} {{ flavor.vcpu.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="cpu">{{ flavor.cpu.usage }}/{{ flavor.cpu.value }} {{ flavor.cpu.unit }}</a>
         </td>
       </tr>
       <tr>
@@ -61,13 +61,13 @@
           <div id="ram_capacity_usage"
                class="capacity_bar"
                data-chart-type="capacity_bar_chart"
-               data-capacity-limit="{{ flavor.ram.value }}"
-               data-capacity-used="{{ flavor.ram.usage }}"
-               data-average-capacity-used="{{ flavor.ram.average }}">
+               data-capacity-limit="{{ flavor.memory.value }}"
+               data-capacity-used="{{ flavor.memory.usage }}"
+               data-average-capacity-used="{{ flavor.memory.average }}">
           </div>
         </td>
         <td>
-          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="ram">{{ flavor.ram.usage }}/{{ flavor.ram.value }} {{ flavor.ram.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="ram">{{ flavor.memory.usage }}/{{ flavor.memory.value }} {{ flavor.memory.unit }}</a>
         </td>
       </tr>
       <tr>
@@ -76,13 +76,13 @@
           <div id="root_disk_capacity_usage"
                class="capacity_bar"
                data-chart-type="capacity_bar_chart"
-               data-capacity-limit="{{ flavor.root_disk.value }}"
-               data-capacity-used="{{ flavor.root_disk.usage }}"
-               data-average-capacity-used="{{ flavor.root_disk.average }}">
+               data-capacity-limit="{{ flavor.storage.value }}"
+               data-capacity-used="{{ flavor.storage.usage }}"
+               data-average-capacity-used="{{ flavor.storage.average }}">
           </div>
         </td>
         <td>
-          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="root_disk">{{ flavor.root_disk.usage }}/{{ flavor.root_disk.value }} {{ flavor.root_disk.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="root_disk">{{ flavor.storage.usage }}/{{ flavor.storage.value }} {{ flavor.storage.unit }}</a>
         </td>
       </tr>
       <tr>

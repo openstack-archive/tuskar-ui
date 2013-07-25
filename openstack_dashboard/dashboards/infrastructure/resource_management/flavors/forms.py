@@ -32,15 +32,15 @@ class CreateFlavor(forms.SelfHandlingForm):
                             error_messages={'invalid': _('Name may only '
                                 'contain letters, numbers, underscores, '
                                 'periods and hyphens.')})
-    vcpu = forms.IntegerField(label=_("VCPU"),
-                              min_value=0,
-                              initial=0)
-    ram = forms.IntegerField(label=_("RAM (MB)"),
+    cpu = forms.IntegerField(label=_("VCPU"),
                              min_value=0,
                              initial=0)
-    root_disk = forms.IntegerField(label=_("Root Disk (GB)"),
-                                   min_value=0,
-                                   initial=0)
+    memory = forms.IntegerField(label=_("RAM (MB)"),
+                             min_value=0,
+                             initial=0)
+    storage = forms.IntegerField(label=_("Root Disk (GB)"),
+                                 min_value=0,
+                                 initial=0)
     ephemeral_disk = forms.IntegerField(label=_("Ephemeral Disk (GB)"),
                                         min_value=0,
                                         initial=0)
@@ -73,9 +73,9 @@ class CreateFlavor(forms.SelfHandlingForm):
             flavor = api.tuskar.FlavorTemplate.create(
                 request,
                 data['name'],
-                data['vcpu'],
-                data['ram'],
-                data['root_disk'],
+                data['cpu'],
+                data['memory'],
+                data['storage'],
                 data['ephemeral_disk'],
                 data['swap_disk']
             )
@@ -94,9 +94,9 @@ class EditFlavor(CreateFlavor):
                 self.request,
                 self.initial['flavor_id'],
                 data['name'],
-                data['vcpu'],
-                data['ram'],
-                data['root_disk'],
+                data['cpu'],
+                data['memory'],
+                data['storage'],
                 data['ephemeral_disk'],
                 data['swap_disk']
             )

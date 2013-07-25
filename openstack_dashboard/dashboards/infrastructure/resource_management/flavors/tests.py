@@ -27,9 +27,9 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
             resp, "infrastructure/resource_management/flavors/create.html")
 
         data = {'name': template.name,
-                'vcpu': 0,
-                'ram': 0,
-                'root_disk': 0,
+                'cpu': 0,
+                'memory': 0,
+                'storage': 0,
                 'ephemeral_disk': 0,
                 'swap_disk': 0}
         resp = self.client.post(url, data)
@@ -68,9 +68,9 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
 
         data = {'flavor_id': template.id,
                 'name': template.name,
-                'vcpu': 0,
-                'ram': 0,
-                'root_disk': 0,
+                'cpu': 0,
+                'memory': 0,
+                'storage': 0,
                 'ephemeral_disk': 0,
                 'swap_disk': 0}
         url = reverse(

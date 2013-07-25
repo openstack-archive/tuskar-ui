@@ -197,10 +197,25 @@ class ResourceClassWorkflowMixin:
         name = self.context.get('name')
         return message % name
 
-    def _add_flavors(self, request, data, resource_class):
-        ids_to_add = data.get('flavors_object_ids') or []
+    def _get_flavors(self, request, data):
+        flavors = []
+        flavor_ids = data.get('flavors_object_ids') or []
         max_vms = data.get('max_vms')
-        resource_class.set_flavors(request, ids_to_add, max_vms)
+        resource_class_name = data['name']
+        for template_id in flavor_ids:
+            template = api.tuskar.FlavorTemplate.get(request, template_id)
+            capacities = []
+            for c in template.capacities:
+                capacities.append({'name': c.name,
+                                   'value': str(c.value),
+                                   'unit': c.unit})
+            # FIXME: tuskar uses resource-class-name prefix for flavors,
+            # e.g. m1.large, we add rc name to the template name:
+            flavor_name = "%s.%s" % (resource_class_name, template.name)
+            flavors.append({'name': flavor_name,
+                            'max_vms': max_vms.get(template.id, None),
+                            'capacities': capacities})
+        return flavors
 
     def _add_racks(self, request, data, resource_class):
         ids_to_add = data.get('racks_object_ids') or []
@@ -219,10 +234,12 @@ class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
 
     def _create_resource_class_info(self, request, data):
         try:
+            flavors = self._get_flavors(request, data)
             return api.tuskar.ResourceClass.create(
                 request,
                 name=data['name'],
-                service_type=data['service_type'])
+                service_type=data['service_type'],
+                flavors=flavors)
         except:
             redirect = self.get_failure_url()
             exceptions.handle(request,
@@ -233,7 +250,6 @@ class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
     def handle(self, request, data):
         resource_class = self._create_resource_class_info(request, data)
         self._add_racks(request, data, resource_class)
-        self._add_flavors(request, data, resource_class)
         return True
 
 
@@ -257,11 +273,13 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
 
     def _update_resource_class_info(self, request, data):
         try:
+            flavors = self._get_flavors(request, data)
             return api.tuskar.ResourceClass.update(
                     request,
                     data['resource_class_id'],
                     name=data['name'],
-                    service_type=data['service_type'])
+                    service_type=data['service_type'],
+                    flavors=flavors)
         except:
             redirect = self.get_failure_url()
             exceptions.handle(request,
@@ -272,7 +290,6 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
     def handle(self, request, data):
         resource_class = self._update_resource_class_info(request, data)
         self._add_racks(request, data, resource_class)
-        self._add_flavors(request, data, resource_class)
         return True
 
 
