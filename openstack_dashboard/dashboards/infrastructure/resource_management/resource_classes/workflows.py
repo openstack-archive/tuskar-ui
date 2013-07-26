@@ -37,15 +37,15 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                                      choices=[('', ''),
                                               ('compute',
                                               ('Compute')),
-                                              ('storage',
-                                              ('Storage')),
+                                              ('not_compute',
+                                              ('Non Compute')),
                                               ],
                                      widget=forms.Select(
                                          attrs={'class': 'switchable'})
                                      )
     image = forms.ChoiceField(label=_('Provisioning Image'),
                               required=True,
-                              choices=[('compute-img', ('Compute-Fedora19'))],
+                              choices=[('compute-img', ('overcloud-compute'))],
                               widget=forms.Select(
                                 attrs={'class': 'switchable'})
                               )
