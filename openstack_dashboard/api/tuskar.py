@@ -34,6 +34,9 @@ import openstack_dashboard.dashboards.infrastructure.models as dummymodels
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(settings, 'TUSKAR_ENDPOINT_URL')
 NOVA_BAREMETAL_CREDS = getattr(settings, 'NOVA_BAREMETAL_CREDS')
+OVERCLOUD_AUTH_URL = getattr(settings, 'OVERCLOUD_AUTH_URL')
+OVERCLOUD_USERNAME = getattr(settings, 'OVERCLOUD_USERNAME')
+OVERCLOUD_PASSWORD = getattr(settings, 'OVERCLOUD_PASSWORD')
 
 
 # FIXME: request isn't used right in the tuskar client right now, but looking
@@ -366,6 +369,20 @@ class Node(StringIdAPIResourceWrapper):
             return self._apiresource.interfaces[0]['address']
         except:
             return None
+
+    @property
+    def running_virtual_machines(self):
+        if not hasattr(self, '_running_virtual_machines'):
+            search_opts = {}
+            search_opts['all_tenants'] = True
+            nova_client = nova.nova_client.Client(OVERCLOUD_USERNAME,
+                                                  OVERCLOUD_PASSWORD,
+                                                  'admin',
+                                                  auth_url=OVERCLOUD_AUTH_URL)
+            self._running_virtual_machines = [s for s in
+                                nova_client.servers.list(True, search_opts)
+                                if s.hostId == self.id]
+        return self._running_virtual_machines
 
 
 class Rack(StringIdAPIResourceWrapper):
