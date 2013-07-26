@@ -512,7 +512,6 @@ class Rack(StringIdAPIResourceWrapper):
         tuskarclient(request).data_centers.provision_all()
 
 
-
 class ResourceClass(StringIdAPIResourceWrapper):
     """Wrapper for the ResourceClass object  returned by the
     dummy model.
