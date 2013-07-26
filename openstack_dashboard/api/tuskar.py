@@ -411,6 +411,40 @@ class Rack(StringIdAPIResourceWrapper):
         # used)
         return [node for node in self.list_nodes if node.alerts]
 
+    @property
+    def list_flavors(self):
+        if not hasattr(self, '_flavors'):
+            # FIXME just a mock of used instances, add real values
+            used_instances = 0
+
+            added_flavors = tuskarclient(self.request).flavors\
+                                .list(self.resource_class.id)
+            self._flavors = []
+            for f in added_flavors:
+                flavor_obj = Flavor(f)
+                #flavor_obj.max_vms = f.max_vms
+
+                # FIXME just a mock of used instances, add real values
+                used_instances += 2
+                flavor_obj.used_instances = used_instances
+                self._flavors.append(flavor_obj)
+
+        return self._flavors
+
+    @property
+    def all_used_instances(self):
+        return [flavor.used_instances for flavor in self.list_flavors]
+
+    @property
+    def total_instances(self):
+        # FIXME just mock implementation, add proper one
+        return sum(self.all_used_instances)
+
+    @property
+    def remaining_capacity(self):
+        # FIXME just mock implementation, add proper one
+        return 100 - self.total_instances
+
 
 class ResourceClass(StringIdAPIResourceWrapper):
     """Wrapper for the ResourceClass object  returned by the
