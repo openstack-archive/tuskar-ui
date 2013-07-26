@@ -119,8 +119,6 @@ class RacksFilterAction(tables.FilterAction):
 
 
 class RacksTable(racks_tables.RacksTable):
-    name = tables.Column('name',
-                         verbose_name=_("Rack Name"))
 
     class Meta:
         name = "racks"

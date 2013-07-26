@@ -67,7 +67,6 @@ class RacksTable(tables.DataTable):
                                ":racks:detail"),
                          verbose_name=_("Rack Name"))
     subnet = tables.Column('subnet', verbose_name=_("IP Subnet"))
-    location = tables.Column('location', verbose_name=_("Location"))
     resource_class = tables.Column('resource_class',
                                     verbose_name=_("Class"),
                                     filters=(lambda resource_class:
