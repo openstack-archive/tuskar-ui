@@ -19,13 +19,15 @@
 
 {% block actions %}
   <div class="btn-group">
-    <a class="btn ajax-modal" href="{% url 'horizon:infrastructure:resource_management:racks:edit_status' rack.id %}?action=start">{% trans "Start" %}</a>
-    <a class="btn ajax-modal" href="{% url 'horizon:infrastructure:resource_management:racks:edit_status' rack.id %}?action=reboot">{% trans "Reboot" %}</a>
-    <a class="btn ajax-modal" href="{% url 'horizon:infrastructure:resource_management:racks:edit_status' rack.id %}?action=shutdown">{% trans "Shutdown" %}</a>
     {% if rack.is_provisioned %}
       <a class="btn ajax-modal" href="{% url 'horizon:infrastructure:resource_management:racks:edit_status' rack.id %}?action=unprovision">{% trans "Unprovision Rack" %}</a>
     {% endif %}
   </div>
+  {# <div class="btn-group"> #}
+    {# <a class="btn ajax-modal" href="{% url 'horizon:infrastructure:resource_management:racks:edit_status' rack.id %}?action=start">{% trans "Start" %}</a> #}
+    {# <a class="btn ajax-modal" href="{% url 'horizon:infrastructure:resource_management:racks:edit_status' rack.id %}?action=reboot">{% trans "Reboot" %}</a> #}
+    {# <a class="btn ajax-modal" href="{% url 'horizon:infrastructure:resource_management:racks:edit_status' rack.id %}?action=shutdown">{% trans "Shutdown" %}</a> #}
+  {# </div> #}
   <div class="btn-group">
     <a class="btn ajax-modal" href="{% url 'horizon:infrastructure:resource_management:racks:detail_edit' rack.id %}">{% trans "Edit" %}</a>
   </div>
