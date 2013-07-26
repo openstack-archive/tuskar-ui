@@ -126,3 +126,10 @@ NOSE_ARGS = ['--nocapture',
 # FIXME: this will eventually be unneeded when the parameter is removed
 # from local settings and api/tuskar.py
 TUSKAR_ENDPOINT_URL = "http://127.0.0.1:6385"
+NOVA_BAREMETAL_CREDS = {
+    'user': 'admin',
+    'password': 'admin_password_here',
+    'tenant': 'admin',
+    'auth_url': 'http://localhost:5001/v2.0/',
+    'bypass_url': 'http://localhost:9774/v2/692567cd99f84f5d8f26ec23ff0ba460'
+}
