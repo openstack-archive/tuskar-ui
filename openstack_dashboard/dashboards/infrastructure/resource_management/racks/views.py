@@ -241,3 +241,13 @@ def node_health(request, rack_id=None):
     res = {'data': data}
     return HttpResponse(simplejson.dumps(res),
         mimetype="application/json")
+
+
+def check_state(request, rack_id=None):
+    rack = api.tuskar.Rack.get(request, rack_id)
+
+    res = {'state': rack.state}
+
+    return HttpResponse(
+        simplejson.dumps(res),
+        mimetype="application/json")

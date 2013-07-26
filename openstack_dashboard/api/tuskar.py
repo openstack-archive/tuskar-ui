@@ -501,7 +501,11 @@ class Rack(StringIdAPIResourceWrapper):
         return 100 - self.total_instances
 
     def is_provisioned(self):
-        return (self.state == 'provisioned')
+        return (self.state == 'active') or (self.state == 'error')
+
+    @property
+    def is_provisioning(self):
+        return (self.state == 'provisioning')
 
     @classmethod
     def provision(cls, request, rack_id):

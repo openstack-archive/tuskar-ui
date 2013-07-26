@@ -2,11 +2,21 @@
 {% load url from future %}
 {% load chart_helpers %}
 
-{% if not rack.is_provisioned %}
+{% if not rack.is_provisioned or rack.is_provisioning %}
   <div class="info row-fluid detail">
     <div class="span12">
-      <div class="well provision-block" style="text-align: center; margin: 2px;">
-          <a class="btn btn-large btn-block btn-primary ajax-modal" href="{% url 'horizon:infrastructure:resource_management:racks:edit_status' rack.id %}?action=provision">{% trans "Provision Rack" %}</a>
+      <div data-state="{{rack.state}}"
+           data-url="{% url 'horizon:infrastructure:resource_management:racks:check_state' rack.id %}"
+           data-interval="20000"
+           class="overall-state well provision-block" style="text-align: center; margin: 2px;">
+          {% if rack.is_provisioning %}
+            <p>Provisioning</p><img src="/static/dashboard/img/horizontal_loader.gif" />
+          {% else %}
+            <a class="btn btn-large btn-block btn-primary ajax-modal"
+               href="{% url 'horizon:infrastructure:resource_management:racks:edit_status' rack.id %}?action=provision">
+               {% trans "Provision Rack" %}
+            </a>
+          {% endif %}
       </div>
     </div>
   </div>
@@ -227,3 +237,43 @@
   </div>
 </div>
 
+
+<script type="text/javascript">
+/* polling of status. */
+horizon.detail_overview = {
+  update: function () {
+    var state_obj = $('.overall-state').first();
+    var state = state_obj.data('state');
+    var interval = state_obj.data('interval');
+    var url = state_obj.data('url');
+    if (state == 'provisioning') {
+      // Wait and try to update again in next interval instead
+      setTimeout(horizon.detail_overview.update, interval);
+
+      this.jqxhr = $.getJSON( url, function() {
+          state_obj.html('<p>Provisioning</p><img src="/static/dashboard/img/horizontal_loader.gif" />')
+        })
+        .done(function(data) {
+          // FIXME find a way how to only update graph with new data
+          // not delete and create
+          if (data['state'] != 'provisioning'){
+            window.location.reload();
+          }
+        })
+        .fail(function() {
+          // FIXME add proper fail message
+          console.log( "error" );
+        })
+        .always(function() {
+          // FIXME add behaviour that should be always done
+        });
+      }
+  }
+};
+
+
+horizon.addInitFunction(function () {
+  horizon.detail_overview.update();
+});
+
+</script>

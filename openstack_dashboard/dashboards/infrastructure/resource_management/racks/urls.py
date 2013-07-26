@@ -35,4 +35,5 @@ urlpatterns = patterns(VIEW_MOD,
     url(RACKS % 'top_communicating.json', 'top_communicating',
         name='top_communicating'),
     url(RACKS % 'node_health.json', 'node_health', name='node_health'),
+    url(RACKS % 'check_state.json', 'check_state', name='check_state'),
 )
