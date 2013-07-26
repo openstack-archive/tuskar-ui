@@ -80,10 +80,10 @@ class RackCreateInfoAction(workflows.Action):
                             error_messages={'invalid': _('Name may only '
                                 'contain letters, numbers, underscores, '
                                 'periods and hyphens.')})
-    resource_class_id = forms.ChoiceField(label=_("Resource Class"))
     location = forms.CharField(label=_("Location"))
     # see GenericIPAddressField, but not for subnets:
     subnet = forms.CharField(label=_("IP Subnet"))
+    resource_class_id = forms.ChoiceField(label=_("Resource Class"))
 
     def clean(self):
         cleaned_data = super(RackCreateInfoAction, self).clean()
