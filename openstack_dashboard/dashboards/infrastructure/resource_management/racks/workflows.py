@@ -40,10 +40,10 @@ class NodeCreateAction(workflows.Action):
     local_gb = forms.CharField(label="Local Disk (GB)", required=True)
 
     # Power Management
-    pm_address = forms.CharField(label="IP Address", required=True)
-    pm_user = forms.CharField(label="User", required=True)
-    pm_password = forms.CharField(label="Password",
-                                      required=True,
+    pm_address = forms.CharField(label="Power Management IP", required=False)
+    pm_user = forms.CharField(label="Power Management User", required=False)
+    pm_password = forms.CharField(label="Power Management Password",
+                                      required=False,
                                       widget=forms.PasswordInput(
                                           render_value=False))
 
