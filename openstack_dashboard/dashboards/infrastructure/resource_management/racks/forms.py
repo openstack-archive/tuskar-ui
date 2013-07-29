@@ -126,7 +126,7 @@ class UpdateRackStatus(forms.SelfHandlingForm):
             action = request.GET.get('action')
 
             if action == "provision":
-                rack = api.tuskar.Rack.provision(
+                api.tuskar.Rack.provision(
                     request,
                     rack.id)
 
