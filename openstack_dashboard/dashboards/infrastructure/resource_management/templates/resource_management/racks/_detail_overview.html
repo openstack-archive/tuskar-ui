@@ -64,6 +64,7 @@
       {% for capacity in rack.capacities %}
       <tr>
         <td class="capacity_label">{{ capacity.name }}:</td>
+        {% if rack.is_provisioned %}
         <td>
           <div id="{{ capacity.name }}_capacity_usage"
                class="capacity_bar"
@@ -76,6 +77,15 @@
         <td>
           <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data">{{ capacity.usage|default:_(" - ") }}/{{ capacity.value|default:_(" - ") }} {{ capacity.unit }}</a>
         </td>
+        {% else %}
+        <td>
+          <div id="{{ capacity.name }}_capacity_usage"
+               class="capacity_bar"
+               data-chart-type="capacity_bar_chart">
+          </div>
+        </td>
+        <td></td>
+        {% endif %}
       </tr>
       {% endfor %}
     </table>
@@ -89,6 +99,7 @@
   <div class="span6">
     <h4>{% trans "Summary of instances and Usage" %}</h4>
     <hr class="header_rule">
+    {% if rack.is_provisioned %}
     <div>
       <strong>{{ rack.total_instances }}</strong> instances
       <strong>{{ rack.remaining_capacity }}%</strong>  capacity remaining
@@ -140,11 +151,15 @@
         {% endfor %}
       </tr>
     </table>
+    {% else %}
+    <p>{% trans "No data available yet." %}</p>
+    {% endif %}
    </div>
 
   <div class="span6 alerts">
     <h4>{% trans "Active Alerts" %}</h4>
     <hr class="header_rule">
+    {% if rack.is_provisioned %}
     <ul>
      {% for alert in rack.alerts %}
        <li><i class="icon-warning-sign"></i>{{ alert.message }}</li>
@@ -156,6 +171,9 @@
          </li>
      {% endfor %}
     </ul>
+    {% else %}
+    <p>{% trans "No data available yet." %}</p>
+    {% endif %}
   </div>
 </div>
 
@@ -173,7 +191,7 @@
     <h4>Top Communicating Racks</h4>
     <hr class="header_rule">
     <div class="clear"></div>
-    {% if rack.nodes_count %}
+    {% if rack.nodes_count and rack.is_provisioned %}
     <div class="communication_charts_wrapper">
       <div class="communication_chart_wrapper">
         <h5>The most contacting</h5>
@@ -212,6 +230,7 @@
       </select>
     </div>
     <h4>Node health</h4>
+    {% if rack.nodes_count and rack.is_provisioned %}
     <hr class="header_rule">
     <div class="clear"></div>
 
@@ -242,6 +261,9 @@
          data-time="now"
          data-size="22">
     </div>
+    {% else %}
+      <p>No data available yet.</p>
+    {% endif %}
   </div>
 </div>
 

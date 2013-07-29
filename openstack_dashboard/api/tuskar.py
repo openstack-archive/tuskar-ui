@@ -500,6 +500,7 @@ class Rack(StringIdAPIResourceWrapper):
         # FIXME just mock implementation, add proper one
         return 100 - self.total_instances
 
+    @property
     def is_provisioned(self):
         return (self.state == 'active') or (self.state == 'error')
 
