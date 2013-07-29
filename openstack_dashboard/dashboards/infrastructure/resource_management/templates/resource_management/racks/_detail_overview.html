@@ -40,12 +40,20 @@
     <h4>{% trans "Resource Assignment" %}</h4>
     <hr class="header_rule">
     <dl>
-      <dt>{% trans "Region" %}</dt>
-      <dd>{{ rack.region|default:_("None") }}</dd>
-      <dt>{% trans "Class" %}</dt>
-      <dd>{{ rack.resource_class.name|default:_("None") }}</dd>
       <dt>{% trans "Nodes" %}</dt>
-      <dd>{{ rack.nodes_count|default:_("None") }}</dd>
+      <dd>
+        <a href="{% url 'horizon:infrastructure:resource_management:racks:detail' rack.id %}?tab=rack_detail_tabs__nodes">
+          {{ rack.nodes_count|default:_("None") }}
+        </a>
+      </dd>
+      <dt>{% trans "Class" %}</dt>
+      <dd>
+        <a href="{% url 'horizon:infrastructure:resource_management:resource_classes:detail' rack.resource_class.id %}">
+        {{ rack.resource_class.name|default:_("None") }}
+        </a>
+      </dd>
+      <dt>{% trans "Class Image" %}</dt>
+      <dd>overcloud-compute</dd> {# FIXME It will eventually have to be not-hardcoded later #}
     </dl>
   </div>
   <div class="span4">
