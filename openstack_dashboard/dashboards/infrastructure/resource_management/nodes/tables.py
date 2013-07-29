@@ -35,10 +35,6 @@ class NodesFilterAction(tables.FilterAction):
 
 
 class NodesTable(tables.DataTable):
-    STATUS_CHOICES = (
-        ("active", True),
-        ("error", False),
-    )
     service_host = tables.Column("service_host",
                          link=("horizon:infrastructure:"
                                "resource_management:nodes:detail"),
@@ -46,9 +42,7 @@ class NodesTable(tables.DataTable):
     mac_address = tables.Column("mac_address", verbose_name=_("MAC Address"))
     pm_address = tables.Column("pm_address", verbose_name=_("IP Address"))
     status = tables.Column("status",
-                           verbose_name=_("Status"),
-                           status=True,
-                           status_choices=STATUS_CHOICES)
+                           verbose_name=_("Status"))
     usage = tables.Column("usage",
                           verbose_name=_("Usage"))
 

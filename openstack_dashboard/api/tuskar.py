@@ -139,7 +139,7 @@ class Node(StringIdAPIResourceWrapper):
     dummy model.
     """
     _attrs = ['id', 'pm_address', 'cpus', 'memory_mb', 'service_host',
-        'local_gb']
+        'local_gb', 'pm_user']
 
     @classmethod
     def manager(cls):
@@ -153,7 +153,36 @@ class Node(StringIdAPIResourceWrapper):
 
     @classmethod
     def get(cls, request, node_id):
-        return cls(cls.manager().get(node_id))
+        # FIXME ugly, fix after demo, make abstraction of instance details
+        # this is realy not optimal, but i dont hve time do fix it now
+        instances, more = nova.server_list(
+            request,
+            search_opts={'paginate': True},
+            all_tenants=True)
+
+        instance_details = {}
+        for instance in instances:
+            id = (instance.
+                  _apiresource._info['OS-EXT-SRV-ATTR:hypervisor_hostname'])
+            instance_details[id] = instance
+
+        node = cls(cls.manager().get(node_id))
+
+        detail = instance_details.get(node_id)
+        if detail:
+            addresses = detail._apiresource.addresses.get('ctlplane')
+            if addresses:
+                node.ip_address_other = (", "
+                    .join([addr['addr'] for addr in addresses]))
+
+            node.status = detail._apiresource._info['OS-EXT-STS:vm_state']
+            node.power_mamanegemt = ""
+            if node.pm_user:
+                node.power_mamanegemt = node.pm_user + "/********"
+        else:
+            node.status = 'unprovisioned'
+
+        return node
 
     @classmethod
     def list(cls, request):
@@ -178,18 +207,22 @@ class Node(StringIdAPIResourceWrapper):
             # FIXME: just a mock of used instances, add real values
             used_instances = 0
 
+            if not self.rack or not self.rack.resource_class:
+                return []
             resource_class = self.rack.resource_class
+
             added_flavors = tuskarclient(self.request).flavors\
                                                       .list(resource_class.id)
             self._flavors = []
-            for f in added_flavors:
-                flavor_obj = Flavor(f)
-                #flavor_obj.max_vms = f.max_vms
+            if added_flavors:
+                for f in added_flavors:
+                    flavor_obj = Flavor(f)
+                    #flavor_obj.max_vms = f.max_vms
 
-                # FIXME just a mock of used instances, add real values
-                used_instances += 5
-                flavor_obj.used_instances = used_instances
-                self._flavors.append(flavor_obj)
+                    # FIXME just a mock of used instances, add real values
+                    used_instances += 5
+                    flavor_obj.used_instances = used_instances
+                    self._flavors.append(flavor_obj)
 
         return self._flavors
 
@@ -202,9 +235,13 @@ class Node(StringIdAPIResourceWrapper):
 
     @property
     def rack(self):
-        if not hasattr(self, '_rack'):
-            self._rack = self._apiresource.rack
-        return self._rack
+        # FIXME association should always contain something
+        try:
+            if not hasattr(self, '_rack'):
+                self._rack = self._apiresource.rack
+            return self._rack
+        except:
+            return None
 
     @property
     def cpu(self):
@@ -300,7 +337,7 @@ class Node(StringIdAPIResourceWrapper):
     @property
     # FIXME: just mock implementation, add proper one
     def is_provisioned(self):
-        return self.rack is not None
+        return self.status != "unprovisioned" and self.rack
 
     @property
     def alerts(self):
@@ -365,6 +402,7 @@ class Rack(StringIdAPIResourceWrapper):
     @classmethod
     def get(cls, request, rack_id):
         rack = cls(tuskarclient(request).racks.get(rack_id))
+        rack.request = request
         return rack
 
     @property
@@ -388,7 +426,7 @@ class Rack(StringIdAPIResourceWrapper):
     @property
     def list_nodes(self):
         if not hasattr(self, '_nodes'):
-            self._nodes = [Node.get(None, node['id']) for node in (
+            self._nodes = [Node.get(self.request, node['id']) for node in (
                 self._apiresource.nodes)]
         return self._nodes
 
@@ -468,21 +506,25 @@ class Rack(StringIdAPIResourceWrapper):
 
     @property
     def list_flavors(self):
+
         if not hasattr(self, '_flavors'):
             # FIXME just a mock of used instances, add real values
             used_instances = 0
 
+            if not self.resource_class:
+                return []
             added_flavors = tuskarclient(self.request).flavors\
                                 .list(self.resource_class.id)
             self._flavors = []
-            for f in added_flavors:
-                flavor_obj = Flavor(f)
-                #flavor_obj.max_vms = f.max_vms
+            if added_flavors:
+                for f in added_flavors:
+                    flavor_obj = Flavor(f)
+                    #flavor_obj.max_vms = f.max_vms
 
-                # FIXME just a mock of used instances, add real values
-                used_instances += 2
-                flavor_obj.used_instances = used_instances
-                self._flavors.append(flavor_obj)
+                    # FIXME just a mock of used instances, add real values
+                    used_instances += 2
+                    flavor_obj.used_instances = used_instances
+                    self._flavors.append(flavor_obj)
 
         return self._flavors
 
