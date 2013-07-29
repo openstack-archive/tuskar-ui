@@ -68,7 +68,7 @@ horizon.Capacity = {
       .attr("rx", lvl_curve)
       .attr("ry", lvl_curve)
       .style("fill", bkgrnd)
-      .style("stroke", "#000000")
+      .style("stroke", "#bebebe")
       .style("stroke-width", 1);
 
     // used resources
@@ -82,7 +82,7 @@ horizon.Capacity = {
          .attr("rx", lvl_curve)
          .attr("ry", lvl_curve)
          .style("fill", usage_color(used_perc))
-         .style("stroke", "#000000")
+         .style("stroke", "#a0a0a0")
          .style("stroke-width", 1)
          .attr("d", used_perc)
          .transition()

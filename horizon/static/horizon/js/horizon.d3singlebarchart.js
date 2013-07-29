@@ -257,7 +257,7 @@ horizon.d3_single_bar_chart = {
         //.attr("rx", base_component.lvl_curve)
         //.attr("ry", base_component.lvl_curve)
         .style("fill", base_component.usage_color(base_component.percentage_used_value()))
-        .style("stroke", "#000000")
+        .style("stroke", "#bebebe")
         .style("stroke-width", 0)
         .attr("d", base_component.percentage_used_value())
         .attr("popup-used", base_component.tooltip_used_value())
@@ -291,7 +291,7 @@ horizon.d3_single_bar_chart = {
       self.y = 0;
       self.x = 0;
       self.width = base_component.w;
-      self.height = 3;
+      self.height = 1;
       self.trasition_attr = "y";
       self.trasition_value = 100 - base_component.percentage_average + "%";
     }
@@ -342,7 +342,7 @@ horizon.d3_single_bar_chart = {
       .attr("rx", base_component.lvl_curve)
       .attr("ry", base_component.lvl_curve)
       .style("fill", base_component.bkgrnd)
-      .style("stroke", "#000000")
+      .style("stroke", "#e0e0e0")
       .style("stroke-width", 1)
       .on("mouseover", function(d){tooltip_free.style("visibility", "visible");})
       .on("mousemove", function(d){tooltip_free.style("top",
@@ -356,7 +356,7 @@ horizon.d3_single_bar_chart = {
       .attr("y", base_component.h/2)
       .attr("x", 3)
       .attr("dominant-baseline", "middle")
-      .attr("font-size", 15)
+      .attr("font-size", 13)
       .on("mouseover", function(d){tooltip.style("visibility", "visible");})
       .on("mousemove", function(d){tooltip.style("top",
         (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
@@ -379,9 +379,9 @@ horizon.d3_single_bar_chart = {
       .attr("y", 0)
       .attr("height", '100%')
       .attr("width", '100%')
-      .style("stroke", "black")
+      .style("stroke", "#bebebe")
       .style("fill", "none")
-      .style("stroke-width", 2);
+      .style("stroke-width", 1);
   },
   //  INIT
   init: function() {

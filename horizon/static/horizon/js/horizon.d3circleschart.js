@@ -170,7 +170,7 @@ horizon.d3_circles_chart = {
         .attr("r", round)//function(d) { return d.r; })// can be sent form server
         .attr("cx", center_x)
         .attr("cy", center_y)
-        .attr("stroke", "grey")
+        .attr("stroke", "#cecece")
         .attr("stroke-width", function(d) {
           return 1;
         })

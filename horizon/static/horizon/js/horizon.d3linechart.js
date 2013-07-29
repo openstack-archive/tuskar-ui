@@ -85,7 +85,7 @@ horizon.d3_line_chart = {
 
     self.margin = {top: 20, right: 80, bottom: 30, left: 50};
     self.width = 550 - self.margin.left - self.margin.right;
-    self.height = 400 - self.margin.top - self.margin.bottom;
+    self.height = 300 - self.margin.top - self.margin.bottom;
 
     self.svg = d3.select(chart_div)
                  .append("svg")

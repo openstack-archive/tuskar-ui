@@ -9,6 +9,7 @@ body {
 
 // sidebar
 .sidebar {
+  font-size: 95%;
   position: fixed;
   top: 0;
   left: 0;
@@ -17,12 +18,27 @@ body {
   border-right: 1px solid rgb(210,210,210);
   background: rgb(235,235,235);
 
+  h1.brand {
+    text-align: center;
+
+    a {
+      display: inline-block;
+      width: 80px;
+      height: 85px;
+      background-size: 80px 85px;
+      float: none;
+      margin: 20px 0;
+    }
+  }
+
   .nav-tabs {
+    margin-top: -30px;
     border-bottom: 1px solid rgb(200,200,200);
 
     a {
       position: relative;
       top: 1px;
+      padding: 7px 10px;
     }
 
     li.active a,
@@ -56,24 +72,35 @@ body {
 
 // right part
 #main_content {
-  padding: 0;
+  padding: 15px 0 25px 0;
   margin-left: 240px;
 
   // topbar
   .topbar {
-    padding: 5px 30px;
-    margin: 0 0 10px 0;
-    background: rgb(244,244,244);
+    padding: 0 30px 0 30px;
+    margin: 0;
+    background: white;
+    color: rgb(180, 180, 180);
+    border: 0 none;
+
+    .page-header {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
 
     h2 {
-      font-weight: normal;
-      font-size: 22px;
-      color: rgb(190,190,190);
+      font-weight: lighter;
+      font-size: 19px;
+      color: rgb(180, 180, 180);
+      line-height: 24px;
     }
 
     #user_info {
       position: relative;
-      top: 10px;
+      color: inherit;
+
+      a {
+        color: rgb(130, 190, 245);
+      }
     }
   }
 
@@ -97,21 +124,24 @@ body {
     border-top: 1px solid rgb(230,230,230);
 
     li a {
+      position: relative;
+      top: -1px;
       border-radius: 0 0 2px 2px;
       text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+      border-top-width: 0;
     }
 
     li.active a {
       border: 1px solid rgb(220, 220, 220);
-      border-top-width: 0;
-      background: linear-gradient(rgb(249, 249, 249), rgb(235,235,235));
-      box-shadow: 1px 0 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+      background: rgb(110, 110, 110);
+      color: white;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
     }
 
     li:not(.active) a:hover {
       border: 1px solid rgb(240, 240, 240);
       border-top-width: 0;
-      background: rgb(249, 249, 249);
+      background: rgb(244, 244, 244);
     }
   }
 
@@ -126,14 +156,18 @@ body {
   #resource_management_tabs {
     font-size: 130%;
     border: 0 none;
+    border-bottom: 1px solid rgb(200, 200, 200);
+    font-weight: lighter;
 
     a {
       padding: 13px 18px;
+      border-top-width: 1px;
+      border-bottom-width: 0;
+      border-radius: 2px 2px 0 0;
     }
 
     li.active a,
     li:not(.active) a:hover {
-      border-top-width: 1px;
     }
   }
 }
@@ -146,7 +180,7 @@ table.table {
   }
 
   th {
-    background: linear-gradient(rgb(249,249,249), rgb(230,230,230));
+    background: linear-gradient(rgb(244,244,244), rgb(235,235,235));
     font-size: 85%;
     text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
   }
@@ -156,8 +190,9 @@ table.table {
     text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
 
     tr td {
-      background: linear-gradient(rgb(244,244,244), rgb(230,230,230));
-      padding: 7px 15px;
+      background: linear-gradient(rgb(244,244,244), rgb(235,235,235));
+      padding: 7px 12px;
+      height: auto;
     }
   }
 
@@ -175,7 +210,18 @@ table.table {
   }
 
   tr td {
-    padding: 5px;
+    padding: 0px 10px;
+    line-height: 1;
+    height: 40px;
+    vertical-align: middle;
+
+    &.anchor {
+      padding: 0;
+
+      a {
+        padding: 4px 10px;
+      }
+    }
   }
 
   .table_search input {
@@ -203,8 +249,8 @@ table.table {
 #main_content {
   h3 {
     font-weight: lighter;
-    font-size: 24px;
-    color: rgb(120,120,120);
+    font-size: 26px;
+    color: rgb(80,80,80);
     margin-bottom: 3px;
     margin: 0 0 3px 0;
   }
@@ -239,46 +285,62 @@ table.table {
 
 
 // capacities
-table.capacities{
-  &.overall_usage{
+table.capacities {
+  &.overall_usage {
     margin-top: 5px;
   }
-  td{
+
+  td {
     padding: 3px;
-    &.capacity_label{
+
+    &.capacity_label {
       width: 60px;
       padding-right: 5px;
       color: rgb(160,160,160);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    & div.capacity_bar{
+
+    & div.capacity_bar {
       line-height: 0;
       width: 120px;
     }
   }
 }
 
-table.flavor_usages{
+// flavor usages
+div.flavor_usage_bar {
+  max-width: 550px;
+}
+
+table.flavor_usages {
   width: 100%;
-  td{
+  max-width: 550px;
+
+  td {
     text-align: center;
     padding: 3px;
-    &.flavor_usage_label{
-      font-size: 17px;
+
+    &.flavor_usage_label {
       width: 60px;
       text-align: center;
     }
-    &.flavor_usage_text{
+
+    &.flavor_usage_text {
       width: 60px;
       text-align: center;
+      line-height: 1;
     }
-    & div.flavor_usage_bar{
+
+    & div.flavor_usage_bar {
+      width: auto;
       text-align: center;
       line-height: 0;
-      height: 150px;
+      height: 120px;
     }
   }
 }
-
 
 #interval_selector {
   position: absolute;
@@ -322,11 +384,11 @@ svg {
 
 .communication_chart_connection {
   display:inline-block;
-  /*min-width: 100px;
-  max-width: 400px;*/
-  width: 18%;
+  width: 60px;
   height: 30px;
   vertical-align: middle;
+  background: url('/static/dashboard/img/communication_flow.png') no-repeat 50% 50%;
+  background-size: 40px 20px;
 }
 
 .circles_chart_time_picker {
@@ -341,10 +403,10 @@ svg {
 
 .breadcrumbs {
   font-size: 85%;
-  margin: 0 0 20px 0;
+  margin: 0 0 25px 0;
 
   a {
-    color: rgb(180, 180, 180);
+    color: rgb(170, 170, 170);
     text-decoration: underline;
 
     &:hover {
@@ -375,8 +437,42 @@ input {
   border-radius: 2px;
 }
 
+.btn-group .btn:first-child {
+  border-radius: 2px 0 0 2px;
+}
+
+.btn-group .btn:last-child {
+  border-radius: 0 2px 2px 0;
+}
+
+.btn {
+  background: rgb(243, 243, 243);
+
+  &:hover {
+    background: rgb( 235, 235, 235);
+  }
+
+  &.btn-primary {
+    background: #0088cc;
+
+    &:hover {
+      background: #006Dcc;
+    }
+  }
+}
+
+.btn-toolbar.pull-right {
+  margin: 0;
+}
+
 .alerts .icon-warning-sign {
   padding-right: 5px;
+}
+
+.well {
+  background: rgb(249, 249, 249);
+  border-width: 1px;
+  box-shadow: none;
 }
 
 // forms
