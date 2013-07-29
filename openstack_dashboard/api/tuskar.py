@@ -51,6 +51,10 @@ class StringIdAPIResourceWrapper(base.APIResourceWrapper):
     # (luckily django autoconverts strings to integers when passing string to
     # django model id)
 
+    def __init__(self, apiresource, request=None):
+        self.request = request
+        self._apiresource = apiresource
+
     # FIXME
     # this is redefined from base.APIResourceWrapper,
     # remove this when tuskarclient returns object instead of dict
@@ -153,6 +157,9 @@ class Node(StringIdAPIResourceWrapper):
 
     @classmethod
     def get(cls, request, node_id):
+        node = cls(cls.manager().get(node_id))
+        node.request = request
+
         # FIXME ugly, fix after demo, make abstraction of instance details
         # this is realy not optimal, but i dont hve time do fix it now
         instances, more = nova.server_list(
@@ -165,8 +172,6 @@ class Node(StringIdAPIResourceWrapper):
             id = (instance.
                   _apiresource._info['OS-EXT-SRV-ATTR:hypervisor_hostname'])
             instance_details[id] = instance
-
-        node = cls(cls.manager().get(node_id))
 
         detail = instance_details.get(node_id)
         if detail:
@@ -235,12 +240,19 @@ class Node(StringIdAPIResourceWrapper):
 
     @property
     def rack(self):
-        # FIXME association should always contain something
         try:
             if not hasattr(self, '_rack'):
-                self._rack = self._apiresource.rack
+                # FIXME the node.rack association should be stored somewhere
+                self._rack = None
+                for rack in Rack.list(self.request):
+                    for node_obj in rack.list_nodes:
+                        if node_obj.id == self.id:
+                            self._rack = rack
+
             return self._rack
         except:
+            msg = "Could not obtain Nodes's rack"
+            LOG.debug(exceptions.error_color(msg))
             return None
 
     @property
@@ -392,11 +404,11 @@ class Rack(StringIdAPIResourceWrapper):
     @classmethod
     def list(cls, request, only_free_racks=False):
         if only_free_racks:
-            return [Rack(r) for r in
+            return [Rack(r, request) for r in
                     tuskarclient(request).racks.list() if (
                         r.resource_class is None)]
         else:
-            return [Rack(r) for r in
+            return [Rack(r, request) for r in
                     tuskarclient(request).racks.list()]
 
     @classmethod
