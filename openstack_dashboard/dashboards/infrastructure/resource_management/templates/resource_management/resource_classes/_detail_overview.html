@@ -47,7 +47,7 @@
           </div>
         </td>
         <td>
-          <a href="#" class="modal_chart">{{ capacity.usage|default:_(" - ") }}/{{ capacity.value|default:_(" - ") }} {{ capacity.unit }}</a>
+          <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="{{ capacity.name }}">{{ capacity.usage|default:_(" - ") }}/{{ capacity.value|default:_(" - ") }} {{ capacity.unit }}</a>
         </td>
       </tr>
       {% endfor %}
