@@ -190,12 +190,12 @@
         {% endfor %}
       </tr>
       <tr>
-        {% for flavor in resource_class.list_flavors %}
+        {% for flavor in node.list_flavors %}
           <td class="modal_chart flavor_usage_text"><a href="{{ "#" }}">{{ flavor.used_instances }}%</a></td>
         {% endfor %}
       </tr>
       <tr>
-        {% for flavor in resource_class.list_flavors %}
+        {% for flavor in node.list_flavors %}
           <td class="flavor_usage_text">{{ flavor.used_instances }} inst.</td>
         {% endfor %}
       </tr>
