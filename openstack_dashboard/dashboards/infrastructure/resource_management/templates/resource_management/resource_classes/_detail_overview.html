@@ -36,6 +36,7 @@
     <table class="capacities">
       {% for capacity in resource_class.capacities %}
       <tr>
+        {% if resource_class.has_provisioned_rack %}
         <td class="capacity_label">{{ capacity.name }}:</td>
         <td>
           <div id="{{ capacity.name }}_capacity_usage"
@@ -49,6 +50,15 @@
         <td>
           <a href="#" data-chart-type="modal_line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="{{ capacity.name }}">{{ capacity.usage|default:_(" - ") }}/{{ capacity.value|default:_(" - ") }} {{ capacity.unit }}</a>
         </td>
+        {% else %}
+        <td>
+          <div id="{{ capacity.name }}_capacity_usage"
+               class="capacity_bar"
+               data-chart-type="capacity_bar_chart">
+          </div>
+        </td>
+        <td></td>
+        {% endif %}
       </tr>
       {% endfor %}
     </table>
@@ -62,12 +72,17 @@
   <div class="span6">
     <h4>{% trans "Capacity Usage" %}</h4>
     <hr class="header_rule">
+    {% if resource_class.has_provisioned_rack %}
     <div data-chart-type="line_chart" data-url="/infrastructure/resource_management/racks/usage_data" data-series="cpu,ram,storage,network"></div>
+    {% else %}
+    <p>{% trans "No data available yet." %}</p>
+    {% endif %}
   </div>
 
   <div class="span6 alerts">
     <h4>{% trans "Active Alerts" %}</h4>
     <hr class="header_rule">
+    {% if resource_class.has_provisioned_rack %}
     <ul>
      {% for rack in resource_class.aggregated_alerts %}
          <li>
@@ -76,6 +91,9 @@
          </li>
      {% endfor %}
     </ul>
+    {% else %}
+    <p>{% trans "No data available yet." %}</p>
+    {% endif %}
   </div>
 </div>
 
@@ -83,6 +101,7 @@
   <div class="span6">
     <h4>{% trans "Summary of Instances and Usage" %}</h4>
     <hr class="header_rule">
+    {% if resource_class.has_provisioned_rack %}
     <!--
     <dl>
       {% for flavor in resource_class.running_virtual_machines %}
@@ -93,8 +112,10 @@
     -->
 
     <div class="clear"></div>
-      <div><strong>{{ resource_class.total_instances }}</strong> instances
-       <strong>{{resource_class.remaining_capacity}}%</strong>  capacity remaining</div>
+      <div>
+        <strong>{{ resource_class.total_instances }}</strong> instances
+        <strong>{{resource_class.remaining_capacity}}%</strong>  capacity remaining
+      </div>
       <div class="flavor_usage_bar"
            data-popup-free='{{resource_class|remaining_capacity_by_flavors}}'
            data-single-bar-orientation="horizontal"
@@ -146,7 +167,9 @@
         {% endfor %}
       </tr>
     </table>
-
+    {% else %}
+    <p>{% trans "No data available yet." %}</p>
+    {% endif %}
   </div>
 
   <div class="span6">
@@ -164,6 +187,7 @@
 
     <h4>Rack health</h4>
 
+    {% if resource_class.has_provisioned_rack %}
     <ul class="nav nav-tabs"
         data-circles-chart-command="change_url"
         data-receiver=".rack_health_chart">
@@ -207,5 +231,9 @@
          data-time="now"
          data-size="22">
     </div>
+    {% else %}
+    <hr class="header_rule">
+    <p>{% trans "No data available yet." %}</p>
+    {% endif %}
   </div>
 </div>

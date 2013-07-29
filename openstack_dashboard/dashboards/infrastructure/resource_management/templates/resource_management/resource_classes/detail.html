@@ -43,12 +43,19 @@
     <tr>
       <td class="capacity_label">{% trans "Usage" %}:</td>
       <td>
+        {% if resource_class.has_provisioned_rack %}
         <div id="resource_class_usage"
              class="capacity_bar"
              data-chart-type="capacity_bar_chart"
              data-capacity-limit="{{ resource_class.vm_capacity.value }}"
              data-capacity-used="{{ resource_class.vm_capacity.usage }}"
         </div>
+        {% else %}
+        <div id="resource_class_usage"
+             class="capacity_bar"
+             data-chart-type="capacity_bar_chart">
+        </div>
+        {% endif %}
       </td>
     </tr>
   </table>

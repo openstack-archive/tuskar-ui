@@ -708,6 +708,10 @@ class ResourceClass(StringIdAPIResourceWrapper):
         return [rack for rack in self.list_racks if (rack.alerts +
             rack.aggregated_alerts)]
 
+    @property
+    def has_provisioned_rack(self):
+        return any([rack.is_provisioned for rack in self.list_racks])
+
 
 class FlavorTemplate(StringIdAPIResourceWrapper):
     """Wrapper for the Flavor object returned by the
