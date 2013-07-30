@@ -122,7 +122,7 @@ def data(TEST):
         location='location',
         subnet='192.168.1.0/24',
         state='provisioned',
-        nodes=[{'id': 1}, {'id': 2}, {'id': 3}, {'id': 4}],
+        nodes=[{'id': '1'}, {'id': '2'}, {'id': '3'}, {'id': '4'}],
         resource_class={'id': '1'}))
 
     TEST.tuskar_racks.add(rack_1)

@@ -43,13 +43,18 @@ class RackViewTests(test.BaseAdminViewTests):
     # to circle back and fix these tests.
     #
     @test.create_stubs({api.tuskar.Rack: ('list', 'create',),
-                        api.tuskar.ResourceClass: ('list',)})
+                        api.tuskar.ResourceClass: ('list',),
+                        api.nova.baremetal.BareMetalNodeManager: ('create',)})
     def test_create_rack_post(self):
         api.tuskar.Rack.list(
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_racks.list())
-        api.tuskar.Rack.create(IsA(http.request.HttpRequest), 'New Rack',
-                                   u'1', 'Tokyo', '1.2.3.4').AndReturn(None)
+        api.nova.baremetal.BareMetalNodeManager.create(
+            'New Node', u'1', u'1024', u'10', 'aa:bb:cc:dd:ee',
+            u'', u'', u'', u'').AndReturn(None)
+        api.tuskar.Rack.create(
+            IsA(http.request.HttpRequest), 'New Rack',
+            u'1', 'Tokyo', '1.2.3.4', [{'id': None}]).AndReturn(None)
         api.tuskar.ResourceClass.list(
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -57,7 +62,9 @@ class RackViewTests(test.BaseAdminViewTests):
         self.mox.ReplayAll()
 
         data = {'name': 'New Rack', 'resource_class_id': u'1',
-                'location': 'Tokyo', 'subnet': '1.2.3.4'}
+                'location': 'Tokyo', 'subnet': '1.2.3.4',
+                'node_name': 'New Node', 'prov_mac_address': 'aa:bb:cc:dd:ee',
+                'cpus': u'1', 'memory_mb': u'1024', 'local_gb': u'10'}
         url = reverse('horizon:infrastructure:resource_management:'
                       'racks:create')
         resp = self.client.post(url, data)
@@ -70,12 +77,14 @@ class RackViewTests(test.BaseAdminViewTests):
 
         api.tuskar.Rack.\
             get(IsA(http.HttpRequest), rack.id).\
-            AndReturn(rack)
+            MultipleTimes().AndReturn(rack)
         api.tuskar.ResourceClass.list(
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
 
         self.mox.ReplayAll()
+
+        api.tuskar.Rack.list_nodes = []
 
         url = reverse('horizon:infrastructure:resource_management:' +
                       'racks:edit', args=[1])
@@ -89,18 +98,23 @@ class RackViewTests(test.BaseAdminViewTests):
     def test_edit_rack_post(self):
         rack = self.tuskar_racks.first()
 
+        rack_data = {'name': 'Updated Rack', 'resource_class_id': u'1',
+                'rack_id': u'1', 'location': 'New Location',
+                     'subnet': '127.10.10.0/24', 'node_macs': None}
+
         data = {'name': 'Updated Rack', 'resource_class_id': u'1',
                 'rack_id': u'1', 'location': 'New Location',
-                'subnet': '127.10.10.0/24', 'node_macs': 'foo'}
+                'subnet': '127.10.10.0/24', 'node_macs': None,
+                'node_name': 'New Node', 'prov_mac_address': 'aa:bb:cc:dd:ee',
+                'cpus': u'1', 'memory_mb': u'1024', 'local_gb': u'10'}
 
         api.tuskar.Rack.get(
-            IsA(http.HttpRequest),
-            rack.id).\
+            IsA(http.HttpRequest), rack.id).MultipleTimes().\
             AndReturn(rack)
         api.tuskar.Rack.list(
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_racks.list())
-        api.tuskar.Rack.update(IsA(http.HttpRequest), rack.id, data)
+        api.tuskar.Rack.update(IsA(http.HttpRequest), rack.id, rack_data)
         api.tuskar.ResourceClass.list(
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())

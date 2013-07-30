@@ -735,8 +735,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @property
     def nodes(self):
         if not hasattr(self, '_nodes'):
-            nodes_array = [rack.nodes for rack in self.racks]
-            self._nodes = [node for nodes in nodes_array for node in nodes]
+            self._nodes = [rack.list_nodes for rack in self.list_racks]
         return self._nodes
 
     @property

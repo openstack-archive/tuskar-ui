@@ -77,9 +77,19 @@ class TuskarApiTests(test.APITestCase):
             self.assertIsInstance(rack, api.tuskar.Rack)
         self.assertEquals(1, len(rc.list_racks))
 
+    ## FIXME: we need to stub out the bare metal client, will
+    ## be easier once the client is separated out a bit
     def test_resource_class_nodes(self):
         rc = self.tuskar_resource_classes.first()
-        for node in rc.list_nodes:
+        r = self.tuskar_racks.first()
+        n = self.nodes.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.get(r.id).AndReturn(r)
+        self.mox.ReplayAll()
+
+        for node in rc.nodes:
             self.assertIsInstance(node, api.tuskar.Node)
         self.assertEquals(4, len(rc.nodes))
 
