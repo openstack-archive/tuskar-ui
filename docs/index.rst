@@ -29,3 +29,8 @@ Future Work
 
 Contact Us
 ----------
+
+Join us on IRC (Internet Relay Chat)::
+
+    Network: Freenode (irc.freenode.net/tuskar)
+    Channel: #tuskar
