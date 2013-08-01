@@ -26,3 +26,11 @@ Further Documentation
 Check out our `docs directory 
 <https://github.com/tuskar/tuskar-ui/blob/master/docs/index.rst>`_
 for expanded documentation.
+
+Contact Us
+----------
+
+Join us on IRC (Internet Relay Chat)::
+
+    Network: Freenode (irc.freenode.net/tuskar)
+    Channel: #tuskar
