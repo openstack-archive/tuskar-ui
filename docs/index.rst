@@ -2,12 +2,12 @@
 Tuskar-UI
 =========
 
-Tuskar-UI is a user interface for `Tuskar <https://github.com/tuskar/tuskar>`_, a management API for OpenStack deployments.  It is based on (and forked from) .
+Tuskar-UI is a user interface for `Tuskar <https://github.com/tuskar/tuskar>`_, a management API for OpenStack deployments.  It is based on (and forked from) `OpenStack Horizon <https://wiki.openstack.org/wiki/Horizon>`_.
 
 High-Level Overview
 -------------------
 
-Tuskar-UI endeavours to be a stateless UI, relying on Tuskar API calls as much as possible.  We use existing Horizon libraries and components where possible.  If added libraries and components are needed, we will work with the Openstack community to push those changes back into Horizon.
+Tuskar-UI endeavours to be a stateless UI, relying on Tuskar API calls as much as possible.  We use existing Horizon libraries and components where possible.  If added libraries and components are needed, we will work with the OpenStack community to push those changes back into Horizon.
 
 Developer Information
 ---------------------
