@@ -38,4 +38,3 @@ assert DynamicChoiceField
 
 # FIXME: TableStep hack adding NumberInput
 from horizon.forms.fields import NumberInput
-

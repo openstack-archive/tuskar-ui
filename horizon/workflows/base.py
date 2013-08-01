@@ -422,10 +422,9 @@ class Step(object):
         extra_context = {"form": self.action,
                          "step": self}
 
-        """FIXME: TableStep"""
+        # FIXME: TableStep:
         if issubclass(self.__class__, TableStep):
             extra_context.update(self.get_context_data(self.workflow.request))
-        """FIXME: TableStep end"""
 
         context = template.RequestContext(self.workflow.request, extra_context)
         return step_template.render(context)
@@ -442,9 +441,7 @@ class Step(object):
         """
         self.action.add_error(message)
 
-"""FIXME: TableStep"""
-
-
+# FIXME: TableStep
 class TableStep(Step):
     """
     A :class:`~horizon.workflows.Step` class which knows how to deal with
@@ -521,7 +518,6 @@ class TableStep(Step):
 
     def has_more_data(self, table):
         return False
-"""FIXME: TableStep end"""
 
 
 class WorkflowMetaclass(type):

@@ -71,10 +71,7 @@ class DynamicTypedChoiceField(DynamicChoiceField, fields.TypedChoiceField):
     pass
 
 
-"""FIXME: TableStep"""
-#should be in django 1.5.1 forms.widgets
-
-
+# FIXME: TableStep
+# Should be in django 1.5.1 forms.widgets
 class NumberInput(widgets.TextInput):
     input_type = 'number'
-"""FIXME: TableStep end"""

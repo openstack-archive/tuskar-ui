@@ -39,7 +39,6 @@ from openstack_dashboard.api import glance
 from openstack_dashboard.api import heat
 from openstack_dashboard.api import keystone
 from openstack_dashboard.api import lbaas
-from openstack_dashboard.api import management
 from openstack_dashboard.api import network
 from openstack_dashboard.api import neutron
 from openstack_dashboard.api import nova
