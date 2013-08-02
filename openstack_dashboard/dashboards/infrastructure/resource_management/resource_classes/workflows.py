@@ -17,14 +17,15 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
-from horizon import workflows
 from horizon import forms
+from horizon import workflows
 
 from openstack_dashboard import api
 
 import re
 
-from .tables import FlavorsTable, RacksTable
+from .tables import FlavorsTable
+from .tables import RacksTable
 
 
 class ResourceClassInfoAndFlavorsAction(workflows.Action):
@@ -116,7 +117,7 @@ class CreateResourceClassInfoAndFlavors(workflows.TableStep):
                     self.workflow.request,
                     resource_class_id)
 
-                # TODO: lsmola ugly interface, rewrite
+                # TODO(lsmola ugly interface, rewrite)
                 self._tables['flavors'].active_multi_select_values = \
                     resource_class.flavortemplates_ids
 
@@ -124,7 +125,7 @@ class CreateResourceClassInfoAndFlavors(workflows.TableStep):
             else:
                 all_flavors = api.tuskar.FlavorTemplate.list(
                         self.workflow.request)
-        except Exception, ex:
+        except Exception:
             all_flavors = []
             exceptions.handle(self.workflow.request,
                               _('Unable to retrieve resource flavors list.'))
@@ -159,7 +160,7 @@ class CreateRacks(workflows.TableStep):
                 resource_class = api.tuskar.ResourceClass.get(
                     self.workflow.request,
                     resource_class_id)
-                # TODO: lsmola ugly interface, rewrite
+                # TODO(lsmola ugly interface, rewrite)
                 self._tables['racks'].active_multi_select_values = \
                     resource_class.racks_ids
                 racks = \

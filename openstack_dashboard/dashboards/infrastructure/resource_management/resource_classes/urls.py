@@ -12,10 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import patterns, url, include
+from django.conf.urls.defaults import patterns
+from django.conf.urls.defaults import url
 
-from .views import (CreateView, UpdateView, DetailView, UpdateRacksView,
-                    UpdateFlavorsView, DetailUpdateView, DetailActionView)
+from .views import (CreateView, DetailUpdateView, DetailActionView, DetailView,
+                    UpdateFlavorsView, UpdateRacksView, UpdateView)
 
 RESOURCE_CLASS = r'^(?P<resource_class_id>[^/]+)/%s$'
 VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \

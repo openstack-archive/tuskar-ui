@@ -14,15 +14,12 @@
 
 import logging
 
-from django import shortcuts
 from django.core import urlresolvers
-from django.utils.http import urlencode
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
-from horizon import messages
-from horizon import tables
 from horizon import forms
+from horizon import tables
 
 from openstack_dashboard import api
 

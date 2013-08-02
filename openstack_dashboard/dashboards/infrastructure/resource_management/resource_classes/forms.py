@@ -29,7 +29,7 @@ class DeleteForm(forms.SelfHandlingForm):
             exceptions.handle(request, _("Unable to delete Resource Class."))
 
 
-# TODO this command will be reused in table, so code is not duplicated
+# TODO(this command will be reused in table, so code is not duplicated)
 class DeleteCommand(object):
     def __init__(self, request, resource_class):
         self.resource_class = resource_class

@@ -1,8 +1,8 @@
-from django.core.urlresolvers import reverse
-from openstack_dashboard.test import helpers as test
-from openstack_dashboard import api
-from mox import IsA
 from django import http
+from django.core.urlresolvers import reverse
+from mox import IsA
+from openstack_dashboard import api
+from openstack_dashboard.test import helpers as test
 
 
 class ResourceViewTests(test.BaseAdminViewTests):

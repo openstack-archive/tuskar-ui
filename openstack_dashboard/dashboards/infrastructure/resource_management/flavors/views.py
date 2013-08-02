@@ -13,24 +13,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 import json
 import logging
 
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import View
 
 from horizon import exceptions
 from horizon import forms
-from horizon import tables
 from horizon import tabs
 
 from openstack_dashboard import api
 from .forms import CreateFlavor, EditFlavor
-from .tables import FlavorsTable
 from .tabs import FlavorDetailTabs
 
 

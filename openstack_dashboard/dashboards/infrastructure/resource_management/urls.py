@@ -14,12 +14,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import patterns, url, include
+from django.conf.urls.defaults import include
+from django.conf.urls.defaults import patterns
+from django.conf.urls.defaults import url
 
 from .flavors import urls as flavor_urls
-from .resource_classes import urls as resource_classes_urls
-from .racks import urls as rack_urls
 from .nodes import urls as node_urls
+from .racks import urls as rack_urls
+from .resource_classes import urls as resource_classes_urls
 from .views import IndexView
 
 urlpatterns = patterns('',

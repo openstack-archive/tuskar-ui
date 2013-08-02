@@ -22,14 +22,14 @@ Views for managing resource classes
 import logging
 import random
 
-from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.utils import simplejson
 from django.utils.translation import ugettext_lazy as _
 
-from horizon import tabs
 from horizon import exceptions
 from horizon import forms
+from horizon import tabs
 from horizon import workflows
 
 from openstack_dashboard import api
@@ -38,7 +38,6 @@ from .forms import DeleteForm
 from .workflows import (CreateResourceClass, UpdateResourceClass,
                         UpdateRacksWorkflow, UpdateFlavorsWorkflow,
                         DetailUpdateWorkflow)
-from .tables import ResourceClassesTable
 from .tabs import ResourceClassDetailTabs
 
 LOG = logging.getLogger(__name__)

@@ -12,7 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 import json
 import logging
 import random
@@ -27,16 +28,16 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic import View
 
 from horizon import exceptions
-from horizon import tabs
 from horizon import forms
+from horizon import tabs
 from horizon import workflows
 from .workflows import (CreateRack, EditRack, DetailEditRack)
 
 from openstack_dashboard import api
 
 from .forms import UploadRack, UpdateRackStatus
-from .tabs import RackDetailTabs
 from .tables import UploadRacksTable
+from .tabs import RackDetailTabs
 
 
 LOG = logging.getLogger(__name__)

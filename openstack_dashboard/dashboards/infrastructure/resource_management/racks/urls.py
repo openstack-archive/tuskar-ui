@@ -12,7 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls import patterns, url, include
+from django.conf.urls import patterns
+from django.conf.urls import url
 
 from .views import (CreateView, UploadView, EditView, DetailEditView,
                     EditRackStatusView, DetailView, UsageDataView)
