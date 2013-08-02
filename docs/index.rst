@@ -9,6 +9,9 @@ High-Level Overview
 
 Tuskar-UI endeavours to be a stateless UI, relying on Tuskar API calls as much as possible.  We use existing Horizon libraries and components where possible.  If added libraries and components are needed, we will work with the OpenStack community to push those changes back into Horizon.
 
+Interested in seeing Tuskar and Tuskar-UI in action? `Watch a demo! <https://www.youtube.com/watch?v=VEY035-Lyzo>`_
+
+
 Developer Information
 ---------------------
 
