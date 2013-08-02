@@ -25,8 +25,6 @@ If you're interested in the code, here are some key places to start:
 * `openstack_dashboard/api/tuskar.py <https://github.com/tuskar/tuskar-ui/blob/master/openstack_dashboard/api/tuskar.py>`_ - This file contains all the API calls made to the Tuskar API (through python-tuskarclient).
 * `openstack_dashboard/dashboards/infrastructure <https://github.com/tuskar/tuskar-ui/tree/master/openstack_dashboard/dashboards/infrastructure>`_ - The Tuskar UI code is contained within this directory.  Up to this point, UI development has been focused within the resource_management/ subdirectory.
 
-*TODO* Contribution Guide
-
 Future Work
 -----------
 
