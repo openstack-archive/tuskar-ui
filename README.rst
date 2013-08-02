@@ -14,6 +14,11 @@ as much as possible. We use existing Horizon libraries and components
 where possible. If added libraries and components are needed, we will 
 work with the OpenStack community to push those changes back into Horizon.
 
+Installation Guide
+------------------
+
+Use the `Installation Guide <https://github.com/tuskar/tuskar-ui/blob/master/docs/install.rst>`_ to install Tuskar-UI.
+
 License
 -------
 

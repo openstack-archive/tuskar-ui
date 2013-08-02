@@ -15,10 +15,10 @@ Interested in seeing Tuskar and Tuskar-UI in action? `Watch a demo! <https://www
 Developer Information
 ---------------------
 
-Install and Contribute
-~~~~~~~~~~~~~~~~~~~~~~
+Installation Guide
+~~~~~~~~~~~~~~~~~~
 
-Follow the `Installation Guide <https://github.com/tuskar/tuskar-ui/blob/master/docs/install.md>`_ to install Tuskar-UI.
+Follow the `Installation Guide <https://github.com/tuskar/tuskar-ui/blob/master/docs/install.rst>`_ to install Tuskar-UI.
 
 If you're interested in the code, here are some key places to start:
 
