@@ -199,7 +199,7 @@ class Node(StringIdAPIResourceWrapper):
     @classmethod
     def list_unracked(cls, request):
         return [cls(h) for h in dummymodels.Node.objects.all() if (
-            h.rack is None)]
+            h.rack_id is None)]
 
     @classmethod
     def create(cls, request, name, mac_address, ip_address, status,
