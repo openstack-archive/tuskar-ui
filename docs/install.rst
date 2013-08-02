@@ -82,7 +82,14 @@ Then, install a virtual environment for your setup:
 
     python tools/install_venv.py
 
-Next, set up your ``local_settings.py`` file:
+Next, run ``run_tests.sh`` to have pip install dependencies:
+
+::
+
+    cd tuskar-ui
+    ./run_tests.sh
+
+Set up your ``local_settings.py`` file:
 
 ::
 
