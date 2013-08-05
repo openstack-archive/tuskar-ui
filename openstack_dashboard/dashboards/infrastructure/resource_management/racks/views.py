@@ -31,13 +31,22 @@ from horizon import exceptions
 from horizon import forms
 from horizon import tabs
 from horizon import workflows
-from .workflows import (CreateRack, EditRack, DetailEditRack)
 
 from openstack_dashboard import api
-
-from .forms import UploadRack, UpdateRackStatus
-from .tables import UploadRacksTable
-from .tabs import RackDetailTabs
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.forms import UpdateRackStatus
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.forms import UploadRack
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.tabs import RackDetailTabs
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.tables import UploadRacksTable
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.workflows import CreateRack
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.workflows import DetailEditRack
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.workflows import EditRack
 
 
 LOG = logging.getLogger(__name__)

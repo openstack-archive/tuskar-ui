@@ -65,9 +65,10 @@ class NodeEditAction(NodeCreateAction):
     # I want to let it fail, but don't commit like that! :)
     def __init__(self, request, *args, **kwargs):
         super(NodeEditAction, self).__init__(request, *args, **kwargs)
-        rack_id = self.initial['rack_id']
-        rack = api.tuskar.Rack.get(request, rack_id)
-        nodes = rack.list_nodes
+        # TODO(Resolve node edits)
+        #rack_id = self.initial['rack_id']
+        #rack = api.tuskar.Rack.get(request, rack_id)
+        #nodes = rack.list_nodes
 
 
 class RackCreateInfoAction(workflows.Action):
@@ -86,8 +87,6 @@ class RackCreateInfoAction(workflows.Action):
         cleaned_data = super(RackCreateInfoAction, self).clean()
         name = cleaned_data.get('name')
         rack_id = self.initial.get('rack_id', None)
-        resource_class_id = cleaned_data.get('resource_class_id')
-        location = cleaned_data.get('location')
         subnet = cleaned_data.get('subnet')
         try:
             racks = api.tuskar.Rack.list(self.request)
@@ -106,8 +105,8 @@ class RackCreateInfoAction(workflows.Action):
                     % name)
             if rack.subnet == subnet and other_record:
                 raise forms.ValidationError(
-                    _('The subnet %s is already assigned to rack %s.')
-                    % (subnet, rack.name))
+                    _('The subnet is already assigned to rack %s.')
+                    % (rack.name))
 
         return cleaned_data
 
@@ -120,11 +119,6 @@ class RackCreateInfoAction(workflows.Action):
 
     class Meta:
         name = _("Rack Settings")
-
-
-class RackEditInfoAction(RackCreateInfoAction):
-    def clean(self):
-        cleaned_data = super(RackCreateInfoAction, self).clean()
 
 
 class CreateRackInfo(workflows.Step):
@@ -181,14 +175,14 @@ class CreateRack(workflows.Workflow):
                 node_id = None
 
             # Then, register the Rack, including the node if it exists
-            rack = api.tuskar.Rack.create(request, data['name'],
-                                              data['resource_class_id'],
-                                              data['location'],
-                                              data['subnet'],
-                                              [{'id': node_id}])
+            api.tuskar.Rack.create(request, data['name'],
+                                   data['resource_class_id'],
+                                   data['location'],
+                                   data['subnet'],
+                                   [{'id': node_id}])
 
             return True
-        except Exception as ex:
+        except Exception:
             exceptions.handle(request, _("Unable to create rack."))
 
 
@@ -203,7 +197,7 @@ class EditRack(CreateRack):
     def handle(self, request, data):
         try:
             rack_id = self.context['rack_id']
-            rack = api.tuskar.Rack.update(request, rack_id, data)
+            api.tuskar.Rack.update(request, rack_id, data)
             return True
         except:
             exceptions.handle(request, _("Unable to update rack."))

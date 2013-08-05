@@ -15,16 +15,8 @@
 #    under the License.
 
 from __future__ import absolute_import
-
-from django import http
-from django.conf import settings
-from django.test.utils import override_settings
-
-from mox import IsA
-
 from openstack_dashboard import api
 from openstack_dashboard.test import helpers as test
-import openstack_dashboard.dashboards.infrastructure.models as dummymodels
 
 
 class TuskarApiTests(test.APITestCase):
@@ -82,7 +74,6 @@ class TuskarApiTests(test.APITestCase):
     def test_resource_class_nodes(self):
         rc = self.tuskar_resource_classes.first()
         r = self.tuskar_racks.first()
-        n = self.nodes.first()
 
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.racks = self.mox.CreateMockAnything()
@@ -93,7 +84,7 @@ class TuskarApiTests(test.APITestCase):
             self.assertIsInstance(node, api.tuskar.Node)
         self.assertEquals(4, len(rc.nodes))
 
-    # TODO: create, delete operations
+    # TODO(create, delete operations)
 
     def test_flavor_template_list(self):
         templates = api.tuskar.FlavorTemplate.list(self.request)

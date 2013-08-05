@@ -24,8 +24,10 @@ from openstack_dashboard import api
 
 import re
 
-from .tables import FlavorsTable
-from .tables import RacksTable
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.resource_classes.tables import FlavorsTable
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.resource_classes.tables import RacksTable
 
 
 class ResourceClassInfoAndFlavorsAction(workflows.Action):

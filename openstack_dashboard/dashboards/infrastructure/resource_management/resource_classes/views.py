@@ -34,11 +34,21 @@ from horizon import workflows
 
 from openstack_dashboard import api
 
-from .forms import DeleteForm
-from .workflows import (CreateResourceClass, UpdateResourceClass,
-                        UpdateRacksWorkflow, UpdateFlavorsWorkflow,
-                        DetailUpdateWorkflow)
-from .tabs import ResourceClassDetailTabs
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.resource_classes.forms import DeleteForm
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.resource_classes.tabs import ResourceClassDetailTabs
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.resource_classes.workflows import CreateResourceClass
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.resource_classes.workflows import DetailUpdateWorkflow
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.resource_classes.workflows import UpdateFlavorsWorkflow
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.resource_classes.workflows import UpdateRacksWorkflow
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.resource_classes.workflows import UpdateResourceClass
+
 
 LOG = logging.getLogger(__name__)
 

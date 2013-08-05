@@ -18,7 +18,7 @@ from django.utils.translation import ugettext_lazy as _
 
 import horizon
 
-from openstack_dashboard.dashboards.infrastructure import dashboard
+#from openstack_dashboard.dashboards.infrastructure import dashboard
 
 
 class Service_Management(horizon.Panel):

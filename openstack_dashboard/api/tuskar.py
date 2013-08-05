@@ -12,22 +12,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import copy
-import logging
-import re
 from collections import namedtuple
-import itertools
+import copy
 from datetime import timedelta
+import logging
 from random import randint
+import re
 
 from django.conf import settings
-from django.db.models import Sum, Max
+from django.db.models import Max
 from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 
+from novaclient.v1_1.contrib import baremetal
 from tuskarclient.v1 import client as tuskar_client
 
-from openstack_dashboard.api import base, nova
+from openstack_dashboard.api import base
+from openstack_dashboard.api import nova
 import openstack_dashboard.dashboards.infrastructure.models as dummymodels
 
 
@@ -156,7 +157,7 @@ class Node(StringIdAPIResourceWrapper):
                 NOVA_BAREMETAL_CREDS['tenant'],
                 auth_url=NOVA_BAREMETAL_CREDS['auth_url'],
                 bypass_url=NOVA_BAREMETAL_CREDS['bypass_url'])
-        return nova.baremetal.BareMetalNodeManager(nc)
+        return baremetal.BareMetalNodeManager(nc)
 
     @classmethod
     def get(cls, request, node_id):

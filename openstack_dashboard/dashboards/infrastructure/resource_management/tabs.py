@@ -17,14 +17,15 @@
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
-from horizon import messages
 from horizon import tabs
 
 from openstack_dashboard.api import tuskar
-
-from .flavors.tables import FlavorsTable
-from .racks.tables import RacksTable
-from .resource_classes.tables import ResourceClassesTable
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.flavors.tables import FlavorsTable
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.tables import RacksTable
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.resource_classes.tables import ResourceClassesTable
 
 
 class RacksTab(tabs.TableTab):

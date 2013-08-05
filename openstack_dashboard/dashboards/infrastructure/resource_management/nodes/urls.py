@@ -15,8 +15,10 @@
 from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
 
-from .views import DetailView
-from .views import UnrackedView
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.nodes.views import DetailView
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.nodes.views import UnrackedView
 
 
 NODES = r'^(?P<node_id>[^/]+)/%s$'

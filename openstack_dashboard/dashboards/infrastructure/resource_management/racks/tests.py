@@ -16,6 +16,8 @@ from django import http
 from mox import IgnoreArg
 from mox import IsA
 
+from novaclient.v1_1.contrib import baremetal
+
 from openstack_dashboard import api
 from openstack_dashboard.test import helpers as test
 
@@ -47,12 +49,12 @@ class RackViewTests(test.BaseAdminViewTests):
     #
     @test.create_stubs({api.tuskar.Rack: ('list', 'create',),
                         api.tuskar.ResourceClass: ('list',),
-                        api.nova.baremetal.BareMetalNodeManager: ('create',)})
+                        baremetal.BareMetalNodeManager: ('create',)})
     def test_create_rack_post(self):
         api.tuskar.Rack.list(
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_racks.list())
-        api.nova.baremetal.BareMetalNodeManager.create(
+        baremetal.BareMetalNodeManager.create(
             'New Node', u'1', u'1024', u'10', 'aa:bb:cc:dd:ee',
             u'', u'', u'', u'').AndReturn(None)
         api.tuskar.Rack.create(
