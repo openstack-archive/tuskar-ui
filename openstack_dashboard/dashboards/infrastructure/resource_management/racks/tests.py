@@ -11,13 +11,16 @@
 #    under the License.
 
 from django.core.urlresolvers import reverse
-from openstack_dashboard.test import helpers as test
-from openstack_dashboard import api
-from mox import IsA, IgnoreArg
 from django import http
-import tempfile
+
+from mox import IgnoreArg
+from mox import IsA
+
+from openstack_dashboard import api
+from openstack_dashboard.test import helpers as test
+
 import base64
-from django.core.files.uploadedfile import InMemoryUploadedFile
+import tempfile
 
 
 class RackViewTests(test.BaseAdminViewTests):

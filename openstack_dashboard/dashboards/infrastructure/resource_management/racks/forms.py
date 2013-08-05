@@ -1,11 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-import re
-
-from django.core import validators
-from django.utils.translation import ugettext_lazy as _
 from django.forms import ValidationError
-from django import template
+from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
 from horizon import forms
@@ -13,10 +9,10 @@ from horizon import messages
 
 from openstack_dashboard import api
 
-import csv
 import base64
-import StringIO
+import csv
 import logging
+import StringIO
 
 LOG = logging.getLogger(__name__)
 
@@ -38,7 +34,7 @@ class UploadRack(forms.SelfHandlingForm):
             else:
                 try:
                     CSVRack.from_str(data)
-                except Exception as e:
+                except Exception:
                     LOG.exception("Failed to parse rack CSV file.")
                     raise ValidationError(_('Failed to parse CSV file.'))
         return data

@@ -13,9 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import re
-
-from django.core import validators
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
@@ -70,7 +67,7 @@ class CreateFlavor(forms.SelfHandlingForm):
 
     def handle(self, request, data):
         try:
-            flavor = api.tuskar.FlavorTemplate.create(
+            api.tuskar.FlavorTemplate.create(
                 request,
                 data['name'],
                 data['cpu'],
@@ -90,7 +87,7 @@ class EditFlavor(CreateFlavor):
 
     def handle(self, request, data):
         try:
-            flavor = api.tuskar.FlavorTemplate.update(
+            api.tuskar.FlavorTemplate.update(
                 self.request,
                 self.initial['flavor_id'],
                 data['name'],

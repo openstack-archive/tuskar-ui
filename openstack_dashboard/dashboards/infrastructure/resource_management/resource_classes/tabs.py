@@ -17,7 +17,8 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import tabs
 
-from tables import ResourceClassDetailFlavorsTable, RacksTable
+from tables import RacksTable
+from tables import ResourceClassDetailFlavorsTable
 
 
 class OverviewTab(tabs.Tab):

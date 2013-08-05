@@ -462,15 +462,16 @@ class Row(html.HTMLElement):
                 # FIXME: TableStep code modified
                 # multi_select fields in the table must be checked after
                 # a server action
-                # TODO: remove this ugly code and create proper TableFormWidget
+                # TODO(remove this ugly code and create proper TableFormWidget)
                 multi_select_values = []
                 if (getattr(table, 'request', False) and
-                    getattr(table.request, 'POST', False)):
+                        getattr(table.request, 'POST', False)):
                     multi_select_values = table.request.POST.getlist(
-                        self.table._meta.multi_select_name)
+                            self.table._meta.multi_select_name)
 
                 multi_select_values += getattr(table,
-                                               'active_multi_select_values', [])
+                                               'active_multi_select_values',
+                                               [])
 
                 if unicode(table.get_object_id(datum)) in multi_select_values:
                     multi_select_value = lambda value: True

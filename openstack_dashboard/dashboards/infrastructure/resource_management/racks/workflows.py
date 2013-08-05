@@ -12,17 +12,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
-from django.forms import widgets
 
 from horizon import exceptions
-from horizon import workflows
 from horizon import forms
+from horizon import workflows
 
 from openstack_dashboard import api
-
-import re
 
 
 class NodeCreateAction(workflows.Action):

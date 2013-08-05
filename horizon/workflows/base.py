@@ -31,8 +31,6 @@ from django.utils.translation import ugettext_lazy as _
 
 # FIXME: TableStep
 from django.utils.datastructures import SortedDict
-from django.template.defaultfilters import linebreaks, safe
-from django.forms.forms import NON_FIELD_ERRORS
 
 from horizon import base
 from horizon import exceptions
@@ -440,6 +438,7 @@ class Step(object):
         Adds an error to the Step based on API issues.
         """
         self.action.add_error(message)
+
 
 # FIXME: TableStep
 class TableStep(Step):
