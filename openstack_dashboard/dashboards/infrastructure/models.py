@@ -53,45 +53,9 @@ class Node(models.Model):
         db_table = 'infrastructure_node'
 
     name = models.CharField(max_length=50, unique=True)
+    rack_id = models.PositiveIntegerField(null=True)
     mac_address = models.CharField(max_length=50, unique=True)
     ip_address = models.CharField(max_length=50, unique=True, null=True)
     status = models.CharField(max_length=50, null=True)
     usage = models.IntegerField(max_length=50, null=True)
-    rack = models.ForeignKey('Rack', null=True)
     capacities = generic.GenericRelation(Capacity)
-
-
-class Rack(models.Model):
-    class Meta:
-        db_table = 'infrastructure_rack'
-
-    name = models.CharField(max_length=50, unique=True)
-    resource_class = models.ForeignKey('ResourceClass', blank=True, null=True)
-    capacities = generic.GenericRelation(Capacity)
-    location = models.CharField(max_length=50)
-    subnet = models.CharField(max_length=50, unique=True)
-    status = models.CharField(max_length=50)
-
-
-class ResourceClass(models.Model):
-    class Meta:
-        # syncdb by default creates 'openstack_dashboard_resourceclass' table,
-        # but it's better to keep models under
-        # openstack_dashboard/dashboards/infrastructure/models.py instead of
-        # openstack_dashboard/models.py since the models.py stub file is
-        # required here anyway
-        db_table = 'infrastructure_resourceclass'
-
-    name = models.CharField(max_length=50, unique=True)
-    service_type = models.CharField(max_length=50)
-    status = models.CharField(max_length=10, null=True, blank=True)
-
-
-class ResourceClassFlavor(models.Model):
-    class Meta:
-        db_table = 'infrastructure_resourceclass_flavors'
-
-    # ResourceClass db model is not used anymore
-    flavortemplate = models.ForeignKey('FlavorTemplate')
-    resource_class = models.ForeignKey('ResourceClass')
-    max_vms = models.PositiveIntegerField(max_length=50, null=True)

@@ -7,24 +7,11 @@
   {"pk": 6, "model": "infrastructure.flavortemplate", "fields": {"name": "large"}},
   {"pk": 7, "model": "infrastructure.flavortemplate", "fields": {"name": "xlarge"}},
 
-  {"pk": 1, "model": "infrastructure.node", "fields": {"name": "node1", "rack": 1, "mac_address": "00-B0-D0-86-AB-F7", "ip_address": "192.168.191.11", "status": "active", "usage": "20"}},
-  {"pk": 2, "model": "infrastructure.node", "fields": {"name": "node2", "rack": 1, "mac_address": "00-B0-D0-86-AB-F8", "ip_address": "192.168.191.12", "status": "active", "usage": "30"}},
-  {"pk": 3, "model": "infrastructure.node", "fields": {"name": "node3", "rack": 2, "mac_address": "00-B0-D0-86-AB-F9", "ip_address": "192.168.191.13", "status": "active", "usage": "40"}},
-  {"pk": 4, "model": "infrastructure.node", "fields": {"name": "node4", "rack": 2, "mac_address": "00-B0-D0-86-AB-F0", "ip_address": "192.168.191.14", "status": "active", "usage": "50"}},
+  {"pk": 1, "model": "infrastructure.node", "fields": {"name": "node1", "rack_id": 1, "mac_address": "00-B0-D0-86-AB-F7", "ip_address": "192.168.191.11", "status": "active", "usage": "20"}},
+  {"pk": 2, "model": "infrastructure.node", "fields": {"name": "node2", "rack_id": 1, "mac_address": "00-B0-D0-86-AB-F8", "ip_address": "192.168.191.12", "status": "active", "usage": "30"}},
+  {"pk": 3, "model": "infrastructure.node", "fields": {"name": "node3", "rack_id": 2, "mac_address": "00-B0-D0-86-AB-F9", "ip_address": "192.168.191.13", "status": "active", "usage": "40"}},
+  {"pk": 4, "model": "infrastructure.node", "fields": {"name": "node4", "rack_id": 2, "mac_address": "00-B0-D0-86-AB-F0", "ip_address": "192.168.191.14", "status": "active", "usage": "50"}},
   {"pk": 5, "model": "infrastructure.node", "fields": {"name": "Unracked Node", "mac_address": "00-B0-D0-86-AB-F1"}},
-
-  {"pk": 1, "model": "infrastructure.rack", "fields": {"name": "rack1", "resource_class": 1, "location": "Boston DC 1", "subnet": "10.16.25.0/24", "status": "active"}},
-  {"pk": 2, "model": "infrastructure.rack", "fields": {"name": "rack2", "resource_class": 1, "location": "Toronto - 151 Front St.", "subnet": "24.50.60.0/22", "status": "active"}},
-
-  {"pk": 1, "model": "infrastructure.resourceclass", "fields": {"service_type": "compute", "name": "m1"}},
-
-  {"pk": 1, "model": "infrastructure.resourceclassflavor", "fields": {"flavortemplate": 1, "resource_class": 1, "max_vms": 128}},
-  {"pk": 2, "model": "infrastructure.resourceclassflavor", "fields": {"flavortemplate": 2, "resource_class": 1, "max_vms": 64}},
-  {"pk": 3, "model": "infrastructure.resourceclassflavor", "fields": {"flavortemplate": 3, "resource_class": 1, "max_vms": 32}},
-  {"pk": 4, "model": "infrastructure.resourceclassflavor", "fields": {"flavortemplate": 4, "resource_class": 1, "max_vms": 16}},
-  {"pk": 5, "model": "infrastructure.resourceclassflavor", "fields": {"flavortemplate": 5, "resource_class": 1, "max_vms": 8}},
-  {"pk": 6, "model": "infrastructure.resourceclassflavor", "fields": {"flavortemplate": 6, "resource_class": 1, "max_vms": 4}},
-  {"pk": 7, "model": "infrastructure.resourceclassflavor", "fields": {"flavortemplate": 7, "resource_class": 1, "max_vms": 2}},
 
   {"pk": 1, "model": "infrastructure.capacity", "fields": {"value": 4, "unit": "GHz", "object_id": 1, "content_type": ["infrastructure", "node"], "name": "cpu"}},
   {"pk": 2, "model": "infrastructure.capacity", "fields": {"value": 4, "unit": "GHz", "object_id": 2, "content_type": ["infrastructure", "node"], "name": "cpu"}},
@@ -88,6 +75,7 @@
   {"pk": 53, "model": "infrastructure.capacity", "fields": {"value": 160, "unit": "GB", "object_id": 7, "content_type": ["infrastructure", "flavortemplate"], "name": "storage"}},
   {"pk": 54, "model": "infrastructure.capacity", "fields": {"value": 0, "unit": "GB", "object_id": 7, "content_type": ["infrastructure", "flavortemplate"], "name": "ephemeral_disk"}},
   {"pk": 55, "model": "infrastructure.capacity", "fields": {"value": 0, "unit": "MB", "object_id": 7, "content_type": ["infrastructure", "flavortemplate"], "name": "swap_disk"}},
+
   {"pk": 1, "model": "infrastructure.alert", "fields": {"message": "Switch is not accessible.", "object_id": "1", "object_type": "rack", "time": "2011-09-01T13:20:30+03:00"}},
   {"pk": 2, "model": "infrastructure.alert", "fields": {"message": "Nova service is not running.", "object_id": "1", "object_type": "node", "time": "2011-09-01T13:20:30+03:00"}},
   {"pk": 3, "model": "infrastructure.alert", "fields": {"message": "Disk usage is over 90%.", "object_id": "1", "object_type": "node", "time": "2011-09-01T13:20:30+03:00"}}
