@@ -24,6 +24,8 @@ from horizon.forms.base import SelfHandlingForm
 from horizon.forms.base import SelfHandlingMixin
 from horizon.forms.fields import DynamicChoiceField
 from horizon.forms.fields import DynamicTypedChoiceField
+# FIXME: TableStep hack adding NumberInput
+from horizon.forms.fields import NumberInput
 from horizon.forms.views import ModalFormMixin
 from horizon.forms.views import ModalFormView
 
@@ -35,6 +37,4 @@ assert ModalFormView
 assert ModalFormMixin
 assert DynamicTypedChoiceField
 assert DynamicChoiceField
-
-# FIXME: TableStep hack adding NumberInput
-from horizon.forms.fields import NumberInput
+assert NumberInput

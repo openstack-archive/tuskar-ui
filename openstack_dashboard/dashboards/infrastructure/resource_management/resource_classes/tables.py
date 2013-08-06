@@ -23,10 +23,12 @@ from horizon import tables
 
 from openstack_dashboard import api
 
-import workflows
-
-from ..flavors import tables as flavors_tables
-from ..racks import tables as racks_tables
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.flavors import tables as flavors_tables
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks import tables as racks_tables
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management import resource_classes
 
 
 LOG = logging.getLogger(__name__)
@@ -138,7 +140,7 @@ class UpdateRacksClass(tables.LinkAction):
             urlresolvers.reverse(
                 url,
                 args=(self.table.kwargs['resource_class_id'],)),
-            workflows.RacksAction.slug)
+            resource_classes.workflows.RacksAction.slug)
 
 
 class UpdateFlavorsClass(tables.LinkAction):
@@ -153,7 +155,7 @@ class UpdateFlavorsClass(tables.LinkAction):
             urlresolvers.reverse(
                 url,
                 args=(self.table.kwargs['resource_class_id'],)),
-            workflows.ResourceClassInfoAndFlavorsAction.slug)
+            resource_classes.workflows.ResourceClassInfoAndFlavorsAction.slug)
 
 
 class ResourceClassDetailFlavorsTable(flavors_tables.FlavorsTable):

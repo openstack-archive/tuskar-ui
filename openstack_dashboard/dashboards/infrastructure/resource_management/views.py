@@ -21,7 +21,8 @@ Views for Resource Management.
 
 from horizon import tabs
 
-from .tabs import ResourceManagementTabs
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.tabs import ResourceManagementTabs
 
 
 class IndexView(tabs.TabbedTableView):

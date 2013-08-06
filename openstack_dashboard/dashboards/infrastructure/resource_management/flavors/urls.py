@@ -13,10 +13,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls.defaults import patterns
+from django.conf.urls.defaults import url
 
-from .views import (CreateView, DetailView, EditView,
-                    DetailEditView, ActiveInstancesDataView)
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.flavors.views import ActiveInstancesDataView
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.flavors.views import CreateView
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.flavors.views import DetailEditView
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.flavors.views import DetailView
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.flavors.views import EditView
 
 
 FLAVORS = r'^(?P<flavor_id>[^/]+)/%s$'

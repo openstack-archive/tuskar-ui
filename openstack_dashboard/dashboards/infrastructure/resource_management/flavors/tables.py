@@ -52,7 +52,7 @@ class FlavorsFilterAction(tables.FilterAction):
     def filter(self, table, flavors, filter_string):
         """ Naive case-insensitive search. """
         q = filter_string.lower()
-        return [flavor for flavor in instances
+        return [flavor for flavor in flavors
                 if q in flavor.name.lower()]
 
 

@@ -30,8 +30,12 @@ from horizon import forms
 from horizon import tabs
 
 from openstack_dashboard import api
-from .forms import CreateFlavor, EditFlavor
-from .tabs import FlavorDetailTabs
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.flavors.forms import CreateFlavor
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.flavors.forms import EditFlavor
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.flavors.tabs import FlavorDetailTabs
 
 
 LOG = logging.getLogger(__name__)

@@ -15,8 +15,20 @@
 from django.conf.urls import patterns
 from django.conf.urls import url
 
-from .views import (CreateView, UploadView, EditView, DetailEditView,
-                    EditRackStatusView, DetailView, UsageDataView)
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.views import CreateView
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.views import DetailEditView
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.views import DetailView
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.views import EditRackStatusView
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.views import EditView
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.views import UploadView
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.racks.views import UsageDataView
 
 
 RACKS = r'^(?P<rack_id>[^/]+)/%s$'

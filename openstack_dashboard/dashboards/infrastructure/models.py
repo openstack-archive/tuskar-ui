@@ -15,9 +15,9 @@
 #    under the License.
 
 # FIXME: configuration for dummy data
-from django.db import models
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
 
 
 class Capacity(models.Model):

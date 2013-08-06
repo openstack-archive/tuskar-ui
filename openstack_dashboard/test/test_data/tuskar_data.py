@@ -10,14 +10,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from openstack_dashboard.api.tuskar import (
-    Flavor, FlavorTemplate, ResourceClass, Node,
-    Rack, Capacity)
+from openstack_dashboard.api.tuskar import Capacity
+from openstack_dashboard.api.tuskar import Flavor
+from openstack_dashboard.api.tuskar import FlavorTemplate
+from openstack_dashboard.api.tuskar import Node
+from openstack_dashboard.api.tuskar import Rack
+from openstack_dashboard.api.tuskar import ResourceClass
+
 from collections import namedtuple
 
 import openstack_dashboard.dashboards.infrastructure.models as dummymodels
 
-from .utils import TestDataContainer
+from openstack_dashboard.test.test_data.utils import TestDataContainer
 
 
 def data(TEST):

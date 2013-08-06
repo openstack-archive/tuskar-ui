@@ -17,7 +17,8 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import tabs
 
-from ..nodes.tables import NodesTable
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.nodes.tables import NodesTable
 
 
 class OverviewTab(tabs.Tab):

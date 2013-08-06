@@ -20,9 +20,10 @@ from horizon import tables
 from horizon import tabs
 
 from openstack_dashboard import api
-
-from .tabs import NodeDetailTabs
-from .tables import UnrackedNodesTable
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.nodes.tables import UnrackedNodesTable
+from openstack_dashboard.dashboards.infrastructure. \
+    resource_management.nodes.tabs import NodeDetailTabs
 
 
 class UnrackedView(tables.DataTableView):
