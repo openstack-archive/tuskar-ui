@@ -47,6 +47,23 @@ def tuskarclient(request):
     return c
 
 
+def baremetalclient(request):
+    nc = nova.nova_client.Client(NOVA_BAREMETAL_CREDS['user'],
+                                NOVA_BAREMETAL_CREDS['password'],
+                                NOVA_BAREMETAL_CREDS['tenant'],
+                                auth_url=NOVA_BAREMETAL_CREDS['auth_url'],
+                                bypass_url=NOVA_BAREMETAL_CREDS['bypass_url'])
+    return baremetal.BareMetalNodeManager(nc)
+
+
+def overcloudclient(request):
+    c = nova.nova_client.Client(OVERCLOUD_USERNAME,
+                                OVERCLOUD_PASSWORD,
+                                'admin',
+                                auth_url=OVERCLOUD_AUTH_URL)
+    return c
+
+
 class StringIdAPIResourceWrapper(base.APIResourceWrapper):
     # horizon DataTable class expects ids to be string,
     # if it's not string, then comparison in
@@ -147,21 +164,11 @@ class Node(StringIdAPIResourceWrapper):
     dummy model.
     """
     _attrs = ['id', 'pm_address', 'cpus', 'memory_mb', 'service_host',
-        'local_gb', 'pm_user']
-
-    @classmethod
-    def manager(cls):
-        nc = nova.nova_client.Client(
-                NOVA_BAREMETAL_CREDS['user'],
-                NOVA_BAREMETAL_CREDS['password'],
-                NOVA_BAREMETAL_CREDS['tenant'],
-                auth_url=NOVA_BAREMETAL_CREDS['auth_url'],
-                bypass_url=NOVA_BAREMETAL_CREDS['bypass_url'])
-        return baremetal.BareMetalNodeManager(nc)
+              'local_gb', 'pm_user']
 
     @classmethod
     def get(cls, request, node_id):
-        node = cls(cls.manager().get(node_id))
+        node = cls(baremetalclient(request).get(node_id))
         node.request = request
 
         # FIXME ugly, fix after demo, make abstraction of instance details
@@ -185,9 +192,9 @@ class Node(StringIdAPIResourceWrapper):
                     .join([addr['addr'] for addr in addresses]))
 
             node.status = detail._apiresource._info['OS-EXT-STS:vm_state']
-            node.power_mamanegemt = ""
+            node.power_management = ""
             if node.pm_user:
-                node.power_mamanegemt = node.pm_user + "/********"
+                node.power_management = node.pm_user + "/********"
         else:
             node.status = 'unprovisioned'
 
@@ -195,20 +202,22 @@ class Node(StringIdAPIResourceWrapper):
 
     @classmethod
     def list(cls, request):
-        return cls.manager().list()
+        return [Node(n, request) for n in
+                baremetalclient(request).list()]
 
     @classmethod
     def list_unracked(cls, request):
-        return [cls(h) for h in dummymodels.Node.objects.all() if (
-            h.rack_id is None)]
+        return [n for n in Node.list(request) if (
+                n.rack is None)]
 
     @classmethod
-    def create(cls, request, name, mac_address, ip_address, status,
-               usage, rack):
-        node = dummymodels.Node(name=name, mac_address=mac_address,
-                                ip_address=ip_address, status=status,
-                                usage=usage, rack=rack)
-        node.save()
+    def create(cls, request, name, cpus, memory_mb, local_gb, prov_mac_address,
+               pm_address, pm_user, pm_password, terminal_port):
+        node = baremetalclient(request).create(name, cpus, memory_mb,
+                                               local_gb, prov_mac_address,
+                                               pm_address, pm_user,
+                                               pm_password, terminal_port)
+        return node
 
     @property
     def list_flavors(self):
@@ -236,13 +245,6 @@ class Node(StringIdAPIResourceWrapper):
         return self._flavors
 
     @property
-    def capacities(self):
-        if not hasattr(self, '_capacities'):
-            self._capacities = [Capacity(c) for c in
-                                self._apiresource.capacities.all()]
-        return self._capacities
-
-    @property
     def rack(self):
         try:
             if not hasattr(self, '_rack'):
@@ -258,70 +260,6 @@ class Node(StringIdAPIResourceWrapper):
             msg = "Could not obtain Nodes's rack"
             LOG.debug(exceptions.error_color(msg))
             return None
-
-    @property
-    def cpu(self):
-        if not hasattr(self, '_cpu'):
-            try:
-                cpu = dummymodels.Capacity.objects\
-                            .filter(node=self._apiresource)\
-                            .filter(name='cpu')[0]
-            except:
-                cpu = dummymodels.Capacity(
-                            name='cpu',
-                            value=_('Unable to retrieve '
-                                    '(Is the node configured properly?)'),
-                            unit='')
-            self._cpu = Capacity(cpu)
-        return self._cpu
-
-    @property
-    def ram(self):
-        if not hasattr(self, '_ram'):
-            try:
-                ram = dummymodels.Capacity.objects\
-                            .filter(node=self._apiresource)\
-                            .filter(name='ram')[0]
-            except:
-                ram = dummymodels.Capacity(
-                            name='ram',
-                            value=_('Unable to retrieve '
-                                    '(Is the node configured properly?)'),
-                            unit='')
-            self._ram = Capacity(ram)
-        return self._ram
-
-    @property
-    def storage(self):
-        if not hasattr(self, '_storage'):
-            try:
-                storage = dummymodels.Capacity.objects\
-                                .filter(node=self._apiresource)\
-                                .filter(name='storage')[0]
-            except:
-                storage = dummymodels.Capacity(
-                                name='storage',
-                                value=_('Unable to retrieve '
-                                        '(Is the node configured properly?)'),
-                                unit='')
-            self._storage = Capacity(storage)
-        return self._storage
-
-    @property
-    def network(self):
-        if not hasattr(self, '_network'):
-            try:
-                network = dummymodels.Capacity.objects\
-                                .filter(node=self._apiresource)\
-                                .filter(name='network')[0]
-            except:
-                network = dummymodels.Capacity(
-                                name='network',
-                                value=_('Unable to retrieve '
-                                        '(Is the node configured properly?)'),
-                                unit='')
-            self._network = Capacity(network)
-        return self._network
 
     @property
     def vm_capacity(self):
@@ -376,12 +314,9 @@ class Node(StringIdAPIResourceWrapper):
         if not hasattr(self, '_running_virtual_machines'):
             search_opts = {}
             search_opts['all_tenants'] = True
-            nova_client = nova.nova_client.Client(OVERCLOUD_USERNAME,
-                                                  OVERCLOUD_PASSWORD,
-                                                  'admin',
-                                                  auth_url=OVERCLOUD_AUTH_URL)
             self._running_virtual_machines = [s for s in
-                                nova_client.servers.list(True, search_opts)
+                                overcloudclient(self.request).
+                                              servers.list(True, search_opts)
                                 if s.hostId == self.id]
         return self._running_virtual_machines
 
@@ -451,8 +386,6 @@ class Rack(StringIdAPIResourceWrapper):
             unicode(node['id']) for node in (
                 self._apiresource.nodes)]
 
-    ## FIXME: this will have to be rewritten to ultimately
-    ## fetch nodes from nova baremetal
     @property
     def list_nodes(self):
         if not hasattr(self, '_nodes'):
@@ -462,28 +395,6 @@ class Rack(StringIdAPIResourceWrapper):
 
     def nodes_count(self):
         return len(self._apiresource.nodes)
-
-    # The idea here is to take a list of MAC addresses and assign them to
-    # our rack. I'm attaching this here so that we can take one list, versus
-    # potentially making a long series of API calls.
-    # The present implementation makes no attempt at optimization since this
-    # is likely short-lived until a real API is implemented.
-    @classmethod
-    def register_nodes(cls, rack_id, nodes_list):
-        for mac in nodes_list:
-            # search for MAC
-            try:
-                node = dummymodels.Node.objects.get(mac_address=mac)
-                if node is not None:
-                    node.rack_id = rack_id
-                    node.save()
-            except:
-                # FIXME: It is unclear what we're supposed to do in this case.
-                # I create a new Node, but it's possible we should not
-                # allow new entries here.
-                # FIXME: If this stays, we should probably add Capabilities
-                # here so that graphs work as expected.
-                Node.create(None, mac, mac, None, None, None, rack_id)
 
     @property
     def resource_class(self):
@@ -594,6 +505,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @classmethod
     def get(cls, request, resource_class_id):
         rc = cls(tuskarclient(request).resource_classes.get(resource_class_id))
+        rc.request = request
         return rc
 
     @classmethod
@@ -606,7 +518,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @classmethod
     def list(cls, request):
-        return [cls(rc) for rc in (
+        return [cls(rc, request) for rc in (
             tuskarclient(request).resource_classes.list())]
 
     @classmethod
@@ -736,7 +648,8 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @property
     def nodes(self):
         if not hasattr(self, '_nodes'):
-            self._nodes = [rack.list_nodes for rack in self.list_racks]
+            nodes_lists = [rack.list_nodes for rack in self.list_racks]
+            self._nodes = [node for nodes in nodes_lists for node in nodes]
         return self._nodes
 
     @property
@@ -745,7 +658,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @property
     def racks_count(self):
-        return len(self.racks)
+        return len(self.list_racks)
 
     @property
     def vm_capacity(self):

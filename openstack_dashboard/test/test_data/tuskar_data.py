@@ -10,16 +10,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from collections import namedtuple
+
 from openstack_dashboard.api.tuskar import Capacity
 from openstack_dashboard.api.tuskar import Flavor
 from openstack_dashboard.api.tuskar import FlavorTemplate
 from openstack_dashboard.api.tuskar import Node
 from openstack_dashboard.api.tuskar import Rack
 from openstack_dashboard.api.tuskar import ResourceClass
-
-from collections import namedtuple
-
-import openstack_dashboard.dashboards.infrastructure.models as dummymodels
 
 from openstack_dashboard.test.test_data.utils import TestDataContainer
 
@@ -135,37 +133,27 @@ def data(TEST):
     TEST.nodes = TestDataContainer()
     TEST.unracked_nodes = TestDataContainer()
 
-    node_1 = Node(dummymodels.Node(id="1",
-                                   name="node1",
-                                   rack_id=1,
-                                   mac_address="00-B0-D0-86-AB-F7",
-                                   ip_address="192.168.191.11",
-                                   status="active",
-                                   usage="20"))
-    node_2 = Node(dummymodels.Node(id="2",
-                                   name="node2",
-                                   rack_id=1,
-                                   mac_address="00-B0-D0-86-AB-F8",
-                                   ip_address="192.168.191.12",
-                                   status="active",
-                                   usage="20"))
-    node_3 = Node(dummymodels.Node(id="3",
-                                   name="node3",
-                                   rack_id=1,
-                                   mac_address="00-B0-D0-86-AB-F9",
-                                   ip_address="192.168.191.13",
-                                   status="active",
-                                   usage="20"))
-    node_4 = Node(dummymodels.Node(id="4",
-                                   name="node4",
-                                   rack_id=1,
-                                   mac_address="00-B0-D0-86-AB-F0",
-                                   ip_address="192.168.191.14",
-                                   status="active",
-                                   usage="20"))
-    node_5 = Node(dummymodels.Node(id="5",
-                                   name="node5",
-                                   mac_address="00-B0-D0-86-AB-F1"))
+    NodeStruct = namedtuple('RackStruct', 'id name prov_mac_address')
+    node_1 = Node(NodeStruct(
+            id="1",
+            name="node1",
+            prov_mac_address="00-B0-D0-86-AB-F7"))
+    node_2 = Node(NodeStruct(
+            id="2",
+            name="node2",
+            prov_mac_address="00-B0-D0-86-AB-F8"))
+    node_3 = Node(NodeStruct(
+            id="3",
+            name="node3",
+            prov_mac_address="00-B0-D0-86-AB-F9"))
+    node_4 = Node(NodeStruct(
+            id="4",
+            name="node4",
+            prov_mac_address="00-B0-D0-86-AB-F0"))
+    node_5 = Node(NodeStruct(
+            id="5",
+            name="node5",
+            prov_mac_address="00-B0-D0-86-AB-F1"))
 
     TEST.nodes.add(node_1, node_2, node_3, node_4)
     TEST.unracked_nodes.add(node_5)

@@ -23,16 +23,20 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         api.tuskar.FlavorTemplate: ('list',),
-        api.tuskar.Rack: ('list',)
+        api.tuskar.Rack: ('list',),
+        api.tuskar.ResourceClass: ('get',)
     })
     def test_create_resource_class_get(self):
         all_templates = self.tuskar_flavor_templates.list()
         all_racks = self.tuskar_racks.list()
+        rc = self.tuskar_resource_classes.first()
 
         api.tuskar.FlavorTemplate.\
             list(IsA(http.HttpRequest)).AndReturn(all_templates)
         api.tuskar.Rack.\
             list(IsA(http.HttpRequest), True).AndReturn(all_racks)
+        api.tuskar.ResourceClass.\
+            get(IsA(http.HttpRequest), rc.id).AndReturn(rc)
         self.mox.ReplayAll()
 
         url = reverse(

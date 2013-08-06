@@ -67,10 +67,11 @@ class UploadRack(forms.SelfHandlingForm):
                     api.tuskar.ResourceClass.list(request))
             for rack in racks:
                 try:
-                    r = api.tuskar.Rack.create(request, rack.name,
-                            rclass_ids[rack.resource_class], rack.region,
-                            rack.subnet)
-                    api.tuskar.Rack.register_nodes(r, rack.nodes)
+                    api.tuskar.Rack.create(request, rack.name,
+                                           rclass_ids[rack.resource_class],
+                                           rack.region, rack.subnet)
+                    # FIXME: will have to handle nodes once proper attributes
+                    # for nodes are added
                     successes.append(rack.name)
                 except:
                     LOG.exception("Exception in processing rack CSV file.")

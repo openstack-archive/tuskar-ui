@@ -162,13 +162,12 @@ class CreateRack(workflows.Workflow):
     def handle(self, request, data):
         try:
             if data['node_name'] is not None:
-                node = api
-                node = api.tuskar.Node.manager().create(data['node_name'],
-                                   data['cpus'], data['memory_mb'],
-                                   data['local_gb'], data['prov_mac_address'],
-                                   data['pm_address'], data['pm_user'],
-                                   data['pm_password'], data['terminal_port'])
-
+                node = api.tuskar.Node.create(
+                    request, data['node_name'],
+                    data['cpus'], data['memory_mb'],
+                    data['local_gb'], data['prov_mac_address'],
+                    data['pm_address'], data['pm_user'],
+                    data['pm_password'], data['terminal_port'])
             if node:
                 node_id = node.id
             else:
