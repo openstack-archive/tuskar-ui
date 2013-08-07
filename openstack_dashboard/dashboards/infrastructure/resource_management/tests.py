@@ -29,23 +29,21 @@ class ResourceManagementTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         api.tuskar.ResourceClass: (
+            'get',
             'list',
             'list_racks',
             'nodes'),
         api.tuskar.FlavorTemplate: (
             'list',),
+        api.tuskar.Node: (
+            'list',),
         api.tuskar.Rack: (
             'list',)})
     def test_index(self):
-        # FlavorTemplate stubs
-        flavors = self.tuskar_flavors.list()
-
-        api.tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).AndReturn(
-                flavors)
-        # FlavorTemplate stubs end
 
         # ResourceClass stubs
-        all_resource_classes = self.tuskar_resource_classes.list()
+        resource_classes = self.tuskar_resource_classes.list()
+        resource_class = self.tuskar_resource_classes.first()
         nodes = []
         racks = []
 
@@ -54,14 +52,26 @@ class ResourceManagementTests(test.BaseAdminViewTests):
 
         api.tuskar.ResourceClass.list(
             IsA(http.HttpRequest)).\
-            AndReturn(all_resource_classes)
+            AndReturn(resource_classes)
+
+        api.tuskar.ResourceClass.get(
+            IsA(http.HttpRequest), resource_class.id).\
+            AndReturn(resource_class)
         # ResourceClass stubs end
 
         # Rack stubs
         racks = self.tuskar_racks.list()
 
         api.tuskar.Rack.list(IsA(http.HttpRequest)).AndReturn(racks)
+        api.tuskar.Node.list(IsA(http.HttpRequest)).AndReturn(nodes)
         # Rack stubs end
+
+        # FlavorTemplate stubs
+        flavors = self.tuskar_flavors.list()
+
+        api.tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).AndReturn(
+                flavors)
+        # FlavorTemplate stubs end
 
         self.mox.ReplayAll()
 
@@ -76,7 +86,7 @@ class ResourceManagementTests(test.BaseAdminViewTests):
 
         # ResourceClass asserts
         self.assertItemsEqual(res.context['resource_classes_table'].data,
-                              all_resource_classes)
+                              resource_classes)
         # ResourceClass asserts end
 
         # Rack asserts

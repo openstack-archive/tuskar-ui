@@ -13,7 +13,6 @@
 from django.core.urlresolvers import reverse
 from django import http
 
-from mox import IgnoreArg
 from mox import IsA
 
 from novaclient.v1_1.contrib import baremetal
@@ -186,13 +185,11 @@ class RackViewTests(test.BaseAdminViewTests):
         self.assertEqual(resp.context['form']['uploaded_data'].value(),
             None)
 
-    @test.create_stubs({api.tuskar.Rack: ('create', 'register_nodes'),
+    @test.create_stubs({api.tuskar.Rack: ('create',),
                         api.tuskar.ResourceClass: ('list',)})
     def test_upload_rack_create(self):
         api.tuskar.Rack.create(IsA(http.request.HttpRequest), 'Rack1',
             '1', 'regionX', '192.168.111.0/24').AndReturn(None)
-        api.tuskar.Rack.register_nodes(IgnoreArg(),
-            IgnoreArg()).AndReturn(None)
         api.tuskar.ResourceClass.list(
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())

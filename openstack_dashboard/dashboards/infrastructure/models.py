@@ -46,16 +46,3 @@ class FlavorTemplate(models.Model):
 
     name = models.CharField(max_length=50, unique=True)
     capacities = generic.GenericRelation(Capacity)
-
-
-class Node(models.Model):
-    class Meta:
-        db_table = 'infrastructure_node'
-
-    name = models.CharField(max_length=50, unique=True)
-    rack_id = models.PositiveIntegerField(null=True)
-    mac_address = models.CharField(max_length=50, unique=True)
-    ip_address = models.CharField(max_length=50, unique=True, null=True)
-    status = models.CharField(max_length=50, null=True)
-    usage = models.IntegerField(max_length=50, null=True)
-    capacities = generic.GenericRelation(Capacity)
