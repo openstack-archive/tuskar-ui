@@ -19,7 +19,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
 
-from openstack_dashboard import api
+from tuskar_ui import api as tuskar
 
 
 LOG = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ class DeleteFlavors(tables.DeleteAction):
     data_type_plural = _("Flavors")
 
     def delete(self, request, obj_id):
-        api.tuskar.FlavorTemplate.delete(request, obj_id)
+        tuskar.FlavorTemplate.delete(request, obj_id)
 
 
 class CreateFlavor(tables.LinkAction):

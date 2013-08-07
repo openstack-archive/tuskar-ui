@@ -17,9 +17,9 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import tabs
 
-from openstack_dashboard.dashboards.infrastructure.resource_management. \
+from tuskar_ui.infrastructure.resource_management. \
     resource_classes.tables import RacksTable
-from openstack_dashboard.dashboards.infrastructure.resource_management. \
+from tuskar_ui.infrastructure.resource_management. \
     resource_classes.tables import ResourceClassDetailFlavorsTable
 
 

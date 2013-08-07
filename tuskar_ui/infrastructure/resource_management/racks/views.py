@@ -32,20 +32,20 @@ from horizon import forms
 from horizon import tabs
 from horizon import workflows
 
-from openstack_dashboard import api
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui import api as tuskar
+from tuskar_ui.infrastructure. \
     resource_management.racks.forms import UpdateRackStatus
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks.forms import UploadRack
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks.tabs import RackDetailTabs
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks.tables import UploadRacksTable
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks.workflows import CreateRack
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks.workflows import DetailEditRack
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks.workflows import EditRack
 
 
@@ -76,7 +76,7 @@ class EditView(workflows.WorkflowView):
     workflow_class = EditRack
 
     def get_initial(self):
-        obj = api.tuskar.Rack.get(self.request, self.kwargs['rack_id'])
+        obj = tuskar.Rack.get(self.request, self.kwargs['rack_id'])
         # mac_str = "\n".join([x.mac_address for x in obj.list_nodes])
         return {'name': obj.name, 'resource_class_id': obj.resource_class_id,
                 'location': obj.location, 'subnet': obj.subnet,
@@ -103,7 +103,7 @@ class EditRackStatusView(forms.ModalFormView):
 
     def get_initial(self):
         try:
-            rack = api.tuskar.Rack.get(
+            rack = tuskar.Rack.get(
                 self.request, self.kwargs['rack_id'])
             action = self.request.GET.get('action')
         except:
@@ -126,7 +126,7 @@ class DetailView(tabs.TabView):
         if not hasattr(self, "_rack"):
             try:
                 rack_id = self.kwargs['rack_id']
-                rack = api.tuskar.Rack.get(self.request, rack_id)
+                rack = tuskar.Rack.get(self.request, rack_id)
             except:
                 redirect = reverse('horizon:infrastructure:'
                                    'resource_management:index')
@@ -191,7 +191,7 @@ def top_communicating(request, rack_id=None):
                 "Normal level of communication",
                 "Low level of communication"]
 
-    rack = api.tuskar.Rack.get(request, rack_id)
+    rack = tuskar.Rack.get(request, rack_id)
     for node in rack.nodes:
         status = random.randint(0, 3)
         percentage = random.randint(0, 100)
@@ -227,7 +227,7 @@ def node_health(request, rack_id=None):
     statuses = ["Good", "Warnings", "Disaster"]
     colors = ["rgb(244,244,244)", "rgb(240,170,0)", "rgb(200,0,0)"]
 
-    rack = api.tuskar.Rack.get(request, rack_id)
+    rack = tuskar.Rack.get(request, rack_id)
 
     for node in rack.nodes:
         rand_index = random.randint(0, 2)
@@ -254,7 +254,7 @@ def node_health(request, rack_id=None):
 
 
 def check_state(request, rack_id=None):
-    rack = api.tuskar.Rack.get(request, rack_id)
+    rack = tuskar.Rack.get(request, rack_id)
 
     res = {'state': rack.state}
 

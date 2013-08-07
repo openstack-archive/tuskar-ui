@@ -20,15 +20,14 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import tables
 
-from tuskar_ui import api
+from tuskar_ui import api as tuskar
 import tuskar_ui.tables
 from tuskar_ui.forms import NumberInput
-
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.flavors import tables as flavors_tables
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks import tables as racks_tables
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management import resource_classes
 
 
@@ -55,7 +54,7 @@ class DeleteResourceClass(tables.DeleteAction):
 
     def delete(self, request, obj_id):
         try:
-            api.tuskar.ResourceClass.delete(request, obj_id)
+            tuskar.ResourceClass.delete(request, obj_id)
         except:
             msg = _('Failed to delete resource class %s') % obj_id
             LOG.info(msg)

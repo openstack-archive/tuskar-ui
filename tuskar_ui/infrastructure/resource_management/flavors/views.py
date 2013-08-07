@@ -29,12 +29,12 @@ from horizon import exceptions
 from horizon import forms
 from horizon import tabs
 
-from openstack_dashboard import api
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui import api as tuskar
+from tuskar_ui.infrastructure. \
     resource_management.flavors.forms import CreateFlavor
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.flavors.forms import EditFlavor
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.flavors.tabs import FlavorDetailTabs
 
 
@@ -64,7 +64,7 @@ class EditView(forms.ModalFormView):
 
     def get_initial(self):
         try:
-            flavor = api.tuskar.FlavorTemplate.get(
+            flavor = tuskar.FlavorTemplate.get(
                 self.request, self.kwargs['flavor_id'])
         except:
             exceptions.handle(self.request,
@@ -100,7 +100,7 @@ class DetailView(tabs.TabView):
         if not hasattr(self, "_flavor"):
             try:
                 flavor_id = self.kwargs['flavor_id']
-                flavor = api.tuskar.FlavorTemplate.get(self.request, flavor_id)
+                flavor = tuskar.FlavorTemplate.get(self.request, flavor_id)
             except:
                 redirect = reverse('horizon:infrastructure:'
                                    'resource_management:index')
@@ -122,7 +122,7 @@ class ActiveInstancesDataView(View):
 
     def get(self, request, *args, **kwargs):
         try:
-            flavor = api.tuskar.FlavorTemplate.get(
+            flavor = tuskar.FlavorTemplate.get(
                 self.request, self.kwargs['flavor_id'])
             values = flavor.vms_over_time(
                 datetime.now() - timedelta(days=7), datetime.now())

@@ -23,13 +23,14 @@ from django.conf import settings
 from django.db.models import Max
 from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
+from requests import ConnectionError
 
 from novaclient.v1_1.contrib import baremetal
 from tuskarclient.v1 import client as tuskar_client
 
 from openstack_dashboard.api import base
 from openstack_dashboard.api import nova
-import openstack_dashboard.dashboards.infrastructure.models as dummymodels
+import tuskar_ui.infrastructure.models as dummymodels
 
 
 LOG = logging.getLogger(__name__)
@@ -207,8 +208,10 @@ class Node(StringIdAPIResourceWrapper):
 
     @classmethod
     def list_unracked(cls, request):
-        return [n for n in Node.list(request) if (
-                n.rack is None)]
+        try:
+            return [n for n in Node.list(request) if (n.rack is None)]
+        except ConnectionError:
+            return []
 
     @classmethod
     def create(cls, request, name, cpus, memory_mb, local_gb, prov_mac_address,

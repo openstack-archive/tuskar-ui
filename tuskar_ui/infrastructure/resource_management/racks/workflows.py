@@ -19,7 +19,7 @@ from horizon import exceptions
 from horizon import forms
 from horizon import workflows
 
-from openstack_dashboard import api
+from tuskar_ui import api as tuskar
 
 
 class NodeCreateAction(workflows.Action):
@@ -67,7 +67,7 @@ class NodeEditAction(NodeCreateAction):
         super(NodeEditAction, self).__init__(request, *args, **kwargs)
         # TODO(Resolve node edits)
         #rack_id = self.initial['rack_id']
-        #rack = api.tuskar.Rack.get(request, rack_id)
+        #rack = tuskar.Rack.get(request, rack_id)
         #nodes = rack.list_nodes
 
 
@@ -89,7 +89,7 @@ class RackCreateInfoAction(workflows.Action):
         rack_id = self.initial.get('rack_id', None)
         subnet = cleaned_data.get('subnet')
         try:
-            racks = api.tuskar.Rack.list(self.request)
+            racks = tuskar.Rack.list(self.request)
         except:
             racks = []
             exceptions.check_message(['Connection', 'refused'],
@@ -113,7 +113,7 @@ class RackCreateInfoAction(workflows.Action):
     def __init__(self, request, *args, **kwargs):
         super(RackCreateInfoAction, self).__init__(request, *args, **kwargs)
         resource_class_id_choices = [('', _("Select a Resource Class"))]
-        for rc in api.tuskar.ResourceClass.list(request):
+        for rc in tuskar.ResourceClass.list(request):
             resource_class_id_choices.append((rc.id, rc.name))
         self.fields['resource_class_id'].choices = resource_class_id_choices
 
@@ -162,7 +162,7 @@ class CreateRack(workflows.Workflow):
     def handle(self, request, data):
         try:
             if data['node_name'] is not None:
-                node = api.tuskar.Node.create(
+                node = tuskar.Node.create(
                     request, data['node_name'],
                     data['cpus'], data['memory_mb'],
                     data['local_gb'], data['prov_mac_address'],
@@ -174,7 +174,7 @@ class CreateRack(workflows.Workflow):
                 node_id = None
 
             # Then, register the Rack, including the node if it exists
-            api.tuskar.Rack.create(request, data['name'],
+            tuskar.Rack.create(request, data['name'],
                                    data['resource_class_id'],
                                    data['location'],
                                    data['subnet'],
@@ -196,7 +196,7 @@ class EditRack(CreateRack):
     def handle(self, request, data):
         try:
             rack_id = self.context['rack_id']
-            api.tuskar.Rack.update(request, rack_id, data)
+            tuskar.Rack.update(request, rack_id, data)
             return True
         except:
             exceptions.handle(request, _("Unable to update rack."))

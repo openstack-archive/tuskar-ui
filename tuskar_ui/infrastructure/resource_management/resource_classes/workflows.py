@@ -20,14 +20,14 @@ from horizon import exceptions
 from horizon import forms
 from horizon import workflows
 
-from tuskar_ui import api
+from tuskar_ui import api as tuskar
 import tuskar_ui.workflows
 
 import re
 
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.tables import FlavorsTable
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.tables import RacksTable
 
 
@@ -61,7 +61,7 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
         name = cleaned_data.get('name')
         resource_class_id = self.initial.get('resource_class_id', None)
         try:
-            resource_classes = api.tuskar.ResourceClass.list(self.request)
+            resource_classes = tuskar.ResourceClass.list(self.request)
         except:
             resource_classes = []
             msg = _('Unable to get resource class list')
@@ -116,7 +116,7 @@ class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.TableStep):
         try:
             resource_class_id = self.workflow.context.get("resource_class_id")
             if resource_class_id:
-                resource_class = api.tuskar.ResourceClass.get(
+                resource_class = tuskar.ResourceClass.get(
                     self.workflow.request,
                     resource_class_id)
 
@@ -126,7 +126,7 @@ class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.TableStep):
 
                 all_flavors = resource_class.all_flavors
             else:
-                all_flavors = api.tuskar.FlavorTemplate.list(
+                all_flavors = tuskar.FlavorTemplate.list(
                         self.workflow.request)
         except Exception:
             all_flavors = []
@@ -160,7 +160,7 @@ class CreateRacks(tuskar_ui.workflows.TableStep):
         try:
             resource_class_id = self.workflow.context.get("resource_class_id")
             if resource_class_id:
-                resource_class = api.tuskar.ResourceClass.get(
+                resource_class = tuskar.ResourceClass.get(
                     self.workflow.request,
                     resource_class_id)
                 # TODO(lsmola ugly interface, rewrite)
@@ -170,7 +170,7 @@ class CreateRacks(tuskar_ui.workflows.TableStep):
                     resource_class.all_racks
             else:
                 racks = \
-                    api.tuskar.Rack.list(self.workflow.request, True)
+                    tuskar.Rack.list(self.workflow.request, True)
         except:
             racks = []
             exceptions.handle(self.workflow.request,
@@ -207,7 +207,7 @@ class ResourceClassWorkflowMixin:
         max_vms = data.get('max_vms')
         resource_class_name = data['name']
         for template_id in flavor_ids:
-            template = api.tuskar.FlavorTemplate.get(request, template_id)
+            template = tuskar.FlavorTemplate.get(request, template_id)
             capacities = []
             for c in template.capacities:
                 capacities.append({'name': c.name,
@@ -239,7 +239,7 @@ class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
     def _create_resource_class_info(self, request, data):
         try:
             flavors = self._get_flavors(request, data)
-            return api.tuskar.ResourceClass.create(
+            return tuskar.ResourceClass.create(
                 request,
                 name=data['name'],
                 service_type=data['service_type'],
@@ -278,7 +278,7 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
     def _update_resource_class_info(self, request, data):
         try:
             flavors = self._get_flavors(request, data)
-            return api.tuskar.ResourceClass.update(
+            return tuskar.ResourceClass.update(
                     request,
                     data['resource_class_id'],
                     name=data['name'],

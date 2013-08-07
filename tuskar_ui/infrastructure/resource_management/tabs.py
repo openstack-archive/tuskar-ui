@@ -22,9 +22,9 @@ from horizon import tabs
 from tuskar_ui import api as tuskar
 from tuskar_ui.infrastructure. \
     resource_management.flavors.tables import FlavorsTable
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks.tables import RacksTable
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.tables import ResourceClassesTable
 
 

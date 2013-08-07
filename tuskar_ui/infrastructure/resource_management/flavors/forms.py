@@ -19,7 +19,7 @@ from horizon import exceptions
 from horizon import forms
 from horizon import messages
 
-from openstack_dashboard import api
+from tuskar_ui import api as tuskar
 
 
 class CreateFlavor(forms.SelfHandlingForm):
@@ -50,7 +50,7 @@ class CreateFlavor(forms.SelfHandlingForm):
         name = cleaned_data.get('name')
         flavor_id = self.initial.get('flavor_id', None)
         try:
-            flavors = api.tuskar.FlavorTemplate.list(self.request)
+            flavors = tuskar.FlavorTemplate.list(self.request)
         except:
             flavors = []
             msg = _('Unable to get flavor list')
@@ -67,7 +67,7 @@ class CreateFlavor(forms.SelfHandlingForm):
 
     def handle(self, request, data):
         try:
-            api.tuskar.FlavorTemplate.create(
+            tuskar.FlavorTemplate.create(
                 request,
                 data['name'],
                 data['cpu'],
@@ -87,7 +87,7 @@ class EditFlavor(CreateFlavor):
 
     def handle(self, request, data):
         try:
-            api.tuskar.FlavorTemplate.update(
+            tuskar.FlavorTemplate.update(
                 self.request,
                 self.initial['flavor_id'],
                 data['name'],

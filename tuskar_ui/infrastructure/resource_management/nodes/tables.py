@@ -16,7 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
 
-from openstack_dashboard import api
+from tuskar_ui import api as tuskar
 
 
 class DeleteNodes(tables.DeleteAction):
@@ -24,7 +24,7 @@ class DeleteNodes(tables.DeleteAction):
     data_type_plural = _("Nodes")
 
     def delete(self, request, obj_id):
-        api.tuskar.node_delete(request, obj_id)
+        tuskar.node_delete(request, obj_id)
 
 
 class NodesFilterAction(tables.FilterAction):

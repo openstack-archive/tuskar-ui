@@ -5,7 +5,7 @@ from horizon import exceptions
 from horizon import forms
 from horizon import messages
 
-from openstack_dashboard import api
+from tuskar_ui import api as tuskar
 
 import logging
 
@@ -40,8 +40,8 @@ class DeleteCommand(object):
 
     def execute(self):
         try:
-            api.tuskar.ResourceClass.delete(self.request,
-                                                self.resource_class.id)
+            tuskar.ResourceClass.delete(self.request,
+                                        self.resource_class.id)
             self.msg = (_('Successfully deleted Class "%s".')
                         % self.resource_class.name)
         except:

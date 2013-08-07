@@ -7,7 +7,7 @@ from horizon import exceptions
 from horizon import forms
 from horizon import messages
 
-from openstack_dashboard import api
+from tuskar_ui import api as tuskar
 
 import base64
 import csv
@@ -64,10 +64,10 @@ class UploadRack(forms.SelfHandlingForm):
             racks = CSVRack.from_str(base64.b64decode(racks_str))
             # get the resource class ids by resource class names
             rclass_ids = dict((rc.name, rc.id) for rc in
-                    api.tuskar.ResourceClass.list(request))
+                    tuskar.ResourceClass.list(request))
             for rack in racks:
                 try:
-                    api.tuskar.Rack.create(request, rack.name,
+                    tuskar.Rack.create(request, rack.name,
                                            rclass_ids[rack.resource_class],
                                            rack.region, rack.subnet)
                     # FIXME: will have to handle nodes once proper attributes
@@ -123,7 +123,7 @@ class UpdateRackStatus(forms.SelfHandlingForm):
             action = request.GET.get('action')
 
             if action == "provision":
-                api.tuskar.Rack.provision(
+                tuskar.Rack.provision(
                     request,
                     rack.id)
 
@@ -138,7 +138,7 @@ class UpdateRackStatus(forms.SelfHandlingForm):
                 elif action == "shutdown":
                     rack.state = "off"
 
-                rack = api.tuskar.Rack.update(
+                rack = tuskar.Rack.update(
                     request,
                     rack.id,
                     {'state': rack.state}

@@ -19,7 +19,7 @@ from django import http
 
 from mox import IsA
 
-from openstack_dashboard import api
+from tuskar_ui import api as tuskar
 from openstack_dashboard.test import helpers as test
 
 
@@ -28,16 +28,16 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         super(ResourceManagementTests, self).setUp()
 
     @test.create_stubs({
-        api.tuskar.ResourceClass: (
+        tuskar.ResourceClass: (
             'get',
             'list',
             'list_racks',
             'nodes'),
-        api.tuskar.FlavorTemplate: (
+        tuskar.FlavorTemplate: (
             'list',),
-        api.tuskar.Node: (
+        tuskar.Node: (
             'list',),
-        api.tuskar.Rack: (
+        tuskar.Rack: (
             'list',)})
     def test_index(self):
 
@@ -47,14 +47,14 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         nodes = []
         racks = []
 
-        api.tuskar.ResourceClass.nodes = nodes
-        api.tuskar.ResourceClass.list_racks = racks
+        tuskar.ResourceClass.nodes = nodes
+        tuskar.ResourceClass.list_racks = racks
 
-        api.tuskar.ResourceClass.list(
+        tuskar.ResourceClass.list(
             IsA(http.HttpRequest)).\
             AndReturn(resource_classes)
 
-        api.tuskar.ResourceClass.get(
+        tuskar.ResourceClass.get(
             IsA(http.HttpRequest), resource_class.id).\
             AndReturn(resource_class)
         # ResourceClass stubs end
@@ -62,14 +62,14 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         # Rack stubs
         racks = self.tuskar_racks.list()
 
-        api.tuskar.Rack.list(IsA(http.HttpRequest)).AndReturn(racks)
-        api.tuskar.Node.list(IsA(http.HttpRequest)).AndReturn(nodes)
+        tuskar.Rack.list(IsA(http.HttpRequest)).AndReturn(racks)
+        tuskar.Node.list(IsA(http.HttpRequest)).AndReturn(nodes)
         # Rack stubs end
 
         # FlavorTemplate stubs
         flavors = self.tuskar_flavors.list()
 
-        api.tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).AndReturn(
+        tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).AndReturn(
                 flavors)
         # FlavorTemplate stubs end
 

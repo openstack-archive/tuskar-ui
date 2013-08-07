@@ -2,19 +2,19 @@ from django.core.urlresolvers import reverse
 from django import http
 from mox import IsA
 
-from openstack_dashboard import api
+from tuskar_ui import api as tuskar
 from openstack_dashboard.test import helpers as test
 
 
 class FlavorTemplatesTests(test.BaseAdminViewTests):
 
-    @test.create_stubs({api.tuskar.FlavorTemplate: ('list', 'create')})
+    @test.create_stubs({tuskar.FlavorTemplate: ('list', 'create')})
     def test_create_flavor_template(self):
         template = self.tuskar_flavor_templates.first()
 
-        api.tuskar.FlavorTemplate.list(
+        tuskar.FlavorTemplate.list(
             IsA(http.HttpRequest)).AndReturn([])
-        api.tuskar.FlavorTemplate.create(IsA(http.HttpRequest),
+        tuskar.FlavorTemplate.create(IsA(http.HttpRequest),
                                      template.name,
                                      0, 0, 0, 0, 0).AndReturn(template)
         self.mox.ReplayAll()
@@ -36,11 +36,11 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(
             resp, reverse('horizon:infrastructure:resource_management:index'))
 
-    @test.create_stubs({api.tuskar.FlavorTemplate: ('list', 'update', 'get')})
+    @test.create_stubs({tuskar.FlavorTemplate: ('list', 'update', 'get')})
     def test_edit_flavor_template_get(self):
         template = self.tuskar_flavor_templates.first()  # has no extra spec
 
-        api.tuskar.FlavorTemplate.get(IsA(http.HttpRequest),
+        tuskar.FlavorTemplate.get(IsA(http.HttpRequest),
                                   template.id).AndReturn(template)
         self.mox.ReplayAll()
 
@@ -52,17 +52,17 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(
             resp, "infrastructure/resource_management/flavors/edit.html")
 
-    @test.create_stubs({api.tuskar.FlavorTemplate: ('list', 'update', 'get')})
+    @test.create_stubs({tuskar.FlavorTemplate: ('list', 'update', 'get')})
     def test_edit_flavor_template_post(self):
         template = self.tuskar_flavor_templates.first()  # has no extra spec
 
-        api.tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).AndReturn(
+        tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).AndReturn(
             self.tuskar_flavor_templates.list())
-        api.tuskar.FlavorTemplate.update(IsA(http.HttpRequest),
+        tuskar.FlavorTemplate.update(IsA(http.HttpRequest),
                                      template.id,
                                      template.name,
                                      0, 0, 0, 0, 0).AndReturn(template)
-        api.tuskar.FlavorTemplate.get(IsA(http.HttpRequest),
+        tuskar.FlavorTemplate.get(IsA(http.HttpRequest),
                                   template.id).AndReturn(template)
         self.mox.ReplayAll()
 
@@ -82,13 +82,13 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(
             resp, reverse('horizon:infrastructure:resource_management:index'))
 
-    @test.create_stubs({api.tuskar.FlavorTemplate: ('list', 'delete')})
+    @test.create_stubs({tuskar.FlavorTemplate: ('list', 'delete')})
     def test_delete_flavor_template(self):
         template = self.tuskar_flavor_templates.first()
 
-        api.tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).\
+        tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).\
             AndReturn(self.tuskar_flavor_templates.list())
-        api.tuskar.FlavorTemplate.delete(IsA(http.HttpRequest), template.id)
+        tuskar.FlavorTemplate.delete(IsA(http.HttpRequest), template.id)
         self.mox.ReplayAll()
 
         form_data = {'action': 'flavors__delete__%s' % template.id}
@@ -99,13 +99,13 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(
             res, reverse('horizon:infrastructure:resource_management:index'))
 
-    @test.create_stubs({api.tuskar.FlavorTemplate: ('get',)})
+    @test.create_stubs({tuskar.FlavorTemplate: ('get',)})
     def test_detail_flavor_template(self):
         template = self.tuskar_flavor_templates.first()
 
-        api.tuskar.FlavorTemplate.get(IsA(http.HttpRequest),
+        tuskar.FlavorTemplate.get(IsA(http.HttpRequest),
                                   template.id).AndReturn(template)
-        api.tuskar.FlavorTemplate.resource_classes = self. \
+        tuskar.FlavorTemplate.resource_classes = self. \
             tuskar_resource_classes
 
         self.mox.ReplayAll()
