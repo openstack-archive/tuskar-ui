@@ -32,20 +32,20 @@ from horizon import forms
 from horizon import tabs
 from horizon import workflows
 
-from openstack_dashboard import api
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui import api
+from tuskar_ui.infrastructure. \
     resource_management.racks.forms import UpdateRackStatus
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks.forms import UploadRack
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks.tabs import RackDetailTabs
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks.tables import UploadRacksTable
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks.workflows import CreateRack
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks.workflows import DetailEditRack
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks.workflows import EditRack
 
 

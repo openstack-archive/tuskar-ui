@@ -5,7 +5,7 @@ from horizon import exceptions
 from horizon import forms
 from horizon import messages
 
-from openstack_dashboard import api
+from tuskar_ui import api
 
 import logging
 

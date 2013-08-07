@@ -17,8 +17,7 @@
 from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
 
-from openstack_dashboard.dashboards.infrastructure. \
-    overview.views import IndexView
+from tuskar_ui.infrastructure.overview.views import IndexView
 
 
 urlpatterns = patterns('',

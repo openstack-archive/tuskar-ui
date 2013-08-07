@@ -29,7 +29,7 @@ from tuskarclient.v1 import client as tuskar_client
 
 from openstack_dashboard.api import base
 from openstack_dashboard.api import nova
-import openstack_dashboard.dashboards.infrastructure.models as dummymodels
+import tuskar_ui.infrastructure.models as dummymodels
 
 
 LOG = logging.getLogger(__name__)

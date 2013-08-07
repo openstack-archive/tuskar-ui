@@ -20,13 +20,13 @@ from horizon import exceptions
 from horizon import forms
 from horizon import workflows
 
-from openstack_dashboard import api
+from tuskar_ui import api
 
 import re
 
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.tables import FlavorsTable
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.tables import RacksTable
 
 

@@ -21,7 +21,7 @@ Views for Resource Management.
 
 from horizon import tabs
 
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.tabs import ResourceManagementTabs
 
 

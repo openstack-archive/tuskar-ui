@@ -15,15 +15,12 @@
 from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
 
-from openstack_dashboard.dashboards.infrastructure. \
-    resource_management.nodes.views import DetailView
-from openstack_dashboard.dashboards.infrastructure. \
-    resource_management.nodes.views import UnrackedView
+from tuskar_ui.infrastructure.resource_management.nodes.views import DetailView
+from tuskar_ui.infrastructure.resource_management.nodes.views import UnrackedView
 
 
 NODES = r'^(?P<node_id>[^/]+)/%s$'
-VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \
-           'resource_management.nodes.views'
+VIEW_MOD = 'tuskar_ui.infrastructure.resource_management.nodes.views'
 
 
 urlpatterns = patterns(VIEW_MOD,

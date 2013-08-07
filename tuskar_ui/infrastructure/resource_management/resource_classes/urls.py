@@ -15,24 +15,24 @@
 from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
 
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.views import CreateView
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.views import DetailActionView
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.views import DetailUpdateView
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.views import DetailView
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.views import UpdateFlavorsView
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.views import UpdateRacksView
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.views import UpdateView
 
 
 RESOURCE_CLASS = r'^(?P<resource_class_id>[^/]+)/%s$'
-VIEW_MOD = 'openstack_dashboard.dashboards.infrastructure.' \
+VIEW_MOD = 'tuskar_ui.infrastructure.' \
            'resource_management.resource_classes.views'
 
 urlpatterns = patterns(

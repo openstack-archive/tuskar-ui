@@ -32,21 +32,21 @@ from horizon import forms
 from horizon import tabs
 from horizon import workflows
 
-from openstack_dashboard import api
+from tuskar_ui import api
 
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.forms import DeleteForm
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.tabs import ResourceClassDetailTabs
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.workflows import CreateResourceClass
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.workflows import DetailUpdateWorkflow
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.workflows import UpdateFlavorsWorkflow
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.workflows import UpdateRacksWorkflow
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.resource_classes.workflows import UpdateResourceClass
 
 

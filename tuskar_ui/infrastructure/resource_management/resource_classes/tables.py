@@ -21,13 +21,13 @@ from horizon import exceptions
 from horizon import forms
 from horizon import tables
 
-from openstack_dashboard import api
+from tuskar_ui import api
 
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.flavors import tables as flavors_tables
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management.racks import tables as racks_tables
-from openstack_dashboard.dashboards.infrastructure. \
+from tuskar_ui.infrastructure. \
     resource_management import resource_classes
 
 

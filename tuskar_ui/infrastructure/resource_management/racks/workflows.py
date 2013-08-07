@@ -19,7 +19,7 @@ from horizon import exceptions
 from horizon import forms
 from horizon import workflows
 
-from openstack_dashboard import api
+from tuskar_ui import api
 
 
 class NodeCreateAction(workflows.Action):

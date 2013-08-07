@@ -19,11 +19,9 @@ from horizon import exceptions
 from horizon import tables
 from horizon import tabs
 
-from openstack_dashboard import api
-from openstack_dashboard.dashboards.infrastructure. \
-    resource_management.nodes.tables import UnrackedNodesTable
-from openstack_dashboard.dashboards.infrastructure. \
-    resource_management.nodes.tabs import NodeDetailTabs
+from tuskar_ui import api
+from tuskar_ui.infrastructure.resource_management.nodes.tables import UnrackedNodesTable
+from tuskar_ui.infrastructure.resource_management.nodes.tabs import NodeDetailTabs
 
 
 class UnrackedView(tables.DataTableView):

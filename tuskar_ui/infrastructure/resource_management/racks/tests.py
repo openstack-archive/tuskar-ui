@@ -17,7 +17,7 @@ from mox import IsA
 
 from novaclient.v1_1.contrib import baremetal
 
-from openstack_dashboard import api
+from tuskar_ui import api
 from openstack_dashboard.test import helpers as test
 
 import base64

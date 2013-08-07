@@ -15,7 +15,7 @@
 from django.core.urlresolvers import reverse
 from django import http
 from mox import IsA
-from openstack_dashboard import api
+from tuskar_ui import api
 from openstack_dashboard.test import helpers as test
 
 

@@ -16,7 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
 
-from openstack_dashboard import api
+from tuskar_ui import api
 
 
 class DeleteNodes(tables.DeleteAction):
