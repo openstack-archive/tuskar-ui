@@ -80,7 +80,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
              reverse("horizon:infrastructure:resource_management:index")))
 
     @test.create_stubs({api.tuskar.ResourceClass: ('get', 'list_flavors',
-                                                   'racks_ids')})
+                                                   'racks_ids', 'all_racks',
+                                                   'all_flavors')})
     def test_edit_resource_class_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
@@ -194,7 +195,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'infrastructure/resource_management/resource_classes/detail.html')
 
     @test.create_stubs({api.tuskar.ResourceClass: ('get', 'list_flavors',
-                                                   'racks_ids')})
+                                                   'racks_ids', 'all_racks',
+                                                   'all_flavors')})
     def test_detail_edit_racks_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
@@ -262,7 +264,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(res, redirect_url)
 
     @test.create_stubs({api.tuskar.ResourceClass: ('get', 'list_flavors',
-                                                   'racks_ids')})
+                                                   'racks_ids', 'all_racks',
+                                                   'all_flavors')})
     def test_detail_edit_flavors_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
