@@ -10,9 +10,5 @@
 {% endblock %}
 
 {% block js %}
-  <script src='{{ STATIC_URL }}horizon/js/horizon.capacity.js' type='text/javascript' charset='utf-8'></script>
-  <script src='{{ STATIC_URL }}horizon/js/horizon.d3modallinechart.js' type='text/javascript' charset='utf-8'></script>
-  <script src='{{ STATIC_URL }}horizon/js/horizon.d3circleschart.js' type='text/javascript' charset='utf-8'></script>
-  <script src='{{ STATIC_URL }}horizon/js/horizon.d3linechart.js' type='text/javascript' charset='utf-8'></script>
-  <script src='{{ STATIC_URL }}horizon/js/horizon.d3singlebarchart.js' type='text/javascript' charset='utf-8'></script>
+  {% include "infrastructure/_scripts.html" %}
 {% endblock %}
