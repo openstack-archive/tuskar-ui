@@ -19,7 +19,7 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import tabs
 
-from openstack_dashboard.api import tuskar
+from tuskar_ui import api as tuskar
 from tuskar_ui.infrastructure. \
     resource_management.flavors.tables import FlavorsTable
 from tuskar_ui.infrastructure. \

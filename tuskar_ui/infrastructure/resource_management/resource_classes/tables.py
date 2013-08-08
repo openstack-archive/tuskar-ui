@@ -18,10 +18,11 @@ from django.core import urlresolvers
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
-from horizon import forms
 from horizon import tables
 
 from tuskar_ui import api
+import tuskar_ui.tables
+from tuskar_ui.forms import NumberInput
 
 from tuskar_ui.infrastructure. \
     resource_management.flavors import tables as flavors_tables
@@ -98,10 +99,10 @@ class FlavorsFilterAction(tables.FilterAction):
 class FlavorsTable(flavors_tables.FlavorsTable):
     name = tables.Column('name',
                          verbose_name=_('Flavor Name'))
-    max_vms = tables.Column("max_vms",
+    max_vms = tuskar_ui.tables.Column("max_vms",
                             auto='form_widget',
                             verbose_name=_("Max. VMs"),
-                            form_widget=forms.NumberInput(),
+                            form_widget=NumberInput(),
                             form_widget_attributes={
                                 'class': "number_input_slim"})
 

@@ -21,6 +21,7 @@ from horizon import forms
 from horizon import workflows
 
 from tuskar_ui import api
+import tuskar_ui.workflows
 
 import re
 
@@ -83,7 +84,7 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                       "settings and add flavors to class.")
 
 
-class CreateResourceClassInfoAndFlavors(workflows.TableStep):
+class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.TableStep):
     table_classes = (FlavorsTable,)
 
     action_class = ResourceClassInfoAndFlavorsAction
@@ -139,7 +140,7 @@ class RacksAction(workflows.Action):
         name = _("Racks")
 
 
-class CreateRacks(workflows.TableStep):
+class CreateRacks(tuskar_ui.workflows.TableStep):
     table_classes = (RacksTable,)
 
     action_class = RacksAction
