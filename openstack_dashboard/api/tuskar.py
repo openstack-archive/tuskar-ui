@@ -325,7 +325,8 @@ class Rack(StringIdAPIResourceWrapper):
     """Wrapper for the Rack object  returned by the
     dummy model.
     """
-    _attrs = ['id', 'name', 'location', 'subnet', 'nodes', 'state']
+    _attrs = ['id', 'name', 'location', 'subnet', 'nodes', 'state',
+              'capacities', 'resource_class']
 
     @classmethod
     def create(cls, request, name, resource_class_id, location, subnet,
@@ -370,11 +371,6 @@ class Rack(StringIdAPIResourceWrapper):
         rack.request = request
         return rack
 
-    @property
-    def resource_class_id(self):
-        rclass = getattr(self._apiresource, 'resource_class', None)
-        return rclass['id'] if rclass else None
-
     @classmethod
     def delete(cls, request, rack_id):
         tuskarclient(request).racks.delete(rack_id)
@@ -384,22 +380,27 @@ class Rack(StringIdAPIResourceWrapper):
         """ List of unicode ids of nodes added to rack"""
         return [
             unicode(node['id']) for node in (
-                self._apiresource.nodes)]
+                self.nodes)]
 
     @property
     def list_nodes(self):
         if not hasattr(self, '_nodes'):
-            self._nodes = [Node.get(self.request, node['id']) for node in (
-                self._apiresource.nodes)]
+            self._nodes = [Node.get(self.request, node['id']) for node in
+                           self.nodes]
         return self._nodes
 
     def nodes_count(self):
-        return len(self._apiresource.nodes)
+        return len(self.nodes)
 
     @property
-    def resource_class(self):
+    def resource_class_id(self):
+        rclass = self.resource_class
+        return rclass['id'] if rclass else None
+
+    @property
+    def get_resource_class(self):
         if not hasattr(self, '_resource_class'):
-            rclass = getattr(self._apiresource, 'resource_class', None)
+            rclass = self.resource_class
             if rclass:
                 self._resource_class = ResourceClass.get(self.request,
                                                          rclass['id'])
@@ -408,21 +409,20 @@ class Rack(StringIdAPIResourceWrapper):
         return self._resource_class
 
     @property
-    def capacities(self):
+    def list_capacities(self):
         if not hasattr(self, '_capacities'):
-            self._capacities = [Capacity(c) for c in
-                                self._apiresource.capacities]
+            self._capacities = [Capacity(c) for c in self.capacities]
         return self._capacities
 
     @property
     def vm_capacity(self):
-        """ Rack VM Capacity is maximum value from It's Resource Class's
+        """ Rack VM Capacity is maximum value from its Resource Class's
             Flavors max_vms (considering flavor sizes are multiples).
         """
         if not hasattr(self, '_vm_capacity'):
             try:
                 value = max([flavor.max_vms for flavor in
-                             self.resource_class.list_flavors])
+                             self.get_resource_class.list_flavors])
             except:
                 value = None
             self._vm_capacity = Capacity({'name': "VM Capacity",
@@ -447,15 +447,14 @@ class Rack(StringIdAPIResourceWrapper):
 
     @property
     def list_flavors(self):
-
         if not hasattr(self, '_flavors'):
             # FIXME just a mock of used instances, add real values
             used_instances = 0
 
-            if not self.resource_class:
+            if not self.get_resource_class:
                 return []
             added_flavors = tuskarclient(self.request).flavors\
-                                .list(self.resource_class.id)
+                                .list(self.get_resource_class.id)
             self._flavors = []
             if added_flavors:
                 for f in added_flavors:
@@ -536,7 +535,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @property
     def deletable(self):
-        return (len(self.list_racks) <= 0)
+        return (len(self.racks) <= 0)
 
     @classmethod
     def delete(cls, request, resource_class_id):
@@ -546,8 +545,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
     def racks_ids(self):
         """ List of unicode ids of racks added to resource class """
         return [
-            unicode(rack['id']) for rack in (
-                self._apiresource.racks)]
+            unicode(rack['id']) for rack in self.racks]
 
     @property
     def list_racks(self):
@@ -557,20 +555,17 @@ class ResourceClass(StringIdAPIResourceWrapper):
                 self.racks_ids)]
         return self._racks
 
+    def set_racks(self, request, racks_ids):
+        # FIXME: there is a bug now in tuskar, we have to remove all racks at
+        # first and then add new ones:
+        # https://github.com/tuskar/tuskar/issues/37
+        tuskarclient(request).resource_classes.update(self.id, racks=[])
+        racks = [{'id': rid} for rid in racks_ids]
+        tuskarclient(request).resource_classes.update(self.id, racks=racks)
+
     @property
-    def capacities(self):
-        """Aggregates Rack capacities values
-        """
-        if not hasattr(self, '_capacities'):
-            capacities = [rack.capacities for rack in self.list_racks]
-
-            def add_capacities(c1, c2):
-                return [Capacity({'name': a.name,
-                                 'value': int(a.value) + int(b.value),
-                                 'unit': a.unit}) for a, b in zip(c1, c2)]
-
-            self._capacities = reduce(add_capacities, capacities)
-        return self._capacities
+    def racks_count(self):
+        return len(self.racks)
 
     @property
     def all_racks(self):
@@ -585,17 +580,20 @@ class ResourceClass(StringIdAPIResourceWrapper):
         return self._all_racks
 
     @property
+    def nodes(self):
+        if not hasattr(self, '_nodes'):
+            nodes_lists = [rack.list_nodes for rack in self.list_racks]
+            self._nodes = [node for nodes in nodes_lists for node in nodes]
+        return self._nodes
+
+    @property
+    def nodes_count(self):
+        return len(self.nodes)
+
+    @property
     def flavors_ids(self):
         """ List of unicode ids of flavors added to resource class """
         return [unicode(flavor.id) for flavor in self.list_flavors]
-
-    # FIXME: for now, we display list of flavor templates when
-    # editing a resource class - we have to set id of flavor template, not
-    # flavor
-    @property
-    def flavortemplates_ids(self):
-        """ List of unicode ids of flavor templates added to resource class """
-        return [unicode(ft.flavor_template.id) for ft in self.list_flavors]
 
     @property
     def list_flavors(self):
@@ -613,22 +611,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
                 used_instances += 5
                 flavor_obj.used_instances = used_instances
                 self._flavors.append(flavor_obj)
-
         return self._flavors
-
-    @property
-    def all_used_instances(self):
-        return [flavor.used_instances for flavor in self.list_flavors]
-
-    @property
-    def total_instances(self):
-        # FIXME just mock implementation, add proper one
-        return sum(self.all_used_instances)
-
-    @property
-    def remaining_capacity(self):
-        # FIXME just mock implementation, add proper one
-        return 100 - self.total_instances
 
     @property
     def all_flavors(self):
@@ -645,20 +628,42 @@ class ResourceClass(StringIdAPIResourceWrapper):
                 self._all_flavors.append(flavor)
         return self._all_flavors
 
+    # FIXME: for now, we display list of flavor templates when
+    # editing a resource class - we have to set id of flavor template, not
+    # flavor
     @property
-    def nodes(self):
-        if not hasattr(self, '_nodes'):
-            nodes_lists = [rack.list_nodes for rack in self.list_racks]
-            self._nodes = [node for nodes in nodes_lists for node in nodes]
-        return self._nodes
+    def flavortemplates_ids(self):
+        """ List of unicode ids of flavor templates added to resource class """
+        return [unicode(ft.flavor_template.id) for ft in self.list_flavors]
 
     @property
-    def nodes_count(self):
-        return len(self.nodes)
+    def all_used_instances(self):
+        return [flavor.used_instances for flavor in self.list_flavors]
 
     @property
-    def racks_count(self):
-        return len(self.list_racks)
+    def total_instances(self):
+        # FIXME just mock implementation, add proper one
+        return sum(self.all_used_instances)
+
+    @property
+    def remaining_capacity(self):
+        # FIXME just mock implementation, add proper one
+        return 100 - self.total_instances
+
+    @property
+    def capacities(self):
+        """Aggregates Rack capacities values
+        """
+        if not hasattr(self, '_capacities'):
+            capacities = [rack.list_capacities for rack in self.list_racks]
+
+            def add_capacities(c1, c2):
+                return [Capacity({'name': a.name,
+                                 'value': int(a.value) + int(b.value),
+                                 'unit': a.unit}) for a, b in zip(c1, c2)]
+
+            self._capacities = reduce(add_capacities, capacities)
+        return self._capacities
 
     @property
     def vm_capacity(self):
@@ -676,14 +681,6 @@ class ResourceClass(StringIdAPIResourceWrapper):
                                           'value': value,
                                           'unit': _('VMs')})
         return self._vm_capacity
-
-    def set_racks(self, request, racks_ids):
-        # FIXME: there is a bug now in tuskar, we have to remove all racks at
-        # first and then add new ones:
-        # https://github.com/tuskar/tuskar/issues/37
-        tuskarclient(request).resource_classes.update(self.id, racks=[])
-        racks = [{'id': rid} for rid in racks_ids]
-        tuskarclient(request).resource_classes.update(self.id, racks=racks)
 
     @property
     def aggregated_alerts(self):
@@ -827,7 +824,7 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
 class Flavor(StringIdAPIResourceWrapper):
     """Wrapper for the Flavor object returned by Tuskar.
     """
-    _attrs = ['name', 'max_vms']
+    _attrs = ['id', 'name', 'max_vms']
 
     @classmethod
     def create(cls, request, resource_class_id, name, max_vms, capacities):

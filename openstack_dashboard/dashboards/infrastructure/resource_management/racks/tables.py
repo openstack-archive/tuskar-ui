@@ -81,11 +81,12 @@ class RacksTable(tables.DataTable):
                                ":racks:detail"),
                          verbose_name=_("Rack Name"))
     subnet = tables.Column('subnet', verbose_name=_("IP Subnet"))
-    resource_class = tables.Column('resource_class',
+    resource_class = tables.Column('get_resource_class',
                                     verbose_name=_("Class"),
                                     filters=(lambda resource_class:
-                                        (resource_class and
-                                            resource_class.name) or None,))
+                                                 (resource_class and
+                                                  resource_class.name)
+                                             or None,))
     node_count = tables.Column('nodes_count', verbose_name=_("Nodes"))
     state = tables.Column('state',
                           verbose_name=_("State"),

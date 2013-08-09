@@ -15,65 +15,139 @@
 #    under the License.
 
 from __future__ import absolute_import
-from openstack_dashboard import api
+
+from openstack_dashboard.api.tuskar import Capacity
+from openstack_dashboard.api.tuskar import Flavor
+from openstack_dashboard.api.tuskar import FlavorTemplate
+from openstack_dashboard.api.tuskar import Node
+from openstack_dashboard.api.tuskar import Rack
+from openstack_dashboard.api.tuskar import ResourceClass
 from openstack_dashboard.test import helpers as test
 
 
 class TuskarApiTests(test.APITestCase):
+
     def test_resource_class_list(self):
-        rcs = self.tuskar_resource_classes.list()
+        rcs = self.tuskarclient_resource_classes.list()
 
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.resource_classes = self.mox.CreateMockAnything()
         tuskarclient.resource_classes.list().AndReturn(rcs)
         self.mox.ReplayAll()
 
-        ret_val = api.tuskar.ResourceClass.list(self.request)
+        ret_val = ResourceClass.list(self.request)
         for rc in ret_val:
-            self.assertIsInstance(rc, api.tuskar.ResourceClass)
+            self.assertIsInstance(rc, ResourceClass)
 
     def test_resource_class_get(self):
-        rc = self.tuskar_resource_classes.first()
+        rc = self.tuskarclient_resource_classes.first()
 
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.resource_classes = self.mox.CreateMockAnything()
         tuskarclient.resource_classes.get(rc.id).AndReturn(rc)
         self.mox.ReplayAll()
 
-        ret_val = api.tuskar.ResourceClass.get(self.request, rc.id)
-        self.assertIsInstance(ret_val, api.tuskar.ResourceClass)
+        ret_val = ResourceClass.get(self.request, rc.id)
+        self.assertIsInstance(ret_val, ResourceClass)
 
-    def test_resource_class_flavor_counts(self):
-        rc = self.tuskar_resource_classes.first()
-        flavors = self.tuskar_flavors.list()
+    def test_resource_class_create(self):
+        rc = self.tuskarclient_resource_classes.first()
 
         tuskarclient = self.stub_tuskarclient()
-        tuskarclient.flavors = self.mox.CreateMockAnything()
-        tuskarclient.flavors.list(rc.id).AndReturn(flavors)
+        tuskarclient.resource_classes = self.mox.CreateMockAnything()
+        tuskarclient.resource_classes.create(name='rclass1',
+                                             service_type='compute',
+                                             flavors=[]).AndReturn(rc)
         self.mox.ReplayAll()
 
-        for f in rc.list_flavors:
-            self.assertIsInstance(f, api.tuskar.Flavor)
-        self.assertEquals(2, len(rc.list_flavors))
+        ret_val = ResourceClass.create(self.request,
+                                                  'rclass1', 'compute', [])
+        self.assertIsInstance(ret_val, ResourceClass)
+
+    def test_resource_class_update(self):
+        rc = self.tuskarclient_resource_classes.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.resource_classes = self.mox.CreateMockAnything()
+        tuskarclient.flavors = self.mox.CreateMockAnything()
+        tuskarclient.resource_classes.update(
+            rc.id,
+            name='rclass1',
+            service_type='compute',
+            flavors=[]).AndReturn(rc)
+        tuskarclient.flavors.list(rc.id).AndReturn([])
+        self.mox.ReplayAll()
+
+        ret_val = ResourceClass.update(self.request, rc.id,
+                                                  name='rclass1',
+                                                  service_type='compute',
+                                                  flavors=[])
+        self.assertIsInstance(ret_val, ResourceClass)
+
+    def test_resource_class_delete(self):
+        rc = self.tuskarclient_resource_classes.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.resource_classes = self.mox.CreateMockAnything()
+        tuskarclient.resource_classes.delete(rc.id)
+        self.mox.ReplayAll()
+
+        ResourceClass.delete(self.request, rc.id)
+
+    def test_resource_class_deletable(self):
+        rc = self.tuskar_resource_classes.first()
+
+        self.assertFalse(rc.deletable)
 
     def test_resource_class_racks(self):
         rc = self.tuskar_resource_classes.first()
-        r = self.tuskar_racks.first()
+        racks = self.tuskarclient_racks.list()
 
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.racks = self.mox.CreateMockAnything()
-        tuskarclient.racks.get(r.id).AndReturn(r)
+        tuskarclient.racks.get('1').AndReturn(racks[0])
+        tuskarclient.racks.get('2').AndReturn(racks[1])
         self.mox.ReplayAll()
 
         for rack in rc.list_racks:
-            self.assertIsInstance(rack, api.tuskar.Rack)
-        self.assertEquals(1, len(rc.list_racks))
+            self.assertIsInstance(rack, Rack)
+        self.assertEquals(2, rc.racks_count)
+
+    def test_resource_class_all_racks(self):
+        rc = self.tuskar_resource_classes.first()
+        racks = self.tuskarclient_racks.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.list().AndReturn(racks)
+        self.mox.ReplayAll()
+
+        all_racks = rc.all_racks
+        for rack in all_racks:
+            self.assertIsInstance(rack, Rack)
+        self.assertEquals(3, len(all_racks))
+
+    def test_resource_class_racks_set(self):
+        rc = self.tuskar_resource_classes.first()
+        racks = self.tuskarclient_racks.list()
+        rack_ids = [rack.id for rack in racks]
+        rack_data = [{'id': rack_id} for rack_id in rack_ids]
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.resource_classes = self.mox.CreateMockAnything()
+        tuskarclient.resource_classes.update(rc.id,
+                                             racks=[])
+        tuskarclient.resource_classes.update(rc.id,
+                                             racks=rack_data)
+        self.mox.ReplayAll()
+
+        rc.set_racks(self.request, rack_ids)
 
     ## FIXME: we need to stub out the bare metal client, will
     ## be easier once the client is separated out a bit
     def test_resource_class_nodes(self):
         rc = self.tuskar_resource_classes.first()
-        r = self.tuskar_racks.first()
+        r = self.tuskarclient_racks.first()
 
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.racks = self.mox.CreateMockAnything()
@@ -81,20 +155,333 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         for node in rc.nodes:
-            self.assertIsInstance(node, api.tuskar.Node)
-        self.assertEquals(4, len(rc.nodes))
+            self.assertIsInstance(node, Node)
+        self.assertEquals(4, rc.nodes_count)
 
-    # TODO(create, delete operations)
+    def test_resource_class_flavors(self):
+        rc = self.tuskar_resource_classes.first()
+        flavors = self.tuskarclient_flavors.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.flavors = self.mox.CreateMockAnything()
+        tuskarclient.flavors.list(rc.id).AndReturn(flavors)
+        self.mox.ReplayAll()
+
+        for f in rc.list_flavors:
+            self.assertIsInstance(f, Flavor)
+        self.assertEquals(2, len(rc.flavors_ids))
+
+    def test_resource_class_capacities(self):
+        rc = self.tuskar_resource_classes.first()
+        racks = self.tuskarclient_racks.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.get('1').AndReturn(racks[0])
+        tuskarclient.racks.get('2').AndReturn(racks[1])
+        self.mox.ReplayAll()
+
+        for capacity in rc.capacities:
+            self.assertIsInstance(capacity, Capacity)
+        self.assertEquals(2, len(rc.capacities))
+
+    def test_resource_class_total_instances(self):
+        rc = self.tuskar_resource_classes.first()
+        flavors = self.tuskarclient_flavors.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.flavors = self.mox.CreateMockAnything()
+        tuskarclient.flavors.list(rc.id).AndReturn(flavors)
+        self.mox.ReplayAll()
+
+        self.assertEquals(15, rc.total_instances)
+
+    def test_resource_class_remaining_capacity(self):
+        rc = self.tuskar_resource_classes.first()
+        flavors = self.tuskarclient_flavors.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.flavors = self.mox.CreateMockAnything()
+        tuskarclient.flavors.list(rc.id).AndReturn(flavors)
+        self.mox.ReplayAll()
+
+        self.assertEquals(85, rc.remaining_capacity)
+
+    def test_resource_class_vm_capacity(self):
+        rc = self.tuskar_resource_classes.first()
+        flavors = self.tuskarclient_flavors.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.flavors = self.mox.CreateMockAnything()
+        tuskarclient.flavors.list(rc.id).AndReturn(flavors)
+        self.mox.ReplayAll()
+
+        vm_capacity = rc.vm_capacity
+        self.assertIsInstance(vm_capacity, Capacity)
+        self.assertEquals(200, vm_capacity.value)
+
+    def test_resource_class_has_provisioned_rack(self):
+        rc1 = self.tuskar_resource_classes.list()[0]
+        rc2 = self.tuskar_resource_classes.list()[1]
+        racks = self.tuskarclient_racks.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.get('1').AndReturn(racks[0])
+        tuskarclient.racks.get('2').AndReturn(racks[1])
+        self.mox.ReplayAll()
+
+        self.assertTrue(rc1.has_provisioned_rack)
+        self.assertFalse(rc2.has_provisioned_rack)
+
+    def test_rack_list(self):
+        racks = self.tuskarclient_racks.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.list().AndReturn(racks)
+        self.mox.ReplayAll()
+
+        ret_val = Rack.list(self.request)
+        for rack in ret_val:
+            self.assertIsInstance(rack, Rack)
+
+    def test_rack_get(self):
+        rack = self.tuskarclient_racks.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.get(rack.id).AndReturn(rack)
+        self.mox.ReplayAll()
+
+        ret_val = Rack.get(self.request, rack.id)
+        self.assertIsInstance(ret_val, Rack)
+
+    def test_rack_create(self):
+        rack = self.tuskarclient_racks.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.create(name='rack1',
+                                  location='location',
+                                  subnet='192.168.1.0/24',
+                                  nodes=[],
+                                  resource_class={'id': 1},
+                                  slots=0).AndReturn(rack)
+        self.mox.ReplayAll()
+
+        ret_val = Rack.create(self.request,
+                              'rack1', 1, 'location', '192.168.1.0/24')
+        self.assertIsInstance(ret_val, Rack)
+
+    def test_rack_update(self):
+        rack = self.tuskarclient_racks.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.update(rack.id,
+                                  name='rack1').AndReturn(rack)
+        self.mox.ReplayAll()
+
+        ret_val = Rack.update(self.request,
+                              rack.id,
+                              {'name': 'rack1'})
+        self.assertIsInstance(ret_val, Rack)
+
+    def test_rack_delete(self):
+        rack = self.tuskarclient_racks.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.delete(rack.id)
+        self.mox.ReplayAll()
+
+        Rack.delete(self.request, rack.id)
+
+    ## FIXME: we need to stub out the bare metal client, will
+    ## be easier once the client is separated out a bit
+    def test_rack_nodes(self):
+        rack = self.tuskar_racks.first()
+
+        for node in rack.list_nodes:
+            self.assertIsInstance(node, Node)
+        self.assertEquals(4, rack.nodes_count)
+        self.assertEquals(4, rack.node_ids)
+
+    def test_rack_resource_class(self):
+        rc = self.tuskarclient_resource_classes.first()
+        rack = self.tuskar_racks.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.resource_classes = self.mox.CreateMockAnything()
+        tuskarclient.resource_classes.get(rc.id).AndReturn(rc)
+        self.mox.ReplayAll()
+
+        self.assertIsInstance(rack.get_resource_class, ResourceClass)
+        self.assertEquals(rack.resource_class_id, '1')
+
+    def test_rack_capacities(self):
+        rack = self.tuskar_racks.first()
+
+        for capacity in rack.list_capacities:
+            self.assertIsInstance(capacity, Capacity)
+        self.assertEquals(2, len(rack.capacities))
+
+    def test_rack_vm_capacity(self):
+        rack = self.tuskar_racks.first()
+        rc = self.tuskarclient_resource_classes.first()
+        flavors = self.tuskarclient_flavors.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.resource_classes = self.mox.CreateMockAnything()
+        tuskarclient.resource_classes.get(rc.id).AndReturn(rc)
+        tuskarclient.flavors = self.mox.CreateMockAnything()
+        tuskarclient.flavors.list(rc.id).AndReturn(flavors)
+        self.mox.ReplayAll()
+
+        vm_capacity = rack.vm_capacity
+        self.assertIsInstance(vm_capacity, Capacity)
+        self.assertEquals(100, vm_capacity.value)
+
+    def test_rack_flavors(self):
+        rack = self.tuskar_racks.first()
+        rc = self.tuskarclient_resource_classes.first()
+        flavors = self.tuskarclient_flavors.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.resource_classes = self.mox.CreateMockAnything()
+        tuskarclient.resource_classes.get(rc.id).AndReturn(rc)
+        tuskarclient.flavors = self.mox.CreateMockAnything()
+        tuskarclient.flavors.list(rc.id).AndReturn(flavors)
+        self.mox.ReplayAll()
+
+        rack_flavors = rack.list_flavors
+        for f in rack_flavors:
+            self.assertIsInstance(f, Flavor)
+        self.assertEquals(2, len(rack_flavors))
+
+    def test_rack_total_instances(self):
+        rack = self.tuskar_racks.first()
+        rc = self.tuskarclient_resource_classes.first()
+        flavors = self.tuskarclient_flavors.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.resource_classes = self.mox.CreateMockAnything()
+        tuskarclient.resource_classes.get(rc.id).AndReturn(rc)
+        tuskarclient.flavors = self.mox.CreateMockAnything()
+        tuskarclient.flavors.list(rc.id).AndReturn(flavors)
+        self.mox.ReplayAll()
+
+        self.assertEquals(6, rack.total_instances)
+
+    def test_rack_remaining_capacity(self):
+        rack = self.tuskar_racks.first()
+        rc = self.tuskarclient_resource_classes.first()
+        flavors = self.tuskarclient_flavors.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.resource_classes = self.mox.CreateMockAnything()
+        tuskarclient.resource_classes.get(rc.id).AndReturn(rc)
+        tuskarclient.flavors = self.mox.CreateMockAnything()
+        tuskarclient.flavors.list(rc.id).AndReturn(flavors)
+        self.mox.ReplayAll()
+
+        self.assertEquals(94, rack.remaining_capacity)
+
+    def test_rack_is_provisioned(self):
+        rack1 = self.tuskar_racks.list()[0]
+        rack2 = self.tuskar_racks.list()[1]
+
+        self.assertTrue(rack1.is_provisioned)
+        self.assertFalse(rack2.is_provisioned)
+
+    def test_rack_is_provisioning(self):
+        rack1 = self.tuskar_racks.list()[0]
+        rack2 = self.tuskar_racks.list()[1]
+
+        self.assertFalse(rack1.is_provisioning)
+        self.assertTrue(rack2.is_provisioning)
+
+    def test_rack_provision(self):
+        rack = self.tuskar_racks.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.data_centers = self.mox.CreateMockAnything()
+        tuskarclient.data_centers.provision_all()
+        self.mox.ReplayAll()
+
+        Rack.provision(self.request, rack.id)
 
     def test_flavor_template_list(self):
-        templates = api.tuskar.FlavorTemplate.list(self.request)
+        templates = FlavorTemplate.list(self.request)
         self.assertEquals(7, len(templates))
         for t in templates:
-            self.assertIsInstance(t, api.tuskar.FlavorTemplate)
+            self.assertIsInstance(t, FlavorTemplate)
 
     def test_flavor_template_get(self):
         test_template = self.tuskar_flavor_templates.first()
-        template = api.tuskar.FlavorTemplate.get(self.request,
+        template = FlavorTemplate.get(self.request,
                                                  test_template.id)
-        self.assertIsInstance(template, api.tuskar.FlavorTemplate)
+        self.assertIsInstance(template, FlavorTemplate)
         self.assertEquals(template.name, test_template.name)
+
+    def test_flavor_create(self):
+        flavor = self.tuskarclient_flavors.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.flavors = self.mox.CreateMockAnything()
+        tuskarclient.flavors.create(1,
+                                   name='nano',
+                                   max_vms=100,
+                                   capacities=[]).AndReturn(flavor)
+        self.mox.ReplayAll()
+
+        ret_val = Flavor.create(self.request,
+                              1, 'nano', 100, [])
+        self.assertIsInstance(ret_val, Flavor)
+
+    def test_flavor_delete(self):
+        rc = self.tuskarclient_resource_classes.first()
+        flavor = self.tuskarclient_flavors.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.flavors = self.mox.CreateMockAnything()
+        tuskarclient.flavors.delete(rc.id, flavor.id)
+        self.mox.ReplayAll()
+
+        Flavor.delete(self.request, rc.id, flavor.id)
+
+    def test_flavor_cpu(self):
+        flavor = self.tuskar_flavors.first()
+
+        cpu = flavor.cpu
+        self.assertIsInstance(cpu, Capacity)
+        self.assertEquals(64, cpu.value)
+
+    def test_flavor_memory(self):
+        flavor = self.tuskar_flavors.first()
+
+        memory = flavor.memory
+        self.assertIsInstance(memory, Capacity)
+        self.assertEquals(1024, memory.value)
+
+    def test_flavor_storage(self):
+        flavor = self.tuskar_flavors.first()
+
+        storage = flavor.storage
+        self.assertIsInstance(storage, Capacity)
+        self.assertEquals(1, storage.value)
+
+    def test_flavor_ephemeral_disk(self):
+        flavor = self.tuskar_flavors.first()
+
+        ephemeral_disk = flavor.ephemeral_disk
+        self.assertIsInstance(ephemeral_disk, Capacity)
+        self.assertEquals(0, ephemeral_disk.value)
+
+    def test_flavor_swap_disk(self):
+        flavor = self.tuskar_flavors.first()
+
+        swap_disk = flavor.swap_disk
+        self.assertIsInstance(swap_disk, Capacity)
+        self.assertEquals(2, swap_disk.value)
