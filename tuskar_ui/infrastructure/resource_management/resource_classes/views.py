@@ -32,7 +32,7 @@ from horizon import forms
 from horizon import tabs
 from horizon import workflows
 
-from tuskar_ui import api
+from tuskar_ui import api as tuskar
 
 from tuskar_ui.infrastructure. \
     resource_management.resource_classes.forms import DeleteForm
@@ -73,8 +73,8 @@ class UpdateView(workflows.WorkflowView):
             resource_class_id = self.kwargs['resource_class_id']
             try:
                 self._object = \
-                    api.tuskar.ResourceClass.get(self.request,
-                                                     resource_class_id)
+                    tuskar.ResourceClass.get(self.request,
+                                             resource_class_id)
             except:
                 redirect = self.success_url
                 msg = _('Unable to retrieve resource class details.')
@@ -116,9 +116,8 @@ class DetailView(tabs.TabView):
         if not hasattr(self, "_resource_class"):
             try:
                 resource_class_id = self.kwargs['resource_class_id']
-                resource_class = api.tuskar.\
-                                     ResourceClass.get(self.request,
-                                                       resource_class_id)
+                resource_class = tuskar.ResourceClass.get(self.request,
+                                                          resource_class_id)
             except:
                 redirect = reverse('horizon:infrastructure:'
                                    'resource_management:index')
@@ -166,7 +165,7 @@ class DetailActionView(forms.ModalFormView):
 
     def get_initial(self):
         try:
-            resource_class = api.tuskar.ResourceClass.get(
+            resource_class = tuskar.ResourceClass.get(
                 self.request, self.kwargs['resource_class_id'])
             action = self.request.GET.get('action')
         except:
@@ -183,9 +182,8 @@ def rack_health(request, resource_class_id=None):
     statuses = ["Good", "Warnings", "Disaster"]
     colors = ["rgb(244,244,244)", "rgb(240,170,0)", "rgb(200,0,0)"]
 
-    resource_class = (api.tuskar.
-                      ResourceClass.get(request,
-                                        resource_class_id))
+    resource_class = (tuskar.ResourceClass.get(request,
+                                               resource_class_id))
 
     for rack in resource_class.list_racks:
         rand_index = random.randint(0, 2)

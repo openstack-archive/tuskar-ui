@@ -19,7 +19,7 @@ from horizon import exceptions
 from horizon import tables
 from horizon import tabs
 
-from tuskar_ui import api
+from tuskar_ui import api as tuskar
 from tuskar_ui.infrastructure.resource_management.nodes.tables import UnrackedNodesTable
 from tuskar_ui.infrastructure.resource_management.nodes.tabs import NodeDetailTabs
 
@@ -30,7 +30,7 @@ class UnrackedView(tables.DataTableView):
 
     def get_data(self):
         try:
-            nodes = api.tuskar.Node.list_unracked(self.request)
+            nodes = tuskar.Node.list_unracked(self.request)
         except:
             nodes = []
             exceptions.handle(self.request,
@@ -51,7 +51,7 @@ class DetailView(tabs.TabView):
         if not hasattr(self, "_node"):
             try:
                 node_id = self.kwargs['node_id']
-                node = api.tuskar.Node.get(self.request, node_id)
+                node = tuskar.Node.get(self.request, node_id)
             except:
                 redirect = reverse('horizon:infrastructure:'
                                    'resource_management:index')

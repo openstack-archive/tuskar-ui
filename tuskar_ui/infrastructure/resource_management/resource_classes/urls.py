@@ -37,7 +37,7 @@ VIEW_MOD = 'tuskar_ui.infrastructure.' \
 
 urlpatterns = patterns(
     VIEW_MOD,
-    url(r'^create$', CreateView.as_view(), name='create'),
+    url(r'^create/$', CreateView.as_view(), name='create'),
     url(r'^(?P<resource_class_id>[^/]+)/$',
         DetailView.as_view(), name='detail'),
     url(RESOURCE_CLASS % 'update', UpdateView.as_view(), name='update'),

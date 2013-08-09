@@ -18,7 +18,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
 
-from tuskar_ui import api
+from tuskar_ui import api as tuskar
 
 LOG = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class DeleteRacks(tables.DeleteAction):
     data_type_plural = _("Racks")
 
     def delete(self, request, obj_id):
-        api.tuskar.Rack.delete(request, obj_id)
+        tuskar.Rack.delete(request, obj_id)
 
 
 class CreateRack(tables.LinkAction):
@@ -65,7 +65,7 @@ class UpdateRow(tables.Row):
     ajax = True
 
     def get_data(self, request, rack_id):
-        rack = api.tuskar.Rack.get(request, rack_id)
+        rack = tuskar.Rack.get(request, rack_id)
         return rack
 
 
