@@ -217,7 +217,7 @@ class Node(StringIdAPIResourceWrapper):
                                                local_gb, prov_mac_address,
                                                pm_address, pm_user,
                                                pm_password, terminal_port)
-        return node
+        return cls(node)
 
     @property
     def list_flavors(self):
@@ -225,9 +225,9 @@ class Node(StringIdAPIResourceWrapper):
             # FIXME: just a mock of used instances, add real values
             used_instances = 0
 
-            if not self.rack or not self.rack.resource_class:
+            if not self.rack or not self.rack.get_resource_class:
                 return []
-            resource_class = self.rack.resource_class
+            resource_class = self.rack.get_resource_class
 
             added_flavors = tuskarclient(self.request).flavors\
                                                       .list(resource_class.id)
@@ -389,6 +389,7 @@ class Rack(StringIdAPIResourceWrapper):
                            self.nodes]
         return self._nodes
 
+    @property
     def nodes_count(self):
         return len(self.nodes)
 

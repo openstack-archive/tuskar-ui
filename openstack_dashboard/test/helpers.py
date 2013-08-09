@@ -36,6 +36,7 @@ from heatclient import client as heat_client
 from keystoneclient.v2_0 import client as keystone_client
 from neutronclient.v2_0 import client as neutron_client
 from novaclient.v1_1 import client as nova_client
+from novaclient.v1_1.contrib import baremetal
 from swiftclient import client as swift_client
 from tuskarclient.v1 import client as tuskar_client
 
@@ -263,6 +264,7 @@ class APITestCase(TestCase):
         self._original_cinderclient = api.cinder.cinderclient
         self._original_heatclient = api.heat.heatclient
         self._original_tuskarclient = api.tuskar.tuskarclient
+        self._original_baremetalclient = api.tuskar.baremetalclient
 
         # Replace the clients with our stubs.
         api.glance.glanceclient = lambda request: self.stub_glanceclient()
@@ -272,6 +274,8 @@ class APITestCase(TestCase):
         api.cinder.cinderclient = lambda request: self.stub_cinderclient()
         api.heat.heatclient = lambda request: self.stub_heatclient()
         api.tuskar.tuskarclient = lambda request: self.stub_tuskarclient()
+        api.tuskar.baremetalclient = lambda request:\
+            self.stub_baremetalclient()
 
     def tearDown(self):
         super(APITestCase, self).tearDown()
@@ -282,6 +286,7 @@ class APITestCase(TestCase):
         api.cinder.cinderclient = self._original_cinderclient
         api.heat.heatclient = self._original_heatclient
         api.tuskar.tuskarclient = self._original_tuskarclient
+        api.tuskar.baremetalclient = self._original_baremetalclient
 
     def stub_novaclient(self):
         if not hasattr(self, "novaclient"):
@@ -344,6 +349,11 @@ class APITestCase(TestCase):
             self.mox.StubOutWithMock(tuskar_client, 'Client')
             self.tuskarclient = self.mox.CreateMock(tuskar_client.Client)
         return self.tuskarclient
+
+    def stub_baremetalclient(self):
+        if not hasattr(self, "baremetalclient"):
+            self.baremetalclient = baremetal.BareMetalNodeManager(None)
+        return self.baremetalclient
 
 
 @unittest.skipUnless(os.environ.get('WITH_SELENIUM', False),

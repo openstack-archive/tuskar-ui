@@ -21,6 +21,7 @@ from openstack_dashboard.api.tuskar import ResourceClass
 
 from openstack_dashboard.test.test_data.utils import TestDataContainer
 
+from novaclient.v1_1.contrib import baremetal
 from tuskarclient.v1 import flavors
 from tuskarclient.v1 import racks
 from tuskarclient.v1 import resource_classes
@@ -167,30 +168,49 @@ def data(TEST):
     TEST.tuskar_racks.add(Rack(rack_1), Rack(rack_2), Rack(rack_3))
 
     # Nodes
-    TEST.nodes = TestDataContainer()
-    TEST.unracked_nodes = TestDataContainer()
+    TEST.baremetalclient_nodes = TestDataContainer()
+    TEST.baremetal_nodes = TestDataContainer()
+    TEST.baremetalclient_unracked_nodes = TestDataContainer()
+    TEST.baremetal_unracked_nodes = TestDataContainer()
+    TEST.baremetalclient_nodes_all = TestDataContainer()
+    TEST.baremetal_nodes_all = TestDataContainer()
 
-    NodeStruct = namedtuple('RackStruct', 'id name prov_mac_address')
-    node_1 = Node(NodeStruct(
-            id="1",
-            name="node1",
-            prov_mac_address="00-B0-D0-86-AB-F7"))
-    node_2 = Node(NodeStruct(
-            id="2",
-            name="node2",
-            prov_mac_address="00-B0-D0-86-AB-F8"))
-    node_3 = Node(NodeStruct(
-            id="3",
-            name="node3",
-            prov_mac_address="00-B0-D0-86-AB-F9"))
-    node_4 = Node(NodeStruct(
-            id="4",
-            name="node4",
-            prov_mac_address="00-B0-D0-86-AB-F0"))
-    node_5 = Node(NodeStruct(
-            id="5",
-            name="node5",
-            prov_mac_address="00-B0-D0-86-AB-F1"))
+    node_1 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '1',
+         'name': 'node1',
+         'prov_mac_address': '00-B0-D0-86-AB-F7'})
+    node_2 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '2',
+         'name': 'node2',
+         'prov_mac_address': '00-B0-D0-86-AB-F8'})
+    node_3 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '3',
+         'name': 'node3',
+         'prov_mac_address': '00-B0-D0-86-AB-F9'})
+    node_4 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '4',
+         'name': 'node4',
+         'prov_mac_address': '00-B0-D0-86-AB-F0'})
+    node_5 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '5',
+         'name': 'node5',
+         'prov_mac_address': '00-B0-D0-86-AB-F1'})
 
-    TEST.nodes.add(node_1, node_2, node_3, node_4)
-    TEST.unracked_nodes.add(node_5)
+    TEST.baremetalclient_nodes.add(node_1, node_2, node_3, node_4)
+    TEST.baremetal_nodes.add(Node(node_1),
+                             Node(node_2),
+                             Node(node_3),
+                             Node(node_4))
+    TEST.baremetalclient_unracked_nodes.add(node_5)
+    TEST.baremetal_unracked_nodes.add(Node(node_5))
+    TEST.baremetalclient_nodes_all.add(node_1, node_2, node_3, node_4, node_5)
+    TEST.baremetal_nodes_all.add(Node(node_1),
+                             Node(node_2),
+                             Node(node_3),
+                             Node(node_4),
+                             Node(node_5))

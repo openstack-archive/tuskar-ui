@@ -16,6 +16,8 @@
 
 from __future__ import absolute_import
 
+from novaclient.v1_1.contrib import baremetal
+
 from openstack_dashboard.api.tuskar import Capacity
 from openstack_dashboard.api.tuskar import Flavor
 from openstack_dashboard.api.tuskar import FlavorTemplate
@@ -26,6 +28,180 @@ from openstack_dashboard.test import helpers as test
 
 
 class TuskarApiTests(test.APITestCase):
+
+    def test_node_get(self):
+        node = self.baremetalclient_nodes.first()
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
+        baremetal.BareMetalNodeManager.get(node.id).AndReturn(node)
+
+        novaclient = self.stub_novaclient()
+        novaclient.servers = self.mox.CreateMockAnything()
+        novaclient.servers.list(True,
+                                {'all_tenants': True,
+                                 'limit': 21}).AndReturn([])
+        self.mox.ReplayAll()
+
+        ret_val = Node.get(self.request, node.id)
+        self.assertIsInstance(ret_val, Node)
+
+    def test_node_create(self):
+        node = self.baremetalclient_nodes.first()
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'create')
+        baremetal.BareMetalNodeManager.create('node',
+                                              1,
+                                              1024,
+                                              10,
+                                              'aa:bb:cc:dd:ee',
+                                              '0.0.0.0',
+                                              'user',
+                                              'password',
+                                              0).AndReturn(node)
+        self.mox.ReplayAll()
+
+        ret_val = Node.create(self.request,
+                              'node',
+                              1,
+                              1024,
+                              10,
+                              'aa:bb:cc:dd:ee',
+                              '0.0.0.0',
+                              'user',
+                              'password',
+                              0)
+        self.assertIsInstance(ret_val, Node)
+
+    def test_node_list(self):
+        nodes = self.baremetalclient_nodes_all.list()
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'list')
+        baremetal.BareMetalNodeManager.list().AndReturn(nodes)
+        self.mox.ReplayAll()
+
+        ret_val = Node.list(self.request)
+        for node in ret_val:
+            self.assertIsInstance(node, Node)
+
+    def test_node_list_unracked(self):
+        nodes = self.baremetalclient_nodes.list()
+        all_nodes = self.baremetalclient_nodes_all.list()
+        racks = self.tuskarclient_racks.list()
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'list')
+        baremetal.BareMetalNodeManager.list().AndReturn(all_nodes)
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.list().MultipleTimes().AndReturn(racks)
+
+        novaclient = self.stub_novaclient()
+        novaclient.servers = self.mox.CreateMockAnything()
+        novaclient.servers.list(True,
+                                {'all_tenants': True,
+                                 'limit': 21}).MultipleTimes().AndReturn([])
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
+        for n in nodes:
+            baremetal.BareMetalNodeManager.get(n.id).\
+                MultipleTimes().AndReturn(n)
+        self.mox.ReplayAll()
+
+        ret_val = Node.list_unracked(self.request)
+        for node in ret_val:
+            self.assertIsInstance(node, Node)
+        self.assertEquals(1, len(ret_val))
+
+    def test_node_flavors(self):
+        node = self.baremetal_nodes.first()
+        nodes = self.baremetalclient_nodes.list()
+        racks = self.tuskarclient_racks.list()
+        rc = self.tuskarclient_resource_classes.first()
+        flavors = self.tuskarclient_flavors.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.list().AndReturn(racks)
+        tuskarclient.resource_classes = self.mox.CreateMockAnything()
+        tuskarclient.resource_classes.get(rc.id).AndReturn(rc)
+        tuskarclient.flavors = self.mox.CreateMockAnything()
+        tuskarclient.flavors.list(rc.id).AndReturn(flavors)
+
+        novaclient = self.stub_novaclient()
+        novaclient.servers = self.mox.CreateMockAnything()
+        novaclient.servers.list(True,
+                                {'all_tenants': True,
+                                 'limit': 21}).MultipleTimes().AndReturn([])
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
+        for n in nodes:
+            baremetal.BareMetalNodeManager.get(n.id).AndReturn(n)
+        self.mox.ReplayAll()
+
+        node.request = self.request
+        ret_val = node.list_flavors
+        for flavor in ret_val:
+            self.assertIsInstance(flavor, Flavor)
+        self.assertEquals(2, len(ret_val))
+
+    def test_node_rack(self):
+        node = self.baremetal_nodes.first()
+        nodes = self.baremetalclient_nodes.list()
+        racks = self.tuskarclient_racks.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.list().AndReturn(racks)
+
+        novaclient = self.stub_novaclient()
+        novaclient.servers = self.mox.CreateMockAnything()
+        novaclient.servers.list(True,
+                                {'all_tenants': True,
+                                 'limit': 21}).MultipleTimes().AndReturn([])
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
+        for n in nodes:
+            baremetal.BareMetalNodeManager.get(n.id).AndReturn(n)
+        self.mox.ReplayAll()
+
+        node.request = self.request
+        rack = node.rack
+        self.assertIsInstance(rack, Rack)
+        self.assertEquals('1', rack.id)
+
+    def test_node_running_instances(self):
+        node = self.baremetal_nodes.first()
+
+        self.assertEquals(4, node.running_instances)
+
+    def test_node_remaining_capacity(self):
+        node = self.baremetal_nodes.first()
+
+        self.assertEquals(96, node.remaining_capacity)
+
+    def test_node_is_provisioned(self):
+        node = self.baremetal_nodes.first()
+        nodes = self.baremetalclient_nodes.list()
+        racks = self.tuskarclient_racks.list()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.racks.list().AndReturn(racks)
+
+        novaclient = self.stub_novaclient()
+        novaclient.servers = self.mox.CreateMockAnything()
+        novaclient.servers.list(True,
+                                {'all_tenants': True,
+                                 'limit': 21}).MultipleTimes().AndReturn([])
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
+        for n in nodes:
+            baremetal.BareMetalNodeManager.get(n.id).AndReturn(n)
+        self.mox.ReplayAll()
+
+        node.request = self.request
+        node.status = 'provisioned'
+        self.assertTrue(node.is_provisioned)
 
     def test_resource_class_list(self):
         rcs = self.tuskarclient_resource_classes.list()
@@ -143,17 +319,28 @@ class TuskarApiTests(test.APITestCase):
 
         rc.set_racks(self.request, rack_ids)
 
-    ## FIXME: we need to stub out the bare metal client, will
-    ## be easier once the client is separated out a bit
     def test_resource_class_nodes(self):
         rc = self.tuskar_resource_classes.first()
-        r = self.tuskarclient_racks.first()
+        racks = self.tuskarclient_racks.list()
+        nodes = self.baremetalclient_nodes.list()
 
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.racks = self.mox.CreateMockAnything()
-        tuskarclient.racks.get(r.id).AndReturn(r)
+        tuskarclient.racks.get('1').AndReturn(racks[0])
+        tuskarclient.racks.get('2').AndReturn(racks[1])
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
+        for n in nodes:
+            baremetal.BareMetalNodeManager.get(n.id).AndReturn(n)
+
+        novaclient = self.stub_novaclient()
+        novaclient.servers = self.mox.CreateMockAnything()
+        novaclient.servers.list(True,
+                                {'all_tenants': True,
+                                 'limit': 21}).MultipleTimes().AndReturn([])
         self.mox.ReplayAll()
 
+        rc.request = self.request
         for node in rc.nodes:
             self.assertIsInstance(node, Node)
         self.assertEquals(4, rc.nodes_count)
@@ -298,15 +485,26 @@ class TuskarApiTests(test.APITestCase):
 
         Rack.delete(self.request, rack.id)
 
-    ## FIXME: we need to stub out the bare metal client, will
-    ## be easier once the client is separated out a bit
     def test_rack_nodes(self):
         rack = self.tuskar_racks.first()
+        nodes = self.baremetalclient_nodes.list()
 
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
+        for n in nodes:
+            baremetal.BareMetalNodeManager.get(n.id).AndReturn(n)
+
+        novaclient = self.stub_novaclient()
+        novaclient.servers = self.mox.CreateMockAnything()
+        novaclient.servers.list(True,
+                                {'all_tenants': True,
+                                 'limit': 21}).MultipleTimes().AndReturn([])
+        self.mox.ReplayAll()
+
+        rack.request = self.request
         for node in rack.list_nodes:
             self.assertIsInstance(node, Node)
+        self.assertEquals(4, len(rack.node_ids))
         self.assertEquals(4, rack.nodes_count)
-        self.assertEquals(4, rack.node_ids)
 
     def test_rack_resource_class(self):
         rc = self.tuskarclient_resource_classes.first()

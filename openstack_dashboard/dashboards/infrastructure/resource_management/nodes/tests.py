@@ -13,7 +13,7 @@ class ResourceViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({api.tuskar.Node: ('list_unracked',), })
     def test_unracked(self):
-        unracked_nodes = self.tuskar_racks.list()
+        unracked_nodes = self.baremetal_unracked_nodes.list()
 
         api.tuskar.Node.list_unracked(IsA(http.HttpRequest)) \
             .AndReturn(unracked_nodes)
