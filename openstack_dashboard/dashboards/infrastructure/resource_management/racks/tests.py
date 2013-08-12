@@ -15,8 +15,6 @@ from django import http
 
 from mox import IsA
 
-from novaclient.v1_1.contrib import baremetal
-
 from openstack_dashboard import api
 from openstack_dashboard.test import helpers as test
 
@@ -48,17 +46,20 @@ class RackViewTests(test.BaseAdminViewTests):
     #
     @test.create_stubs({api.tuskar.Rack: ('list', 'create',),
                         api.tuskar.ResourceClass: ('list',),
-                        baremetal.BareMetalNodeManager: ('create',)})
+                        api.tuskar.Node: ('create',)})
     def test_create_rack_post(self):
+        node = self.baremetal_nodes.first()
+
         api.tuskar.Rack.list(
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_racks.list())
-        baremetal.BareMetalNodeManager.create(
+        api.tuskar.Node.create(
+            IsA(http.request.HttpRequest),
             'New Node', u'1', u'1024', u'10', 'aa:bb:cc:dd:ee',
-            u'', u'', u'', u'').AndReturn(None)
+            u'', u'', u'', u'').AndReturn(node)
         api.tuskar.Rack.create(
             IsA(http.request.HttpRequest), 'New Rack',
-            u'1', 'Tokyo', '1.2.3.4', [{'id': None}]).AndReturn(None)
+            u'1', 'Tokyo', '1.2.3.4', [{'id': '1'}]).AndReturn(None)
         api.tuskar.ResourceClass.list(
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -74,7 +75,7 @@ class RackViewTests(test.BaseAdminViewTests):
         resp = self.client.post(url, data)
         self.assertRedirectsNoFollow(resp, self.index_page)
 
-    @test.create_stubs({api.tuskar.Rack: ('get',),
+    @test.create_stubs({api.tuskar.Rack: ('get', 'list_nodes'),
                         api.tuskar.ResourceClass: ('list',)})
     def test_edit_rack_get(self):
         rack = self.tuskar_racks.first()
