@@ -23,7 +23,8 @@ from horizon import tables
 from tuskar_ui import api as tuskar
 from tuskar_ui.forms import NumberInput
 from tuskar_ui.infrastructure. \
-    resource_management.flavors import tables as flavors_tables
+    resource_management.flavor_templates import tables \
+        as flavor_templates_tables
 from tuskar_ui.infrastructure. \
     resource_management.racks import tables as racks_tables
 from tuskar_ui.infrastructure. \
@@ -94,15 +95,15 @@ class FlavorsFilterAction(tables.FilterAction):
         pass
 
 
-class FlavorsTable(flavors_tables.FlavorsTable):
+class FlavorTemplatesTable(flavor_templates_tables.FlavorTemplatesTable):
     name = tables.Column('name',
-                         verbose_name=_('Flavor Name'))
+                         verbose_name=_('Flavor Template Name'))
     max_vms = tuskar_ui.tables.Column("max_vms",
-                            auto='form_widget',
-                            verbose_name=_("Max. VMs"),
-                            form_widget=NumberInput(),
-                            form_widget_attributes={
-                                'class': "number_input_slim"})
+                                      auto='form_widget',
+                                      verbose_name=_("Max. VMs"),
+                                      form_widget=NumberInput(),
+                                      form_widget_attributes={
+                                          'class': "number_input_slim"})
 
     class Meta:
         name = "flavors"
@@ -157,7 +158,11 @@ class UpdateFlavorsClass(tables.LinkAction):
             resource_classes.workflows.ResourceClassInfoAndFlavorsAction.slug)
 
 
-class ResourceClassDetailFlavorsTable(flavors_tables.FlavorsTable):
+class FlavorsTable(flavor_templates_tables.FlavorTemplatesTable):
+    name = tables.Column('name',
+                         link=("horizon:infrastructure:"
+                               "resource_management:flavor_templates:detail"),
+                         verbose_name=_('Flavor Name'))
     max_vms = tables.Column("max_vms",
                             verbose_name=_("Max. VMs"))
 

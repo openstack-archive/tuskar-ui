@@ -19,7 +19,7 @@ from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
 
 from tuskar_ui.infrastructure. \
-    resource_management.flavors import urls as flavor_urls
+    resource_management.flavor_templates import urls as flavor_template_urls
 from tuskar_ui.infrastructure. \
     resource_management.nodes import urls as node_urls
 from tuskar_ui.infrastructure. \
@@ -31,7 +31,8 @@ from tuskar_ui.infrastructure. \
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'flavors/', include(flavor_urls, namespace='flavors')),
+    url(r'flavor_templates/', include(flavor_template_urls,
+                                      namespace='flavor_templates')),
     url(r'racks/', include(rack_urls, namespace='racks')),
     url(r'resource_classes/',
         include(resource_classes_urls, namespace='resource_classes')),

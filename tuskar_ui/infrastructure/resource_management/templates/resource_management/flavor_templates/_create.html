@@ -3,10 +3,10 @@
 {% load url from future %}
 
 {% block form_id %}create_flavor_form{% endblock %}
-{% block form_action %}{% url 'horizon:infrastructure:resource_management:flavors:create' %}{% endblock %}
+{% block form_action %}{% url 'horizon:infrastructure:resource_management:flavor_templates:create' %}{% endblock %}
 
 {% block modal_id %}create_flavor_modal{% endblock %}
-{% block modal-header %}{% trans "Create Flavor" %}{% endblock %}
+{% block modal-header %}{% trans "Create Flavor Template" %}{% endblock %}
 
 {% block modal-body %}
 <div class="left">
@@ -16,11 +16,11 @@
 </div>
 <div class="right">
     <h3>{% trans "Description" %}:</h3>
-    <p>{% trans "From here you can define the sizing of a new flavor." %}</p>
+    <p>{% trans "From here you can define the sizing of a new flavor template." %}</p>
 </div>
 {% endblock %}
 
 {% block modal-footer %}
-  <input class="btn btn-primary pull-right" type="submit" value="{% trans "Create Flavor" %}" />
+  <input class="btn btn-primary pull-right" type="submit" value="{% trans "Create Flavor Template" %}" />
   <a href="{% url 'horizon:infrastructure:resource_management:index' %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
 {% endblock %}

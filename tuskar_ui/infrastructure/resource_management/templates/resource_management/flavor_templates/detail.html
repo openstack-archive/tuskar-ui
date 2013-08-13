@@ -1,0 +1,24 @@
+{% extends 'infrastructure/base_detail.html' %}
+{% load i18n %}
+{% block title %}{% trans "Flavor Template Detail"%}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Flavor Template Detail") %}
+{% endblock page_header %}
+
+{% block actions %}
+  <div class="btn-group">
+    <a class="btn ajax-modal" href="{% url 'horizon:infrastructure:resource_management:flavor_templates:detail_edit' flavor_template.id %}">{% trans "Edit" %}</a>
+  </div>
+{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'horizon:infrastructure:resource_management:index' %}?tab=resource_management_tabs__resource_classes_tab" >Home</a>
+    <span class="separator"></span>
+    <a href="{% url 'horizon:infrastructure:resource_management:index' %}?tab=resource_management_tabs__flavor_templates_tab" >Flavor Templates</a>
+    <span class="separator"></span>
+  </div>
+{% endblock breadcrumbs %}
+
+{% block name %}{{ flavor_template.name }}{% endblock %}
