@@ -38,7 +38,7 @@ INSTALLED_APPS = (
     'openstack_dashboard',
     'openstack_dashboard.dashboards.project',
     'openstack_dashboard.dashboards.admin',
-    'openstack_dashboard.dashboards.infrastructure',
+    'tuskar_ui.infrastructure',
     'openstack_dashboard.dashboards.settings',
 )
 
