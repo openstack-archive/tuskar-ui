@@ -20,7 +20,7 @@ Installation prerequisites are:
    machine as tuskar-ui, but it must be network accessible.
 
 You may find
-`the Tuskar install guide <https://github.com/tuskar/tuskar/blob/master/INSTALL.rst>`_
+`the Tuskar install guide <https://github.com/stackforge/tuskar/blob/master/INSTALL.rst>`_
 helpful.
 
 For baremetal provisioning, you will want a Nova Baremetal driver
@@ -70,17 +70,24 @@ On RHEL 6, you'll need to build nodejs from source:
 Install the management UI
 -------------------------
 
-Begin by cloning the tuskar-ui repository:
+Begin by cloning the horizon and tuskar-ui repositories:
 
 ::
 
-    git clone git://github.com/tuskar/tuskar-ui.git
+    git clone git://github.com/openstack/horizon.git
+    git clone git://github.com/stackforge/tuskar-ui.git
+
+Go into horizon and create a symlink to the tuskar-ui code:
+
+::
+
+    cd horizon
+    ln -s ../tuskar-ui/tuskar_ui
 
 Then, install a virtual environment for your setup:
 
 ::
 
-    cd tuskar-ui
     python tools/install_venv.py
 
 Next, run ``run_tests.sh`` to have pip install dependencies:
@@ -93,7 +100,7 @@ Set up your ``local_settings.py`` file:
 
 ::
 
-    cp openstack_dashboard/local/local_settings.py.example openstack_dashboard/local/local_settings.py
+    cp ../tuskar-ui/local_settings.py.example openstack_dashboard/local/local_settings.py
 
 Open up the copied ``local_settings.py`` file in your preferred text
 editor. You will want to customize several settings:
@@ -142,7 +149,13 @@ First, activate your virtual environment:
 
     source .venv/bin/activate
 
-Then, synchronize your local database:
+tuskar-ui introduces one additional dependency - python-tuskarclient:
+
+::
+
+    pip install git+http://github.com/stackforge/python-tuskarclient.git
+
+Finally, synchronize your local database:
 
 ::
 
