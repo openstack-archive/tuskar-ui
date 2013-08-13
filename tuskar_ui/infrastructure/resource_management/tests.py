@@ -81,7 +81,8 @@ class ResourceManagementTests(test.BaseAdminViewTests):
             res, 'infrastructure/resource_management/index.html')
 
         # FlavorTemplate asserts
-        self.assertItemsEqual(res.context['flavors_table'].data, flavors)
+        self.assertItemsEqual(res.context['flavor_templates_table'].data,
+                              flavors)
         # FlavorTemplate asserts end
 
         # ResourceClass asserts

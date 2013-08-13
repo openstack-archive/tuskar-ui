@@ -19,16 +19,16 @@ from horizon import tabs
 
 class OverviewTab(tabs.Tab):
     name = _("Overview")
-    slug = "flavor_overview_tab"
-    template_name = ("infrastructure/resource_management/flavors/"
+    slug = "flavor_template_overview_tab"
+    template_name = ("infrastructure/resource_management/flavor_templates/"
                      "_detail_overview.html")
     preload = False
 
     def get_context_data(self, request):
-        return {"flavor": self.tab_group.kwargs['flavor']}
+        return {"flavor_template": self.tab_group.kwargs['flavor_template']}
 
 
-class FlavorDetailTabs(tabs.TabGroup):
-    slug = "flavor_detail_tabs"
+class FlavorTemplateDetailTabs(tabs.TabGroup):
+    slug = "flavor_template_detail_tabs"
     tabs = (OverviewTab,)
     sticky = True

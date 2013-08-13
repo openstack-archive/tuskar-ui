@@ -25,42 +25,42 @@ from tuskar_ui import api as tuskar
 LOG = logging.getLogger(__name__)
 
 
-class DeleteFlavors(tables.DeleteAction):
-    data_type_singular = _("Flavor")
-    data_type_plural = _("Flavors")
+class DeleteFlavorTemplates(tables.DeleteAction):
+    data_type_singular = _("Flavor Template")
+    data_type_plural = _("Flavor Templates")
 
     def delete(self, request, obj_id):
         tuskar.FlavorTemplate.delete(request, obj_id)
 
 
-class CreateFlavor(tables.LinkAction):
+class CreateFlavorTemplate(tables.LinkAction):
     name = "create"
-    verbose_name = _("Create Flavor")
-    url = "horizon:infrastructure:resource_management:flavors:create"
+    verbose_name = _("Create Flavor Template")
+    url = "horizon:infrastructure:resource_management:flavor_templates:create"
     classes = ("ajax-modal", "btn-create")
 
 
-class EditFlavor(tables.LinkAction):
+class EditFlavorTemplate(tables.LinkAction):
     name = "edit"
-    verbose_name = _("Edit Flavor")
-    url = "horizon:infrastructure:resource_management:flavors:edit"
+    verbose_name = _("Edit Flavor Template")
+    url = "horizon:infrastructure:resource_management:flavor_templates:edit"
     classes = ("ajax-modal", "btn-edit")
 
 
-class FlavorsFilterAction(tables.FilterAction):
+class FlavorTemplatesFilterAction(tables.FilterAction):
 
-    def filter(self, table, flavors, filter_string):
+    def filter(self, table, flavor_templates, filter_string):
         """ Naive case-insensitive search. """
         q = filter_string.lower()
-        return [flavor for flavor in flavors
-                if q in flavor.name.lower()]
+        return [flavor_template for flavor_template in flavor_templates
+                if q in flavor_template.name.lower()]
 
 
-class FlavorsTable(tables.DataTable):
+class FlavorTemplatesTable(tables.DataTable):
     name = tables.Column('name',
                          link=("horizon:infrastructure:"
-                               "resource_management:flavors:detail"),
-                         verbose_name=_('Flavor Name'))
+                               "resource_management:flavor_templates:detail"),
+                         verbose_name=_('Flavor Template Name'))
     cpu = tables.Column(
         "cpu",
         verbose_name=_('VCPU'),
@@ -88,7 +88,9 @@ class FlavorsTable(tables.DataTable):
     )
 
     class Meta:
-        name = "flavors"
-        verbose_name = _("Flavors")
-        table_actions = (CreateFlavor, DeleteFlavors, FlavorsFilterAction)
-        row_actions = (EditFlavor, DeleteFlavors)
+        name = "flavor_templates"
+        verbose_name = _("Flavor Templates")
+        table_actions = (CreateFlavorTemplate,
+                         DeleteFlavorTemplates,
+                         FlavorTemplatesFilterAction)
+        row_actions = (EditFlavorTemplate, DeleteFlavorTemplates)
