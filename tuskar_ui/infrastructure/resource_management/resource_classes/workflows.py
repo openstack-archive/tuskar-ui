@@ -26,7 +26,7 @@ import tuskar_ui.workflows
 import re
 
 from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.tables import FlavorsTable
+    resource_management.resource_classes.tables import FlavorTemplatesTable
 from tuskar_ui.infrastructure. \
     resource_management.resource_classes.tables import RacksTable
 
@@ -85,7 +85,7 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
 
 
 class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.TableStep):
-    table_classes = (FlavorsTable,)
+    table_classes = (FlavorTemplatesTable,)
 
     action_class = ResourceClassInfoAndFlavorsAction
     template_name = 'infrastructure/resource_management/resource_classes/'\

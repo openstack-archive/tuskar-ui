@@ -22,7 +22,7 @@ from horizon import messages
 from tuskar_ui import api as tuskar
 
 
-class CreateFlavor(forms.SelfHandlingForm):
+class CreateFlavorTemplate(forms.SelfHandlingForm):
     name = forms.RegexField(label=_("Name"),
                             max_length=25,
                             regex=r'^[\w\.\- ]+$',
@@ -46,23 +46,23 @@ class CreateFlavor(forms.SelfHandlingForm):
                                    initial=0)
 
     def clean(self):
-        cleaned_data = super(CreateFlavor, self).clean()
+        cleaned_data = super(CreateFlavorTemplate, self).clean()
         name = cleaned_data.get('name')
-        flavor_id = self.initial.get('flavor_id', None)
+        flavor_template_id = self.initial.get('flavor_template_id', None)
         try:
-            flavors = tuskar.FlavorTemplate.list(self.request)
+            flavor_templates = tuskar.FlavorTemplate.list(self.request)
         except:
-            flavors = []
-            msg = _('Unable to get flavor list')
+            flavor_templates = []
+            msg = _('Unable to get flavor templates list')
             exceptions.check_message(["Connection", "refused"], msg)
             raise
-        # Check if there is no flavor with the same name
-        for flavor in flavors:
-            if flavor.name == name and flavor.id != flavor_id:
+        # Check if there is no flavor template with the same name
+        for flavor_template in flavor_templates:
+            if (flavor_template.name == name and
+                    flavor_template.id != flavor_template_id):
                 raise forms.ValidationError(
-                    _('The name "%s" is already used by another flavor.')
-                    % name
-                )
+                    _('The name "%s" is already used by another'
+                      'flavor template.') % name)
         return cleaned_data
 
     def handle(self, request, data):
@@ -76,20 +76,20 @@ class CreateFlavor(forms.SelfHandlingForm):
                 data['ephemeral_disk'],
                 data['swap_disk']
             )
-            msg = _('Created flavor "%s".') % data['name']
+            msg = _('Created Flavor Template "%s".') % data['name']
             messages.success(request, msg)
             return True
         except:
-            exceptions.handle(request, _("Unable to create flavor."))
+            exceptions.handle(request, _("Unable to create Flavor Template."))
 
 
-class EditFlavor(CreateFlavor):
+class EditFlavorTemplate(CreateFlavorTemplate):
 
     def handle(self, request, data):
         try:
             tuskar.FlavorTemplate.update(
                 self.request,
-                self.initial['flavor_id'],
+                self.initial['flavor_template_id'],
                 data['name'],
                 data['cpu'],
                 data['memory'],
@@ -98,8 +98,8 @@ class EditFlavor(CreateFlavor):
                 data['swap_disk']
             )
 
-            msg = _('Updated flavor "%s".') % data['name']
+            msg = _('Updated Flavor Template "%s".') % data['name']
             messages.success(request, msg)
             return True
         except:
-            exceptions.handle(request, _("Unable to update flavor."))
+            exceptions.handle(request, _("Unable to update Flavor Template."))
