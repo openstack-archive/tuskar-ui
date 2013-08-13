@@ -2,11 +2,11 @@
 {% load i18n %}
 {% load url from future %}
 
-{% block form_id %}edit_flavor_form{% endblock %}
-{% block form_action %}{% url form_url flavor_id %}{% endblock %}
+{% block form_id %}edit_flavor_template_form{% endblock %}
+{% block form_action %}{% url form_url flavor_template_id %}{% endblock %}
 
-{% block modal_id %}edit_flavor_modal{% endblock %}
-{% block modal-header %}{% trans "Edit Flavor" %}{% endblock %}
+{% block modal_id %}edit_flavor_template_modal{% endblock %}
+{% block modal-header %}{% trans "Edit Flavor Template" %}{% endblock %}
 
 {% block modal-body %}
 <div class="left">
@@ -16,8 +16,8 @@
 </div>
 <div class="right">
   <h3>{% trans "Description" %}:</h3>
-  <p>{% trans "From here you can alter the sizing of the current flavor." %}</p>
-  <p>{% trans "Note: this will not affect the resources allocated to any existing instances using this flavor." %}</p>
+  <p>{% trans "From here you can alter the sizing of the current flavor template." %}</p>
+  <p>{% trans "Note: this will not affect the resources allocated to any existing instances using this flavor template." %}</p>
 </div>
 {% endblock %}
 
