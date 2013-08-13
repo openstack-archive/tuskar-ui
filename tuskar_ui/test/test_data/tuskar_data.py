@@ -12,12 +12,12 @@
 
 from collections import namedtuple
 
-from openstack_dashboard.api.tuskar import Capacity
-from openstack_dashboard.api.tuskar import Flavor
-from openstack_dashboard.api.tuskar import FlavorTemplate
-from openstack_dashboard.api.tuskar import Node
-from openstack_dashboard.api.tuskar import Rack
-from openstack_dashboard.api.tuskar import ResourceClass
+from tuskar_ui.api import Capacity
+from tuskar_ui.api import Flavor
+from tuskar_ui.api import FlavorTemplate
+from tuskar_ui.api import Node
+from tuskar_ui.api import Rack
+from tuskar_ui.api import ResourceClass
 
 from openstack_dashboard.test.test_data.utils import TestDataContainer
 

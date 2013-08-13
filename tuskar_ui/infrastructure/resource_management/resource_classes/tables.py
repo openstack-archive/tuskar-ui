@@ -21,7 +21,6 @@ from horizon import exceptions
 from horizon import tables
 
 from tuskar_ui import api as tuskar
-import tuskar_ui.tables
 from tuskar_ui.forms import NumberInput
 from tuskar_ui.infrastructure. \
     resource_management.flavors import tables as flavors_tables
@@ -29,7 +28,7 @@ from tuskar_ui.infrastructure. \
     resource_management.racks import tables as racks_tables
 from tuskar_ui.infrastructure. \
     resource_management import resource_classes
-
+import tuskar_ui.tables
 
 LOG = logging.getLogger(__name__)
 

@@ -20,7 +20,7 @@ from django import http
 from mox import IsA
 
 from tuskar_ui import api as tuskar
-from openstack_dashboard.test import helpers as test
+from tuskar_ui.test import helpers as test
 
 
 class ResourceManagementTests(test.BaseAdminViewTests):

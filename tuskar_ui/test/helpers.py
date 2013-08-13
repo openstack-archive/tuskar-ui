@@ -51,7 +51,8 @@ from horizon.test import helpers as horizon_helpers
 
 from openstack_dashboard import api
 from openstack_dashboard import context_processors
-from openstack_dashboard.test.test_data.utils import load_test_data
+from tuskar_ui import api as tuskar_api
+from tuskar_ui.test.test_data.utils import load_test_data
 
 
 # Makes output of failing mox tests much easier to read.
@@ -263,8 +264,8 @@ class APITestCase(TestCase):
         self._original_neutronclient = api.neutron.neutronclient
         self._original_cinderclient = api.cinder.cinderclient
         self._original_heatclient = api.heat.heatclient
-        self._original_tuskarclient = api.tuskar.tuskarclient
-        self._original_baremetalclient = api.tuskar.baremetalclient
+        self._original_tuskarclient = tuskar_api.tuskarclient
+        self._original_baremetalclient = tuskar_api.baremetalclient
 
         # Replace the clients with our stubs.
         api.glance.glanceclient = lambda request: self.stub_glanceclient()
@@ -273,8 +274,8 @@ class APITestCase(TestCase):
         api.neutron.neutronclient = lambda request: self.stub_neutronclient()
         api.cinder.cinderclient = lambda request: self.stub_cinderclient()
         api.heat.heatclient = lambda request: self.stub_heatclient()
-        api.tuskar.tuskarclient = lambda request: self.stub_tuskarclient()
-        api.tuskar.baremetalclient = lambda request:\
+        tuskar_api.tuskarclient = lambda request: self.stub_tuskarclient()
+        tuskar_api.baremetalclient = lambda request:\
             self.stub_baremetalclient()
 
     def tearDown(self):
@@ -285,8 +286,8 @@ class APITestCase(TestCase):
         api.neutron.neutronclient = self._original_neutronclient
         api.cinder.cinderclient = self._original_cinderclient
         api.heat.heatclient = self._original_heatclient
-        api.tuskar.tuskarclient = self._original_tuskarclient
-        api.tuskar.baremetalclient = self._original_baremetalclient
+        tuskar_api.tuskarclient = self._original_tuskarclient
+        tuskar_api.baremetalclient = self._original_baremetalclient
 
     def stub_novaclient(self):
         if not hasattr(self, "novaclient"):

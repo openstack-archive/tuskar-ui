@@ -14,28 +14,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import copy
-import inspect
 import logging
 
-from django.core import urlresolvers
-from django import forms
-from django.forms.forms import NON_FIELD_ERRORS
 from django import template
-from django.template.defaultfilters import linebreaks
-from django.template.defaultfilters import safe
-from django.template.defaultfilters import slugify
-from django.utils.encoding import force_unicode
-from django.utils.importlib import import_module
-from django.utils.translation import ugettext_lazy as _
 
 # FIXME: TableStep
 from django.utils.datastructures import SortedDict
 
-from horizon import base
-from horizon import exceptions
-from horizon.templatetags.horizon import has_permissions
-from horizon.utils import html
 import horizon.workflows
 
 

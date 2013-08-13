@@ -16,7 +16,7 @@ from django.core.urlresolvers import reverse
 from django import http
 from mox import IsA
 from tuskar_ui import api as tuskar
-from openstack_dashboard.test import helpers as test
+from tuskar_ui.test import helpers as test
 
 
 class ResourceClassViewTests(test.BaseAdminViewTests):
@@ -55,7 +55,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         add_racks_ids = []
 
-        api.tuskar.ResourceClass.list(
+        tuskar.ResourceClass.list(
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
         tuskar.ResourceClass.\
@@ -79,7 +79,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             ("%s?tab=resource_management_tabs__resource_classes_tab" %
              reverse("horizon:infrastructure:resource_management:index")))
 
-    @test.create_stubs({api.tuskar.ResourceClass: ('get', 'list_flavors',
+    @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
                                                    'racks_ids', 'all_racks',
                                                    'all_flavors')})
     def test_edit_resource_class_get(self):
@@ -194,7 +194,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(res,
             'infrastructure/resource_management/resource_classes/detail.html')
 
-    @test.create_stubs({api.tuskar.ResourceClass: ('get', 'list_flavors',
+    @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
                                                    'racks_ids', 'all_racks',
                                                    'all_flavors')})
     def test_detail_edit_racks_get(self):
@@ -263,7 +263,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             reverse(detail_url, args=(resource_class.id,)))
         self.assertRedirectsNoFollow(res, redirect_url)
 
-    @test.create_stubs({api.tuskar.ResourceClass: ('get', 'list_flavors',
+    @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
                                                    'racks_ids', 'all_racks',
                                                    'all_flavors')})
     def test_detail_edit_flavors_get(self):

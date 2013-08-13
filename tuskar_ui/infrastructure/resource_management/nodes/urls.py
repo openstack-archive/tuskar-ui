@@ -16,7 +16,8 @@ from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
 
 from tuskar_ui.infrastructure.resource_management.nodes.views import DetailView
-from tuskar_ui.infrastructure.resource_management.nodes.views import UnrackedView
+from tuskar_ui.infrastructure.resource_management.nodes.views \
+    import UnrackedView
 
 
 NODES = r'^(?P<node_id>[^/]+)/%s$'

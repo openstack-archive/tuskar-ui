@@ -20,8 +20,10 @@ from horizon import tables
 from horizon import tabs
 
 from tuskar_ui import api as tuskar
-from tuskar_ui.infrastructure.resource_management.nodes.tables import UnrackedNodesTable
-from tuskar_ui.infrastructure.resource_management.nodes.tabs import NodeDetailTabs
+from tuskar_ui.infrastructure.resource_management.nodes.tables \
+    import UnrackedNodesTable
+from tuskar_ui.infrastructure.resource_management.nodes.tabs \
+    import NodeDetailTabs
 
 
 class UnrackedView(tables.DataTableView):

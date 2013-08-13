@@ -16,11 +16,16 @@
 from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
 
-from tuskar_ui.infrastructure.resource_management.flavors.views import ActiveInstancesDataView
-from tuskar_ui.infrastructure.resource_management.flavors.views import CreateView
-from tuskar_ui.infrastructure.resource_management.flavors.views import DetailEditView
-from tuskar_ui.infrastructure.resource_management.flavors.views import DetailView
-from tuskar_ui.infrastructure.resource_management.flavors.views import EditView
+from tuskar_ui.infrastructure.resource_management.flavors.views \
+    import ActiveInstancesDataView
+from tuskar_ui.infrastructure.resource_management.flavors.views \
+    import CreateView
+from tuskar_ui.infrastructure.resource_management.flavors.views \
+    import DetailEditView
+from tuskar_ui.infrastructure.resource_management.flavors.views \
+    import DetailView
+from tuskar_ui.infrastructure.resource_management.flavors.views \
+    import EditView
 
 
 FLAVORS = r'^(?P<flavor_id>[^/]+)/%s$'

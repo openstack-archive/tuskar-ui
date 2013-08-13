@@ -18,13 +18,13 @@ from __future__ import absolute_import
 
 from novaclient.v1_1.contrib import baremetal
 
-from openstack_dashboard.api.tuskar import Capacity
-from openstack_dashboard.api.tuskar import Flavor
-from openstack_dashboard.api.tuskar import FlavorTemplate
-from openstack_dashboard.api.tuskar import Node
-from openstack_dashboard.api.tuskar import Rack
-from openstack_dashboard.api.tuskar import ResourceClass
-from openstack_dashboard.test import helpers as test
+from tuskar_ui.api import Capacity
+from tuskar_ui.api import Flavor
+from tuskar_ui.api import FlavorTemplate
+from tuskar_ui.api import Node
+from tuskar_ui.api import Rack
+from tuskar_ui.api import ResourceClass
+from tuskar_ui.test import helpers as test
 
 
 class TuskarApiTests(test.APITestCase):
