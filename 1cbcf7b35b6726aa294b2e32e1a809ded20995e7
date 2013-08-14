@@ -1,0 +1,8 @@
+Verified+2: Jenkins
+Approved+1: Tomas Sedovic <tomas@sedovic.cz>
+Code-Review+2: Matt Wagner <matt.wagner@redhat.com>
+Submitted-by: Jenkins
+Submitted-at: Wed, 14 Aug 2013 08:25:21 +0000
+Reviewed-on: https://review.openstack.org/41767
+Project: stackforge/tuskar-ui
+Branch: refs/heads/master
