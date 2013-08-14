@@ -421,6 +421,33 @@ class TuskarApiTests(test.APITestCase):
         self.assertTrue(rc1.has_provisioned_rack)
         self.assertFalse(rc2.has_provisioned_rack)
 
+    def test_resource_class_aggregated_alerts(self):
+        rc = self.tuskar_resource_classes.list()[0]
+        rc.request = self.request
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        racks = self.tuskarclient_racks.list()
+        tuskarclient.racks.get('1').AndReturn(racks[0])
+        tuskarclient.racks.get('2').AndReturn(racks[1])
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
+        nodes = self.baremetalclient_nodes.list()
+        for n in nodes:
+            baremetal.BareMetalNodeManager.get(n.id).AndReturn(n)
+
+        novaclient = self.stub_novaclient()
+        novaclient.servers = self.mox.CreateMockAnything()
+        novaclient.servers.list(True,
+                                {'all_tenants': True,
+                                 'limit': 21}).MultipleTimes().AndReturn([])
+
+        self.mox.ReplayAll()
+
+        for rack in rc.aggregated_alerts:
+            self.assertIsInstance(rack, Rack)
+        self.assertEquals(1, len(rc.aggregated_alerts))
+
     def test_rack_list(self):
         racks = self.tuskarclient_racks.list()
 
@@ -609,6 +636,27 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         Rack.provision(self.request, rack.id)
+
+    def test_rack_aggregated_alerts(self):
+        rack = self.tuskar_racks.first()
+        rack.request = self.request
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
+        nodes = self.baremetalclient_nodes.list()
+        for n in nodes:
+            baremetal.BareMetalNodeManager.get(n.id).AndReturn(n)
+
+        novaclient = self.stub_novaclient()
+        novaclient.servers = self.mox.CreateMockAnything()
+        novaclient.servers.list(True,
+                                {'all_tenants': True,
+                                 'limit': 21}).MultipleTimes().AndReturn([])
+
+        self.mox.ReplayAll()
+
+        for node in rack.aggregated_alerts:
+            self.assertIsInstance(node, Node)
+        self.assertEquals(1, len(rack.aggregated_alerts))
 
     def test_flavor_template_list(self):
         templates = FlavorTemplate.list(self.request)
