@@ -388,9 +388,14 @@ NOVA_BAREMETAL_CREDS = {
     'auth_url': 'http://localhost:5000/v2.0/',
     'bypass_url': 'http://<OS_AUTH_HOST>:8774/v2/<ADMIN_TENANT_ID>'
 }
-OVERCLOUD_AUTH_URL = 'http://127.0.0.1:5000/v2.0'
-OVERCLOUD_USERNAME = 'admin'
-OVERCLOUD_PASSWORD = 'password'
+
+OVERCLOUD_CREDS = {
+    'enabled': False,
+    'user': 'admin',
+    'password': 'password',
+    'tenant': 'admin',
+    'auth_url': 'http://localhost:5000/v2.0/',
+}
 
 # FIXME: configuration for dummy data
 DATABASES = {

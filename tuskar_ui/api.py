@@ -36,9 +36,7 @@ import tuskar_ui.infrastructure.models as dummymodels
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(settings, 'TUSKAR_ENDPOINT_URL')
 NOVA_BAREMETAL_CREDS = getattr(settings, 'NOVA_BAREMETAL_CREDS')
-OVERCLOUD_AUTH_URL = getattr(settings, 'OVERCLOUD_AUTH_URL')
-OVERCLOUD_USERNAME = getattr(settings, 'OVERCLOUD_USERNAME')
-OVERCLOUD_PASSWORD = getattr(settings, 'OVERCLOUD_PASSWORD')
+OVERCLOUD_CREDS = getattr(settings, 'OVERCLOUD_CREDS')
 
 
 # FIXME: request isn't used right in the tuskar client right now, but looking
@@ -58,10 +56,10 @@ def baremetalclient(request):
 
 
 def overcloudclient(request):
-    c = nova.nova_client.Client(OVERCLOUD_USERNAME,
-                                OVERCLOUD_PASSWORD,
-                                'admin',
-                                auth_url=OVERCLOUD_AUTH_URL)
+    c = nova.nova_client.Client(OVERCLOUD_CREDS['user'],
+                                OVERCLOUD_CREDS['password'],
+                                OVERCLOUD_CREDS['tenant'],
+                                auth_url=OVERCLOUD_CREDS['auth_url'])
     return c
 
 
@@ -315,12 +313,15 @@ class Node(StringIdAPIResourceWrapper):
     @property
     def running_virtual_machines(self):
         if not hasattr(self, '_running_virtual_machines'):
-            search_opts = {}
-            search_opts['all_tenants'] = True
-            self._running_virtual_machines = [s for s in
-                                overcloudclient(self.request).
-                                              servers.list(True, search_opts)
-                                if s.hostId == self.id]
+            if OVERCLOUD_CREDS['enabled']:
+                search_opts = {}
+                search_opts['all_tenants'] = True
+                self._running_virtual_machines = [s for s in
+                    overcloudclient(self.request).servers
+                        .list(True, search_opts)
+                    if s.hostId == self.id]
+            else:
+                self._running_virtual_machines = []
         return self._running_virtual_machines
 
 
