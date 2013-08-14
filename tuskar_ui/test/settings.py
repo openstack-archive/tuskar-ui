@@ -133,6 +133,11 @@ NOVA_BAREMETAL_CREDS = {
     'auth_url': 'http://localhost:5001/v2.0/',
     'bypass_url': 'http://localhost:9774/v2/692567cd99f84f5d8f26ec23ff0ba460'
 }
-OVERCLOUD_AUTH_URL = 'http://127.0.0.1:5000/v2.0'
-OVERCLOUD_USERNAME = 'admin'
-OVERCLOUD_PASSWORD = 'password'
+
+OVERCLOUD_CREDS = {
+    'enabled': True,
+    'user': 'admin',
+    'password': 'password',
+    'tenant': 'admin',
+    'auth_url': 'http://localhost:5000/v2.0/',
+}
