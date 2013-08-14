@@ -55,11 +55,22 @@ class RackViewTests(test.BaseAdminViewTests):
                 self.tuskar_racks.list())
         tuskar.Node.create(
             IsA(http.request.HttpRequest),
-            'New Node', u'1', u'1024', u'10', 'aa:bb:cc:dd:ee',
-            u'', u'', u'', u'').AndReturn(node)
+            name='New Node',
+            cpus=u'1',
+            memory_mb=u'1024',
+            local_gb=u'10',
+            prov_mac_address='aa:bb:cc:dd:ee',
+            pm_address=u'',
+            pm_user=u'',
+            pm_password=u'',
+            terminal_port=u'').AndReturn(node)
         tuskar.Rack.create(
-            IsA(http.request.HttpRequest), 'New Rack',
-            u'1', 'Tokyo', '1.2.3.4', [{'id': '1'}]).AndReturn(None)
+            IsA(http.request.HttpRequest),
+            name='New Rack',
+            resource_class_id=u'1',
+            location='Tokyo',
+            subnet='1.2.3.4',
+            nodes=[{'id': '1'}]).AndReturn(None)
         tuskar.ResourceClass.list(
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -189,8 +200,11 @@ class RackViewTests(test.BaseAdminViewTests):
     @test.create_stubs({tuskar.Rack: ('create',),
                         tuskar.ResourceClass: ('list',)})
     def test_upload_rack_create(self):
-        tuskar.Rack.create(IsA(http.request.HttpRequest), 'Rack1',
-            '1', 'regionX', '192.168.111.0/24').AndReturn(None)
+        tuskar.Rack.create(IsA(http.request.HttpRequest),
+                name='Rack1',
+                resource_class_id='1',
+                location='regionX',
+                subnet='192.168.111.0/24').AndReturn(None)
         tuskar.ResourceClass.list(
             IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
