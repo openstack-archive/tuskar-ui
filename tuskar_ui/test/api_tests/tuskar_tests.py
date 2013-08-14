@@ -61,15 +61,15 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         ret_val = Node.create(self.request,
-                              'node',
-                              1,
-                              1024,
-                              10,
-                              'aa:bb:cc:dd:ee',
-                              '0.0.0.0',
-                              'user',
-                              'password',
-                              0)
+                              name='node',
+                              cpus=1,
+                              memory_mb=1024,
+                              local_gb=10,
+                              prov_mac_address='aa:bb:cc:dd:ee',
+                              pm_address='0.0.0.0',
+                              pm_user='user',
+                              pm_password='password',
+                              terminal_port=0)
         self.assertIsInstance(ret_val, Node)
 
     def test_node_list(self):
@@ -237,7 +237,9 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         ret_val = ResourceClass.create(self.request,
-                                                  'rclass1', 'compute', [])
+                                                  name='rclass1',
+                                                  service_type='compute',
+                                                  flavors=[])
         self.assertIsInstance(ret_val, ResourceClass)
 
     def test_resource_class_update(self):
@@ -484,8 +486,11 @@ class TuskarApiTests(test.APITestCase):
                                   slots=0).AndReturn(rack)
         self.mox.ReplayAll()
 
-        ret_val = Rack.create(self.request,
-                              'rack1', 1, 'location', '192.168.1.0/24')
+        ret_val = Rack.create(request=self.request,
+                              name='rack1',
+                              resource_class_id=1,
+                              location='location',
+                              subnet='192.168.1.0/24')
         self.assertIsInstance(ret_val, Rack)
 
     def test_rack_update(self):
@@ -683,7 +688,10 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         ret_val = Flavor.create(self.request,
-                              1, 'nano', 100, [])
+                              resource_class_id=1,
+                              name='nano',
+                              max_vms=100,
+                              capacities=[])
         self.assertIsInstance(ret_val, Flavor)
 
     def test_flavor_delete(self):
@@ -695,7 +703,8 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.flavors.delete(rc.id, flavor.id)
         self.mox.ReplayAll()
 
-        Flavor.delete(self.request, rc.id, flavor.id)
+        Flavor.delete(self.request, resource_class_id=rc.id,
+                                    flavor_id=flavor.id)
 
     def test_flavor_cpu(self):
         flavor = self.tuskar_flavors.first()

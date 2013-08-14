@@ -122,22 +122,22 @@ class Capacity(StringIdAPIResourceWrapper):
     _attrs = ['name', 'value', 'unit']
 
     @classmethod
-    def create(cls, request, content_object, name, value, unit):
+    def create(cls, request, **kwargs):
         c = dummymodels.Capacity(
-            content_object=content_object,
-            name=name,
-            value=value,
-            unit=unit)
+            content_object=kwargs['content_object'],
+            name=kwargs['name'],
+            value=kwargs['value'],
+            unit=kwargs['unit'])
         c.save()
         return Capacity(c)
 
     @classmethod
-    def update(cls, request, capacity_id, content_object, name, value, unit):
-        c = dummymodels.Capacity.objects.get(id=capacity_id)
-        c.content_object = content_object
-        c.name = name
-        c.value = value
-        c.unit = unit
+    def update(cls, request, **kwargs):
+        c = dummymodels.Capacity.objects.get(id=kwargs['capacity_id'])
+        c.content_object = kwargs['content_object']
+        c.name = kwargs['name']
+        c.value = kwargs['value']
+        c.unit = kwargs['unit']
         c.save()
         return cls(c)
 
@@ -212,12 +212,16 @@ class Node(StringIdAPIResourceWrapper):
             return []
 
     @classmethod
-    def create(cls, request, name, cpus, memory_mb, local_gb, prov_mac_address,
-               pm_address, pm_user, pm_password, terminal_port):
-        node = baremetalclient(request).create(name, cpus, memory_mb,
-                                               local_gb, prov_mac_address,
-                                               pm_address, pm_user,
-                                               pm_password, terminal_port)
+    def create(cls, request, **kwargs):
+        node = baremetalclient(request).create(kwargs['name'],
+                                               kwargs['cpus'],
+                                               kwargs['memory_mb'],
+                                               kwargs['local_gb'],
+                                               kwargs['prov_mac_address'],
+                                               kwargs['pm_address'],
+                                               kwargs['pm_user'],
+                                               kwargs['pm_password'],
+                                               kwargs['terminal_port'])
         return cls(node)
 
     @property
@@ -333,30 +337,30 @@ class Rack(StringIdAPIResourceWrapper):
               'capacities', 'resource_class']
 
     @classmethod
-    def create(cls, request, name, resource_class_id, location, subnet,
-               nodes=[]):
+    def create(cls, request, **kwargs):
+        nodes = kwargs.get('nodes', [])
         ## FIXME: set nodes here
         rack = tuskarclient(request).racks.create(
-                name=name,
-                location=location,
-                subnet=subnet,
+                name=kwargs['name'],
+                location=kwargs['location'],
+                subnet=kwargs['subnet'],
                 nodes=nodes,
-                resource_class={'id': resource_class_id},
+                resource_class={'id': kwargs['resource_class_id']},
                 slots=0)
         return cls(rack)
 
     @classmethod
-    def update(cls, request, rack_id, kwargs):
+    def update(cls, request, rack_id, rack_kwargs):
         ## FIXME: set nodes here
-        correct_kwargs = copy.copy(kwargs)
+        rack_args = copy.copy(rack_kwargs)
         # remove rack_id from kwargs (othervise it is duplicated)
-        correct_kwargs.pop('rack_id', None)
+        rack_args.pop('rack_id', None)
         # correct data mapping for resource_class
-        if 'resource_class_id' in correct_kwargs:
-            correct_kwargs['resource_class'] = {
-                'id': correct_kwargs.pop('resource_class_id', None)}
+        if 'resource_class_id' in rack_args:
+            rack_args['resource_class'] = {
+                'id': rack_args.pop('resource_class_id', None)}
 
-        rack = tuskarclient(request).racks.update(rack_id, **correct_kwargs)
+        rack = tuskarclient(request).racks.update(rack_id, **rack_args)
         return cls(rack)
 
     @classmethod
@@ -513,12 +517,12 @@ class ResourceClass(StringIdAPIResourceWrapper):
         return rc
 
     @classmethod
-    def create(self, request, name, service_type, flavors):
+    def create(self, request, **kwargs):
         return ResourceClass(
             tuskarclient(request).resource_classes.create(
-                name=name,
-                service_type=service_type,
-                flavors=flavors))
+                name=kwargs['name'],
+                service_type=kwargs['service_type'],
+                flavors=kwargs['flavors']))
 
     @classmethod
     def list(cls, request):
@@ -526,15 +530,19 @@ class ResourceClass(StringIdAPIResourceWrapper):
             tuskarclient(request).resource_classes.list())]
 
     @classmethod
+    ## FIXME : kwargs here is a little dicey
     def update(cls, request, resource_class_id, **kwargs):
         resource_class = cls(tuskarclient(request).resource_classes.update(
                 resource_class_id, **kwargs))
 
         ## FIXME: flavors have to be updated separately, seems less than ideal
         for flavor_id in resource_class.flavors_ids:
-            Flavor.delete(request, resource_class.id, flavor_id)
+            Flavor.delete(request, resource_class_id=resource_class.id,
+                                   flavor_id=flavor_id)
         for flavor in kwargs['flavors']:
-            Flavor.create(request, resource_class.id, **flavor)
+            Flavor.create(request,
+                          resource_class_id=resource_class.id,
+                          **flavor)
 
         return resource_class
 
@@ -730,16 +738,34 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
         return cls(dummymodels.FlavorTemplate.objects.get(id=flavor_id))
 
     @classmethod
-    def create(cls, request,
-               name, cpu, memory, storage, ephemeral_disk, swap_disk):
-        template = dummymodels.FlavorTemplate(name=name)
+    def create(cls, request, **kwargs):
+        template = dummymodels.FlavorTemplate(name=kwargs['name'])
         template.save()
-        Capacity.create(request, template, 'cpu', cpu, '')
-        Capacity.create(request, template, 'memory', memory, 'MB')
-        Capacity.create(request, template, 'storage', storage, 'GB')
         Capacity.create(request,
-                        template, 'ephemeral_disk', ephemeral_disk, 'GB')
-        Capacity.create(request, template, 'swap_disk', swap_disk, 'MB')
+                        content_object=template,
+                        name='cpu',
+                        value=kwargs['cpu'],
+                        unit='')
+        Capacity.create(request,
+                        content_object=template,
+                        name='memory',
+                        value=kwargs['memory'],
+                        unit='MB')
+        Capacity.create(request,
+                        content_object=template,
+                        name='storage',
+                        value=kwargs['storage'],
+                        unit='GB')
+        Capacity.create(request,
+                        content_object=template,
+                        name='ephemeral_disk',
+                        value=kwargs['ephemeral_disk'],
+                        unit='GB')
+        Capacity.create(request,
+                        content_object=template,
+                        name='swap_disk',
+                        value=kwargs['swap_disk'],
+                        unit='MB')
 
     @property
     def capacities(self):
@@ -802,23 +828,41 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
         return values
 
     @classmethod
-    def update(cls, request, template_id, name, cpu, memory, storage,
-               ephemeral_disk, swap_disk):
-        t = dummymodels.FlavorTemplate.objects.get(id=template_id)
-        t.name = name
+    def update(cls, request, **kwargs):
+        t = dummymodels.FlavorTemplate.objects.get(id=kwargs['template_id'])
+        t.name = kwargs['name']
         t.save()
         template = cls(t)
-        Capacity.update(request, template.cpu.id, template._apiresource,
-                        'cpu', cpu, '')
-        Capacity.update(request, template.memory.id, template._apiresource,
-                        'memory', memory, 'MB')
-        Capacity.update(request, template.storage.id, template._apiresource,
-                        'storage', storage, 'GB')
-        Capacity.update(request, template.ephemeral_disk.id,
-                        template._apiresource, 'ephemeral_disk',
-                        ephemeral_disk, 'GB')
-        Capacity.update(request, template.swap_disk.id, template._apiresource,
-                        'swap_disk', swap_disk, 'MB')
+        Capacity.update(request,
+                        capacity_id=template.cpu.id,
+                        content_object=template._apiresource,
+                        name='cpu',
+                        value=kwargs['cpu'],
+                        unit='')
+        Capacity.update(request,
+                        capacity_id=template.memory.id,
+                        content_object=template._apiresource,
+                        name='memory',
+                        value=kwargs['memory'],
+                        unit='MB')
+        Capacity.update(request,
+                        capacity_id=template.storage.id,
+                        content_object=template._apiresource,
+                        name='storage',
+                        value=kwargs['storage'],
+                        unit='GB')
+        Capacity.update(request,
+                        capacity_id=template.ephemeral_disk.id,
+                        content_object=template._apiresource,
+                        name='ephemeral_disk',
+                        value=kwargs['ephemeral_disk'],
+                        unit='GB')
+        Capacity.update(request,
+                        capacity_id=template.swap_disk.id,
+                        content_object=template._apiresource,
+                        name='swap_disk',
+                        value=kwargs['swap_disk'],
+                        unit='MB')
         return template
 
     @classmethod
@@ -832,16 +876,18 @@ class Flavor(StringIdAPIResourceWrapper):
     _attrs = ['id', 'name', 'max_vms']
 
     @classmethod
-    def create(cls, request, resource_class_id, name, max_vms, capacities):
+    def create(cls, request, **kwargs):
         return cls(tuskarclient(request).flavors.create(
-                resource_class_id,
-                name=name,
-                max_vms=max_vms,
-                capacities=capacities))
+                kwargs['resource_class_id'],
+                name=kwargs['name'],
+                max_vms=kwargs['max_vms'],
+                capacities=kwargs['capacities']))
 
     @classmethod
-    def delete(cls, request, resource_class_id, flavor_id):
-        tuskarclient(request).flavors.delete(resource_class_id, flavor_id)
+    def delete(cls, request, **kwargs):
+        tuskarclient(request).flavors.delete(
+                                kwargs['resource_class_id'],
+                                kwargs['flavor_id'])
 
     # FIXME: returns flavor template for this flavor
     @property

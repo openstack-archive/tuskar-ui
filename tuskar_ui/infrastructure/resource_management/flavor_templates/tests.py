@@ -15,8 +15,12 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
         tuskar.FlavorTemplate.list(
             IsA(http.HttpRequest)).AndReturn([])
         tuskar.FlavorTemplate.create(IsA(http.HttpRequest),
-                                     template.name,
-                                     0, 0, 0, 0, 0).AndReturn(template)
+                                     name=template.name,
+                                     cpu=0,
+                                     memory=0,
+                                     storage=0,
+                                     ephemeral_disk=0,
+                                     swap_disk=0).AndReturn(template)
         self.mox.ReplayAll()
 
         url = reverse('horizon:infrastructure:resource_management:'
@@ -59,9 +63,13 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
         tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).AndReturn(
             self.tuskar_flavor_templates.list())
         tuskar.FlavorTemplate.update(IsA(http.HttpRequest),
-                                     template.id,
-                                     template.name,
-                                     0, 0, 0, 0, 0).AndReturn(template)
+                                     template_id=template.id,
+                                     name=template.name,
+                                     cpu=0,
+                                     memory=0,
+                                     storage=0,
+                                     ephemeral_disk=0,
+                                     swap_disk=0).AndReturn(template)
         tuskar.FlavorTemplate.get(IsA(http.HttpRequest),
                                   template.id).AndReturn(template)
         self.mox.ReplayAll()

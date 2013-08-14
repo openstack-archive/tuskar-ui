@@ -163,22 +163,27 @@ class CreateRack(workflows.Workflow):
         try:
             if data['node_name'] is not None:
                 node = tuskar.Node.create(
-                    request, data['node_name'],
-                    data['cpus'], data['memory_mb'],
-                    data['local_gb'], data['prov_mac_address'],
-                    data['pm_address'], data['pm_user'],
-                    data['pm_password'], data['terminal_port'])
+                    request,
+                    name=data['node_name'],
+                    cpus=data['cpus'],
+                    memory_mb=data['memory_mb'],
+                    local_gb=data['local_gb'],
+                    prov_mac_address=data['prov_mac_address'],
+                    pm_address=data['pm_address'],
+                    pm_user=data['pm_user'],
+                    pm_password=data['pm_password'],
+                    terminal_port=data['terminal_port'])
             if node:
                 node_id = node.id
             else:
                 node_id = None
 
             # Then, register the Rack, including the node if it exists
-            tuskar.Rack.create(request, data['name'],
-                                   data['resource_class_id'],
-                                   data['location'],
-                                   data['subnet'],
-                                   [{'id': node_id}])
+            tuskar.Rack.create(request, name=data['name'],
+                                   resource_class_id=data['resource_class_id'],
+                                   location=data['location'],
+                                   subnet=data['subnet'],
+                                   nodes=[{'id': node_id}])
 
             return True
         except Exception:
