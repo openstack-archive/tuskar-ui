@@ -69,12 +69,12 @@ class CreateFlavor(forms.SelfHandlingForm):
         try:
             tuskar.FlavorTemplate.create(
                 request,
-                data['name'],
-                data['cpu'],
-                data['memory'],
-                data['storage'],
-                data['ephemeral_disk'],
-                data['swap_disk']
+                name=data['name'],
+                cpu=data['cpu'],
+                memory=data['memory'],
+                storage=data['storage'],
+                ephemeral_disk=data['ephemeral_disk'],
+                swap_disk=data['swap_disk']
             )
             msg = _('Created flavor "%s".') % data['name']
             messages.success(request, msg)
@@ -89,13 +89,13 @@ class EditFlavor(CreateFlavor):
         try:
             tuskar.FlavorTemplate.update(
                 self.request,
-                self.initial['flavor_id'],
-                data['name'],
-                data['cpu'],
-                data['memory'],
-                data['storage'],
-                data['ephemeral_disk'],
-                data['swap_disk']
+                template_id=self.initial['flavor_id'],
+                name=data['name'],
+                cpu=data['cpu'],
+                memory=data['memory'],
+                storage=data['storage'],
+                ephemeral_disk=data['ephemeral_disk'],
+                swap_disk=data['swap_disk']
             )
 
             msg = _('Updated flavor "%s".') % data['name']
