@@ -67,9 +67,11 @@ class UploadRack(forms.SelfHandlingForm):
                     tuskar.ResourceClass.list(request))
             for rack in racks:
                 try:
-                    tuskar.Rack.create(request, rack.name,
-                                           rclass_ids[rack.resource_class],
-                                           rack.region, rack.subnet)
+                    tuskar.Rack.create(request, name=rack.name,
+                                           resource_class_id=
+                                               rclass_ids[rack.resource_class],
+                                           location=rack.region,
+                                           subnet=rack.subnet)
                     # FIXME: will have to handle nodes once proper attributes
                     # for nodes are added
                     successes.append(rack.name)
