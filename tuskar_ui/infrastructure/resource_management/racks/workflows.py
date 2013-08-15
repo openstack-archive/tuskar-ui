@@ -90,7 +90,7 @@ class RackCreateInfoAction(workflows.Action):
         subnet = cleaned_data.get('subnet')
         try:
             racks = tuskar.Rack.list(self.request)
-        except:
+        except Exception:
             racks = []
             exceptions.check_message(['Connection', 'refused'],
                 _("Unable to retrieve rack list."))
@@ -198,7 +198,7 @@ class EditRack(CreateRack):
             rack_id = self.context['rack_id']
             tuskar.Rack.update(request, rack_id, data)
             return True
-        except:
+        except Exception:
             exceptions.handle(request, _("Unable to update rack."))
 
 

@@ -75,7 +75,7 @@ class UpdateView(workflows.WorkflowView):
                 self._object = \
                     tuskar.ResourceClass.get(self.request,
                                              resource_class_id)
-            except:
+            except Exception:
                 redirect = self.success_url
                 msg = _('Unable to retrieve resource class details.')
                 exceptions.handle(self.request, msg, redirect=redirect)
@@ -118,7 +118,7 @@ class DetailView(tabs.TabView):
                 resource_class_id = self.kwargs['resource_class_id']
                 resource_class = tuskar.ResourceClass.get(self.request,
                                                           resource_class_id)
-            except:
+            except Exception:
                 redirect = reverse('horizon:infrastructure:'
                                    'resource_management:index')
                 exceptions.handle(self.request,
@@ -149,7 +149,7 @@ class DetailActionView(forms.ModalFormView):
                 form_class = DeleteForm
 
             return form_class(self.request, **self.get_form_kwargs())
-        except:
+        except Exception:
             exceptions.handle(self.request, _("Unable to build an Action."))
 
     def get_success_url(self):
@@ -168,7 +168,7 @@ class DetailActionView(forms.ModalFormView):
             resource_class = tuskar.ResourceClass.get(
                 self.request, self.kwargs['resource_class_id'])
             action = self.request.GET.get('action')
-        except:
+        except Exception:
             exceptions.handle(self.request,
                               _("Unable to retrieve resource class data."))
         return {'resource_class': resource_class,

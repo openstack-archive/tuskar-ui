@@ -73,7 +73,7 @@ class UploadRack(forms.SelfHandlingForm):
                     # FIXME: will have to handle nodes once proper attributes
                     # for nodes are added
                     successes.append(rack.name)
-                except:
+                except Exception:
                     LOG.exception("Exception in processing rack CSV file.")
                     fails.append(rack.name)
             if successes:
@@ -147,5 +147,5 @@ class UpdateRackStatus(forms.SelfHandlingForm):
                 msg = _('Updated rack "%s" status.') % rack.name
             messages.success(request, msg)
             return True
-        except:
+        except Exception:
             exceptions.handle(request, _("Unable to update Rack status."))

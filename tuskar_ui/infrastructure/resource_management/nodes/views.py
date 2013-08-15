@@ -33,7 +33,7 @@ class UnrackedView(tables.DataTableView):
     def get_data(self):
         try:
             nodes = tuskar.Node.list_unracked(self.request)
-        except:
+        except Exception:
             nodes = []
             exceptions.handle(self.request,
                               _('Unable to retrieve nodes.'))
@@ -54,7 +54,7 @@ class DetailView(tabs.TabView):
             try:
                 node_id = self.kwargs['node_id']
                 node = tuskar.Node.get(self.request, node_id)
-            except:
+            except Exception:
                 redirect = reverse('horizon:infrastructure:'
                                    'resource_management:index')
                 exceptions.handle(self.request,

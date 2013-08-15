@@ -55,7 +55,7 @@ class DeleteResourceClass(tables.DeleteAction):
     def delete(self, request, obj_id):
         try:
             tuskar.ResourceClass.delete(request, obj_id)
-        except:
+        except Exception:
             msg = _('Failed to delete resource class %s') % obj_id
             LOG.info(msg)
             redirect = urlresolvers.reverse(

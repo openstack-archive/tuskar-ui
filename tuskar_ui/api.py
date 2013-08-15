@@ -257,7 +257,7 @@ class Node(StringIdAPIResourceWrapper):
                             self._rack = rack
 
             return self._rack
-        except:
+        except Exception:
             msg = "Could not obtain Nodes's rack"
             LOG.debug(exceptions.error_color(msg))
             return None
@@ -270,7 +270,7 @@ class Node(StringIdAPIResourceWrapper):
                             .filter(
                                 resource_class__rack__node=self._apiresource)\
                             .aggregate(Max("max_vms"))['max_vms__max']
-            except:
+            except Exception:
                 value = _("Unable to retrieve vm capacity")
 
             vm_capacity = dummymodels.Capacity(name=_("Max VMs"),
@@ -307,7 +307,7 @@ class Node(StringIdAPIResourceWrapper):
     def mac_address(self):
         try:
             return self._apiresource.interfaces[0]['address']
-        except:
+        except Exception:
             return None
 
     @property
@@ -428,7 +428,7 @@ class Rack(StringIdAPIResourceWrapper):
             try:
                 value = max([flavor.max_vms for flavor in
                              self.get_resource_class.list_flavors])
-            except:
+            except Exception:
                 value = None
             self._vm_capacity = Capacity({'name': "VM Capacity",
                                           'value': value,
@@ -680,7 +680,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
             try:
                 value = self.racks_count * max([flavor.max_vms for flavor in
                                                 self.list_flavors])
-            except:
+            except Exception:
                 value = _("Unable to retrieve vm capacity")
             self._vm_capacity = Capacity({'name': _("VM Capacity"),
                                           'value': value,
@@ -754,7 +754,7 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
             try:
                 capacity = [c for c in self.capacities if (
                     c.name == capacity_name)][0]
-            except:
+            except Exception:
                 capacity = dummymodels.Capacity(
                     name=capacity_name,
                     value=_('Unable to retrieve '
@@ -869,7 +869,7 @@ class Flavor(StringIdAPIResourceWrapper):
             try:
                 capacity = [c for c in self.capacities if (
                     c.name == capacity_name)][0]
-            except:
+            except Exception:
                 # FIXME: test this
                 capacity = Capacity(
                     name=capacity_name,

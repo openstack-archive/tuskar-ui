@@ -41,7 +41,7 @@ class NodesTab(tabs.TableTab):
         try:
             rack = self.tab_group.kwargs['rack']
             nodes = rack.list_nodes
-        except:
+        except Exception:
             nodes = []
             exceptions.handle(self.tab_group.request,
                               _('Unable to retrieve node list.'))

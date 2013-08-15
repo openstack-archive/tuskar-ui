@@ -69,7 +69,7 @@ class EditView(forms.ModalFormView):
         try:
             flavor_template = tuskar.FlavorTemplate.get(
                 self.request, self.kwargs['flavor_template_id'])
-        except:
+        except Exception:
             exceptions.handle(self.request,
                               _("Unable to retrieve flavor template data."))
         return {'flavor_template_id': flavor_template.id,
@@ -108,7 +108,7 @@ class DetailView(tabs.TabView):
                 flavor_template_id = self.kwargs['flavor_template_id']
                 flavor_template = tuskar.FlavorTemplate.get(self.request,
                                                             flavor_template_id)
-            except:
+            except Exception:
                 redirect = reverse('horizon:infrastructure:'
                                    'resource_management:index')
                 exceptions.handle(self.request,
@@ -135,6 +135,6 @@ class ActiveInstancesDataView(View):
                 datetime.now() - timedelta(days=7), datetime.now())
             return HttpResponse(json.dumps(values, cls=DjangoJSONEncoder),
                                 mimetype='application/json')
-        except:
+        except Exception:
             exceptions.handle(self.request,
                               _("Unable to retrieve flavor template data."))

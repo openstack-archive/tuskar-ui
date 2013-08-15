@@ -46,7 +46,7 @@ class RacksTab(tabs.TableTab):
         try:
             resource_class = self.tab_group.kwargs['resource_class']
             racks = resource_class.list_racks
-        except:
+        except Exception:
             racks = []
             exceptions.handle(self.tab_group.request,
                               _('Unable to retrieve rack list.'))
@@ -64,7 +64,7 @@ class FlavorsTab(tabs.TableTab):
         try:
             resource_class = self.tab_group.kwargs['resource_class']
             racks = resource_class.list_flavors
-        except:
+        except Exception:
             racks = []
             exceptions.handle(self.tab_group.request,
                               _('Unable to retrieve flavor list.'))

@@ -62,7 +62,7 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
         resource_class_id = self.initial.get('resource_class_id', None)
         try:
             resource_classes = tuskar.ResourceClass.list(self.request)
-        except:
+        except Exception:
             resource_classes = []
             msg = _('Unable to get resource class list')
             exceptions.check_message(["Connection", "refused"], msg)
@@ -171,7 +171,7 @@ class CreateRacks(tuskar_ui.workflows.TableStep):
             else:
                 racks = \
                     tuskar.Rack.list(self.workflow.request, True)
-        except:
+        except Exception:
             racks = []
             exceptions.handle(self.workflow.request,
                               _('Unable to retrieve racks list.'))
@@ -244,7 +244,7 @@ class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
                 name=data['name'],
                 service_type=data['service_type'],
                 flavors=flavors)
-        except:
+        except Exception:
             redirect = self.get_failure_url()
             exceptions.handle(request,
                               _('Unable to create resource class.'),
@@ -284,7 +284,7 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
                     name=data['name'],
                     service_type=data['service_type'],
                     flavors=flavors)
-        except:
+        except Exception:
             redirect = self.get_failure_url()
             exceptions.handle(request,
                               _('Unable to create resource class.'),

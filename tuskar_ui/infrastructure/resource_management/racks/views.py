@@ -106,7 +106,7 @@ class EditRackStatusView(forms.ModalFormView):
             rack = tuskar.Rack.get(
                 self.request, self.kwargs['rack_id'])
             action = self.request.GET.get('action')
-        except:
+        except Exception:
             exceptions.handle(self.request,
                               _("Unable to retrieve rack data."))
         return {'rack': rack,
@@ -127,7 +127,7 @@ class DetailView(tabs.TabView):
             try:
                 rack_id = self.kwargs['rack_id']
                 rack = tuskar.Rack.get(self.request, rack_id)
-            except:
+            except Exception:
                 redirect = reverse('horizon:infrastructure:'
                                    'resource_management:index')
                 exceptions.handle(self.request,

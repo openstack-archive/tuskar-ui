@@ -51,7 +51,7 @@ class CreateFlavorTemplate(forms.SelfHandlingForm):
         flavor_template_id = self.initial.get('flavor_template_id', None)
         try:
             flavor_templates = tuskar.FlavorTemplate.list(self.request)
-        except:
+        except Exception:
             flavor_templates = []
             msg = _('Unable to get flavor templates list')
             exceptions.check_message(["Connection", "refused"], msg)
@@ -79,7 +79,7 @@ class CreateFlavorTemplate(forms.SelfHandlingForm):
             msg = _('Created Flavor Template "%s".') % data['name']
             messages.success(request, msg)
             return True
-        except:
+        except Exception:
             exceptions.handle(request, _("Unable to create Flavor Template."))
 
 
@@ -101,5 +101,5 @@ class EditFlavorTemplate(CreateFlavorTemplate):
             msg = _('Updated Flavor Template "%s".') % data['name']
             messages.success(request, msg)
             return True
-        except:
+        except Exception:
             exceptions.handle(request, _("Unable to update Flavor Template."))

@@ -25,7 +25,7 @@ class DeleteForm(forms.SelfHandlingForm):
 
             messages.success(request, self.command.msg)
             return True
-        except:
+        except Exception:
             exceptions.handle(request, _("Unable to delete Resource Class."))
 
 
@@ -44,7 +44,7 @@ class DeleteCommand(object):
                                         self.resource_class.id)
             self.msg = (_('Successfully deleted Class "%s".')
                         % self.resource_class.name)
-        except:
+        except Exception:
             self.msg = _('Failed to delete Class %s') % self.resource_class.id
             LOG.info(self.msg)
             redirect = reverse(

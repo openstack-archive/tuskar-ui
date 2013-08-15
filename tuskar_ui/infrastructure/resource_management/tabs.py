@@ -38,7 +38,7 @@ class RacksTab(tabs.TableTab):
     def get_racks_data(self):
         try:
             racks = tuskar.Rack.list(self.request)
-        except:
+        except Exception:
             racks = []
             exceptions.handle(self.request,
                               _('Unable to retrieve racks.'))
@@ -48,7 +48,7 @@ class RacksTab(tabs.TableTab):
         context = super(RacksTab, self).get_context_data(request)
         try:
             context["nodes"] = tuskar.Node.list_unracked(self.request)
-        except:
+        except Exception:
             context["nodes"] = []
             exceptions.handle(request,
                               _('Unable to retrieve nodes.'))
@@ -64,7 +64,7 @@ class FlavorTemplatesTab(tabs.TableTab):
     def get_flavor_templates_data(self):
         try:
             flavor_templates = tuskar.FlavorTemplate.list(self.request)
-        except:
+        except Exception:
             flavor_templates = []
             exceptions.handle(self.request,
                               _('Unable to retrieve Tuskar Flavor Templates.'))
@@ -81,7 +81,7 @@ class ResourceClassesTab(tabs.TableTab):
     def get_resource_classes_data(self):
         try:
             resource_classes = tuskar.ResourceClass.list(self.request)
-        except:
+        except Exception:
             resource_classes = []
             exceptions.handle(self.request,
                               _('Unable to retrieve resource classes list.'))
