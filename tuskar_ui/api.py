@@ -30,13 +30,15 @@ from tuskarclient.v1 import client as tuskar_client
 
 from openstack_dashboard.api import base
 from openstack_dashboard.api import nova
+
 import tuskar_ui.infrastructure.models as dummymodels
 
 
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(settings, 'TUSKAR_ENDPOINT_URL')
-NOVA_BAREMETAL_CREDS = getattr(settings, 'NOVA_BAREMETAL_CREDS')
-OVERCLOUD_CREDS = getattr(settings, 'OVERCLOUD_CREDS')
+REMOTE_NOVA_BAREMETAL_CREDS = getattr(settings, 'REMOTE_NOVA_BAREMETAL_CREDS',
+                                      False)
+OVERCLOUD_CREDS = getattr(settings, 'OVERCLOUD_CREDS', False)
 
 
 # FIXME: request isn't used right in the tuskar client right now, but looking
@@ -47,11 +49,27 @@ def tuskarclient(request):
 
 
 def baremetalclient(request):
-    nc = nova.nova_client.Client(NOVA_BAREMETAL_CREDS['user'],
-                                NOVA_BAREMETAL_CREDS['password'],
-                                NOVA_BAREMETAL_CREDS['tenant'],
-                                auth_url=NOVA_BAREMETAL_CREDS['auth_url'],
-                                bypass_url=NOVA_BAREMETAL_CREDS['bypass_url'])
+    if REMOTE_NOVA_BAREMETAL_CREDS:
+        LOG.debug('remote nova baremetal client connection created')
+        nc = nova.nova_client.Client(REMOTE_NOVA_BAREMETAL_CREDS['user'],
+                        REMOTE_NOVA_BAREMETAL_CREDS['password'],
+                        REMOTE_NOVA_BAREMETAL_CREDS['tenant'],
+                        auth_url=REMOTE_NOVA_BAREMETAL_CREDS['auth_url'],
+                        bypass_url=REMOTE_NOVA_BAREMETAL_CREDS['bypass_url'])
+    else:
+        insecure = getattr(settings, 'OPENSTACK_SSL_NO_VERIFY', False)
+        LOG.debug('nova baremetal client connection created using token "%s" '
+                  'and url "%s"' %
+                  (request.user.token.id, base.url_for(request, 'compute')))
+        nc = nova.nova_client.Client(request.user.username,
+                                   request.user.token.id,
+                                   project_id=request.user.tenant_id,
+                                   auth_url=base.url_for(request, 'compute'),
+                                   insecure=insecure,
+                                   http_log_debug=settings.DEBUG)
+        nc.client.auth_token = request.user.token.id
+        nc.client.management_url = base.url_for(request, 'compute')
+
     return baremetal.BareMetalNodeManager(nc)
 
 
@@ -313,7 +331,7 @@ class Node(StringIdAPIResourceWrapper):
     @property
     def running_virtual_machines(self):
         if not hasattr(self, '_running_virtual_machines'):
-            if OVERCLOUD_CREDS['enabled']:
+            if OVERCLOUD_CREDS:
                 search_opts = {}
                 search_opts['all_tenants'] = True
                 self._running_virtual_machines = [s for s in
@@ -321,6 +339,8 @@ class Node(StringIdAPIResourceWrapper):
                         .list(True, search_opts)
                     if s.hostId == self.id]
             else:
+                LOG.debug('OVERCLOUD_CREDS is not set. '
+                          'Can\'t connect to Overcloud')
                 self._running_virtual_machines = []
         return self._running_virtual_machines
 
