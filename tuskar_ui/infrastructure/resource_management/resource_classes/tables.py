@@ -96,7 +96,7 @@ class FlavorsFilterAction(tables.FilterAction):
 
 
 class FlavorTemplatesTable(flavor_templates_tables.FlavorTemplatesTable):
-    name = tables.Column('name',
+    name = tuskar_ui.tables.Column('name',
                          verbose_name=_('Flavor Template Name'))
     max_vms = tuskar_ui.tables.Column("max_vms",
                                       auto='form_widget',
@@ -159,11 +159,11 @@ class UpdateFlavorsClass(tables.LinkAction):
 
 
 class FlavorsTable(flavor_templates_tables.FlavorTemplatesTable):
-    name = tables.Column('name',
+    name = tuskar_ui.tables.Column('name',
                          link=("horizon:infrastructure:"
                                "resource_management:flavor_templates:detail"),
                          verbose_name=_('Flavor Name'))
-    max_vms = tables.Column("max_vms",
+    max_vms = tuskar_ui.tables.Column("max_vms",
                             verbose_name=_("Max. VMs"))
 
     class Meta:
