@@ -85,11 +85,11 @@ class StringIdAPIResourceWrapper(base.APIResourceWrapper):
             else:
                 return self._apiresource.__getattribute__(attr)
         else:
-            msg = ('Attempted to access unknown attribute "%s" on '
-                   'APIResource object of type "%s" wrapping resource of '
-                   'type "%s".') % (attr, self.__class__,
-                                    self._apiresource.__class__)
-            LOG.debug(exceptions.error_color(msg))
+            #msg = ('Attempted to access unknown attribute "%s" on '
+            #       'APIResource object of type "%s" wrapping resource of '
+            #       'type "%s".') % (attr, self.__class__,
+            #                        self._apiresource.__class__)
+            #LOG.debug(exceptions.error_color(msg))
             raise AttributeError(attr)
 
     @property
