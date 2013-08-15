@@ -20,6 +20,7 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import tables
 
 from tuskar_ui import api as tuskar
+from tuskar_ui import tables as tuskar_tables
 
 
 LOG = logging.getLogger(__name__)
@@ -56,32 +57,32 @@ class FlavorTemplatesFilterAction(tables.FilterAction):
                 if q in flavor_template.name.lower()]
 
 
-class FlavorTemplatesTable(tables.DataTable):
-    name = tables.Column('name',
+class FlavorTemplatesTable(tuskar_tables.DataTable):
+    name = tuskar_tables.Column('name',
                          link=("horizon:infrastructure:"
                                "resource_management:flavor_templates:detail"),
                          verbose_name=_('Flavor Template Name'))
-    cpu = tables.Column(
+    cpu = tuskar_tables.Column(
         "cpu",
         verbose_name=_('VCPU'),
         filters=(lambda x: getattr(x, 'value', ''),)
     )
-    memory = tables.Column(
+    memory = tuskar_tables.Column(
         "memory",
         verbose_name=_('RAM (MB)'),
         filters=(lambda x: getattr(x, 'value', ''),)
     )
-    storage = tables.Column(
+    storage = tuskar_tables.Column(
         "storage",
         verbose_name=_('Root Disk (GB)'),
         filters=(lambda x: getattr(x, 'value', ''),)
     )
-    ephemeral_disk = tables.Column(
+    ephemeral_disk = tuskar_tables.Column(
         "ephemeral_disk",
         verbose_name=_('Ephemeral Disk (GB)'),
         filters=(lambda x: getattr(x, 'value', ''),)
     )
-    swap_disk = tables.Column(
+    swap_disk = tuskar_tables.Column(
         "swap_disk",
         verbose_name=_('Swap Disk (MB)'),
         filters=(lambda x: getattr(x, 'value', ''),)

@@ -20,7 +20,7 @@ from horizon import tabs
 from tuskar_ui.infrastructure.resource_management. \
     resource_classes.tables import RacksTable
 from tuskar_ui.infrastructure.resource_management. \
-    resource_classes.tables import FlavorsTable
+    resource_classes.tables import FlavorTemplatesTable
 
 
 class OverviewTab(tabs.Tab):
@@ -54,7 +54,7 @@ class RacksTab(tabs.TableTab):
 
 
 class FlavorsTab(tabs.TableTab):
-    table_classes = (FlavorsTable,)
+    table_classes = (FlavorTemplatesTable,)
     name = _("Flavors")
     slug = "flavors"
     template_name = ("infrastructure/resource_management/resource_classes/"
