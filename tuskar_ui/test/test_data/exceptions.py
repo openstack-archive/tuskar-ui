@@ -18,6 +18,7 @@ from keystoneclient import exceptions as keystone_exceptions
 from neutronclient.common import exceptions as neutron_exceptions
 from novaclient import exceptions as nova_exceptions
 from swiftclient import client as swift_exceptions
+import tuskarclient.exc as tuskar_exceptions
 
 from openstack_dashboard.test.test_data.utils import TestDataContainer
 
@@ -68,3 +69,6 @@ def data(TEST):
 
     cinder_exception = cinder_exceptions.BadRequest
     TEST.exceptions.cinder = create_stubbed_exception(cinder_exception)
+
+    tuskar_exception = tuskar_exceptions.ClientException
+    TEST.exceptions.tuskar = create_stubbed_exception(tuskar_exception)

@@ -5,9 +5,9 @@ from django.utils.translation import ugettext_lazy as _
 from horizon.test.settings import *  # noqa
 from horizon.utils.secret_key import generate_or_read_from_file
 
-from openstack_dashboard.exceptions import NOT_FOUND
-from openstack_dashboard.exceptions import RECOVERABLE
-from openstack_dashboard.exceptions import UNAUTHORIZED
+from tuskar_ui.exceptions import NOT_FOUND
+from tuskar_ui.exceptions import RECOVERABLE
+from tuskar_ui.exceptions import UNAUTHORIZED
 
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
