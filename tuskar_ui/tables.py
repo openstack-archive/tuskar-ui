@@ -14,33 +14,25 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import collections
 import copy
 import logging
 from operator import attrgetter
 import sys
 
-from django.conf import settings
-from django.core import urlresolvers
 from django import forms
 from django.http import HttpResponse
 from django import template
-from django.template.defaultfilters import truncatechars
-from django.template.loader import render_to_string
 from django.utils.datastructures import SortedDict
 from django.utils.html import escape
 from django.utils import http
-from django.utils.http import urlencode
-from django.utils.safestring import mark_safe
 from django.utils import termcolors
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import conf
 from horizon import exceptions
 from horizon import messages
-from horizon.tables.actions import FilterAction
 from horizon.tables.actions import LinkAction
-from horizon.utils import html
+from horizon.tables import base as horizon_tables
 
 
 LOG = logging.getLogger(__name__)
@@ -48,152 +40,7 @@ PALETTE = termcolors.PALETTES[termcolors.DEFAULT_PALETTE]
 STRING_SEPARATOR = "__"
 
 
-class Column(html.HTMLElement):
-    """ A class which represents a single column in a :class:`.DataTable`.
-
-    .. attribute:: transform
-
-        A string or callable. If ``transform`` is a string, it should be the
-        name of the attribute on the underlying data class which
-        should be displayed in this column. If it is a callable, it
-        will be passed the current row's data at render-time and should
-        return the contents of the cell. Required.
-
-    .. attribute:: verbose_name
-
-        The name for this column which should be used for display purposes.
-        Defaults to the value of ``transform`` with the first letter
-        of each word capitalized.
-
-    .. attribute:: sortable
-
-        Boolean to determine whether this column should be sortable or not.
-        Defaults to ``True``.
-
-    .. attribute:: hidden
-
-        Boolean to determine whether or not this column should be displayed
-        when rendering the table. Default: ``False``.
-
-    .. attribute:: link
-
-        A string or callable which returns a URL which will be wrapped around
-        this column's text as a link.
-
-    .. attribute:: allowed_data_types
-
-        A list of data types for which the link should be created.
-        Default is an empty list (``[]``).
-
-        When the list is empty and the ``link`` attribute is not None, all the
-        rows under this column will be links.
-
-    .. attribute::  status
-
-        Boolean designating whether or not this column represents a status
-        (i.e. "enabled/disabled", "up/down", "active/inactive").
-        Default: ``False``.
-
-    .. attribute::  status_choices
-
-        A tuple of tuples representing the possible data values for the
-        status column and their associated boolean equivalent. Positive
-        states should equate to ``True``, negative states should equate
-        to ``False``, and indeterminate states should be ``None``.
-
-        Values are compared in a case-insensitive manner.
-
-        Example (these are also the default values)::
-
-            status_choices = (
-                    ('enabled', True),
-                    ('true', True)
-                    ('up', True),
-                    ('active', True),
-                    ('on', True),
-                    ('none', None),
-                    ('unknown', None),
-                    ('', None),
-                    ('disabled', False),
-                    ('down', False),
-                    ('false', False),
-                    ('inactive', False),
-                    ('off', False),
-                )
-
-    .. attribute::  display_choices
-
-        A tuple of tuples representing the possible values to substitute
-        the data when displayed in the column cell.
-
-    .. attribute:: empty_value
-
-        A string or callable to be used for cells which have no data.
-        Defaults to the string ``"-"``.
-
-    .. attribute:: summation
-
-        A string containing the name of a summation method to be used in
-        the generation of a summary row for this column. By default the
-        options are ``"sum"`` or ``"average"``, which behave as expected.
-        Optional.
-
-    .. attribute:: filters
-
-        A list of functions (often template filters) to be applied to the
-        value of the data for this column prior to output. This is effectively
-        a shortcut for writing a custom ``transform`` function in simple cases.
-
-    .. attribute:: classes
-
-        An iterable of CSS classes which should be added to this column.
-        Example: ``classes=('foo', 'bar')``.
-
-    .. attribute:: attrs
-
-        A dict of HTML attribute strings which should be added to this column.
-        Example: ``attrs={"data-foo": "bar"}``.
-
-    .. attribute:: truncate
-
-        An integer for the maximum length of the string in this column. If the
-        data in this column is larger than the supplied number, the data for
-        this column will be truncated and an ellipsis will be appended to the
-        truncated data.
-        Defaults to ``None``.
-
-    .. attribute:: link_classes
-
-        An iterable of CSS classes which will be added when the column's text
-        is displayed as a link.
-        Example: ``classes=('link-foo', 'link-bar')``.
-        Defaults to ``None``.
-    """
-    summation_methods = {
-        "sum": sum,
-        "average": lambda data: sum(data, 0.0) / len(data)
-    }
-    # Used to retain order when instantiating columns on a table
-    creation_counter = 0
-
-    transform = None
-    name = None
-    verbose_name = None
-    status_choices = (
-        ('enabled', True),
-        ('true', True),
-        ('up', True),
-        ('active', True),
-        ('on', True),
-        ('none', None),
-        ('unknown', None),
-        ('', None),
-        ('disabled', False),
-        ('down', False),
-        ('false', False),
-        ('inactive', False),
-        ('off', False),
-    )
+class Column(horizon_tables.Column):
 
     def __init__(self, transform, verbose_name=None, sortable=True,
                  link=None, allowed_data_types=[], hidden=False, attrs=None,
@@ -203,237 +50,17 @@ class Column(html.HTMLElement):
                  # FIXME: Added for TableStep:
                  form_widget=None, form_widget_attributes=None
                  ):
+        super(Column, self).__init__(
+            transform, verbose_name, sortable, link, allowed_data_types,
+            hidden, attrs, status, status_choices, display_choices,
+            empty_value, filters, classes, summation, auto, truncate,
+            link_classes)
 
-        self.classes = list(classes or getattr(self, "classes", []))
-        super(Column, self).__init__()
-        self.attrs.update(attrs or {})
-
-        if callable(transform):
-            self.transform = transform
-            self.name = transform.__name__
-        else:
-            self.transform = unicode(transform)
-            self.name = self.transform
-
-        # Empty string is a valid value for verbose_name
-        if verbose_name is None:
-            verbose_name = self.transform.title()
-        else:
-            verbose_name = verbose_name
-
-        self.auto = auto
-        self.sortable = sortable
-        self.verbose_name = verbose_name
-        self.link = link
-        self.allowed_data_types = allowed_data_types
-        self.hidden = hidden
-        self.status = status
-        self.empty_value = empty_value or '-'
-        self.filters = filters or []
-        self.truncate = truncate
-        self.link_classes = link_classes or []
         self.form_widget = form_widget  # FIXME: TableStep
         self.form_widget_attributes = form_widget_attributes or {}  # TableStep
 
-        if status_choices:
-            self.status_choices = status_choices
-        self.display_choices = display_choices
 
-        if summation is not None and summation not in self.summation_methods:
-            raise ValueError("Summation method %s must be one of %s."
-                             % (summation,
-                                ", ".join(self.summation_methods.keys())))
-        self.summation = summation
-
-        self.creation_counter = Column.creation_counter
-        Column.creation_counter += 1
-
-        if self.sortable and not self.auto:
-            self.classes.append("sortable")
-        if self.hidden:
-            self.classes.append("hide")
-        if self.link is not None:
-            self.classes.append('anchor')
-
-    def __unicode__(self):
-        return unicode(self.verbose_name)
-
-    def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.name)
-
-    def get_raw_data(self, datum):
-        """
-        Returns the raw data for this column, before any filters or formatting
-        are applied to it. This is useful when doing calculations on data in
-        the table.
-        """
-        # Callable transformations
-        if callable(self.transform):
-            data = self.transform(datum)
-        # Basic object lookups
-        elif hasattr(datum, self.transform):
-            data = getattr(datum, self.transform, None)
-        # Dict lookups
-        elif isinstance(datum, collections.Iterable) and \
-                self.transform in datum:
-            data = datum.get(self.transform)
-        else:
-            if settings.DEBUG:
-                msg = _("The attribute %(attr)s doesn't exist on "
-                        "%(obj)s.") % {'attr': self.transform, 'obj': datum}
-                msg = termcolors.colorize(msg, **PALETTE['ERROR'])
-                LOG.warning(msg)
-            data = None
-        return data
-
-    def get_data(self, datum):
-        """
-        Returns the final display data for this column from the given inputs.
-
-        The return value will be either the attribute specified for this column
-        or the return value of the attr:`~horizon.tables.Column.transform`
-        method for this column.
-        """
-        datum_id = self.table.get_object_id(datum)
-
-        if datum_id in self.table._data_cache[self]:
-            return self.table._data_cache[self][datum_id]
-
-        data = self.get_raw_data(datum)
-        display_value = None
-
-        if self.display_choices:
-            display_value = [display for (value, display) in
-                             self.display_choices
-                             if value.lower() == (data or '').lower()]
-
-        if display_value:
-            data = display_value[0]
-        else:
-            for filter_func in self.filters:
-                data = filter_func(data)
-
-        if data and self.truncate:
-            data = truncatechars(data, self.truncate)
-
-        self.table._data_cache[self][datum_id] = data
-
-        return self.table._data_cache[self][datum_id]
-
-    def get_link_url(self, datum):
-        """ Returns the final value for the column's ``link`` property.
-
-        If ``allowed_data_types`` of this column  is not empty and the datum
-        has an assigned type, check if the datum's type is in the
-        ``allowed_data_types`` list. If not, the datum won't be displayed
-        as a link.
-
-        If ``link`` is a callable, it will be passed the current data object
-        and should return a URL. Otherwise ``get_link_url`` will attempt to
-        call ``reverse`` on ``link`` with the object's id as a parameter.
-        Failing that, it will simply return the value of ``link``.
-        """
-        if self.allowed_data_types:
-            data_type_name = self.table._meta.data_type_name
-            data_type = getattr(datum, data_type_name, None)
-            if data_type and (data_type not in self.allowed_data_types):
-                return None
-        obj_id = self.table.get_object_id(datum)
-        if callable(self.link):
-            return self.link(datum)
-        try:
-            return urlresolvers.reverse(self.link, args=(obj_id,))
-        except urlresolvers.NoReverseMatch:
-            return self.link
-
-    def get_summation(self):
-        """
-        Returns the summary value for the data in this column if a
-        valid summation method is specified for it. Otherwise returns ``None``.
-        """
-        if self.summation not in self.summation_methods:
-            return None
-
-        summation_function = self.summation_methods[self.summation]
-        data = [self.get_raw_data(datum) for datum in self.table.data]
-        data = filter(lambda datum: datum is not None, data)
-
-        if len(data):
-            summation = summation_function(data)
-            for filter_func in self.filters:
-                summation = filter_func(summation)
-            return summation
-        else:
-            return None
-
-
-class Row(html.HTMLElement):
-    """ Represents a row in the table.
-
-    When iterated, the ``Row`` instance will yield each of its cells.
-
-    Rows are capable of AJAX updating, with a little added work:
-
-    The ``ajax`` property needs to be set to ``True``, and
-    subclasses need to define a ``get_data`` method which returns a data
-    object appropriate for consumption by the table (effectively the "get"
-    lookup versus the table's "list" lookup).
-
-    The automatic update interval is configurable by setting the key
-    ``ajax_poll_interval`` in the ``HORIZON_CONFIG`` dictionary.
-    Default: ``2500`` (measured in milliseconds).
-
-    .. attribute:: table
-
-        The table which this row belongs to.
-
-    .. attribute:: datum
-
-        The data object which this row represents.
-
-    .. attribute:: id
-
-        A string uniquely representing this row composed of the table name
-        and the row data object's identifier.
-
-    .. attribute:: cells
-
-        The cells belonging to this row stored in a ``SortedDict`` object.
-        This attribute is populated during instantiation.
-
-    .. attribute:: status
-
-        Boolean value representing the status of this row calculated from
-        the values of the table's ``status_columns`` if they are set.
-
-    .. attribute:: status_class
-
-        Returns a css class for the status of the row based on ``status``.
-
-    .. attribute:: ajax
-
-        Boolean value to determine whether ajax updating for this row is
-        enabled.
-
-    .. attribute:: ajax_action_name
-
-        String that is used for the query parameter key to request AJAX
-        updates. Generally you won't need to change this value.
-        Default: ``"row_update"``.
-    """
-    ajax = False
-    ajax_action_name = "row_update"
-
-    def __init__(self, table, datum=None):
-        super(Row, self).__init__()
-        self.table = table
-        self.datum = datum
-        self.selected = False
-        if self.datum:
-            self.load_cells()
-        else:
-            self.id = None
-            self.cells = []
+class Row(horizon_tables.Row):
 
     def load_cells(self, datum=None):
         """
@@ -501,7 +128,7 @@ class Row(html.HTMLElement):
                 table._data_cache[column][table.get_object_id(datum)] = data
             else:
                 data = column.get_data(datum)
-            cell = Cell(datum, data, column, self)
+            cell = horizon_tables.Cell(datum, data, column, self)
             cells.append((column.name or column.auto, cell))
         self.cells = SortedDict(cells)
 
@@ -524,328 +151,18 @@ class Row(html.HTMLElement):
         if display_name:
             self.attrs['data-display'] = escape(display_name)
 
-    def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.id)
 
-    def __iter__(self):
-        return iter(self.cells.values())
+class DataTableOptions(horizon_tables.DataTableOptions):
 
-    @property
-    def status(self):
-        column_names = self.table._meta.status_columns
-        if column_names:
-            statuses = dict([(column_name, self.cells[column_name].status) for
-                             column_name in column_names])
-            return self.table.calculate_row_status(statuses)
-
-    @property
-    def status_class(self):
-        column_names = self.table._meta.status_columns
-        if column_names:
-            return self.table.get_row_status_class(self.status)
-        else:
-            return ''
-
-    def render(self):
-        return render_to_string("horizon/common/_data_table_row.html",
-                                {"row": self})
-
-    def get_cells(self):
-        """ Returns the bound cells for this row in order. """
-        return self.cells.values()
-
-    def get_ajax_update_url(self):
-        table_url = self.table.get_absolute_url()
-        params = urlencode({"table": self.table.name,
-                            "action": self.ajax_action_name,
-                            "obj_id": self.table.get_object_id(self.datum)})
-        return "%s?%s" % (table_url, params)
-
-    def get_data(self, request, obj_id):
-        """
-        Fetches the updated data for the row based on the object id
-        passed in. Must be implemented by a subclass to allow AJAX updating.
-        """
-        raise NotImplementedError("You must define a get_data method on %s"
-                                  % self.__class__.__name__)
-
-
-class Cell(html.HTMLElement):
-    """ Represents a single cell in the table. """
-    def __init__(self, datum, data, column, row, attrs=None, classes=None):
-        self.classes = classes or getattr(self, "classes", [])
-        super(Cell, self).__init__()
-        self.attrs.update(attrs or {})
-
-        self.datum = datum
-        self.data = data
-        self.column = column
-        self.row = row
-
-    def __repr__(self):
-        return '<%s: %s, %s>' % (self.__class__.__name__,
-                                 self.column.name,
-                                 self.row.id)
-
-    @property
-    def value(self):
-        """
-        Returns a formatted version of the data for final output.
-
-        This takes into consideration the
-        :attr:`~horizon.tables.Column.link`` and
-        :attr:`~horizon.tables.Column.empty_value`
-        attributes.
-        """
-        try:
-            data = self.column.get_data(self.datum)
-            if data is None:
-                if callable(self.column.empty_value):
-                    data = self.column.empty_value(self.datum)
-                else:
-                    data = self.column.empty_value
-        except Exception:
-            data = None
-            exc_info = sys.exc_info()
-            raise template.TemplateSyntaxError, exc_info[1], exc_info[2]
-        if self.url:
-            link_classes = ' '.join(self.column.link_classes)
-            # Escape the data inside while allowing our HTML to render
-            data = mark_safe('<a href="%s" class="%s">%s</a>' %
-                             (self.url, link_classes, escape(data)))
-        return data
-
-    @property
-    def url(self):
-        if self.column.link:
-            url = self.column.get_link_url(self.datum)
-            if url:
-                return url
-        else:
-            return None
-
-    @property
-    def status(self):
-        """ Gets the status for the column based on the cell's data. """
-        # Deal with status column mechanics based in this cell's data
-        if hasattr(self, '_status'):
-            return self._status
-
-        if self.column.status or \
-                self.column.name in self.column.table._meta.status_columns:
-            #returns the first matching status found
-            data_value_lower = unicode(self.data).lower()
-            for status_name, status_value in self.column.status_choices:
-                if unicode(status_name).lower() == data_value_lower:
-                    self._status = status_value
-                    return self._status
-        self._status = None
-        return self._status
-
-    def get_status_class(self, status):
-        """ Returns a css class name determined by the status value. """
-        if status is True:
-            return "status_up"
-        elif status is False:
-            return "status_down"
-        else:
-            return "status_unknown"
-
-    def get_default_classes(self):
-        """ Returns a flattened string of the cell's CSS classes. """
-        if not self.url:
-            self.column.classes = [cls for cls in self.column.classes
-                                    if cls != "anchor"]
-        column_class_string = self.column.get_final_attrs().get('class', "")
-        classes = set(column_class_string.split(" "))
-        if self.column.status:
-            classes.add(self.get_status_class(self.status))
-        return list(classes)
-
-
-class DataTableOptions(object):
-    """ Contains options for :class:`.DataTable` objects.
-
-    .. attribute:: name
-
-        A short name or slug for the table.
-
-    .. attribute:: verbose_name
-
-        A more verbose name for the table meant for display purposes.
-
-    .. attribute:: columns
-
-        A list of column objects or column names. Controls ordering/display
-        of the columns in the table.
-
-    .. attribute:: table_actions
-
-        A list of action classes derived from the
-        :class:`~horizon.tables.Action` class. These actions will handle tasks
-        such as bulk deletion, etc. for multiple objects at once.
-
-    .. attribute:: row_actions
-
-        A list similar to ``table_actions`` except tailored to appear for
-        each row. These actions act on a single object at a time.
-
-    .. attribute:: actions_column
-
-        Boolean value to control rendering of an additional column containing
-        the various actions for each row. Defaults to ``True`` if any actions
-        are specified in the ``row_actions`` option.
-
-    .. attribute:: multi_select
-
-        Boolean value to control rendering of an extra column with checkboxes
-        for selecting multiple objects in the table. Defaults to ``True`` if
-        any actions are specified in the ``table_actions`` option.
-
-    .. attribute:: filter
-
-        Boolean value to control the display of the "filter" search box
-        in the table actions. By default it checks whether or not an instance
-        of :class:`.FilterAction` is in :attr:`.table_actions`.
-
-    .. attribute:: template
-
-        String containing the template which should be used to render the
-        table. Defaults to ``"horizon/common/_data_table.html"``.
-
-    .. attribute:: context_var_name
-
-        The name of the context variable which will contain the table when
-        it is rendered. Defaults to ``"table"``.
-
-    .. attribute:: pagination_param
-
-        The name of the query string parameter which will be used when
-        paginating this table. When using multiple tables in a single
-        view this will need to be changed to differentiate between the
-        tables. Default: ``"marker"``.
-
-    .. attribute:: status_columns
-
-        A list or tuple of column names which represents the "state"
-        of the data object being represented.
-
-        If ``status_columns`` is set, when the rows are rendered the value
-        of this column will be used to add an extra class to the row in
-        the form of ``"status_up"`` or ``"status_down"`` for that row's
-        data.
-
-        The row status is used by other Horizon components to trigger tasks
-        such as dynamic AJAX updating.
-
-    .. attribute:: row_class
-
-        The class which should be used for rendering the rows of this table.
-        Optional. Default: :class:`~horizon.tables.Row`.
-
-    .. attribute:: column_class
-
-        The class which should be used for handling the columns of this table.
-        Optional. Default: :class:`~horizon.tables.Column`.
-
-    .. attribute:: mixed_data_type
-
-        A toggle to indicate if the table accepts two or more types of data.
-        Optional. Default: :``False``
-
-    .. attribute:: data_types
-
-        A list of data types that this table would accept. Default to be an
-        empty list, but if the attibute ``mixed_data_type`` is set to ``True``,
-        then this list must have at least one element.
-
-    .. attribute:: data_type_name
-
-        The name of an attribute to assign to data passed to the table when it
-        accepts mix data. Default: ``"_table_data_type"``
-
-    .. attribute:: footer
-
-        Boolean to control whether or not to show the table's footer.
-        Default: ``True``.
-
-    .. attribute:: permissions
-
-        A list of permission names which this table requires in order to be
-        displayed. Defaults to an empty list (``[]``).
-    """
     def __init__(self, options):
-        self.name = getattr(options, 'name', self.__class__.__name__)
-        verbose_name = getattr(options, 'verbose_name', None) \
-                                    or self.name.title()
-        self.verbose_name = verbose_name
-        self.columns = getattr(options, 'columns', None)
-        self.status_columns = getattr(options, 'status_columns', [])
-        self.table_actions = getattr(options, 'table_actions', [])
-        self.row_actions = getattr(options, 'row_actions', [])
+        super(DataTableOptions, self).__init__(options)
+
+        # FIXME: TableStep
         self.row_class = getattr(options, 'row_class', Row)
         self.column_class = getattr(options, 'column_class', Column)
-        self.pagination_param = getattr(options, 'pagination_param', 'marker')
-        self.browser_table = getattr(options, 'browser_table', None)
-        self.footer = getattr(options, 'footer', True)
-        self.no_data_message = getattr(options,
-                                       "no_data_message",
-                                       _("No items to display."))
-        self.permissions = getattr(options, 'permissions', [])
-
-        # Set self.filter if we have any FilterActions
-        filter_actions = [action for action in self.table_actions if
-                          issubclass(action, FilterAction)]
-        if len(filter_actions) > 1:
-            raise NotImplementedError("Multiple filter actions is not "
-                                      "currently supported.")
-        self.filter = getattr(options, 'filter', len(filter_actions) > 0)
-        if len(filter_actions) == 1:
-            self._filter_action = filter_actions.pop()
-        else:
-            self._filter_action = None
-
-        self.template = 'horizon/common/_data_table.html'
-        self.row_actions_template = \
-                        'horizon/common/_data_table_row_actions.html'
-        self.table_actions_template = \
-                        'horizon/common/_data_table_table_actions.html'
-        self.context_var_name = unicode(getattr(options,
-                                                'context_var_name',
-                                                'table'))
-        self.actions_column = getattr(options,
-                                     'actions_column',
-                                     len(self.row_actions) > 0)
-        # FIXME: TableStep
         self.multi_select_name = getattr(options,
                                          'multi_select_name',
                                          'object_ids')
-        self.multi_select = getattr(options,
-                                    'multi_select',
-                                    len(self.table_actions) > 0)
-
-        # Set runtime table defaults; not configurable.
-        self.has_more_data = False
-
-        # Set mixed data type table attr
-        self.mixed_data_type = getattr(options, 'mixed_data_type', False)
-        self.data_types = getattr(options, 'data_types', [])
-
-        # If the data_types has more than 2 elements, set mixed_data_type
-        # to True automatically.
-        if len(self.data_types) > 1:
-            self.mixed_data_type = True
-
-        # However, if the mixed_data_type is set to True manually and the
-        # the data_types is empty, raise an errror.
-        if self.mixed_data_type and len(self.data_types) <= 1:
-            raise ValueError("If mixed_data_type is set to True in class %s, "
-                             "data_types should has more than one types" %
-                             self.name)
-
-        self.data_type_name = getattr(options,
-                                      'data_type_name',
-                                      "_table_data_type")
 
 
 class DataTableMetaclass(type):
