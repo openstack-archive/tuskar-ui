@@ -15,13 +15,13 @@
 
 def load_test_data(load_onto=None):
     from openstack_dashboard.test.test_data import cinder_data
-    from openstack_dashboard.test.test_data import exceptions
     from openstack_dashboard.test.test_data import glance_data
     from openstack_dashboard.test.test_data import heat_data
     from openstack_dashboard.test.test_data import keystone_data
     from openstack_dashboard.test.test_data import neutron_data
     from openstack_dashboard.test.test_data import nova_data
     from openstack_dashboard.test.test_data import swift_data
+    from tuskar_ui.test.test_data import exceptions
     from tuskar_ui.test.test_data import tuskar_data
 
     # The order of these loaders matters, some depend on others.
