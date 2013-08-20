@@ -1,0 +1,19 @@
+{% extends "horizon/client_side/template.html" %}
+{% load horizon %}
+
+{% block id %}modal_chart_template{% endblock %}
+
+{% block template %}
+{% jstemplate %}
+<div class="[[classes]]" style="top: 80px; display: block;">
+    <ul id="interval_selector">
+        <li><a href="#" data-interval="12h">12h</a></li>
+        <li><a href="#" data-interval="24h">24h</a></li>
+        <li class="active"><a href="#" data-interval="1w">1w</a></li>
+        <li><a href="#" data-interval="1m">1m</a></li>
+        <li><a href="#" data-interval="1y">1y</a></li>
+    </ul>
+    <div id="modal_chart"></div>
+</div>
+{% endjstemplate %}
+{% endblock %}
