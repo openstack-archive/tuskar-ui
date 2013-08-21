@@ -632,7 +632,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
             added_flavors = tuskarclient(self.request).flavors.list(self.id)
             self._flavors = []
             for f in added_flavors:
-                flavor_obj = Flavor(f)
+                flavor_obj = Flavor(f, self.request)
                 #flavor_obj.max_vms = f.max_vms
 
                 # FIXME just a mock of used instances, add real values
@@ -889,6 +889,13 @@ class Flavor(StringIdAPIResourceWrapper):
     """Wrapper for the Flavor object returned by Tuskar.
     """
     _attrs = ['id', 'name', 'max_vms']
+
+    @classmethod
+    def get(cls, request, resource_class_id, flavor_id):
+        flavor = cls(tuskarclient(request).flavors.get(resource_class_id,
+                                                       flavor_id))
+        flavor.request = request
+        return flavor
 
     @classmethod
     def create(cls, request, **kwargs):

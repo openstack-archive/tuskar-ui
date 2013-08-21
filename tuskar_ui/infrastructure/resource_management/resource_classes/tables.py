@@ -13,6 +13,7 @@
 #    under the License.
 
 import logging
+import re
 
 from django.core import urlresolvers
 from django.utils.translation import ugettext_lazy as _
@@ -159,9 +160,17 @@ class UpdateFlavorsClass(tables.LinkAction):
 
 
 class FlavorsTable(flavor_templates_tables.FlavorTemplatesTable):
+    def get_flavor_detail_link(datum):
+        # FIXME - horizon Column.get_link_url does not allow to access GET
+        # params
+        resource_class_id = re.findall("[0-9]+", datum.request.path)[-1]
+        return urlresolvers.reverse("horizon:infrastructure:"
+                                    "resource_management:resource_classes:"
+                                    "flavors:detail",
+                                    args=(resource_class_id, datum.id))
+
     name = tuskar_ui.tables.Column('name',
-                         link=("horizon:infrastructure:"
-                               "resource_management:flavor_templates:detail"),
+                         link=get_flavor_detail_link,
                          verbose_name=_('Flavor Name'))
     max_vms = tuskar_ui.tables.Column("max_vms",
                             verbose_name=_("Max. VMs"))
