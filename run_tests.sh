@@ -50,9 +50,11 @@ function usage {
 # DEFAULTS FOR RUN_TESTS.SH
 #
 root=`pwd`
+horizon_root=${HORIZON-../horizon}
+export PYTHONPATH=$horizon_root
 venv=$root/.venv
 with_venv=tools/with_venv.sh
-included_dirs="openstack_dashboard horizon"
+included_dirs="tuskar_ui"
 
 always_venv=0
 backup_env=0
@@ -137,7 +139,7 @@ function run_pylint {
 
 function run_pep8 {
   echo "Running flake8 ..."
-  DJANGO_SETTINGS_MODULE=openstack_dashboard.test.settings ${command_wrapper} flake8 $included_dirs
+  DJANGO_SETTINGS_MODULE=tuskar_ui.test.settings ${command_wrapper} flake8 $included_dirs
 }
 
 function run_sphinx {
@@ -179,7 +181,7 @@ function environment_check {
     if [ $ENV_VERS -eq $environment_version ]; then
       if [ -e ${venv} ]; then
         # If the environment exists and is up-to-date then set our variables
-        command_wrapper="${root}/${with_venv}"
+        command_wrapper="${horizon_root}/${with_venv}"
         echo "Environment is up to date."
         return 0
       fi
@@ -293,24 +295,15 @@ function run_tests_subset {
 }
 
 function run_tests_all {
-  echo "Running Horizon application tests"
-  export NOSE_XUNIT_FILE=horizon/nosetests.xml
+  echo "Running Tuskar-UI application tests"
+  export NOSE_XUNIT_FILE=tuskar_ui/nosetests.xml
   if [ "$NOSE_WITH_HTML_OUTPUT" = '1' ]; then
-    export NOSE_HTML_OUT_FILE='horizon_nose_results.html'
+    export NOSE_HTML_OUT_FILE='tuskar_ui_nose_results.html'
   fi
   ${command_wrapper} coverage erase
-  ${command_wrapper} coverage run -p $root/manage.py test horizon --settings=horizon.test.settings $testopts
+  ${command_wrapper} coverage run -p $root/manage.py test tuskar_ui --settings=tuskar_ui.test.settings $testopts
   # get results of the Horizon tests
-  HORIZON_RESULT=$?
-
-  echo "Running openstack_dashboard tests"
-  export NOSE_XUNIT_FILE=openstack_dashboard/nosetests.xml
-  if [ "$NOSE_WITH_HTML_OUTPUT" = '1' ]; then
-    export NOSE_HTML_OUT_FILE='dashboard_nose_results.html'
-  fi
-  ${command_wrapper} coverage run -p $root/manage.py test openstack_dashboard --settings=openstack_dashboard.test.settings $testopts
-  # get results of the openstack_dashboard tests
-  DASHBOARD_RESULT=$?
+  TUSKAR_UI_RESULT=$?
 
   if [ $with_coverage -eq 1 ]; then
     echo "Generating coverage reports"
@@ -321,12 +314,12 @@ function run_tests_all {
   # Remove the leftover coverage files from the -p flag earlier.
   rm -f .coverage.*
 
-  if [ $(($HORIZON_RESULT || $DASHBOARD_RESULT)) -eq 0 ]; then
+  if [ $(($TUSKAR_UI_RESULT)) -eq 0 ]; then
     echo "Tests completed successfully."
   else
     echo "Tests failed."
   fi
-  exit $(($HORIZON_RESULT || $DASHBOARD_RESULT))
+  exit $(($TUSKAR_UI_RESULT))
 }
 
 function run_makemessages {
