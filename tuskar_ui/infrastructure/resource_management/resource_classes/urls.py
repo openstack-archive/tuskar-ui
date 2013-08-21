@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from django.conf.urls.defaults import include
 from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
 
@@ -29,6 +30,8 @@ from tuskar_ui.infrastructure. \
     resource_management.resource_classes.views import UpdateRacksView
 from tuskar_ui.infrastructure. \
     resource_management.resource_classes.views import UpdateView
+from tuskar_ui.infrastructure. \
+    resource_management.flavors import urls as flavor_urls
 
 
 RESOURCE_CLASS = r'^(?P<resource_class_id>[^/]+)/%s$'
@@ -51,4 +54,6 @@ urlpatterns = patterns(
         name='update_flavors'),
     url(RESOURCE_CLASS % 'rack_health.json', 'rack_health',
         name='rack_health'),
+    url(r'^(?P<resource_class_id>[^/]+)/flavors/',
+        include(flavor_urls, namespace='flavors')),
 )
