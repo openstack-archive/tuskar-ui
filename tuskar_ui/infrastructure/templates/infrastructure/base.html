@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block css %}
-  {% include "_stylesheets.html" %}
+  {{block.super}}
 
   {% load compress %}
   {% compress css %}
@@ -10,5 +10,6 @@
 {% endblock %}
 
 {% block js %}
+  {{ block.super }}
   {% include "infrastructure/_scripts.html" %}
 {% endblock %}
