@@ -51,22 +51,6 @@ other tools:
     easy_install pip
     easy_install nose
 
-You will also want to install Node.js, which is needed by Horizon to
-build stylesheets (from LESS).
-
-On Fedora 18+, you can ``yum install nodejs``. (Note that the package
-called ``node`` is not related to Node.js.)
-
-On RHEL 6, you'll need to build nodejs from source:
-
-::
-
-    wget http://nodejs.org/dist/v0.10.15/node-v0.10.15.tar.gz
-    tar -zxf node-v0.10.15.tar.gz
-    cd node-v0.10.15
-    ./configure
-    make && make install
-
 Install the management UI
 -------------------------
 
