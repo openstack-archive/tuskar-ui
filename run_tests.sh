@@ -50,8 +50,6 @@ function usage {
 # DEFAULTS FOR RUN_TESTS.SH
 #
 root=`pwd`
-horizon_root=${HORIZON-../horizon}
-export PYTHONPATH=$horizon_root
 venv=$root/.venv
 with_venv=tools/with_venv.sh
 included_dirs="tuskar_ui"
