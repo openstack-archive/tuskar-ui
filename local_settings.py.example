@@ -384,13 +384,13 @@ TUSKAR_ENDPOINT_URL = "http://127.0.0.1:6385"
 # The REMOTE_NOVA_BAREMETAL_CREDS settings can be used to connect to a remote
 # Nova Baremetal instance instead of the one defined in the Keystone service
 # catalog.
-REMOTE_NOVA_BAREMETAL_CREDS = {
-    'user': 'admin',
-    'password': 'password',
-    'tenant': 'admin',
-    'auth_url': 'http://localhost:5000/v2.0/',
-    'bypass_url': 'http://<OS_AUTH_HOST>:8774/v2/<ADMIN_TENANT_ID>'
-}
+# REMOTE_NOVA_BAREMETAL_CREDS = {
+#     'user': 'admin',
+#     'password': 'password',
+#     'tenant': 'admin',
+#     'auth_url': 'http://localhost:5000/v2.0/',
+#     'bypass_url': 'http://<OS_AUTH_HOST>:8774/v2/<ADMIN_TENANT_ID>'
+# }
 
 OVERCLOUD_CREDS = {
     'user': 'admin',
