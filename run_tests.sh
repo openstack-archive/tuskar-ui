@@ -6,7 +6,7 @@ set -o errexit
 # Increment me any time the environment should be rebuilt.
 # This includes dependncy changes, directory renames, etc.
 # Simple integer secuence: 1, 2, 3...
-environment_version=39
+environment_version=40
 #--------------------------------------------------------#
 
 function usage {
@@ -50,8 +50,6 @@ function usage {
 # DEFAULTS FOR RUN_TESTS.SH
 #
 root=`pwd`
-horizon_root=${HORIZON-../horizon}
-export PYTHONPATH=$horizon_root
 venv=$root/.venv
 with_venv=tools/with_venv.sh
 included_dirs="tuskar_ui"
@@ -181,7 +179,7 @@ function environment_check {
     if [ $ENV_VERS -eq $environment_version ]; then
       if [ -e ${venv} ]; then
         # If the environment exists and is up-to-date then set our variables
-        command_wrapper="${horizon_root}/${with_venv}"
+        command_wrapper="${root}/${with_venv}"
         echo "Environment is up to date."
         return 0
       fi
