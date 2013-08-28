@@ -737,22 +737,6 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
     """
     _attrs = ['name']
 
-    @property
-    def max_vms(self):
-        return getattr(self, '_max_vms', '0')
-
-    @max_vms.setter
-    def max_vms(self, value='0'):
-        self._max_vms = value
-
-    @property
-    def used_instances(self):
-        return getattr(self, '_used_instances', 0)
-
-    @used_instances.setter
-    def used_instances(self, value=0):
-        self._used_instances = value
-
     @classmethod
     def list(cls, request, only_free_racks=False):
         return [cls(f) for f in dummymodels.FlavorTemplate.objects.all()]
