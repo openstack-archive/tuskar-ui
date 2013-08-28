@@ -18,46 +18,36 @@ Views for managing resource classes
 import logging
 import random
 
-from django.core.urlresolvers import reverse
-from django.http import HttpResponse
+from django.core import urlresolvers
+import django.http
 from django.utils import simplejson
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import exceptions
-from horizon import forms
-from horizon import tabs
-from horizon import workflows
+from horizon import forms as horizon_forms
+from horizon import tabs as horizon_tabs
+from horizon import workflows as horizon_workflows
 
 from tuskar_ui import api as tuskar
 
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.forms import DeleteForm
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.tabs import ResourceClassDetailTabs
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.workflows import CreateResourceClass
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.workflows import DetailUpdateWorkflow
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.workflows import UpdateFlavorsWorkflow
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.workflows import UpdateRacksWorkflow
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.workflows import UpdateResourceClass
+from tuskar_ui.infrastructure.resource_management.resource_classes import forms
+from tuskar_ui.infrastructure.resource_management.resource_classes import tabs
+from tuskar_ui.infrastructure.resource_management.resource_classes\
+    import workflows
 
 
 LOG = logging.getLogger(__name__)
 
 
-class CreateView(workflows.WorkflowView):
-    workflow_class = CreateResourceClass
+class CreateView(horizon_workflows.WorkflowView):
+    workflow_class = workflows.CreateResourceClass
 
     def get_initial(self):
         pass
 
 
-class UpdateView(workflows.WorkflowView):
-    workflow_class = UpdateResourceClass
+class UpdateView(horizon_workflows.WorkflowView):
+    workflow_class = workflows.UpdateResourceClass
 
     def get_context_data(self, **kwargs):
         context = super(UpdateView, self).get_context_data(**kwargs)
@@ -87,19 +77,19 @@ class UpdateView(workflows.WorkflowView):
 
 
 class DetailUpdateView(UpdateView):
-    workflow_class = DetailUpdateWorkflow
+    workflow_class = workflows.DetailUpdateWorkflow
 
 
 class UpdateRacksView(UpdateView):
-    workflow_class = UpdateRacksWorkflow
+    workflow_class = workflows.UpdateRacksWorkflow
 
 
 class UpdateFlavorsView(UpdateView):
-    workflow_class = UpdateFlavorsWorkflow
+    workflow_class = workflows.UpdateFlavorsWorkflow
 
 
-class DetailView(tabs.TabView):
-    tab_group_class = ResourceClassDetailTabs
+class DetailView(horizon_tabs.TabView):
+    tab_group_class = tabs.ResourceClassDetailTabs
     template_name = ('infrastructure/resource_management/resource_classes/'
                      'detail.html')
 
@@ -115,8 +105,8 @@ class DetailView(tabs.TabView):
                 resource_class = tuskar.ResourceClass.get(self.request,
                                                           resource_class_id)
             except Exception:
-                redirect = reverse('horizon:infrastructure:'
-                                   'resource_management:index')
+                redirect = urlresolvers.reverse('horizon:infrastructure:'
+                                                'resource_management:index')
                 exceptions.handle(self.request,
                                   _('Unable to retrieve details for '
                                     'resource class "%s".')
@@ -131,7 +121,7 @@ class DetailView(tabs.TabView):
                                     **kwargs)
 
 
-class DetailActionView(forms.ModalFormView):
+class DetailActionView(horizon_forms.ModalFormView):
     template_name = ('infrastructure/resource_management/'
                      'resource_classes/action.html')
 
@@ -142,7 +132,7 @@ class DetailActionView(forms.ModalFormView):
         try:
             action = self.request.GET.get('action')
             if action == "delete":
-                form_class = DeleteForm
+                form_class = forms.DeleteForm
 
             return form_class(self.request, **self.get_form_kwargs())
         except Exception:
@@ -150,7 +140,8 @@ class DetailActionView(forms.ModalFormView):
 
     def get_success_url(self):
         # FIXME this should be set on form level
-        return reverse("horizon:infrastructure:resource_management:index")
+        return urlresolvers.reverse('horizon:infrastructure:'
+                                        'resource_management:index')
 
     def get_context_data(self, **kwargs):
         context = super(DetailActionView, self).get_context_data(**kwargs)
@@ -201,5 +192,5 @@ def rack_health(request, resource_class_id=None):
         data.sort(key=lambda x: x['percentage'])
 
     res = {'data': data}
-    return HttpResponse(simplejson.dumps(res),
-        mimetype="application/json")
+    return django.http.HttpResponse(simplejson.dumps(res),
+                                    mimetype="application/json")

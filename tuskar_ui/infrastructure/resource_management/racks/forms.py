@@ -12,8 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.forms import ValidationError
-from django.utils.translation import ugettext_lazy as _
+import django.forms
+from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import exceptions
 from horizon import forms
@@ -42,20 +42,21 @@ class UploadRack(forms.SelfHandlingForm):
 
         if 'upload' in self.request.POST:
             if not csv_file:
-                raise ValidationError(_('CSV file not set.'))
+                raise django.forms.ValidationError(_('CSV file not set.'))
             else:
                 try:
                     CSVRack.from_str(data)
                 except Exception:
                     LOG.exception("Failed to parse rack CSV file.")
-                    raise ValidationError(_('Failed to parse CSV file.'))
+                    raise django.forms.ValidationError(
+                                                _('Failed to parse CSV file.'))
         return data
 
     def clean_uploaded_data(self):
         data = self.cleaned_data['uploaded_data']
         if 'add_racks' in self.request.POST:
             if not data:
-                raise ValidationError(_('Upload CSV file first'))
+                raise django.forms.ValidationError(_('Upload CSV file first'))
         elif 'upload' in self.request.POST:
             # reset obsolete uploaded data
             self.data['uploaded_data'] = None

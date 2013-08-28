@@ -12,13 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import patterns
-from django.conf.urls.defaults import url
+from django.conf.urls import defaults
 
-from tuskar_ui.infrastructure. \
-    service_management.views import IndexView
+from tuskar_ui.infrastructure.service_management import views
 
 
-urlpatterns = patterns('',
-    url(r'^$', IndexView.as_view(), name='index'),
+urlpatterns = defaults.patterns('',
+    defaults.url(r'^$', views.IndexView.as_view(), name='index'),
 )

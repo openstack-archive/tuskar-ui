@@ -16,12 +16,7 @@ from __future__ import absolute_import
 
 from novaclient.v1_1.contrib import baremetal
 
-from tuskar_ui.api import Capacity
-from tuskar_ui.api import Flavor
-from tuskar_ui.api import FlavorTemplate
-from tuskar_ui.api import Node
-from tuskar_ui.api import Rack
-from tuskar_ui.api import ResourceClass
+from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 
 
@@ -40,8 +35,8 @@ class TuskarApiTests(test.APITestCase):
                                  'limit': 21}).AndReturn([])
         self.mox.ReplayAll()
 
-        ret_val = Node.get(self.request, node.id)
-        self.assertIsInstance(ret_val, Node)
+        ret_val = api.Node.get(self.request, node.id)
+        self.assertIsInstance(ret_val, api.Node)
 
     def test_node_create(self):
         node = self.baremetalclient_nodes.first()
@@ -58,17 +53,17 @@ class TuskarApiTests(test.APITestCase):
                                               0).AndReturn(node)
         self.mox.ReplayAll()
 
-        ret_val = Node.create(self.request,
-                              name='node',
-                              cpus=1,
-                              memory_mb=1024,
-                              local_gb=10,
-                              prov_mac_address='aa:bb:cc:dd:ee',
-                              pm_address='0.0.0.0',
-                              pm_user='user',
-                              pm_password='password',
-                              terminal_port=0)
-        self.assertIsInstance(ret_val, Node)
+        ret_val = api.Node.create(self.request,
+                                  name='node',
+                                  cpus=1,
+                                  memory_mb=1024,
+                                  local_gb=10,
+                                  prov_mac_address='aa:bb:cc:dd:ee',
+                                  pm_address='0.0.0.0',
+                                  pm_user='user',
+                                  pm_password='password',
+                                  terminal_port=0)
+        self.assertIsInstance(ret_val, api.Node)
 
     def test_node_list(self):
         nodes = self.baremetalclient_nodes_all.list()
@@ -77,9 +72,9 @@ class TuskarApiTests(test.APITestCase):
         baremetal.BareMetalNodeManager.list().AndReturn(nodes)
         self.mox.ReplayAll()
 
-        ret_val = Node.list(self.request)
+        ret_val = api.Node.list(self.request)
         for node in ret_val:
-            self.assertIsInstance(node, Node)
+            self.assertIsInstance(node, api.Node)
 
     def test_node_list_unracked(self):
         nodes = self.baremetalclient_nodes.list()
@@ -105,9 +100,9 @@ class TuskarApiTests(test.APITestCase):
                 MultipleTimes().AndReturn(n)
         self.mox.ReplayAll()
 
-        ret_val = Node.list_unracked(self.request)
+        ret_val = api.Node.list_unracked(self.request)
         for node in ret_val:
-            self.assertIsInstance(node, Node)
+            self.assertIsInstance(node, api.Node)
         self.assertEquals(1, len(ret_val))
 
     def test_node_flavors(self):
@@ -139,7 +134,7 @@ class TuskarApiTests(test.APITestCase):
         node.request = self.request
         ret_val = node.list_flavors
         for flavor in ret_val:
-            self.assertIsInstance(flavor, Flavor)
+            self.assertIsInstance(flavor, api.Flavor)
         self.assertEquals(2, len(ret_val))
 
     def test_node_rack(self):
@@ -164,7 +159,7 @@ class TuskarApiTests(test.APITestCase):
 
         node.request = self.request
         rack = node.rack
-        self.assertIsInstance(rack, Rack)
+        self.assertIsInstance(rack, api.Rack)
         self.assertEquals('1', rack.id)
 
     def test_node_running_instances(self):
@@ -209,9 +204,9 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.resource_classes.list().AndReturn(rcs)
         self.mox.ReplayAll()
 
-        ret_val = ResourceClass.list(self.request)
+        ret_val = api.ResourceClass.list(self.request)
         for rc in ret_val:
-            self.assertIsInstance(rc, ResourceClass)
+            self.assertIsInstance(rc, api.ResourceClass)
 
     def test_resource_class_get(self):
         rc = self.tuskarclient_resource_classes.first()
@@ -221,8 +216,8 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.resource_classes.get(rc.id).AndReturn(rc)
         self.mox.ReplayAll()
 
-        ret_val = ResourceClass.get(self.request, rc.id)
-        self.assertIsInstance(ret_val, ResourceClass)
+        ret_val = api.ResourceClass.get(self.request, rc.id)
+        self.assertIsInstance(ret_val, api.ResourceClass)
 
     def test_resource_class_create(self):
         rc = self.tuskarclient_resource_classes.first()
@@ -234,11 +229,11 @@ class TuskarApiTests(test.APITestCase):
                                              flavors=[]).AndReturn(rc)
         self.mox.ReplayAll()
 
-        ret_val = ResourceClass.create(self.request,
-                                                  name='rclass1',
-                                                  service_type='compute',
-                                                  flavors=[])
-        self.assertIsInstance(ret_val, ResourceClass)
+        ret_val = api.ResourceClass.create(self.request,
+                                           name='rclass1',
+                                           service_type='compute',
+                                           flavors=[])
+        self.assertIsInstance(ret_val, api.ResourceClass)
 
     def test_resource_class_update(self):
         rc = self.tuskarclient_resource_classes.first()
@@ -246,19 +241,18 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.resource_classes = self.mox.CreateMockAnything()
         tuskarclient.flavors = self.mox.CreateMockAnything()
-        tuskarclient.resource_classes.update(
-            rc.id,
-            name='rclass1',
-            service_type='compute',
-            flavors=[]).AndReturn(rc)
+        tuskarclient.resource_classes.update(rc.id,
+                                             name='rclass1',
+                                             service_type='compute',
+                                             flavors=[]).AndReturn(rc)
         tuskarclient.flavors.list(rc.id).AndReturn([])
         self.mox.ReplayAll()
 
-        ret_val = ResourceClass.update(self.request, rc.id,
-                                                  name='rclass1',
-                                                  service_type='compute',
-                                                  flavors=[])
-        self.assertIsInstance(ret_val, ResourceClass)
+        ret_val = api.ResourceClass.update(self.request, rc.id,
+                                           name='rclass1',
+                                           service_type='compute',
+                                           flavors=[])
+        self.assertIsInstance(ret_val, api.ResourceClass)
 
     def test_resource_class_delete(self):
         rc = self.tuskarclient_resource_classes.first()
@@ -268,7 +262,7 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.resource_classes.delete(rc.id)
         self.mox.ReplayAll()
 
-        ResourceClass.delete(self.request, rc.id)
+        api.ResourceClass.delete(self.request, rc.id)
 
     def test_resource_class_deletable(self):
         rc = self.tuskar_resource_classes.first()
@@ -286,7 +280,7 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         for rack in rc.list_racks:
-            self.assertIsInstance(rack, Rack)
+            self.assertIsInstance(rack, api.Rack)
         self.assertEquals(2, rc.racks_count)
 
     def test_resource_class_all_racks(self):
@@ -300,7 +294,7 @@ class TuskarApiTests(test.APITestCase):
 
         all_racks = rc.all_racks
         for rack in all_racks:
-            self.assertIsInstance(rack, Rack)
+            self.assertIsInstance(rack, api.Rack)
         self.assertEquals(3, len(all_racks))
 
     def test_resource_class_racks_set(self):
@@ -342,7 +336,7 @@ class TuskarApiTests(test.APITestCase):
 
         rc.request = self.request
         for node in rc.nodes:
-            self.assertIsInstance(node, Node)
+            self.assertIsInstance(node, api.Node)
         self.assertEquals(4, rc.nodes_count)
 
     def test_resource_class_flavors(self):
@@ -355,7 +349,7 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         for f in rc.list_flavors:
-            self.assertIsInstance(f, Flavor)
+            self.assertIsInstance(f, api.Flavor)
         self.assertEquals(2, len(rc.flavors_ids))
 
     def test_resource_class_capacities(self):
@@ -369,7 +363,7 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         for capacity in rc.capacities:
-            self.assertIsInstance(capacity, Capacity)
+            self.assertIsInstance(capacity, api.Capacity)
         self.assertEquals(2, len(rc.capacities))
 
     def test_resource_class_total_instances(self):
@@ -404,7 +398,7 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         vm_capacity = rc.vm_capacity
-        self.assertIsInstance(vm_capacity, Capacity)
+        self.assertIsInstance(vm_capacity, api.Capacity)
         self.assertEquals(200, vm_capacity.value)
 
     def test_resource_class_has_provisioned_rack(self):
@@ -445,7 +439,7 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         for rack in rc.aggregated_alerts:
-            self.assertIsInstance(rack, Rack)
+            self.assertIsInstance(rack, api.Rack)
         self.assertEquals(1, len(rc.aggregated_alerts))
 
     def test_rack_list(self):
@@ -456,9 +450,9 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.racks.list().AndReturn(racks)
         self.mox.ReplayAll()
 
-        ret_val = Rack.list(self.request)
+        ret_val = api.Rack.list(self.request)
         for rack in ret_val:
-            self.assertIsInstance(rack, Rack)
+            self.assertIsInstance(rack, api.Rack)
 
     def test_rack_get(self):
         rack = self.tuskarclient_racks.first()
@@ -468,8 +462,8 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.racks.get(rack.id).AndReturn(rack)
         self.mox.ReplayAll()
 
-        ret_val = Rack.get(self.request, rack.id)
-        self.assertIsInstance(ret_val, Rack)
+        ret_val = api.Rack.get(self.request, rack.id)
+        self.assertIsInstance(ret_val, api.Rack)
 
     def test_rack_create(self):
         rack = self.tuskarclient_racks.first()
@@ -484,12 +478,12 @@ class TuskarApiTests(test.APITestCase):
                                   slots=0).AndReturn(rack)
         self.mox.ReplayAll()
 
-        ret_val = Rack.create(request=self.request,
-                              name='rack1',
-                              resource_class_id=1,
-                              location='location',
-                              subnet='192.168.1.0/24')
-        self.assertIsInstance(ret_val, Rack)
+        ret_val = api.Rack.create(request=self.request,
+                                  name='rack1',
+                                  resource_class_id=1,
+                                  location='location',
+                                  subnet='192.168.1.0/24')
+        self.assertIsInstance(ret_val, api.Rack)
 
     def test_rack_update(self):
         rack = self.tuskarclient_racks.first()
@@ -500,10 +494,10 @@ class TuskarApiTests(test.APITestCase):
                                   name='rack1').AndReturn(rack)
         self.mox.ReplayAll()
 
-        ret_val = Rack.update(self.request,
-                              rack.id,
-                              {'name': 'rack1'})
-        self.assertIsInstance(ret_val, Rack)
+        ret_val = api.Rack.update(self.request,
+                                  rack.id,
+                                  {'name': 'rack1'})
+        self.assertIsInstance(ret_val, api.Rack)
 
     def test_rack_delete(self):
         rack = self.tuskarclient_racks.first()
@@ -513,7 +507,7 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.racks.delete(rack.id)
         self.mox.ReplayAll()
 
-        Rack.delete(self.request, rack.id)
+        api.Rack.delete(self.request, rack.id)
 
     def test_rack_nodes(self):
         rack = self.tuskar_racks.first()
@@ -532,7 +526,7 @@ class TuskarApiTests(test.APITestCase):
 
         rack.request = self.request
         for node in rack.list_nodes:
-            self.assertIsInstance(node, Node)
+            self.assertIsInstance(node, api.Node)
         self.assertEquals(4, len(rack.node_ids))
         self.assertEquals(4, rack.nodes_count)
 
@@ -545,14 +539,14 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.resource_classes.get(rc.id).AndReturn(rc)
         self.mox.ReplayAll()
 
-        self.assertIsInstance(rack.get_resource_class, ResourceClass)
+        self.assertIsInstance(rack.get_resource_class, api.ResourceClass)
         self.assertEquals(rack.resource_class_id, '1')
 
     def test_rack_capacities(self):
         rack = self.tuskar_racks.first()
 
         for capacity in rack.list_capacities:
-            self.assertIsInstance(capacity, Capacity)
+            self.assertIsInstance(capacity, api.Capacity)
         self.assertEquals(2, len(rack.capacities))
 
     def test_rack_vm_capacity(self):
@@ -568,7 +562,7 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         vm_capacity = rack.vm_capacity
-        self.assertIsInstance(vm_capacity, Capacity)
+        self.assertIsInstance(vm_capacity, api.Capacity)
         self.assertEquals(100, vm_capacity.value)
 
     def test_rack_flavors(self):
@@ -585,7 +579,7 @@ class TuskarApiTests(test.APITestCase):
 
         rack_flavors = rack.list_flavors
         for f in rack_flavors:
-            self.assertIsInstance(f, Flavor)
+            self.assertIsInstance(f, api.Flavor)
         self.assertEquals(2, len(rack_flavors))
 
     def test_rack_total_instances(self):
@@ -638,7 +632,7 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.data_centers.provision_all()
         self.mox.ReplayAll()
 
-        Rack.provision(self.request, rack.id)
+        api.Rack.provision(self.request, rack.id)
 
     def test_rack_aggregated_alerts(self):
         rack = self.tuskar_racks.first()
@@ -658,20 +652,20 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         for node in rack.aggregated_alerts:
-            self.assertIsInstance(node, Node)
+            self.assertIsInstance(node, api.Node)
         self.assertEquals(1, len(rack.aggregated_alerts))
 
     def test_flavor_template_list(self):
-        templates = FlavorTemplate.list(self.request)
+        templates = api.FlavorTemplate.list(self.request)
         self.assertEquals(7, len(templates))
         for t in templates:
-            self.assertIsInstance(t, FlavorTemplate)
+            self.assertIsInstance(t, api.FlavorTemplate)
 
     def test_flavor_template_get(self):
         test_template = self.tuskar_flavor_templates.first()
-        template = FlavorTemplate.get(self.request,
+        template = api.FlavorTemplate.get(self.request,
                                                  test_template.id)
-        self.assertIsInstance(template, FlavorTemplate)
+        self.assertIsInstance(template, api.FlavorTemplate)
         self.assertEquals(template.name, test_template.name)
 
     def test_flavor_create(self):
@@ -680,17 +674,17 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.flavors = self.mox.CreateMockAnything()
         tuskarclient.flavors.create(1,
-                                   name='nano',
-                                   max_vms=100,
-                                   capacities=[]).AndReturn(flavor)
+                                    name='nano',
+                                    max_vms=100,
+                                    capacities=[]).AndReturn(flavor)
         self.mox.ReplayAll()
 
-        ret_val = Flavor.create(self.request,
-                              resource_class_id=1,
-                              name='nano',
-                              max_vms=100,
-                              capacities=[])
-        self.assertIsInstance(ret_val, Flavor)
+        ret_val = api.Flavor.create(self.request,
+                                    resource_class_id=1,
+                                    name='nano',
+                                    max_vms=100,
+                                    capacities=[])
+        self.assertIsInstance(ret_val, api.Flavor)
 
     def test_flavor_delete(self):
         rc = self.tuskarclient_resource_classes.first()
@@ -701,40 +695,41 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.flavors.delete(rc.id, flavor.id)
         self.mox.ReplayAll()
 
-        Flavor.delete(self.request, resource_class_id=rc.id,
-                                    flavor_id=flavor.id)
+        api.Flavor.delete(self.request,
+                          resource_class_id=rc.id,
+                          flavor_id=flavor.id)
 
     def test_flavor_cpu(self):
         flavor = self.tuskar_flavors.first()
 
         cpu = flavor.cpu
-        self.assertIsInstance(cpu, Capacity)
+        self.assertIsInstance(cpu, api.Capacity)
         self.assertEquals(64, cpu.value)
 
     def test_flavor_memory(self):
         flavor = self.tuskar_flavors.first()
 
         memory = flavor.memory
-        self.assertIsInstance(memory, Capacity)
+        self.assertIsInstance(memory, api.Capacity)
         self.assertEquals(1024, memory.value)
 
     def test_flavor_storage(self):
         flavor = self.tuskar_flavors.first()
 
         storage = flavor.storage
-        self.assertIsInstance(storage, Capacity)
+        self.assertIsInstance(storage, api.Capacity)
         self.assertEquals(1, storage.value)
 
     def test_flavor_ephemeral_disk(self):
         flavor = self.tuskar_flavors.first()
 
         ephemeral_disk = flavor.ephemeral_disk
-        self.assertIsInstance(ephemeral_disk, Capacity)
+        self.assertIsInstance(ephemeral_disk, api.Capacity)
         self.assertEquals(0, ephemeral_disk.value)
 
     def test_flavor_swap_disk(self):
         flavor = self.tuskar_flavors.first()
 
         swap_disk = flavor.swap_disk
-        self.assertIsInstance(swap_disk, Capacity)
+        self.assertIsInstance(swap_disk, api.Capacity)
         self.assertEquals(2, swap_disk.value)

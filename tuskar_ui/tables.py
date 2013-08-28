@@ -14,22 +14,22 @@
 
 import copy
 import logging
-from operator import attrgetter
+import operator
 import sys
 
 from django import forms
-from django.http import HttpResponse
+import django.http
 from django import template
-from django.utils.datastructures import SortedDict
-from django.utils.html import escape
+from django.utils import datastructures
+from django.utils import html
 from django.utils import http
 from django.utils import termcolors
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import conf
 from horizon import exceptions
 from horizon import messages
-from horizon.tables.actions import LinkAction
+from horizon.tables import actions as table_actions
 from horizon.tables import base as horizon_tables
 
 
@@ -128,7 +128,7 @@ class Row(horizon_tables.Row):
                 data = column.get_data(datum)
             cell = horizon_tables.Cell(datum, data, column, self)
             cells.append((column.name or column.auto, cell))
-        self.cells = SortedDict(cells)
+        self.cells = datastructures.SortedDict(cells)
 
         if self.ajax:
             interval = conf.HORIZON_CONFIG['ajax_poll_interval']
@@ -147,7 +147,7 @@ class Row(horizon_tables.Row):
         # Add the row's display name if available
         display_name = table.get_object_display(datum)
         if display_name:
-            self.attrs['data-display'] = escape(display_name)
+            self.attrs['data-display'] = html.escape(display_name)
 
 
 class DataTableOptions(horizon_tables.DataTableOptions):
@@ -185,7 +185,7 @@ class DataTableMetaclass(type):
         for base in bases[::-1]:
             if hasattr(base, 'base_columns'):
                 columns = base.base_columns.items() + columns
-        attrs['base_columns'] = SortedDict(columns)
+        attrs['base_columns'] = datastructures.SortedDict(columns)
 
         # If the table is in a ResourceBrowser, the column number must meet
         # these limits because of the width of the browser.
@@ -218,15 +218,15 @@ class DataTableMetaclass(type):
             actions_column.classes.append('actions_column')
             columns.append(("actions", actions_column))
         # Store this set of columns internally so we can copy them per-instance
-        attrs['_columns'] = SortedDict(columns)
+        attrs['_columns'] = datastructures.SortedDict(columns)
 
         # Gather and register actions for later access since we only want
         # to instantiate them once.
         # (list() call gives deterministic sort order, which sets don't have.)
         actions = list(set(opts.row_actions) | set(opts.table_actions))
-        actions.sort(key=attrgetter('name'))
-        actions_dict = SortedDict([(action.name, action())
-                                   for action in actions])
+        actions.sort(key=operator.attrgetter('name'))
+        actions_dict = datastructures.SortedDict([(action.name, action())
+                                                    for action in actions])
         attrs['base_actions'] = actions_dict
         if opts._filter_action:
             # Replace our filter action with the instantiated version
@@ -278,7 +278,7 @@ class DataTable(object):
             column = copy.copy(_column)
             column.table = self
             columns.append((key, column))
-        self.columns = SortedDict(columns)
+        self.columns = datastructures.SortedDict(columns)
         self._populate_data_cache()
 
         # Associate these actions with this table
@@ -455,7 +455,7 @@ class DataTable(object):
             # Hook for modifying actions based on data. No-op by default.
             bound_action.update(self.request, datum)
             # Pre-create the URL for this link with appropriate parameters
-            if issubclass(bound_action.__class__, LinkAction):
+            if issubclass(bound_action.__class__, table_actions.LinkAction):
                 bound_action.bound_url = bound_action.get_link_url(datum)
             bound_actions.append(bound_action)
         return bound_actions
@@ -573,9 +573,10 @@ class DataTable(object):
                     error = exceptions.handle(request, ignore=True)
                 if request.is_ajax():
                     if not error:
-                        return HttpResponse(new_row.render())
+                        return django.http.HttpResponse(new_row.render())
                     else:
-                        return HttpResponse(status=error.status_code)
+                        return django.http.HttpResponse(
+                                    status=error.status_code)
 
             preemptive_actions = [action for action in
                                   self.base_actions.values() if action.preempt]
