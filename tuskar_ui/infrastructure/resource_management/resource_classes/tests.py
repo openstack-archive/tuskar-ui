@@ -13,6 +13,7 @@
 #    under the License.
 
 from django.core.urlresolvers import reverse
+from django.utils import simplejson
 from django import http
 from mox import IsA
 from tuskar_ui import api as tuskar
@@ -79,6 +80,36 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             ("%s?tab=resource_management_tabs__resource_classes_tab" %
              reverse("horizon:infrastructure:resource_management:index")))
 
+    @test.create_stubs({
+        tuskar.ResourceClass: ('list', 'create', 'set_racks'),
+    })
+    def test_create_resource_class_post_exception(self):
+        new_resource_class = self.tuskar_resource_classes.first()
+        new_unique_name = "unique_name_for_sure"
+        new_flavors = []
+
+        add_racks_ids = []
+
+        tuskar.ResourceClass.list(
+            IsA(http.request.HttpRequest)).AndReturn(
+                self.tuskar_resource_classes.list())
+        tuskar.ResourceClass.\
+            create(IsA(http.HttpRequest), name=new_unique_name,
+                   service_type=new_resource_class.service_type,
+                   flavors=new_flavors).\
+            AndRaise(self.exceptions.tuskar)
+        self.mox.ReplayAll()
+
+        url = reverse('horizon:infrastructure:resource_management:'
+                      'resource_classes:create')
+        form_data = {'name': new_unique_name,
+                     'service_type': new_resource_class.service_type,
+                     'image': 'compute-img'}
+        res = self.client.post(url, form_data)
+        self.assertRedirectsNoFollow(res,
+            ("%s?tab=resource_management_tabs__resource_classes_tab" %
+             reverse("horizon:infrastructure:resource_management:index")))
+
     @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
                                                    'racks_ids', 'all_racks',
                                                    'all_flavors')})
@@ -106,6 +137,28 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             args=[resource_class.id])
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
+
+    @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
+                                                   'racks_ids', 'all_racks',
+                                                   'all_flavors')})
+    def test_edit_resource_class_get_exception(self):
+        resource_class = self.tuskar_resource_classes.first()
+        all_flavors = []
+        all_racks = []
+
+        tuskar.ResourceClass.\
+            get(IsA(http.HttpRequest), resource_class.id).MultipleTimes()\
+            .AndRaise(self.exceptions.tuskar)
+
+        self.mox.ReplayAll()
+
+        url = reverse(
+            'horizon:infrastructure:resource_management:'
+            'resource_classes:update',
+            args=[resource_class.id])
+        res = self.client.get(url)
+        self.assertRedirectsNoFollow(
+            res, reverse('horizon:infrastructure:resource_management:index'))
 
     @test.create_stubs({
         tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks')
@@ -166,6 +219,29 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(
             res, reverse('horizon:infrastructure:resource_management:index'))
 
+    @test.create_stubs({tuskar.ResourceClass: ('delete', 'list')})
+    def test_delete_resource_class_exception(self):
+        resource_class = self.tuskar_resource_classes.first()
+        all_resource_classes = self.tuskar_resource_classes.list()
+
+        tuskar.ResourceClass.delete(
+            IsA(http.HttpRequest),
+            resource_class.id).AndRaise(self.exceptions.tuskar)
+        tuskar.ResourceClass.list(
+            IsA(http.HttpRequest)).\
+            AndReturn(all_resource_classes)
+        self.mox.ReplayAll()
+
+        form_data = {'action':
+                     'resource_classes__delete__%s' % resource_class.id}
+        res = self.client.post(
+            reverse('horizon:infrastructure:resource_management:index'),
+            form_data)
+        # FIXME: there should be a better test than this, but the message
+        # is unreadable in a redirect response
+        self.assertRedirectsNoFollow(
+            res, reverse('horizon:infrastructure:resource_management:index'))
+
     @test.create_stubs({
         tuskar.ResourceClass: ('get', 'list_flavors', 'list_racks')
     })
@@ -193,6 +269,49 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertEqual(res.status_code, 200)
         self.assertTemplateUsed(res,
             'infrastructure/resource_management/resource_classes/detail.html')
+
+    @test.create_stubs({
+        tuskar.ResourceClass: ('get', 'list_racks')
+    })
+    def test_rack_health_get(self):
+        resource_class = self.tuskar_resource_classes.first()
+        racks = [self.tuskar_racks.first()]
+        tuskar.ResourceClass.get(
+            IsA(http.HttpRequest),
+            resource_class.id).\
+            AndReturn(resource_class)
+        self.mox.ReplayAll()
+
+        tuskar.ResourceClass.list_racks = racks
+
+        url = reverse('horizon:infrastructure:resource_management:'
+                      'resource_classes:rack_health', args=[resource_class.id])
+        res = self.client.get(url)
+        data = simplejson.loads(res.content)['data']
+
+        # FIXME: this is dummy data right now, just assert its presence
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['name'], 'rack1')
+
+    @test.create_stubs({
+        tuskar.ResourceClass: ('get', 'list_flavors', 'list_racks')
+    })
+    def test_detail_get_exception(self):
+        resource_class = self.tuskar_resource_classes.first()
+        flavors = []
+        racks = []
+
+        tuskar.ResourceClass.get(
+            IsA(http.HttpRequest),
+            resource_class.id).\
+                    MultipleTimes().AndRaise(self.exceptions.tuskar)
+        self.mox.ReplayAll()
+
+        url = reverse('horizon:infrastructure:resource_management:'
+                      'resource_classes:detail', args=[resource_class.id])
+        res = self.client.get(url)
+        self.assertRedirectsNoFollow(
+            res, reverse('horizon:infrastructure:resource_management:index'))
 
     @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
                                                    'racks_ids', 'all_racks',
@@ -331,12 +450,3 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         redirect_url = "%s?tab=resource_class_details__flavors" % (
             reverse(redirect_url, args=(resource_class.id,)))
         self.assertRedirectsNoFollow(res, redirect_url)
-
-    # def test_detail_get_exception(self):
-    #     index_url = reverse('horizon:infractructure:resource_management:'
-    #                         'resource_classes:index')
-    #     detail_url = reverse('horizon:infrastructure:resource_management:'
-    #                          'resource_classes:detail', args=[42])
-
-    #     res = self.client.get(detail_url)
-    #     self.assertRedirectsNoFollow(res, index_url)
