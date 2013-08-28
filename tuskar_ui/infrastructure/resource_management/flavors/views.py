@@ -13,19 +13,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext_lazy as _
+from django.core import urlresolvers
+from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import exceptions
-from horizon import tabs
+from horizon import tabs as horizon_tabs
 
 from tuskar_ui import api as tuskar
-from tuskar_ui.infrastructure. \
-    resource_management.flavors.tabs import FlavorDetailTabs
+from tuskar_ui.infrastructure.resource_management.flavors import tabs
 
 
-class DetailView(tabs.TabView):
-    tab_group_class = FlavorDetailTabs
+class DetailView(horizon_tabs.TabView):
+    tab_group_class = tabs.FlavorDetailTabs
     template_name = ('infrastructure/resource_management/flavors/detail.html')
 
     def get_context_data(self, **kwargs):
@@ -43,8 +42,8 @@ class DetailView(tabs.TabView):
                                            flavor_id,
                                            resource_class_id)
             except Exception:
-                redirect = reverse('horizon:infrastructure:'
-                                   'resource_management:index')
+                redirect = urlresolvers.reverse(
+                            'horizon:infrastructure:resource_management:index')
                 exceptions.handle(self.request,
                                   _('Unable to retrieve details for '
                                     'flavor "%s".') % flavor_id,
@@ -59,8 +58,8 @@ class DetailView(tabs.TabView):
                 resource_class = tuskar.ResourceClass.get(self.request,
                                                           resource_class_id)
             except Exception:
-                redirect = reverse('horizon:infrastructure:'
-                                   'resource_management:index')
+                redirect = urlresolvers.reverse(
+                            'horizon:infrastructure:resource_management:index')
                 exceptions.handle(self.request,
                                   _('Unable to retrieve details for resource '
                                     'class "%s".') % resource_class_id,

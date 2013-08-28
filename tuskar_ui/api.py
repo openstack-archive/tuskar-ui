@@ -12,18 +12,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from collections import namedtuple
+import collections
 import copy
-from datetime import timedelta
+import datetime
 import logging
-from random import randint
+import random
 import re
 
-from django.conf import settings
-from django.db.models import Max
-from django.utils.translation import ugettext_lazy as _
+import django.conf
+import django.db.models
+from django.utils.translation import ugettext_lazy as _  # noqa
 from horizon import exceptions
-from requests import ConnectionError
+import requests
 
 from novaclient.v1_1.contrib import baremetal
 from tuskarclient.v1 import client as tuskar_client
@@ -35,10 +35,11 @@ import tuskar_ui.infrastructure.models as dummymodels
 
 
 LOG = logging.getLogger(__name__)
-TUSKAR_ENDPOINT_URL = getattr(settings, 'TUSKAR_ENDPOINT_URL')
-REMOTE_NOVA_BAREMETAL_CREDS = getattr(settings, 'REMOTE_NOVA_BAREMETAL_CREDS',
+TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
+REMOTE_NOVA_BAREMETAL_CREDS = getattr(django.conf.settings,
+                                      'REMOTE_NOVA_BAREMETAL_CREDS',
                                       False)
-OVERCLOUD_CREDS = getattr(settings, 'OVERCLOUD_CREDS', False)
+OVERCLOUD_CREDS = getattr(django.conf.settings, 'OVERCLOUD_CREDS', False)
 
 
 # FIXME: request isn't used right in the tuskar client right now, but looking
@@ -58,13 +59,15 @@ def baremetalclient(request):
         return nc
 
     def create_nova_client_baremetal():
-        insecure = getattr(settings, 'OPENSTACK_SSL_NO_VERIFY', False)
-        nc = nova.nova_client.Client(request.user.username,
-                                     request.user.token.id,
-                                     project_id=request.user.tenant_id,
-                                     auth_url=base.url_for(request, 'compute'),
-                                     insecure=insecure,
-                                     http_log_debug=settings.DEBUG)
+        insecure = getattr(django.conf.settings, 'OPENSTACK_SSL_NO_VERIFY',
+                           False)
+        nc = nova.nova_client.Client(
+                request.user.username,
+                request.user.token.id,
+                project_id=request.user.tenant_id,
+                auth_url=base.url_for(request, 'compute'),
+                insecure=insecure,
+                http_log_debug=django.conf.settings.DEBUG)
         nc.client.auth_token = request.user.token.id
         nc.client.management_url = base.url_for(request, 'compute')
 
@@ -168,7 +171,7 @@ class Capacity(StringIdAPIResourceWrapper):
     @property
     def usage(self):
         if not hasattr(self, '_usage'):
-            self._usage = randint(0, int(self.value))
+            self._usage = random.randint(0, int(self.value))
         return self._usage
 
     # defines a random average of capacity - API should probably be able to
@@ -176,7 +179,7 @@ class Capacity(StringIdAPIResourceWrapper):
     @property
     def average(self):
         if not hasattr(self, '_average'):
-            self._average = randint(0, int(self.value))
+            self._average = random.randint(0, int(self.value))
         return self._average
 
 
@@ -230,7 +233,7 @@ class Node(StringIdAPIResourceWrapper):
     def list_unracked(cls, request):
         try:
             return [n for n in Node.list(request) if (n.rack is None)]
-        except ConnectionError:
+        except requests.ConnectionError:
             return []
 
     @classmethod
@@ -292,10 +295,12 @@ class Node(StringIdAPIResourceWrapper):
     def vm_capacity(self):
         if not hasattr(self, '_vm_capacity'):
             try:
-                value = dummymodels.ResourceClassFlavor.objects\
-                            .filter(
-                                resource_class__rack__node=self._apiresource)\
-                            .aggregate(Max("max_vms"))['max_vms__max']
+                value = (
+                    dummymodels.ResourceClassFlavor.objects
+                        .filter(resource_class__rack__node=self._apiresource)
+                        .aggregate(django.db.models.Max("max_vms"))
+                        ['max_vms__max']
+                )
             except Exception:
                 value = _("Unable to retrieve vm capacity")
 
@@ -820,7 +825,7 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
     @property
     def running_virtual_machines(self):
         # FIXME: arbitrary number
-        return randint(0, int(self.cpu.value))
+        return random.randint(0, int(self.cpu.value))
 
     # defines a random average of capacity - API should probably be able to
     # determine average of capacity based on capacity value and obejct_id
@@ -828,10 +833,11 @@ class FlavorTemplate(StringIdAPIResourceWrapper):
         values = []
         current_time = start_time
         while current_time <= end_time:
-            values.append(
-                {'date': current_time,
-                 'active_vms': randint(0, self.running_virtual_machines)})
-            current_time += timedelta(hours=1)
+            values.append({
+                'date': current_time,
+                'active_vms': random.randint(0, self.running_virtual_machines)
+            })
+            current_time += datetime.timedelta(hours=1)
 
         return values
 
@@ -917,7 +923,8 @@ class Flavor(StringIdAPIResourceWrapper):
         if not hasattr(self, '_capacities'):
             ## FIXME: should we distinguish between tuskar
             ## capacities and our internal capacities?
-            CapacityStruct = namedtuple('CapacityStruct', 'name value unit')
+            CapacityStruct = collections.namedtuple('CapacityStruct',
+                                                    'name value unit')
             self._capacities = [Capacity(CapacityStruct(
                         name=c['name'],
                         value=c['value'],
@@ -963,7 +970,7 @@ class Flavor(StringIdAPIResourceWrapper):
     @property
     def running_virtual_machines(self):
         # FIXME: arbitrary number
-        return randint(0, int(self.cpu.value))
+        return random.randint(0, int(self.cpu.value))
 
     # defines a random average of capacity - API should probably be able to
     # determine average of capacity based on capacity value and obejct_id
@@ -971,8 +978,10 @@ class Flavor(StringIdAPIResourceWrapper):
         values = []
         current_time = start_time
         while current_time <= end_time:
-            values.append({'date': current_time,
-                           'value': randint(0, self.running_virtual_machines)})
-            current_time += timedelta(hours=1)
+            values.append({
+                'date': current_time,
+                'value': random.randint(0, self.running_virtual_machines)
+            })
+            current_time += datetime.timedelta(hours=1)
 
         return values

@@ -12,19 +12,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import patterns
-from django.conf.urls.defaults import url
+from django.conf.urls import defaults
 
-from tuskar_ui.infrastructure.resource_management.nodes.views import DetailView
-from tuskar_ui.infrastructure.resource_management.nodes.views \
-    import UnrackedView
+from tuskar_ui.infrastructure.resource_management.nodes import views
 
 
 NODES = r'^(?P<node_id>[^/]+)/%s$'
 VIEW_MOD = 'tuskar_ui.infrastructure.resource_management.nodes.views'
 
 
-urlpatterns = patterns(VIEW_MOD,
-    url(NODES % 'detail', DetailView.as_view(), name='detail'),
-    url(r'^unracked/$', UnrackedView.as_view(), name='unracked'),
+urlpatterns = defaults.patterns(VIEW_MOD,
+    defaults.url(NODES % 'detail', views.DetailView.as_view(), name='detail'),
+    defaults.url(r'^unracked/$',
+                 views.UnrackedView.as_view(),
+                 name='unracked'),
 )

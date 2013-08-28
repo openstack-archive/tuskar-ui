@@ -12,15 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import exceptions
 from horizon import tabs
 
-from tuskar_ui.infrastructure.resource_management. \
-    resource_classes.tables import RacksTable
-from tuskar_ui.infrastructure.resource_management. \
-    resource_classes.tables import FlavorsTable
+from tuskar_ui.infrastructure.resource_management.resource_classes\
+    import tables
 
 
 class OverviewTab(tabs.Tab):
@@ -36,7 +34,7 @@ class OverviewTab(tabs.Tab):
 
 
 class RacksTab(tabs.TableTab):
-    table_classes = (RacksTable,)
+    table_classes = (tables.RacksTable,)
     name = _("Racks")
     slug = "racks"
     template_name = ("infrastructure/resource_management/resource_classes/"
@@ -54,7 +52,7 @@ class RacksTab(tabs.TableTab):
 
 
 class FlavorsTab(tabs.TableTab):
-    table_classes = (FlavorsTable,)
+    table_classes = (tables.FlavorsTable,)
     name = _("Flavors")
     slug = "flavors"
     template_name = ("infrastructure/resource_management/resource_classes/"

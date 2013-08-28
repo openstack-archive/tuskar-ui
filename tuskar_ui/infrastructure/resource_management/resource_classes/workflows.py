@@ -13,8 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext_lazy as _
+from django.core import urlresolvers
+from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import exceptions
 from horizon import forms
@@ -25,10 +25,8 @@ import tuskar_ui.workflows
 
 import re
 
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.tables import FlavorTemplatesTable
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.tables import RacksTable
+from tuskar_ui.infrastructure.resource_management.resource_classes\
+    import tables
 
 
 class ResourceClassInfoAndFlavorsAction(workflows.Action):
@@ -85,7 +83,7 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
 
 
 class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.TableStep):
-    table_classes = (FlavorTemplatesTable,)
+    table_classes = (tables.FlavorTemplatesTable,)
 
     action_class = ResourceClassInfoAndFlavorsAction
     template_name = 'infrastructure/resource_management/resource_classes/'\
@@ -141,7 +139,7 @@ class RacksAction(workflows.Action):
 
 
 class CreateRacks(tuskar_ui.workflows.TableStep):
-    table_classes = (RacksTable,)
+    table_classes = (tables.RacksTable,)
 
     action_class = RacksAction
     contributes = ("racks_object_ids")
@@ -189,7 +187,8 @@ class ResourceClassWorkflowMixin:
     def get_index_url(self):
         """This url is used both as success and failure url"""
         return "%s?tab=resource_management_tabs__resource_classes_tab" %\
-            reverse("horizon:infrastructure:resource_management:index")
+            urlresolvers.reverse('horizon:infrastructure:resource_management:'
+                                        'index')
 
     def get_success_url(self):
         return self.get_index_url()
@@ -303,7 +302,8 @@ class DetailUpdateWorkflow(UpdateResourceClass):
         url = "horizon:infrastructure:resource_management:resource_classes:"\
               "detail"
         return "%s?tab=resource_class_details__overview" % (
-            reverse(url, args=(self.context["resource_class_id"])))
+            urlresolvers.reverse(url,
+                                 args=(self.context["resource_class_id"])))
 
 
 class UpdateRacksWorkflow(UpdateResourceClass):
@@ -312,7 +312,8 @@ class UpdateRacksWorkflow(UpdateResourceClass):
         url = "horizon:infrastructure:resource_management:resource_classes:"\
               "detail"
         return "%s?tab=resource_class_details__racks" % (
-            reverse(url, args=(self.context["resource_class_id"])))
+            urlresolvers.reverse(url,
+                                 args=(self.context["resource_class_id"])))
 
 
 class UpdateFlavorsWorkflow(UpdateResourceClass):
@@ -321,4 +322,5 @@ class UpdateFlavorsWorkflow(UpdateResourceClass):
         url = "horizon:infrastructure:resource_management:resource_classes:"\
               "detail"
         return "%s?tab=resource_class_details__flavors" % (
-            reverse(url, args=(self.context["resource_class_id"])))
+            urlresolvers.reverse(url,
+                                 args=(self.context["resource_class_id"])))

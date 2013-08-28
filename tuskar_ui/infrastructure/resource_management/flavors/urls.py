@@ -13,16 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import patterns
-from django.conf.urls.defaults import url
+from django.conf.urls import defaults
 
-from tuskar_ui.infrastructure.resource_management.flavors.views \
-    import DetailView
+from tuskar_ui.infrastructure.resource_management.flavors import views
 
 
 VIEW_MOD = 'tuskar_ui.infrastructure.' \
            'resource_management.flavors.views'
 
-urlpatterns = patterns(VIEW_MOD,
-    url(r'^(?P<flavor_id>[^/]+)/$', DetailView.as_view(), name='detail')
+urlpatterns = defaults.patterns(VIEW_MOD,
+    defaults.url(r'^(?P<flavor_id>[^/]+)/$',
+                 views.DetailView.as_view(),
+                 name='detail')
 )

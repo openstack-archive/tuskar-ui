@@ -17,12 +17,11 @@ Views for Resource Management.
 """
 
 
-from horizon import tabs
+from horizon import tabs as horizon_tabs
 
-from tuskar_ui.infrastructure. \
-    resource_management.tabs import ResourceManagementTabs
+from tuskar_ui.infrastructure.resource_management import tabs
 
 
-class IndexView(tabs.TabbedTableView):
-    tab_group_class = ResourceManagementTabs
+class IndexView(horizon_tabs.TabbedTableView):
+    tab_group_class = tabs.ResourceManagementTabs
     template_name = 'infrastructure/resource_management/index.html'

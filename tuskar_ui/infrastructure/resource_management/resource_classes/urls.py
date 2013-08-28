@@ -12,48 +12,41 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import include
-from django.conf.urls.defaults import patterns
-from django.conf.urls.defaults import url
+from django.conf.urls import defaults
 
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.views import CreateView
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.views import DetailActionView
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.views import DetailUpdateView
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.views import DetailView
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.views import UpdateFlavorsView
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.views import UpdateRacksView
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.views import UpdateView
-from tuskar_ui.infrastructure. \
-    resource_management.flavors import urls as flavor_urls
+from tuskar_ui.infrastructure.resource_management.flavors\
+    import urls as flavor_urls
+from tuskar_ui.infrastructure.resource_management.resource_classes import views
 
 
 RESOURCE_CLASS = r'^(?P<resource_class_id>[^/]+)/%s$'
-VIEW_MOD = 'tuskar_ui.infrastructure.' \
-           'resource_management.resource_classes.views'
+VIEW_MOD = ('tuskar_ui.infrastructure.resource_management.resource_classes.'
+            'views')
 
-urlpatterns = patterns(
+urlpatterns = defaults.patterns(
     VIEW_MOD,
-    url(r'^create/$', CreateView.as_view(), name='create'),
-    url(r'^(?P<resource_class_id>[^/]+)/$',
-        DetailView.as_view(), name='detail'),
-    url(RESOURCE_CLASS % 'update', UpdateView.as_view(), name='update'),
-    url(RESOURCE_CLASS % 'detail_action', DetailActionView.as_view(),
-        name='detail_action'),
-    url(RESOURCE_CLASS % 'detail_update', DetailUpdateView.as_view(),
-        name='detail_update'),
-    url(RESOURCE_CLASS % 'update_racks', UpdateRacksView.as_view(),
-        name='update_racks'),
-    url(RESOURCE_CLASS % 'update_flavors', UpdateFlavorsView.as_view(),
-        name='update_flavors'),
-    url(RESOURCE_CLASS % 'rack_health.json', 'rack_health',
-        name='rack_health'),
-    url(r'^(?P<resource_class_id>[^/]+)/flavors/',
-        include(flavor_urls, namespace='flavors')),
+    defaults.url(r'^create/$', views.CreateView.as_view(), name='create'),
+    defaults.url(r'^(?P<resource_class_id>[^/]+)/$',
+                 views.DetailView.as_view(),
+                 name='detail'),
+    defaults.url(RESOURCE_CLASS % 'update',
+                 views.UpdateView.as_view(),
+                 name='update'),
+    defaults.url(RESOURCE_CLASS % 'detail_action',
+                 views.DetailActionView.as_view(),
+                 name='detail_action'),
+    defaults.url(RESOURCE_CLASS % 'detail_update',
+                 views.DetailUpdateView.as_view(),
+                 name='detail_update'),
+    defaults.url(RESOURCE_CLASS % 'update_racks',
+                 views.UpdateRacksView.as_view(),
+                 name='update_racks'),
+    defaults.url(RESOURCE_CLASS % 'update_flavors',
+                 views.UpdateFlavorsView.as_view(),
+                 name='update_flavors'),
+    defaults.url(RESOURCE_CLASS % 'rack_health.json',
+                 'rack_health',
+                 name='rack_health'),
+    defaults.url(r'^(?P<resource_class_id>[^/]+)/flavors/',
+                 defaults.include(flavor_urls, namespace='flavors')),
 )

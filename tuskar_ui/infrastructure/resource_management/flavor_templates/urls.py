@@ -13,31 +13,27 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import patterns
-from django.conf.urls.defaults import url
+from django.conf.urls import defaults
 
-from tuskar_ui.infrastructure.resource_management.flavor_templates.views \
-    import ActiveInstancesDataView
-from tuskar_ui.infrastructure.resource_management.flavor_templates.views \
-    import CreateView
-from tuskar_ui.infrastructure.resource_management.flavor_templates.views \
-    import DetailEditView
-from tuskar_ui.infrastructure.resource_management.flavor_templates.views \
-    import DetailView
-from tuskar_ui.infrastructure.resource_management.flavor_templates.views \
-    import EditView
+from tuskar_ui.infrastructure.resource_management.flavor_templates import views
 
 
 FLAVOR_TEMPLATES = r'^(?P<flavor_template_id>[^/]+)/%s$'
 VIEW_MOD = 'tuskar_ui.infrastructure.' \
            'resource_management.flavor_templates.views'
 
-urlpatterns = patterns(VIEW_MOD,
-    url(r'^create/$', CreateView.as_view(), name='create'),
-    url(FLAVOR_TEMPLATES % 'edit/$', EditView.as_view(), name='edit'),
-    url(FLAVOR_TEMPLATES % 'detail_edit/$',
-        DetailEditView.as_view(), name='detail_edit'),
-    url(FLAVOR_TEMPLATES % 'detail', DetailView.as_view(), name='detail'),
-    url(FLAVOR_TEMPLATES % 'active_instances_data',
-        ActiveInstancesDataView.as_view(), name='active_instances_data')
+urlpatterns = defaults.patterns(VIEW_MOD,
+    defaults.url(r'^create/$', views.CreateView.as_view(), name='create'),
+    defaults.url(FLAVOR_TEMPLATES % 'edit/$',
+                 views.EditView.as_view(),
+                 name='edit'),
+    defaults.url(FLAVOR_TEMPLATES % 'detail_edit/$',
+                 views.DetailEditView.as_view(),
+                 name='detail_edit'),
+    defaults.url(FLAVOR_TEMPLATES % 'detail',
+                 views.DetailView.as_view(),
+                 name='detail'),
+    defaults.url(FLAVOR_TEMPLATES % 'active_instances_data',
+                 views.ActiveInstancesDataView.as_view(),
+                 name='active_instances_data')
 )

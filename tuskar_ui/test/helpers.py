@@ -22,7 +22,7 @@ from tuskarclient.v1 import client as tuskar_client
 
 from openstack_dashboard.test import helpers as openstack_dashboard_helpers
 from tuskar_ui import api as tuskar_api
-from tuskar_ui.test.test_data.utils import load_test_data
+from tuskar_ui.test.test_data import utils as test_data_utils
 
 
 # Makes output of failing mox tests much easier to read.
@@ -56,7 +56,7 @@ class TestCase(openstack_dashboard_helpers.TestCase):
         super(TestCase, self).setUp()
 
         # load tuskar-specific test data
-        load_test_data(self)
+        test_data_utils.load_test_data(self)
 
 
 class BaseAdminViewTests(openstack_dashboard_helpers.BaseAdminViewTests):
@@ -68,7 +68,7 @@ class BaseAdminViewTests(openstack_dashboard_helpers.BaseAdminViewTests):
         super(BaseAdminViewTests, self).setUp()
 
         # load tuskar-specific test data
-        load_test_data(self)
+        test_data_utils.load_test_data(self)
 
 
 class APITestCase(openstack_dashboard_helpers.APITestCase):
@@ -81,7 +81,7 @@ class APITestCase(openstack_dashboard_helpers.APITestCase):
         super(APITestCase, self).setUp()
 
         # load tuskar-specfic test data
-        load_test_data(self)
+        test_data_utils.load_test_data(self)
 
         # Store the original clients
         self._original_tuskarclient = tuskar_api.tuskarclient
