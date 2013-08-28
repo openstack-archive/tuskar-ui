@@ -14,12 +14,12 @@
 
 # FIXME: configuration for dummy data
 from django.contrib.contenttypes import generic
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import models as contenttype_models
 from django.db import models
 
 
 class Capacity(models.Model):
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(contenttype_models.ContentType)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
 

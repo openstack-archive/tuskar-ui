@@ -12,22 +12,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import exceptions
 from horizon import tabs
 
 from tuskar_ui import api as tuskar
-from tuskar_ui.infrastructure. \
-    resource_management.flavor_templates.tables import FlavorTemplatesTable
-from tuskar_ui.infrastructure. \
-    resource_management.racks.tables import RacksTable
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes.tables import ResourceClassesTable
+from tuskar_ui.infrastructure.resource_management.flavor_templates\
+    import tables as flavor_templates_tables
+from tuskar_ui.infrastructure.resource_management.racks\
+    import tables as racks_tables
+from tuskar_ui.infrastructure.resource_management.resource_classes\
+    import tables as resource_classes_tables
 
 
 class RacksTab(tabs.TableTab):
-    table_classes = (RacksTable,)
+    table_classes = (racks_tables.RacksTable,)
     name = _("Racks")
     slug = "racks_tab"
     template_name = ("infrastructure/resource_management/"
@@ -54,7 +54,7 @@ class RacksTab(tabs.TableTab):
 
 
 class FlavorTemplatesTab(tabs.TableTab):
-    table_classes = (FlavorTemplatesTable,)
+    table_classes = (flavor_templates_tables.FlavorTemplatesTable,)
     name = _("Flavor Templates")
     slug = "flavor_templates_tab"
     template_name = "horizon/common/_detail_table.html"
@@ -70,7 +70,7 @@ class FlavorTemplatesTab(tabs.TableTab):
 
 
 class ResourceClassesTab(tabs.TableTab):
-    table_classes = (ResourceClassesTable,)
+    table_classes = (resource_classes_tables.ResourceClassesTable,)
     name = _("Classes")
     slug = "resource_classes_tab"
     template_name = "horizon/common/_detail_table.html"

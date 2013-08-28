@@ -16,20 +16,18 @@ import logging
 import re
 
 from django.core import urlresolvers
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import exceptions
 from horizon import tables
 
 from tuskar_ui import api as tuskar
-from tuskar_ui.forms import NumberInput
-from tuskar_ui.infrastructure. \
-    resource_management.flavor_templates import tables \
-        as flavor_templates_tables
-from tuskar_ui.infrastructure. \
-    resource_management.racks import tables as racks_tables
-from tuskar_ui.infrastructure. \
-    resource_management import resource_classes
+from tuskar_ui import forms
+from tuskar_ui.infrastructure.resource_management.flavor_templates\
+    import tables as flavor_templates_tables
+from tuskar_ui.infrastructure.resource_management.racks\
+    import tables as racks_tables
+from tuskar_ui.infrastructure.resource_management import resource_classes
 import tuskar_ui.tables
 
 LOG = logging.getLogger(__name__)
@@ -102,7 +100,7 @@ class FlavorTemplatesTable(flavor_templates_tables.FlavorTemplatesTable):
     max_vms = tuskar_ui.tables.Column("max_vms",
                                       auto='form_widget',
                                       verbose_name=_("Max. VMs"),
-                                      form_widget=NumberInput(),
+                                      form_widget=forms.NumberInput(),
                                       form_widget_attributes={
                                           'class': "number_input_slim"})
 

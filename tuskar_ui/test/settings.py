@@ -14,21 +14,19 @@
 
 import os
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon.test.settings import *  # noqa
-from horizon.utils.secret_key import generate_or_read_from_file
+from horizon.utils import secret_key as secret_key_utils
 
-from tuskar_ui.exceptions import NOT_FOUND
-from tuskar_ui.exceptions import RECOVERABLE
-from tuskar_ui.exceptions import UNAUTHORIZED
+from tuskar_ui import exceptions
 
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_PATH = os.path.abspath(os.path.join(TEST_DIR, ".."))
 
-SECRET_KEY = generate_or_read_from_file(os.path.join(TEST_DIR,
-                                                     '.secret_key_store'))
+SECRET_KEY = secret_key_utils.generate_or_read_from_file(
+    os.path.join(TEST_DIR, '.secret_key_store'))
 ROOT_URLCONF = 'openstack_dashboard.urls'
 TEMPLATE_DIRS = (
     os.path.join(TEST_DIR, 'templates'),
@@ -69,9 +67,9 @@ HORIZON_CONFIG = {
     },
     'user_home': None,
     'help_url': "http://docs.openstack.org",
-    'exceptions': {'recoverable': RECOVERABLE,
-                   'not_found': NOT_FOUND,
-                   'unauthorized': UNAUTHORIZED},
+    'exceptions': {'recoverable': exceptions.RECOVERABLE,
+                   'not_found': exceptions.NOT_FOUND,
+                   'unauthorized': exceptions.UNAUTHORIZED},
 }
 
 # Set to True to allow users to upload images to glance via Horizon server.

@@ -12,8 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext_lazy as _
+from django.core import urlresolvers
+from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import exceptions
 from horizon import forms
@@ -212,8 +212,8 @@ class DetailEditRack(EditRack):
 
     def get_success_url(self):
         rack_id = self.context['rack_id']
-        return reverse(self.success_url, args=(rack_id,))
+        return urlresolvers.reverse(self.success_url, args=(rack_id,))
 
     def get_failure_url(self):
         rack_id = self.context['rack_id']
-        return reverse(self.success_url, args=(rack_id,))
+        return urlresolvers.reverse(self.success_url, args=(rack_id,))

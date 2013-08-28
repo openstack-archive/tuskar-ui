@@ -12,27 +12,26 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls.defaults import include
-from django.conf.urls.defaults import patterns
-from django.conf.urls.defaults import url
+from django.conf.urls import defaults
 
-from tuskar_ui.infrastructure. \
-    resource_management.flavor_templates import urls as flavor_template_urls
-from tuskar_ui.infrastructure. \
-    resource_management.nodes import urls as node_urls
-from tuskar_ui.infrastructure. \
-    resource_management.racks import urls as rack_urls
-from tuskar_ui.infrastructure. \
-    resource_management.resource_classes import urls as resource_classes_urls
-from tuskar_ui.infrastructure. \
-    resource_management.views import IndexView
+from tuskar_ui.infrastructure.resource_management.flavor_templates\
+    import urls as flavor_template_urls
+from tuskar_ui.infrastructure.resource_management.nodes\
+    import urls as node_urls
+from tuskar_ui.infrastructure.resource_management.racks\
+    import urls as rack_urls
+from tuskar_ui.infrastructure.resource_management.resource_classes\
+    import urls as resource_classes_urls
+from tuskar_ui.infrastructure.resource_management import views
 
-urlpatterns = patterns('',
-    url(r'^$', IndexView.as_view(), name='index'),
-    url(r'flavor_templates/', include(flavor_template_urls,
-                                      namespace='flavor_templates')),
-    url(r'racks/', include(rack_urls, namespace='racks')),
-    url(r'resource_classes/',
-        include(resource_classes_urls, namespace='resource_classes')),
-    url(r'nodes/', include(node_urls, namespace='nodes')),
+urlpatterns = defaults.patterns('',
+    defaults.url(r'^$', views.IndexView.as_view(), name='index'),
+    defaults.url(r'flavor_templates/',
+                 defaults.include(flavor_template_urls,
+                                  namespace='flavor_templates')),
+    defaults.url(r'racks/', defaults.include(rack_urls, namespace='racks')),
+    defaults.url(r'resource_classes/',
+                 defaults.include(resource_classes_urls,
+                                  namespace='resource_classes')),
+    defaults.url(r'nodes/', defaults.include(node_urls, namespace='nodes')),
 )

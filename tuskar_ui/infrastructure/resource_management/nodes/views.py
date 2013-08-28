@@ -12,22 +12,20 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext_lazy as _
+from django.core import urlresolvers
+from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import exceptions
-from horizon import tables
-from horizon import tabs
+from horizon import tables as horizon_tables
+from horizon import tabs as horizon_tabs
 
 from tuskar_ui import api as tuskar
-from tuskar_ui.infrastructure.resource_management.nodes.tables \
-    import UnrackedNodesTable
-from tuskar_ui.infrastructure.resource_management.nodes.tabs \
-    import NodeDetailTabs
+from tuskar_ui.infrastructure.resource_management.nodes import tables
+from tuskar_ui.infrastructure.resource_management.nodes import tabs
 
 
-class UnrackedView(tables.DataTableView):
-    table_class = UnrackedNodesTable
+class UnrackedView(horizon_tables.DataTableView):
+    table_class = tables.UnrackedNodesTable
     template_name = 'infrastructure/resource_management/nodes/unracked.html'
 
     def get_data(self):
@@ -40,8 +38,8 @@ class UnrackedView(tables.DataTableView):
         return nodes
 
 
-class DetailView(tabs.TabView):
-    tab_group_class = NodeDetailTabs
+class DetailView(horizon_tabs.TabView):
+    tab_group_class = tabs.NodeDetailTabs
     template_name = 'infrastructure/resource_management/nodes/detail.html'
 
     def get_context_data(self, **kwargs):
@@ -55,8 +53,8 @@ class DetailView(tabs.TabView):
                 node_id = self.kwargs['node_id']
                 node = tuskar.Node.get(self.request, node_id)
             except Exception:
-                redirect = reverse('horizon:infrastructure:'
-                                   'resource_management:index')
+                redirect = urlresolvers.reverse(
+                    'horizon:infrastructure:resource_management:index')
                 exceptions.handle(self.request,
                                   _('Unable to retrieve details for '
                                     'node "%s".')

@@ -17,7 +17,7 @@ import logging
 from django import template
 
 # FIXME: TableStep
-from django.utils.datastructures import SortedDict
+from django.utils import datastructures
 
 import horizon.workflows
 
@@ -57,7 +57,7 @@ class TableStep(horizon.workflows.Step):
         table_instances = [(table._meta.name,
                             table(workflow.request, needs_form_wrapper=False))
                            for table in self.table_classes]
-        self._tables = SortedDict(table_instances)
+        self._tables = datastructures.SortedDict(table_instances)
         self._table_data_loaded = False
 
     def render(self):

@@ -12,8 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext_lazy as _
+from django.core import urlresolvers
+from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import exceptions
 from horizon import forms
@@ -61,6 +61,6 @@ class DeleteCommand(object):
         except Exception:
             self.msg = _('Failed to delete Class %s') % self.resource_class.id
             LOG.info(self.msg)
-            redirect = reverse(
-                "horizon:infrastructure:resource_management:index")
+            redirect = urlresolvers.reverse(
+                            'horizon:infrastructure:resource_management:index')
             exceptions.handle(self.request, self.msg, redirect=redirect)

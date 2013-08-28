@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.core.urlresolvers import reverse
+from django.core import urlresolvers
 from django import http
-from mox import IsA
+import mox
 
 from tuskar_ui import api as tuskar
 from tuskar_ui.test import helpers as test
@@ -27,8 +27,8 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
         template = self.tuskar_flavor_templates.first()
 
         tuskar.FlavorTemplate.list(
-            IsA(http.HttpRequest)).AndReturn([])
-        tuskar.FlavorTemplate.create(IsA(http.HttpRequest),
+            mox.IsA(http.HttpRequest)).AndReturn([])
+        tuskar.FlavorTemplate.create(mox.IsA(http.HttpRequest),
                                      name=template.name,
                                      cpu=0,
                                      memory=0,
@@ -37,12 +37,14 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
                                      swap_disk=0).AndReturn(template)
         self.mox.ReplayAll()
 
-        url = reverse('horizon:infrastructure:resource_management:'
-                      'flavor_templates:create')
+        url = urlresolvers.reverse('horizon:infrastructure:'
+                                        'resource_management:flavor_templates:'
+                                        'create')
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assertTemplateUsed(resp, "infrastructure/resource_management/"
-                                      "flavor_templates/create.html")
+        self.assertTemplateUsed(resp,
+                                'infrastructure/resource_management/'
+                                    'flavor_templates/create.html')
 
         data = {'name': template.name,
                 'cpu': 0,
@@ -51,17 +53,18 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
                 'ephemeral_disk': 0,
                 'swap_disk': 0}
         resp = self.client.post(url, data)
-        self.assertRedirectsNoFollow(
-            resp, reverse('horizon:infrastructure:resource_management:index'))
+        self.assertRedirectsNoFollow(resp,
+            urlresolvers.reverse('horizon:infrastructure:resource_management:'
+                                    'index'))
 
     @test.create_stubs({tuskar.FlavorTemplate: ('list', 'create')})
     def test_create_flavor_template_post_exception(self):
         template = self.tuskar_flavor_templates.first()
 
         tuskar.FlavorTemplate.list(
-            IsA(http.HttpRequest)).AndReturn([])
+            mox.IsA(http.HttpRequest)).AndReturn([])
         tuskar.FlavorTemplate.create(
-            IsA(http.HttpRequest),
+            mox.IsA(http.HttpRequest),
             name=template.name,
             cpu=0,
             memory=0,
@@ -71,8 +74,9 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
 
         self.mox.ReplayAll()
 
-        url = reverse('horizon:infrastructure:resource_management:'
-                      'flavor_templates:create')
+        url = urlresolvers.reverse('horizon:infrastructure:'
+                                        'resource_management:flavor_templates:'
+                                        'create')
         data = {'name': template.name,
                 'cpu': 0,
                 'memory': 0,
@@ -87,13 +91,14 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
     def test_edit_flavor_template_get(self):
         template = self.tuskar_flavor_templates.first()  # has no extra spec
 
-        tuskar.FlavorTemplate.get(IsA(http.HttpRequest),
+        tuskar.FlavorTemplate.get(mox.IsA(http.HttpRequest),
                                   template.id).AndReturn(template)
         self.mox.ReplayAll()
 
-        url = reverse(
-            'horizon:infrastructure:resource_management:flavor_templates:edit',
-            args=[template.id])
+        url = urlresolvers.reverse('horizon:infrastructure:'
+                                        'resource_management:flavor_templates:'
+                                        'edit',
+                                   args=[template.id])
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, "infrastructure/resource_management/"
@@ -103,9 +108,9 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
     def test_edit_flavor_template_post(self):
         template = self.tuskar_flavor_templates.first()  # has no extra spec
 
-        tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).AndReturn(
+        tuskar.FlavorTemplate.list(mox.IsA(http.HttpRequest)).AndReturn(
             self.tuskar_flavor_templates.list())
-        tuskar.FlavorTemplate.update(IsA(http.HttpRequest),
+        tuskar.FlavorTemplate.update(mox.IsA(http.HttpRequest),
                                      template_id=template.id,
                                      name=template.name,
                                      cpu=0,
@@ -113,7 +118,7 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
                                      storage=0,
                                      ephemeral_disk=0,
                                      swap_disk=0).AndReturn(template)
-        tuskar.FlavorTemplate.get(IsA(http.HttpRequest),
+        tuskar.FlavorTemplate.get(mox.IsA(http.HttpRequest),
                                   template.id).AndReturn(template)
         self.mox.ReplayAll()
 
@@ -124,23 +129,25 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
                 'storage': 0,
                 'ephemeral_disk': 0,
                 'swap_disk': 0}
-        url = reverse(
-            'horizon:infrastructure:resource_management:flavor_templates:edit',
-            args=[template.id])
+        url = urlresolvers.reverse('horizon:infrastructure:'
+                                        'resource_management:flavor_templates:'
+                                        'edit',
+                                   args=[template.id])
         resp = self.client.post(url, data)
         self.assertNoFormErrors(resp)
         self.assertMessageCount(success=1)
-        self.assertRedirectsNoFollow(
-            resp, reverse('horizon:infrastructure:resource_management:index'))
+        self.assertRedirectsNoFollow(resp,
+            urlresolvers.reverse('horizon:infrastructure:resource_management:'
+                                        'index'))
 
     @test.create_stubs({tuskar.FlavorTemplate: ('list', 'update')})
     def test_edit_flavor_template_post_exception(self):
         template = self.tuskar_flavor_templates.first()  # has no extra spec
 
-        tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).AndReturn(
+        tuskar.FlavorTemplate.list(mox.IsA(http.HttpRequest)).AndReturn(
             self.tuskar_flavor_templates.list())
         tuskar.FlavorTemplate.update(
-            IsA(http.HttpRequest),
+            mox.IsA(http.HttpRequest),
             template_id=template.id,
             name=template.name,
             cpu=0,
@@ -157,9 +164,10 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
                 'storage': 0,
                 'ephemeral_disk': 0,
                 'swap_disk': 0}
-        url = reverse(
-            'horizon:infrastructure:resource_management:flavor_templates:edit',
-            args=[template.id])
+        url = urlresolvers.reverse('horizon:infrastructure:'
+                                        'resource_management:flavor_templates:'
+                                        'edit',
+                                   args=[template.id])
         resp = self.client.post(url, data)
 
         self.assertMessageCount(resp, error=1)
@@ -168,50 +176,59 @@ class FlavorTemplatesTests(test.BaseAdminViewTests):
     def test_delete_flavor_template(self):
         template = self.tuskar_flavor_templates.first()
 
-        tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).\
-            AndReturn(self.tuskar_flavor_templates.list())
-        tuskar.FlavorTemplate.delete(IsA(http.HttpRequest), template.id)
+        tuskar.FlavorTemplate.list(
+            mox.IsA(http.HttpRequest)).AndReturn(
+                self.tuskar_flavor_templates.list())
+        tuskar.FlavorTemplate.delete(mox.IsA(http.HttpRequest), template.id)
         self.mox.ReplayAll()
 
         form_data = {'action': 'flavor_templates__delete__%s' % template.id}
         res = self.client.post(
-            reverse('horizon:infrastructure:resource_management:index'),
+            urlresolvers.reverse('horizon:infrastructure:resource_management:'
+                                    'index'),
             form_data)
 
-        self.assertRedirectsNoFollow(
-            res, reverse('horizon:infrastructure:resource_management:index'))
+        self.assertRedirectsNoFollow(res,
+            urlresolvers.reverse('horizon:infrastructure:resource_management:'
+                                    'index'))
 
     @test.create_stubs({tuskar.FlavorTemplate: ('get',)})
     def test_detail_flavor_template(self):
         template = self.tuskar_flavor_templates.first()
 
-        tuskar.FlavorTemplate.get(IsA(http.HttpRequest),
+        tuskar.FlavorTemplate.get(mox.IsA(http.HttpRequest),
                                   template.id).AndReturn(template)
         tuskar.FlavorTemplate.resource_classes = self. \
             tuskar_resource_classes
 
         self.mox.ReplayAll()
 
-        url = reverse('horizon:infrastructure:resource_management:'
-                      'flavor_templates:detail', args=[template.id])
+        url = urlresolvers.reverse('horizon:infrastructure:'
+                                        'resource_management:flavor_templates:'
+                                        'detail',
+                                   args=[template.id])
         res = self.client.get(url)
-        self.assertTemplateUsed(res, "infrastructure/resource_management/"
-                                     "flavor_templates/detail.html")
+        self.assertTemplateUsed(res,
+                                'infrastructure/resource_management/'
+                                    'flavor_templates/detail.html')
 
     @test.create_stubs({tuskar.FlavorTemplate: ('get',)})
     def test_detail_flavor_template_exception(self):
         template = self.tuskar_flavor_templates.first()
 
         tuskar.FlavorTemplate.get(
-            IsA(http.HttpRequest),
-            template.id).AndRaise(self.exceptions.tuskar)
+            mox.IsA(http.HttpRequest), template.id).AndRaise(
+                self.exceptions.tuskar)
         tuskar.FlavorTemplate.resource_classes = self.tuskar_resource_classes
 
         self.mox.ReplayAll()
 
-        url = reverse('horizon:infrastructure:resource_management:'
-                      'flavor_templates:detail', args=[template.id])
+        url = urlresolvers.reverse('horizon:infrastructure:'
+                                        'resource_management:flavor_templates:'
+                                        'detail',
+                                   args=[template.id])
         res = self.client.get(url)
 
-        self.assertRedirectsNoFollow(
-            res, reverse('horizon:infrastructure:resource_management:index'))
+        self.assertRedirectsNoFollow(res,
+            urlresolvers.reverse('horizon:infrastructure:resource_management:'
+                                    'index'))
