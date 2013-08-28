@@ -62,7 +62,8 @@ class UpdateView(horizon_workflows.WorkflowView):
                     tuskar.ResourceClass.get(self.request,
                                              resource_class_id)
             except Exception:
-                redirect = self.success_url
+                redirect = urlresolvers.reverse('horizon:infrastructure:'
+                                   'resource_management:index')
                 msg = _('Unable to retrieve resource class details.')
                 exceptions.handle(self.request, msg, redirect=redirect)
 
@@ -171,7 +172,6 @@ def rack_health(request, resource_class_id=None):
 
     resource_class = (tuskar.ResourceClass.get(request,
                                                resource_class_id))
-
     for rack in resource_class.list_racks:
         rand_index = random.randint(0, 2)
         percentage = (2 - rand_index) * 50
