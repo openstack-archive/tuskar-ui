@@ -81,7 +81,9 @@ class EditRackStatusView(horizon_forms.ModalFormView):
 
     def get_success_url(self):
         # Redirect to previous url
-        return self.request.META.get('HTTP_REFERER', None)
+        default_url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:index')
+        return self.request.META.get('HTTP_REFERER', default_url)
 
     def get_context_data(self, **kwargs):
         context = super(EditRackStatusView, self).get_context_data(**kwargs)
