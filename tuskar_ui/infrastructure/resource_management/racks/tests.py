@@ -144,6 +144,65 @@ class RackViewTests(test.BaseAdminViewTests):
         self.assertMessageCount(success=1)
         self.assertRedirectsNoFollow(response, self.index_page)
 
+    @test.create_stubs({tuskar.Rack: ('get',)})
+    def test_edit_status_rack_get(self):
+        rack = self.tuskar_racks.first()
+
+        tuskar.Rack.\
+            get(IsA(http.HttpRequest), rack.id).\
+            AndReturn(rack)
+
+        self.mox.ReplayAll()
+
+        url = reverse('horizon:infrastructure:resource_management:' +
+                      'racks:edit_status', args=[rack.id])
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(
+            res,
+            'infrastructure/resource_management/racks/edit_status.html')
+
+    @test.create_stubs({tuskar.Rack: ('get', 'update')})
+    def test_edit_status_update_rack_post(self):
+        rack = self.tuskar_racks.first()
+
+        tuskar.Rack.\
+            get(IsA(http.HttpRequest), rack.id).\
+            AndReturn(rack)
+        tuskar.Rack.update(IsA(http.HttpRequest), rack.id,
+                           {'state': 'active'}).AndReturn(rack)
+
+        self.mox.ReplayAll()
+
+        url = reverse('horizon:infrastructure:resource_management:' +
+                      'racks:edit_status', args=[rack.id]) +\
+                      "?action=start"
+        response = self.client.post(url)
+
+        self.assertNoFormErrors(response)
+        self.assertMessageCount(success=1)
+        self.assertRedirectsNoFollow(response, self.index_page)
+
+    @test.create_stubs({tuskar.Rack: ('get', 'provision')})
+    def test_edit_status_provision_rack_post(self):
+        rack = self.tuskar_racks.first()
+
+        tuskar.Rack.\
+            get(IsA(http.HttpRequest), rack.id).\
+            AndReturn(rack)
+        tuskar.Rack.provision(IsA(http.HttpRequest), rack.id)
+
+        self.mox.ReplayAll()
+
+        url = reverse('horizon:infrastructure:resource_management:' +
+                      'racks:edit_status', args=[rack.id]) +\
+                      "?action=provision"
+        response = self.client.post(url)
+
+        self.assertNoFormErrors(response)
+        self.assertMessageCount(success=1)
+        self.assertRedirectsNoFollow(response, self.index_page)
+
     @test.create_stubs({tuskar.Rack: ('delete', 'list')})
     def test_delete_rack(self):
         rack_id = u'1'
@@ -219,3 +278,75 @@ class RackViewTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(resp, self.index_page)
         self.assertMessageCount(success=1)
         self.assertMessageCount(error=0)
+
+    @test.create_stubs({tuskar.Rack: ('get', 'list_nodes', 'list_flavors')})
+    def test_detail_rack(self):
+        rack = self.tuskar_racks.first()
+
+        tuskar.Rack.get(IsA(http.HttpRequest),
+                        rack.id).AndReturn(rack)
+
+        self.mox.ReplayAll()
+
+        tuskar.Rack.list_nodes = []
+        tuskar.Rack.list_flavors = []
+
+        url = reverse('horizon:infrastructure:resource_management:'
+                      'racks:detail', args=[rack.id])
+        res = self.client.get(url)
+        self.assertTemplateUsed(res, "infrastructure/resource_management/"
+                                     "racks/detail.html")
+
+    # FIXME: test actual json output once we stop using mock data
+    def test_usage_data_rack(self):
+        url = reverse('horizon:infrastructure:resource_management:'
+                      'racks:usage_data')
+        res = self.client.get(url)
+        self.assertEquals(res['Content-Type'], 'application/json')
+
+    # FIXME: test actual json output once we stop using mock data
+    @test.create_stubs({tuskar.Rack: ('get',)})
+    def test_top_communicating_rack(self):
+        rack = self.tuskar_racks.first()
+
+        tuskar.Rack.get(IsA(http.HttpRequest),
+                        rack.id).AndReturn(rack)
+
+        self.mox.ReplayAll()
+
+        url = reverse('horizon:infrastructure:resource_management:'
+                      'racks:top_communicating', args=[rack.id])
+        res = self.client.get(url)
+        self.assertEquals(res['Content-Type'], 'application/json')
+
+    # FIXME: test actual json output once we stop using mock data
+    @test.create_stubs({tuskar.Rack: ('get',)})
+    def test_node_health_rack(self):
+        rack = self.tuskar_racks.first()
+
+        tuskar.Rack.get(IsA(http.HttpRequest),
+                        rack.id).AndReturn(rack)
+
+        self.mox.ReplayAll()
+
+        url = reverse('horizon:infrastructure:resource_management:'
+                      'racks:node_health', args=[rack.id])
+        res = self.client.get(url)
+        self.assertEquals(res['Content-Type'], 'application/json')
+
+    @test.create_stubs({tuskar.Rack: ('get',)})
+    def test_check_state_rack(self):
+        rack = self.tuskar_racks.first()
+
+        tuskar.Rack.get(IsA(http.HttpRequest),
+                        rack.id).AndReturn(rack)
+
+        self.mox.ReplayAll()
+
+        url = reverse('horizon:infrastructure:resource_management:'
+                      'racks:check_state', args=[rack.id])
+        res = self.client.get(url)
+        state_json = '{"state": "active"}'
+
+        self.assertEquals(res['Content-Type'], 'application/json')
+        self.assertEquals(res.content, state_json)
