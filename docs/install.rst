@@ -27,6 +27,9 @@ For baremetal provisioning, you will want a Nova Baremetal driver
 installed and registered in the Keystone services catalog. (You can
 `read more about setting up Nova Baremetal here <https://wiki.openstack.org/wiki/Baremetal>`_.)
 
+If you are using Devstack to run OpenStack, you can use
+`Devstack Baremetal configuration <https://github.com/stackforge/tuskar/blob/master/devstack_baremetal.rst>`_.
+
 Installing the packages
 -----------------------
 
