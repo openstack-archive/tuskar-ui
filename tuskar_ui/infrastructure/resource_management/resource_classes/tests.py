@@ -12,9 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.core.urlresolvers import reverse
+from django.core import urlresolvers
 from django import http
-from mox import IsA
+
+import mox
+
 from tuskar_ui import api as tuskar
 from tuskar_ui.test import helpers as test
 
@@ -31,17 +33,17 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         all_racks = self.tuskar_racks.list()
         rc = self.tuskar_resource_classes.first()
 
-        tuskar.FlavorTemplate.\
-            list(IsA(http.HttpRequest)).AndReturn(all_templates)
-        tuskar.Rack.\
-            list(IsA(http.HttpRequest), True).AndReturn(all_racks)
-        tuskar.ResourceClass.\
-            get(IsA(http.HttpRequest), rc.id).AndReturn(rc)
+        tuskar.FlavorTemplate.list(
+            mox.IsA(http.HttpRequest)).AndReturn(all_templates)
+        tuskar.Rack.list(
+            mox.IsA(http.HttpRequest), True).AndReturn(all_racks)
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest), rc.id).AndReturn(rc)
         self.mox.ReplayAll()
 
-        url = reverse(
-            'horizon:infrastructure:resource_management:'
-            'resource_classes:create')
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:resource_classes:'
+                'create')
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
 
@@ -56,28 +58,32 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         add_racks_ids = []
 
         tuskar.ResourceClass.list(
-            IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
-        tuskar.ResourceClass.\
-            create(IsA(http.HttpRequest), name=new_unique_name,
-                   service_type=new_resource_class.service_type,
-                   flavors=new_flavors).\
-            AndReturn(new_resource_class)
-        tuskar.ResourceClass.\
-            set_racks(IsA(http.HttpRequest), add_racks_ids)
+        tuskar.ResourceClass.create(
+            mox.IsA(http.HttpRequest),
+            name=new_unique_name,
+            service_type=new_resource_class.service_type,
+            flavors=new_flavors).AndReturn(new_resource_class)
+        tuskar.ResourceClass.set_racks(mox.IsA(http.HttpRequest),
+                                       add_racks_ids)
         self.mox.ReplayAll()
 
-        url = reverse('horizon:infrastructure:resource_management:'
-                      'resource_classes:create')
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:resource_classes:'
+                'create')
         form_data = {'name': new_unique_name,
                      'service_type': new_resource_class.service_type,
                      'image': 'compute-img'}
         res = self.client.post(url, form_data)
         self.assertNoFormErrors(res)
         self.assertMessageCount(success=1)
-        self.assertRedirectsNoFollow(res,
-            ("%s?tab=resource_management_tabs__resource_classes_tab" %
-             reverse("horizon:infrastructure:resource_management:index")))
+
+        redirect_url = (
+            "%s?tab=resource_management_tabs__resource_classes_tab" %
+                urlresolvers.reverse('horizon:infrastructure:'
+                                            'resource_management:index'))
+        self.assertRedirectsNoFollow(res, redirect_url)
 
     @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
                                                    'racks_ids', 'all_racks',
@@ -87,9 +93,10 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         all_flavors = []
         all_racks = []
 
-        tuskar.ResourceClass.\
-            get(IsA(http.HttpRequest), resource_class.id).MultipleTimes().\
-            AndReturn(resource_class)
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest),
+                    resource_class.id).MultipleTimes().AndReturn(
+                        resource_class)
 
         self.mox.ReplayAll()
 
@@ -100,9 +107,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.all_flavors = all_flavors
         tuskar.ResourceClass.list_flavors = all_flavors
 
-        url = reverse(
-            'horizon:infrastructure:resource_management:'
-            'resource_classes:update',
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:resource_classes:'
+                'update',
             args=[resource_class.id])
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
@@ -116,55 +123,58 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         add_racks_ids = []
 
         tuskar.ResourceClass.get(
-            IsA(http.HttpRequest),
-            resource_class.id).\
-            AndReturn(resource_class)
+            mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
+                resource_class)
         tuskar.ResourceClass.list(
-            IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
-        tuskar.ResourceClass.\
-            update(IsA(http.HttpRequest), resource_class.id,
-                   name=resource_class.name,
-                   service_type=resource_class.service_type,
-                   flavors=[]).\
-            AndReturn(resource_class)
-        tuskar.ResourceClass.\
-            set_racks(IsA(http.HttpRequest), add_racks_ids)
+        tuskar.ResourceClass.update(mox.IsA(http.HttpRequest),
+                                    resource_class.id,
+                                    name=resource_class.name,
+                                    service_type=resource_class.service_type,
+                                    flavors=[]).AndReturn(resource_class)
+        tuskar.ResourceClass.set_racks(mox.IsA(http.HttpRequest),
+                                       add_racks_ids)
         self.mox.ReplayAll()
 
         form_data = {'resource_class_id': resource_class.id,
                      'name': resource_class.name,
                      'service_type': resource_class.service_type,
                      'image': 'compute-img'}
-        url = reverse('horizon:infrastructure:resource_management:'
-                     'resource_classes:update', args=[resource_class.id])
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:resource_classes:'
+                'update',
+            args=[resource_class.id])
         res = self.client.post(url, form_data)
         self.assertNoFormErrors(res)
         self.assertMessageCount(success=1)
-        self.assertRedirectsNoFollow(res,
-            ("%s?tab=resource_management_tabs__resource_classes_tab" %
-             reverse("horizon:infrastructure:resource_management:index")))
+
+        redirect_url = (
+            "%s?tab=resource_management_tabs__resource_classes_tab" %
+                urlresolvers.reverse('horizon:infrastructure:'
+                                            'resource_management:index'))
+        self.assertRedirectsNoFollow(res, redirect_url)
 
     @test.create_stubs({tuskar.ResourceClass: ('delete', 'list')})
     def test_delete_resource_class(self):
         resource_class = self.tuskar_resource_classes.first()
         all_resource_classes = self.tuskar_resource_classes.list()
 
-        tuskar.ResourceClass.delete(
-            IsA(http.HttpRequest),
-            resource_class.id)
+        tuskar.ResourceClass.delete(mox.IsA(http.HttpRequest),
+                                    resource_class.id)
         tuskar.ResourceClass.list(
-            IsA(http.HttpRequest)).\
-            AndReturn(all_resource_classes)
+            mox.IsA(http.HttpRequest)).AndReturn(all_resource_classes)
         self.mox.ReplayAll()
 
         form_data = {'action':
                      'resource_classes__delete__%s' % resource_class.id}
-        res = self.client.post(
-            reverse('horizon:infrastructure:resource_management:index'),
-            form_data)
-        self.assertRedirectsNoFollow(
-            res, reverse('horizon:infrastructure:resource_management:index'))
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:index')
+        res = self.client.post(url, form_data)
+
+        redirect_url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:index')
+        self.assertRedirectsNoFollow(res, redirect_url)
 
     @test.create_stubs({
         tuskar.ResourceClass: ('get', 'list_flavors', 'list_racks')
@@ -175,16 +185,17 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         racks = []
 
         tuskar.ResourceClass.get(
-            IsA(http.HttpRequest),
-            resource_class.id).\
-            MultipleTimes().AndReturn(resource_class)
+            mox.IsA(http.HttpRequest), resource_class.id).\
+                MultipleTimes().AndReturn(resource_class)
         self.mox.ReplayAll()
 
         tuskar.ResourceClass.list_flavors = flavors
         tuskar.ResourceClass.list_racks = racks
 
-        url = reverse('horizon:infrastructure:resource_management:'
-                      'resource_classes:detail', args=[resource_class.id])
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:resource_classes:'
+                'detail',
+            args=[resource_class.id])
         res = self.client.get(url)
         self.assertItemsEqual(res.context['flavors_table'].data,
                               flavors)
@@ -202,9 +213,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         all_flavors = []
         all_racks = []
 
-        tuskar.ResourceClass.\
-            get(IsA(http.HttpRequest), resource_class.id).\
-            MultipleTimes().AndReturn(resource_class)
+        tuskar.ResourceClass.get(mox.IsA(http.HttpRequest),
+                                 resource_class.id).\
+               MultipleTimes().AndReturn(resource_class)
         self.mox.ReplayAll()
 
         # FIXME I should probably track the racks and flavors methods
@@ -214,9 +225,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.all_flavors = all_flavors
         tuskar.ResourceClass.list_flavors = all_flavors
 
-        url = reverse(
-            'horizon:infrastructure:resource_management:'
-            'resource_classes:update_racks',
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:resource_classes:'
+                'update_racks',
             args=[resource_class.id])
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
@@ -230,37 +241,37 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         add_racks_ids = []
 
         tuskar.ResourceClass.get(
-            IsA(http.HttpRequest),
-            resource_class.id).\
-            AndReturn(resource_class)
+            mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
+                resource_class)
         tuskar.ResourceClass.list(
-            IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
-        tuskar.ResourceClass.\
-            update(IsA(http.HttpRequest), resource_class.id,
-                   name=resource_class.name,
-                   service_type=resource_class.service_type,
-                   flavors=[]).\
-            AndReturn(resource_class)
-        tuskar.ResourceClass.\
-            set_racks(IsA(http.HttpRequest), add_racks_ids)
+        tuskar.ResourceClass.update(mox.IsA(http.HttpRequest),
+                                    resource_class.id,
+                                    name=resource_class.name,
+                                    service_type=resource_class.service_type,
+                                    flavors=[]).AndReturn(resource_class)
+        tuskar.ResourceClass.set_racks(mox.IsA(http.HttpRequest),
+                                       add_racks_ids)
         self.mox.ReplayAll()
 
         form_data = {'resource_class_id': resource_class.id,
                      'name': resource_class.name,
                      'service_type': resource_class.service_type,
                      'image': 'compute-img'}
-        url = reverse('horizon:infrastructure:resource_management:'
-                      'resource_classes:update_racks',
-                      args=[resource_class.id])
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:resource_classes:'
+                'update_racks',
+            args=[resource_class.id])
         res = self.client.post(url, form_data)
         self.assertNoFormErrors(res)
         self.assertMessageCount(success=1)
 
-        detail_url = "horizon:infrastructure:resource_management:"\
-                     "resource_classes:detail"
-        redirect_url = "%s?tab=resource_class_details__racks" % (
-            reverse(detail_url, args=(resource_class.id,)))
+        detail_url = ('horizon:infrastructure:resource_management:'
+                      'resource_classes:detail')
+        redirect_url = (
+            "%s?tab=resource_class_details__racks" %
+                urlresolvers.reverse(detail_url, args=(resource_class.id,)))
         self.assertRedirectsNoFollow(res, redirect_url)
 
     @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
@@ -271,9 +282,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         all_flavors = []
         all_racks = []
 
-        tuskar.ResourceClass.\
-            get(IsA(http.HttpRequest), resource_class.id).\
-            MultipleTimes().AndReturn(resource_class)
+        tuskar.ResourceClass.get(mox.IsA(http.HttpRequest),
+                                 resource_class.id).\
+               MultipleTimes().AndReturn(resource_class)
         self.mox.ReplayAll()
 
         # FIXME I should probably track the racks and flavors methods
@@ -283,9 +294,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.all_flavors = all_flavors
         tuskar.ResourceClass.list_flavors = all_flavors
 
-        url = reverse(
-            'horizon:infrastructure:resource_management:'
-            'resource_classes:update_flavors',
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:resource_classes:'
+                'update_flavors',
             args=[resource_class.id])
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
@@ -299,37 +310,36 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         add_racks_ids = []
 
         tuskar.ResourceClass.get(
-            IsA(http.HttpRequest),
-            resource_class.id).\
-            AndReturn(resource_class)
+            mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
+                resource_class)
         tuskar.ResourceClass.list(
-            IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
-        tuskar.ResourceClass.\
-            update(IsA(http.HttpRequest), resource_class.id,
-                   name=resource_class.name,
-                   service_type=resource_class.service_type,
-                   flavors=[]).\
-            AndReturn(resource_class)
-        tuskar.ResourceClass.\
-            set_racks(IsA(http.HttpRequest), add_racks_ids)
+        tuskar.ResourceClass.update(mox.IsA(http.HttpRequest),
+                                    resource_class.id,
+                                    name=resource_class.name,
+                                    service_type=resource_class.service_type,
+                                    flavors=[]).AndReturn(resource_class)
+        tuskar.ResourceClass.set_racks(mox.IsA(http.HttpRequest),
+                                       add_racks_ids)
         self.mox.ReplayAll()
 
         form_data = {'resource_class_id': resource_class.id,
                      'name': resource_class.name,
                      'service_type': resource_class.service_type,
                      'image': 'compute-img'}
-        url = reverse('horizon:infrastructure:resource_management:'
-                      'resource_classes:update_flavors',
-                      args=[resource_class.id])
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:resource_classes:'
+                'update_flavors',
+            args=[resource_class.id])
         res = self.client.post(url, form_data)
         self.assertNoFormErrors(res)
         self.assertMessageCount(success=1)
 
-        redirect_url = "horizon:infrastructure:resource_management:"\
-                       "resource_classes:detail"
+        redirect_url = ('horizon:infrastructure:resource_management:'
+                            'resource_classes:detail')
         redirect_url = "%s?tab=resource_class_details__flavors" % (
-            reverse(redirect_url, args=(resource_class.id,)))
+            urlresolvers.reverse(redirect_url, args=(resource_class.id,)))
         self.assertRedirectsNoFollow(res, redirect_url)
 
     # def test_detail_get_exception(self):

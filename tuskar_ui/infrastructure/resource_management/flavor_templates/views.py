@@ -13,49 +13,43 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from datetime import datetime
-from datetime import timedelta
+import datetime
 import json
 import logging
 
-from django.core.serializers.json import DjangoJSONEncoder
-from django.core.urlresolvers import reverse
-from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponse
-from django.utils.translation import ugettext_lazy as _
-from django.views.generic import View
+from django.core.serializers import json as json_serializers
+from django.core import urlresolvers
+from django import http
+from django.utils.translation import ugettext_lazy as _  # noqa
+from django.views import generic
 
 from horizon import exceptions
-from horizon import forms
-from horizon import tabs
+from horizon import forms as horizon_forms
+from horizon import tabs as horizon_tabs
 
 from tuskar_ui import api as tuskar
-from tuskar_ui.infrastructure. \
-    resource_management.flavor_templates.forms import CreateFlavorTemplate
-from tuskar_ui.infrastructure. \
-    resource_management.flavor_templates.forms import EditFlavorTemplate
-from tuskar_ui.infrastructure. \
-    resource_management.flavor_templates.tabs import FlavorTemplateDetailTabs
+from tuskar_ui.infrastructure.resource_management.flavor_templates import forms
+from tuskar_ui.infrastructure.resource_management.flavor_templates import tabs
 
 
 LOG = logging.getLogger(__name__)
 
 
-class CreateView(forms.ModalFormView):
-    form_class = CreateFlavorTemplate
+class CreateView(horizon_forms.ModalFormView):
+    form_class = forms.CreateFlavorTemplate
     template_name = ('infrastructure/resource_management/'
                      'flavor_templates/create.html')
-    success_url = reverse_lazy(
+    success_url = urlresolvers.reverse_lazy(
         'horizon:infrastructure:resource_management:index')
 
 
-class EditView(forms.ModalFormView):
-    form_class = EditFlavorTemplate
+class EditView(horizon_forms.ModalFormView):
+    form_class = forms.EditFlavorTemplate
     template_name = ('infrastructure/resource_management/'
                      'flavor_templates/edit.html')
     form_url = ('horizon:infrastructure:resource_management:'
                 'flavor_templates:edit')
-    success_url = reverse_lazy(
+    success_url = urlresolvers.reverse_lazy(
         'horizon:infrastructure:resource_management:index')
 
     def get_context_data(self, **kwargs):
@@ -88,12 +82,12 @@ class DetailEditView(EditView):
                    'flavor_templates:detail')
 
     def get_success_url(self):
-        return reverse(self.success_url,
-                       args=(self.kwargs['flavor_template_id'],))
+        return urlresolvers.reverse(
+            self.success_url, args=(self.kwargs['flavor_template_id'],))
 
 
-class DetailView(tabs.TabView):
-    tab_group_class = FlavorTemplateDetailTabs
+class DetailView(horizon_tabs.TabView):
+    tab_group_class = tabs.FlavorTemplateDetailTabs
     template_name = ('infrastructure/resource_management/'
                      'flavor_templates/detail.html')
 
@@ -109,8 +103,8 @@ class DetailView(tabs.TabView):
                 flavor_template = tuskar.FlavorTemplate.get(self.request,
                                                             flavor_template_id)
             except Exception:
-                redirect = reverse('horizon:infrastructure:'
-                                   'resource_management:index')
+                redirect = urlresolvers.reverse(
+                    'horizon:infrastructure:resource_management:index')
                 exceptions.handle(self.request,
                                   _('Unable to retrieve details for '
                                     'flavor template "%s".')
@@ -125,16 +119,18 @@ class DetailView(tabs.TabView):
                                     **kwargs)
 
 
-class ActiveInstancesDataView(View):
+class ActiveInstancesDataView(generic.View):
 
     def get(self, request, *args, **kwargs):
         try:
             flavor_template = tuskar.FlavorTemplate.get(
                 self.request, self.kwargs['flavor_template_id'])
             values = flavor_template.vms_over_time(
-                datetime.now() - timedelta(days=7), datetime.now())
-            return HttpResponse(json.dumps(values, cls=DjangoJSONEncoder),
-                                mimetype='application/json')
+                datetime.datetime.now() - datetime.timedelta(days=7),
+                datetime.datetime.now())
+            return http.HttpResponse(
+                json.dumps(values, cls=json_serializers.DjangoJSONEncoder),
+                mimetype='application/json')
         except Exception:
             exceptions.handle(self.request,
                               _("Unable to retrieve flavor template data."))

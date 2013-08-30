@@ -10,16 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from collections import namedtuple
+import collections
 
-from tuskar_ui.api import Capacity
-from tuskar_ui.api import Flavor
-from tuskar_ui.api import FlavorTemplate
-from tuskar_ui.api import Node
-from tuskar_ui.api import Rack
-from tuskar_ui.api import ResourceClass
+from tuskar_ui import api
 
-from openstack_dashboard.test.test_data.utils import TestDataContainer
+from openstack_dashboard.test.test_data import utils as test_data_utils
 
 from novaclient.v1_1.contrib import baremetal
 from tuskarclient.v1 import flavors
@@ -28,43 +23,46 @@ from tuskarclient.v1 import resource_classes
 
 
 def data(TEST):
-    FlavorTemplateStruct = namedtuple('FlavorStruct', 'id name\
-        capacities')
-    CapacityStruct = namedtuple('CapacityStruct', 'name value unit')
-    TEST.tuskar_flavor_templates = TestDataContainer()
-    flavor_template_1 = FlavorTemplate(FlavorTemplateStruct(
+    FlavorTemplateStruct = collections.namedtuple('FlavorStruct',
+                                                  'id name capacities')
+    CapacityStruct = collections.namedtuple('CapacityStruct',
+                                            'name value unit')
+    TEST.tuskar_flavor_templates = test_data_utils.TestDataContainer()
+    flavor_template_1 = api.FlavorTemplate(
+        FlavorTemplateStruct(
             id="1",
             name='nano',
             capacities=[
-              Capacity(CapacityStruct(
-                name='cpu',
-                unit='',
-                value='1')),
-              Capacity(CapacityStruct(
-                name='memory',
-                unit='MB',
-                value='64')),
-              Capacity(CapacityStruct(
-                name='storage',
-                unit='MB',
-                value='128')),
-              Capacity(CapacityStruct(
-                name='ephemeral_disk',
-                unit='GB',
-                value='0')),
-              Capacity(CapacityStruct(
-                name='swap_disk',
-                unit='GB',
-                value='0'))]))
-    flavor_template_2 = FlavorTemplate(FlavorTemplateStruct(
+                api.Capacity(CapacityStruct(
+                    name='cpu',
+                    unit='',
+                    value='1')),
+                api.Capacity(CapacityStruct(
+                    name='memory',
+                    unit='MB',
+                    value='64')),
+                api.Capacity(CapacityStruct(
+                    name='storage',
+                    unit='MB',
+                    value='128')),
+                api.Capacity(CapacityStruct(
+                    name='ephemeral_disk',
+                    unit='GB',
+                    value='0')),
+                api.Capacity(CapacityStruct(
+                    name='swap_disk',
+                    unit='GB',
+                    value='0'))]))
+    flavor_template_2 = api.FlavorTemplate(
+        FlavorTemplateStruct(
             id="2",
             name='large',
             capacities=[]))
     TEST.tuskar_flavor_templates.add(flavor_template_1, flavor_template_2)
 
     # Flavors
-    TEST.tuskarclient_flavors = TestDataContainer()
-    TEST.tuskar_flavors = TestDataContainer()
+    TEST.tuskarclient_flavors = test_data_utils.TestDataContainer()
+    TEST.tuskar_flavors = test_data_utils.TestDataContainer()
     flavor_1 = flavors.Flavor(flavors.FlavorManager(None),
                               {'id': '1',
                                'name': 'nano',
@@ -91,11 +89,11 @@ def data(TEST):
                                'max_vms': 10,
                                'capacities': []})
     TEST.tuskarclient_flavors.add(flavor_1, flavor_2)
-    TEST.tuskar_flavors.add(Flavor(flavor_1), Flavor(flavor_2))
+    TEST.tuskar_flavors.add(api.Flavor(flavor_1), api.Flavor(flavor_2))
 
     # Resource Classes
-    TEST.tuskarclient_resource_classes = TestDataContainer()
-    TEST.tuskar_resource_classes = TestDataContainer()
+    TEST.tuskarclient_resource_classes = test_data_utils.TestDataContainer()
+    TEST.tuskar_resource_classes = test_data_utils.TestDataContainer()
     resource_class_1 = resource_classes.ResourceClass(
         resource_classes.ResourceClassManager(None),
         {'id': '1',
@@ -109,12 +107,12 @@ def data(TEST):
          'racks': [],
          'name': 'rclass2'})
     TEST.tuskarclient_resource_classes.add(resource_class_1, resource_class_2)
-    TEST.tuskar_resource_classes.add(ResourceClass(resource_class_1),
-                                     ResourceClass(resource_class_2))
+    TEST.tuskar_resource_classes.add(api.ResourceClass(resource_class_1),
+                                     api.ResourceClass(resource_class_2))
 
     #Racks
-    TEST.tuskarclient_racks = TestDataContainer()
-    TEST.tuskar_racks = TestDataContainer()
+    TEST.tuskarclient_racks = test_data_utils.TestDataContainer()
+    TEST.tuskar_racks = test_data_utils.TestDataContainer()
     rack_1 = racks.Rack(racks.RackManager(None),
                         {'id': '1',
                          'name': 'rack1',
@@ -165,15 +163,15 @@ def data(TEST):
                                "unit": "MB"}],
                          'resource_class': None})
     TEST.tuskarclient_racks.add(rack_1, rack_2, rack_3)
-    TEST.tuskar_racks.add(Rack(rack_1), Rack(rack_2), Rack(rack_3))
+    TEST.tuskar_racks.add(api.Rack(rack_1), api.Rack(rack_2), api.Rack(rack_3))
 
     # Nodes
-    TEST.baremetalclient_nodes = TestDataContainer()
-    TEST.baremetal_nodes = TestDataContainer()
-    TEST.baremetalclient_unracked_nodes = TestDataContainer()
-    TEST.baremetal_unracked_nodes = TestDataContainer()
-    TEST.baremetalclient_nodes_all = TestDataContainer()
-    TEST.baremetal_nodes_all = TestDataContainer()
+    TEST.baremetalclient_nodes = test_data_utils.TestDataContainer()
+    TEST.baremetal_nodes = test_data_utils.TestDataContainer()
+    TEST.baremetalclient_unracked_nodes = test_data_utils.TestDataContainer()
+    TEST.baremetal_unracked_nodes = test_data_utils.TestDataContainer()
+    TEST.baremetalclient_nodes_all = test_data_utils.TestDataContainer()
+    TEST.baremetal_nodes_all = test_data_utils.TestDataContainer()
 
     node_1 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
@@ -202,15 +200,15 @@ def data(TEST):
          'prov_mac_address': '00-B0-D0-86-AB-F1'})
 
     TEST.baremetalclient_nodes.add(node_1, node_2, node_3, node_4)
-    TEST.baremetal_nodes.add(Node(node_1),
-                             Node(node_2),
-                             Node(node_3),
-                             Node(node_4))
+    TEST.baremetal_nodes.add(api.Node(node_1),
+                             api.Node(node_2),
+                             api.Node(node_3),
+                             api.Node(node_4))
     TEST.baremetalclient_unracked_nodes.add(node_5)
-    TEST.baremetal_unracked_nodes.add(Node(node_5))
+    TEST.baremetal_unracked_nodes.add(api.Node(node_5))
     TEST.baremetalclient_nodes_all.add(node_1, node_2, node_3, node_4, node_5)
-    TEST.baremetal_nodes_all.add(Node(node_1),
-                             Node(node_2),
-                             Node(node_3),
-                             Node(node_4),
-                             Node(node_5))
+    TEST.baremetal_nodes_all.add(api.Node(node_1),
+                             api.Node(node_2),
+                             api.Node(node_3),
+                             api.Node(node_4),
+                             api.Node(node_5))

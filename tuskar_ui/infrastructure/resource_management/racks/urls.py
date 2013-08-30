@@ -12,40 +12,31 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls import patterns
-from django.conf.urls import url
+from django.conf import urls
 
-from tuskar_ui.infrastructure. \
-    resource_management.racks.views import CreateView
-from tuskar_ui.infrastructure. \
-    resource_management.racks.views import DetailEditView
-from tuskar_ui.infrastructure. \
-    resource_management.racks.views import DetailView
-from tuskar_ui.infrastructure. \
-    resource_management.racks.views import EditRackStatusView
-from tuskar_ui.infrastructure. \
-    resource_management.racks.views import EditView
-from tuskar_ui.infrastructure. \
-    resource_management.racks.views import UploadView
-from tuskar_ui.infrastructure. \
-    resource_management.racks.views import UsageDataView
-
+from tuskar_ui.infrastructure.resource_management.racks import views
 
 RACKS = r'^(?P<rack_id>[^/]+)/%s$'
 VIEW_MOD = 'tuskar_ui.infrastructure.resource_management.racks.views'
 
 
-urlpatterns = patterns(VIEW_MOD,
-    url(r'^create/$', CreateView.as_view(), name='create'),
-    url(r'^upload/$', UploadView.as_view(), name='upload'),
-    url(r'^usage_data$', UsageDataView.as_view(), name='usage_data'),
-    url(RACKS % 'edit/', EditView.as_view(), name='edit'),
-    url(RACKS % 'detail_edit/', DetailEditView.as_view(), name='detail_edit'),
-    url(RACKS % 'edit_status/', EditRackStatusView.as_view(),
-                                name='edit_status'),
-    url(RACKS % 'detail', DetailView.as_view(), name='detail'),
-    url(RACKS % 'top_communicating.json', 'top_communicating',
-        name='top_communicating'),
-    url(RACKS % 'node_health.json', 'node_health', name='node_health'),
-    url(RACKS % 'check_state.json', 'check_state', name='check_state'),
+urlpatterns = urls.patterns(VIEW_MOD,
+    urls.url(r'^create/$', views.CreateView.as_view(), name='create'),
+    urls.url(r'^upload/$', views.UploadView.as_view(), name='upload'),
+    urls.url(r'^usage_data$',
+             views.UsageDataView.as_view(),
+             name='usage_data'),
+    urls.url(RACKS % 'edit/', views.EditView.as_view(), name='edit'),
+    urls.url(RACKS % 'detail_edit/',
+             views.DetailEditView.as_view(),
+             name='detail_edit'),
+    urls.url(RACKS % 'edit_status/',
+             views.EditRackStatusView.as_view(),
+             name='edit_status'),
+    urls.url(RACKS % 'detail', views.DetailView.as_view(), name='detail'),
+    urls.url(RACKS % 'top_communicating.json',
+             'top_communicating',
+             name='top_communicating'),
+    urls.url(RACKS % 'node_health.json', 'node_health', name='node_health'),
+    urls.url(RACKS % 'check_state.json', 'check_state', name='check_state'),
 )

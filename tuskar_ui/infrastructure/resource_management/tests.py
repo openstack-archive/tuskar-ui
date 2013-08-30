@@ -12,10 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.core.urlresolvers import reverse
+from django.core import urlresolvers
 from django import http
 
-from mox import IsA
+import mox
 
 from tuskar_ui import api as tuskar
 from tuskar_ui.test import helpers as test
@@ -49,31 +49,32 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.list_racks = racks
 
         tuskar.ResourceClass.list(
-            IsA(http.HttpRequest)).\
+            mox.IsA(http.HttpRequest)).\
             AndReturn(resource_classes)
 
         tuskar.ResourceClass.get(
-            IsA(http.HttpRequest), resource_class.id).\
+            mox.IsA(http.HttpRequest), resource_class.id).\
             AndReturn(resource_class)
         # ResourceClass stubs end
 
         # Rack stubs
         racks = self.tuskar_racks.list()
 
-        tuskar.Rack.list(IsA(http.HttpRequest)).AndReturn(racks)
-        tuskar.Node.list(IsA(http.HttpRequest)).AndReturn(nodes)
+        tuskar.Rack.list(mox.IsA(http.HttpRequest)).AndReturn(racks)
+        tuskar.Node.list(mox.IsA(http.HttpRequest)).AndReturn(nodes)
         # Rack stubs end
 
         # FlavorTemplate stubs
         flavors = self.tuskar_flavors.list()
 
-        tuskar.FlavorTemplate.list(IsA(http.HttpRequest)).AndReturn(
+        tuskar.FlavorTemplate.list(mox.IsA(http.HttpRequest)).AndReturn(
                 flavors)
         # FlavorTemplate stubs end
 
         self.mox.ReplayAll()
 
-        url = reverse('horizon:infrastructure:resource_management:index')
+        url = urlresolvers.reverse(
+                            'horizon:infrastructure:resource_management:index')
         res = self.client.get(url)
         self.assertTemplateUsed(
             res, 'infrastructure/resource_management/index.html')

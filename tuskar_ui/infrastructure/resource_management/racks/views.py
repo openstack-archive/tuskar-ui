@@ -12,68 +12,56 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from datetime import datetime
-from datetime import timedelta
+import datetime
 import json
 import logging
 import random
 
-from django.core.serializers.json import DjangoJSONEncoder
-from django.core.urlresolvers import reverse
-from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponse
+from django.core.serializers import json as json_serializer
+from django.core import urlresolvers
+from django import http
 
 from django.utils import simplejson
-from django.utils.translation import ugettext_lazy as _
-from django.views.generic import View
+from django.utils.translation import ugettext_lazy as _  # noqa
+from django.views import generic
 
 from horizon import exceptions
-from horizon import forms
-from horizon import tabs
-from horizon import workflows
+from horizon import forms as horizon_forms
+from horizon import tabs as horizon_tabs
+from horizon import workflows as horizon_workflows
 
 from tuskar_ui import api as tuskar
-from tuskar_ui.infrastructure. \
-    resource_management.racks.forms import UpdateRackStatus
-from tuskar_ui.infrastructure. \
-    resource_management.racks.forms import UploadRack
-from tuskar_ui.infrastructure. \
-    resource_management.racks.tabs import RackDetailTabs
-from tuskar_ui.infrastructure. \
-    resource_management.racks.tables import UploadRacksTable
-from tuskar_ui.infrastructure. \
-    resource_management.racks.workflows import CreateRack
-from tuskar_ui.infrastructure. \
-    resource_management.racks.workflows import DetailEditRack
-from tuskar_ui.infrastructure. \
-    resource_management.racks.workflows import EditRack
+from tuskar_ui.infrastructure.resource_management.racks import forms
+from tuskar_ui.infrastructure.resource_management.racks import tables
+from tuskar_ui.infrastructure.resource_management.racks import tabs
+from tuskar_ui.infrastructure.resource_management.racks import workflows
 
 
 LOG = logging.getLogger(__name__)
 
 
-class CreateView(workflows.WorkflowView):
-    workflow_class = CreateRack
+class CreateView(horizon_workflows.WorkflowView):
+    workflow_class = workflows.CreateRack
 
     def get_initial(self):
         pass
 
 
-class UploadView(forms.ModalFormView):
-    form_class = UploadRack
+class UploadView(horizon_forms.ModalFormView):
+    form_class = forms.UploadRack
     template_name = 'infrastructure/resource_management/racks/upload.html'
-    success_url = reverse_lazy(
+    success_url = urlresolvers.reverse_lazy(
         'horizon:infrastructure:resource_management:index')
 
     def get_context_data(self, **kwargs):
         context = super(UploadView, self).get_context_data(**kwargs)
-        context['racks_table'] = UploadRacksTable(
+        context['racks_table'] = tables.UploadRacksTable(
                 self.request, kwargs['form'].initial.get('racks', []))
         return context
 
 
-class EditView(workflows.WorkflowView):
-    workflow_class = EditRack
+class EditView(horizon_workflows.WorkflowView):
+    workflow_class = workflows.EditRack
 
     def get_initial(self):
         obj = tuskar.Rack.get(self.request, self.kwargs['rack_id'])
@@ -84,11 +72,11 @@ class EditView(workflows.WorkflowView):
 
 
 class DetailEditView(EditView):
-    workflow_class = DetailEditRack
+    workflow_class = workflows.DetailEditRack
 
 
-class EditRackStatusView(forms.ModalFormView):
-    form_class = UpdateRackStatus
+class EditRackStatusView(horizon_forms.ModalFormView):
+    form_class = forms.UpdateRackStatus
     template_name = 'infrastructure/resource_management/racks/edit_status.html'
 
     def get_success_url(self):
@@ -113,8 +101,8 @@ class EditRackStatusView(forms.ModalFormView):
                 'action': action}
 
 
-class DetailView(tabs.TabView):
-    tab_group_class = RackDetailTabs
+class DetailView(horizon_tabs.TabView):
+    tab_group_class = tabs.RackDetailTabs
     template_name = 'infrastructure/resource_management/racks/detail.html'
 
     def get_context_data(self, **kwargs):
@@ -128,13 +116,12 @@ class DetailView(tabs.TabView):
                 rack_id = self.kwargs['rack_id']
                 rack = tuskar.Rack.get(self.request, rack_id)
             except Exception:
-                redirect = reverse('horizon:infrastructure:'
-                                   'resource_management:index')
-                exceptions.handle(self.request,
-                                  _('Unable to retrieve details for '
-                                    'rack "%s".')
-                                    % rack_id,
-                                    redirect=redirect)
+                redirect = urlresolvers.reverse(
+                    'horizon:infrastructure:resource_management:index')
+                exceptions.handle(
+                    self.request,
+                    _('Unable to retrieve details for rack "%s".') % rack_id,
+                    redirect=redirect)
             self._rack = rack
         return self._rack
 
@@ -144,7 +131,7 @@ class DetailView(tabs.TabView):
                                     **kwargs)
 
 
-class UsageDataView(View):
+class UsageDataView(generic.View):
 
     def get(self, request, *args, **kwargs):
         interval = request.GET.get('interval', '1w')
@@ -170,16 +157,17 @@ class UsageDataView(View):
 
         values = []
         for i in range(data_count):
-            timediff = timedelta(**{timedelta_param: i})
-            current_value = {'date': datetime.now() - timediff}
+            timediff = datetime.timedelta(**{timedelta_param: i})
+            current_value = {'date': datetime.datetime.now() - timediff}
 
             for usage_type in series:
                 current_value[usage_type] = random.randint(1, 9)
 
             values.append(current_value)
 
-        return HttpResponse(json.dumps(values, cls=DjangoJSONEncoder),
-                            mimetype='application/json')
+        return http.HttpResponse(
+                    json.dumps(values, cls=json_serializer.DjangoJSONEncoder),
+                    mimetype='application/json')
 
 
 def top_communicating(request, rack_id=None):
@@ -216,8 +204,8 @@ def top_communicating(request, rack_id=None):
                 'range': ["#000060", "#99FFFF"]}
     res = {'data': data,
            'settings': settings}
-    return HttpResponse(simplejson.dumps(res),
-        mimetype="application/json")
+    return http.HttpResponse(simplejson.dumps(res),
+                             mimetype="application/json")
 
 
 def node_health(request, rack_id=None):
@@ -249,8 +237,8 @@ def node_health(request, rack_id=None):
         data.sort(key=lambda x: x['percentage'])
 
     res = {'data': data}
-    return HttpResponse(simplejson.dumps(res),
-        mimetype="application/json")
+    return http.HttpResponse(simplejson.dumps(res),
+                             mimetype="application/json")
 
 
 def check_state(request, rack_id=None):
@@ -258,6 +246,5 @@ def check_state(request, rack_id=None):
 
     res = {'state': rack.state}
 
-    return HttpResponse(
-        simplejson.dumps(res),
-        mimetype="application/json")
+    return http.HttpResponse(simplejson.dumps(res),
+                             mimetype="application/json")
