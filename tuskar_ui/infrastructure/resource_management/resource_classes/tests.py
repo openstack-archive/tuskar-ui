@@ -283,6 +283,49 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'infrastructure/resource_management/resource_classes/detail.html')
 
     @test.create_stubs({
+        tuskar.ResourceClass: ('get',)
+    })
+    def test_detail_action_get(self):
+        resource_class = self.tuskar_resource_classes.first()
+
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest),
+            resource_class.id).AndReturn(resource_class)
+
+        self.mox.ReplayAll()
+
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:resource_classes:'
+            'detail_action', args=[resource_class.id]) + "?action=delete"
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+
+    @test.create_stubs({
+        tuskar.ResourceClass: ('get', 'delete')
+    })
+    def test_detail_action_post(self):
+        resource_class = self.tuskar_resource_classes.first()
+
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest),
+            resource_class.id).AndReturn(resource_class)
+        tuskar.ResourceClass.delete(mox.IsA(http.HttpRequest),
+                                    resource_class.id)
+
+        self.mox.ReplayAll()
+
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:resource_classes:'
+            'detail_action', args=[resource_class.id]) + "?action=delete"
+        res = self.client.post(url)
+        self.assertNoFormErrors(res)
+        self.assertMessageCount(success=1)
+
+        redirect_url = urlresolvers.reverse('horizon:infrastructure:'
+                                            'resource_management:index')
+        self.assertRedirectsNoFollow(res, redirect_url)
+
+    @test.create_stubs({
         tuskar.ResourceClass: ('get', 'list_racks')
     })
     def test_rack_health_get(self):
