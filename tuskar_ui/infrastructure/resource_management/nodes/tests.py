@@ -39,3 +39,43 @@ class ResourceViewTests(test.BaseAdminViewTests):
 
         unracked_nodes_table = res.context['unracked_nodes_table'].data
         self.assertItemsEqual(unracked_nodes_table, unracked_nodes)
+
+    @test.create_stubs({tuskar.Node: ('get', 'running_virtual_machines')})
+    def test_detail_node(self):
+        node = self.baremetal_nodes.first()
+
+        tuskar.Node.get(mox.IsA(http.HttpRequest),
+                        node.id).AndReturn(node)
+
+        self.mox.ReplayAll()
+
+        tuskar.Node.running_virtual_machines = []
+
+        url = urlresolvers.reverse('horizon:infrastructure:'
+                                   'resource_management:nodes:'
+                                   'detail',
+                                   args=[node.id])
+        res = self.client.get(url)
+        self.assertTemplateUsed(res,
+                                'infrastructure/resource_management/'
+                                'nodes/detail.html')
+
+    @test.create_stubs({tuskar.Node: ('get',)})
+    def test_detail_node_exception(self):
+        node = self.baremetal_nodes.first()
+
+        tuskar.Node.get(
+            mox.IsA(http.HttpRequest),
+            node.id).AndRaise(self.exceptions.tuskar)
+
+        self.mox.ReplayAll()
+
+        url = urlresolvers.reverse('horizon:infrastructure:'
+                                   'resource_management:nodes:'
+                                   'detail',
+                                   args=[node.id])
+        res = self.client.get(url)
+
+        self.assertRedirectsNoFollow(res,
+            urlresolvers.reverse('horizon:infrastructure:resource_management:'
+                                    'index'))
