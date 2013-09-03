@@ -18,8 +18,6 @@ from horizon import exceptions
 from horizon import tabs
 
 from tuskar_ui import api as tuskar
-from tuskar_ui.infrastructure.resource_management.flavor_templates\
-    import tables as flavor_templates_tables
 from tuskar_ui.infrastructure.resource_management.racks\
     import tables as racks_tables
 from tuskar_ui.infrastructure.resource_management.resource_classes\
@@ -53,22 +51,6 @@ class RacksTab(tabs.TableTab):
         return context
 
 
-class FlavorTemplatesTab(tabs.TableTab):
-    table_classes = (flavor_templates_tables.FlavorTemplatesTable,)
-    name = _("Flavor Templates")
-    slug = "flavor_templates_tab"
-    template_name = "horizon/common/_detail_table.html"
-
-    def get_flavor_templates_data(self):
-        try:
-            flavor_templates = tuskar.FlavorTemplate.list(self.request)
-        except Exception:
-            flavor_templates = []
-            exceptions.handle(self.request,
-                              _('Unable to retrieve Tuskar Flavor Templates.'))
-        return flavor_templates
-
-
 class ResourceClassesTab(tabs.TableTab):
     table_classes = (resource_classes_tables.ResourceClassesTable,)
     name = _("Classes")
@@ -88,5 +70,5 @@ class ResourceClassesTab(tabs.TableTab):
 
 class ResourceManagementTabs(tabs.TabGroup):
     slug = "resource_management_tabs"
-    tabs = (ResourceClassesTab, RacksTab, FlavorTemplatesTab)
+    tabs = (ResourceClassesTab, RacksTab)
     sticky = True

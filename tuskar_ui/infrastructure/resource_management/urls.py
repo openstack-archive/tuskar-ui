@@ -14,8 +14,6 @@
 
 from django.conf.urls import defaults
 
-from tuskar_ui.infrastructure.resource_management.flavor_templates\
-    import urls as flavor_template_urls
 from tuskar_ui.infrastructure.resource_management.nodes\
     import urls as node_urls
 from tuskar_ui.infrastructure.resource_management.racks\
@@ -26,9 +24,6 @@ from tuskar_ui.infrastructure.resource_management import views
 
 urlpatterns = defaults.patterns('',
     defaults.url(r'^$', views.IndexView.as_view(), name='index'),
-    defaults.url(r'flavor_templates/',
-                 defaults.include(flavor_template_urls,
-                                  namespace='flavor_templates')),
     defaults.url(r'racks/', defaults.include(rack_urls, namespace='racks')),
     defaults.url(r'resource_classes/',
                  defaults.include(resource_classes_urls,

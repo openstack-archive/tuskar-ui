@@ -22,9 +22,6 @@ from horizon import exceptions
 from horizon import tables
 
 from tuskar_ui import api as tuskar
-from tuskar_ui import forms
-from tuskar_ui.infrastructure.resource_management.flavor_templates\
-    import tables as flavor_templates_tables
 from tuskar_ui.infrastructure.resource_management.racks\
     import tables as racks_tables
 from tuskar_ui.infrastructure.resource_management import resource_classes
@@ -94,23 +91,6 @@ class FlavorsFilterAction(tables.FilterAction):
         pass
 
 
-class FlavorTemplatesTable(flavor_templates_tables.FlavorTemplatesTable):
-    name = tuskar_ui.tables.Column('name',
-                         verbose_name=_('Flavor Template Name'))
-    max_vms = tuskar_ui.tables.Column("max_vms",
-                                      auto='form_widget',
-                                      verbose_name=_("Max. VMs"),
-                                      form_widget=forms.NumberInput(),
-                                      form_widget_attributes={
-                                          'class': "number_input_slim"})
-
-    class Meta:
-        name = "flavors"
-        verbose_name = _("Flavors")
-        multi_select = True
-        multi_select_name = "flavors_object_ids"
-
-
 class RacksFilterAction(tables.FilterAction):
     def filter(self, table, instances, filter_string):
         pass
@@ -157,7 +137,7 @@ class UpdateFlavorsClass(tables.LinkAction):
             resource_classes.workflows.ResourceClassInfoAndFlavorsAction.slug)
 
 
-class FlavorsTable(flavor_templates_tables.FlavorTemplatesTable):
+class FlavorsTable(tuskar_ui.tables.DataTable):
     def get_flavor_detail_link(datum):
         # FIXME - horizon Column.get_link_url does not allow to access GET
         # params
@@ -170,6 +150,33 @@ class FlavorsTable(flavor_templates_tables.FlavorTemplatesTable):
     name = tuskar_ui.tables.Column('name',
                          link=get_flavor_detail_link,
                          verbose_name=_('Flavor Name'))
+
+    cpu = tuskar_ui.tables.Column(
+        "cpu",
+        verbose_name=_('VCPU'),
+        filters=(lambda x: getattr(x, 'value', ''),)
+    )
+    memory = tuskar_ui.tables.Column(
+        "memory",
+        verbose_name=_('RAM (MB)'),
+        filters=(lambda x: getattr(x, 'value', ''),)
+    )
+    storage = tuskar_ui.tables.Column(
+        "storage",
+        verbose_name=_('Root Disk (GB)'),
+        filters=(lambda x: getattr(x, 'value', ''),)
+    )
+    ephemeral_disk = tuskar_ui.tables.Column(
+        "ephemeral_disk",
+        verbose_name=_('Ephemeral Disk (GB)'),
+        filters=(lambda x: getattr(x, 'value', ''),)
+    )
+    swap_disk = tuskar_ui.tables.Column(
+        "swap_disk",
+        verbose_name=_('Swap Disk (MB)'),
+        filters=(lambda x: getattr(x, 'value', ''),)
+    )
+
     max_vms = tuskar_ui.tables.Column("max_vms",
                             verbose_name=_("Max. VMs"))
 
