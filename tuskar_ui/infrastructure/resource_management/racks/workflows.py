@@ -187,6 +187,8 @@ class CreateRack(workflows.Workflow):
 
             return True
         except Exception:
+            import traceback
+            traceback.print_exc()
             exceptions.handle(request, _("Unable to create rack."))
 
 
