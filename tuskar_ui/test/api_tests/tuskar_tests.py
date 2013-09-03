@@ -655,19 +655,6 @@ class TuskarApiTests(test.APITestCase):
             self.assertIsInstance(node, api.Node)
         self.assertEquals(1, len(rack.aggregated_alerts))
 
-    def test_flavor_template_list(self):
-        templates = api.FlavorTemplate.list(self.request)
-        self.assertEquals(7, len(templates))
-        for t in templates:
-            self.assertIsInstance(t, api.FlavorTemplate)
-
-    def test_flavor_template_get(self):
-        test_template = self.tuskar_flavor_templates.first()
-        template = api.FlavorTemplate.get(self.request,
-                                                 test_template.id)
-        self.assertIsInstance(template, api.FlavorTemplate)
-        self.assertEquals(template.name, test_template.name)
-
     def test_flavor_create(self):
         flavor = self.tuskarclient_flavors.first()
 
