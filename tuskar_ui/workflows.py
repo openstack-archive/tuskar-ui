@@ -25,6 +25,100 @@ import horizon.workflows
 LOG = logging.getLogger(__name__)
 
 
+class FormsetStep(horizon.workflows.Step):
+    """
+    A workflow step that can render Django FormSets.
+
+    This distinct class is required due to the complexity involved in handling
+    both dynamic tab loading, dynamic table updating and table actions all
+    within one view.
+
+    .. attribute:: formset_definitions
+
+        An iterable of tuples of {{ formset_name }} and formset class
+        which this tab will contain. Equivalent to the
+        :attr:`~horizon.tables.MultiTableView.table_classes` attribute on
+        :class:`~horizon.tables.MultiTableView`. For each tuple you
+        need to define a corresponding ``get_{{ formset_name }}_data`` method
+        as with :class:`~horizon.tables.MultiTableView`.
+    """
+
+    formset_definitions = None
+
+    def __init__(self, workflow):
+        super(FormsetStep, self).__init__(workflow)
+        if not self.formset_definitions:
+            class_name = self.__class__.__name__
+            raise NotImplementedError("You must define a formset_definitions "
+                                      "attribute on %s" % class_name)
+        self._formsets = {}
+        self._formset_data_loaded = False
+
+    def prepare_action_context(self, request, context):
+        """
+        Passes the formsets to the action for validation and data extraction.
+        """
+        formsets = self.load_formset_data(request.POST or None)
+        context['_formsets'] = formsets
+        return context
+
+    def load_formset_data(self, post_data=None):
+        """
+        Calls the ``get_{{ formset_name }}_data`` methods for each formset class
+        and creates the formsets. Returns a dictionary with the formsets.
+
+        This is called from prepare_action_context.
+        """
+        # Mark our data as loaded so we can check it later.
+        self._formset_data_loaded = True
+
+        for formset_name, formset_class in self.formset_definitions:
+            # Fetch the data function.
+            func_name = "get_%s_data" % formset_name
+            data_func = getattr(self, func_name, None)
+            if data_func is None:
+                cls_name = self.__class__.__name__
+                raise NotImplementedError("You must define a %s method "
+                                          "on %s." % (func_name, cls_name))
+            # Load the data and create the formsets.
+            initial = data_func()
+            self._formsets[formset_name] = formset_class(
+                data=post_data,
+                initial=initial,
+            )
+        return self._formsets
+
+    def render(self):
+        """ Renders the step. """
+        step_template = template.loader.get_template(self.template_name)
+        extra_context = {"form": self.action,
+                         "step": self}
+        if issubclass(self.__class__, FormsetStep):
+            extra_context.update(self.get_context_data(self.workflow.request))
+        context = template.RequestContext(self.workflow.request, extra_context)
+        return step_template.render(context)
+
+    def get_context_data(self, request):
+        """
+        Adds a ``{{ formset_name }}_formset`` item to the context for each
+        formset in the ``formset_definitions`` attribute.
+
+        If only one table class is provided, a shortcut ``formset`` context
+        variable is also added containing the single formset.
+        """
+        context = {}
+        # The data should have been loaded by now.
+        if not self._formset_data_loaded:
+            raise RuntimeError("You must load the data with load_formset_data"
+                               "before displaying the step.")
+        for formset_name, formset in self._formsets.iteritems():
+            context["%s_formset" % formset_name] = formset
+        # If there's only one formset class, add a shortcut name as well.
+        if len(self._formsets) == 1:
+            context["formset"] = formset
+        return context
+
+
 # FIXME: TableStep
 class TableStep(horizon.workflows.Step):
     """

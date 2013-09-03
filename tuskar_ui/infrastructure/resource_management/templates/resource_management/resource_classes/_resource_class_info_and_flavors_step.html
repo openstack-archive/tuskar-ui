@@ -1,4 +1,4 @@
-<noscript><h3>{{ step }}</h3></noscript>
+<noscript><h3>{{ step }}</h3>xx</noscript>
 <table class="table-fixed">
   <tbody>
     <tr>
@@ -13,9 +13,49 @@
 </table>
 
 <div id="id_resource_class_flavors_table">
-  {{ flavors_table.render }}
+    {{ flavors_formset.management_form }}
+    {% if flavors_formset.non_field_errors %}
+        <div class="alert alert-error">
+            {{ flavors_formset.non_field_errors }}
+        </div>
+    {% endif %}
+    <table class="table table-bordered">
+        <thead>
+            <tr class="table_caption"></tr>
+            <tr>
+                {% for field in flavors_formset.0.visible_fields %}
+                    <th class="normal_column">{{ field.field.label }}</th>
+                {% endfor %}
+            </tr></thead>
+        <tbody>
+        {% for form in flavors_formset %}
+            <tr>
+                {% for field in form.visible_fields %}
+                    <td class="control-group{% if field.errors %} error{% endif %}">
+                        {{ field }}
+                        {% for error in field.errors %}
+                        <span class="help-inline">{{ error }}</span>
+                        {% endfor %}
+                        {%  if forloop.first %}
+                            {% for field in form.hidden_fields %}
+                                {{ field }}
+                            {% endfor %}
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-error">
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr><td colspan="{{ flavors_formset.0.visible_fields|length }}"></tr>
+        </tfoot>
+    </table>
 </div>
-
 
 <script type="text/javascript">
     // show the flavors table only when service_type is compute
@@ -51,6 +91,4 @@
     $(".modal #flavors input[type=checkbox]").bind('click', function() {
        toggle_max_vms($(this));
     });
-
-
 </script>
