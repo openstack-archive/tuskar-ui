@@ -14,12 +14,16 @@
 
 from django.core import urlresolvers
 from django.utils.translation import ugettext_lazy as _  # noqa
+from django.forms.formsets import formset_factory
 
 from horizon import exceptions
 from horizon import forms
 from horizon import messages
 
 from tuskar_ui import api as tuskar
+from tuskar_ui.infrastructure.resource_management.flavor_templates import\
+    forms as flavor_templates_forms
+from tuskar_ui import forms as tuskar_forms
 
 import logging
 
@@ -64,3 +68,49 @@ class DeleteCommand(object):
             redirect = urlresolvers.reverse(
                             'horizon:infrastructure:resource_management:index')
             exceptions.handle(self.request, self.msg, redirect=redirect)
+
+
+# Inherit from the EditFlavorTemplate form to get all the nice validation.
+class FlavorTemplatesForm(flavor_templates_forms.EditFlavorTemplate):
+    def __init__(self, *args, **kwargs):
+
+        # Drop the ``request`` parameter, as Formsets don't support it
+        request = None
+        super(FlavorTemplatesForm, self).__init__(request, *args, **kwargs)
+
+        # Add a field for selecting the flavors
+        selected_field = forms.BooleanField(label='', required=False)
+        self.fields.insert(0, 'selected', selected_field)
+
+        # Add nice widget types and classes
+        self.fields['name'].widget = forms.TextInput(
+            attrs={'class':'input input-small'},
+        )
+        for name in [
+            'cpu',
+            'memory',
+            'storage',
+            'ephemeral_disk',
+            'swap_disk',
+        ]:
+            self.fields[name].widget = tuskar_forms.NumberInput(
+                    attrs={'class':'number_input_slim'},
+            )
+
+    max_vms = forms.IntegerField(
+        label=_("Max. VMs"),
+        min_value=0,
+        initial=0,
+        widget=tuskar_forms.NumberInput(
+            attrs={'class':'number_input_slim'},
+        ),
+        required=False,
+    )
+    # Long name as used in the validation of EditFlavorTemplate.
+    flavor_template_id = forms.IntegerField(widget=forms.HiddenInput())
+
+
+FlavorTemplatesFormset = formset_factory(
+    FlavorTemplatesForm,
+    extra=0,
+)
