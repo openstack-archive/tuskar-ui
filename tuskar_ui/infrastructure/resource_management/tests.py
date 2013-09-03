@@ -31,8 +31,6 @@ class ResourceManagementTests(test.BaseAdminViewTests):
             'list',
             'list_racks',
             'nodes'),
-        tuskar.FlavorTemplate: (
-            'list',),
         tuskar.Node: (
             'list',),
         tuskar.Rack: (
@@ -64,13 +62,6 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         tuskar.Node.list(mox.IsA(http.HttpRequest)).AndReturn(nodes)
         # Rack stubs end
 
-        # FlavorTemplate stubs
-        flavors = self.tuskar_flavors.list()
-
-        tuskar.FlavorTemplate.list(mox.IsA(http.HttpRequest)).AndReturn(
-                flavors)
-        # FlavorTemplate stubs end
-
         self.mox.ReplayAll()
 
         url = urlresolvers.reverse(
@@ -78,11 +69,6 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         res = self.client.get(url)
         self.assertTemplateUsed(
             res, 'infrastructure/resource_management/index.html')
-
-        # FlavorTemplate asserts
-        self.assertItemsEqual(res.context['flavor_templates_table'].data,
-                              flavors)
-        # FlavorTemplate asserts end
 
         # ResourceClass asserts
         self.assertItemsEqual(res.context['resource_classes_table'].data,
