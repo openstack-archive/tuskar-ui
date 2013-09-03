@@ -23,8 +23,8 @@ from horizon import workflows
 from tuskar_ui import api as tuskar
 import tuskar_ui.workflows
 
-import re
-
+from tuskar_ui.infrastructure.resource_management.flavors\
+    import forms as flavors_forms
 from tuskar_ui.infrastructure.resource_management.resource_classes\
     import tables
 
@@ -73,7 +73,17 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                       ' another resource class.')
                     % name
                 )
-
+        formset = self.initial.get('_formsets', {}).get('flavors')
+        if formset:
+            if formset.is_valid():
+                cleaned_data['flavors'] = [form.cleaned_data
+                                           for form in formset
+                                           if form.cleaned_data
+                                           and not form.cleaned_data['DELETE']]
+            else:
+                raise forms.ValidationError(
+                    _('Errors in the flavors list.'),
+                )
         return cleaned_data
 
     class Meta:
@@ -82,33 +92,15 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                       "settings and add flavors to class.")
 
 
-class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.TableStep):
-    table_classes = (tables.FlavorTemplatesTable,)
+class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.FormsetStep):
+    formset_definitions = (
+        ('flavors', flavors_forms.FlavorFormset),
+    )
 
     action_class = ResourceClassInfoAndFlavorsAction
     template_name = 'infrastructure/resource_management/resource_classes/'\
                     '_resource_class_info_and_flavors_step.html'
-    contributes = ("name", "service_type", "flavors_object_ids",
-                   'max_vms')
-
-    def contribute(self, data, context):
-        request = self.workflow.request
-        if data:
-            context["flavors_object_ids"] =\
-                request.POST.getlist("flavors_object_ids")
-
-            # todo: lsmola django can't parse dictionaruy from POST
-            # this should be rewritten to django formset
-            context["max_vms"] = {}
-            for index, value in request.POST.items():
-                match = re.match(
-                    '^(flavors_object_ids__max_vms__(.*?))$',
-                    index)
-                if match:
-                    context["max_vms"][match.groups()[1]] = value
-
-        context.update(data)
-        return context
+    contributes = ("name", "service_type", "flavors")
 
     def get_flavors_data(self):
         try:
@@ -117,20 +109,29 @@ class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.TableStep):
                 resource_class = tuskar.ResourceClass.get(
                     self.workflow.request,
                     resource_class_id)
-
-                # TODO(lsmola ugly interface, rewrite)
-                self._tables['flavors'].active_multi_select_values = \
-                    resource_class.flavortemplates_ids
-
-                all_flavors = resource_class.all_flavors
+                flavors = resource_class.list_flavors
             else:
-                all_flavors = tuskar.FlavorTemplate.list(
-                        self.workflow.request)
+                flavors = []
         except Exception:
-            all_flavors = []
+            flavors = []
             exceptions.handle(self.workflow.request,
                               _('Unable to retrieve resource flavors list.'))
-        return all_flavors
+        flavors_data = []
+        for flavor in flavors:
+            if '.' in flavor.name:
+                name = flavor.name.split('.', 1)[1]
+            else:
+                name = flavor.name
+            data = {
+                'id': flavor.id,
+                'name': name,
+            }
+            for capacity_name in flavors_forms.CAPACITIES:
+                capacity = getattr(flavor, capacity_name, None)
+                capacity_value = getattr(capacity, 'value', '')
+                data[capacity_name] = capacity_value
+            flavors_data.append(data)
+        return flavors_data
 
 
 class RacksAction(workflows.Action):
@@ -202,22 +203,18 @@ class ResourceClassWorkflowMixin:
 
     def _get_flavors(self, request, data):
         flavors = []
-        flavor_ids = data.get('flavors_object_ids') or []
-        max_vms = data.get('max_vms')
         resource_class_name = data['name']
-        for template_id in flavor_ids:
-            template = tuskar.FlavorTemplate.get(request, template_id)
-            capacities = []
-            for c in template.capacities:
-                capacities.append({'name': c.name,
-                                   'value': str(c.value),
-                                   'unit': c.unit})
+        for flavor in data.get('flavors') or []:
+            capacities = [{'name': name,
+                           'value': str(flavor.get(name, '')),
+                           'unit': unit} for name, (label, unit, required)
+                                in flavors_forms.CAPACITIES.items()]
             # FIXME: tuskar uses resource-class-name prefix for flavors,
             # e.g. m1.large, we add rc name to the template name:
-            flavor_name = "%s.%s" % (resource_class_name, template.name)
-            flavors.append({'name': flavor_name,
-                            'max_vms': max_vms.get(template.id, None),
-                            'capacities': capacities})
+            flavor_name = "%s.%s" % (resource_class_name, flavor['name'])
+            # FIXME: for now just use blank max_vms
+            flavors.append({'name': flavor_name, 'capacities': capacities,
+                            'max_vms': None, 'id': data.get('id')})
         return flavors
 
     def _add_racks(self, request, data, resource_class):
@@ -237,7 +234,10 @@ class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
 
     def _create_resource_class_info(self, request, data):
         try:
-            flavors = self._get_flavors(request, data)
+            if data['service_type'] == 'compute':
+                flavors = self._get_flavors(request, data)
+            else:
+                flavors = []
             return tuskar.ResourceClass.create(
                 request,
                 name=data['name'],
@@ -276,7 +276,10 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
 
     def _update_resource_class_info(self, request, data):
         try:
-            flavors = self._get_flavors(request, data)
+            if data['service_type'] == 'compute':
+                flavors = self._get_flavors(request, data)
+            else:
+                flavors = []
             return tuskar.ResourceClass.update(
                     request,
                     data['resource_class_id'],
