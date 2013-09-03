@@ -13,19 +13,7 @@
 #    under the License.
 
 # FIXME: configuration for dummy data
-from django.contrib.contenttypes import generic
-from django.contrib.contenttypes import models as contenttype_models
 from django.db import models
-
-
-class Capacity(models.Model):
-    content_type = models.ForeignKey(contenttype_models.ContentType)
-    object_id = models.PositiveIntegerField()
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
-
-    name = models.CharField(max_length=50)
-    value = models.PositiveIntegerField()
-    unit = models.CharField(max_length=10)
 
 
 class Alert(models.Model):
@@ -36,11 +24,3 @@ class Alert(models.Model):
     object_type = models.CharField(max_length=20)
     message = models.CharField(max_length=250)
     time = models.DateTimeField()
-
-
-class FlavorTemplate(models.Model):
-    class Meta:
-        db_table = 'infrastructure_flavortemplate'
-
-    name = models.CharField(max_length=50, unique=True)
-    capacities = generic.GenericRelation(Capacity)

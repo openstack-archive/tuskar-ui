@@ -36,9 +36,9 @@ class NodesFilterAction(tables.FilterAction):
 
 class NodesTable(tables.DataTable):
     service_host = tables.Column("service_host",
-                        link=("horizon:infrastructure:"
-                            "resource_management:nodes:detail"),
-                        verbose_name=_("Name"))
+                                 link=("horizon:infrastructure:"
+                                       "resource_management:nodes:detail"),
+                                 verbose_name=_("Name"))
     mac_address = tables.Column("mac_address", verbose_name=_("MAC Address"))
     pm_address = tables.Column("pm_address", verbose_name=_("IP Address"))
     status = tables.Column("status",
