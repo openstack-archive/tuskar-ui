@@ -142,7 +142,7 @@ class DetailActionView(horizon_forms.ModalFormView):
     def get_success_url(self):
         # FIXME this should be set on form level
         return urlresolvers.reverse('horizon:infrastructure:'
-                                        'resource_management:index')
+                                    'resource_management:index')
 
     def get_context_data(self, **kwargs):
         context = super(DetailActionView, self).get_context_data(**kwargs)
