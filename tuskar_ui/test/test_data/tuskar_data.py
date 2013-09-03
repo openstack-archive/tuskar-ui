@@ -10,8 +10,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import collections
-
 from tuskar_ui import api
 
 from openstack_dashboard.test.test_data import utils as test_data_utils
@@ -23,43 +21,6 @@ from tuskarclient.v1 import resource_classes
 
 
 def data(TEST):
-    FlavorTemplateStruct = collections.namedtuple('FlavorStruct',
-                                                  'id name capacities')
-    CapacityStruct = collections.namedtuple('CapacityStruct',
-                                            'name value unit')
-    TEST.tuskar_flavor_templates = test_data_utils.TestDataContainer()
-    flavor_template_1 = api.FlavorTemplate(
-        FlavorTemplateStruct(
-            id="1",
-            name='nano',
-            capacities=[
-                api.Capacity(CapacityStruct(
-                    name='cpu',
-                    unit='',
-                    value='1')),
-                api.Capacity(CapacityStruct(
-                    name='memory',
-                    unit='MB',
-                    value='64')),
-                api.Capacity(CapacityStruct(
-                    name='storage',
-                    unit='MB',
-                    value='128')),
-                api.Capacity(CapacityStruct(
-                    name='ephemeral_disk',
-                    unit='GB',
-                    value='0')),
-                api.Capacity(CapacityStruct(
-                    name='swap_disk',
-                    unit='GB',
-                    value='0'))]))
-    flavor_template_2 = api.FlavorTemplate(
-        FlavorTemplateStruct(
-            id="2",
-            name='large',
-            capacities=[]))
-    TEST.tuskar_flavor_templates.add(flavor_template_1, flavor_template_2)
-
     # Flavors
     TEST.tuskarclient_flavors = test_data_utils.TestDataContainer()
     TEST.tuskar_flavors = test_data_utils.TestDataContainer()

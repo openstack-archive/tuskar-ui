@@ -1,0 +1,112 @@
+{{ formset.management_form }}
+{% if formset.non_field_errors %}
+    <div class="alert alert-error">
+        {{ formset.non_field_errors }}
+    </div>
+{% endif %}
+<table class="table table-bordered formset-table" id="{{ formset.prefix }}-formset-table">
+    <thead>
+        <tr class="table_caption"></tr>
+        <tr>
+            {% for field in flavors_formset.0.visible_fields %}
+                <th class="normal_column head-{{ field.name }}">{{ field.field.label }}</th>
+            {% endfor %}
+        </tr></thead>
+    <tbody>
+    {% for form in formset %}
+        <tr>
+            {% for field in form.visible_fields %}
+            <td class="control-group
+                       {% if field.errors %} error{% endif %}
+                       {% if field.required %} required{% endif %}
+                       field-{{ field.name }}">
+                    {{ field }}
+                    {% for error in field.errors %}
+                    <span class="help-inline">{{ error }}</span>
+                    {% endfor %}
+                    {%  if forloop.first %}
+                        {% for field in form.hidden_fields %}
+                            {{ field }}
+                            {% for error in field.errors %}
+                            <span class="help-inline">{{ field.name }}: {{ error }}</span>
+                            {% endfor %}
+                        {% endfor %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-error">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr><td colspan="{{ flavors_formset.0.visible_fields|length }}">
+        </td></tr>
+    </tfoot>
+</table>
+
+
+<script type="text/javascript">
+(function () {
+    var prefix = '{{ formset.prefix|escapejs }}'
+    var input_name_re = new RegExp('^' + prefix + '-\\d+-');
+    var input_id_re = new RegExp('^id_' + prefix + '-\\d+-');
+    var table = $('#' + prefix + '-formset-table');
+    var empty_row = table.find('tbody tr:last').clone();
+
+    // go through the whole table and fix the numbering of rows
+    var reenumerate_rows = function () {
+        var count = 0;
+        table.find('tbody tr').each(function () {
+            $(this).find('input').each(function () {
+                var input = $(this);
+                input.attr('name', input.attr('name').replace(
+                    input_name_re,
+                    prefix + '-' + count + '-'));
+                input.attr('id', input.attr('id').replace(
+                    input_id_re,
+                    'id_' + prefix + '-' + count + '-'));
+            });
+            count += 1;
+        });
+        $('#id_' + prefix + '-TOTAL_FORMS').val(count);
+    };
+
+    // replace the "Delete" checkboxes with × for deleting rows
+    var del_row = function () {
+        $(this).closest('tr').remove();
+        reenumerate_rows();
+    };
+
+    $('<a href="#" class="close">×</a>').replaceAll(
+        table.find('input[name$="-DELETE"]')
+    ).click(del_row);
+
+    // add more empty rows in the flavors table
+    var add_row = function () {
+        var new_row = empty_row.clone();
+        // connect signals and clean up
+        $('<a href="#" class="close">×</a>').replaceAll(
+            new_row.find('input[name$="-DELETE"]')
+        ).click(del_row);
+        new_row.find('input').val(null);
+        new_row.find('td').removeClass('error')
+        new_row.find('span.help-inline').remove();
+        table.find('tbody').append(new_row);
+        reenumerate_rows();
+    };
+
+    $('#{{ formset.prefix }}-formset-table tfoot td').append(
+        '<a href="#">{{ _("Add a row")|escapejs }}</a>').click(add_row);
+
+    // if the formset is not empty, delete the empty row from the end
+    if (table.find('tbody tr').length > 1 && !table.find('tbody tr:last input').val()) {
+        table.find('tbody tr:last').remove();
+        reenumerate_rows();
+    }
+
+} ());
+</script>
