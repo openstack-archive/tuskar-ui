@@ -13,44 +13,25 @@
 </table>
 
 <div id="id_resource_class_flavors_table">
-  {{ flavors_table.render }}
+    {% include 'infrastructure/resource_management/resource_classes/_formset.html' with formset=flavors_formset %}
 </div>
 
-
 <script type="text/javascript">
-    // show the flavors table only when service_type is compute
-    var toggle_table = function(value){
-      if (value == 'compute'){
-        $('#id_resource_class_flavors_table').show();
-      }
-      else{
-        $('#id_resource_class_flavors_table').hide();
-      }
+(function () {
+    // show the flavors table only when service_type is not control
+    var toggle_table = function (value) {
+        if (value && value !== 'control') {
+            $('#id_resource_class_flavors_table').show();
+        } else {
+            $('#id_resource_class_flavors_table').hide();
+        }
     };
     toggle_table($('#id_service_type').val())
 
-    $('#id_service_type').change(function(){
-      toggle_table($('#id_service_type').val())
+    $('#id_service_type').change(function () {
+        toggle_table($('#id_service_type').val());
     });
 
-    var toggle_max_vms = function(check_box){
-      var checked = check_box.prop('checked');
-      var id = check_box.val();
-
-      if (checked){
-        $('input[name=flavors_object_ids__max_vms__' + id + "]").show();
-      }
-      else{
-        $('input[name=flavors_object_ids__max_vms__' + id + "]").hide();
-      }
-    };
-
-    $(".modal #flavors input[type=checkbox]").each(function() {
-      toggle_max_vms($(this));
-    });
-    $(".modal #flavors input[type=checkbox]").bind('click', function() {
-       toggle_max_vms($(this));
-    });
-
-
+    var empty_row = $('#{{ formset.prefix }}-formset-table tbody tr:last').clone()
+} ());
 </script>
