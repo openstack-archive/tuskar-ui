@@ -483,15 +483,19 @@ input {
   }
 }
 
-// rack creation
-#id_resource_class_flavors_table {
-  .table tr td {
+// formsets
+.formset-table {
+  tr td {
     line-height: 2;
   }
 
-  .number_input_slim {
-    width: 3em;
+  input {
     padding: 2px 5px;
     margin: 0;
+  }
+
+  input.number_input_slim {
+    width: 4em;
+    text-align: right;
   }
 }
