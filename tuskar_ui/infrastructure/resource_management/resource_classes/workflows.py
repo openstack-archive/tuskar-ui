@@ -23,8 +23,8 @@ from horizon import workflows
 from tuskar_ui import api as tuskar
 import tuskar_ui.workflows
 
-from tuskar_ui.infrastructure.resource_management.resource_classes\
-    import forms as resource_classes_forms
+from tuskar_ui.infrastructure.resource_management.flavors\
+    import forms as flavors_forms
 from tuskar_ui.infrastructure.resource_management.resource_classes\
     import tables
 
@@ -46,9 +46,11 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                                          attrs={'class': 'switchable'})
                                      )
     image = forms.ChoiceField(label=_('Provisioning Image'),
-                            required=True,
-                            choices=[('compute-img', ('overcloud-compute'))],
-                            widget=forms.Select(attrs={'class': 'switchable'}))
+                              required=True,
+                              choices=[('compute-img', ('overcloud-compute'))],
+                              widget=forms.Select(
+                                  attrs={'class': 'switchable'})
+                              )
 
     def clean(self):
         cleaned_data = super(ResourceClassInfoAndFlavorsAction,
@@ -74,11 +76,10 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
         formset = self.initial.get('_formsets', {}).get('flavors')
         if formset:
             if formset.is_valid():
-                cleaned_data['flavors'] = [
-                    form.cleaned_data
-                    for form in formset
-                    if form.cleaned_data.get('selected')
-                ]
+                cleaned_data['flavors'] = [form.cleaned_data
+                                           for form in formset
+                                           if form.cleaned_data
+                                           and not form.cleaned_data['DELETE']]
             else:
                 raise forms.ValidationError(
                     _('Errors in the flavors list.'),
@@ -93,7 +94,7 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
 
 class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.FormsetStep):
     formset_definitions = (
-        ('flavors', resource_classes_forms.FlavorTemplatesFormset),
+        ('flavors', flavors_forms.FlavorFormset),
     )
 
     action_class = ResourceClassInfoAndFlavorsAction
@@ -102,34 +103,35 @@ class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.FormsetStep):
     contributes = ("name", "service_type", "flavors")
 
     def get_flavors_data(self):
-        flavortemplates_ids = []
         try:
             resource_class_id = self.workflow.context.get("resource_class_id")
             if resource_class_id:
                 resource_class = tuskar.ResourceClass.get(
                     self.workflow.request,
                     resource_class_id)
-                all_flavors = resource_class.all_flavors
-                flavortemplates_ids = resource_class.flavortemplates_ids
+                flavors = resource_class.list_flavors
             else:
-                all_flavors = tuskar.FlavorTemplate.list(
-                        self.workflow.request)
+                flavors = []
         except Exception:
-            all_flavors = []
+            flavors = []
             exceptions.handle(self.workflow.request,
                               _('Unable to retrieve resource flavors list.'))
         flavors_data = []
-        for flavor_template in all_flavors:
+        for flavor in flavors:
+            if '.' in flavor.name:
+                name = flavor.name.split('.', 1)[1]
+            else:
+                name = flavor.name
             data = {
-                'selected': flavor_template.id in flavortemplates_ids,
-                'name': flavor_template.name,
-                'flavor_template_id': flavor_template.id,
-                'max_vms': getattr(flavor_template, 'max_vms', None),
+                'id': flavor.id,
+                'name': name,
             }
-            for capacity_name in ['cpu', 'memory', 'storage', 'ephemeral_disk',
-                                  'swap_disk']:
-                capacity = getattr(flavor_template, capacity_name, None)
+            for capacity_name in flavors_forms.CAPACITIES:
+                capacity = getattr(flavor, capacity_name, None)
                 capacity_value = getattr(capacity, 'value', '')
+                # Make sure we don't have "None" in there
+                if capacity_value is None:
+                    capacity_value = ''
                 data[capacity_name] = capacity_value
             flavors_data.append(data)
         return flavors_data
@@ -206,22 +208,16 @@ class ResourceClassWorkflowMixin:
         flavors = []
         resource_class_name = data['name']
         for flavor in data.get('flavors') or []:
-            flavor_id = flavor.get('flavor_template_id')
-            if not flavor_id:
-                continue
-            # FIXME: thesheep maybe use the values from the formset here
-            template = tuskar.FlavorTemplate.get(request, flavor_id)
-            capacities = []
-            for c in template.capacities:
-                capacities.append({'name': c.name,
-                                   'value': str(c.value),
-                                   'unit': c.unit})
+            capacities = [{'name': name,
+                           'value': str(flavor.get(name, '')),
+                           'unit': unit} for name, (label, unit, required)
+                                in flavors_forms.CAPACITIES.items()]
             # FIXME: tuskar uses resource-class-name prefix for flavors,
             # e.g. m1.large, we add rc name to the template name:
-            flavor_name = "%s.%s" % (resource_class_name, template.name)
-            flavors.append({'name': flavor_name,
-                            'max_vms': flavor.get('max_vms'),
-                            'capacities': capacities})
+            flavor_name = "%s.%s" % (resource_class_name, flavor['name'])
+            # FIXME: for now just use blank max_vms
+            flavors.append({'name': flavor_name, 'capacities': capacities,
+                            'max_vms': None, 'id': data.get('id')})
         return flavors
 
     def _add_racks(self, request, data, resource_class):
@@ -241,7 +237,10 @@ class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
 
     def _create_resource_class_info(self, request, data):
         try:
-            flavors = self._get_flavors(request, data)
+            if data['service_type'] == 'compute':
+                flavors = self._get_flavors(request, data)
+            else:
+                flavors = []
             return tuskar.ResourceClass.create(
                 request,
                 name=data['name'],
@@ -280,7 +279,10 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
 
     def _update_resource_class_info(self, request, data):
         try:
-            flavors = self._get_flavors(request, data)
+            if data['service_type'] == 'compute':
+                flavors = self._get_flavors(request, data)
+            else:
+                flavors = []
             return tuskar.ResourceClass.update(
                     request,
                     data['resource_class_id'],

@@ -85,6 +85,7 @@ class FormsetStep(horizon.workflows.Step):
             self._formsets[formset_name] = formset_class(
                 data=post_data,
                 initial=initial,
+                prefix=formset_name,
             )
         return self._formsets
 
