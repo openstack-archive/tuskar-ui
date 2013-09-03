@@ -1,0 +1,72 @@
+{{ formset.management_form }}
+{% if formset.non_field_errors %}
+    <div class="alert alert-error">
+        {{ formset.non_field_errors }}
+    </div>
+{% endif %}
+<table class="table table-bordered formset-table" id="{{ formset.prefix }}-formset-table">
+    <thead>
+        <tr class="table_caption"></tr>
+        <tr>
+            {% for field in flavors_formset.0.visible_fields %}
+                <th class="normal_column head-{{ field.name }}">{{ field.field.label }}</th>
+            {% endfor %}
+        </tr></thead>
+    <tbody>
+    {% for form in formset %}
+        <tr>
+            {% for field in form.visible_fields %}
+            <td class="control-group
+                       {% if field.errors %} error{% endif %}
+                       {% if field.required %} required{% endif %}
+                       field-{{ field.name }}">
+                    {{ field }}
+                    {% for error in field.errors %}
+                    <span class="help-inline">{{ error }}</span>
+                    {% endfor %}
+                    {%  if forloop.first %}
+                        {% for field in form.hidden_fields %}
+                            {{ field }}
+                            {% for error in field.errors %}
+                            <span class="help-inline">{{ field.name }}: {{ error }}</span>
+                            {% endfor %}
+                        {% endfor %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-error">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr><td colspan="{{ flavors_formset.0.visible_fields|length }}">
+        </td></tr>
+    </tfoot>
+</table>
+
+
+<script type="text/javascript">
+(function () {
+    var empty_row = $('#{{ formset.prefix }}-formset-table tbody tr:last').clone()
+
+    // add more empty rows in the flavors table
+    var add_row = function () {
+        var new_row = empty_row.clone();
+        new_row.find('input').each(function () {
+            var input = $(this);
+            var number = $('#{{ formset.prefix }}-formset-table tbody tr').length;
+            input.attr('name', input.attr('name').replace(/^{{ formset.prefix }}-\d+-/, '{{ formset.prefix }}-' + number + '-'));
+            input.attr('id', input.attr('id').replace(/^id_{{ formset.prefix }}-\d+-/, 'id_{{ formset.prefix }}-' + number + '-'));
+            $('#id_form-TOTAL_FORMS').val(number + 1);
+        });
+        $('#{{ formset.prefix }}-formset-table tbody').append(new_row);
+    };
+
+    $('#{{ formset.prefix }}-formset-table tfoot td').append(
+        '<a href="#">{{ _("Add a row") }}</a>').click(add_row);
+} ());
+</script>
