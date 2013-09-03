@@ -25,17 +25,13 @@ from tuskar_ui.test import helpers as test
 class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
-        tuskar.FlavorTemplate: ('list',),
         tuskar.Rack: ('list',),
         tuskar.ResourceClass: ('get',)
     })
     def test_create_resource_class_get(self):
-        all_templates = self.tuskar_flavor_templates.list()
         all_racks = self.tuskar_racks.list()
         rc = self.tuskar_resource_classes.first()
 
-        tuskar.FlavorTemplate.list(
-            mox.IsA(http.HttpRequest)).AndReturn(all_templates)
         tuskar.Rack.list(
             mox.IsA(http.HttpRequest), True).AndReturn(all_racks)
         tuskar.ResourceClass.get(
@@ -77,9 +73,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'name': new_unique_name,
             'service_type': new_resource_class.service_type,
             'image': 'compute-img',
-            'form-TOTAL_FORMS': 0,
-            'form-INITIAL_FORMS': 0,
-            'form-MAX_NUM_FORMS': 1000,
+            'flavors-TOTAL_FORMS': 0,
+            'flavors-INITIAL_FORMS': 0,
+            'flavors-MAX_NUM_FORMS': 1000,
         }
         res = self.client.post(url, form_data)
         self.assertNoFormErrors(res)
@@ -116,9 +112,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'name': new_unique_name,
             'service_type': new_resource_class.service_type,
             'image': 'compute-img',
-            'form-TOTAL_FORMS': 0,
-            'form-INITIAL_FORMS': 0,
-            'form-MAX_NUM_FORMS': 1000,
+            'flavors-TOTAL_FORMS': 0,
+            'flavors-INITIAL_FORMS': 0,
+            'flavors-MAX_NUM_FORMS': 1000,
         }
         res = self.client.post(url, form_data)
         self.assertRedirectsNoFollow(res,
@@ -127,8 +123,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
              reverse("horizon:infrastructure:resource_management:index")))
 
     @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
-                                                   'racks_ids', 'all_racks',
-                                                   'all_flavors')})
+                                                   'racks_ids', 'all_racks')})
     def test_edit_resource_class_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
@@ -154,7 +149,6 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         # so maybe they shouldn't be a @property
         # properties set
         tuskar.ResourceClass.all_racks = all_racks
-        tuskar.ResourceClass.all_flavors = all_flavors
         tuskar.ResourceClass.list_flavors = all_flavors
 
         url = urlresolvers.reverse(
@@ -165,8 +159,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertEqual(res.status_code, 200)
 
     @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
-                                                   'racks_ids', 'all_racks',
-                                                   'all_flavors')})
+                                                   'racks_ids', 'all_racks')})
     def test_edit_resource_class_get_exception(self):
         resource_class = self.tuskar_resource_classes.first()
 
@@ -187,7 +180,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
-                               'all_flavors', 'flavortemplates_ids')
+                               'list_flavors')
     })
     def test_edit_resource_class_post(self):
         resource_class = self.tuskar_resource_classes.first()
@@ -200,8 +193,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
                 resource_class)
-        tuskar.ResourceClass.all_flavors = []
-        tuskar.ResourceClass.flavortemplates_ids = []
+        tuskar.ResourceClass.list_flavors = []
         tuskar.ResourceClass.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -219,9 +211,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'name': resource_class.name,
             'service_type': resource_class.service_type,
             'image': 'compute-img',
-            'form-TOTAL_FORMS': 0,
-            'form-INITIAL_FORMS': 0,
-            'form-MAX_NUM_FORMS': 1000,
+            'flavors-TOTAL_FORMS': 0,
+            'flavors-INITIAL_FORMS': 0,
+            'flavors-MAX_NUM_FORMS': 1000,
         }
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
@@ -400,8 +392,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                 'horizon:infrastructure:resource_management:index'))
 
     @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
-                                                   'racks_ids', 'all_racks',
-                                                   'all_flavors')})
+                                                   'racks_ids', 'all_racks')})
     def test_detail_edit_racks_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
@@ -427,7 +418,6 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         # so maybe they shouldn't be a @property
         # properties set
         tuskar.ResourceClass.all_racks = all_racks
-        tuskar.ResourceClass.all_flavors = all_flavors
         tuskar.ResourceClass.list_flavors = all_flavors
 
         url = urlresolvers.reverse(
@@ -439,7 +429,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
-                               'all_flavors', 'flavortemplates_ids')
+                               'list_flavors')
     })
     def test_detail_edit_racks_post(self):
         resource_class = self.tuskar_resource_classes.first()
@@ -452,8 +442,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
                 resource_class)
-        tuskar.ResourceClass.all_flavors = []
-        tuskar.ResourceClass.flavortemplates_ids = []
+        tuskar.ResourceClass.list_flavors = []
         tuskar.ResourceClass.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -471,9 +460,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'name': resource_class.name,
             'service_type': resource_class.service_type,
             'image': 'compute-img',
-            'form-TOTAL_FORMS': 0,
-            'form-INITIAL_FORMS': 0,
-            'form-MAX_NUM_FORMS': 1000,
+            'flavors-TOTAL_FORMS': 0,
+            'flavors-INITIAL_FORMS': 0,
+            'flavors-MAX_NUM_FORMS': 1000,
         }
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
@@ -491,8 +480,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(res, redirect_url)
 
     @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
-                                                   'racks_ids', 'all_racks',
-                                                   'all_flavors')})
+                                                   'racks_ids', 'all_racks')})
     def test_detail_edit_flavors_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
@@ -518,7 +506,6 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         # so maybe they shouldn't be a @property
         # properties set
         tuskar.ResourceClass.all_racks = all_racks
-        tuskar.ResourceClass.all_flavors = all_flavors
         tuskar.ResourceClass.list_flavors = all_flavors
 
         url = urlresolvers.reverse(
@@ -530,7 +517,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
-                               'all_flavors', 'flavortemplates_ids')
+                               'list_flavors')
     })
     def test_detail_edit_flavors_post(self):
         resource_class = self.tuskar_resource_classes.first()
@@ -543,8 +530,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
                 resource_class)
-        tuskar.ResourceClass.all_flavors = []
-        tuskar.ResourceClass.flavortemplates_ids = []
+        tuskar.ResourceClass.list_flavors = []
         tuskar.ResourceClass.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -562,9 +548,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'name': resource_class.name,
             'service_type': resource_class.service_type,
             'image': 'compute-img',
-            'form-TOTAL_FORMS': 0,
-            'form-INITIAL_FORMS': 0,
-            'form-MAX_NUM_FORMS': 1000,
+            'flavors-TOTAL_FORMS': 0,
+            'flavors-INITIAL_FORMS': 0,
+            'flavors-MAX_NUM_FORMS': 1000,
         }
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'

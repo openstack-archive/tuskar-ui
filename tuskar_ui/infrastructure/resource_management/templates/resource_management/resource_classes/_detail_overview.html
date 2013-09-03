@@ -131,7 +131,7 @@
       <tr>
         {% for flavor in resource_class.list_flavors %}
           <td class="flavor_usage_label">
-            <a href="{% url 'horizon:infrastructure:resource_management:flavor_templates:detail' flavor.id %}">{{ flavor.name }}</a>
+            {{ flavor.name }}
           </td>
         {% endfor %}
       </tr>
