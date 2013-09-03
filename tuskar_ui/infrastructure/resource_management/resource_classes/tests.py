@@ -73,9 +73,14 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
                 'create')
-        form_data = {'name': new_unique_name,
-                     'service_type': new_resource_class.service_type,
-                     'image': 'compute-img'}
+        form_data = {
+            'name': new_unique_name,
+            'service_type': new_resource_class.service_type,
+            'image': 'compute-img',
+            'form-TOTAL_FORMS': 0,
+            'form-INITIAL_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+        }
         res = self.client.post(url, form_data)
         self.assertNoFormErrors(res)
         self.assertMessageCount(success=1)
@@ -107,9 +112,14 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         url = urlresolvers.reverse(
                 'horizon:infrastructure:resource_management:'
                 'resource_classes:create')
-        form_data = {'name': new_unique_name,
-                     'service_type': new_resource_class.service_type,
-                     'image': 'compute-img'}
+        form_data = {
+            'name': new_unique_name,
+            'service_type': new_resource_class.service_type,
+            'image': 'compute-img',
+            'form-TOTAL_FORMS': 0,
+            'form-INITIAL_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+        }
         res = self.client.post(url, form_data)
         self.assertRedirectsNoFollow(res,
             ("%s?tab=resource_management_tabs__resource_classes_tab" %
@@ -177,6 +187,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
                 resource_class)
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
+                resource_class)
         tuskar.ResourceClass.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -189,10 +202,15 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                                        add_racks_ids)
         self.mox.ReplayAll()
 
-        form_data = {'resource_class_id': resource_class.id,
+        form_data = {
+            'resource_class_id': resource_class.id,
                      'name': resource_class.name,
                      'service_type': resource_class.service_type,
-                     'image': 'compute-img'}
+                     'image': 'compute-img',
+            'form-TOTAL_FORMS': 0,
+            'form-INITIAL_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+        }
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
                 'update',
@@ -407,6 +425,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
                 resource_class)
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
+                resource_class)
         tuskar.ResourceClass.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -419,10 +440,15 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                                        add_racks_ids)
         self.mox.ReplayAll()
 
-        form_data = {'resource_class_id': resource_class.id,
-                     'name': resource_class.name,
-                     'service_type': resource_class.service_type,
-                     'image': 'compute-img'}
+        form_data = {
+            'resource_class_id': resource_class.id,
+            'name': resource_class.name,
+            'service_type': resource_class.service_type,
+            'image': 'compute-img',
+            'form-TOTAL_FORMS': 0,
+            'form-INITIAL_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+        }
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
                 'update_racks',
@@ -476,6 +502,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
                 resource_class)
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
+                resource_class)
         tuskar.ResourceClass.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -488,10 +517,15 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                                        add_racks_ids)
         self.mox.ReplayAll()
 
-        form_data = {'resource_class_id': resource_class.id,
-                     'name': resource_class.name,
-                     'service_type': resource_class.service_type,
-                     'image': 'compute-img'}
+        form_data = {
+            'resource_class_id': resource_class.id,
+            'name': resource_class.name,
+            'service_type': resource_class.service_type,
+            'image': 'compute-img',
+            'form-TOTAL_FORMS': 0,
+            'form-INITIAL_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+        }
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
                 'update_flavors',
