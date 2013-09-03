@@ -104,8 +104,8 @@ class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.TableStep):
                 match = re.match(
                     '^(flavors_object_ids__max_vms__(.*?))$',
                     index)
-                if match:
-                    context["max_vms"][match.groups()[1]] = value
+                if value and match:
+                    context["max_vms"][match.groups()[1]] = int(value)
 
         context.update(data)
         return context
