@@ -17,7 +17,6 @@ import copy
 import datetime
 import logging
 import random
-import re
 
 import django.conf
 import django.db.models
@@ -656,29 +655,6 @@ class ResourceClass(StringIdAPIResourceWrapper):
         return self._flavors
 
     @property
-    def all_flavors(self):
-        """ Joined relation table resourceclassflavor with all global flavors
-        """
-        if not hasattr(self, '_all_flavors'):
-            my_flavors = self.list_flavors
-            self._all_flavors = []
-            for flavor in FlavorTemplate.list(self.request):
-                fname = "%s.%s" % (self.name, flavor.name)
-                f = next((f for f in my_flavors if f.name == fname), None)
-                if f:
-                    flavor.max_vms = f.max_vms
-                self._all_flavors.append(flavor)
-        return self._all_flavors
-
-    # FIXME: for now, we display list of flavor templates when
-    # editing a resource class - we have to set id of flavor template, not
-    # flavor
-    @property
-    def flavortemplates_ids(self):
-        """ List of unicode ids of flavor templates added to resource class """
-        return [unicode(ft.flavor_template.id) for ft in self.list_flavors]
-
-    @property
     def all_used_instances(self):
         return [flavor.used_instances for flavor in self.list_flavors]
 
@@ -736,154 +712,6 @@ class ResourceClass(StringIdAPIResourceWrapper):
         return any([rack.is_provisioned for rack in self.list_racks])
 
 
-class FlavorTemplate(StringIdAPIResourceWrapper):
-    """Wrapper for the Flavor object returned by the
-    dummy model.
-    """
-    _attrs = ['name']
-
-    @classmethod
-    def list(cls, request, only_free_racks=False):
-        return [cls(f) for f in dummymodels.FlavorTemplate.objects.all()]
-
-    @classmethod
-    def get(cls, request, flavor_id):
-        return cls(dummymodels.FlavorTemplate.objects.get(id=flavor_id))
-
-    @classmethod
-    def create(cls, request, **kwargs):
-        template = dummymodels.FlavorTemplate(name=kwargs['name'])
-        template.save()
-        Capacity.create(request,
-                        content_object=template,
-                        name='cpu',
-                        value=kwargs['cpu'],
-                        unit='')
-        Capacity.create(request,
-                        content_object=template,
-                        name='memory',
-                        value=kwargs['memory'],
-                        unit='MB')
-        Capacity.create(request,
-                        content_object=template,
-                        name='storage',
-                        value=kwargs['storage'],
-                        unit='GB')
-        Capacity.create(request,
-                        content_object=template,
-                        name='ephemeral_disk',
-                        value=kwargs['ephemeral_disk'],
-                        unit='GB')
-        Capacity.create(request,
-                        content_object=template,
-                        name='swap_disk',
-                        value=kwargs['swap_disk'],
-                        unit='MB')
-
-    @property
-    def capacities(self):
-        if not hasattr(self, '_capacities'):
-            self._capacities = [Capacity(c) for c in
-                                self._apiresource.capacities.all()]
-        return self._capacities
-
-    def capacity(self, capacity_name):
-        key = "_%s" % capacity_name
-        if not hasattr(self, key):
-            try:
-                capacity = [c for c in self.capacities if (
-                    c.name == capacity_name)][0]
-            except Exception:
-                capacity = dummymodels.Capacity(
-                    name=capacity_name,
-                    value=_('Unable to retrieve '
-                            '(Is the flavor configured properly?)'),
-                    unit='')
-            setattr(self, key, capacity)
-        return getattr(self, key)
-
-    @property
-    def cpu(self):
-        return self.capacity('cpu')
-
-    @property
-    def memory(self):
-        return self.capacity('memory')
-
-    @property
-    def storage(self):
-        return self.capacity('storage')
-
-    @property
-    def ephemeral_disk(self):
-        return self.capacity('ephemeral_disk')
-
-    @property
-    def swap_disk(self):
-        return self.capacity('swap_disk')
-
-    @property
-    def running_virtual_machines(self):
-        # FIXME: arbitrary number
-        return random.randint(0, int(self.cpu.value))
-
-    # defines a random average of capacity - API should probably be able to
-    # determine average of capacity based on capacity value and obejct_id
-    def vms_over_time(self, start_time, end_time):
-        values = []
-        current_time = start_time
-        while current_time <= end_time:
-            values.append(
-                {'date': current_time,
-                 'active_vms': random.randint(0,
-                                              self.running_virtual_machines)})
-            current_time += datetime.timedelta(hours=1)
-
-        return values
-
-    @classmethod
-    def update(cls, request, **kwargs):
-        t = dummymodels.FlavorTemplate.objects.get(id=kwargs['template_id'])
-        t.name = kwargs['name']
-        t.save()
-        template = cls(t)
-        Capacity.update(request,
-                        capacity_id=template.cpu.id,
-                        content_object=template._apiresource,
-                        name='cpu',
-                        value=kwargs['cpu'],
-                        unit='')
-        Capacity.update(request,
-                        capacity_id=template.memory.id,
-                        content_object=template._apiresource,
-                        name='memory',
-                        value=kwargs['memory'],
-                        unit='MB')
-        Capacity.update(request,
-                        capacity_id=template.storage.id,
-                        content_object=template._apiresource,
-                        name='storage',
-                        value=kwargs['storage'],
-                        unit='GB')
-        Capacity.update(request,
-                        capacity_id=template.ephemeral_disk.id,
-                        content_object=template._apiresource,
-                        name='ephemeral_disk',
-                        value=kwargs['ephemeral_disk'],
-                        unit='GB')
-        Capacity.update(request,
-                        capacity_id=template.swap_disk.id,
-                        content_object=template._apiresource,
-                        name='swap_disk',
-                        value=kwargs['swap_disk'],
-                        unit='MB')
-        return template
-
-    @classmethod
-    def delete(cls, request, template_id):
-        dummymodels.FlavorTemplate.objects.get(id=template_id).delete()
-
-
 class Flavor(StringIdAPIResourceWrapper):
     """Wrapper for the Flavor object returned by Tuskar.
     """
@@ -909,14 +737,6 @@ class Flavor(StringIdAPIResourceWrapper):
         tuskarclient(request).flavors.delete(
                                 kwargs['resource_class_id'],
                                 kwargs['flavor_id'])
-
-    # FIXME: returns flavor template for this flavor
-    @property
-    def flavor_template(self):
-        # strip resource class prefix from flavor name before comparing:
-        fname = re.sub(r'^.*\.', '', self.name)
-        return next(f for f in FlavorTemplate.list(None) if (
-            f.name == fname))
 
     @property
     def capacities(self):
