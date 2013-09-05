@@ -126,8 +126,17 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest),
-                    resource_class.id).MultipleTimes().AndReturn(
-                        resource_class)
+            resource_class.id).AndReturn(resource_class)
+
+        # get_flavors_data in workflows.py
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest),
+            resource_class.id).AndReturn(resource_class)
+
+        # get_racks_data in workflows.py
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest),
+            resource_class.id).AndReturn(resource_class)
 
         self.mox.ReplayAll()
 
@@ -152,7 +161,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         resource_class = self.tuskar_resource_classes.first()
 
         tuskar.ResourceClass.\
-            get(mox.IsA(http.HttpRequest), resource_class.id).MultipleTimes()\
+            get(mox.IsA(http.HttpRequest), resource_class.id)\
             .AndRaise(self.exceptions.tuskar)
 
         self.mox.ReplayAll()
@@ -263,7 +272,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).\
-                MultipleTimes().AndReturn(resource_class)
+            AndReturn(resource_class)
         self.mox.ReplayAll()
 
         tuskar.ResourceClass.list_flavors = flavors
@@ -358,7 +367,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest),
             resource_class.id).\
-                    MultipleTimes().AndRaise(self.exceptions.tuskar)
+            AndRaise(self.exceptions.tuskar)
         self.mox.ReplayAll()
 
         url = urlresolvers.reverse(
@@ -379,7 +388,18 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         tuskar.ResourceClass.get(mox.IsA(http.HttpRequest),
                                  resource_class.id).\
-               MultipleTimes().AndReturn(resource_class)
+                                 AndReturn(resource_class)
+
+        # get_flavors_data in workflows.py
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest),
+            resource_class.id).AndReturn(resource_class)
+
+        # get_racks_data in workflows.py
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest),
+            resource_class.id).AndReturn(resource_class)
+
         self.mox.ReplayAll()
 
         # FIXME I should probably track the racks and flavors methods
@@ -448,7 +468,18 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         tuskar.ResourceClass.get(mox.IsA(http.HttpRequest),
                                  resource_class.id).\
-               MultipleTimes().AndReturn(resource_class)
+                                 AndReturn(resource_class)
+
+        # get_flavors_data in workflows.py
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest),
+            resource_class.id).AndReturn(resource_class)
+
+        # get_racks_data in workflows.py
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest),
+            resource_class.id).AndReturn(resource_class)
+
         self.mox.ReplayAll()
 
         # FIXME I should probably track the racks and flavors methods

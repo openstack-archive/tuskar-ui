@@ -93,7 +93,7 @@ class RackViewTests(test.BaseAdminViewTests):
         rack = self.tuskar_racks.first()
 
         tuskar.Rack.get(
-            mox.IsA(http.HttpRequest), rack.id).MultipleTimes().AndReturn(rack)
+            mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
         tuskar.ResourceClass.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -126,7 +126,7 @@ class RackViewTests(test.BaseAdminViewTests):
                 'cpus': u'1', 'memory_mb': u'1024', 'local_gb': u'10'}
 
         tuskar.Rack.get(
-            mox.IsA(http.HttpRequest), rack.id).MultipleTimes().AndReturn(rack)
+            mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
         tuskar.Rack.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_racks.list())
