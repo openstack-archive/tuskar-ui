@@ -93,12 +93,12 @@ class RacksTable(tables.DataTable):
                           status=True,
                           status_choices=STATUS_CHOICES)
     usage = tables.Column(
-              'vm_capacity',
-              verbose_name=_("Usage"),
-              filters=(lambda vm_capacity:
-                (vm_capacity.value and
-                    "%s %%" % int(round((100 / float(vm_capacity.value)) *
-                                        vm_capacity.usage, 0))) or None,))
+        'vm_capacity',
+        verbose_name=_("Usage"),
+        filters=(lambda vm_capacity:
+                     (vm_capacity.value and
+                      "%s %%" % int(round((100 / float(vm_capacity.value)) *
+                                          vm_capacity.usage, 0))) or None,))
 
     class Meta:
         name = "racks"

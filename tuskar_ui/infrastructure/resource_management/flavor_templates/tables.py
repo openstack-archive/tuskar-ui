@@ -61,7 +61,7 @@ class FlavorTemplatesTable(tuskar_tables.DataTable):
     name = tuskar_tables.Column('name',
                          link=("horizon:infrastructure:"
                                "resource_management:flavor_templates:detail"),
-                         verbose_name=_('Flavor Template Name'))
+                                verbose_name=_('Flavor Template Name'))
     cpu = tuskar_tables.Column(
         "cpu",
         verbose_name=_('VCPU'),
