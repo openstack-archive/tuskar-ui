@@ -49,7 +49,7 @@ Future Work
 
 The following documents and YouTube videos represent the future work being planned for Tuskar-UI.
 
-* `User Stories <https://etherpad.openstack.org/tuskar-ui-stories>`_ [YouTube Discussion: `Part 1 <http://www.youtube.com/watch?v=gmxCUNySYqc>`_]
+* `User Stories <https://etherpad.openstack.org/tuskar-ui-stories>`_ [YouTube Discussion: `Part 1 <http://www.youtube.com/watch?v=gmxCUNySYqc>`_ | `Part 2 <https://www.youtube.com/watch?v=E2TKZuwPtLA>`_]
 
 
 Contact Us
