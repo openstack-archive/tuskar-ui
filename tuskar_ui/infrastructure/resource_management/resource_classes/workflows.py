@@ -27,6 +27,8 @@ import re
 
 from tuskar_ui.infrastructure.resource_management.resource_classes\
     import tables
+from tuskar_ui.infrastructure.resource_management.resource_classes\
+    import forms as resource_classes_forms
 
 
 class ResourceClassInfoAndFlavorsAction(workflows.Action):
@@ -73,7 +75,18 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                       ' another resource class.')
                     % name
                 )
-
+        formset = self.initial.get('_formsets', {}).get('flavors')
+        if formset:
+            if formset.is_valid():
+                cleaned_data['flavors'] = [
+                    form.cleaned_data
+                    for form in formset
+                    if form.cleaned_data.get('selected')
+                ]
+            else:
+                raise forms.ValidationError(
+                    _('Errors in the flavors list.'),
+                )
         return cleaned_data
 
     class Meta:
@@ -82,47 +95,26 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                       "settings and add flavors to class.")
 
 
-class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.TableStep):
-    table_classes = (tables.FlavorTemplatesTable,)
+class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.FormsetStep):
+    formset_definitions = (
+        ('flavors', resource_classes_forms.FlavorTemplatesFormset),
+    )
 
     action_class = ResourceClassInfoAndFlavorsAction
     template_name = 'infrastructure/resource_management/resource_classes/'\
                     '_resource_class_info_and_flavors_step.html'
-    contributes = ("name", "service_type", "flavors_object_ids",
-                   'max_vms')
-
-    def contribute(self, data, context):
-        request = self.workflow.request
-        if data:
-            context["flavors_object_ids"] =\
-                request.POST.getlist("flavors_object_ids")
-
-            # todo: lsmola django can't parse dictionaruy from POST
-            # this should be rewritten to django formset
-            context["max_vms"] = {}
-            for index, value in request.POST.items():
-                match = re.match(
-                    '^(flavors_object_ids__max_vms__(.*?))$',
-                    index)
-                if value and match:
-                    context["max_vms"][match.groups()[1]] = int(value)
-
-        context.update(data)
-        return context
+    contributes = ("name", "service_type", "flavors", 'max_vms')
 
     def get_flavors_data(self):
+        flavortemplates_ids = []
         try:
             resource_class_id = self.workflow.context.get("resource_class_id")
             if resource_class_id:
                 resource_class = tuskar.ResourceClass.get(
                     self.workflow.request,
                     resource_class_id)
-
-                # TODO(lsmola ugly interface, rewrite)
-                self._tables['flavors'].active_multi_select_values = \
-                    resource_class.flavortemplates_ids
-
                 all_flavors = resource_class.all_flavors
+                flavortemplates_ids = resource_class.flavortemplates_ids
             else:
                 all_flavors = tuskar.FlavorTemplate.list(
                         self.workflow.request)
@@ -130,7 +122,23 @@ class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.TableStep):
             all_flavors = []
             exceptions.handle(self.workflow.request,
                               _('Unable to retrieve resource flavors list.'))
-        return all_flavors
+        #return all_flavors
+
+        get = lambda obj, name: getattr(getattr(obj, name, None), 'value', '')
+        return [
+            {
+                'selected': flavor.id in flavortemplates_ids,
+                'name': flavor.name,
+                'cpu': get(flavor, 'cpu'),
+                'memory': get(flavor, 'memory'),
+                'storage': get(flavor, 'storage'),
+                'ephemeral_disk': get(flavor, 'ephemeral_disk'),
+                'swap_disk': get(flavor, 'swap_disk'),
+                # XXX Shouldn't max_vms be taken from the resource class?
+                'max_vms': get(flavor, 'max_vms'),
+                'flavor_template_id': flavor.id,
+            } for flavor in all_flavors
+        ]
 
 
 class RacksAction(workflows.Action):
@@ -202,11 +210,13 @@ class ResourceClassWorkflowMixin:
 
     def _get_flavors(self, request, data):
         flavors = []
-        flavor_ids = data.get('flavors_object_ids') or []
-        max_vms = data.get('max_vms')
         resource_class_name = data['name']
-        for template_id in flavor_ids:
-            template = tuskar.FlavorTemplate.get(request, template_id)
+        for flavor in data.get('flavors') or []:
+            flavor_id = flavor.get('flavor_template_id')
+            if not flavor_id:
+                continue
+            # FIXME: thesheep maybe use the values from the formset here
+            template = tuskar.FlavorTemplate.get(request, flavor_id)
             capacities = []
             for c in template.capacities:
                 capacities.append({'name': c.name,
@@ -216,7 +226,7 @@ class ResourceClassWorkflowMixin:
             # e.g. m1.large, we add rc name to the template name:
             flavor_name = "%s.%s" % (resource_class_name, template.name)
             flavors.append({'name': flavor_name,
-                            'max_vms': max_vms.get(template.id, None),
+                            'max_vms': flavor.get('max_vms'),
                             'capacities': capacities})
         return flavors
 
