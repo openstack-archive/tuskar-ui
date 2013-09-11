@@ -49,7 +49,7 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                               required=True,
                               choices=[('compute-img', ('overcloud-compute'))],
                               widget=forms.Select(
-                                attrs={'class': 'switchable'})
+                                  attrs={'class': 'switchable'})
                               )
 
     def clean(self):
