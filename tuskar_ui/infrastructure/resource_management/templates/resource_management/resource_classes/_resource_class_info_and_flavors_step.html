@@ -18,9 +18,9 @@
 
 
 <script type="text/javascript">
-    // show the flavors table only when service_type is compute
+    // show the flavors table only if service_type is not compute
     var toggle_table = function(value){
-      if (value == 'compute'){
+      if (value === 'compute'){
         $('#id_resource_class_flavors_table').show();
       }
       else{
