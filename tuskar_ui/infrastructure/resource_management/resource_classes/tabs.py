@@ -70,7 +70,7 @@ class FlavorsTab(tabs.TableTab):
 
     def allowed(self, request):
         resource_class = self.tab_group.kwargs['resource_class']
-        return resource_class.service_type == "compute"
+        return resource_class.service_type != "control"
 
 
 class ResourceClassDetailTabs(tabs.TabGroup):
