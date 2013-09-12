@@ -30,12 +30,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass: ('get',)
     })
     def test_create_resource_class_get(self):
-        all_templates = self.tuskar_flavor_templates.list()
         all_racks = self.tuskar_racks.list()
         rc = self.tuskar_resource_classes.first()
 
-        tuskar.FlavorTemplate.list(
-            mox.IsA(http.HttpRequest)).AndReturn(all_templates)
         tuskar.Rack.list(
             mox.IsA(http.HttpRequest), True).AndReturn(all_racks)
         tuskar.ResourceClass.get(
