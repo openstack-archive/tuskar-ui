@@ -154,19 +154,19 @@ If everything has gone according to plan, you should be able to run:
 
     tools/with_venv.sh ./manage.py runserver
 
-and have the application start on port 8000. The Tuskar dashboard will
-be located at http://localhost:8000/infrastructure
+and have the application start on port 8080. The Tuskar dashboard will
+be located at http://localhost:8080/infrastructure
 
 If you wish to access it remotely (i.e., not just from localhost), you
-need to open port 8000 in iptables:
+need to open port 8080 in iptables:
 
 ::
 
-    iptables -I INPUT -p tcp --dport 8000 -j ACCEPT
+    iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
 
-and launch the server with ``0.0.0.0:8000`` on the end:
+and launch the server with ``0.0.0.0:8080`` on the end:
 
 ::
 
-    tools/with_venv.sh ./manage.py runserver 0.0.0.0:8000
+    tools/with_venv.sh ./manage.py runserver 0.0.0.0:8080
 
