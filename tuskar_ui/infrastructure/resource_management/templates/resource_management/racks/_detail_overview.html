@@ -2,7 +2,7 @@
 {% load url from future %}
 {% load chart_helpers %}
 
-{% if not rack.is_provisioned or rack.is_provisioning %}
+{% if rack.is_provisioning %}
   <div class="info row-fluid detail">
     <div class="span12">
       <div data-state="{{rack.state}}"
@@ -11,11 +11,6 @@
            class="overall-state well provision-block" style="text-align: center; margin: 2px;">
           {% if rack.is_provisioning %}
             <p>Provisioning</p><img src="/static/dashboard/img/horizontal_loader.gif" />
-          {% else %}
-            <a class="btn btn-large btn-block btn-primary ajax-modal"
-               href="{% url 'horizon:infrastructure:resource_management:racks:edit_status' rack.id %}?action=provision">
-               {% trans "Provision Rack" %}
-            </a>
           {% endif %}
       </div>
     </div>
