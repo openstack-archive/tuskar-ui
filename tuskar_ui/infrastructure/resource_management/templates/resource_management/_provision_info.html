@@ -1,0 +1,60 @@
+{% load i18n %}
+{% load url from future %}
+
+<div class="provisioning-state">
+{% if provisioning_state == "unprovisioned" %}
+    <div class="well well-small clearfix">
+        <a class="btn btn-primary btn-small ajax-modal pull-right"
+           href="{% url 'horizon:infrastructure:resource_management:provision' %}">
+           {% trans "Provision Deployment" %}
+        </a>
+        {% trans "Some racks are not provisioned yet." %}
+    </div>
+{% endif %}
+</div>
+
+<script>
+(function () {
+    var init_check_state = function () {
+        var divs = $('div.provisioning-state');
+        var old_state = '{{ provisioning_state|escapejs }}';
+        var url = '{% filter escapejs %}{% url "horizon:infrastructure:resource_management:provisioning_state" %}{% endfilter %}';
+        var progress_html = '{% filter escapejs %}{% include "infrastructure/resource_management/_provision_progress.html" %}{% endfilter %}';
+        var success_html = '<div class="alert alert-block alert-success"><a href="#" class="close" data-dismiss="alert">×</a>{% filter escapejs %}{% trans "Provisioning succeeded." %}{%endfilter %}</div>';
+        var error_html = '<div class="alert alert-block alert-error"><a href="#" class="close" data-dismiss="alert">×</a>{% filter escapejs %}{% trans "Provisioning state unavailable." %}{% endfilter %}</div>';
+
+        var check_state = function () {
+            $.getJSON(url, function(data) {
+                var new_state = data['state'];
+                if (old_state === new_state) {
+                    // Nothing to see here, move along.
+                    return;
+                };
+                if (new_state === 'provisioning') {
+                    divs.html(progress_html);
+                } else if (old_state === 'provisioning') {
+                    // Provisioning finished, don't poll anymore.
+                    window.clearInterval(interval_id);
+                    divs.html(success_html);
+                };
+                old_state = new_state;
+            }).fail(function() { element.html(error_html); });
+        };
+
+        if (old_state == 'provisioning') {
+            // Only display progress if js is enabled.
+            divs.html(progress_html);
+        };
+        if (old_state !== 'provisioned') {
+            // Only poll when unprovisioned or provisioning.
+            var interval_id = window.setInterval(check_state, 20000);
+        };
+    };
+
+    if (typeof($) !== 'undefined') {
+        $(init_check_state);
+    } else {
+        addHorizonLoadEvent(init_check_state);
+    }
+}());
+</script>

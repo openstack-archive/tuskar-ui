@@ -8,14 +8,19 @@
       <div data-state="{{rack.state}}"
            data-url="{% url 'horizon:infrastructure:resource_management:racks:check_state' rack.id %}"
            data-interval="20000"
-           class="overall-state well provision-block" style="text-align: center; margin: 2px;">
+           class="overall-state provision-block">
           {% if rack.is_provisioning %}
-            <p>Provisioning</p><img src="/static/dashboard/img/horizontal_loader.gif" />
+            {% include "infrastructure/resource_management/_provision_progress.html" %}
           {% else %}
-            <a class="btn btn-large btn-block btn-primary ajax-modal"
-               href="{% url 'horizon:infrastructure:resource_management:racks:edit_status' rack.id %}?action=provision">
-               {% trans "Provision Rack" %}
-            </a>
+            <div class="well clearfix">
+                <p class="pull-right">
+                    {% trans "To make it ready to use," %}
+                    <a href="{% url 'horizon:infrastructure:resource_management:index' %}">
+                        {% trans "provision your whole deployment." %}
+                    </a>
+                </p>
+                {% trans "Rack is not provisioned yet." %}
+            </div>
           {% endif %}
       </div>
     </div>
@@ -288,7 +293,7 @@ horizon.detail_overview = {
       setTimeout(horizon.detail_overview.update, interval);
 
       this.jqxhr = $.getJSON( url, function() {
-          state_obj.html('<p>Provisioning</p><img src="/static/dashboard/img/horizontal_loader.gif" />')
+          state_obj.html('{% filter escapejs %}{% include "infrastructure/resource_management/_provision_progress.html" %}{% endfilter %}');
         })
         .done(function(data) {
           // FIXME find a way how to only update graph with new data
