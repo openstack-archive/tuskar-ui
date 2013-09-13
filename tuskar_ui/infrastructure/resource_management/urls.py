@@ -26,6 +26,8 @@ from tuskar_ui.infrastructure.resource_management import views
 
 urlpatterns = defaults.patterns('',
     defaults.url(r'^$', views.IndexView.as_view(), name='index'),
+    defaults.url(r'provision', views.ProvisionView.as_view(),
+                    name='provision'),
     defaults.url(r'flavor_templates/',
                  defaults.include(flavor_template_urls,
                                   namespace='flavor_templates')),
