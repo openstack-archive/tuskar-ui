@@ -24,7 +24,47 @@ from tuskar_ui.infrastructure.resource_management.resource_classes\
     import tables as resource_classes_tables
 
 
-class RacksTab(tabs.TableTab):
+def get_provision_racks_and_state(racks):
+    unprovisioned_racks = [rack for rack in racks
+                            if not rack.is_provisioned]
+    provisioning_racks = [rack for rack in racks
+                            if rack.is_provisioning]
+    if provisioning_racks:
+        state = 'provisioning'
+    elif unprovisioned_racks:
+        state = 'unprovisioned'
+    else:
+        state = 'provisioned'
+    return unprovisioned_racks, provisioning_racks, state
+
+
+class ProvisioningInfoMixin(object):
+    def get_provisioning_racks_data(self):
+        try:
+            racks = tuskar.Rack.list(self.request)
+        except Exception:
+            racks = []
+            exceptions.handle(self.request, _("Unable to retrieve racks."))
+        return racks
+
+    def get_context_data(self, request=None, **kwargs):
+        # XXX get_context_data has different signatures in different views
+        if request:
+            context = super(ProvisioningInfoMixin, self).get_context_data(request, **kwargs)
+        else:
+            context = super(ProvisioningInfoMixin, self).get_context_data(**kwargs)
+        (unprovisioned_racks, provisioning_racks,
+            state) = get_provision_racks_and_state(
+                        self.get_provisioning_racks_data())
+        context.update({
+            'unprovisioned_racks': unprovisioned_racks,
+            'provisioning_racks': provisioning_racks,
+            'provisioning_state': state,
+        })
+        return context
+
+
+class RacksTab(ProvisioningInfoMixin, tabs.TableTab):
     table_classes = (racks_tables.RacksTable,)
     name = _("Racks")
     slug = "racks_tab"
@@ -51,11 +91,12 @@ class RacksTab(tabs.TableTab):
         return context
 
 
-class ResourceClassesTab(tabs.TableTab):
+class ResourceClassesTab(ProvisioningInfoMixin, tabs.TableTab):
     table_classes = (resource_classes_tables.ResourceClassesTable,)
     name = _("Classes")
     slug = "resource_classes_tab"
-    template_name = "horizon/common/_detail_table.html"
+    template_name = ("infrastructure/resource_management/"
+                    "resource_classes/_index_table.html")
     #preload = False buggy, checkboxes doesn't work wit table actions
 
     def get_resource_classes_data(self):

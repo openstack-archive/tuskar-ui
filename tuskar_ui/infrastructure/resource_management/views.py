@@ -16,12 +16,37 @@
 Views for Resource Management.
 """
 
+from django import http
+from django.core import urlresolvers
+from django.utils import simplejson
 
+from horizon import forms as horizon_forms
 from horizon import tabs as horizon_tabs
 
+from tuskar_ui import api as tuskar
+from tuskar_ui.infrastructure.resource_management import forms
 from tuskar_ui.infrastructure.resource_management import tabs
 
 
 class IndexView(horizon_tabs.TabbedTableView):
     tab_group_class = tabs.ResourceManagementTabs
     template_name = 'infrastructure/resource_management/index.html'
+
+
+class ProvisionView(tabs.ProvisioningInfoMixin, horizon_forms.ModalFormView):
+    form_class = forms.Provision
+    template_name = 'infrastructure/resource_management/provision.html'
+
+    def get_success_url(self):
+        # Redirect to previous URL
+        default_url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:index')
+        return self.request.META.get('HTTP_REFERER', default_url)
+
+
+def provisioning_state(request, rack_id=None):
+    racks = tuskar.Rack.list(request)
+    (unprovisioned_racks, provisioning_racks,
+        state) = tabs.get_provision_racks_and_state(racks)
+    return http.HttpResponse(simplejson.dumps({'state': state}),
+                             mimetype="application/json")

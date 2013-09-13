@@ -625,14 +625,12 @@ class TuskarApiTests(test.APITestCase):
         self.assertTrue(rack2.is_provisioning)
 
     def test_rack_provision(self):
-        rack = self.tuskar_racks.first()
-
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.data_centers = self.mox.CreateMockAnything()
         tuskarclient.data_centers.provision_all()
         self.mox.ReplayAll()
 
-        api.Rack.provision(self.request, rack.id)
+        api.Rack.provision_all(self.request)
 
     def test_rack_aggregated_alerts(self):
         rack = self.tuskar_racks.first()

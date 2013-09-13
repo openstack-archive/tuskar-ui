@@ -22,6 +22,9 @@ from tuskar_ui.test import helpers as test
 
 
 class ResourceManagementTests(test.BaseAdminViewTests):
+    index_page = urlresolvers.reverse(
+        'horizon:infrastructure:resource_management:index')
+
     def setUp(self):
         super(ResourceManagementTests, self).setUp()
 
@@ -46,6 +49,7 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.nodes = nodes
         tuskar.ResourceClass.list_racks = racks
 
+        tuskar.Rack.list(mox.IsA(http.HttpRequest)).AndReturn(racks)
         tuskar.ResourceClass.list(
             mox.IsA(http.HttpRequest)).\
             AndReturn(resource_classes)
@@ -58,6 +62,7 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         # Rack stubs
         racks = self.tuskar_racks.list()
 
+        tuskar.Rack.list(mox.IsA(http.HttpRequest)).AndReturn(racks)
         tuskar.Rack.list(mox.IsA(http.HttpRequest)).AndReturn(racks)
         tuskar.Node.list(mox.IsA(http.HttpRequest)).AndReturn(nodes)
         # Rack stubs end
@@ -78,3 +83,18 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         # Rack asserts
         self.assertItemsEqual(res.context['racks_table'].data, racks)
         # Rack asserts end
+
+    @test.create_stubs({tuskar.Rack: ('provision_all',)})
+    def test_provision_post(self):
+        tuskar.Rack.provision_all(mox.IsA(http.HttpRequest))
+
+        self.mox.ReplayAll()
+
+        url = urlresolvers.reverse('horizon:infrastructure:'
+                                   'resource_management:provision',
+                                   args=[])
+        response = self.client.post(url)
+
+        self.assertNoFormErrors(response)
+        self.assertMessageCount(success=1)
+        self.assertRedirectsNoFollow(response, self.index_page)
