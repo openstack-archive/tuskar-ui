@@ -37,10 +37,14 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
     service_type = forms.ChoiceField(label=_('Class Type'),
                                      required=True,
                                      choices=[('', ''),
+                                              ('controller',
+                                              ('Controller')),
                                               ('compute',
                                               ('Compute')),
-                                              ('not_compute',
-                                              ('Non Compute')),
+                                              ('object_storage',
+                                              ('Object Storage')),
+                                              ('block_storage',
+                                              ('Block Storage')),
                                               ],
                                      widget=forms.Select(
                                          attrs={'class': 'switchable'})
