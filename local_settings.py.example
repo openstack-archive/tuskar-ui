@@ -398,16 +398,3 @@ OVERCLOUD_CREDS = {
     'tenant': 'admin',
     'auth_url': 'http://localhost:5000/v2.0/',
 }
-
-# FIXME: configuration for dummy data
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'openstack_dashboard/dummydb.sqlite',
-    }
-}
-
-# FIXME: configuration for dummy data
-FIXTURE_DIRS = (
-    'openstack_dashboard/dashboards/infrastructure/fixtures/',
-)

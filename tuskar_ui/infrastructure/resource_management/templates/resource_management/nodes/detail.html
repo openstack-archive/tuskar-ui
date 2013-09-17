@@ -22,27 +22,3 @@
 {% endblock breadcrumbs %}
 
 {% block name %}{{ node.name }}{% endblock %}
-
-{% block overall_usage %}
-  <table class="capacities overall_usage">
-    <tr>
-      <td class="capacity_label">{% trans "Usage" %}:</td>
-      <td>
-        {% if node.is_provisioned %}
-        <div id="node_usage"
-             class="capacity_bar"
-             data-chart-type="capacity_bar_chart"
-             data-capacity-limit="{{ node.vm_capacity.value }}"
-             data-capacity-used="{{ node.vm_capacity.usage }}"
-             data-average-capacity-used="{{ 4 }}">
-        </div>
-        {% else %}
-        <div id="node_usage"
-             class="capacity_bar"
-             data-chart-type="capacity_bar_chart">
-        </div>
-        {% endif %}
-      </td>
-    </tr>
-  </table>
-{% endblock %}

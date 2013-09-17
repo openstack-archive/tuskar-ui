@@ -30,8 +30,6 @@ from tuskarclient.v1 import client as tuskar_client
 from openstack_dashboard.api import base
 from openstack_dashboard.api import nova
 
-import tuskar_ui.infrastructure.models as dummymodels
-
 
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
@@ -144,26 +142,6 @@ class Capacity(StringIdAPIResourceWrapper):
     dummy model.
     """
     _attrs = ['name', 'value', 'unit']
-
-    @classmethod
-    def create(cls, request, **kwargs):
-        c = dummymodels.Capacity(
-            content_object=kwargs['content_object'],
-            name=kwargs['name'],
-            value=kwargs['value'],
-            unit=kwargs['unit'])
-        c.save()
-        return Capacity(c)
-
-    @classmethod
-    def update(cls, request, **kwargs):
-        c = dummymodels.Capacity.objects.get(id=kwargs['capacity_id'])
-        c.content_object = kwargs['content_object']
-        c.name = kwargs['name']
-        c.value = kwargs['value']
-        c.unit = kwargs['unit']
-        c.save()
-        return cls(c)
 
     # defines a random usage of capacity - API should probably be able to
     # determine usage of capacity based on capacity value and obejct_id
@@ -291,25 +269,6 @@ class Node(StringIdAPIResourceWrapper):
             return None
 
     @property
-    def vm_capacity(self):
-        if not hasattr(self, '_vm_capacity'):
-            try:
-                value = (
-                    dummymodels.ResourceClassFlavor.objects
-                        .filter(resource_class__rack__node=self._apiresource)
-                        .aggregate(django.db.models.Max("max_vms"))
-                        ['max_vms__max']
-                )
-            except Exception:
-                value = _("Unable to retrieve vm capacity")
-
-            vm_capacity = dummymodels.Capacity(name=_("Max VMs"),
-                                               value=value,
-                                               unit=_("VMs"))
-            self._vm_capacity = Capacity(vm_capacity)
-        return self._vm_capacity
-
-    @property
     # FIXME: just mock implementation, add proper one
     def running_instances(self):
         return 4
@@ -327,10 +286,7 @@ class Node(StringIdAPIResourceWrapper):
     @property
     def alerts(self):
         if not hasattr(self, '_alerts'):
-            self._alerts = [Alert(a) for a in
-                dummymodels.Alert.objects
-                    .filter(object_type='node')
-                    .filter(object_id=str(self.id))]
+            self._alerts = []
         return self._alerts
 
     @property
@@ -470,10 +426,7 @@ class Rack(StringIdAPIResourceWrapper):
     @property
     def alerts(self):
         if not hasattr(self, '_alerts'):
-            self._alerts = [Alert(a) for a in
-                dummymodels.Alert.objects
-                    .filter(object_type='rack')
-                    .filter(object_id=int(self.id))]
+            self._alerts = []
         return self._alerts
 
     @property
