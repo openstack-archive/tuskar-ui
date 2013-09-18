@@ -139,12 +139,6 @@ tuskar-ui introduces one additional dependency - python-tuskarclient:
 
     pip install git+http://github.com/stackforge/python-tuskarclient.git
 
-Finally, synchronize your local database:
-
-::
-
-    ./manage.py syncdb
-
 Starting the app
 ----------------
 

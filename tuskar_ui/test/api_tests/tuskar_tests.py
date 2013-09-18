@@ -440,7 +440,7 @@ class TuskarApiTests(test.APITestCase):
 
         for rack in rc.aggregated_alerts:
             self.assertIsInstance(rack, api.Rack)
-        self.assertEquals(1, len(rc.aggregated_alerts))
+        self.assertEquals(0, len(rc.aggregated_alerts))
 
     def test_rack_list(self):
         racks = self.tuskarclient_racks.list()
@@ -653,7 +653,7 @@ class TuskarApiTests(test.APITestCase):
 
         for node in rack.aggregated_alerts:
             self.assertIsInstance(node, api.Node)
-        self.assertEquals(1, len(rack.aggregated_alerts))
+        self.assertEquals(0, len(rack.aggregated_alerts))
 
     def test_flavor_create(self):
         flavor = self.tuskarclient_flavors.first()

@@ -1,5 +1,0 @@
-[
-  {"pk": 1, "model": "infrastructure.alert", "fields": {"message": "Switch is not accessible.", "object_id": "1", "object_type": "rack", "time": "2011-09-01T13:20:30+03:00"}},
-  {"pk": 2, "model": "infrastructure.alert", "fields": {"message": "Nova service is not running.", "object_id": "1", "object_type": "node", "time": "2011-09-01T13:20:30+03:00"}},
-  {"pk": 3, "model": "infrastructure.alert", "fields": {"message": "Disk usage is over 90%.", "object_id": "1", "object_type": "node", "time": "2011-09-01T13:20:30+03:00"}}
-]
