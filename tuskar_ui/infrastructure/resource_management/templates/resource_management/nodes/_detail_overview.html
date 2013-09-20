@@ -170,7 +170,7 @@
       <tr>
         {% for flavor in node.list_flavors %}
           <td class="flavor_usage_label">
-            <a href="{% url 'horizon:infrastructure:resource_management:flavors:detail' flavor.id %}">{{ flavor.name }}</a>
+            <a href="{% url 'horizon:infrastructure:resource_management:resource_classes:flavors:detail' node.rack.resource_class.id flavor.id %}">{{ flavor.name }}</a>
           </td>
         {% endfor %}
       </tr>
