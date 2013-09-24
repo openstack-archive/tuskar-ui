@@ -17,7 +17,10 @@ from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import exceptions
 from horizon import forms
+from horizon import messages
 from horizon import workflows
+
+import requests
 
 from tuskar_ui import api as tuskar
 
@@ -186,8 +189,14 @@ class CreateRack(workflows.Workflow):
                                    nodes=[{'id': node_id}])
 
             return True
+        except requests.ConnectionError:
+            messages.error(request,
+                           _("Unable to connect to Nova Baremetal. Please "
+                             "check your configuration."))
+            return False
         except Exception:
             exceptions.handle(request, _("Unable to create rack."))
+            return False
 
 
 class EditRack(CreateRack):
