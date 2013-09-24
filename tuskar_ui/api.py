@@ -569,7 +569,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
             self._all_racks =\
                 [r for r in (
                     Rack.list(self.request)) if (
-                        r.resource_class_id is None or
+                        getattr(r, 'resource_class_id', None) is None or
                         str(r.resource_class_id) == self.id)]
         return self._all_racks
 
