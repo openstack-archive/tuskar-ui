@@ -172,11 +172,9 @@ class CreateRacks(tuskar_ui.workflows.TableStep):
                 # TODO(lsmola ugly interface, rewrite)
                 self._tables['racks'].active_multi_select_values = \
                     resource_class.racks_ids
-                racks = \
-                    resource_class.all_racks
+                racks = resource_class.all_racks
             else:
-                racks = \
-                    tuskar.Rack.list(self.workflow.request, True)
+                racks = tuskar.Rack.list(self.workflow.request, True)
         except Exception:
             racks = []
             exceptions.handle(self.workflow.request,

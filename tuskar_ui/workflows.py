@@ -120,7 +120,6 @@ class FormsetStep(horizon.workflows.Step):
         return context
 
 
-# FIXME: TableStep
 class TableStep(horizon.workflows.Step):
     """
     A :class:`~horizon.workflows.Step` class which knows how to deal with
