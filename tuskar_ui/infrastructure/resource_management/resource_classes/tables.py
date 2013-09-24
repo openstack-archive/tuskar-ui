@@ -27,6 +27,7 @@ from tuskar_ui.infrastructure.resource_management.racks\
 from tuskar_ui.infrastructure.resource_management import resource_classes
 import tuskar_ui.tables
 
+
 LOG = logging.getLogger(__name__)
 
 
@@ -98,12 +99,14 @@ class RacksFilterAction(tables.FilterAction):
 
 class RacksTable(racks_tables.RacksTable):
 
+    multi_select_name = "racks_object_ids"
+
     class Meta:
         name = "racks"
         verbose_name = _("Racks")
         multi_select = True
-        multi_select_name = "racks_object_ids"
         table_actions = (RacksFilterAction,)
+        row_class = tuskar_ui.tables.MultiselectRow
 
 
 class UpdateRacksClass(tables.LinkAction):
@@ -137,7 +140,7 @@ class UpdateFlavorsClass(tables.LinkAction):
             resource_classes.workflows.ResourceClassInfoAndFlavorsAction.slug)
 
 
-class FlavorsTable(tuskar_ui.tables.DataTable):
+class FlavorsTable(tables.DataTable):
     def get_flavor_detail_link(datum):
         # FIXME - horizon Column.get_link_url does not allow to access GET
         # params
@@ -147,37 +150,37 @@ class FlavorsTable(tuskar_ui.tables.DataTable):
                                     "flavors:detail",
                                     args=(resource_class_id, datum.id))
 
-    name = tuskar_ui.tables.Column('name',
+    name = tables.Column('name',
                          link=get_flavor_detail_link,
                          verbose_name=_('Flavor Name'))
 
-    cpu = tuskar_ui.tables.Column(
+    cpu = tables.Column(
         "cpu",
         verbose_name=_('VCPU'),
         filters=(lambda x: getattr(x, 'value', ''),)
     )
-    memory = tuskar_ui.tables.Column(
+    memory = tables.Column(
         "memory",
         verbose_name=_('RAM (MB)'),
         filters=(lambda x: getattr(x, 'value', ''),)
     )
-    storage = tuskar_ui.tables.Column(
+    storage = tables.Column(
         "storage",
         verbose_name=_('Root Disk (GB)'),
         filters=(lambda x: getattr(x, 'value', ''),)
     )
-    ephemeral_disk = tuskar_ui.tables.Column(
+    ephemeral_disk = tables.Column(
         "ephemeral_disk",
         verbose_name=_('Ephemeral Disk (GB)'),
         filters=(lambda x: getattr(x, 'value', ''),)
     )
-    swap_disk = tuskar_ui.tables.Column(
+    swap_disk = tables.Column(
         "swap_disk",
         verbose_name=_('Swap Disk (MB)'),
         filters=(lambda x: getattr(x, 'value', ''),)
     )
 
-    max_vms = tuskar_ui.tables.Column("max_vms",
+    max_vms = tables.Column("max_vms",
                             verbose_name=_("Max. VMs"))
 
     class Meta:
