@@ -12,16 +12,47 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import itertools
+import logging
+import sys
+
 from django import forms
+from django import template
 from django.utils import datastructures
 from django.utils import html
+from django.utils.safestring import mark_safe
 
 from horizon import conf
 from horizon.tables import base as horizon_tables
 
 
+LOG = logging.getLogger(__name__)
 STRING_SEPARATOR = "__"
 
+
+# FIXME: Remove this class and use Row directly after it becomes easier to
+# extend it, see bug #1229677
+class BaseCell(horizon_tables.Cell):
+    """ Represents a single cell in the table. """
+    def __init__(self, datum, column, row, attrs=None, classes=None):
+        super(BaseCell, self).__init__(datum, None, column, row, attrs, classes)
+        self.data = self.get_data(datum, column, row)
+
+    def get_data(self, datum, column, row):
+        """ Fetches the data to be displayed in this cell. """
+        table = row.table
+        if column.auto == "multi_select":
+            widget = forms.CheckboxInput(check_test=lambda value: False)
+            # Convert value to string to avoid accidental type conversion
+            data = widget.render('object_ids',
+                                 unicode(table.get_object_id(datum)))
+            table._data_cache[column][table.get_object_id(datum)] = data
+        elif column.auto == "actions":
+            data = table.render_row_actions(datum)
+            table._data_cache[column][table.get_object_id(datum)] = data
+        else:
+            data = column.get_data(datum)
+        return data
 
 # FIXME: Remove this class and use Row directly after it becomes easier to
 # extend it, see bug #1229677
@@ -34,6 +65,8 @@ class BaseRow(horizon_tables.Row):
     without touching the code of the other.
     """
 
+    cell_class = BaseCell
+
     def load_cells(self, datum=None):
         # Compile all the cells on instantiation.
         table = self.table
@@ -43,8 +76,7 @@ class BaseRow(horizon_tables.Row):
             datum = self.datum
         cells = []
         for column in table.columns.values():
-            data = self.load_cell_data(column, datum)
-            cell = horizon_tables.Cell(datum, data, column, self)
+            cell = self.cell_class(datum, column, self)
             cells.append((column.name or column.auto, cell))
         self.cells = datastructures.SortedDict(cells)
 
@@ -67,57 +99,98 @@ class BaseRow(horizon_tables.Row):
         if display_name:
             self.attrs['data-display'] = html.escape(display_name)
 
-    def load_cell_data(self, column, datum):
-        table = self.table
-        if column.auto == "multi_select":
-            widget = forms.CheckboxInput(check_test=lambda value: False)
-            # Convert value to string to avoid accidental type conversion
-            data = widget.render('object_ids',
-                                 unicode(table.get_object_id(datum)))
-            table._data_cache[column][table.get_object_id(datum)] = data
-        elif column.auto == "actions":
-            data = table.render_row_actions(datum)
-            table._data_cache[column][table.get_object_id(datum)] = data
+
+class FormsetCell(BaseCell):
+    def get_data(self, datum, column, row):
+        try:
+            field = (self.row.form or {})[column.name]
+        except KeyError:
+            data = super(FormsetCell, self).get_data(datum, column, row)
         else:
-            data = column.get_data(datum)
+            data = field.as_widget()
+        return data
+
+    @property
+    def value(self):
+        """
+        Returns a formatted version of the data for final output.
+
+        This takes into consideration the
+        :attr:`~horizon.tables.Column.link`` and
+        :attr:`~horizon.tables.Column.empty_value`
+        attributes.
+        """
+        try:
+            data = self.data
+            if data is None:
+                if callable(self.column.empty_value):
+                    data = self.column.empty_value(self.datum)
+                else:
+                    data = self.column.empty_value
+        except Exception:
+            data = None
+            exc_info = sys.exc_info()
+            raise template.TemplateSyntaxError, exc_info[1], exc_info[2]
+        if self.url:
+            link_classes = ' '.join(self.column.link_classes)
+            # Escape the data inside while allowing our HTML to render
+            data = mark_safe('<a href="%s" class="%s">%s</a>' %
+                             (self.url, link_classes, html.escape(data)))
         return data
 
 
-class MultiselectRow(BaseRow):
-    """
-    A DataTable Row class that handles pre-selected multi-select checboxes.
+class FormsetRow(BaseRow):
+    cell_class = FormsetCell
 
-    It adds custom code to pre-fill the checkboxes in the multi-select column
-    according to provided values, so that the selections can be kept between
-    requests.
-    """
+    def __init__(self, column, datum, form):
+        self.form = form
+        super(FormsetRow, self).__init__(column, datum)
 
-    def load_cell_data(self, column, datum):
-        table = self.table
-        if column.auto == "multi_select":
-            # multi_select fields in the table must be checked after
-            # a server action
-            # TODO(remove this ugly code and create proper TableFormWidget)
-            multi_select_values = []
-            if (getattr(table, 'request', False) and
-                    getattr(table.request, 'POST', False)):
-                multi_select_values = table.request.POST.getlist(
-                        self.table.multi_select_name)
 
-            multi_select_values += getattr(table,
-                                           'active_multi_select_values',
-                                           [])
+class FormsetDataTable(horizon_tables.DataTable):
+    formset_class = None
+    _formset = None
 
-            if unicode(table.get_object_id(datum)) in multi_select_values:
-                multi_select_value = lambda value: True
+    def get_formset_data(self):
+        """Formats the self.filtered_data in a way suitable for a formset."""
+        data = []
+        for datum in self.filtered_data:
+            form_data = {}
+            for column in self.columns.values():
+                value = column.get_data(datum)
+                form_data[column.name] = value
+            data.append(form_data)
+        return data
+
+    def get_formset(self):
+        """Provide the formset corresponding to this DataTable."""
+        if self._formset is None:
+            self._formset = self.formset_class(
+                self.request.POST or None,
+                initial=self.get_formset_data(),
+                prefix=self._meta.name)
+        return self._formset
+
+    def get_rows(self):
+        """ Return the row data for this table broken out by columns. """
+        try:
+            rows = []
+            if self.formset_class is None:
+                formset = []
             else:
-                multi_select_value = lambda value: False
-            widget = forms.CheckboxInput(check_test=multi_select_value)
-
-            # Convert value to string to avoid accidental type conversion
-            data = widget.render(self.table.multi_select_name,
-                                 unicode(table.get_object_id(datum)))
-            table._data_cache[column][table.get_object_id(datum)] = data
-        else:
-            data = super(MultiselectRow, self).load_cell_data(column, datum)
-        return data
+                formset = self.get_formset()
+                formset.is_valid()
+            for datum, form in itertools.izip_longest(self.filtered_data,
+                                                        formset):
+                row = self._meta.row_class(self, datum, form)
+                if self.get_object_id(datum) == self.current_item_id:
+                    self.selected = True
+                    row.classes.append('current_selected')
+                rows.append(row)
+        except Exception:
+            # Exceptions can be swallowed at the template level here,
+            # re-raising as a TemplateSyntaxError makes them visible.
+            LOG.exception("Error while rendering table rows.")
+            exc_info = sys.exc_info()
+            raise template.TemplateSyntaxError, exc_info[1], exc_info[2]
+        return rows

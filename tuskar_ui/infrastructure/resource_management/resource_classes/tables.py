@@ -22,10 +22,10 @@ from horizon import exceptions
 from horizon import tables
 
 from tuskar_ui import api as tuskar
-from tuskar_ui.infrastructure.resource_management.racks\
-    import tables as racks_tables
 from tuskar_ui.infrastructure.resource_management import resource_classes
 import tuskar_ui.tables
+from tuskar_ui.infrastructure.resource_management.resource_classes\
+    import forms
 
 
 LOG = logging.getLogger(__name__)
@@ -97,16 +97,49 @@ class RacksFilterAction(tables.FilterAction):
         pass
 
 
-class RacksTable(racks_tables.RacksTable):
+class RacksTable(
+        tuskar_ui.tables.FormsetDataTable,
+    ):
+    STATUS_CHOICES = (
+        ("unprovisioned", False),
+        ("provisioning", None),
+        ("active", True),
+        ("error", False),
+    )
 
-    multi_select_name = "racks_object_ids"
+    id = tables.Column("id", verbose_name="")
+    name = tables.Column('name',
+                         link=("horizon:infrastructure:resource_management"
+                               ":racks:detail"),
+                         verbose_name=_("Rack Name"))
+    subnet = tables.Column('subnet', verbose_name=_("IP Subnet"))
+    resource_class = tables.Column('get_resource_class',
+                                    verbose_name=_("Class"),
+                                    filters=(lambda resource_class:
+                                                 (resource_class.name if
+                                                  resource_class else None),))
+    node_count = tables.Column('nodes_count', verbose_name=_("Nodes"))
+    state = tables.Column('state',
+                          verbose_name=_("State"),
+                          status=True,
+                          status_choices=STATUS_CHOICES)
+
+    usage = tables.Column(
+        'vm_capacity',
+        verbose_name=_("Usage"),
+        filters=(lambda vm_capacity:
+                     (vm_capacity.value and
+                      "%s %%" % int(round((100 / float(vm_capacity.value)) *
+                                          vm_capacity.usage, 0))) or None,))
+
+    formset_class = forms.SelectRackFormset
 
     class Meta:
         name = "racks"
         verbose_name = _("Racks")
-        multi_select = True
+        multi_select = False
+        row_class = tuskar_ui.tables.FormsetRow
         table_actions = (RacksFilterAction,)
-        row_class = tuskar_ui.tables.MultiselectRow
 
 
 class UpdateRacksClass(tables.LinkAction):
