@@ -484,9 +484,9 @@ input {
 }
 
 // formsets
-.formset-table {
-  tr td {
-    line-height: 2;
+.datatable {
+  th.narrow {
+    width: 1em;
   }
 
   input {
@@ -499,7 +499,7 @@ input {
     text-align: right;
   }
 
-  th.required span:after {
+  th span.required:after {
     // Copied from horizon.less, because there is no way to reuse their class.
     content: "*";
     font-weight: bold;
