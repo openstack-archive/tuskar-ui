@@ -46,6 +46,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         tuskar.ResourceClass: ('list', 'create', 'set_racks'),
+        tuskar.Rack: ('list',),
     })
     def test_create_resource_class_post(self):
         new_resource_class = self.tuskar_resource_classes.first()
@@ -54,6 +55,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         add_racks_ids = []
 
+        tuskar.Rack.list(
+            mox.IsA(http.request.HttpRequest), True).AndReturn([])
         tuskar.ResourceClass.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -76,6 +79,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'flavors-TOTAL_FORMS': 0,
             'flavors-INITIAL_FORMS': 0,
             'flavors-MAX_NUM_FORMS': 1000,
+            'racks-TOTAL_FORMS': 0,
+            'racks-INITIAL_FORMS': 0,
+            'racks-MAX_NUM_FORMS': 1000,
         }
         res = self.client.post(url, form_data)
         self.assertNoFormErrors(res)
@@ -89,12 +95,15 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         tuskar.ResourceClass: ('list', 'create', 'set_racks'),
+        tuskar.Rack: ('list',),
     })
     def test_create_resource_class_post_exception(self):
         new_resource_class = self.tuskar_resource_classes.first()
         new_unique_name = "unique_name_for_sure"
         new_flavors = []
 
+        tuskar.Rack.list(
+            mox.IsA(http.request.HttpRequest), True).AndReturn([])
         tuskar.ResourceClass.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -115,6 +124,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'flavors-TOTAL_FORMS': 0,
             'flavors-INITIAL_FORMS': 0,
             'flavors-MAX_NUM_FORMS': 1000,
+            'racks-TOTAL_FORMS': 0,
+            'racks-INITIAL_FORMS': 0,
+            'racks-MAX_NUM_FORMS': 1000,
         }
         res = self.client.post(url, form_data)
         self.assertRedirectsNoFollow(res,
@@ -180,13 +192,19 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
-                               'list_flavors')
+                               'list_flavors', 'all_racks', 'racks_ids'),
+        tuskar.Rack: ('list',),
     })
     def test_edit_resource_class_post(self):
         resource_class = self.tuskar_resource_classes.first()
 
         add_racks_ids = []
 
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
+                resource_class)
+        tuskar.ResourceClass.all_racks = []
+        tuskar.ResourceClass.racks_ids = []
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
                 resource_class)
@@ -214,6 +232,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'flavors-TOTAL_FORMS': 0,
             'flavors-INITIAL_FORMS': 0,
             'flavors-MAX_NUM_FORMS': 1000,
+            'racks-TOTAL_FORMS': 0,
+            'racks-INITIAL_FORMS': 0,
+            'racks-MAX_NUM_FORMS': 1000,
         }
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
@@ -429,13 +450,18 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
-                               'list_flavors')
+                               'list_flavors', 'all_racks', 'racks_ids')
     })
     def test_detail_edit_racks_post(self):
         resource_class = self.tuskar_resource_classes.first()
 
         add_racks_ids = []
 
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
+                resource_class)
+        tuskar.ResourceClass.all_racks = []
+        tuskar.ResourceClass.racks_ids = []
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
                 resource_class)
@@ -463,6 +489,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'flavors-TOTAL_FORMS': 0,
             'flavors-INITIAL_FORMS': 0,
             'flavors-MAX_NUM_FORMS': 1000,
+            'racks-TOTAL_FORMS': 0,
+            'racks-INITIAL_FORMS': 0,
+            'racks-MAX_NUM_FORMS': 1000,
         }
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
@@ -517,7 +546,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
-                               'list_flavors')
+                               'list_flavors', 'all_racks', 'racks_ids'),
+        tuskar.Rack: ('list',),
     })
     def test_detail_edit_flavors_post(self):
         resource_class = self.tuskar_resource_classes.first()
@@ -527,6 +557,11 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
                 resource_class)
+        tuskar.ResourceClass.get(
+            mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
+                resource_class)
+        tuskar.ResourceClass.all_racks = []
+        tuskar.ResourceClass.racks_ids = []
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
                 resource_class)
@@ -551,6 +586,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'flavors-TOTAL_FORMS': 0,
             'flavors-INITIAL_FORMS': 0,
             'flavors-MAX_NUM_FORMS': 1000,
+            'racks-TOTAL_FORMS': 0,
+            'racks-INITIAL_FORMS': 0,
+            'racks-MAX_NUM_FORMS': 1000,
         }
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'

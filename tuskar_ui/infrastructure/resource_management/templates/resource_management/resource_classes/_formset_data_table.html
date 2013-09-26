@@ -1,0 +1,107 @@
+{% extends 'horizon/common/_data_table.html' %}
+{% load i18n %}
+
+{% block table_columns %}
+  {% if not table.is_browser_table %}
+  <tr>
+    {% for column in columns %}
+        <th {{ column.attr_string|safe }}><span
+            {% if column.name in table.get_required_columns %}
+                class="required"
+            {% endif %}
+        >{{ column }}</span></th>
+    {% endfor %}
+  </tr>
+  {% endif %}
+{% endblock table_columns %}
+
+{% block table %}
+    {% with table.get_formset as formset %}
+        {{ formset.management_form }}
+        {% if formset.non_field_errors %}
+            <div class="alert alert-error">
+                {{ formset.non_field_errors }}
+            </div>
+        {% endif %}
+    {% endwith %}
+    {{ block.super }}
+
+<script type="text/javascript">
+(function () {
+    // prepares the js-enabled parts of the formset data table
+    var init_formset = function () {
+        var table = $('table#{{ table.name|escapejs }}');
+        var prefix = '{{ table.get_formset.prefix|escapejs }}';
+        var input_name_re = new RegExp('^' + prefix + '-(\\d+|__prefix__)-');
+        var input_id_re = new RegExp('^id_' + prefix + '-(\\d+|__prefix__)-');
+        var empty_row_html = '{% filter escapejs %}{% include "infrastructure/resource_management/resource_classes/_formset_data_table_row.html" with row=table.get_empty_row %}{% endfilter %}';
+
+        // go through the whole table and fix the numbering of rows
+        var reenumerate_rows = function () {
+            var count = 0;
+            table.find('tbody tr').each(function () {
+                $(this).find('input').each(function () {
+                    var input = $(this);
+                    input.attr('name', input.attr('name').replace(
+                        input_name_re,
+                        prefix + '-' + count + '-'));
+                    input.attr('id', input.attr('id').replace(
+                        input_id_re,
+                        'id_' + prefix + '-' + count + '-'));
+                });
+                count += 1;
+            });
+            $('#id_' + prefix + '-TOTAL_FORMS').val(count);
+        };
+
+        // replace the "Delete" checkboxes with × for deleting rows
+        var del_row = function () {
+            $(this).closest('tr').hide();
+            $(this).prev('input[name$="-DELETE"]').attr('checked', true);
+        };
+
+        table.find('input[name$="-DELETE"]').hide().after(
+            $('<a href="#" class="close">×</a>').click(del_row)
+        );
+
+        // add more empty rows in the flavors table
+        var add_row = function () {
+            var new_row = $(empty_row_html);
+            // connect signals and clean up
+            new_row.find('input[name$="-DELETE"]').hide().after(
+                $('<a href="#" class="close">×</a>').click(del_row)
+            );
+            table.find('tbody').append(new_row);
+            reenumerate_rows();
+        };
+
+        // if there are extra empty rows, add the button for new rows
+        if ($('#id_' + prefix + '-TOTAL_FORMS').val() >
+                $('#id_' + prefix + '-INITIAL_FORMS').val()) {
+            table.find('tfoot td').append(
+                '<a href="#" class="btn btn-small pull-right">' + 
+                '{% filter escapejs %}{% trans "Add a row" %}{% endfilter %}' +
+                '</a>'
+            ).click(add_row);
+        };
+
+        // if the formset is not empty, and is not being redisplayed,
+        // delete the empty extra row from the end
+        if (table.find('tbody tr').length > 1 &&
+                $('#id_' + prefix + '-TOTAL_FORMS').val() >
+                    $('#id_' + prefix + '-INITIAL_FORMS').val()) {
+            table.find('tbody tr:last').remove();
+            reenumerate_rows();
+            $('#id_' + prefix + '-INITIAL_FORMS').val(
+                $('#id_' + prefix + '-TOTAL_FORMS').val());
+        };
+    };
+
+    if (typeof($) !== 'undefined') {
+        $(init_formset);
+    } else {
+        addHorizonLoadEvent(init_formset);
+    }
+} ());
+</script>
+{% endblock table %}
