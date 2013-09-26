@@ -1,0 +1,28 @@
+{% extends 'horizon/common/_data_table.html' %}
+{% load i18n %}
+
+{% block table_columns %}
+  {% if not table.is_browser_table %}
+  <tr>
+    {% for column in columns %}
+        <th {{ column.attr_string|safe }}><span
+            {% if column.name in table.get_required_columns %}
+                class="required"
+            {% endif %}
+        >{{ column }}</span></th>
+    {% endfor %}
+  </tr>
+  {% endif %}
+{% endblock table_columns %}
+
+{% block table %}
+    {% with table.get_formset as formset %}
+        {{ formset.management_form }}
+        {% if formset.non_field_errors %}
+            <div class="alert alert-error">
+                {{ formset.non_field_errors }}
+            </div>
+        {% endif %}
+    {% endwith %}
+    {{ block.super }}
+{% endblock table %}
