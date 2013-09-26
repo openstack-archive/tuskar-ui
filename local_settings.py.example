@@ -379,7 +379,7 @@ SECURITY_GROUP_RULES = {
     },
 }
 
-TUSKAR_ENDPOINT_URL = "http://127.0.0.1:6385"
+TUSKAR_ENDPOINT_URL = "http://127.0.0.1:8585"
 
 # The REMOTE_NOVA_BAREMETAL_CREDS settings can be used to connect to a remote
 # Nova Baremetal instance instead of the one defined in the Keystone service

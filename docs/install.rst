@@ -98,7 +98,7 @@ editor. You will want to customize several settings:
    environment. (They should be correct unless you modified your
    OpenStack server to change them.)
 -  ``TUSKAR_ENDPOINT_URL`` should point to the Tuskar server you
-   configured. It normally runs on port 6385.
+   configured. It normally runs on port 8585.
 -  ``REMOTE_NOVA_BAREMETAL_CREDS`` is optional. It's a dictionary of settings
    for connecting to a remote Nova Baremetal. If not set, this information is
    gathered from Keystone's service catalog, but a common configuration with
