@@ -22,10 +22,14 @@ from horizon import exceptions
 from horizon import tables
 
 from tuskar_ui import api as tuskar
+from tuskar_ui.infrastructure.resource_management.flavors\
+    import forms as flavors_forms
+from tuskar_ui.infrastructure.resource_management.racks\
+    import tables as racks_tables
 from tuskar_ui.infrastructure.resource_management import resource_classes
-import tuskar_ui.tables
 from tuskar_ui.infrastructure.resource_management.resource_classes\
     import forms
+import tuskar_ui.tables
 
 
 LOG = logging.getLogger(__name__)
@@ -97,48 +101,21 @@ class RacksFilterAction(tables.FilterAction):
         pass
 
 
-class RacksTable(
-        tuskar_ui.tables.FormsetDataTable,
-    ):
-    STATUS_CHOICES = (
-        ("unprovisioned", False),
-        ("provisioning", None),
-        ("active", True),
-        ("error", False),
-    )
+class RacksTable(racks_tables.RacksTable):
+    class Meta:
+        name = "racks"
+        verbose_name = _("Racks")
+        table_actions = (RacksFilterAction,)
 
-    id = tables.Column("id", verbose_name="")
-    name = tables.Column('name',
-                         link=("horizon:infrastructure:resource_management"
-                               ":racks:detail"),
-                         verbose_name=_("Rack Name"))
-    subnet = tables.Column('subnet', verbose_name=_("IP Subnet"))
-    resource_class = tables.Column('get_resource_class',
-                                    verbose_name=_("Class"),
-                                    filters=(lambda resource_class:
-                                                 (resource_class.name if
-                                                  resource_class else None),))
-    node_count = tables.Column('nodes_count', verbose_name=_("Nodes"))
-    state = tables.Column('state',
-                          verbose_name=_("State"),
-                          status=True,
-                          status_choices=STATUS_CHOICES)
 
-    usage = tables.Column(
-        'vm_capacity',
-        verbose_name=_("Usage"),
-        filters=(lambda vm_capacity:
-                     (vm_capacity.value and
-                      "%s %%" % int(round((100 / float(vm_capacity.value)) *
-                                          vm_capacity.usage, 0))) or None,))
-
+class RacksFormsetTable(tuskar_ui.tables.FormsetDataTableMixin, RacksTable):
+    selected = tables.Column('selected', verbose_name=_("Selected"))
     formset_class = forms.SelectRackFormset
 
     class Meta:
         name = "racks"
         verbose_name = _("Racks")
         multi_select = False
-        row_class = tuskar_ui.tables.FormsetRow
         table_actions = (RacksFilterAction,)
 
 
@@ -169,7 +146,7 @@ class UpdateFlavorsClass(tables.LinkAction):
         return "%s?step=%s" % (
             urlresolvers.reverse(
                 url,
-                args=(self.table.kwargs['resource_class_id'],)),
+                args=(self.table.kwargs.get('resource_class_id'),)),
             resource_classes.workflows.ResourceClassInfoAndFlavorsAction.slug)
 
 
@@ -220,3 +197,21 @@ class FlavorsTable(tables.DataTable):
         name = "flavors"
         verbose_name = _("Flavors")
         table_actions = (FlavorsFilterAction, UpdateFlavorsClass)
+
+
+class FlavorsFormsetTable(tuskar_ui.tables.FormsetDataTableMixin,
+                        FlavorsTable):
+
+    name = tables.Column(
+        'name',
+        verbose_name=_('Flavor Name'),
+        filters=(lambda n: (n or '.').split('.')[1],),
+    )
+    DELETE = tables.Column('DELETE', verbose_name=_("Delete"))
+    formset_class = flavors_forms.FlavorFormset
+
+    class Meta:
+        name = "flavors"
+        verbose_name = _("Flavors")
+        table_actions = ()
+        multi_select = False

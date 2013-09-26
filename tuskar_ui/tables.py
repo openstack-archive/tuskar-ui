@@ -18,9 +18,9 @@ import sys
 
 from django import forms
 from django import template
+from django.template import loader
 from django.utils import datastructures
 from django.utils import html
-from django.utils.safestring import mark_safe
 
 from horizon import conf
 from horizon.tables import base as horizon_tables
@@ -35,7 +35,8 @@ STRING_SEPARATOR = "__"
 class BaseCell(horizon_tables.Cell):
     """ Represents a single cell in the table. """
     def __init__(self, datum, column, row, attrs=None, classes=None):
-        super(BaseCell, self).__init__(datum, None, column, row, attrs, classes)
+        super(BaseCell, self).__init__(datum, None, column, row, attrs,
+                                        classes)
         self.data = self.get_data(datum, column, row)
 
     def get_data(self, datum, column, row):
@@ -54,6 +55,7 @@ class BaseCell(horizon_tables.Cell):
             data = column.get_data(datum)
         return data
 
+
 # FIXME: Remove this class and use Row directly after it becomes easier to
 # extend it, see bug #1229677
 class BaseRow(horizon_tables.Row):
@@ -65,8 +67,6 @@ class BaseRow(horizon_tables.Row):
     without touching the code of the other.
     """
 
-    cell_class = BaseCell
-
     def load_cells(self, datum=None):
         # Compile all the cells on instantiation.
         table = self.table
@@ -76,7 +76,7 @@ class BaseRow(horizon_tables.Row):
             datum = self.datum
         cells = []
         for column in table.columns.values():
-            cell = self.cell_class(datum, column, self)
+            cell = table._meta.cell_class(datum, column, self)
             cells.append((column.name or column.auto, cell))
         self.cells = datastructures.SortedDict(cells)
 
@@ -101,57 +101,64 @@ class BaseRow(horizon_tables.Row):
 
 
 class FormsetCell(BaseCell):
-    def get_data(self, datum, column, row):
+    """A DataTable cell that knows about its field from the fieldset."""
+
+    def __init__(self, *args, **kwargs):
+        super(FormsetCell, self).__init__(*args, **kwargs)
         try:
-            field = (self.row.form or {})[column.name]
+            self.field = (self.row.form or {})[self.column.name]
         except KeyError:
-            data = super(FormsetCell, self).get_data(datum, column, row)
+            self.field = None
         else:
-            data = field.as_widget()
-        return data
-
-    @property
-    def value(self):
-        """
-        Returns a formatted version of the data for final output.
-
-        This takes into consideration the
-        :attr:`~horizon.tables.Column.link`` and
-        :attr:`~horizon.tables.Column.empty_value`
-        attributes.
-        """
-        try:
-            data = self.data
-            if data is None:
-                if callable(self.column.empty_value):
-                    data = self.column.empty_value(self.datum)
-                else:
-                    data = self.column.empty_value
-        except Exception:
-            data = None
-            exc_info = sys.exc_info()
-            raise template.TemplateSyntaxError, exc_info[1], exc_info[2]
-        if self.url:
-            link_classes = ' '.join(self.column.link_classes)
-            # Escape the data inside while allowing our HTML to render
-            data = mark_safe('<a href="%s" class="%s">%s</a>' %
-                             (self.url, link_classes, html.escape(data)))
-        return data
+            if self.field.errors:
+                self.attrs['class'] = self.attrs.get('class', '') + ' error'
 
 
 class FormsetRow(BaseRow):
-    cell_class = FormsetCell
+    """A DataTable row that knows about its form from the fieldset."""
+
+    template_path = ('infrastructure/resource_management/'
+        'resource_classes/_formset_data_table_row.html')
 
     def __init__(self, column, datum, form):
         self.form = form
         super(FormsetRow, self).__init__(column, datum)
+        if self.cells == []:
+            # We need to be able to handle empty rows, because there may
+            # be extra empty forms in a formset. The original DataTable breaks
+            # on this, because it sets self.cells to [], but later expects a
+            # SortedDict. We just fill self.cells with empty Cells.
+            cells = []
+            for column in self.table.columns.values():
+                cell = self.table._meta.cell_class(None, column, self)
+                cells.append((column.name or column.auto, cell))
+            self.cells = datastructures.SortedDict(cells)
+
+    def render(self):
+        return loader.render_to_string(self.template_path, {"row": self})
 
 
-class FormsetDataTable(horizon_tables.DataTable):
+class FormsetDataTableMixin(object):
+    """
+    A mixin for DataTable to support Django Formsets.
+
+    This works the same as the ``FormsetDataTable`` below, but can be used
+    to add to existing DataTable subclasses.
+    """
     formset_class = None
-    _formset = None
 
-    def get_formset_data(self):
+    def __init__(self, *args, **kwargs):
+        super(FormsetDataTableMixin, self).__init__(*args, **kwargs)
+        self._formset = None
+
+        # Override Meta settings, because we need custom Form and Cell classes,
+        # and also our own template.
+        self._meta.row_class = FormsetRow
+        self._meta.cell_class = FormsetCell
+        self._meta.template = ('infrastructure/resource_management/'
+            'resource_classes/_formset_data_table.html')
+
+    def _get_formset_data(self):
         """Formats the self.filtered_data in a way suitable for a formset."""
         data = []
         for datum in self.filtered_data:
@@ -159,20 +166,30 @@ class FormsetDataTable(horizon_tables.DataTable):
             for column in self.columns.values():
                 value = column.get_data(datum)
                 form_data[column.name] = value
+            form_data['id'] = self.get_object_id(datum)
             data.append(form_data)
         return data
 
     def get_formset(self):
-        """Provide the formset corresponding to this DataTable."""
+        """
+        Provide the formset corresponding to this DataTable.
+
+        Use this to validate the formset and to get the submitted data back.
+        """
         if self._formset is None:
             self._formset = self.formset_class(
                 self.request.POST or None,
-                initial=self.get_formset_data(),
+                initial=self._get_formset_data(),
                 prefix=self._meta.name)
         return self._formset
 
     def get_rows(self):
-        """ Return the row data for this table broken out by columns. """
+        """
+        Return the row data for this table broken out by columns.
+
+        The row objects get an additional ``form`` parameter, with the
+        formset form corresponding to that row.
+        """
         try:
             rows = []
             if self.formset_class is None:
@@ -194,3 +211,29 @@ class FormsetDataTable(horizon_tables.DataTable):
             exc_info = sys.exc_info()
             raise template.TemplateSyntaxError, exc_info[1], exc_info[2]
         return rows
+
+    def get_object_id(self, datum):
+        # We need to support ``None`` when there are more forms than data.
+        if datum is None:
+            return None
+        return super(FormsetDataTableMixin, self).get_object_id(datum)
+
+
+class FormsetDataTable(FormsetDataTableMixin, horizon_tables.DataTable):
+    """
+    A DataTable with support for Django Formsets.
+
+    Note that :attr:`~horizon.tables.DataTableOptions.row_class` and
+    :attr:`~horizon.tables.DataTaleOptions.cell_class` are overwritten in this
+    class, so setting them in ``Meta`` has no effect.
+
+    .. attribute:: formset_class
+
+        A classs made with :function:`~django.forms.formsets.formset_factory`
+        containing the definition of the formset to use with this data table.
+
+        The columns that are named the same as the formset fields will be
+        replaced with form widgets in the table. Any hidden fields from the
+        formset will also be included. The fields that are not hidden and
+        don't correspond to any column will not be included in the form.
+    """

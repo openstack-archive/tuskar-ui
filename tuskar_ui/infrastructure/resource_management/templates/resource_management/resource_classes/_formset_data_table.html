@@ -1,65 +1,25 @@
+{% extends 'horizon/common/_data_table.html' %}
 {% load i18n %}
 
-{{ formset.management_form }}
-{% if formset.non_field_errors %}
-    <div class="alert alert-error">
-        {{ formset.non_field_errors }}
-    </div>
-{% endif %}
-<table class="table table-bordered formset-table" id="{{ formset.prefix }}-formset-table">
-    <thead>
-        <tr class="table_caption"></tr>
-        <tr>
-            {% for field in flavors_formset.0.visible_fields %}
-                <th class="normal_column head-{{ field.name }} {% if field.field.required %} required{% endif %}">
-                    <span>{{ field.field.label }}</span>
-                </th>
-            {% endfor %}
-        </tr></thead>
-    <tbody>
-    {% for form in formset %}
-        <tr>
-            {% for field in form.visible_fields %}
-            <td class="control-group
-                       {% if field.errors %} error{% endif %}
-                       field-{{ field.name }}">
-                    {{ field }}
-                    {% for error in field.errors %}
-                    <span class="help-inline">{{ error }}</span>
-                    {% endfor %}
-                    {%  if forloop.first %}
-                        {% for field in form.hidden_fields %}
-                            {{ field }}
-                            {% for error in field.errors %}
-                            <span class="help-inline">{{ field.name }}: {{ error }}</span>
-                            {% endfor %}
-                        {% endfor %}
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-error">
-                                {{ form.non_field_errors }}
-                            </div>
-                        {% endif %}
-                    {% endif %}
-                </td>
-            {% endfor %}
-        </tr>
-    {% endfor %}
-    </tbody>
-    <tfoot>
-        <tr><td colspan="{{ flavors_formset.0.visible_fields|length }}">
-        </td></tr>
-    </tfoot>
-</table>
-
+{% block table %}
+    {% with table.get_formset as formset %}
+        {{ formset.management_form }}
+        {% if formset.non_field_errors %}
+            <div class="alert alert-error">
+                {{ formset.non_field_errors }}
+            </div>
+        {% endif %}
+    {% endwith %}
+    {{ block.super }}
 
 <script type="text/javascript">
 (function () {
-    // prepares the js-enabled parts of the formset table
+    // prepares the js-enabled parts of the formset data table
     var init_formset = function () {
-        var prefix = '{{ formset.prefix|escapejs }}';
+        var table = $('table#{{ table.name|escapejs }}');
+        var prefix = '{{ table.get_formset.prefix|escapejs }}';
         var input_name_re = new RegExp('^' + prefix + '-\\d+-');
         var input_id_re = new RegExp('^id_' + prefix + '-\\d+-');
-        var table = $('#' + prefix + '-formset-table');
         var empty_row = table.find('tbody tr:last').clone();
 
         // go through the whole table and fix the numbering of rows
@@ -105,18 +65,24 @@
             reenumerate_rows();
         };
 
-        $('#{{ formset.prefix }}-formset-table tfoot td').append(
-            '<a href="#" class="btn">{% filter escapejs %}{% trans "Add a row" %}{% endfilter %}</a>'
-        ).click(add_row);
+        // if there are extra empty rows, add the button for new rows
+        if ($('#id_' + prefix + '-TOTAL_FORMS').val() >
+                $('#id_' + prefix + '-INITIAL_FORMS').val()) {
+            table.find('tfoot td').append(
+                '<a href="#" class="btn btn-small pull-right">' + 
+                '{% filter escapejs %}{% trans "Add a row" %}{% endfilter %}' +
+                '</a>'
+            ).click(add_row);
+        };
 
         // if the formset is not empty, and is not being redisplayed,
-        // delete the empty row from the end
+        // delete the empty extra row from the end
         if (table.find('tbody tr').length > 1 &&
                 $('#id_' + prefix + '-TOTAL_FORMS').val() >
                     $('#id_' + prefix + '-INITIAL_FORMS').val()) {
             table.find('tbody tr:last').remove();
             reenumerate_rows();
-        }
+        };
     };
 
     if (typeof($) !== 'undefined') {
@@ -126,3 +92,4 @@
     }
 } ());
 </script>
+{% endblock table %}

@@ -484,11 +484,7 @@ input {
 }
 
 // formsets
-.formset-table {
-  tr td {
-    line-height: 2;
-  }
-
+.datatable {
   input {
     padding: 2px 5px;
     margin: 0;
@@ -497,14 +493,5 @@ input {
   input.number_input_slim {
     width: 4em;
     text-align: right;
-  }
-
-  th.required span:after {
-    // Copied from horizon.less, because there is no way to reuse their class.
-    content: "*";
-    font-weight: bold;
-    line-height: 0;
-    padding-left: 4px;
-    color: #3290c0;
   }
 }

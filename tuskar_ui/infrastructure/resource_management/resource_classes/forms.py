@@ -68,7 +68,8 @@ class DeleteCommand(object):
 
 
 class SelectRack(django.forms.Form):
-    id = django.forms.BooleanField()
+    id = django.forms.IntegerField(widget=django.forms.HiddenInput())
+    selected = django.forms.BooleanField(required=False)
 
 
 SelectRackFormset = django.forms.formsets.formset_factory(SelectRack, extra=0)
