@@ -13,7 +13,7 @@
 </table>
 
 <div id="id_resource_class_flavors_table">
-    {% include 'infrastructure/resource_management/resource_classes/_formset.html' with formset=flavors_formset %}
+    {{ flavors_table.render }}
 </div>
 
 <script type="text/javascript">
