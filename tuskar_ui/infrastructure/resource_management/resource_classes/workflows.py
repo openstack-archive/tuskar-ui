@@ -77,13 +77,15 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                       ' another resource class.')
                     % name
                 )
-        formset = self.initial.get('_formsets', {}).get('flavors')
-        if formset:
+        table = self.initial.get('_tables', {}).get('flavors')
+        if table:
+            formset = table.get_formset()
             if formset.is_valid():
                 cleaned_data['flavors'] = [form.cleaned_data
                                            for form in formset
                                            if form.cleaned_data
-                                           and not form.cleaned_data['DELETE']]
+                                           and not
+                                           form.cleaned_data.get('DELETE')]
             else:
                 raise forms.ValidationError(
                     _('Errors in the flavors list.'),
@@ -96,10 +98,8 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                       "settings and add flavors to class.")
 
 
-class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.FormsetStep):
-    formset_definitions = (
-        ('flavors', flavors_forms.FlavorFormset),
-    )
+class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.TableStep):
+    table_classes = (tables.FlavorsFormsetTable,)
 
     action_class = ResourceClassInfoAndFlavorsAction
     template_name = 'infrastructure/resource_management/resource_classes/'\
@@ -120,34 +120,33 @@ class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.FormsetStep):
             flavors = []
             exceptions.handle(self.workflow.request,
                               _('Unable to retrieve resource flavors list.'))
-        flavors_data = []
-        for flavor in flavors:
-            if '.' in flavor.name:
-                name = flavor.name.split('.', 1)[1]
-            else:
-                name = flavor.name
-            data = {
-                'id': flavor.id,
-                'name': name,
-            }
-            for capacity_name in flavors_forms.CAPACITIES:
-                capacity = getattr(flavor, capacity_name, None)
-                capacity_value = getattr(capacity, 'value', '')
-                # Make sure we don't have "None" in there
-                if capacity_value is None:
-                    capacity_value = ''
-                data[capacity_name] = capacity_value
-            flavors_data.append(data)
-        return flavors_data
+        return flavors
 
 
 class RacksAction(workflows.Action):
     class Meta:
         name = _("Racks")
 
+    def clean(self):
+        cleaned_data = super(RacksAction, self).clean()
+        table = self.initial.get('_tables', {}).get('racks')
+        if table:
+            formset = table.get_formset()
+            if formset.is_valid():
+                cleaned_data['racks_object_ids'] = [
+                    form.cleaned_data['id'] for form in formset
+                    if form.cleaned_data and
+                    form.cleaned_data.get('selected') and
+                    not form.cleaned_data.get('DELETE')]
+            else:
+                raise forms.ValidationError(
+                    _('Errors in the racks table.'),
+                )
+        return cleaned_data
+
 
 class CreateRacks(tuskar_ui.workflows.TableStep):
-    table_classes = (tables.RacksTable,)
+    table_classes = (tables.RacksFormsetTable,)
 
     action_class = RacksAction
     contributes = ("racks_object_ids")
@@ -169,10 +168,10 @@ class CreateRacks(tuskar_ui.workflows.TableStep):
                 resource_class = tuskar.ResourceClass.get(
                     self.workflow.request,
                     resource_class_id)
-                # TODO(lsmola ugly interface, rewrite)
-                self._tables['racks'].active_multi_select_values = \
-                    resource_class.racks_ids
+                selected_racks = resource_class.racks_ids
                 racks = resource_class.all_racks
+                for rack in racks:
+                    rack.selected = (rack.id in selected_racks)
             else:
                 racks = tuskar.Rack.list(self.workflow.request, True)
         except Exception:

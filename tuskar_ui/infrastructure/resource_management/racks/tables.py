@@ -96,7 +96,7 @@ class RacksTable(tables.DataTable):
         'vm_capacity',
         verbose_name=_("Usage"),
         filters=(lambda vm_capacity:
-                     (vm_capacity.value and
+                     (vm_capacity and vm_capacity.value and
                       "%s %%" % int(round((100 / float(vm_capacity.value)) *
                                           vm_capacity.usage, 0))) or None,))
 
