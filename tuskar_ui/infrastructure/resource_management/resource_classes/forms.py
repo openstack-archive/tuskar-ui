@@ -13,6 +13,7 @@
 #    under the License.
 
 from django.core import urlresolvers
+import django.forms
 from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import exceptions
@@ -64,3 +65,11 @@ class DeleteCommand(object):
             redirect = urlresolvers.reverse(
                             'horizon:infrastructure:resource_management:index')
             exceptions.handle(self.request, self.msg, redirect=redirect)
+
+
+class SelectRack(django.forms.Form):
+    id = django.forms.IntegerField(widget=django.forms.HiddenInput())
+    selected = django.forms.BooleanField(required=False)
+
+
+SelectRackFormset = django.forms.formsets.formset_factory(SelectRack, extra=0)
