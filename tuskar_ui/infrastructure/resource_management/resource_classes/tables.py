@@ -22,9 +22,13 @@ from horizon import exceptions
 from horizon import tables
 
 from tuskar_ui import api as tuskar
+from tuskar_ui.infrastructure.resource_management.flavors\
+    import forms as flavors_forms
 from tuskar_ui.infrastructure.resource_management.racks\
     import tables as racks_tables
 from tuskar_ui.infrastructure.resource_management import resource_classes
+from tuskar_ui.infrastructure.resource_management.resource_classes\
+    import forms
 import tuskar_ui.tables
 
 
@@ -98,15 +102,28 @@ class RacksFilterAction(tables.FilterAction):
 
 
 class RacksTable(racks_tables.RacksTable):
+    class Meta:
+        name = "racks"
+        verbose_name = _("Racks")
+        table_actions = (RacksFilterAction,)
 
-    multi_select_name = "racks_object_ids"
+
+class RacksFormsetTable(tuskar_ui.tables.FormsetDataTableMixin, RacksTable):
+    formset_class = forms.SelectRackFormset
 
     class Meta:
         name = "racks"
         verbose_name = _("Racks")
-        multi_select = True
+        multi_select = False
         table_actions = (RacksFilterAction,)
-        row_class = tuskar_ui.tables.MultiselectRow
+
+    def __init__(self, *args, **kwargs):
+        # Adding a column at the left of the table.
+        selected = tables.Column('selected', verbose_name="", sortable=False)
+        selected.classes.append('narrow')
+        selected.table = self
+        self._columns.insert(0, 'selected', selected)
+        super(RacksFormsetTable, self).__init__(*args, **kwargs)
 
 
 class UpdateRacksClass(tables.LinkAction):
@@ -136,7 +153,7 @@ class UpdateFlavorsClass(tables.LinkAction):
         return "%s?step=%s" % (
             urlresolvers.reverse(
                 url,
-                args=(self.table.kwargs['resource_class_id'],)),
+                args=(self.table.kwargs.get('resource_class_id'),)),
             resource_classes.workflows.ResourceClassInfoAndFlavorsAction.slug)
 
 
@@ -187,3 +204,21 @@ class FlavorsTable(tables.DataTable):
         name = "flavors"
         verbose_name = _("Flavors")
         table_actions = (FlavorsFilterAction, UpdateFlavorsClass)
+
+
+class FlavorsFormsetTable(tuskar_ui.tables.FormsetDataTableMixin,
+                        FlavorsTable):
+
+    name = tables.Column(
+        'name',
+        verbose_name=_('Flavor Name'),
+        filters=(lambda n: (n or '.').split('.')[1],),
+    )
+    DELETE = tables.Column('DELETE', verbose_name=_("Delete"))
+    formset_class = flavors_forms.FlavorFormset
+
+    class Meta:
+        name = "flavors"
+        verbose_name = _("Flavors")
+        table_actions = ()
+        multi_select = False
