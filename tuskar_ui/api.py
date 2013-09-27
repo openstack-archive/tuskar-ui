@@ -110,7 +110,10 @@ class StringIdAPIResourceWrapper(base.APIResourceWrapper):
             if issubclass(self._apiresource.__class__, dict):
                 return self._apiresource.get(attr)
             else:
-                return self._apiresource.__getattribute__(attr)
+                try:
+                    return self._apiresource.__getattribute__(attr)
+                except AttributeError:
+                    return None
         else:
             raise AttributeError(attr)
 
@@ -352,7 +355,7 @@ class Rack(StringIdAPIResourceWrapper):
         if only_free_racks:
             return [Rack(r, request) for r in
                     tuskarclient(request).racks.list() if (
-                        r.resource_class is None)]
+                        getattr(r, 'resource_class', None) is None)]
         else:
             return [Rack(r, request) for r in
                     tuskarclient(request).racks.list()]
@@ -388,7 +391,8 @@ class Rack(StringIdAPIResourceWrapper):
     @property
     def resource_class_id(self):
         rclass = self.resource_class
-        return rclass['id'] if rclass else None
+        resource_class_id = rclass['id'] if rclass else None
+        return resource_class_id
 
     @property
     def get_resource_class(self):
