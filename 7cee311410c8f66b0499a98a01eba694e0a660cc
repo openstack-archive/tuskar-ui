@@ -1,0 +1,9 @@
+Verified+2: Jenkins
+Approved+1: Jordan OMara <jomara@redhat.com>
+Code-Review+2: Jordan OMara <jomara@redhat.com>
+Code-Review+1: Radomir Dopieralski <openstack@sheep.art.pl>
+Submitted-by: Jenkins
+Submitted-at: Mon, 30 Sep 2013 19:21:49 +0000
+Reviewed-on: https://review.openstack.org/47874
+Project: stackforge/tuskar-ui
+Branch: refs/heads/master
