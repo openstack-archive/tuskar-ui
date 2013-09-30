@@ -24,9 +24,13 @@ from tuskar_ui.infrastructure.resource_management import views
 
 urlpatterns = defaults.patterns('',
     defaults.url(r'^$', views.IndexView.as_view(), name='index'),
-    defaults.url(r'racks/', defaults.include(rack_urls, namespace='racks')),
-    defaults.url(r'resource_classes/',
+    defaults.url(r'^provision$', views.ProvisionView.as_view(),
+                    name='provision'),
+    defaults.url(r'^provisioning_state.json$', views.provisioning_state,
+                    name='provisioning_state'),
+    defaults.url(r'^racks/', defaults.include(rack_urls, namespace='racks')),
+    defaults.url(r'^resource_classes/',
                  defaults.include(resource_classes_urls,
                                   namespace='resource_classes')),
-    defaults.url(r'nodes/', defaults.include(node_urls, namespace='nodes')),
+    defaults.url(r'^nodes/', defaults.include(node_urls, namespace='nodes')),
 )

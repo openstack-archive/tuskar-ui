@@ -185,26 +185,6 @@ class RackViewTests(test.BaseAdminViewTests):
         self.assertMessageCount(success=1)
         self.assertRedirectsNoFollow(response, self.index_page)
 
-    @test.create_stubs({tuskar.Rack: ('get', 'provision')})
-    def test_edit_status_provision_rack_post(self):
-        rack = self.tuskar_racks.first()
-
-        tuskar.Rack.\
-            get(mox.IsA(http.HttpRequest), rack.id).\
-            AndReturn(rack)
-        tuskar.Rack.provision(mox.IsA(http.HttpRequest), rack.id)
-
-        self.mox.ReplayAll()
-
-        url = urlresolvers.reverse('horizon:infrastructure:'
-                                   'resource_management:racks:edit_status',
-                                   args=[rack.id]) + "?action=provision"
-        response = self.client.post(url)
-
-        self.assertNoFormErrors(response)
-        self.assertMessageCount(success=1)
-        self.assertRedirectsNoFollow(response, self.index_page)
-
     @test.create_stubs({tuskar.Rack: ('delete', 'list')})
     def test_delete_rack(self):
         rack_id = u'1'

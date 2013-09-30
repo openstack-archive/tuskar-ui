@@ -485,7 +485,7 @@ class Rack(StringIdAPIResourceWrapper):
         return (self.state == 'provisioning')
 
     @classmethod
-    def provision(cls, request, rack_id):
+    def provision_all(cls, request):
         tuskarclient(request).data_centers.provision_all()
 
 
