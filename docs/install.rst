@@ -121,24 +121,6 @@ and selecting the id column that matches your tenant name.
 (Of course, substituting the appropriate values in for ``USERNAME``,
 ``PASSWORD``, ``TENANTNAME`` and ``AUTHURL``)
 
-Final setup
------------
-
-Now that your configuration is in order, it's time to set up a couple
-other things.
-
-First, activate your virtual environment:
-
-::
-
-    source .venv/bin/activate
-
-tuskar-ui introduces one additional dependency - python-tuskarclient:
-
-::
-
-    pip install git+http://github.com/stackforge/python-tuskarclient.git
-
 Starting the app
 ----------------
 
