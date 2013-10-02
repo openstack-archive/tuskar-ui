@@ -135,7 +135,7 @@ NOSE_ARGS = ['--nocapture',
              '--cover-inclusive',
              '--all-modules']
 
-TUSKAR_ENDPOINT_URL = "http://127.0.0.1:6385"
+TUSKAR_ENDPOINT_URL = "http://127.0.0.1:8585"
 
 OVERCLOUD_CREDS = {
     'enabled': True,
