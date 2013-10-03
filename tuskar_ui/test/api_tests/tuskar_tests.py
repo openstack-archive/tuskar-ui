@@ -42,27 +42,32 @@ class TuskarApiTests(test.APITestCase):
         node = self.baremetalclient_nodes.first()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'create')
-        baremetal.BareMetalNodeManager.create('node',
-                                              1,
-                                              1024,
-                                              10,
-                                              'aa:bb:cc:dd:ee',
-                                              '0.0.0.0',
-                                              'user',
-                                              'password',
-                                              0).AndReturn(node)
+        baremetal.BareMetalNodeManager.create('node', 1, 1024, 10,
+            'aa:bb:cc:dd:ee', '0.0.0.0', 'user', 'password', 0).AndReturn(node)
         self.mox.ReplayAll()
 
-        ret_val = api.Node.create(self.request,
-                                  name='node',
-                                  cpus=1,
-                                  memory_mb=1024,
-                                  local_gb=10,
-                                  prov_mac_address='aa:bb:cc:dd:ee',
-                                  pm_address='0.0.0.0',
-                                  pm_user='user',
-                                  pm_password='password',
-                                  terminal_port=0)
+        ret_val = api.Node.create(self.request, name='node', cpus=1,
+            memory_mb=1024, local_gb=10, prov_mac_address='aa:bb:cc:dd:ee',
+            pm_address='0.0.0.0', pm_user='user', pm_password='password',
+            terminal_port=0)
+        self.assertIsInstance(ret_val, api.Node)
+
+    def test_node_create_with_empty_pm(self):
+        """
+        Make sure that when pm_address, pm_user and terminal_port are not
+        provided (empty), their values are set to None, as this is required
+        by the baremetal VM.
+        """
+        node = self.baremetalclient_nodes.first()
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'create')
+        baremetal.BareMetalNodeManager.create('node', 1, 1024, 10,
+            'aa:bb:cc:dd:ee', None, None, '', None).AndReturn(node)
+        self.mox.ReplayAll()
+
+        ret_val = api.Node.create(self.request, name='node', cpus=1,
+            memory_mb=1024, local_gb=10, prov_mac_address='aa:bb:cc:dd:ee',
+            pm_address='', pm_user='', pm_password='', terminal_port='')
         self.assertIsInstance(ret_val, api.Node)
 
     def test_node_list(self):
