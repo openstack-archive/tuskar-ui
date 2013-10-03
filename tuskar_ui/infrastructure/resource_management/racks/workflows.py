@@ -172,9 +172,9 @@ class CreateRack(workflows.Workflow):
                     memory_mb=data['memory_mb'],
                     local_gb=data['local_gb'],
                     prov_mac_address=data['prov_mac_address'],
-                    pm_address=data['pm_address'],
-                    pm_user=data['pm_user'],
-                    pm_password=data['pm_password'],
+                    pm_address=data['pm_address'] or None,
+                    pm_user=data['pm_user'] or None,
+                    pm_password=data['pm_password'] or None,
                     terminal_port=data['terminal_port'])
             if node:
                 node_id = node.id

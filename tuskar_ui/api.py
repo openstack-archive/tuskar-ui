@@ -223,9 +223,9 @@ class Node(StringIdAPIResourceWrapper):
                                                kwargs['memory_mb'],
                                                kwargs['local_gb'],
                                                kwargs['prov_mac_address'],
-                                               kwargs['pm_address'],
-                                               kwargs['pm_user'],
-                                               kwargs['pm_password'],
+                                               kwargs['pm_address'] or None,
+                                               kwargs['pm_user'] or None,
+                                               kwargs['pm_password'] or None,
                                                kwargs['terminal_port'])
         return cls(node)
 
