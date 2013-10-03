@@ -165,7 +165,7 @@ class CreateRack(workflows.Workflow):
     def handle(self, request, data):
         try:
             if data['node_name'] is not None:
-                node = tuskar.Node.create(
+                node = tuskar.BaremetalNode.create(
                     request,
                     name=data['node_name'],
                     cpus=data['cpus'],

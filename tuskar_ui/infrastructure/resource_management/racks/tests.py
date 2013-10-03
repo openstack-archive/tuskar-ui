@@ -47,14 +47,14 @@ class RackViewTests(test.BaseAdminViewTests):
     #
     @test.create_stubs({tuskar.Rack: ('list', 'create',),
                         tuskar.ResourceClass: ('list',),
-                        tuskar.Node: ('create',)})
+                        tuskar.BaremetalNode: ('create',)})
     def test_create_rack_post(self):
         node = self.baremetal_nodes.first()
 
         tuskar.Rack.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_racks.list())
-        tuskar.Node.create(
+        tuskar.BaremetalNode.create(
             mox.IsA(http.request.HttpRequest),
             name='New Node',
             cpus=u'1',
@@ -71,7 +71,7 @@ class RackViewTests(test.BaseAdminViewTests):
             resource_class_id=u'1',
             location='Tokyo',
             subnet='1.2.3.4',
-            nodes=[{'id': '1'}]).AndReturn(None)
+            nodes=[{'id': '11'}]).AndReturn(None)
         tuskar.ResourceClass.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -262,13 +262,17 @@ class RackViewTests(test.BaseAdminViewTests):
         self.assertMessageCount(success=1)
         self.assertMessageCount(error=0)
 
-    @test.create_stubs({tuskar.Rack: ('get', 'list_nodes', 'list_flavors')})
+    @test.create_stubs({tuskar.Rack: ('get', 'list_nodes', 'list_flavors'),
+                        tuskar.ResourceClass: ('get',)})
     def test_detail_rack(self):
         rack = self.tuskar_racks.first()
+        rack.request = self.request
+        rc = self.tuskar_resource_classes.first()
 
         tuskar.Rack.get(mox.IsA(http.HttpRequest),
                         rack.id).AndReturn(rack)
-
+        tuskar.ResourceClass.get(mox.IsA(http.HttpRequest),
+                                 rc.id).AndReturn(rc)
         self.mox.ReplayAll()
 
         tuskar.Rack.list_nodes = []

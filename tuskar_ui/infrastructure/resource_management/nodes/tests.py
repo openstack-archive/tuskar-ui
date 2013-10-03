@@ -21,15 +21,15 @@ from tuskar_ui import api as tuskar
 from tuskar_ui.test import helpers as test
 
 
-class ResourceViewTests(test.BaseAdminViewTests):
+class NodeViewTests(test.BaseAdminViewTests):
     unracked_page = urlresolvers.reverse(
         'horizon:infrastructure:resource_management:nodes:unracked')
 
-    @test.create_stubs({tuskar.Node: ('list_unracked',), })
+    @test.create_stubs({tuskar.BaremetalNode: ('list_unracked',), })
     def test_unracked(self):
         unracked_nodes = self.baremetal_unracked_nodes.list()
 
-        tuskar.Node.list_unracked(
+        tuskar.BaremetalNode.list_unracked(
             mox.IsA(http.HttpRequest)).AndReturn(unracked_nodes)
         self.mox.ReplayAll()
 
@@ -40,16 +40,26 @@ class ResourceViewTests(test.BaseAdminViewTests):
         unracked_nodes_table = res.context['unracked_nodes_table'].data
         self.assertItemsEqual(unracked_nodes_table, unracked_nodes)
 
-    @test.create_stubs({tuskar.Node: ('get', 'running_virtual_machines')})
+    @test.create_stubs({tuskar.Node: ('get', 'running_virtual_machines',
+                                      'list_flavors'),
+                        tuskar.Rack: ('get',),
+                        tuskar.BaremetalNode: ('get',)})
     def test_detail_node(self):
-        node = self.baremetal_nodes.first()
+        node = self.tuskar_nodes.first()
+        node.request = self.request
+        rack = self.tuskar_racks.first()
+        bm_node = self.baremetal_nodes.first()
 
         tuskar.Node.get(mox.IsA(http.HttpRequest),
                         node.id).AndReturn(node)
-
+        tuskar.Rack.get(mox.IsA(http.HttpRequest),
+                        rack.id).AndReturn(rack)
+        tuskar.BaremetalNode.get(mox.IsA(http.HttpRequest),
+                        bm_node.id).AndReturn(bm_node)
         self.mox.ReplayAll()
 
         tuskar.Node.running_virtual_machines = []
+        tuskar.Node.list_flavors = []
 
         url = urlresolvers.reverse('horizon:infrastructure:'
                                    'resource_management:nodes:'
@@ -62,7 +72,7 @@ class ResourceViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({tuskar.Node: ('get',)})
     def test_detail_node_exception(self):
-        node = self.baremetal_nodes.first()
+        node = self.tuskar_nodes.first()
 
         tuskar.Node.get(
             mox.IsA(http.HttpRequest),

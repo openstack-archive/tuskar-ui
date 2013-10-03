@@ -21,7 +21,6 @@ import random
 import django.conf
 import django.db.models
 from django.utils.translation import ugettext_lazy as _  # noqa
-from horizon import exceptions
 import requests
 
 from novaclient.v1_1.contrib import baremetal
@@ -163,12 +162,22 @@ class Capacity(StringIdAPIResourceWrapper):
         return self._average
 
 
-class Node(StringIdAPIResourceWrapper):
-    """Wrapper for the Node object  returned by the
-    dummy model.
-    """
+class BaremetalNode(StringIdAPIResourceWrapper):
     _attrs = ['id', 'pm_address', 'cpus', 'memory_mb', 'service_host',
               'local_gb', 'pm_user']
+
+    @classmethod
+    def create(cls, request, **kwargs):
+        node = baremetalclient(request).create(kwargs['name'],
+                                               kwargs['cpus'],
+                                               kwargs['memory_mb'],
+                                               kwargs['local_gb'],
+                                               kwargs['prov_mac_address'],
+                                               kwargs['pm_address'],
+                                               kwargs['pm_user'],
+                                               kwargs['pm_password'],
+                                               kwargs['terminal_port'])
+        return cls(node)
 
     @classmethod
     def get(cls, request, node_id):
@@ -206,28 +215,126 @@ class Node(StringIdAPIResourceWrapper):
 
     @classmethod
     def list(cls, request):
-        return [Node(n, request) for n in
+        return [cls(n, request) for n in
                 baremetalclient(request).list()]
 
     @classmethod
     def list_unracked(cls, request):
         try:
-            return [n for n in Node.list(request) if (n.rack is None)]
+            racked_node_ids = [node.nova_baremetal_node_id
+                               for node in Node.list(request)]
+            return [bn for bn in BaremetalNode.list(request)
+                    if bn.id not in racked_node_ids]
         except requests.ConnectionError:
             return []
 
+    @property
+    def mac_address(self):
+        try:
+            return self._apiresource.interfaces[0]['address']
+        except Exception:
+            return None
+
+    @property
+    # FIXME: just mock implementation, add proper one
+    def running_instances(self):
+        return 4
+
+    @property
+    # FIXME: just mock implementation, add proper one
+    def remaining_capacity(self):
+        return 100 - self.running_instances
+
+    @property
+    def running_virtual_machines(self):
+        if not hasattr(self, '_running_virtual_machines'):
+            if OVERCLOUD_CREDS:
+                search_opts = {}
+                search_opts['all_tenants'] = True
+                self._running_virtual_machines = [s for s in
+                    overcloudclient(self.request).servers
+                        .list(True, search_opts)
+                    if s.hostId == self.id]
+            else:
+                LOG.debug('OVERCLOUD_CREDS is not set. '
+                          'Can\'t connect to Overcloud')
+                self._running_virtual_machines = []
+        return self._running_virtual_machines
+
+
+class Node(StringIdAPIResourceWrapper):
+    """Wrapper for the Node object  returned by the
+    dummy model.
+    """
+    _attrs = ['id', 'rack', 'nova_baremetal_node_id']
+
     @classmethod
-    def create(cls, request, **kwargs):
-        node = baremetalclient(request).create(kwargs['name'],
-                                               kwargs['cpus'],
-                                               kwargs['memory_mb'],
-                                               kwargs['local_gb'],
-                                               kwargs['prov_mac_address'],
-                                               kwargs['pm_address'],
-                                               kwargs['pm_user'],
-                                               kwargs['pm_password'],
-                                               kwargs['terminal_port'])
-        return cls(node)
+    def get(cls, request, node_id):
+        node = cls(tuskarclient(request).nodes.get(node_id))
+        node.request = request
+        return node
+
+    @classmethod
+    def list(cls, request):
+        return [cls(node, request)
+                for node in (tuskarclient(request).nodes.list())]
+
+    @property
+    def get_rack(self):
+        if not hasattr(self, '_rack'):
+            if self.rack:
+                self._rack = Rack.get(self.request, self.rack['id'])
+            else:
+                self._rack = None
+        return self._rack
+
+    @property
+    def get_rack_id(self):
+        if self.rack:
+            return unicode(self.rack['id'])
+        else:
+            return None
+
+    @property
+    def get_nova_baremetal_node(self):
+        if not hasattr(self, '_nova_baremetal_node'):
+            if self.nova_baremetal_node_id:
+                self._nova_baremetal_node = BaremetalNode.get(
+                    self.request,
+                    self.nova_baremetal_node_id)
+            else:
+                self._nova_baremetal_node = None
+        return self._nova_baremetal_node
+
+    def nova_baremetal_node_attribute(self, attr_name):
+        key = "_%s" % attr_name
+        if not hasattr(self, key):
+            if self.get_nova_baremetal_node:
+                value = getattr(self.get_nova_baremetal_node, attr_name, None)
+            else:
+                value = None
+            setattr(self, key, value)
+        return getattr(self, key)
+
+    @property
+    def service_host(self):
+        return self.nova_baremetal_node_attribute('service_host')
+
+    @property
+    def mac_address(self):
+        return self.nova_baremetal_node_attribute('mac_address')
+
+    @property
+    def pm_address(self):
+        return self.nova_baremetal_node_attribute('pm_address')
+
+    @property
+    def status(self):
+        return self.nova_baremetal_node_attribute('status')
+
+    @property
+    def running_virtual_machines(self):
+        return self.nova_baremetal_node_attribute('running_virtual_machines')
 
     @property
     def list_flavors(self):
@@ -235,9 +342,9 @@ class Node(StringIdAPIResourceWrapper):
             # FIXME: just a mock of used instances, add real values
             used_instances = 0
 
-            if not self.rack or not self.rack.get_resource_class:
+            if not self.rack or not self.get_rack.get_resource_class:
                 return []
-            resource_class = self.rack.get_resource_class
+            resource_class = self.get_rack.get_resource_class
 
             added_flavors = tuskarclient(self.request).flavors\
                                                       .list(resource_class.id)
@@ -255,65 +362,16 @@ class Node(StringIdAPIResourceWrapper):
         return self._flavors
 
     @property
-    def rack(self):
-        try:
-            if not hasattr(self, '_rack'):
-                # FIXME the node.rack association should be stored somewhere
-                self._rack = None
-                for rack in Rack.list(self.request):
-                    for node_obj in rack.list_nodes:
-                        if node_obj.id == self.id:
-                            self._rack = rack
-
-            return self._rack
-        except Exception:
-            msg = "Could not obtain Nodes's rack"
-            LOG.debug(exceptions.error_color(msg))
-            return None
-
-    @property
-    # FIXME: just mock implementation, add proper one
-    def running_instances(self):
-        return 4
-
-    @property
-    # FIXME: just mock implementation, add proper one
-    def remaining_capacity(self):
-        return 100 - self.running_instances
-
-    @property
     # FIXME: just mock implementation, add proper one
     def is_provisioned(self):
-        return self.status != "unprovisioned" and self.rack
+        return (self.status != "unprovisioned"
+                and self.rack)
 
     @property
     def alerts(self):
         if not hasattr(self, '_alerts'):
             self._alerts = []
         return self._alerts
-
-    @property
-    def mac_address(self):
-        try:
-            return self._apiresource.interfaces[0]['address']
-        except Exception:
-            return None
-
-    @property
-    def running_virtual_machines(self):
-        if not hasattr(self, '_running_virtual_machines'):
-            if OVERCLOUD_CREDS:
-                search_opts = {}
-                search_opts['all_tenants'] = True
-                self._running_virtual_machines = [s for s in
-                    overcloudclient(self.request).servers
-                        .list(True, search_opts)
-                    if s.hostId == self.id]
-            else:
-                LOG.debug('OVERCLOUD_CREDS is not set. '
-                          'Can\'t connect to Overcloud')
-                self._running_virtual_machines = []
-        return self._running_virtual_machines
 
 
 class Rack(StringIdAPIResourceWrapper):
@@ -580,8 +638,8 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @property
     def nodes(self):
         if not hasattr(self, '_nodes'):
-            nodes_lists = [rack.list_nodes for rack in self.list_racks]
-            self._nodes = [node for nodes in nodes_lists for node in nodes]
+            self._nodes = [n for n in Node.list(self.request)
+                           if n.get_rack_id in self.racks_ids]
         return self._nodes
 
     @property
