@@ -218,15 +218,17 @@ class Node(StringIdAPIResourceWrapper):
 
     @classmethod
     def create(cls, request, **kwargs):
+        # The pm_address, pm_user and terminal_port need to be None when
+        # empty for the baremetal vm to work.
         node = baremetalclient(request).create(kwargs['name'],
                                                kwargs['cpus'],
                                                kwargs['memory_mb'],
                                                kwargs['local_gb'],
                                                kwargs['prov_mac_address'],
-                                               kwargs['pm_address'],
-                                               kwargs['pm_user'],
+                                               kwargs['pm_address'] or None,
+                                               kwargs['pm_user'] or None,
                                                kwargs['pm_password'],
-                                               kwargs['terminal_port'])
+                                               kwargs['terminal_port'] or None)
         return cls(node)
 
     @property
