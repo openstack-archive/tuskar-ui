@@ -21,15 +21,15 @@ from tuskar_ui import api as tuskar
 from tuskar_ui.test import helpers as test
 
 
-class ResourceViewTests(test.BaseAdminViewTests):
+class NodeViewTests(test.BaseAdminViewTests):
     unracked_page = urlresolvers.reverse(
         'horizon:infrastructure:resource_management:nodes:unracked')
 
-    @test.create_stubs({tuskar.Node: ('list_unracked',), })
+    @test.create_stubs({tuskar.BaremetalNode: ('list_unracked',), })
     def test_unracked(self):
         unracked_nodes = self.baremetal_unracked_nodes.list()
 
-        tuskar.Node.list_unracked(
+        tuskar.BaremetalNode.list_unracked(
             mox.IsA(http.HttpRequest)).AndReturn(unracked_nodes)
         self.mox.ReplayAll()
 

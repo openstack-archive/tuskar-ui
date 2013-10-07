@@ -30,7 +30,7 @@ class UnrackedView(horizon_tables.DataTableView):
 
     def get_data(self):
         try:
-            nodes = tuskar.Node.list_unracked(self.request)
+            nodes = tuskar.BaremetalNode.list_unracked(self.request)
         except Exception:
             nodes = []
             exceptions.handle(self.request,

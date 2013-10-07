@@ -316,6 +316,11 @@ class Node(StringIdAPIResourceWrapper):
         return self._running_virtual_machines
 
 
+class BaremetalNode(Node):
+    _attrs = ['id', 'pm_address', 'cpus', 'memory_mb', 'service_host',
+              'local_gb', 'pm_user']
+
+
 class Rack(StringIdAPIResourceWrapper):
     """Wrapper for the Rack object  returned by the
     dummy model.
