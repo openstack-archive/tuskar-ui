@@ -176,7 +176,7 @@ class Node(StringIdAPIResourceWrapper):
         node.request = request
 
         # FIXME ugly, fix after demo, make abstraction of instance details
-        # this is realy not optimal, but i dont hve time do fix it now
+        # this is realy not optimal, but i dont have time do fix it now
         instances, more = nova.server_list(
             request,
             search_opts={'paginate': True},
@@ -192,8 +192,8 @@ class Node(StringIdAPIResourceWrapper):
         if detail:
             addresses = detail._apiresource.addresses.get('ctlplane')
             if addresses:
-                node.ip_address_other = (", "
-                    .join([addr['addr'] for addr in addresses]))
+                node.ip_address_other = (", ".join([addr['addr']
+                                                    for addr in addresses]))
 
             node.status = detail._apiresource._info['OS-EXT-STS:vm_state']
             node.power_management = ""
@@ -206,8 +206,7 @@ class Node(StringIdAPIResourceWrapper):
 
     @classmethod
     def list(cls, request):
-        return [Node(n, request) for n in
-                baremetalclient(request).list()]
+        return [Node(n, request) for n in baremetalclient(request).list()]
 
     @classmethod
     def list_unracked(cls, request):
@@ -325,6 +324,64 @@ class Node(StringIdAPIResourceWrapper):
 class BaremetalNode(Node):
     _attrs = ['id', 'pm_address', 'cpus', 'memory_mb', 'service_host',
               'local_gb', 'pm_user']
+
+    @classmethod
+    def create(cls, request, **kwargs):
+        # The pm_address, pm_user and terminal_port need to be None when
+        # empty for the baremetal vm to work.
+        # terminal_port needs separate handling because 0 is a valid value.
+        terminal_port = kwargs['terminal_port']
+        if terminal_port == '':
+            terminal_port = None
+        node = baremetalclient(request).create(kwargs['name'],
+                                               kwargs['cpus'],
+                                               kwargs['memory_mb'],
+                                               kwargs['local_gb'],
+                                               kwargs['prov_mac_address'],
+                                               kwargs['pm_address'] or None,
+                                               kwargs['pm_user'] or None,
+                                               kwargs['pm_password'],
+                                               terminal_port)
+        return cls(node)
+
+    @classmethod
+    def get(cls, request, node_id):
+        node = cls(baremetalclient(request).get(node_id))
+        node.request = request
+
+        # FIXME ugly, fix after demo, make abstraction of instance details
+        # this is realy not optimal, but i dont hve time do fix it now
+        instances, more = nova.server_list(
+            request,
+            search_opts={'paginate': True},
+            all_tenants=True)
+
+        instance_details = {}
+        for instance in instances:
+            id = (instance.
+                  _apiresource._info['OS-EXT-SRV-ATTR:hypervisor_hostname'])
+            instance_details[id] = instance
+
+        detail = instance_details.get(node_id)
+        if detail:
+            addresses = detail._apiresource.addresses.get('ctlplane')
+            if addresses:
+                node.ip_address_other = (", "
+                    .join([addr['addr'] for addr in addresses]))
+
+            node.status = detail._apiresource._info['OS-EXT-STS:vm_state']
+            node.power_management = ""
+            if node.pm_user:
+                node.power_management = node.pm_user + "/********"
+        else:
+            node.status = 'unprovisioned'
+
+        return node
+
+    @classmethod
+    def list(cls, request):
+        return [cls(n, request) for n in
+                baremetalclient(request).list()]
 
 
 class Rack(StringIdAPIResourceWrapper):
