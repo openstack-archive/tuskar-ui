@@ -47,14 +47,14 @@ class RackViewTests(test.BaseAdminViewTests):
     #
     @test.create_stubs({tuskar.Rack: ('list', 'create',),
                         tuskar.ResourceClass: ('list',),
-                        tuskar.Node: ('create',)})
+                        tuskar.BaremetalNode: ('create',)})
     def test_create_rack_post(self):
         node = self.baremetal_nodes.first()
 
         tuskar.Rack.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_racks.list())
-        tuskar.Node.create(
+        tuskar.BaremetalNode.create(
             mox.IsA(http.request.HttpRequest),
             name='New Node',
             cpus=u'1',
