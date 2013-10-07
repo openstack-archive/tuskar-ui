@@ -38,9 +38,8 @@ class DetailView(horizon_tabs.TabView):
             try:
                 flavor_id = self.kwargs['flavor_id']
                 resource_class_id = self.kwargs['resource_class_id']
-                flavor = tuskar.Flavor.get(self.request,
-                                           flavor_id,
-                                           resource_class_id)
+                flavor = tuskar.Flavor.get(
+                    self.request, resource_class_id, flavor_id)
             except Exception:
                 redirect = urlresolvers.reverse(
                             'horizon:infrastructure:resource_management:index')
