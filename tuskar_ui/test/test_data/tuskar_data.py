@@ -127,6 +127,45 @@ def data(TEST):
     TEST.tuskar_racks.add(api.Rack(rack_1), api.Rack(rack_2), api.Rack(rack_3))
 
     # Nodes
+    TEST.tuskarclient_nodes = test_data_utils.TestDataContainer()
+    TEST.tuskar_nodes = test_data_utils.TestDataContainer()
+    # FIXME this will be removed once Node/BaremetalNode separation is complete
+    TEST.tuskarclient_nodes_all = test_data_utils.TestDataContainer()
+
+    tuskar_node_1 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '1',
+         'name': 'node1',
+         'prov_mac_address': '00-B0-D0-86-AB-F7'})
+    tuskar_node_2 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '2',
+         'name': 'node2',
+         'prov_mac_address': '00-B0-D0-86-AB-F8'})
+    tuskar_node_3 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '3',
+         'name': 'node3',
+         'prov_mac_address': '00-B0-D0-86-AB-F9'})
+    tuskar_node_4 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '4',
+         'name': 'node4',
+         'prov_mac_address': '00-B0-D0-86-AB-F0'})
+    tuskar_node_5 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '5',
+         'name': 'node5',
+         'prov_mac_address': '00-B0-D0-86-AB-F1'})
+
+    TEST.tuskarclient_nodes.add(tuskar_node_1, tuskar_node_2,
+                                tuskar_node_3, tuskar_node_4)
+    TEST.tuskarclient_nodes_all.add(tuskar_node_1, tuskar_node_2,
+                                    tuskar_node_3, tuskar_node_4,
+                                    tuskar_node_5)
+    TEST.tuskar_nodes.add(api.Node(tuskar_node_1), api.Node(tuskar_node_2),
+                          api.Node(tuskar_node_3), api.Node(tuskar_node_4))
+
     TEST.baremetalclient_nodes = test_data_utils.TestDataContainer()
     TEST.baremetal_nodes = test_data_utils.TestDataContainer()
     TEST.baremetalclient_unracked_nodes = test_data_utils.TestDataContainer()
@@ -161,15 +200,15 @@ def data(TEST):
          'prov_mac_address': '00-B0-D0-86-AB-F1'})
 
     TEST.baremetalclient_nodes.add(node_1, node_2, node_3, node_4)
-    TEST.baremetal_nodes.add(api.Node(node_1),
-                             api.Node(node_2),
-                             api.Node(node_3),
-                             api.Node(node_4))
+    TEST.baremetal_nodes.add(api.BaremetalNode(node_1),
+                             api.BaremetalNode(node_2),
+                             api.BaremetalNode(node_3),
+                             api.BaremetalNode(node_4))
     TEST.baremetalclient_unracked_nodes.add(node_5)
     TEST.baremetal_unracked_nodes.add(api.Node(node_5))
     TEST.baremetalclient_nodes_all.add(node_1, node_2, node_3, node_4, node_5)
-    TEST.baremetal_nodes_all.add(api.Node(node_1),
-                             api.Node(node_2),
-                             api.Node(node_3),
-                             api.Node(node_4),
-                             api.Node(node_5))
+    TEST.baremetal_nodes_all.add(api.BaremetalNode(node_1),
+                                 api.BaremetalNode(node_2),
+                                 api.BaremetalNode(node_3),
+                                 api.BaremetalNode(node_4),
+                                 api.BaremetalNode(node_5))
