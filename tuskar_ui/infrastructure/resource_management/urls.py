@@ -12,7 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from django import conf
 from django.conf.urls import defaults
+from django.views import generic
 
 from tuskar_ui.infrastructure.resource_management.nodes\
     import urls as node_urls
@@ -34,3 +36,10 @@ urlpatterns = defaults.patterns('',
                                   namespace='resource_classes')),
     defaults.url(r'^nodes/', defaults.include(node_urls, namespace='nodes')),
 )
+
+if conf.settings.DEBUG:
+    urlpatterns += defaults.patterns('',
+        defaults.url(r'^qunit/$',
+            generic.TemplateView.as_view(
+                template_name="infrastructure/qunit.html"),
+                name='qunit_tests'))
