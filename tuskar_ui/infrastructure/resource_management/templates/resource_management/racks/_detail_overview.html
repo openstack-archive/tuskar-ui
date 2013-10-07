@@ -51,8 +51,8 @@
       </dd>
       <dt>{% trans "Class" %}</dt>
       <dd>
-        <a href="{% url 'horizon:infrastructure:resource_management:resource_classes:detail' rack.resource_class.id %}">
-        {{ rack.resource_class.name|default:_("None") }}
+        <a href="{% url 'horizon:infrastructure:resource_management:resource_classes:detail' rack.get_resource_class.id %}">
+        {{ rack.get_resource_class.name|default:_("None") }}
         </a>
       </dd>
       <dt>{% trans "Class Image" %}</dt>
