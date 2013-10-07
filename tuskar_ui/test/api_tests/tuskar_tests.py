@@ -22,6 +22,60 @@ from tuskar_ui.test import helpers as test
 
 class TuskarApiTests(test.APITestCase):
 
+    def test_baremetal_node_get(self):
+        node = self.baremetalclient_nodes.first()
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
+        baremetal.BareMetalNodeManager.get(node.id).AndReturn(node)
+
+        novaclient = self.stub_novaclient()
+        novaclient.servers = self.mox.CreateMockAnything()
+        novaclient.servers.list(True,
+                                {'all_tenants': True,
+                                 'limit': 21}).AndReturn([])
+        self.mox.ReplayAll()
+
+        ret_val = api.BaremetalNode.get(self.request, node.id)
+        self.assertIsInstance(ret_val, api.BaremetalNode)
+
+    def test_baremetal_node_create(self):
+        node = self.baremetalclient_nodes.first()
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'create')
+        baremetal.BareMetalNodeManager.create('node',
+                                              1,
+                                              1024,
+                                              10,
+                                              'aa:bb:cc:dd:ee',
+                                              '0.0.0.0',
+                                              'user',
+                                              'password',
+                                              0).AndReturn(node)
+        self.mox.ReplayAll()
+
+        ret_val = api.BaremetalNode.create(self.request,
+                                           name='node',
+                                           cpus=1,
+                                           memory_mb=1024,
+                                           local_gb=10,
+                                           prov_mac_address='aa:bb:cc:dd:ee',
+                                           pm_address='0.0.0.0',
+                                           pm_user='user',
+                                           pm_password='password',
+                                           terminal_port=0)
+        self.assertIsInstance(ret_val, api.Node)
+
+    def test_baremetal_node_list(self):
+        nodes = self.baremetalclient_nodes_all.list()
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'list')
+        baremetal.BareMetalNodeManager.list().AndReturn(nodes)
+        self.mox.ReplayAll()
+
+        ret_val = api.BaremetalNode.list(self.request)
+        for node in ret_val:
+            self.assertIsInstance(node, api.Node)
+
     def test_node_get(self):
         node = self.baremetalclient_nodes.first()
 
