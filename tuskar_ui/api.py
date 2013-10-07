@@ -320,6 +320,54 @@ class BaremetalNode(Node):
     _attrs = ['id', 'pm_address', 'cpus', 'memory_mb', 'service_host',
               'local_gb', 'pm_user']
 
+    @classmethod
+    def create(cls, request, **kwargs):
+        node = baremetalclient(request).create(
+            kwargs['name'], kwargs['cpus'], kwargs['memory_mb'],
+            kwargs['local_gb'], kwargs['prov_mac_address'],
+            kwargs['pm_address'], kwargs['pm_user'], kwargs['pm_password'],
+            kwargs['terminal_port'])
+        return cls(node)
+
+    @classmethod
+    def get(cls, request, node_id):
+        node = cls(baremetalclient(request).get(node_id))
+        node.request = request
+
+        # FIXME ugly, fix after demo, make abstraction of instance details
+        # this is realy not optimal, but i dont hve time do fix it now
+        instances, more = nova.server_list(
+            request,
+            search_opts={'paginate': True},
+            all_tenants=True)
+
+        instance_details = {}
+        for instance in instances:
+            id = (instance.
+                  _apiresource._info['OS-EXT-SRV-ATTR:hypervisor_hostname'])
+            instance_details[id] = instance
+
+        detail = instance_details.get(node_id)
+        if detail:
+            addresses = detail._apiresource.addresses.get('ctlplane')
+            if addresses:
+                node.ip_address_other = (", "
+                    .join([addr['addr'] for addr in addresses]))
+
+            node.status = detail._apiresource._info['OS-EXT-STS:vm_state']
+            node.power_management = ""
+            if node.pm_user:
+                node.power_management = node.pm_user + "/********"
+        else:
+            node.status = 'unprovisioned'
+
+        return node
+
+    @classmethod
+    def list(cls, request):
+        return [cls(n, request) for n in
+                baremetalclient(request).list()]
+
 
 class Rack(StringIdAPIResourceWrapper):
     """Wrapper for the Rack object  returned by the
