@@ -25,7 +25,7 @@ class FlavorsTests(test.BaseAdminViewTests):
     @test.create_stubs({tuskar.Flavor: ('get',),
                         tuskar.ResourceClass: ('get',)})
     def test_detail_flavor(self):
-        flavor = self.tuskar_flavors.first()
+        flavor = self.tuskar_flavors.list()[1]
         resource_class = self.tuskar_resource_classes.first()
 
         tuskar.ResourceClass.get(mox.IsA(http.HttpRequest),
@@ -48,7 +48,7 @@ class FlavorsTests(test.BaseAdminViewTests):
 
     @test.create_stubs({tuskar.Flavor: ('get',)})
     def test_detail_flavor_exception(self):
-        flavor = self.tuskar_flavors.first()
+        flavor = self.tuskar_flavors.list()[1]
         resource_class = self.tuskar_resource_classes.first()
 
         tuskar.Flavor.get(mox.IsA(http.HttpRequest),
