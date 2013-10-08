@@ -40,5 +40,6 @@ urlpatterns = defaults.patterns('',
 
 if conf.settings.DEBUG:
     urlpatterns += defaults.patterns('',
-        defaults.url(r'^qunit$', defaults.include(test_urls, namespace='tests'))
+        defaults.url(r'^qunit$', defaults.include(test_urls,
+                                                    namespace='tests'))
     )
