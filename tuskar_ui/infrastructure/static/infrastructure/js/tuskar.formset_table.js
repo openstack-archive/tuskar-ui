@@ -54,11 +54,10 @@ tuskar.formset_table = (function () {
         // if there are extra empty rows, add the button for new rows
         if ($('#id_' + prefix + '-TOTAL_FORMS').val() >
                 $('#id_' + prefix + '-INITIAL_FORMS').val()) {
-            table.find('tfoot td').append(
-                '<a href="#" class="btn btn-small pull-right">' +
-                add_label +
-                '</a>'
-            ).click(function () {
+            var button = $('<a href="#" class="btn btn-small pull-right">' +
+                           add_label + '</a>');
+            table.find('tfoot td:last').append(button);
+            button.click(function () {
                 module.add_row(table, prefix, empty_row_html);
             });
         };
