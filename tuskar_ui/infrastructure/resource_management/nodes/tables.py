@@ -17,6 +17,9 @@ from django.utils.translation import ugettext_lazy as _  # noqa
 from horizon import tables
 
 from tuskar_ui import api as tuskar
+from tuskar_ui.infrastructure.resource_management.nodes import forms \
+    as nodes_forms
+import tuskar_ui.tables
 
 
 class DeleteNodes(tables.DeleteAction):
@@ -60,3 +63,32 @@ class UnrackedNodesTable(NodesTable):
         verbose_name = _("Unracked Nodes")
         table_actions = ()
         row_actions = ()
+
+
+class NodesFormsetTable(tuskar_ui.tables.FormsetDataTable):
+    service_host = tables.Column('service_host', verbose_name=_("Name"))
+    mac_address = tables.Column('mac_address', verbose_name=_("MAC Address"))
+
+    cpus = tables.Column('cpus', verbose_name=_("CPUs"))
+    memory_mb = tables.Column('memory_mb', verbose_name=_("Memory (MB)"))
+    local_gb = tables.Column('local_gb', verbose_name=_("Local Disk (GB)"))
+
+    pm_address = tables.Column('pm_address',
+        verbose_name=_("Power Management IP"))
+    pm_user = tables.Column('pm_user', verbose_name=_("Power Management User"))
+    pm_password = tables.Column('pm_password',
+        verbose_name=_("Power Management Password"))
+
+    terminal_port = tables.Column('terminal_port',
+        verbose_name=_("Terminal Port"))
+
+    # This is needed for the formset with can_delete=True
+    DELETE = tables.Column('DELETE', verbose_name=_("Delete"))
+
+    formset_class = nodes_forms.NodeFormset
+
+    class Meta:
+        name = "nodes"
+        verbose_name = _("Nodes")
+        table_actions = ()
+        multi_select = False
