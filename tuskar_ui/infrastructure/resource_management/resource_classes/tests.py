@@ -297,7 +297,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                 'horizon:infrastructure:resource_management:index'))
 
     @test.create_stubs({
-        tuskar.ResourceClass: ('get', 'list_flavors', 'list_racks')
+        tuskar.ResourceClass: ('get', 'list_flavors', 'list_racks', 'nodes')
     })
     def test_detail_get(self):
         resource_class = self.tuskar_resource_classes.first()
@@ -311,6 +311,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         tuskar.ResourceClass.list_flavors = flavors
         tuskar.ResourceClass.list_racks = racks
+        tuskar.ResourceClass.nodes = []
 
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'

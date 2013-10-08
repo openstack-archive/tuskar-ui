@@ -14,7 +14,7 @@
       <dt>{% trans "Management IP" %}</dt>
       <dd>{{ node.pm_address|default:_("None") }}</dd>
       <dt>{% trans "Power Management" %}</dt>
-      <dd>{{ node.rack.power_management|default:_("-") }}</dd>
+      <dd>{{ node.get_rack.power_management|default:_("-") }}</dd>
       <dt>{% trans "Status" %}</dt>
       <dd>{{ node.status|default:_("None") }}</dd>
     </dl>
@@ -24,8 +24,8 @@
     <hr class="header_rule">
     <dl>
       <dt>{% trans "Rack" %}</dt>
-      {% if node.rack %}
-      <dd><a href="{% url 'horizon:infrastructure:resource_management:racks:detail' node.rack.id %}">{{ node.rack.name|default:_("None") }}</a></dd>
+      {% if node.get_rack %}
+      <dd><a href="{% url 'horizon:infrastructure:resource_management:racks:detail' node.rack_id %}">{{ node.get_rack.name|default:_("None") }}</a></dd>
       {% else %}
       <dd>{% trans "None" %}</dd>
       {% endif %}
@@ -170,7 +170,7 @@
       <tr>
         {% for flavor in node.list_flavors %}
           <td class="flavor_usage_label">
-            <a href="{% url 'horizon:infrastructure:resource_management:resource_classes:flavors:detail' node.rack.resource_class.id flavor.id %}">{{ flavor.name }}</a>
+            <a href="{% url 'horizon:infrastructure:resource_management:resource_classes:flavors:detail' node.get_rack.resource_class.id flavor.id %}">{{ flavor.name }}</a>
           </td>
         {% endfor %}
       </tr>
@@ -234,7 +234,7 @@
         <div id="most_contacting_racks"
              class="communication_chart"
              data-chart-type="circles_chart"
-             data-url="{% url 'horizon:infrastructure:resource_management:racks:top_communicating' node.rack.id %}?cond=from"
+             data-url="{% url 'horizon:infrastructure:resource_management:racks:top_communicating' node.rack_id %}?cond=from"
              data-time="now"
              data-size="22">
         </div>
