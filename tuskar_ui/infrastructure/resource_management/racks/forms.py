@@ -20,6 +20,7 @@ from horizon import forms
 from horizon import messages
 
 from tuskar_ui import api as tuskar
+import tuskar_ui.forms
 
 import base64
 import csv
@@ -149,3 +150,50 @@ class UpdateRackStatus(forms.SelfHandlingForm):
             msg = _('Updated rack "%s" status.') % rack.name
             messages.success(request, msg)
             return True
+
+
+class NodeForm(django.forms.Form):
+    id = django.forms.IntegerField(required=False,
+        widget=django.forms.HiddenInput())
+
+    service_host = django.forms.CharField(label=_("Name"), required=True,
+        widget=django.forms.TextInput(attrs={'class': 'input input-mini'}))
+    mac_address = django.forms.CharField(label=_("MAC Address"),
+        widget=django.forms.TextInput(attrs={'class': 'input input-small'}),
+        required=True)
+
+    # Hardware Specifications
+    cpus = django.forms.IntegerField(label=_("CPUs"), required=True,
+        min_value=1, widget=tuskar_ui.forms.NumberInput(attrs={
+            'class': 'input number_input_slim',
+        }))
+    memory_mb = django.forms.IntegerField(label=_("Memory"),
+        required=True, min_value=1, widget=tuskar_ui.forms.NumberInput(attrs={
+            'class': 'input number_input_slim',
+        }))
+    local_gb = django.forms.IntegerField(label=_("Local Disk (GB)"),
+        min_value=1, widget=tuskar_ui.forms.NumberInput(attrs={
+            'class': 'input number_input_slim',
+        }), required=True)
+
+    # Power Management
+    pm_address = django.forms.GenericIPAddressField(
+        widget=django.forms.TextInput(attrs={'class': 'input input-small'}),
+        label=_("Power Management IP"), required=False)
+    pm_user = django.forms.CharField(label=_("Power Management User"),
+        widget=django.forms.TextInput(attrs={'class': 'input input-mini'}),
+        required=False)
+    pm_password = django.forms.CharField(label=_("Power Management Password"),
+        required=False, widget=django.forms.PasswordInput(render_value=False,
+            attrs={'class': 'input input-mini'}))
+
+    # Access
+    terminal_port = django.forms.IntegerField(label=_("Terminal Port"),
+        required=False, min_value=0, max_value=1024,
+        widget=tuskar_ui.forms.NumberInput(attrs={
+            'class': 'input number_input_slim',
+        }))
+
+
+NodeFormset = django.forms.formsets.formset_factory(NodeForm, extra=1,
+    can_delete=True)
