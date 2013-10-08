@@ -42,7 +42,7 @@ class NodeViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({tuskar.Node: ('get', 'running_virtual_machines')})
     def test_detail_node(self):
-        node = self.baremetal_nodes.first()
+        node = self.tuskar_nodes.first()
 
         tuskar.Node.get(mox.IsA(http.HttpRequest),
                         node.id).AndReturn(node)

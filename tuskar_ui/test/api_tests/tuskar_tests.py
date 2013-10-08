@@ -65,6 +65,25 @@ class TuskarApiTests(test.APITestCase):
                                            terminal_port=0)
         self.assertIsInstance(ret_val, api.Node)
 
+    def test_baremetal_node_create_with_empty_pm(self):
+        """
+        Make sure that when pm_address, pm_user and terminal_port are not
+        provided (empty), their values are set to None, as this is required
+        by the baremetal VM.
+        """
+        node = self.baremetalclient_nodes.first()
+
+        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'create')
+        baremetal.BareMetalNodeManager.create('node', 1, 1024, 10,
+            'aa:bb:cc:dd:ee', None, None, '', None).AndReturn(node)
+        self.mox.ReplayAll()
+
+        ret_val = api.BaremetalNode.create(
+            self.request, name='node', cpus=1,
+            memory_mb=1024, local_gb=10, prov_mac_address='aa:bb:cc:dd:ee',
+            pm_address='', pm_user='', pm_password='', terminal_port='')
+        self.assertIsInstance(ret_val, api.Node)
+
     def test_baremetal_node_list(self):
         nodes = self.baremetalclient_nodes_all.list()
 
@@ -77,7 +96,7 @@ class TuskarApiTests(test.APITestCase):
             self.assertIsInstance(node, api.Node)
 
     def test_node_get(self):
-        node = self.baremetalclient_nodes.first()
+        node = self.tuskarclient_nodes.first()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
         baremetal.BareMetalNodeManager.get(node.id).AndReturn(node)
@@ -93,7 +112,7 @@ class TuskarApiTests(test.APITestCase):
         self.assertIsInstance(ret_val, api.Node)
 
     def test_node_create(self):
-        node = self.baremetalclient_nodes.first()
+        node = self.tuskarclient_nodes.first()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'create')
         baremetal.BareMetalNodeManager.create('node', 1, 1024, 10,
@@ -106,26 +125,8 @@ class TuskarApiTests(test.APITestCase):
             terminal_port=0)
         self.assertIsInstance(ret_val, api.Node)
 
-    def test_node_create_with_empty_pm(self):
-        """
-        Make sure that when pm_address, pm_user and terminal_port are not
-        provided (empty), their values are set to None, as this is required
-        by the baremetal VM.
-        """
-        node = self.baremetalclient_nodes.first()
-
-        self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'create')
-        baremetal.BareMetalNodeManager.create('node', 1, 1024, 10,
-            'aa:bb:cc:dd:ee', None, None, '', None).AndReturn(node)
-        self.mox.ReplayAll()
-
-        ret_val = api.Node.create(self.request, name='node', cpus=1,
-            memory_mb=1024, local_gb=10, prov_mac_address='aa:bb:cc:dd:ee',
-            pm_address='', pm_user='', pm_password='', terminal_port='')
-        self.assertIsInstance(ret_val, api.Node)
-
     def test_node_list(self):
-        nodes = self.baremetalclient_nodes_all.list()
+        nodes = self.tuskarclient_nodes_all.list()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'list')
         baremetal.BareMetalNodeManager.list().AndReturn(nodes)
@@ -136,8 +137,8 @@ class TuskarApiTests(test.APITestCase):
             self.assertIsInstance(node, api.Node)
 
     def test_node_list_unracked(self):
-        nodes = self.baremetalclient_nodes.list()
-        all_nodes = self.baremetalclient_nodes_all.list()
+        nodes = self.tuskarclient_nodes.list()
+        all_nodes = self.tuskarclient_nodes_all.list()
         racks = self.tuskarclient_racks.list()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'list')
@@ -165,8 +166,8 @@ class TuskarApiTests(test.APITestCase):
         self.assertEquals(1, len(ret_val))
 
     def test_node_flavors(self):
-        node = self.baremetal_nodes.first()
-        nodes = self.baremetalclient_nodes.list()
+        node = self.tuskar_nodes.first()
+        nodes = self.tuskarclient_nodes.list()
         racks = self.tuskarclient_racks.list()
         rc = self.tuskarclient_resource_classes.first()
         flavors = self.tuskarclient_flavors.list()
@@ -197,8 +198,8 @@ class TuskarApiTests(test.APITestCase):
         self.assertEquals(2, len(ret_val))
 
     def test_node_rack(self):
-        node = self.baremetal_nodes.first()
-        nodes = self.baremetalclient_nodes.list()
+        node = self.tuskar_nodes.first()
+        nodes = self.tuskarclient_nodes.list()
         racks = self.tuskarclient_racks.list()
 
         tuskarclient = self.stub_tuskarclient()
@@ -222,18 +223,18 @@ class TuskarApiTests(test.APITestCase):
         self.assertEquals('1', rack.id)
 
     def test_node_running_instances(self):
-        node = self.baremetal_nodes.first()
+        node = self.tuskar_nodes.first()
 
         self.assertEquals(4, node.running_instances)
 
     def test_node_remaining_capacity(self):
-        node = self.baremetal_nodes.first()
+        node = self.tuskar_nodes.first()
 
         self.assertEquals(96, node.remaining_capacity)
 
     def test_node_is_provisioned(self):
-        node = self.baremetal_nodes.first()
-        nodes = self.baremetalclient_nodes.list()
+        node = self.tuskar_nodes.first()
+        nodes = self.tuskarclient_nodes.list()
         racks = self.tuskarclient_racks.list()
 
         tuskarclient = self.stub_tuskarclient()
