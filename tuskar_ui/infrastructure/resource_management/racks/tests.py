@@ -262,9 +262,12 @@ class RackViewTests(test.BaseAdminViewTests):
         self.assertMessageCount(success=1)
         self.assertMessageCount(error=0)
 
-    @test.create_stubs({tuskar.Rack: ('get', 'list_nodes', 'list_flavors')})
+    @test.create_stubs({
+        tuskar.Rack: ('get', 'list_nodes', 'list_flavors',
+                      'get_resource_class')})
     def test_detail_rack(self):
         rack = self.tuskar_racks.first()
+        resource_class = self.tuskar_resource_classes.first()
 
         tuskar.Rack.get(mox.IsA(http.HttpRequest),
                         rack.id).AndReturn(rack)
@@ -273,6 +276,7 @@ class RackViewTests(test.BaseAdminViewTests):
 
         tuskar.Rack.list_nodes = []
         tuskar.Rack.list_flavors = []
+        tuskar.Rack.get_resource_class = resource_class
 
         url = urlresolvers.reverse('horizon:infrastructure:'
                                    'resource_management:racks:detail',
