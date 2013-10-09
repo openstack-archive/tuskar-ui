@@ -1,0 +1,33 @@
+{% extends "infrastructure/resource_management/resource_classes/_table_step.html" %}
+{% block table_step %}
+  <div id="flavors-table-block">
+    {{ block.super }}
+  </div>
+  <script>
+    (window.$ || window.addHorizonLoadEvent)(function () {
+      'use strict';
+
+      var $select = $('select#id_service_type'),
+          $table_block = $('#flavors-table-block'),
+          $tab = $(
+            'a[data-target="#create_resource_class__' +
+            'resourceclassflavorsaction"]'
+          ).parent('li');
+
+      $select.change(function () {
+        if ($select.val() == 'compute') {
+          $table_block.show();
+          $tab.show(300);
+        } else {
+          $table_block.hide();
+          $tab.hide(300);
+        };
+      });
+
+      if ($select.val() != 'compute') {
+          $table_block.hide();
+          $tab.hide();
+      };
+    });
+  </script>
+{% endblock %}
