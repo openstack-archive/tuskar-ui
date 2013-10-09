@@ -154,10 +154,6 @@ class CreateRacks(tuskar_ui.workflows.TableStep):
                     'resource_classes/_racks_step.html'
 
     def contribute(self, data, context):
-        request = self.workflow.request
-        context["racks_object_ids"] =\
-            request.POST.getlist("racks_object_ids")
-
         context.update(data)
         return context
 
