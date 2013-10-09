@@ -156,7 +156,7 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         node.request = self.request
-        self.assertIsInstance(node.get_rack, api.Rack)
+        self.assertIsInstance(node.rack, api.Rack)
         self.assertEquals('1', node.rack_id)
 
     def test_node_nova_baremetal_node(self):
@@ -543,7 +543,7 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.resource_classes.get(rc.id).AndReturn(rc)
         self.mox.ReplayAll()
 
-        self.assertIsInstance(rack.get_resource_class, api.ResourceClass)
+        self.assertIsInstance(rack.resource_class, api.ResourceClass)
         self.assertEquals(rack.resource_class_id, '1')
 
     def test_rack_capacities(self):

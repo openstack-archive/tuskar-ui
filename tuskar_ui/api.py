@@ -273,7 +273,7 @@ class Node(StringIdAPIResourceWrapper):
     Wrapper for the Node object  returned by the
     dummy model.
     """
-    _attrs = ['id', 'rack', 'nova_baremetal_node_id']
+    _attrs = ['id', 'nova_baremetal_node_id']
 
     @classmethod
     def get(cls, request, node_id):
@@ -286,18 +286,18 @@ class Node(StringIdAPIResourceWrapper):
         return [cls(n, request) for n in (tuskarclient(request).nodes.list())]
 
     @property
-    def get_rack(self):
+    def rack(self):
         if not hasattr(self, '_rack'):
-            if self.rack:
-                self._rack = Rack.get(self.request, self.rack['id'])
+            if self.rack_id:
+                self._rack = Rack.get(self.request, self.rack_id)
             else:
                 self._rack = None
         return self._rack
 
     @property
     def rack_id(self):
-        if self.rack:
-            return unicode(self.rack['id'])
+        if self._apiresource.rack:
+            return unicode(self._apiresource.rack['id'])
         else:
             return None
 
@@ -348,9 +348,9 @@ class Node(StringIdAPIResourceWrapper):
             # FIXME: just a mock of used instances, add real values
             used_instances = 0
 
-            if not self.rack or not self.get_rack.get_resource_class:
+            if not self.rack or not self.rack.resource_class:
                 return []
-            resource_class = self.get_rack.get_resource_class
+            resource_class = self.rack.resource_class
 
             added_flavors = tuskarclient(self.request).flavors\
                                                       .list(resource_class.id)
@@ -384,7 +384,7 @@ class Rack(StringIdAPIResourceWrapper):
     dummy model.
     """
     _attrs = ['id', 'name', 'location', 'subnet', 'nodes', 'state',
-              'capacities', 'resource_class']
+              'capacities']
 
     @classmethod
     def create(cls, request, **kwargs):
@@ -453,17 +453,17 @@ class Rack(StringIdAPIResourceWrapper):
 
     @property
     def resource_class_id(self):
-        rclass = self.resource_class
+        rclass = self._apiresource.resource_class
         resource_class_id = rclass['id'] if rclass else None
         return resource_class_id
 
     @property
-    def get_resource_class(self):
+    def resource_class(self):
         if not hasattr(self, '_resource_class'):
-            rclass = self.resource_class
-            if rclass:
-                self._resource_class = ResourceClass.get(self.request,
-                                                         rclass['id'])
+            if self.resource_class_id:
+                self._resource_class = ResourceClass.get(
+                    self.request,
+                    self.resource_class_id)
             else:
                 self._resource_class = None
         return self._resource_class
@@ -482,7 +482,7 @@ class Rack(StringIdAPIResourceWrapper):
         if not hasattr(self, '_vm_capacity'):
             try:
                 value = max([flavor.max_vms for flavor in
-                             self.get_resource_class.list_flavors])
+                             self.resource_class.list_flavors])
             except Exception:
                 value = None
             self._vm_capacity = Capacity({'name': "VM Capacity",
@@ -508,10 +508,10 @@ class Rack(StringIdAPIResourceWrapper):
             # FIXME just a mock of used instances, add real values
             used_instances = 0
 
-            if not self.get_resource_class:
+            if not self.resource_class:
                 return []
             added_flavors = tuskarclient(self.request).flavors\
-                                .list(self.get_resource_class.id)
+                                .list(self.resource_class_id)
             self._flavors = []
             if added_flavors:
                 for f in added_flavors:
