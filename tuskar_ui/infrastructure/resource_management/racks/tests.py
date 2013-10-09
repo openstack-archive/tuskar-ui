@@ -71,7 +71,7 @@ class RackViewTests(test.BaseAdminViewTests):
             resource_class_id=u'1',
             location='Tokyo',
             subnet='1.2.3.4',
-            nodes=[{'id': '1'}]).AndReturn(None)
+            nodes=[{'id': '11'}]).AndReturn(None)
         tuskar.ResourceClass.list(
             mox.IsA(http.request.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -262,21 +262,21 @@ class RackViewTests(test.BaseAdminViewTests):
         self.assertMessageCount(success=1)
         self.assertMessageCount(error=0)
 
-    @test.create_stubs({
-        tuskar.Rack: ('get', 'list_nodes', 'list_flavors',
-                      'get_resource_class')})
+    @test.create_stubs({tuskar.Rack: ('get', 'list_nodes', 'list_flavors'),
+                        tuskar.ResourceClass: ('get',)})
     def test_detail_rack(self):
         rack = self.tuskar_racks.first()
+        rack.request = self.request
         resource_class = self.tuskar_resource_classes.first()
 
         tuskar.Rack.get(mox.IsA(http.HttpRequest),
                         rack.id).AndReturn(rack)
-
+        tuskar.ResourceClass.get(mox.IsA(http.HttpRequest),
+                                 resource_class.id).AndReturn(resource_class)
         self.mox.ReplayAll()
 
         tuskar.Rack.list_nodes = []
         tuskar.Rack.list_flavors = []
-        tuskar.Rack.get_resource_class = resource_class
 
         url = urlresolvers.reverse('horizon:infrastructure:'
                                    'resource_management:racks:detail',

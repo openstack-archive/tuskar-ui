@@ -12,8 +12,8 @@
     <span class="separator"></span>
     <a href="{% url 'horizon:infrastructure:resource_management:index' %}?tab=resource_management_tabs__racks_tab" >Racks</a>
     <span class="separator"></span>
-    {% if node.rack %}
-      <a href="{% url 'horizon:infrastructure:resource_management:racks:detail' node.rack.id %}">{{ node.rack.name }}</a>
+    {% if node.get_rack %}
+      <a href="{% url 'horizon:infrastructure:resource_management:racks:detail' node.rack_id %}">{{ node.get_rack.name }}</a>
     {% else %}
       <a href="{% url 'horizon:infrastructure:resource_management:nodes:unracked' %}" >Unracked Nodes</a>
     {% endif %}

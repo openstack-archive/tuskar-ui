@@ -85,7 +85,7 @@ class RacksTab(ProvisioningInfoMixin, tabs.TableTab):
     def get_context_data(self, request):
         context = super(RacksTab, self).get_context_data(request)
         try:
-            context["nodes"] = tuskar.Node.list_unracked(self.request)
+            context["nodes"] = tuskar.BaremetalNode.list_unracked(self.request)
         except Exception:
             context["nodes"] = []
             exceptions.handle(request,

@@ -16,6 +16,7 @@ from openstack_dashboard.test.test_data import utils as test_data_utils
 
 from novaclient.v1_1.contrib import baremetal
 from tuskarclient.v1 import flavors
+from tuskarclient.v1 import nodes
 from tuskarclient.v1 import racks
 from tuskarclient.v1 import resource_classes
 
@@ -129,42 +130,36 @@ def data(TEST):
     # Nodes
     TEST.tuskarclient_nodes = test_data_utils.TestDataContainer()
     TEST.tuskar_nodes = test_data_utils.TestDataContainer()
-    # FIXME this will be removed once Node/BaremetalNode separation is complete
-    TEST.tuskarclient_nodes_all = test_data_utils.TestDataContainer()
 
-    tuskar_node_1 = baremetal.BareMetalNode(
-        baremetal.BareMetalNodeManager(None),
+    tuskar_node_1 = nodes.Node(
+        nodes.NodeManager(None),
         {'id': '1',
-         'name': 'node1',
-         'prov_mac_address': '00-B0-D0-86-AB-F7'})
-    tuskar_node_2 = baremetal.BareMetalNode(
-        baremetal.BareMetalNodeManager(None),
+         'nova_baremetal_node_id': '11',
+         'rack': {"id": "1"}})
+    tuskar_node_2 = nodes.Node(
+        nodes.NodeManager(None),
         {'id': '2',
-         'name': 'node2',
-         'prov_mac_address': '00-B0-D0-86-AB-F8'})
-    tuskar_node_3 = baremetal.BareMetalNode(
-        baremetal.BareMetalNodeManager(None),
+         'nova_baremetal_node_id': '12',
+         'rack': {"id": "1"}})
+    tuskar_node_3 = nodes.Node(
+        nodes.NodeManager(None),
         {'id': '3',
-         'name': 'node3',
-         'prov_mac_address': '00-B0-D0-86-AB-F9'})
-    tuskar_node_4 = baremetal.BareMetalNode(
-        baremetal.BareMetalNodeManager(None),
+         'nova_baremetal_node_id': '13',
+         'rack': {"id": "1"}})
+    tuskar_node_4 = nodes.Node(
+        nodes.NodeManager(None),
         {'id': '4',
-         'name': 'node4',
-         'prov_mac_address': '00-B0-D0-86-AB-F0'})
-    tuskar_node_5 = baremetal.BareMetalNode(
-        baremetal.BareMetalNodeManager(None),
-        {'id': '5',
-         'name': 'node5',
-         'prov_mac_address': '00-B0-D0-86-AB-F1'})
+         'nova_baremetal_node_id': '14',
+         'rack': {"id": "1"}})
 
-    TEST.tuskarclient_nodes.add(tuskar_node_1, tuskar_node_2,
-                                tuskar_node_3, tuskar_node_4)
-    TEST.tuskarclient_nodes_all.add(tuskar_node_1, tuskar_node_2,
-                                    tuskar_node_3, tuskar_node_4,
-                                    tuskar_node_5)
-    TEST.tuskar_nodes.add(api.Node(tuskar_node_1), api.Node(tuskar_node_2),
-                          api.Node(tuskar_node_3), api.Node(tuskar_node_4))
+    TEST.tuskarclient_nodes.add(tuskar_node_1,
+                                tuskar_node_2,
+                                tuskar_node_3,
+                                tuskar_node_4)
+    TEST.tuskar_nodes.add(api.Node(tuskar_node_1),
+                          api.Node(tuskar_node_2),
+                          api.Node(tuskar_node_3),
+                          api.Node(tuskar_node_4))
 
     TEST.baremetalclient_nodes = test_data_utils.TestDataContainer()
     TEST.baremetal_nodes = test_data_utils.TestDataContainer()
@@ -175,27 +170,27 @@ def data(TEST):
 
     node_1 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
-        {'id': '1',
+        {'id': '11',
          'name': 'node1',
          'prov_mac_address': '00-B0-D0-86-AB-F7'})
     node_2 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
-        {'id': '2',
+        {'id': '12',
          'name': 'node2',
          'prov_mac_address': '00-B0-D0-86-AB-F8'})
     node_3 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
-        {'id': '3',
+        {'id': '13',
          'name': 'node3',
          'prov_mac_address': '00-B0-D0-86-AB-F9'})
     node_4 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
-        {'id': '4',
+        {'id': '14',
          'name': 'node4',
          'prov_mac_address': '00-B0-D0-86-AB-F0'})
     node_5 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
-        {'id': '5',
+        {'id': '15',
          'name': 'node5',
          'prov_mac_address': '00-B0-D0-86-AB-F1'})
 
