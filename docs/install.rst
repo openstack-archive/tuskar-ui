@@ -20,7 +20,7 @@ Installation prerequisites are:
    machine as tuskar-ui, but it must be network accessible.
 
 You may find
-`the Tuskar install guide <https://github.com/stackforge/tuskar/blob/master/INSTALL.rst>`_
+`the Tuskar install guide <https://github.com/openstack/tuskar/blob/master/INSTALL.rst>`_
 helpful.
 
 For baremetal provisioning, you will want a Nova Baremetal driver
@@ -28,7 +28,7 @@ installed and registered in the Keystone services catalog. (You can
 `read more about setting up Nova Baremetal here <https://wiki.openstack.org/wiki/Baremetal>`_.)
 
 If you are using Devstack to run OpenStack, you can use
-`Devstack Baremetal configuration <https://github.com/stackforge/tuskar-ui/blob/master/docs/devstack_baremetal.rst>`_.
+`Devstack Baremetal configuration <https://github.com/openstack/tuskar-ui/blob/master/docs/devstack_baremetal.rst>`_.
 
 Installing the packages
 -----------------------
@@ -62,7 +62,7 @@ Begin by cloning the horizon and tuskar-ui repositories:
 ::
 
     git clone git://github.com/openstack/horizon.git
-    git clone git://github.com/stackforge/tuskar-ui.git
+    git clone git://github.com/openstack/tuskar-ui.git
 
 Go into horizon and create a symlink to the tuskar-ui code:
 
@@ -137,7 +137,7 @@ tuskar-ui introduces one additional dependency - python-tuskarclient:
 
 ::
 
-    pip install git+http://github.com/stackforge/python-tuskarclient.git
+    pip install git+http://github.com/openstack/python-tuskarclient.git
 
 Starting the app
 ----------------

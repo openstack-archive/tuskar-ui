@@ -2,7 +2,7 @@
 Tuskar-UI
 =========
 
-Tuskar-UI is a user interface for `Tuskar <https://github.com/stackforge/tuskar>`_, a management API for OpenStack deployments.  It is a plugin for `OpenStack Horizon <https://wiki.openstack.org/wiki/Horizon>`_.
+Tuskar-UI is a user interface for `Tuskar <https://github.com/openstack/tuskar>`_, a management API for OpenStack deployments.  It is a plugin for `OpenStack Horizon <https://wiki.openstack.org/wiki/Horizon>`_.
 
 High-Level Overview
 -------------------
@@ -18,16 +18,16 @@ Developer Information
 Installation Guide
 ~~~~~~~~~~~~~~~~~~
 
-Follow the `Installation Guide <https://github.com/stackforge/tuskar-ui/blob/master/docs/install.rst>`_ to install Tuskar-UI.
+Follow the `Installation Guide <https://github.com/openstack/tuskar-ui/blob/master/docs/install.rst>`_ to install Tuskar-UI.
 
 Contributing
 ~~~~~~~~~~~~
 
-We've moved the code to `stackforge <https://github.com/stackforge>`__
+We've moved the code to `openstack <https://github.com/openstack>`__
 to be more familiar to the OpenStack developers. Please go there if you
 want to check it out:
 
-    git clone https://github.com/stackforge/tuskar-ui.git
+    git clone https://github.com/openstack/tuskar-ui.git
 
 The list of bugs and blueprints is on Launchpad:
 
@@ -35,14 +35,14 @@ The list of bugs and blueprints is on Launchpad:
 
 We use OpenStack's Gerrit for the code contributions:
 
-`<https://review.openstack.org/#/q/status:open+project:stackforge/tuskar-ui,n,z>`__
+`<https://review.openstack.org/#/q/status:open+project:openstack/tuskar-ui,n,z>`__
 
 and we follow the `OpenStack Gerrit Workflow <https://wiki.openstack.org/wiki/Gerrit_Workflow>`__.
 
 If you're interested in the code, here are some key places to start:
 
-* `tuskar_ui/api.py <https://github.com/stackforge/tuskar-ui/blob/master/tuskar_ui/api.py>`_ - This file contains all the API calls made to the Tuskar API (through python-tuskarclient).
-* `tuskar_ui/infrastructure <https://github.com/stackforge/tuskar-ui/tree/master/tuskar_ui/infrastructure>`_ - The Tuskar UI code is contained within this directory.  Up to this point, UI development has been focused within the resource_management/ subdirectory.
+* `tuskar_ui/api.py <https://github.com/openstack/tuskar-ui/blob/master/tuskar_ui/api.py>`_ - This file contains all the API calls made to the Tuskar API (through python-tuskarclient).
+* `tuskar_ui/infrastructure <https://github.com/openstack/tuskar-ui/tree/master/tuskar_ui/infrastructure>`_ - The Tuskar UI code is contained within this directory.  Up to this point, UI development has been focused within the resource_management/ subdirectory.
 
 Future Work
 -----------
