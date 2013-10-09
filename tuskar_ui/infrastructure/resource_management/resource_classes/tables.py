@@ -154,7 +154,7 @@ class UpdateFlavorsClass(tables.LinkAction):
             urlresolvers.reverse(
                 url,
                 args=(self.table.kwargs.get('resource_class_id'),)),
-            resource_classes.workflows.ResourceClassInfoAndFlavorsAction.slug)
+            resource_classes.workflows.ResourceClassFlavorsAction.slug)
 
 
 class FlavorsTable(tables.DataTable):
