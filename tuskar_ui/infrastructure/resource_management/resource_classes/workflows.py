@@ -1,4 +1,3 @@
-
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -29,7 +28,7 @@ from tuskar_ui.infrastructure.resource_management.resource_classes\
 import tuskar_ui.workflows
 
 
-class ResourceClassInfoAndFlavorsAction(workflows.Action):
+class ResourceClassInfoAction(workflows.Action):
     name = forms.CharField(max_length=255,
                            label=_("Class Name"),
                            help_text="",
@@ -57,20 +56,18 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
     )
 
     def __init__(self, *args, **kwargs):
-        super(ResourceClassInfoAndFlavorsAction,
-                self).__init__(*args, **kwargs)
+        super(ResourceClassInfoAction, self).__init__(*args, **kwargs)
         try:
             images, more = glance.image_list_detailed(self.request)
         except Exception:
             exceptions.handle(self.request,
-                              _('Unable to retrieve image list.'))
+                _('Unable to retrieve image list.'))
         else:
             self.fields['image_id'].choices = [
                 (image.id, image.name) for image in images]
 
     def clean(self):
-        cleaned_data = super(ResourceClassInfoAndFlavorsAction,
-                             self).clean()
+        cleaned_data = super(ResourceClassInfoAction, self).clean()
 
         name = cleaned_data.get('name')
         resource_class_id = self.initial.get('resource_class_id', None)
@@ -89,15 +86,28 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                       ' another resource class.')
                     % name
                 )
-        table = self.initial.get('_tables', {}).get('flavors')
-        if table:
-            formset = table.get_formset()
+        return cleaned_data
+
+    class Meta:
+        name = _("Class Settings")
+        help_text = _("From here you can fill in the class settings.")
+
+
+class CreateResourceClassInfo(workflows.Step):
+    action_class = ResourceClassInfoAction
+    contributes = ("name", "service_type", "image_id")
+
+
+class ResourceClassFlavorsAction(workflows.Action):
+    def clean(self):
+        cleaned_data = super(ResourceClassFlavorsAction, self).clean()
+        formset = self.initial.get('_formsets', {}).get('flavors')
+        if formset:
             if formset.is_valid():
                 cleaned_data['flavors'] = [form.cleaned_data
                                            for form in formset
                                            if form.cleaned_data
-                                           and not
-                                           form.cleaned_data.get('DELETE')]
+                                           and not form.cleaned_data['DELETE']]
             else:
                 raise forms.ValidationError(
                     _('Errors in the flavors list.'),
@@ -105,18 +115,17 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
         return cleaned_data
 
     class Meta:
-        name = _("Class Settings")
-        help_text = _("From here you can fill the class "
-                      "settings and add flavors to class.")
+        name = _("Flavors")
+        help_text = _("From here you can add flavors to the class.")
 
 
-class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.TableStep):
+class CreateResourceClassFlavors(tuskar_ui.workflows.TableStep):
     table_classes = (tables.FlavorsFormsetTable,)
 
-    action_class = ResourceClassInfoAndFlavorsAction
-    template_name = 'infrastructure/resource_management/resource_classes/'\
-                    '_resource_class_info_and_flavors_step.html'
-    contributes = ("name", "service_type", "image_id", "flavors")
+    action_class = ResourceClassFlavorsAction
+    template_name = ('infrastructure/resource_management/resource_classes/'
+        '_flavors_step.html')
+    contributes = ("flavors",)
 
     def get_flavors_data(self):
         try:
@@ -162,8 +171,8 @@ class CreateRacks(tuskar_ui.workflows.TableStep):
 
     action_class = RacksAction
     contributes = ("racks_object_ids")
-    template_name = 'infrastructure/resource_management/'\
-                    'resource_classes/_racks_step.html'
+    template_name = ('infrastructure/resource_management/resource_classes/'
+        '_table_step.html')
 
     def contribute(self, data, context):
         context.update(data)
@@ -239,7 +248,7 @@ class ResourceClassWorkflowMixin:
 
 
 class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
-    default_steps = (CreateResourceClassInfoAndFlavors,
+    default_steps = (CreateResourceClassInfo, CreateResourceClassFlavors,
                      CreateRacks)
 
     slug = "create_resource_class"
@@ -273,7 +282,11 @@ class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
         return True
 
 
-class UpdateResourceClassInfoAndFlavors(CreateResourceClassInfoAndFlavors):
+class UpdateResourceClassInfo(CreateResourceClassInfo):
+    depends_on = ("resource_class_id",)
+
+
+class UpdateResourceClassFlavors(CreateResourceClassFlavors):
     depends_on = ("resource_class_id",)
 
 
@@ -282,7 +295,7 @@ class UpdateRacks(CreateRacks):
 
 
 class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
-    default_steps = (UpdateResourceClassInfoAndFlavors,
+    default_steps = (UpdateResourceClassInfo, UpdateResourceClassFlavors,
                      UpdateRacks)
 
     slug = "update_resource_class"
@@ -327,21 +340,21 @@ class DetailUpdateWorkflow(UpdateResourceClass):
                                  args=(self.context["resource_class_id"])))
 
 
-class UpdateRacksWorkflow(UpdateResourceClass):
-    def get_index_url(self):
-        """This url is used both as success and failure url"""
-        url = "horizon:infrastructure:resource_management:resource_classes:"\
-              "detail"
-        return "%s?tab=resource_class_details__racks" % (
-            urlresolvers.reverse(url,
-                                 args=(self.context["resource_class_id"])))
-
-
 class UpdateFlavorsWorkflow(UpdateResourceClass):
     def get_index_url(self):
         """This url is used both as success and failure url"""
         url = "horizon:infrastructure:resource_management:resource_classes:"\
               "detail"
         return "%s?tab=resource_class_details__flavors" % (
+            urlresolvers.reverse(url,
+                                 args=(self.context["resource_class_id"])))
+
+
+class UpdateRacksWorkflow(UpdateResourceClass):
+    def get_index_url(self):
+        """This url is used both as success and failure url"""
+        url = "horizon:infrastructure:resource_management:resource_classes:"\
+              "detail"
+        return "%s?tab=resource_class_details__racks" % (
             urlresolvers.reverse(url,
                                  args=(self.context["resource_class_id"])))
