@@ -1,0 +1,9 @@
+Verified+2: Jenkins
+Approved+1: Imre Farkas <ifarkas@redhat.com>
+Code-Review+2: Imre Farkas <ifarkas@redhat.com>
+Code-Review+2: Radomir Dopieralski <openstack@sheep.art.pl>
+Submitted-by: Jenkins
+Submitted-at: Wed, 09 Oct 2013 14:12:25 +0000
+Reviewed-on: https://review.openstack.org/50644
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
