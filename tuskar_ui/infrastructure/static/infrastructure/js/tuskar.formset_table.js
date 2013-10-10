@@ -52,27 +52,35 @@ tuskar.formset_table = (function () {
         module.replace_delete(table);
 
         // if there are extra empty rows, add the button for new rows
-        if ($('#id_' + prefix + '-TOTAL_FORMS').val() >
-                $('#id_' + prefix + '-INITIAL_FORMS').val()) {
-            table.find('tfoot td').append(
-                '<a href="#" class="btn btn-small pull-right">' +
-                add_label +
-                '</a>'
-            ).click(function () {
+        if (add_label) {
+            var button = $('<a href="#" class="btn btn-small pull-right">' +
+                add_label + '</a>');
+            table.find('tfoot td').append(button);
+            button.click(function () {
                 module.add_row(table, prefix, empty_row_html);
             });
         };
 
-        // if the formset is not empty, and is not being redisplayed,
-        // delete the empty extra row from the end
+        // if the formset is not empty and has no errors,
+        // delete the empty extra rows from the end
+        var initial_forms = +$('#id_' + prefix + '-INITIAL_FORMS').val();
+        var total_forms = +$('#id_' + prefix + '-TOTAL_FORMS').val();
+
         if (table.find('tbody tr').length > 1 &&
-                $('#id_' + prefix + '-TOTAL_FORMS').val() >
-                    $('#id_' + prefix + '-INITIAL_FORMS').val()) {
-            table.find('tbody tr:last').remove();
+            table.find('tbody td.error').length == 0 &&
+            total_forms > initial_forms) {
+            table.find('tbody tr').each(function (index) {
+                if (index >= initial_forms) {
+                    $(this).remove();
+                };
+            });
             module.reenumerate_rows(table, prefix);
             $('#id_' + prefix + '-INITIAL_FORMS').val(
                 $('#id_' + prefix + '-TOTAL_FORMS').val());
         };
+
+        // enable tooltips
+        table.find('td.error[title]').tooltip();
     };
 
     return module;
