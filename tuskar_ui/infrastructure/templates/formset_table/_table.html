@@ -31,7 +31,11 @@
         // prepare the js-enabled parts of the formset data table
         var prefix = '{{ table.name|escapejs }}';
         var empty_row_html = '{% filter escapejs %}{% include "formset_table/_row.html" with row=table.get_empty_row %}{% endfilter %}';
+        {% if table.formset_class.extra %}
         var add_label = '{% filter escapejs %}{% trans "Add a row" %}{% endfilter %}';
+        {% else %}
+        var add_label = '';
+        {% endif %}
 
         tuskar.formset_table.init(prefix, empty_row_html, add_label);
     });

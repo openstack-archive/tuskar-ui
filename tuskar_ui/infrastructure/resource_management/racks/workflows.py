@@ -23,55 +23,9 @@ from horizon import workflows
 import requests
 
 from tuskar_ui import api as tuskar
-
-
-class NodeCreateAction(workflows.Action):
-    # node_macs = forms.CharField(label=_("MAC Addresses"),
-    #     widget=forms.Textarea(attrs={'rows': 12, 'cols': 20}),
-    #     required=False)
-
-    node_name = forms.CharField(label="Name", required=True)
-    prov_mac_address = forms.CharField(label=("MAC Address"),
-                                  required=True)
-
-    # Hardware Specifications
-    cpus = forms.CharField(label="CPUs", required=True)
-    memory_mb = forms.CharField(label="Memory", required=True)
-    local_gb = forms.CharField(label="Local Disk (GB)", required=True)
-
-    # Power Management
-    pm_address = forms.CharField(label="Power Management IP", required=False)
-    pm_user = forms.CharField(label="Power Management User", required=False)
-    pm_password = forms.CharField(label="Power Management Password",
-                                      required=False,
-                                      widget=forms.PasswordInput(
-                                          render_value=False))
-
-    # Access
-    terminal_port = forms.CharField(label="Terminal Port", required=False)
-
-    class Meta:
-        name = _("Nodes")
-
-
-# mawagner FIXME - For the demo, all we can really do is edit the one
-# associated node. That's very much _not_ what this form is actually
-# about, though.
-class NodeEditAction(NodeCreateAction):
-
-    class Meta:
-        name = _("Nodes")
-
-    # FIXME: mawagner - This is all for debugging. The idea is to fetch
-    # the first node and display it in the form; the latter part needs
-    # implementation. This also needs error handling; right now for testing
-    # I want to let it fail, but don't commit like that! :)
-    def __init__(self, request, *args, **kwargs):
-        super(NodeEditAction, self).__init__(request, *args, **kwargs)
-        # TODO(Resolve node edits)
-        #rack_id = self.initial['rack_id']
-        #rack = tuskar.Rack.get(request, rack_id)
-        #nodes = rack.list_nodes
+from tuskar_ui.infrastructure.resource_management.nodes import tables \
+    as nodes_tables
+import tuskar_ui.workflows
 
 
 class RackCreateInfoAction(workflows.Action):
@@ -82,7 +36,6 @@ class RackCreateInfoAction(workflows.Action):
                                 'contain letters, numbers, underscores, '
                                 'periods and hyphens.')})
     location = forms.CharField(label=_("Location"))
-    # see GenericIPAddressField, but not for subnets:
     subnet = forms.CharField(label=_("IP Subnet"))
     resource_class_id = forms.ChoiceField(label=_("Resource Class"))
 
@@ -137,21 +90,52 @@ class EditRackInfo(CreateRackInfo):
     depends_on = ('rack_id',)
 
 
-class CreateNodes(workflows.Step):
-    action_class = NodeCreateAction
-    contributes = ('node_name', 'prov_mac_address', 'cpus', 'memory_mb',
-                   'local_gb', 'pm_address', 'pm_user', 'pm_password',
-                   'terminal_port')
+class NodeCreateAction(workflows.Action):
+    class Meta:
+        name = _("Create Nodes")
+        help_text = _("Here you can create the nodes for this rack.")
 
-    def get_nodes_data():
-        pass
+    def clean(self):
+        cleaned_data = super(NodeCreateAction, self).clean()
+        table = self.initial.get('_tables', {}).get('nodes')
+        if table:
+            formset = table.get_formset()
+            if formset.is_valid():
+                cleaned_data['nodes'] = [form.cleaned_data
+                                           for form in formset
+                                           if form.cleaned_data
+                                           and not
+                                           form.cleaned_data.get('DELETE')]
+            else:
+                raise forms.ValidationError(_("Errors in the nodes list."))
+        return cleaned_data
+
+
+class NodeEditAction(NodeCreateAction):
+    class Meta:
+        name = _("Edit Nodes")
+        help_text = _("Here you can edit the nodes for this rack.")
+
+
+class CreateNodes(tuskar_ui.workflows.TableStep):
+    action_class = NodeCreateAction
+    contributes = ('nodes',)
+    table_classes = (nodes_tables.NodesFormsetTable,)
+    template_name = (
+        'infrastructure/resource_management/racks/_rack_nodes_step.html')
+
+    def get_nodes_data(self):
+        return []
 
 
 class EditNodes(CreateNodes):
     action_class = NodeEditAction
     depends_on = ('rack_id',)
-    contributes = ('node_macs',)
-    # help_text = _("Editing nodes via textbox is not presently supported.")
+
+    def get_nodes_data(self):
+        rack_id = self.workflow.context['rack_id']
+        rack = tuskar.Rack.get(self.workflow.request, rack_id)
+        return rack.list_nodes
 
 
 class CreateRack(workflows.Workflow):
@@ -162,31 +146,70 @@ class CreateRack(workflows.Workflow):
     success_message = _("Rack created.")
     failure_message = _("Unable to create rack.")
 
-    def handle(self, request, data):
-        try:
-            if data['node_name'] is not None:
-                node = tuskar.BaremetalNode.create(
-                    request,
-                    name=data['node_name'],
-                    cpus=data['cpus'],
-                    memory_mb=data['memory_mb'],
-                    local_gb=data['local_gb'],
-                    prov_mac_address=data['prov_mac_address'],
-                    pm_address=data['pm_address'],
-                    pm_user=data['pm_user'],
-                    pm_password=data['pm_password'],
-                    terminal_port=data['terminal_port'])
-            if node:
-                node_id = node.id
-            else:
-                node_id = None
+    # FIXME active tabs coflict
+    # When on page with tabs, the workflow with more steps is used,
+    # there is a conflict of active tabs and it always shows the
+    # first tab after an action. So I explicitly specify to what
+    # tab it should redirect after action, until the coflict will
+    # be fixed in Horizon.
+    def get_index_url(self):
+        """This url is used both as success and failure url"""
+        return "%s?tab=resource_management_tabs__racks_tab" %\
+            urlresolvers.reverse('horizon:infrastructure:resource_management:'
+                                        'index')
 
-            # Then, register the Rack, including the node if it exists
+    def create_or_update_node(self, node_data):
+        """Creates (if id=='') or updates (otherwise) a node."""
+        try:
+            if node_data['id'] not in ('', None):
+                node_id = unicode(node_data['id'])
+                # TODO(rdopieralski) there is currently no way to update
+                # a baremetal node
+                #
+                # tuskar.BaremetalNode.update(
+                #    self.request,
+                #    node_id=node_id,
+                #    name=node_data['service_host'],
+                #    cpus=node_data['cpus'],
+                #    memory_mb=node_data['memory_mb'],
+                #    local_gb=node_data['local_gb'],
+                #    prov_mac_address=node_data['mac_address'],
+                #    pm_address=node_data['pm_address'],
+                #    pm_user=node_data['pm_user'],
+                #    pm_password=node_data['pm_password'],
+                #    terminal_port=node_data['terminal_port'])
+                return node_id
+            else:
+                node = tuskar.BaremetalNode.create(
+                    self.request,
+                    name=node_data['service_host'],
+                    cpus=node_data['cpus'],
+                    memory_mb=node_data['memory_mb'],
+                    local_gb=node_data['local_gb'],
+                    prov_mac_address=node_data['mac_address'],
+                    pm_address=node_data['pm_address'],
+                    pm_user=node_data['pm_user'],
+                    pm_password=node_data['pm_password'],
+                    terminal_port=node_data['terminal_port'])
+                return node.id
+        except Exception:
+            exceptions.handle(self.request, _("Unable to update node."))
+            return None
+
+
+    def handle(self, request, data):
+        # First, create and/or update nodes
+        node_ids = []
+        for node_data in data['nodes']:
+            node_id = self.create_or_update_node(node_data)
+            if node_id is not None:
+                node_ids.append({'id': node_id})
+        try:
+            # Then, register the Rack, including the nodes
             tuskar.Rack.create(request, name=data['name'],
-                                   resource_class_id=data['resource_class_id'],
-                                   location=data['location'],
-                                   subnet=data['subnet'],
-                                   nodes=[{'id': node_id}])
+                resource_class_id=data['resource_class_id'],
+                location=data['location'], subnet=data['subnet'],
+                nodes=node_ids)
 
             return True
         except requests.ConnectionError:
@@ -208,12 +231,16 @@ class EditRack(CreateRack):
     failure_message = _("Unable to update rack.")
 
     def handle(self, request, data):
+        node_ids = [{'id': self.create_or_update_node(node_data)}
+                for node_data in data['nodes']]
         try:
             rack_id = self.context['rack_id']
+            data['nodes'] = node_ids
             tuskar.Rack.update(request, rack_id, data)
             return True
         except Exception:
             exceptions.handle(request, _("Unable to update rack."))
+            return False
 
 
 class DetailEditRack(EditRack):
