@@ -36,7 +36,7 @@ class NodesTab(tabs.TableTab):
     slug = "nodes"
     template_name = "horizon/common/_detail_table.html"
 
-    def get_nodes_data(self):
+    def get_nodes_table_data(self):
         try:
             rack = self.tab_group.kwargs['rack']
             nodes = rack.list_nodes

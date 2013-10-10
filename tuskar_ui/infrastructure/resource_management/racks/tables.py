@@ -20,6 +20,7 @@ from horizon import tables
 
 from tuskar_ui import api as tuskar
 
+
 LOG = logging.getLogger(__name__)
 
 
