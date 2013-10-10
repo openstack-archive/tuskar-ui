@@ -56,7 +56,7 @@ class UploadView(horizon_forms.ModalFormView):
     def get_context_data(self, **kwargs):
         context = super(UploadView, self).get_context_data(**kwargs)
         context['racks_table'] = tables.UploadRacksTable(
-                self.request, kwargs['form'].initial.get('racks', []))
+            self.request, kwargs['form'].initial.get('racks', []))
         return context
 
 
@@ -168,8 +168,8 @@ class UsageDataView(generic.View):
             values.append(current_value)
 
         return http.HttpResponse(
-                    json.dumps(values, cls=json_serializer.DjangoJSONEncoder),
-                    mimetype='application/json')
+            json.dumps(values, cls=json_serializer.DjangoJSONEncoder),
+            mimetype='application/json')
 
 
 def top_communicating(request, rack_id=None):

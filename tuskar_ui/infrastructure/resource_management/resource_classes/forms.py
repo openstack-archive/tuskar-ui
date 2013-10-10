@@ -63,7 +63,7 @@ class DeleteCommand(object):
             self.msg = _('Failed to delete Class %s') % self.resource_class.id
             LOG.info(self.msg)
             redirect = urlresolvers.reverse(
-                            'horizon:infrastructure:resource_management:index')
+                'horizon:infrastructure:resource_management:index')
             exceptions.handle(self.request, self.msg, redirect=redirect)
 
 

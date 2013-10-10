@@ -40,7 +40,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
-                'create')
+            'create')
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
 
@@ -71,7 +71,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
-                'create')
+            'create')
         form_data = {
             'name': new_unique_name,
             'service_type': new_resource_class.service_type,
@@ -89,8 +89,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         redirect_url = (
             "%s?tab=resource_management_tabs__resource_classes_tab" %
-                urlresolvers.reverse('horizon:infrastructure:'
-                                            'resource_management:index'))
+            urlresolvers.reverse('horizon:infrastructure:'
+                                 'resource_management:index'))
         self.assertRedirectsNoFollow(res, redirect_url)
 
     @test.create_stubs({
@@ -115,8 +115,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.mox.ReplayAll()
 
         url = urlresolvers.reverse(
-                'horizon:infrastructure:resource_management:'
-                'resource_classes:create')
+            'horizon:infrastructure:resource_management:'
+            'resource_classes:create')
         form_data = {
             'name': new_unique_name,
             'service_type': new_resource_class.service_type,
@@ -165,7 +165,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
-                'update',
+            'update',
             args=[resource_class.id])
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
@@ -238,7 +238,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         }
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
-                'update',
+            'update',
             args=[resource_class.id])
         res = self.client.post(url, form_data)
         self.assertNoFormErrors(res)
@@ -246,8 +246,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         redirect_url = (
             "%s?tab=resource_management_tabs__resource_classes_tab" %
-                urlresolvers.reverse('horizon:infrastructure:'
-                                            'resource_management:index'))
+            urlresolvers.reverse('horizon:infrastructure:'
+                                 'resource_management:index'))
         self.assertRedirectsNoFollow(res, redirect_url)
 
     @test.create_stubs({tuskar.ResourceClass: ('delete', 'list')})
@@ -315,7 +315,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
-                'detail',
+            'detail',
             args=[resource_class.id])
         res = self.client.get(url)
         self.assertItemsEqual(res.context['flavors_table'].data,
@@ -384,8 +384,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.list_racks = racks
 
         url = urlresolvers.reverse(
-                'horizon:infrastructure:resource_management:'
-                'resource_classes:rack_health', args=[resource_class.id])
+            'horizon:infrastructure:resource_management:'
+            'resource_classes:rack_health', args=[resource_class.id])
         res = self.client.get(url)
         data = simplejson.loads(res.content)['data']
 
@@ -406,8 +406,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.mox.ReplayAll()
 
         url = urlresolvers.reverse(
-                'horizon:infrastructure:resource_management:'
-                'resource_classes:detail', args=[resource_class.id])
+            'horizon:infrastructure:resource_management:'
+            'resource_classes:detail', args=[resource_class.id])
         res = self.client.get(url)
         self.assertRedirectsNoFollow(
             res, urlresolvers.reverse(
@@ -444,7 +444,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
-                'update_racks',
+            'update_racks',
             args=[resource_class.id])
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
@@ -496,7 +496,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         }
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
-                'update_racks',
+            'update_racks',
             args=[resource_class.id])
         res = self.client.post(url, form_data)
         self.assertNoFormErrors(res)
@@ -506,7 +506,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                       'resource_classes:detail')
         redirect_url = (
             "%s?tab=resource_class_details__racks" %
-                urlresolvers.reverse(detail_url, args=(resource_class.id,)))
+            urlresolvers.reverse(detail_url, args=(resource_class.id,)))
         self.assertRedirectsNoFollow(res, redirect_url)
 
     @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
@@ -540,7 +540,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
-                'update_flavors',
+            'update_flavors',
             args=[resource_class.id])
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
@@ -593,7 +593,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         }
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:resource_classes:'
-                'update_flavors',
+            'update_flavors',
             args=[resource_class.id])
         res = self.client.post(url, form_data)
         self.assertNoFormErrors(res)
