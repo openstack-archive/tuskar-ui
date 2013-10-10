@@ -29,7 +29,7 @@ class RackViewTests(test.BaseAdminViewTests):
     @test.create_stubs({tuskar.ResourceClass: ('list',)})
     def test_create_rack_get(self):
         tuskar.ResourceClass.list(
-            mox.IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
 
         self.mox.ReplayAll()
@@ -52,10 +52,10 @@ class RackViewTests(test.BaseAdminViewTests):
         node = self.baremetal_nodes.first()
 
         tuskar.Rack.list(
-            mox.IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_racks.list())
         tuskar.BaremetalNode.create(
-            mox.IsA(http.request.HttpRequest),
+            mox.IsA(http.HttpRequest),
             name='New Node',
             cpus=u'1',
             memory_mb=u'1024',
@@ -66,14 +66,14 @@ class RackViewTests(test.BaseAdminViewTests):
             pm_password=u'',
             terminal_port=u'').AndReturn(node)
         tuskar.Rack.create(
-            mox.IsA(http.request.HttpRequest),
+            mox.IsA(http.HttpRequest),
             name='New Rack',
             resource_class_id=u'1',
             location='Tokyo',
             subnet='1.2.3.4',
             nodes=[{'id': '11'}]).AndReturn(None)
         tuskar.ResourceClass.list(
-            mox.IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
 
         self.mox.ReplayAll()
@@ -95,7 +95,7 @@ class RackViewTests(test.BaseAdminViewTests):
         tuskar.Rack.get(
             mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
         tuskar.ResourceClass.list(
-            mox.IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
 
         self.mox.ReplayAll()
@@ -128,11 +128,11 @@ class RackViewTests(test.BaseAdminViewTests):
         tuskar.Rack.get(
             mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
         tuskar.Rack.list(
-            mox.IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_racks.list())
         tuskar.Rack.update(mox.IsA(http.HttpRequest), rack.id, rack_data)
         tuskar.ResourceClass.list(
-            mox.IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
 
         self.mox.ReplayAll()
@@ -189,9 +189,9 @@ class RackViewTests(test.BaseAdminViewTests):
     def test_delete_rack(self):
         rack_id = u'1'
         tuskar.Rack.delete(
-            mox.IsA(http.request.HttpRequest), rack_id).AndReturn(None)
+            mox.IsA(http.HttpRequest), rack_id).AndReturn(None)
         tuskar.Rack.list(
-            mox.IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_racks.list())
 
         self.mox.ReplayAll()
@@ -242,13 +242,13 @@ class RackViewTests(test.BaseAdminViewTests):
     @test.create_stubs({tuskar.Rack: ('create',),
                         tuskar.ResourceClass: ('list',)})
     def test_upload_rack_create(self):
-        tuskar.Rack.create(mox.IsA(http.request.HttpRequest),
+        tuskar.Rack.create(mox.IsA(http.HttpRequest),
                 name='Rack1',
                 resource_class_id='1',
                 location='regionX',
                 subnet='192.168.111.0/24').AndReturn(None)
         tuskar.ResourceClass.list(
-            mox.IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
         self.mox.ReplayAll()
         csv_data = ('Rack1,rclass1,192.168.111.0/24,regionX,f0:dd:f1:da:f9:b5 '
