@@ -3,9 +3,6 @@
   <td{{ cell.attr_string|safe }}>
     {% if cell.field %}
       {{ cell.field }}
-      {% for error in cell.field.errors %}
-        <span class="help-inline">{{ error }}</span>
-      {% endfor %}
     {% else %}
       {%if cell.wrap_list %}<ul>{% endif %}{{ cell.value }}{%if cell.wrap_list %}</ul>{% endif %}
     {% endif %}

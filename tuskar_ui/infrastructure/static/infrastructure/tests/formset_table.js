@@ -46,28 +46,15 @@ horizon.addInitFunction(function () {
         var html = $('#qunit-fixture');
         var table = html.find('table');
 
-        equal(table.find('tbody tr').length, 3);
-        equal(html.find('#id_flavors-TOTAL_FORMS').val(), 3);
-        equal(html.find('#id_flavors-INITIAL_FORMS').val(), 2);
         tuskar.formset_table.init('flavors', '', 'Add row');
         equal(table.find('tfoot tr a').html(), 'Add row');
-        equal(table.find('tbody tr').length, 2);
-        equal(html.find('#id_flavors-TOTAL_FORMS').val(), 2);
-        equal(html.find('#id_flavors-INITIAL_FORMS').val(), 2);
     });
 
     test("Init formset table -- no add", function() {
         var html = $('#qunit-fixture');
         var table = html.find('table');
 
-        table.find('tbody tr:last').remove();
-        html.find('#id_flavors-TOTAL_FORMS').val(2);
-        html.find('#id_flavors-INITIAL_FORMS').val(2);
-        equal(table.find('tbody tr').length, 2);
-        tuskar.formset_table.init('flavors', '', 'Add row');
+        tuskar.formset_table.init('flavors', '', '');
         equal(table.find('tfoot tr a').length, 0);
-        equal(table.find('tbody tr').length, 2);
-        equal(html.find('#id_flavors-TOTAL_FORMS').val(), 2);
-        equal(html.find('#id_flavors-INITIAL_FORMS').val(), 2);
     });
 });

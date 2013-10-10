@@ -110,7 +110,10 @@ class FormsetCell(BaseCell):
             self.field = None
         else:
             if self.field.errors:
-                self.attrs['class'] = self.attrs.get('class', '') + ' error'
+                self.attrs['class'] = (self.attrs.get('class', '') +
+                    ' error control-group')
+                self.attrs['title'] = ' '.join(
+                    unicode(error) for error in self.field.errors)
 
 
 class FormsetRow(BaseRow):
