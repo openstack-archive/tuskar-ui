@@ -49,7 +49,7 @@ class UploadRack(forms.SelfHandlingForm):
                 except Exception:
                     LOG.exception("Failed to parse rack CSV file.")
                     raise django.forms.ValidationError(
-                                                _('Failed to parse CSV file.'))
+                        _('Failed to parse CSV file.'))
         return data
 
     def clean_uploaded_data(self):

@@ -42,11 +42,11 @@ class DetailView(horizon_tabs.TabView):
                     self.request, resource_class_id, flavor_id)
             except Exception:
                 redirect = urlresolvers.reverse(
-                            'horizon:infrastructure:resource_management:index')
+                    'horizon:infrastructure:resource_management:index')
                 exceptions.handle(self.request,
                                   _('Unable to retrieve details for '
                                     'flavor "%s".') % flavor_id,
-                                    redirect=redirect)
+                                  redirect=redirect)
             self._flavor = flavor
         return self._flavor
 
@@ -58,7 +58,7 @@ class DetailView(horizon_tabs.TabView):
                                                           resource_class_id)
             except Exception:
                 redirect = urlresolvers.reverse(
-                            'horizon:infrastructure:resource_management:index')
+                    'horizon:infrastructure:resource_management:index')
                 exceptions.handle(self.request,
                                   _('Unable to retrieve details for resource '
                                     'class "%s".') % resource_class_id,

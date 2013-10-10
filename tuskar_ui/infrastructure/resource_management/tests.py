@@ -70,7 +70,7 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         self.mox.ReplayAll()
 
         url = urlresolvers.reverse(
-                            'horizon:infrastructure:resource_management:index')
+            'horizon:infrastructure:resource_management:index')
         res = self.client.get(url)
         self.assertTemplateUsed(
             res, 'infrastructure/resource_management/index.html')

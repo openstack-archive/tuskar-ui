@@ -58,12 +58,12 @@ def baremetalclient(request):
         insecure = getattr(django.conf.settings, 'OPENSTACK_SSL_NO_VERIFY',
                            False)
         nc = nova.nova_client.Client(
-                request.user.username,
-                request.user.token.id,
-                project_id=request.user.tenant_id,
-                auth_url=base.url_for(request, 'compute'),
-                insecure=insecure,
-                http_log_debug=django.conf.settings.DEBUG)
+            request.user.username,
+            request.user.token.id,
+            project_id=request.user.tenant_id,
+            auth_url=base.url_for(request, 'compute'),
+            insecure=insecure,
+            http_log_debug=django.conf.settings.DEBUG)
         nc.client.auth_token = request.user.token.id
         nc.client.management_url = base.url_for(request, 'compute')
 
@@ -257,9 +257,9 @@ class BaremetalNode(StringIdAPIResourceWrapper):
             if OVERCLOUD_CREDS:
                 search_opts = {}
                 search_opts['all_tenants'] = True
-                self._running_virtual_machines = [s for s in
-                    overcloudclient(self.request).servers
-                        .list(True, search_opts)
+                self._running_virtual_machines = [
+                    s for s in overcloudclient(
+                        self.request).servers.list(True, search_opts)
                     if s.hostId == self.id]
             else:
                 LOG.debug('OVERCLOUD_CREDS is not set. '
@@ -391,12 +391,12 @@ class Rack(StringIdAPIResourceWrapper):
         nodes = kwargs.get('nodes', [])
         ## FIXME: set nodes here
         rack = tuskarclient(request).racks.create(
-                name=kwargs['name'],
-                location=kwargs['location'],
-                subnet=kwargs['subnet'],
-                nodes=nodes,
-                resource_class={'id': kwargs['resource_class_id']},
-                slots=0)
+            name=kwargs['name'],
+            location=kwargs['location'],
+            subnet=kwargs['subnet'],
+            nodes=nodes,
+            resource_class={'id': kwargs['resource_class_id']},
+            slots=0)
         return cls(rack)
 
     @classmethod
@@ -580,8 +580,8 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @classmethod
     ## FIXME : kwargs here is a little dicey
     def update(cls, request, resource_class_id, **kwargs):
-        resource_class = cls(tuskarclient(request).resource_classes.update(
-                resource_class_id, **kwargs))
+        resource_class = cls(tuskarclient(request).resource_classes.
+                             update(resource_class_id, **kwargs))
 
         ## FIXME: flavors have to be updated separately, seems less than ideal
         for flavor_id in resource_class.flavors_ids:
@@ -747,16 +747,16 @@ class Flavor(StringIdAPIResourceWrapper):
     @classmethod
     def create(cls, request, **kwargs):
         return cls(tuskarclient(request).flavors.create(
-                kwargs['resource_class_id'],
-                name=kwargs['name'],
-                max_vms=kwargs['max_vms'],
-                capacities=kwargs['capacities']))
+            kwargs['resource_class_id'],
+            name=kwargs['name'],
+            max_vms=kwargs['max_vms'],
+            capacities=kwargs['capacities']))
 
     @classmethod
     def delete(cls, request, **kwargs):
         tuskarclient(request).flavors.delete(
-                                kwargs['resource_class_id'],
-                                kwargs['flavor_id'])
+            kwargs['resource_class_id'],
+            kwargs['flavor_id'])
 
     @property
     def capacities(self):
@@ -765,10 +765,10 @@ class Flavor(StringIdAPIResourceWrapper):
             ## capacities and our internal capacities?
             CapacityStruct = collections.namedtuple('CapacityStruct',
                                                     'name value unit')
-            self._capacities = [Capacity(CapacityStruct(
-                        name=c['name'],
-                        value=c['value'],
-                        unit=c['unit'])) for c in self._apiresource.capacities]
+            self._capacities = [Capacity(CapacityStruct(name=c['name'],
+                                                        value=c['value'],
+                                                        unit=c['unit']))
+                                for c in self._apiresource.capacities]
         return self._capacities
 
     def capacity(self, capacity_name):

@@ -285,11 +285,11 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
             else:
                 flavors = []
             return tuskar.ResourceClass.update(
-                    request,
-                    data['resource_class_id'],
-                    name=data['name'],
-                    service_type=data['service_type'],
-                    flavors=flavors)
+                request,
+                data['resource_class_id'],
+                name=data['name'],
+                service_type=data['service_type'],
+                flavors=flavors)
         except Exception:
             redirect = self.get_failure_url()
             exceptions.handle(request,

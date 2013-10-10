@@ -1,4 +1,4 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
+# Vim: tabstop=4 shiftwidth=4 softtabstop=4
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -55,9 +55,9 @@ class ProvisioningInfoMixin(object):
         else:
             context = super(ProvisioningInfoMixin, self).get_context_data(
                 **kwargs)
-        (unprovisioned_racks, provisioning_racks,
-            state) = get_provision_racks_and_state(
-                        self.get_provisioning_racks_data())
+        (unprovisioned_racks, provisioning_racks, state) = (
+            get_provision_racks_and_state(self.
+                                          get_provisioning_racks_data()))
         context.update({
             'unprovisioned_racks': unprovisioned_racks,
             'provisioning_racks': provisioning_racks,
