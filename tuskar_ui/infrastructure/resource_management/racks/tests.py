@@ -26,6 +26,10 @@ class RackViewTests(test.BaseAdminViewTests):
     index_page = urlresolvers.reverse(
         'horizon:infrastructure:resource_management:index')
 
+    index_page_racks_tab = urlresolvers.reverse(
+        'horizon:infrastructure:resource_management:index') +\
+        "?tab=resource_management_tabs__racks_tab"
+
     @test.create_stubs({tuskar.ResourceClass: ('list',)})
     def test_create_rack_get(self):
         tuskar.ResourceClass.list(
@@ -57,14 +61,14 @@ class RackViewTests(test.BaseAdminViewTests):
         tuskar.BaremetalNode.create(
             mox.IsA(http.HttpRequest),
             name='New Node',
-            cpus=u'1',
-            memory_mb=u'1024',
-            local_gb=u'10',
+            cpus=1,
+            memory_mb=1024,
+            local_gb=10,
             prov_mac_address='aa:bb:cc:dd:ee',
             pm_address=u'',
             pm_user=u'',
             pm_password=u'',
-            terminal_port=u'').AndReturn(node)
+            terminal_port=None).AndReturn(node)
         tuskar.Rack.create(
             mox.IsA(http.HttpRequest),
             name='New Rack',
@@ -78,14 +82,24 @@ class RackViewTests(test.BaseAdminViewTests):
 
         self.mox.ReplayAll()
 
-        data = {'name': 'New Rack', 'resource_class_id': u'1',
-                'location': 'Tokyo', 'subnet': '1.2.3.4',
-                'node_name': 'New Node', 'prov_mac_address': 'aa:bb:cc:dd:ee',
-                'cpus': u'1', 'memory_mb': u'1024', 'local_gb': u'10'}
+        data = {
+            'name': 'New Rack',
+            'resource_class_id': u'1',
+            'location': 'Tokyo',
+            'subnet': '1.2.3.4',
+            'nodes-TOTAL_FORMS': 1,
+            'nodes-INITIAL_FORMS': 0,
+            'nodes-MAX_NUM_FORMS': 1024,
+            'nodes-0-service_host': 'New Node',
+            'nodes-0-mac_address': 'aa:bb:cc:dd:ee',
+            'nodes-0-cpus': u'1',
+            'nodes-0-memory_mb': u'1024',
+            'nodes-0-local_gb': u'10',
+        }
         url = urlresolvers.reverse('horizon:infrastructure:'
                                         'resource_management:racks:create')
         resp = self.client.post(url, data)
-        self.assertRedirectsNoFollow(resp, self.index_page)
+        self.assertRedirectsNoFollow(resp, self.index_page_racks_tab)
 
     @test.create_stubs({tuskar.Rack: ('get', 'list_nodes'),
                         tuskar.ResourceClass: ('list',)})
@@ -94,37 +108,48 @@ class RackViewTests(test.BaseAdminViewTests):
 
         tuskar.Rack.get(
             mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
+        tuskar.Rack.list_nodes = []
+        tuskar.Rack.get(mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
         tuskar.ResourceClass.list(
             mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
 
         self.mox.ReplayAll()
 
-        tuskar.Rack.list_nodes = []
-
         url = urlresolvers.reverse('horizon:infrastructure:'
-                                        'resource_management:racks:edit',
-                                   args=[1])
+            'resource_management:racks:edit', args=[1])
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
-        self.assertTemplateUsed(res,
-                                'horizon/common/_workflow_base.html')
+        self.assertTemplateUsed(res, 'horizon/common/_workflow_base.html')
 
-    @test.create_stubs({tuskar.Rack: ('get', 'list', 'update',),
+    @test.create_stubs({tuskar.Rack: ('get', 'list', 'update', 'list_nodes'),
                         tuskar.ResourceClass: ('list',)})
     def test_edit_rack_post(self):
         rack = self.tuskar_racks.first()
 
-        rack_data = {'name': 'Updated Rack', 'resource_class_id': u'1',
-                'rack_id': u'1', 'location': 'New Location',
-                     'subnet': '127.10.10.0/24', 'node_macs': None}
+        rack_data = {
+            'name': 'Updated Rack',
+            'resource_class_id': u'1',
+            'rack_id': u'1',
+            'location': 'New Location',
+            'subnet': '127.10.10.0/24',
+            'nodes': [],
+        }
 
-        data = {'name': 'Updated Rack', 'resource_class_id': u'1',
-                'rack_id': u'1', 'location': 'New Location',
-                'subnet': '127.10.10.0/24', 'node_macs': None,
-                'node_name': 'New Node', 'prov_mac_address': 'aa:bb:cc:dd:ee',
-                'cpus': u'1', 'memory_mb': u'1024', 'local_gb': u'10'}
+        data = {
+            'name': 'Updated Rack',
+            'resource_class_id': u'1',
+            'rack_id': u'1',
+            'location': 'New Location',
+            'subnet': '127.10.10.0/24',
+            'nodes-TOTAL_FORMS': 0,
+            'nodes-INITIAL_FORMS': 0,
+            'nodes-MAX_NUM_FORMS': 1024,
+        }
 
+        tuskar.Rack.get(
+            mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
+        tuskar.Rack.list_nodes = []
         tuskar.Rack.get(
             mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
         tuskar.Rack.list(
@@ -143,7 +168,7 @@ class RackViewTests(test.BaseAdminViewTests):
         response = self.client.post(url, data)
         self.assertNoFormErrors(response)
         self.assertMessageCount(success=1)
-        self.assertRedirectsNoFollow(response, self.index_page)
+        self.assertRedirectsNoFollow(response, self.index_page_racks_tab)
 
     @test.create_stubs({tuskar.Rack: ('get',)})
     def test_edit_status_rack_get(self):
