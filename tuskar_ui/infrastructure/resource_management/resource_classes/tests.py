@@ -56,9 +56,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         add_racks_ids = []
 
         tuskar.Rack.list(
-            mox.IsA(http.request.HttpRequest), True).AndReturn([])
+            mox.IsA(http.HttpRequest), True).AndReturn([])
         tuskar.ResourceClass.list(
-            mox.IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
         tuskar.ResourceClass.create(
             mox.IsA(http.HttpRequest),
@@ -103,9 +103,9 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         new_flavors = []
 
         tuskar.Rack.list(
-            mox.IsA(http.request.HttpRequest), True).AndReturn([])
+            mox.IsA(http.HttpRequest), True).AndReturn([])
         tuskar.ResourceClass.list(
-            mox.IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
         tuskar.ResourceClass.\
             create(mox.IsA(http.HttpRequest), name=new_unique_name,
@@ -213,7 +213,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                 resource_class)
         tuskar.ResourceClass.list_flavors = []
         tuskar.ResourceClass.list(
-            mox.IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
         tuskar.ResourceClass.update(mox.IsA(http.HttpRequest),
                                     resource_class.id,
@@ -470,7 +470,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                 resource_class)
         tuskar.ResourceClass.list_flavors = []
         tuskar.ResourceClass.list(
-            mox.IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
         tuskar.ResourceClass.update(mox.IsA(http.HttpRequest),
                                     resource_class.id,
@@ -567,7 +567,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                 resource_class)
         tuskar.ResourceClass.list_flavors = []
         tuskar.ResourceClass.list(
-            mox.IsA(http.request.HttpRequest)).AndReturn(
+            mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
         tuskar.ResourceClass.update(mox.IsA(http.HttpRequest),
                                     resource_class.id,
