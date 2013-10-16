@@ -328,6 +328,10 @@ class Node(StringIdAPIResourceWrapper):
         return self.nova_baremetal_node_attribute('mac_address')
 
     @property
+    def ip_address_other(self):
+        return self.nova_baremetal_node_attribute('ip_address_other')
+
+    @property
     def pm_address(self):
         return self.nova_baremetal_node_attribute('pm_address')
 
