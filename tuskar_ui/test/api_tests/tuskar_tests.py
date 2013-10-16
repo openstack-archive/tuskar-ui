@@ -70,15 +70,15 @@ class TuskarApiTests(test.APITestCase):
 
     def test_baremetal_node_get(self):
         node = self.baremetalclient_nodes.first()
+        server = self.servers.first()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
         baremetal.BareMetalNodeManager.get(node.id).AndReturn(node)
 
         novaclient = self.stub_novaclient()
         novaclient.servers = self.mox.CreateMockAnything()
-        novaclient.servers.list(True,
-                                {'all_tenants': True,
-                                 'limit': 21}).AndReturn([])
+        novaclient.servers.get(node.instance_uuid).AndReturn(server)
+
         self.mox.ReplayAll()
 
         ret_val = api.BaremetalNode.get(self.request, node.id)
