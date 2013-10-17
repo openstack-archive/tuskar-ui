@@ -123,7 +123,7 @@ def data(TEST):
                               {"name": "total_memory",
                                "value": "2",
                                "unit": "MB"}],
-                         'resource_class': None})
+                         })
     TEST.tuskarclient_racks.add(rack_1, rack_2, rack_3)
     TEST.tuskar_racks.add(api.Rack(rack_1), api.Rack(rack_2), api.Rack(rack_3))
 
