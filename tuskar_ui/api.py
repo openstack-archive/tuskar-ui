@@ -294,7 +294,10 @@ class Node(StringIdAPIResourceWrapper):
     @property
     def rack_id(self):
         try:
-            return unicode(self._apiresource.rack['id'])
+            if self._apiresource.rack['id']:
+                return unicode(self._apiresource.rack['id'])
+            else:
+                return None
         except AttributeError:
             return None
 
