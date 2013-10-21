@@ -27,7 +27,7 @@
     {{ block.super }}
 
 <script type="text/javascript">
-    ($ || addHorizonLoadEvent)(function () {
+    (window.$ || window.addHorizonLoadEvent)(function () {
         // prepare the js-enabled parts of the formset data table
         var prefix = '{{ table.name|escapejs }}';
         var empty_row_html = '{% filter escapejs %}{% include "formset_table/_row.html" with row=table.get_empty_row %}{% endfilter %}';
