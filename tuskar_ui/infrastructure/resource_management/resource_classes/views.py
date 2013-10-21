@@ -72,9 +72,12 @@ class UpdateView(horizon_workflows.WorkflowView):
     def get_initial(self):
         resource_class = self._get_object()
 
-        return {'resource_class_id': resource_class.id,
-                'name': resource_class.name,
-                'service_type': resource_class.service_type}
+        return {
+            'resource_class_id': resource_class.id,
+            'name': resource_class.name,
+            'service_type': resource_class.service_type,
+            'image_id': resource_class.image_id,
+        }
 
 
 class DetailUpdateView(UpdateView):

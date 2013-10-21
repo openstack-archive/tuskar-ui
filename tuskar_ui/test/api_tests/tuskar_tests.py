@@ -253,12 +253,14 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.resource_classes = self.mox.CreateMockAnything()
         tuskarclient.resource_classes.create(name='rclass1',
                                              service_type='compute',
+                                             image_id=None,
                                              flavors=[]).AndReturn(rc)
         self.mox.ReplayAll()
 
         ret_val = api.ResourceClass.create(self.request,
                                            name='rclass1',
                                            service_type='compute',
+                                           image_id=None,
                                            flavors=[])
         self.assertIsInstance(ret_val, api.ResourceClass)
 
@@ -271,6 +273,7 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.resource_classes.update(rc.id,
                                              name='rclass1',
                                              service_type='compute',
+                                             image_id=None,
                                              flavors=[]).AndReturn(rc)
         tuskarclient.flavors.list(rc.id).AndReturn([])
         self.mox.ReplayAll()
@@ -278,6 +281,7 @@ class TuskarApiTests(test.APITestCase):
         ret_val = api.ResourceClass.update(self.request, rc.id,
                                            name='rclass1',
                                            service_type='compute',
+                                           image_id=None,
                                            flavors=[])
         self.assertIsInstance(ret_val, api.ResourceClass)
 

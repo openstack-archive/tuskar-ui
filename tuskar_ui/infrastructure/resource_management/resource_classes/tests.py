@@ -18,20 +18,31 @@ from django.utils import simplejson
 
 import mox
 
+from openstack_dashboard.api import glance
+
 from tuskar_ui import api as tuskar
 from tuskar_ui.test import helpers as test
+
+
+class MockImage(object):
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
 
 
 class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         tuskar.Rack: ('list',),
-        tuskar.ResourceClass: ('get',)
+        tuskar.ResourceClass: ('get',),
+        glance: ('image_list_detailed',),
     })
     def test_create_resource_class_get(self):
         all_racks = self.tuskar_racks.list()
         rc = self.tuskar_resource_classes.first()
 
+        glance.image_list_detailed(mox.IsA(http.HttpRequest)).AndReturn(
+            ([], False))
         tuskar.Rack.list(
             mox.IsA(http.HttpRequest), True).AndReturn(all_racks)
         tuskar.ResourceClass.get(
@@ -47,14 +58,18 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
     @test.create_stubs({
         tuskar.ResourceClass: ('list', 'create', 'set_racks'),
         tuskar.Rack: ('list',),
+        glance: ('image_list_detailed',),
     })
     def test_create_resource_class_post(self):
         new_resource_class = self.tuskar_resource_classes.first()
         new_unique_name = "unique_name_for_sure"
         new_flavors = []
+        image_id = 'eb9196c2-822d-4bee-9b45-02534eead25e'
 
         add_racks_ids = []
 
+        glance.image_list_detailed(mox.IsA(http.HttpRequest)).AndReturn(
+            ([MockImage(image_id, 'image')], False))
         tuskar.Rack.list(
             mox.IsA(http.HttpRequest), True).AndReturn([])
         tuskar.ResourceClass.list(
@@ -64,6 +79,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             mox.IsA(http.HttpRequest),
             name=new_unique_name,
             service_type=new_resource_class.service_type,
+            image_id=image_id,
             flavors=new_flavors).AndReturn(new_resource_class)
         tuskar.ResourceClass.set_racks(mox.IsA(http.HttpRequest),
                                        add_racks_ids)
@@ -75,7 +91,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         form_data = {
             'name': new_unique_name,
             'service_type': new_resource_class.service_type,
-            'image': 'compute-img',
+            'image_id': image_id,
             'flavors-TOTAL_FORMS': 0,
             'flavors-INITIAL_FORMS': 0,
             'flavors-MAX_NUM_FORMS': 1000,
@@ -96,12 +112,16 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
     @test.create_stubs({
         tuskar.ResourceClass: ('list', 'create', 'set_racks'),
         tuskar.Rack: ('list',),
+        glance: ('image_list_detailed',),
     })
     def test_create_resource_class_post_exception(self):
         new_resource_class = self.tuskar_resource_classes.first()
         new_unique_name = "unique_name_for_sure"
         new_flavors = []
+        image_id = 'eb9196c2-822d-4bee-9b45-02534eead25e'
 
+        glance.image_list_detailed(mox.IsA(http.HttpRequest)).AndReturn(
+            ([MockImage(image_id, 'image')], False))
         tuskar.Rack.list(
             mox.IsA(http.HttpRequest), True).AndReturn([])
         tuskar.ResourceClass.list(
@@ -110,6 +130,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass.\
             create(mox.IsA(http.HttpRequest), name=new_unique_name,
                    service_type=new_resource_class.service_type,
+                   image_id=image_id,
                    flavors=new_flavors).\
             AndRaise(self.exceptions.tuskar)
         self.mox.ReplayAll()
@@ -120,7 +141,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         form_data = {
             'name': new_unique_name,
             'service_type': new_resource_class.service_type,
-            'image': 'compute-img',
+            'image_id': image_id,
             'flavors-TOTAL_FORMS': 0,
             'flavors-INITIAL_FORMS': 0,
             'flavors-MAX_NUM_FORMS': 1000,
@@ -134,13 +155,18 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
              urlresolvers.
              reverse("horizon:infrastructure:resource_management:index")))
 
-    @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
-                                                   'racks_ids', 'all_racks')})
+    @test.create_stubs({
+        tuskar.ResourceClass: ('get', 'list_flavors', 'racks_ids',
+                               'all_racks'),
+        glance: ('image_list_detailed',),
+    })
     def test_edit_resource_class_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
         all_racks = []
 
+        glance.image_list_detailed(mox.IsA(http.HttpRequest)).AndReturn(
+            ([], False))
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest),
             resource_class.id).AndReturn(resource_class)
@@ -170,8 +196,11 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
 
-    @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
-                                                   'racks_ids', 'all_racks')})
+    @test.create_stubs({
+        tuskar.ResourceClass: ('get', 'list_flavors',
+                               'racks_ids', 'all_racks'),
+        glance: ('image_list_detailed',),
+    })
     def test_edit_resource_class_get_exception(self):
         resource_class = self.tuskar_resource_classes.first()
 
@@ -194,12 +223,16 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
                                'list_flavors', 'all_racks', 'racks_ids'),
         tuskar.Rack: ('list',),
+        glance: ('image_list_detailed',),
     })
     def test_edit_resource_class_post(self):
         resource_class = self.tuskar_resource_classes.first()
+        image_id = 'eb9196c2-822d-4bee-9b45-02534eead25e'
 
         add_racks_ids = []
 
+        glance.image_list_detailed(mox.IsA(http.HttpRequest)).AndReturn(
+            ([MockImage(image_id, 'image')], False))
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
                 resource_class)
@@ -219,6 +252,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                                     resource_class.id,
                                     name=resource_class.name,
                                     service_type=resource_class.service_type,
+                                    image_id=image_id,
                                     flavors=[]).AndReturn(resource_class)
         tuskar.ResourceClass.set_racks(mox.IsA(http.HttpRequest),
                                        add_racks_ids)
@@ -228,7 +262,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'resource_class_id': resource_class.id,
             'name': resource_class.name,
             'service_type': resource_class.service_type,
-            'image': 'compute-img',
+            'image_id': image_id,
             'flavors-TOTAL_FORMS': 0,
             'flavors-INITIAL_FORMS': 0,
             'flavors-MAX_NUM_FORMS': 1000,
@@ -413,13 +447,18 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             res, urlresolvers.reverse(
                 'horizon:infrastructure:resource_management:index'))
 
-    @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
-                                                   'racks_ids', 'all_racks')})
+    @test.create_stubs({
+        tuskar.ResourceClass: ('get', 'list_flavors',
+                                'racks_ids', 'all_racks'),
+        glance: ('image_list_detailed',),
+    })
     def test_detail_edit_racks_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
         all_racks = []
 
+        glance.image_list_detailed(mox.IsA(http.HttpRequest)).AndReturn(
+            ([], False))
         tuskar.ResourceClass.get(mox.IsA(http.HttpRequest),
                                  resource_class.id).\
                                  AndReturn(resource_class)
@@ -451,13 +490,16 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
-                               'list_flavors', 'all_racks', 'racks_ids')
+                               'list_flavors', 'all_racks', 'racks_ids'),
+        glance: ('image_list_detailed',),
     })
     def test_detail_edit_racks_post(self):
         resource_class = self.tuskar_resource_classes.first()
-
+        image_id = 'eb9196c2-822d-4bee-9b45-02534eead25e'
         add_racks_ids = []
 
+        glance.image_list_detailed(mox.IsA(http.HttpRequest)).AndReturn(
+            ([MockImage(image_id, 'image')], False))
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
                 resource_class)
@@ -477,6 +519,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                                     resource_class.id,
                                     name=resource_class.name,
                                     service_type=resource_class.service_type,
+                                    image_id=image_id,
                                     flavors=[]).AndReturn(resource_class)
         tuskar.ResourceClass.set_racks(mox.IsA(http.HttpRequest),
                                        add_racks_ids)
@@ -486,7 +529,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'resource_class_id': resource_class.id,
             'name': resource_class.name,
             'service_type': resource_class.service_type,
-            'image': 'compute-img',
+            'image_id': image_id,
             'flavors-TOTAL_FORMS': 0,
             'flavors-INITIAL_FORMS': 0,
             'flavors-MAX_NUM_FORMS': 1000,
@@ -509,13 +552,18 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             urlresolvers.reverse(detail_url, args=(resource_class.id,)))
         self.assertRedirectsNoFollow(res, redirect_url)
 
-    @test.create_stubs({tuskar.ResourceClass: ('get', 'list_flavors',
-                                                   'racks_ids', 'all_racks')})
+    @test.create_stubs({
+        tuskar.ResourceClass: ('get', 'list_flavors',
+                                'racks_ids', 'all_racks'),
+        glance: ('image_list_detailed',),
+    })
     def test_detail_edit_flavors_get(self):
         resource_class = self.tuskar_resource_classes.first()
         all_flavors = []
         all_racks = []
 
+        glance.image_list_detailed(mox.IsA(http.HttpRequest)).AndReturn(
+            ([], False))
         tuskar.ResourceClass.get(mox.IsA(http.HttpRequest),
                                  resource_class.id).\
                                  AndReturn(resource_class)
@@ -549,12 +597,15 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         tuskar.ResourceClass: ('get', 'list', 'update', 'set_racks',
                                'list_flavors', 'all_racks', 'racks_ids'),
         tuskar.Rack: ('list',),
+        glance: ('image_list_detailed',),
     })
     def test_detail_edit_flavors_post(self):
         resource_class = self.tuskar_resource_classes.first()
-
+        image_id = 'eb9196c2-822d-4bee-9b45-02534eead25e'
         add_racks_ids = []
 
+        glance.image_list_detailed(mox.IsA(http.HttpRequest)).AndReturn(
+            ([MockImage(image_id, 'image')], False))
         tuskar.ResourceClass.get(
             mox.IsA(http.HttpRequest), resource_class.id).AndReturn(
                 resource_class)
@@ -574,6 +625,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
                                     resource_class.id,
                                     name=resource_class.name,
                                     service_type=resource_class.service_type,
+                                    image_id=image_id,
                                     flavors=[]).AndReturn(resource_class)
         tuskar.ResourceClass.set_racks(mox.IsA(http.HttpRequest),
                                        add_racks_ids)
@@ -583,7 +635,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'resource_class_id': resource_class.id,
             'name': resource_class.name,
             'service_type': resource_class.service_type,
-            'image': 'compute-img',
+            'image_id': image_id,
             'flavors-TOTAL_FORMS': 0,
             'flavors-INITIAL_FORMS': 0,
             'flavors-MAX_NUM_FORMS': 1000,
