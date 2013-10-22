@@ -14,6 +14,7 @@
 
 from django.utils.translation import ugettext_lazy as _  # noqa
 
+from horizon import exceptions
 from horizon import tables
 
 from tuskar_ui import api as tuskar
@@ -27,7 +28,16 @@ class DeleteNodes(tables.DeleteAction):
     data_type_plural = _("Nodes")
 
     def delete(self, request, obj_id):
-        tuskar.node_delete(request, obj_id)
+        try:
+            node = tuskar.Node.get(request, obj_id)
+            rack = node.rack
+            nodes = [{'id': node_id}
+                for node_id in rack.node_ids
+                if node_id != obj_id]
+            tuskar.Rack.update(request, rack.id, {'nodes': nodes})
+        except Exception:
+            exceptions.handle(request, _("Error deleting node."))
+            return False
 
 
 class NodesFilterAction(tables.FilterAction):
