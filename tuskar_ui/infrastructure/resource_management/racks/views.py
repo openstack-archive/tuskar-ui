@@ -103,7 +103,7 @@ class EditRackStatusView(horizon_forms.ModalFormView):
                 'action': action}
 
 
-class DetailView(horizon_tabs.TabView):
+class DetailView(horizon_tabs.TabbedTableView):
     tab_group_class = tabs.RackDetailTabs
     template_name = 'infrastructure/resource_management/racks/detail.html'
 
