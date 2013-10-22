@@ -46,7 +46,7 @@ information can be found in the LICENSE file.
 Further Documentation
 ---------------------
 
-Check out our `docs directory
+Check out our `docs directory 
 <https://github.com/openstack/tuskar-ui/blob/master/docs/index.rst>`_
 for expanded documentation.
 
