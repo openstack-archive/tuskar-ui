@@ -174,7 +174,7 @@ class BaremetalNode(StringIdAPIResourceWrapper):
         terminal_port = kwargs['terminal_port']
         if terminal_port == '':
             terminal_port = None
-        node = baremetalclient(request).create(kwargs['name'],
+        node = baremetalclient(request).create(kwargs['service_host'],
                                                kwargs['cpus'],
                                                kwargs['memory_mb'],
                                                kwargs['local_gb'],

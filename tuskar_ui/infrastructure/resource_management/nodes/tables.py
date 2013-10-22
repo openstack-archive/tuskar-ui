@@ -48,7 +48,9 @@ class NodesFilterAction(tables.FilterAction):
 
 
 class NodesTable(tables.DataTable):
-    service_host = tables.Column("service_host", verbose_name=_("Name"),
+    service_host = tables.Column(
+        "service_host",
+        verbose_name=_("Service Host"),
         link=("horizon:infrastructure:resource_management:nodes:detail"))
     mac_address = tables.Column("mac_address", verbose_name=_("MAC Address"))
     pm_address = tables.Column("pm_address",
@@ -76,7 +78,8 @@ class UnrackedNodesTable(NodesTable):
 
 
 class NodesFormsetTable(tuskar_ui.tables.FormsetDataTable):
-    service_host = tables.Column('service_host', verbose_name=_("Name"))
+    service_host = tables.Column('service_host',
+                                 verbose_name=_("Service Host"))
     mac_address = tables.Column('mac_address', verbose_name=_("MAC Address"))
 
     cpus = tables.Column('cpus', verbose_name=_("CPUs"))

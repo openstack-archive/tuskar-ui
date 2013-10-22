@@ -174,7 +174,7 @@ class CreateRack(workflows.Workflow):
             # tuskar.BaremetalNode.update(
             #    self.request,
             #    node_id=node_id,
-            #    name=node_data['service_host'],
+            #    service_host=node_data['service_host'],
             #    cpus=node_data['cpus'],
             #    memory_mb=node_data['memory_mb'],
             #    local_gb=node_data['local_gb'],
@@ -187,7 +187,7 @@ class CreateRack(workflows.Workflow):
         else:
             node = tuskar.BaremetalNode.create(
                 self.request,
-                name=node_data['service_host'],
+                service_host=node_data['service_host'],
                 cpus=node_data['cpus'],
                 memory_mb=node_data['memory_mb'],
                 local_gb=node_data['local_gb'],

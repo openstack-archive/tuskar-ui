@@ -60,7 +60,7 @@ class RackViewTests(test.BaseAdminViewTests):
                 self.tuskar_racks.list())
         tuskar.BaremetalNode.create(
             mox.IsA(http.HttpRequest),
-            name='New Node',
+            service_host='New Node',
             cpus=1,
             memory_mb=1024,
             local_gb=10,

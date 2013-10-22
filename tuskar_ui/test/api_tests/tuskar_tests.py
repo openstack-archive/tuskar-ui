@@ -38,7 +38,7 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         ret_val = api.BaremetalNode.create(self.request,
-                                           name='node',
+                                           service_host='node',
                                            cpus=1,
                                            memory_mb=1024,
                                            local_gb=10,
@@ -63,7 +63,7 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         ret_val = api.BaremetalNode.create(
-            self.request, name='node', cpus=1,
+            self.request, service_host='node', cpus=1,
             memory_mb=1024, local_gb=10, prov_mac_address='aa:bb:cc:dd:ee',
             pm_address='', pm_user='', pm_password='', terminal_port='')
         self.assertIsInstance(ret_val, api.BaremetalNode)
