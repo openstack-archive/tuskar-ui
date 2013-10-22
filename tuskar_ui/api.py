@@ -558,7 +558,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
     """Wrapper for the ResourceClass object  returned by the
     dummy model.
     """
-    _attrs = ['id', 'name', 'service_type', 'racks']
+    _attrs = ['id', 'name', 'service_type', 'image_id', 'racks']
 
     @classmethod
     def get(cls, request, resource_class_id):
@@ -567,12 +567,13 @@ class ResourceClass(StringIdAPIResourceWrapper):
         return rc
 
     @classmethod
-    def create(self, request, **kwargs):
+    def create(self, request, name, service_type, image_id, flavors):
         return ResourceClass(
             tuskarclient(request).resource_classes.create(
-                name=kwargs['name'],
-                service_type=kwargs['service_type'],
-                flavors=kwargs['flavors']))
+                name=name,
+                service_type=service_type,
+                image_id=image_id,
+                flavors=flavors))
 
     @classmethod
     def list(cls, request):
@@ -580,16 +581,20 @@ class ResourceClass(StringIdAPIResourceWrapper):
             tuskarclient(request).resource_classes.list())]
 
     @classmethod
-    ## FIXME : kwargs here is a little dicey
-    def update(cls, request, resource_class_id, **kwargs):
-        resource_class = cls(tuskarclient(request).resource_classes.
-                             update(resource_class_id, **kwargs))
+    def update(cls, request, resource_class_id, name, service_type, image_id,
+                flavors):
+        resource_class = cls(tuskarclient(request).resource_classes.update(
+            resource_class_id,
+            name=name,
+            service_type=service_type,
+            image_id=image_id,
+            flavors=flavors))
 
         ## FIXME: flavors have to be updated separately, seems less than ideal
         for flavor_id in resource_class.flavors_ids:
             Flavor.delete(request, resource_class_id=resource_class.id,
                                    flavor_id=flavor_id)
-        for flavor in kwargs['flavors']:
+        for flavor in flavors:
             Flavor.create(request,
                           resource_class_id=resource_class.id,
                           **flavor)

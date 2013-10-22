@@ -19,14 +19,14 @@ from django.utils.translation import ugettext_lazy as _  # noqa
 from horizon import exceptions
 from horizon import forms
 from horizon import workflows
+from openstack_dashboard.api import glance
 
 from tuskar_ui import api as tuskar
-import tuskar_ui.workflows
-
 from tuskar_ui.infrastructure.resource_management.flavors\
     import forms as flavors_forms
 from tuskar_ui.infrastructure.resource_management.resource_classes\
     import tables
+import tuskar_ui.workflows
 
 
 class ResourceClassInfoAndFlavorsAction(workflows.Action):
@@ -49,12 +49,24 @@ class ResourceClassInfoAndFlavorsAction(workflows.Action):
                                      widget=forms.Select(
                                          attrs={'class': 'switchable'})
                                      )
-    image = forms.ChoiceField(label=_('Provisioning Image'),
-                              required=True,
-                              choices=[('compute-img', ('overcloud-compute'))],
-                              widget=forms.Select(
-                                  attrs={'class': 'switchable'})
-                              )
+    image_id = forms.ChoiceField(
+        label=_('Provisioning Image'),
+        required=True,
+        choices=[],
+        widget=forms.Select(attrs={'class': 'switchable'}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(ResourceClassInfoAndFlavorsAction,
+                self).__init__(*args, **kwargs)
+        try:
+            images, more = glance.image_list_detailed(self.request)
+        except Exception:
+            exceptions.handle(self.request,
+                              _('Unable to retrieve image list.'))
+        else:
+            self.fields['image_id'].choices = [
+                (image.id, image.name) for image in images]
 
     def clean(self):
         cleaned_data = super(ResourceClassInfoAndFlavorsAction,
@@ -104,7 +116,7 @@ class CreateResourceClassInfoAndFlavors(tuskar_ui.workflows.TableStep):
     action_class = ResourceClassInfoAndFlavorsAction
     template_name = 'infrastructure/resource_management/resource_classes/'\
                     '_resource_class_info_and_flavors_step.html'
-    contributes = ("name", "service_type", "flavors")
+    contributes = ("name", "service_type", "image_id", "flavors")
 
     def get_flavors_data(self):
         try:
@@ -246,6 +258,7 @@ class CreateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
                 request,
                 name=data['name'],
                 service_type=data['service_type'],
+                image_id=data['image_id'],
                 flavors=flavors)
         except Exception:
             redirect = self.get_failure_url()
@@ -289,6 +302,7 @@ class UpdateResourceClass(ResourceClassWorkflowMixin, workflows.Workflow):
                 data['resource_class_id'],
                 name=data['name'],
                 service_type=data['service_type'],
+                image_id=data['image_id'],
                 flavors=flavors)
         except Exception:
             redirect = self.get_failure_url()
