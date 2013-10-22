@@ -38,16 +38,13 @@ class NodesFilterAction(tables.FilterAction):
 
 
 class NodesTable(tables.DataTable):
-    service_host = tables.Column("service_host",
-                                 link=("horizon:infrastructure:"
-                                       "resource_management:nodes:detail"),
-                                 verbose_name=_("Name"))
+    service_host = tables.Column("service_host", verbose_name=_("Name"),
+        link=("horizon:infrastructure:resource_management:nodes:detail"))
     mac_address = tables.Column("mac_address", verbose_name=_("MAC Address"))
-    pm_address = tables.Column("pm_address", verbose_name=_("IP Address"))
-    status = tables.Column("status",
-                           verbose_name=_("Status"))
-    usage = tables.Column("usage",
-                          verbose_name=_("Usage"))
+    pm_address = tables.Column("pm_address",
+        verbose_name=_("Management Address"))
+    status = tables.Column("status", verbose_name=_("Status"))
+    usage = tables.Column("usage", verbose_name=_("Usage"))
 
     class Meta:
         name = "nodes_table"
