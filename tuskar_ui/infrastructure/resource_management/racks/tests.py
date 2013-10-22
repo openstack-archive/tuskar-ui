@@ -366,3 +366,40 @@ class RackViewTests(test.BaseAdminViewTests):
 
         self.assertEquals(res['Content-Type'], 'application/json')
         self.assertEquals(res.content, state_json)
+
+    @test.create_stubs({
+        tuskar.Rack: ('get', 'list_nodes', 'list_flavors', 'update',
+            'node_ids'),
+        tuskar.ResourceClass: ('get',),
+        tuskar.Node: ('get',),
+        tuskar.BaremetalNode: ('get',),
+    })
+    def test_node_delete(self):
+        rack = self.tuskar_racks.first()
+        rack.request = self.request
+        baremetal_nodes = self.baremetal_nodes.list()
+        baremetal_node = baremetal_nodes[0]
+        tuskar_node = self.tuskar_nodes.first()
+
+        tuskar.Rack.list_nodes = baremetal_nodes
+        tuskar.Rack.node_ids = [node.id for node in baremetal_nodes]
+        tuskar.Rack.list_flavors = []
+
+        tuskar.Rack.get(mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
+        tuskar.Node.get(mox.IsA(http.HttpRequest),
+            baremetal_node.id).AndReturn(tuskar_node)
+        tuskar.Rack.get(None, rack.id).AndReturn(rack)  # called by node.rack
+        tuskar.Rack.update(mox.IsA(http.HttpRequest), rack.id,
+            {'nodes': [{'id': node_id}
+                for node_id in tuskar.Rack.node_ids
+                if node_id != baremetal_node.id]}).AndReturn(rack)
+        self.mox.ReplayAll()
+
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:racks:detail',
+            args=[rack.id])
+        form_data = {'action': 'nodes_table__delete__%s' % baremetal_node.id}
+        response = self.client.post(url, form_data)
+        self.assertNoFormErrors(response)
+        self.assertMessageCount(success=1)
+        self.assertRedirectsNoFollow(response, url)
