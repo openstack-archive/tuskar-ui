@@ -14,6 +14,7 @@
 
 from django.utils.translation import ugettext_lazy as _  # noqa
 
+from horizon import messages
 from horizon import tables
 
 from tuskar_ui import api as tuskar
@@ -27,7 +28,11 @@ class DeleteNodes(tables.DeleteAction):
     data_type_plural = _("Nodes")
 
     def delete(self, request, obj_id):
-        tuskar.node_delete(request, obj_id)
+        node = tuskar.Node.get(request, obj_id)
+        # TODO(rdopieralski) When tuskar-api can delete nodes, do it here.
+        # node.delete(request)
+        messages.error(request, _("Error deleting node %s. "
+            "Deleting nodes is not supported.") % node.service_host)
 
 
 class NodesFilterAction(tables.FilterAction):
