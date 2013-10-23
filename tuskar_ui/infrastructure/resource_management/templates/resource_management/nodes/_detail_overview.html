@@ -36,7 +36,7 @@
       <dt>{% trans "Provisioned Image" %}</dt>
       <dd>{{ node.image|default:_("None") }}</dd>
       <dt>{% trans "Running Instances" %}</dt>
-      <dd>{{ node.running_virtual_machines|length }}</dd>
+      <dd>{{ running_instances }}</dd>
     </dl>
   </div>
   <div class="span4">

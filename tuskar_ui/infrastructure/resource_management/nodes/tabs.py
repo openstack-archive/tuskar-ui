@@ -14,7 +14,9 @@
 
 from django.utils.translation import ugettext_lazy as _  # noqa
 
+from horizon import messages
 from horizon import tabs
+import requests
 
 
 class OverviewTab(tabs.Tab):
@@ -25,7 +27,17 @@ class OverviewTab(tabs.Tab):
     preload = False
 
     def get_context_data(self, request):
-        return {"node": self.tab_group.kwargs['node']}
+        node = self.tab_group.kwargs['node']
+        try:
+            running_instances = len(node.running_virtual_machines)
+        except requests.exceptions.ConnectionError:
+            running_instances = _("Unknown")
+            messages.warning(request,
+                _("Can't retrieve the running instances from the overcloud."))
+        return {
+            'node': node,
+            'running_instances': running_instances,
+        }
 
 
 class NodeDetailTabs(tabs.TabGroup):
