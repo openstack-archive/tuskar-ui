@@ -23,6 +23,11 @@ import horizon.workflows
 LOG = logging.getLogger(__name__)
 
 
+# A WorkflowView that uses tuskar's base template with additional CSS and JS
+class WorkflowView(horizon.workflows.WorkflowView):
+    template_name = 'infrastructure/_workflow_base.html'
+
+
 # FIXME: TableStep
 class TableStep(horizon.workflows.Step):
     """

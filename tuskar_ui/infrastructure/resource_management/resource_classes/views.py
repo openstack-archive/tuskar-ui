@@ -26,7 +26,6 @@ from django.utils.translation import ugettext_lazy as _  # noqa
 from horizon import exceptions
 from horizon import forms as horizon_forms
 from horizon import tabs as horizon_tabs
-from horizon import workflows as horizon_workflows
 
 from tuskar_ui import api as tuskar
 
@@ -34,19 +33,20 @@ from tuskar_ui.infrastructure.resource_management.resource_classes import forms
 from tuskar_ui.infrastructure.resource_management.resource_classes import tabs
 from tuskar_ui.infrastructure.resource_management.resource_classes\
     import workflows
+from tuskar_ui import workflows as tuskar_workflows
 
 
 LOG = logging.getLogger(__name__)
 
 
-class CreateView(horizon_workflows.WorkflowView):
+class CreateView(tuskar_workflows.WorkflowView):
     workflow_class = workflows.CreateResourceClass
 
     def get_initial(self):
         pass
 
 
-class UpdateView(horizon_workflows.WorkflowView):
+class UpdateView(tuskar_workflows.WorkflowView):
     workflow_class = workflows.UpdateResourceClass
 
     def get_context_data(self, **kwargs):
