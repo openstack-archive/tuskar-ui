@@ -44,7 +44,7 @@ class RackViewTests(test.BaseAdminViewTests):
 
         self.assertEqual(rack.status_code, 200)
         self.assertTemplateUsed(rack,
-                                'horizon/common/_workflow_base.html')
+                                'infrastructure/_workflow_base.html')
 
     # FIXME (mawagner) - After moving EditRack to use workflows, we need
     # to circle back and fix these tests.
@@ -120,7 +120,7 @@ class RackViewTests(test.BaseAdminViewTests):
             'resource_management:racks:edit', args=[1])
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
-        self.assertTemplateUsed(res, 'horizon/common/_workflow_base.html')
+        self.assertTemplateUsed(res, 'infrastructure/_workflow_base.html')
 
     @test.create_stubs({tuskar.Rack: ('get', 'list', 'update', 'list_nodes'),
                         tuskar.ResourceClass: ('list',)})

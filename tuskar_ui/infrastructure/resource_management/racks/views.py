@@ -28,19 +28,19 @@ from django.views import generic
 from horizon import exceptions
 from horizon import forms as horizon_forms
 from horizon import tabs as horizon_tabs
-from horizon import workflows as horizon_workflows
 
 from tuskar_ui import api as tuskar
 from tuskar_ui.infrastructure.resource_management.racks import forms
 from tuskar_ui.infrastructure.resource_management.racks import tables
 from tuskar_ui.infrastructure.resource_management.racks import tabs
 from tuskar_ui.infrastructure.resource_management.racks import workflows
+from tuskar_ui import workflows as tuskar_workflows
 
 
 LOG = logging.getLogger(__name__)
 
 
-class CreateView(horizon_workflows.WorkflowView):
+class CreateView(tuskar_workflows.WorkflowView):
     workflow_class = workflows.CreateRack
 
     def get_initial(self):
@@ -60,7 +60,7 @@ class UploadView(horizon_forms.ModalFormView):
         return context
 
 
-class EditView(horizon_workflows.WorkflowView):
+class EditView(tuskar_workflows.WorkflowView):
     workflow_class = workflows.EditRack
 
     def get_initial(self):
