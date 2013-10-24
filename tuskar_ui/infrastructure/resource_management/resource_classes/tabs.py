@@ -40,7 +40,7 @@ class RacksTab(tabs.TableTab):
     template_name = ("infrastructure/resource_management/resource_classes/"
                      "_detail_racks.html")
 
-    def get_racks_data(self):
+    def get_racks_table_data(self):
         try:
             resource_class = self.tab_group.kwargs['resource_class']
             racks = resource_class.list_racks
@@ -56,17 +56,17 @@ class FlavorsTab(tabs.TableTab):
     name = _("Flavors")
     slug = "flavors"
     template_name = ("infrastructure/resource_management/resource_classes/"
-                     "_detail_flavors.html")
+         "_detail_flavors.html")
 
-    def get_flavors_data(self):
+    def get_flavors_table_data(self):
         try:
             resource_class = self.tab_group.kwargs['resource_class']
-            racks = resource_class.list_flavors
+            flavors = resource_class.list_flavors
         except Exception:
-            racks = []
+            flavors = []
             exceptions.handle(self.tab_group.request,
                               _('Unable to retrieve flavor list.'))
-        return racks
+        return flavors
 
     def allowed(self, request):
         resource_class = self.tab_group.kwargs['resource_class']

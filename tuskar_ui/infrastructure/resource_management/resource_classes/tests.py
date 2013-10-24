@@ -351,10 +351,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'detail',
             args=[resource_class.id])
         res = self.client.get(url)
-        self.assertItemsEqual(res.context['flavors_table'].data,
-                              flavors)
-        self.assertItemsEqual(res.context['racks_table'].data,
-                              racks)
+        self.assertItemsEqual(res.context['flavors_table_table'].data, flavors)
+        self.assertItemsEqual(res.context['racks_table_table'].data, racks)
         self.assertEqual(res.status_code, 200)
         self.assertTemplateUsed(res,
             'infrastructure/resource_management/resource_classes/detail.html')
