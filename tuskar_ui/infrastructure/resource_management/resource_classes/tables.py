@@ -70,18 +70,14 @@ class ResourcesClassFilterAction(tables.FilterAction):
 
 
 class ResourceClassesTable(tables.DataTable):
-    name = tables.Column("name",
-                         link=('horizon:infrastructure:'
-                               'resource_management:resource_classes:detail'),
-                         verbose_name=_("Class Name"))
-    service_type = tables.Column("service_type",
-                                 verbose_name=_("Class Type"))
-    racks_count = tables.Column("racks_count",
-                                verbose_name=_("Racks"),
-                                empty_value="0")
-    nodes_count = tables.Column("nodes_count",
-                                verbose_name=_("Nodes"),
-                                empty_value="0")
+    name = tables.Column("name", link=("horizon:infrastructure:"
+            "resource_management:resource_classes:detail"),
+        verbose_name=_("Class Name"))
+    service_type = tables.Column("service_type", verbose_name=_("Class Type"))
+    racks_count = tables.Column("racks_count", verbose_name=_("Racks"),
+        empty_value="0")
+    nodes_count = tables.Column("nodes_count", verbose_name=_("Nodes"),
+        empty_value="0")
 
     class Meta:
         name = "resource_classes"
@@ -133,8 +129,8 @@ class UpdateRacksClass(tables.LinkAction):
     classes = ("ajax-modal", "btn-edit")
 
     def get_link_url(self, datum=None):
-        url = "horizon:infrastructure:resource_management:resource_classes:"\
-              "update_racks"
+        url = ("horizon:infrastructure:resource_management:resource_classes:"
+            "update_racks")
         return "%s?step=%s" % (
             urlresolvers.reverse(
                 url,
@@ -148,13 +144,12 @@ class UpdateFlavorsClass(tables.LinkAction):
     classes = ("ajax-modal", "btn-edit")
 
     def get_link_url(self, datum=None):
-        url = "horizon:infrastructure:resource_management:resource_classes:"\
-              "update_flavors"
+        url = ("horizon:infrastructure:resource_management:resource_classes:"
+            "update_flavors")
+        resource_class_id = self.table.kwargs.get('resource_class_id')
         return "%s?step=%s" % (
-            urlresolvers.reverse(
-                url,
-                args=(self.table.kwargs.get('resource_class_id'),)),
-            resource_classes.workflows.ResourceClassInfoAndFlavorsAction.slug)
+            urlresolvers.reverse(url, args=(resource_class_id,)),
+            resource_classes.workflows.ResourceClassFlavorsAction.slug)
 
 
 class FlavorsTable(tables.DataTable):
@@ -162,15 +157,15 @@ class FlavorsTable(tables.DataTable):
         # FIXME - horizon Column.get_link_url does not allow to access GET
         # params
         resource_class_id = re.findall("[0-9]+", datum.request.path)[-1]
-        return urlresolvers.reverse("horizon:infrastructure:"
-                                    "resource_management:resource_classes:"
-                                    "flavors:detail",
-                                    args=(resource_class_id, datum.id))
+        return urlresolvers.reverse(
+            "horizon:infrastructure:resource_management:resource_classes:"
+            "flavors:detail", args=(resource_class_id, datum.id))
 
-    name = tables.Column('name',
-                         link=get_flavor_detail_link,
-                         verbose_name=_('Flavor Name'))
-
+    name = tables.Column(
+        'name',
+        link=get_flavor_detail_link,
+        verbose_name=_('Flavor Name'),
+    )
     cpu = tables.Column(
         "cpu",
         verbose_name=_('VCPU'),
@@ -196,9 +191,7 @@ class FlavorsTable(tables.DataTable):
         verbose_name=_('Swap Disk (MB)'),
         filters=(lambda x: getattr(x, 'value', ''),)
     )
-
-    max_vms = tables.Column("max_vms",
-                            verbose_name=_("Max. VMs"))
+    max_vms = tables.Column("max_vms", verbose_name=_("Max. VMs"))
 
     class Meta:
         name = "flavors"
@@ -207,7 +200,7 @@ class FlavorsTable(tables.DataTable):
 
 
 class FlavorsFormsetTable(tuskar_ui.tables.FormsetDataTableMixin,
-                        FlavorsTable):
+        FlavorsTable):
 
     name = tables.Column(
         'name',
