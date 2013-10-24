@@ -99,7 +99,7 @@ class RacksFilterAction(tables.FilterAction):
 
 class RacksTable(racks_tables.RacksTable):
     class Meta:
-        name = "racks"
+        name = "racks_table"
         verbose_name = _("Racks")
         table_actions = (RacksFilterAction,)
 
@@ -194,7 +194,7 @@ class FlavorsTable(tables.DataTable):
     max_vms = tables.Column("max_vms", verbose_name=_("Max. VMs"))
 
     class Meta:
-        name = "flavors"
+        name = "flavors_table"
         verbose_name = _("Flavors")
         table_actions = (FlavorsFilterAction, UpdateFlavorsClass)
 
