@@ -135,7 +135,7 @@ class EditNodes(CreateNodes):
     def get_nodes_data(self):
         rack_id = self.workflow.context['rack_id']
         rack = tuskar.Rack.get(self.workflow.request, rack_id)
-        return rack.list_nodes
+        return [node.nova_baremetal_node for node in rack.list_nodes]
 
 
 class CreateRack(workflows.Workflow):
@@ -208,6 +208,8 @@ class CreateRack(workflows.Workflow):
                 exceptions.handle(self.request, _("Unable to update node."))
                 return False
             else:
+                # TODO(rdopiera) Make sure whether we want Node id or
+                # BaremetalNode id here. See bug #1244202
                 node_ids.append({'id': node_id})
         try:
             # Then, register the Rack, including the nodes
