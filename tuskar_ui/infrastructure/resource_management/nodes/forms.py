@@ -25,7 +25,7 @@ class NodeForm(django.forms.Form):
     service_host = django.forms.CharField(label=_("Service Host"),
         widget=django.forms.TextInput(attrs={'class': 'input input-mini'}),
         required=True)
-    mac_address = django.forms.CharField(label=_("MAC Address"),
+    mac_address = tuskar_ui.forms.MACField(label=_("MAC Address"),
         widget=django.forms.TextInput(attrs={'class': 'input input-mini'}),
         required=True)
 
