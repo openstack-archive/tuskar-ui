@@ -23,6 +23,7 @@ from horizon import workflows
 import requests
 
 from tuskar_ui import api as tuskar
+from tuskar_ui import forms as tuskar_forms
 from tuskar_ui.infrastructure.resource_management.nodes import tables \
     as nodes_tables
 import tuskar_ui.workflows
@@ -36,7 +37,7 @@ class RackCreateInfoAction(workflows.Action):
                                 'contain letters, numbers, underscores, '
                                 'periods and hyphens.')})
     location = forms.CharField(label=_("Location"))
-    subnet = forms.CharField(label=_("IP Subnet"))
+    subnet = tuskar_forms.NetworkField(label=_("IP Subnet"))
     resource_class_id = forms.ChoiceField(label=_("Resource Class"))
 
     def clean(self):

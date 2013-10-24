@@ -74,7 +74,7 @@ class RackViewTests(test.BaseAdminViewTests):
             name='New Rack',
             resource_class_id=u'1',
             location='Tokyo',
-            subnet='1.2.3.4',
+            subnet='1.2.3.4/24',
             nodes=[{'id': '11'}]).AndReturn(None)
         tuskar.ResourceClass.list(
             mox.IsA(http.HttpRequest)).AndReturn(
@@ -86,7 +86,7 @@ class RackViewTests(test.BaseAdminViewTests):
             'name': 'New Rack',
             'resource_class_id': u'1',
             'location': 'Tokyo',
-            'subnet': '1.2.3.4',
+            'subnet': '1.2.3.4/24',
             'nodes-TOTAL_FORMS': 1,
             'nodes-INITIAL_FORMS': 0,
             'nodes-MAX_NUM_FORMS': 1024,

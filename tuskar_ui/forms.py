@@ -28,3 +28,11 @@ class MACField(forms.fields.Field):
                 value, version=48, dialect=netaddr.mac_unix)).upper()
         except netaddr.AddrFormatError:
             raise forms.ValidationError(_(u'Enter a valid MAC address.'))
+
+
+class NetworkField(forms.fields.Field):
+    def clean(self, value):
+        try:
+            return str(netaddr.IPNetwork(value, version=4))
+        except netaddr.AddrFormatError:
+            raise forms.ValidationError(_("Enter valid IPv4 network address."))
