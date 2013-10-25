@@ -449,6 +449,13 @@ class Rack(StringIdAPIResourceWrapper):
         return self._nodes
 
     @property
+    def list_baremetal_nodes(self):
+        if not hasattr(self, '_baremetal_nodes'):
+            self._baremetal_nodes = [node.nova_baremetal_node
+                for node in self.list_nodes]
+        return self._baremetal_nodes
+
+    @property
     def nodes_count(self):
         return len(self.nodes)
 
