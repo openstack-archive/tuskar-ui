@@ -33,40 +33,33 @@ from openstack_dashboard.api import nova
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
 REMOTE_NOVA_BAREMETAL_CREDS = getattr(django.conf.settings,
-                                      'REMOTE_NOVA_BAREMETAL_CREDS',
-                                      False)
+    'REMOTE_NOVA_BAREMETAL_CREDS', False)
 OVERCLOUD_CREDS = getattr(django.conf.settings, 'OVERCLOUD_CREDS', False)
 
 
 # FIXME: request isn't used right in the tuskar client right now, but looking
 # at other clients, it seems like it will be in the future
 def tuskarclient(request):
-    c = tuskar_client.Client(TUSKAR_ENDPOINT_URL)
-    return c
+    return tuskar_client.Client(TUSKAR_ENDPOINT_URL)
 
 
 def baremetalclient(request):
     def create_remote_nova_client_baremetal():
-        nc = nova.nova_client.Client(REMOTE_NOVA_BAREMETAL_CREDS['user'],
-                        REMOTE_NOVA_BAREMETAL_CREDS['password'],
-                        REMOTE_NOVA_BAREMETAL_CREDS['tenant'],
-                        auth_url=REMOTE_NOVA_BAREMETAL_CREDS['auth_url'],
-                        bypass_url=REMOTE_NOVA_BAREMETAL_CREDS['bypass_url'])
-        return nc
+        return nova.nova_client.Client(REMOTE_NOVA_BAREMETAL_CREDS['user'],
+            REMOTE_NOVA_BAREMETAL_CREDS['password'],
+            REMOTE_NOVA_BAREMETAL_CREDS['tenant'],
+            auth_url=REMOTE_NOVA_BAREMETAL_CREDS['auth_url'],
+            bypass_url=REMOTE_NOVA_BAREMETAL_CREDS['bypass_url'])
 
     def create_nova_client_baremetal():
         insecure = getattr(django.conf.settings, 'OPENSTACK_SSL_NO_VERIFY',
-                           False)
-        nc = nova.nova_client.Client(
-            request.user.username,
-            request.user.token.id,
-            project_id=request.user.tenant_id,
-            auth_url=base.url_for(request, 'compute'),
-            insecure=insecure,
+            False)
+        nc = nova.nova_client.Client(request.user.username,
+            request.user.token.id, project_id=request.user.tenant_id,
+            auth_url=base.url_for(request, 'compute'), insecure=insecure,
             http_log_debug=django.conf.settings.DEBUG)
         nc.client.auth_token = request.user.token.id
         nc.client.management_url = base.url_for(request, 'compute')
-
         return nc
 
     if REMOTE_NOVA_BAREMETAL_CREDS:
@@ -74,29 +67,26 @@ def baremetalclient(request):
         nc = create_remote_nova_client_baremetal()
     else:
         LOG.debug('nova baremetal client connection created using token "%s" '
-                  'and url "%s"' %
-                  (request.user.token.id, base.url_for(request, 'compute')))
+          'and url "%s"' % (request.user.token.id, base.url_for(request,
+              'compute')))
         nc = create_nova_client_baremetal()
 
     return baremetal.BareMetalNodeManager(nc)
 
 
 def overcloudclient(request):
-    c = nova.nova_client.Client(OVERCLOUD_CREDS['user'],
-                                OVERCLOUD_CREDS['password'],
-                                OVERCLOUD_CREDS['tenant'],
-                                auth_url=OVERCLOUD_CREDS['auth_url'])
-    return c
+    return nova.nova_client.Client(OVERCLOUD_CREDS['user'],
+        OVERCLOUD_CREDS['password'], OVERCLOUD_CREDS['tenant'],
+        auth_url=OVERCLOUD_CREDS['auth_url'])
 
 
+# horizon DataTable class expects ids to be string,
+# if it's not string, then comparison in
+# horizon/tables/base.py:get_object_by_id fails.
+# Because of this, ids returned from dummy api are converted to string
+# (luckily django autoconverts strings to integers when passing string to
+# django model id)
 class StringIdAPIResourceWrapper(base.APIResourceWrapper):
-    # horizon DataTable class expects ids to be string,
-    # if it's not string, then comparison in
-    # horizon/tables/base.py:get_object_by_id fails.
-    # Because of this, ids returned from dummy api are converted to string
-    # (luckily django autoconverts strings to integers when passing string to
-    # django model id)
-
     def __init__(self, apiresource, request=None):
         self.request = request
         self._apiresource = apiresource
@@ -133,16 +123,14 @@ class StringIdAPIResourceWrapper(base.APIResourceWrapper):
 
 
 class Alert(StringIdAPIResourceWrapper):
-    """Wrapper for the Alert object returned by the
-    dummy model.
-    """
+    """Wrapper for the Alert object returned by the dummy model."""
+
     _attrs = ['message', 'time']
 
 
 class Capacity(StringIdAPIResourceWrapper):
-    """Wrapper for the Capacity object returned by the
-    dummy model.
-    """
+    """Wrapper for the Capacity object returned by the dummy model."""
+
     _attrs = ['name', 'value', 'unit']
 
     # defines a random usage of capacity - API should probably be able to
@@ -174,15 +162,16 @@ class BaremetalNode(StringIdAPIResourceWrapper):
         terminal_port = kwargs['terminal_port']
         if terminal_port == '':
             terminal_port = None
-        node = baremetalclient(request).create(kwargs['service_host'],
-                                               kwargs['cpus'],
-                                               kwargs['memory_mb'],
-                                               kwargs['local_gb'],
-                                               kwargs['prov_mac_address'],
-                                               kwargs['pm_address'] or None,
-                                               kwargs['pm_user'] or None,
-                                               kwargs['pm_password'],
-                                               terminal_port)
+        node = baremetalclient(request).create(
+            kwargs['service_host'],
+            kwargs['cpus'],
+            kwargs['memory_mb'],
+            kwargs['local_gb'],
+            kwargs['prov_mac_address'],
+            kwargs['pm_address'] or None,
+            kwargs['pm_user'] or None,
+            kwargs['pm_password'],
+            terminal_port)
         return cls(node)
 
     @classmethod
@@ -192,18 +181,17 @@ class BaremetalNode(StringIdAPIResourceWrapper):
 
         try:
             # Nova instance info will be added to baremetal node attributes
-            nova_instance = nova.server_get(request,
-                                            node.instance_uuid)
+            nova_instance = nova.server_get(request, node.instance_uuid)
         except Exception:
             nova_instance = None
             LOG.debug("Couldn't obtain nova.server_get instance for "
-                      "baremetal node %s" % node_id)
+                "baremetal node %s" % node_id)
         if nova_instance:
             # If baremetal is provisioned, there is a nova instance.
             addresses = nova_instance._apiresource.addresses.get('ctlplane')
             if addresses:
-                node.ip_address_other = (", "
-                    .join([addr['addr'] for addr in addresses]))
+                node.ip_address_other = ", ".join([addr['addr']
+                    for addr in addresses])
             node.status = (nova_instance._apiresource.
                 _info['OS-EXT-STS:vm_state'])
             node.power_management = ""
@@ -218,16 +206,15 @@ class BaremetalNode(StringIdAPIResourceWrapper):
 
     @classmethod
     def list(cls, request):
-        return [cls(n, request) for n in
-                baremetalclient(request).list()]
+        return [cls(n, request) for n in baremetalclient(request).list()]
 
     @classmethod
     def list_unracked(cls, request):
         try:
             racked_node_ids = [node.nova_baremetal_node_id
-                               for node in Node.list(request)]
+                for node in Node.list(request)]
             return [bn for bn in BaremetalNode.list(request)
-                    if bn.id not in racked_node_ids]
+                if bn.id not in racked_node_ids]
         except requests.ConnectionError:
             return []
 
@@ -254,22 +241,20 @@ class BaremetalNode(StringIdAPIResourceWrapper):
             if OVERCLOUD_CREDS:
                 search_opts = {}
                 search_opts['all_tenants'] = True
-                self._running_virtual_machines = [
-                    s for s in overcloudclient(
-                        self.request).servers.list(True, search_opts)
-                    if s.hostId == self.id]
+                self._running_virtual_machines = [server for server in
+                    overcloudclient(self.request).servers.list(True,
+                        search_opts)
+                    if server.hostId == self.id]
             else:
-                LOG.debug('OVERCLOUD_CREDS is not set. '
-                          'Can\'t connect to Overcloud')
+                LOG.debug(
+                    "OVERCLOUD_CREDS is not set. Can't connect to Overcloud")
                 self._running_virtual_machines = []
         return self._running_virtual_machines
 
 
 class Node(StringIdAPIResourceWrapper):
-    """
-    Wrapper for the Node object  returned by the
-    dummy model.
-    """
+    """Wrapper for the Node object  returned by the dummy model."""
+
     _attrs = ['id', 'nova_baremetal_node_id']
 
     @classmethod
@@ -302,8 +287,7 @@ class Node(StringIdAPIResourceWrapper):
     def nova_baremetal_node(self):
         if not hasattr(self, '_nova_baremetal_node'):
             if self.nova_baremetal_node_id:
-                self._nova_baremetal_node = BaremetalNode.get(
-                    self.request,
+                self._nova_baremetal_node = BaremetalNode.get(self.request,
                     self.nova_baremetal_node_id)
             else:
                 self._nova_baremetal_node = None
@@ -353,12 +337,12 @@ class Node(StringIdAPIResourceWrapper):
                 return []
             resource_class = self.rack.resource_class
 
-            added_flavors = tuskarclient(self.request).flavors\
-                                                      .list(resource_class.id)
+            added_flavors = tuskarclient(
+                self.request).flavors.list(resource_class.id)
             self._flavors = []
             if added_flavors:
-                for f in added_flavors:
-                    flavor_obj = Flavor(f)
+                for flavor in added_flavors:
+                    flavor_obj = Flavor(flavor)
                     #flavor_obj.max_vms = f.max_vms
 
                     # FIXME just a mock of used instances, add real values
@@ -381,11 +365,10 @@ class Node(StringIdAPIResourceWrapper):
 
 
 class Rack(StringIdAPIResourceWrapper):
-    """Wrapper for the Rack object  returned by the
-    dummy model.
-    """
+    """Wrapper for the Rack object  returned by the dummy model."""
+
     _attrs = ['id', 'name', 'location', 'subnet', 'nodes', 'state',
-              'capacities']
+        'capacities']
 
     @classmethod
     def create(cls, request, **kwargs):
@@ -409,20 +392,20 @@ class Rack(StringIdAPIResourceWrapper):
         # correct data mapping for resource_class
         if 'resource_class_id' in rack_args:
             rack_args['resource_class'] = {
-                'id': rack_args.pop('resource_class_id', None)}
-
+                'id': rack_args.pop('resource_class_id', None),
+            }
         rack = tuskarclient(request).racks.update(rack_id, **rack_args)
         return cls(rack)
 
     @classmethod
     def list(cls, request, only_free_racks=False):
         if only_free_racks:
-            return [Rack(r, request) for r in
-                    tuskarclient(request).racks.list() if (
-                        getattr(r, 'resource_class', None) is None)]
+            return [Rack(r, request)
+                for r in tuskarclient(request).racks.list()
+                if getattr(r, 'resource_class', None) is None]
         else:
-            return [Rack(r, request) for r in
-                    tuskarclient(request).racks.list()]
+            return [Rack(r, request)
+                for r in tuskarclient(request).racks.list()]
 
     @classmethod
     def get(cls, request, rack_id):
@@ -437,15 +420,13 @@ class Rack(StringIdAPIResourceWrapper):
     @property
     def node_ids(self):
         """ List of unicode ids of nodes added to rack"""
-        return [
-            unicode(node['id']) for node in (
-                self.nodes)]
+        return [unicode(node['id']) for node in self.nodes]
 
     @property
     def list_nodes(self):
         if not hasattr(self, '_nodes'):
-            self._nodes = [Node.get(self.request, node['id']) for node in
-                           self.nodes]
+            self._nodes = [Node.get(self.request, node['id'])
+                for node in self.nodes]
         return self._nodes
 
     @property
@@ -470,8 +451,7 @@ class Rack(StringIdAPIResourceWrapper):
     def resource_class(self):
         if not hasattr(self, '_resource_class'):
             if self.resource_class_id:
-                self._resource_class = ResourceClass.get(
-                    self.request,
+                self._resource_class = ResourceClass.get(self.request,
                     self.resource_class_id)
             else:
                 self._resource_class = None
@@ -480,7 +460,8 @@ class Rack(StringIdAPIResourceWrapper):
     @property
     def list_capacities(self):
         if not hasattr(self, '_capacities'):
-            self._capacities = [Capacity(c) for c in self.capacities]
+            self._capacities = [Capacity(capacity)
+                for capacity in self.capacities]
         return self._capacities
 
     @property
@@ -490,13 +471,15 @@ class Rack(StringIdAPIResourceWrapper):
         """
         if not hasattr(self, '_vm_capacity'):
             try:
-                value = max([flavor.max_vms for flavor in
-                             self.resource_class.list_flavors])
+                value = max(flavor.max_vms
+                    for flavor in self.resource_class.list_flavors)
             except Exception:
                 value = None
-            self._vm_capacity = Capacity({'name': "VM Capacity",
-                                          'value': value,
-                                          'unit': 'VMs'})
+            self._vm_capacity = Capacity({
+                'name': "VM Capacity",
+                'value': value,
+                'unit': 'VMs',
+            })
         return self._vm_capacity
 
     @property
@@ -519,12 +502,12 @@ class Rack(StringIdAPIResourceWrapper):
 
             if not self.resource_class:
                 return []
-            added_flavors = tuskarclient(self.request).flavors\
-                                .list(self.resource_class_id)
+            added_flavors = tuskarclient(
+                self.request).flavors.list(self.resource_class_id)
             self._flavors = []
             if added_flavors:
-                for f in added_flavors:
-                    flavor_obj = Flavor(f)
+                for flavor in added_flavors:
+                    flavor_obj = Flavor(flavor)
                     #flavor_obj.max_vms = f.max_vms
 
                     # FIXME just a mock of used instances, add real values
@@ -550,11 +533,11 @@ class Rack(StringIdAPIResourceWrapper):
 
     @property
     def is_provisioned(self):
-        return (self.state == 'active') or (self.state == 'error')
+        return self.state == 'active' or self.state == 'error'
 
     @property
     def is_provisioning(self):
-        return (self.state == 'provisioning')
+        return self.state == 'provisioning'
 
     @classmethod
     def provision_all(cls, request):
@@ -562,9 +545,8 @@ class Rack(StringIdAPIResourceWrapper):
 
 
 class ResourceClass(StringIdAPIResourceWrapper):
-    """Wrapper for the ResourceClass object  returned by the
-    dummy model.
-    """
+    """Wrapper for the ResourceClass object  returned by the dummy model."""
+
     _attrs = ['id', 'name', 'service_type', 'image_id', 'racks']
 
     @classmethod
@@ -576,11 +558,8 @@ class ResourceClass(StringIdAPIResourceWrapper):
     @classmethod
     def create(self, request, name, service_type, image_id, flavors):
         return ResourceClass(
-            tuskarclient(request).resource_classes.create(
-                name=name,
-                service_type=service_type,
-                image_id=image_id,
-                flavors=flavors))
+            tuskarclient(request).resource_classes.create(name=name,
+                service_type=service_type, image_id=image_id, flavors=flavors))
 
     @classmethod
     def list(cls, request):
@@ -591,26 +570,22 @@ class ResourceClass(StringIdAPIResourceWrapper):
     def update(cls, request, resource_class_id, name, service_type, image_id,
                 flavors):
         resource_class = cls(tuskarclient(request).resource_classes.update(
-            resource_class_id,
-            name=name,
-            service_type=service_type,
-            image_id=image_id,
-            flavors=flavors))
+            resource_class_id, name=name, service_type=service_type,
+            image_id=image_id, flavors=flavors))
 
         ## FIXME: flavors have to be updated separately, seems less than ideal
         for flavor_id in resource_class.flavors_ids:
             Flavor.delete(request, resource_class_id=resource_class.id,
-                                   flavor_id=flavor_id)
+                flavor_id=flavor_id)
         for flavor in flavors:
-            Flavor.create(request,
-                          resource_class_id=resource_class.id,
-                          **flavor)
+            Flavor.create(request, resource_class_id=resource_class.id,
+                **flavor)
 
         return resource_class
 
     @property
     def deletable(self):
-        return (len(self.racks) <= 0)
+        return not self.racks
 
     @classmethod
     def delete(cls, request, resource_class_id):
@@ -618,16 +593,15 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @property
     def racks_ids(self):
-        """ List of unicode ids of racks added to resource class """
-        return [
-            unicode(rack['id']) for rack in self.racks]
+        """ List of unicode ids of racks added to resource class."""
+        return [unicode(rack['id']) for rack in self.racks]
 
     @property
     def list_racks(self):
-        """ List of racks added to ResourceClass """
+        """ List of racks added to ResourceClass."""
         if not hasattr(self, '_racks'):
-            self._racks = [Rack.get(self.request, rid) for rid in (
-                self.racks_ids)]
+            self._racks = [Rack.get(self.request, rid)
+                for rid in self.racks_ids]
         return self._racks
 
     def set_racks(self, request, racks_ids):
@@ -644,21 +618,21 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @property
     def all_racks(self):
-        """ List of racks added to ResourceClass + list of free racks,
-        meaning racks that don't belong to any ResourceClass"""
+        """
+        List of racks added to ResourceClass + list of free racks,
+        meaning racks that don't belong to any ResourceClass.
+        """
         if not hasattr(self, '_all_racks'):
-            self._all_racks =\
-                [r for r in (
-                    Rack.list(self.request)) if (
-                        r.resource_class_id is None or
-                        str(r.resource_class_id) == self.id)]
+            self._all_racks = [r for r in Rack.list(self.request)
+                if r.resource_class_id is None
+                or str(r.resource_class_id) == self.id]
         return self._all_racks
 
     @property
     def nodes(self):
         if not hasattr(self, '_nodes'):
             self._nodes = [n for n in Node.list(self.request)
-                           if n.rack_id in self.racks_ids]
+                if n.rack_id in self.racks_ids]
         return self._nodes
 
     @property
@@ -667,7 +641,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @property
     def flavors_ids(self):
-        """ List of unicode ids of flavors added to resource class """
+        """ List of unicode ids of flavors added to resource class."""
         return [unicode(flavor.id) for flavor in self.list_flavors]
 
     @property
@@ -678,8 +652,8 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
             added_flavors = tuskarclient(self.request).flavors.list(self.id)
             self._flavors = []
-            for f in added_flavors:
-                flavor_obj = Flavor(f, self.request)
+            for flavor in added_flavors:
+                flavor_obj = Flavor(flavor, self.request)
                 #flavor_obj.max_vms = f.max_vms
 
                 # FIXME just a mock of used instances, add real values
@@ -704,72 +678,73 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @property
     def capacities(self):
-        """Aggregates Rack capacities values
-        """
+        """Aggregates Rack capacities values."""
         if not hasattr(self, '_capacities'):
             capacities = [rack.list_capacities for rack in self.list_racks]
 
             def add_capacities(c1, c2):
-                return [Capacity({'name': a.name,
-                                 'value': int(a.value) + int(b.value),
-                                 'unit': a.unit}) for a, b in zip(c1, c2)]
+                return [Capacity({
+                    'name': a.name,
+                    'value': int(a.value) + int(b.value),
+                    'unit': a.unit},
+                ) for a, b in zip(c1, c2)]
 
             self._capacities = reduce(add_capacities, capacities)
         return self._capacities
 
     @property
     def vm_capacity(self):
-        """ Resource Class VM Capacity is maximum value from It's Flavors
-            max_vms (considering flavor sizes are multiples), multipled by
-            number of Racks in Resource Class.
+        """
+        Resource Class VM Capacity is maximum value from It's Flavors
+        max_vms (considering flavor sizes are multiples), multipled by
+        number of Racks in Resource Class.
         """
         if not hasattr(self, '_vm_capacity'):
             try:
-                value = self.racks_count * max([flavor.max_vms for flavor in
-                                                self.list_flavors])
+                value = self.racks_count * max(flavor.max_vms
+                    for flavor in self.list_flavors)
             except Exception:
                 value = _("Unable to retrieve vm capacity")
-            self._vm_capacity = Capacity({'name': _("VM Capacity"),
-                                          'value': value,
-                                          'unit': _('VMs')})
+            self._vm_capacity = Capacity({
+                'name': _("VM Capacity"),
+                'value': value,
+                'unit': _('VMs'),
+            })
         return self._vm_capacity
 
     @property
     def aggregated_alerts(self):
         # FIXME: for now return only list of racks (particular alerts are not
         # used)
-        return [rack for rack in self.list_racks if (rack.alerts +
-            rack.aggregated_alerts)]
+        return [rack for rack in self.list_racks
+            if rack.alerts + rack.aggregated_alerts]
 
     @property
     def has_provisioned_rack(self):
-        return any([rack.is_provisioned for rack in self.list_racks])
+        return any(rack.is_provisioned for rack in self.list_racks)
 
 
 class Flavor(StringIdAPIResourceWrapper):
-    """Wrapper for the Flavor object returned by Tuskar.
-    """
+    """Wrapper for the Flavor object returned by Tuskar."""
+
     _attrs = ['id', 'name', 'max_vms']
 
     @classmethod
     def get(cls, request, resource_class_id, flavor_id):
         flavor = cls(tuskarclient(request).flavors.get(resource_class_id,
-                                                       flavor_id))
+            flavor_id))
         flavor.request = request
         return flavor
 
     @classmethod
     def create(cls, request, **kwargs):
         return cls(tuskarclient(request).flavors.create(
-            kwargs['resource_class_id'],
-            name=kwargs['name'],
-            max_vms=kwargs['max_vms'],
-            capacities=kwargs['capacities']))
+            kwargs['resource_class_id'], name=kwargs['name'],
+            max_vms=kwargs['max_vms'], capacities=kwargs['capacities']))
 
     @classmethod
     def delete(cls, request, **kwargs):
-        tuskarclient(request).flavors.delete(
-            kwargs['resource_class_id'],
+        tuskarclient(request).flavors.delete(kwargs['resource_class_id'],
             kwargs['flavor_id'])
 
     @property
@@ -778,26 +753,27 @@ class Flavor(StringIdAPIResourceWrapper):
             ## FIXME: should we distinguish between tuskar
             ## capacities and our internal capacities?
             CapacityStruct = collections.namedtuple('CapacityStruct',
-                                                    'name value unit')
-            self._capacities = [Capacity(CapacityStruct(name=c['name'],
-                                                        value=c['value'],
-                                                        unit=c['unit']))
-                                for c in self._apiresource.capacities]
+                'name value unit')
+            self._capacities = [Capacity(CapacityStruct(capacity['name'],
+                    capacity['value'], capacity['unit']))
+                for capacity in self._apiresource.capacities]
         return self._capacities
 
     def capacity(self, capacity_name):
         key = "_%s" % capacity_name
         if not hasattr(self, key):
             try:
-                capacity = [c for c in self.capacities if (
-                    c.name == capacity_name)][0]
+                for capacity in self.capacities:
+                    if capacity.name == capacity_name:
+                        break
+                else:
+                    # FIXME: the case where no capacity matches should
+                    # probably have its own error handling.
+                    raise Exception()
             except Exception:
                 # FIXME: test this
-                capacity = Capacity(
-                    name=capacity_name,
-                    value=_('Unable to retrieve '
-                            '(Is the flavor configured properly?)'),
-                    unit='')
+                capacity = Capacity(name=capacity_name, unit='', value=_(
+                    'Unable to retrieve (Is the flavor configured properly?)'))
             setattr(self, key, capacity)
         return getattr(self, key)
 
@@ -832,9 +808,10 @@ class Flavor(StringIdAPIResourceWrapper):
         values = []
         current_time = start_time
         while current_time <= end_time:
-            values.append(
-                {'date': current_time,
-                 'value': random.randint(0, self.running_virtual_machines)})
+            values.append({
+                'date': current_time,
+                'value': random.randint(0, self.running_virtual_machines),
+            })
             current_time += datetime.timedelta(hours=1)
 
         return values
