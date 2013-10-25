@@ -29,15 +29,10 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         super(ResourceManagementTests, self).setUp()
 
     @test.create_stubs({
-        tuskar.ResourceClass: (
-            'get',
-            'list',
-            'list_racks',
-            'nodes'),
-        tuskar.Node: (
-            'list',),
-        tuskar.Rack: (
-            'list',)})
+        tuskar.ResourceClass: ('get', 'list', 'list_racks', 'nodes'),
+        tuskar.Node: ('list',),
+        tuskar.Rack: ('list',)
+    })
     def test_index(self):
 
         # ResourceClass stubs
