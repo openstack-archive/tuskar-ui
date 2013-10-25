@@ -37,6 +37,46 @@ REMOTE_NOVA_BAREMETAL_CREDS = getattr(django.conf.settings,
 OVERCLOUD_CREDS = getattr(django.conf.settings, 'OVERCLOUD_CREDS', False)
 
 
+# FIXME: replace with horizon.utils.memoized.cached_property when it becomes
+# available (see https://review.openstack.org/53859)
+class cached_property(object):
+    """
+    Works like @property, but caches its value per instance.
+
+    Unlike the @memoized decorator, it doesn't keep a reference to the instance
+    of the object, and thus doesn't make that object stay in memory forever.
+
+    This code is lifted from:
+    https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/utils.py#L35
+
+    The class has to have a ``__dict__`` in order for this property to work.
+    """
+
+    # Implementation detail: this property is implemented as non-data
+    # descriptor.  Non-data descriptors are only invoked if there is
+    # no entry with the same name in the instance's __dict__.
+    # This allows us to completely get rid of the access function call
+    # overhead.  If one choses to invoke __get__ by hand the property
+    # will still work as expected because the lookup logic is replicated
+    # in __get__ for manual invocation.
+
+    def __init__(self, func, name=None, doc=None):
+        self.__name__ = name or func.__name__
+        self.__module__ = func.__module__
+        self.__doc__ = doc or func.__doc__
+        self.func = func
+
+    def __get__(self, obj, type=None):
+        if obj is None:
+            return self
+        try:
+            value = obj.__dict__[self.__name__]
+        except KeyError:
+            value = self.func(obj)
+            obj.__dict__[self.__name__] = value
+        return value
+
+
 # FIXME: request isn't used right in the tuskar client right now, but looking
 # at other clients, it seems like it will be in the future
 def tuskarclient(request):
@@ -135,19 +175,15 @@ class Capacity(StringIdAPIResourceWrapper):
 
     # defines a random usage of capacity - API should probably be able to
     # determine usage of capacity based on capacity value and obejct_id
-    @property
+    @cached_property
     def usage(self):
-        if not hasattr(self, '_usage'):
-            self._usage = random.randint(0, int(self.value))
-        return self._usage
+        return random.randint(0, int(self.value))
 
     # defines a random average of capacity - API should probably be able to
     # determine average of capacity based on capacity value and obejct_id
-    @property
+    @cached_property
     def average(self):
-        if not hasattr(self, '_average'):
-            self._average = random.randint(0, int(self.value))
-        return self._average
+        return random.randint(0, int(self.value))
 
 
 class BaremetalNode(StringIdAPIResourceWrapper):
@@ -235,21 +271,19 @@ class BaremetalNode(StringIdAPIResourceWrapper):
     def remaining_capacity(self):
         return 100 - self.running_instances
 
-    @property
+    @cached_property
     def running_virtual_machines(self):
-        if not hasattr(self, '_running_virtual_machines'):
-            if OVERCLOUD_CREDS:
-                search_opts = {}
-                search_opts['all_tenants'] = True
-                self._running_virtual_machines = [server for server in
-                    overcloudclient(self.request).servers.list(True,
-                        search_opts)
-                    if server.hostId == self.id]
-            else:
-                LOG.debug(
-                    "OVERCLOUD_CREDS is not set. Can't connect to Overcloud")
-                self._running_virtual_machines = []
-        return self._running_virtual_machines
+        if OVERCLOUD_CREDS:
+            search_opts = {}
+            search_opts['all_tenants'] = True
+            return [
+                s for s in overcloudclient(
+                    self.request).servers.list(True, search_opts)
+                if s.hostId == self.id]
+        else:
+            LOG.debug('OVERCLOUD_CREDS is not set. '
+                      'Can\'t connect to Overcloud')
+            return []
 
 
 class Node(StringIdAPIResourceWrapper):
@@ -267,14 +301,12 @@ class Node(StringIdAPIResourceWrapper):
     def list(cls, request):
         return [cls(n, request) for n in (tuskarclient(request).nodes.list())]
 
-    @property
+    @cached_property
     def rack(self):
-        if not hasattr(self, '_rack'):
-            if self.rack_id:
-                self._rack = Rack.get(self.request, self.rack_id)
-            else:
-                self._rack = None
-        return self._rack
+        if self.rack_id:
+            return Rack.get(self.request, self.rack_id)
+        else:
+            return None
 
     @property
     def rack_id(self):
@@ -283,15 +315,13 @@ class Node(StringIdAPIResourceWrapper):
         except AttributeError:
             return None
 
-    @property
+    @cached_property
     def nova_baremetal_node(self):
-        if not hasattr(self, '_nova_baremetal_node'):
-            if self.nova_baremetal_node_id:
-                self._nova_baremetal_node = BaremetalNode.get(self.request,
-                    self.nova_baremetal_node_id)
-            else:
-                self._nova_baremetal_node = None
-        return self._nova_baremetal_node
+        if self.nova_baremetal_node_id:
+            return BaremetalNode.get(self.request,
+                self.nova_baremetal_node_id)
+        else:
+            return None
 
     def nova_baremetal_node_attribute(self, attr_name):
         key = "_%s" % attr_name
@@ -327,41 +357,37 @@ class Node(StringIdAPIResourceWrapper):
     def running_virtual_machines(self):
         return self.nova_baremetal_node_attribute('running_virtual_machines')
 
-    @property
+    @cached_property
     def list_flavors(self):
-        if not hasattr(self, '_flavors'):
-            # FIXME: just a mock of used instances, add real values
-            used_instances = 0
+        # FIXME: just a mock of used instances, add real values
+        used_instances = 0
 
-            if not self.rack or not self.rack.resource_class:
-                return []
-            resource_class = self.rack.resource_class
+        if not self.rack or not self.rack.resource_class:
+            return []
+        resource_class = self.rack.resource_class
 
-            added_flavors = tuskarclient(
-                self.request).flavors.list(resource_class.id)
-            self._flavors = []
-            if added_flavors:
-                for flavor in added_flavors:
-                    flavor_obj = Flavor(flavor)
-                    #flavor_obj.max_vms = f.max_vms
+        added_flavors = tuskarclient(
+            self.request).flavors.list(resource_class.id)
+        flavors = []
+        if added_flavors:
+            for flavor in added_flavors:
+                flavor_obj = Flavor(flavor)
+                #flavor_obj.max_vms = f.max_vms
 
-                    # FIXME just a mock of used instances, add real values
-                    used_instances += 5
-                    flavor_obj.used_instances = used_instances
-                    self._flavors.append(flavor_obj)
-
-        return self._flavors
+                # FIXME just a mock of used instances, add real values
+                used_instances += 5
+                flavor_obj.used_instances = used_instances
+                flavors.append(flavor_obj)
+        return flavors
 
     @property
     # FIXME: just mock implementation, add proper one
     def is_provisioned(self):
         return (self.status != "unprovisioned" and self.rack)
 
-    @property
+    @cached_property
     def alerts(self):
-        if not hasattr(self, '_alerts'):
-            self._alerts = []
-        return self._alerts
+        return []
 
 
 class Rack(StringIdAPIResourceWrapper):
@@ -419,15 +445,12 @@ class Rack(StringIdAPIResourceWrapper):
 
     @property
     def node_ids(self):
-        """ List of unicode ids of nodes added to rack"""
+        """List of unicode ids of nodes added to rack."""
         return [unicode(node['id']) for node in self.nodes]
 
-    @property
+    @cached_property
     def list_nodes(self):
-        if not hasattr(self, '_nodes'):
-            self._nodes = [Node.get(self.request, node['id'])
-                for node in self.nodes]
-        return self._nodes
+        return [Node.get(self.request, node['id']) for node in self.nodes]
 
     @property
     def list_baremetal_nodes(self):
@@ -447,46 +470,33 @@ class Rack(StringIdAPIResourceWrapper):
         except AttributeError:
             return None
 
-    @property
+    @cached_property
     def resource_class(self):
-        if not hasattr(self, '_resource_class'):
-            if self.resource_class_id:
-                self._resource_class = ResourceClass.get(self.request,
-                    self.resource_class_id)
-            else:
-                self._resource_class = None
-        return self._resource_class
+        if self.resource_class_id:
+            return ResourceClass.get(self.request, self.resource_class_id)
+        else:
+            return None
 
-    @property
+    @cached_property
     def list_capacities(self):
-        if not hasattr(self, '_capacities'):
-            self._capacities = [Capacity(capacity)
-                for capacity in self.capacities]
-        return self._capacities
+        return [Capacity(c) for c in self.capacities]
 
-    @property
+    @cached_property
     def vm_capacity(self):
-        """ Rack VM Capacity is maximum value from its Resource Class's
-            Flavors max_vms (considering flavor sizes are multiples).
         """
-        if not hasattr(self, '_vm_capacity'):
-            try:
-                value = max(flavor.max_vms
-                    for flavor in self.resource_class.list_flavors)
-            except Exception:
-                value = None
-            self._vm_capacity = Capacity({
-                'name': "VM Capacity",
-                'value': value,
-                'unit': 'VMs',
-            })
-        return self._vm_capacity
+        Rack VM Capacity is maximum value from its Resource Class's
+        Flavors max_vms (considering flavor sizes are multiples).
+        """
+        try:
+            value = max([flavor.max_vms for flavor in
+                self.resource_class.list_flavors])
+        except Exception:
+            value = None
+        return Capacity({'name': "VM Capacity", 'value': value, 'unit': 'VMs'})
 
-    @property
+    @cached_property
     def alerts(self):
-        if not hasattr(self, '_alerts'):
-            self._alerts = []
-        return self._alerts
+        return []
 
     @property
     def aggregated_alerts(self):
@@ -494,28 +504,25 @@ class Rack(StringIdAPIResourceWrapper):
         # used)
         return [node for node in self.list_nodes if node.alerts]
 
-    @property
+    @cached_property
     def list_flavors(self):
-        if not hasattr(self, '_flavors'):
+        # FIXME just a mock of used instances, add real values
+        used_instances = 0
+
+        if not self.resource_class:
+            return []
+        added_flavors = tuskarclient(
+            self.request).flavors.list(self.resource_class_id)
+        flavors = []
+        for flavor in added_flavors:
+            flavor_obj = Flavor(flavor)
+            #flavor_obj.max_vms = f.max_vms
+
             # FIXME just a mock of used instances, add real values
-            used_instances = 0
-
-            if not self.resource_class:
-                return []
-            added_flavors = tuskarclient(
-                self.request).flavors.list(self.resource_class_id)
-            self._flavors = []
-            if added_flavors:
-                for flavor in added_flavors:
-                    flavor_obj = Flavor(flavor)
-                    #flavor_obj.max_vms = f.max_vms
-
-                    # FIXME just a mock of used instances, add real values
-                    used_instances += 2
-                    flavor_obj.used_instances = used_instances
-                    self._flavors.append(flavor_obj)
-
-        return self._flavors
+            used_instances += 2
+            flavor_obj.used_instances = used_instances
+            flavors.append(flavor_obj)
+        return flavors
 
     @property
     def all_used_instances(self):
@@ -593,16 +600,13 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @property
     def racks_ids(self):
-        """ List of unicode ids of racks added to resource class."""
+        """List of unicode ids of racks added to resource class."""
         return [unicode(rack['id']) for rack in self.racks]
 
-    @property
+    @cached_property
     def list_racks(self):
-        """ List of racks added to ResourceClass."""
-        if not hasattr(self, '_racks'):
-            self._racks = [Rack.get(self.request, rid)
-                for rid in self.racks_ids]
-        return self._racks
+        """List of racks added to ResourceClass."""
+        return [Rack.get(self.request, rid) for rid in self.racks_ids]
 
     def set_racks(self, request, racks_ids):
         # FIXME: there is a bug now in tuskar, we have to remove all racks at
@@ -616,24 +620,20 @@ class ResourceClass(StringIdAPIResourceWrapper):
     def racks_count(self):
         return len(self.racks)
 
-    @property
+    @cached_property
     def all_racks(self):
         """
         List of racks added to ResourceClass + list of free racks,
         meaning racks that don't belong to any ResourceClass.
         """
-        if not hasattr(self, '_all_racks'):
-            self._all_racks = [r for r in Rack.list(self.request)
-                if r.resource_class_id is None
-                or str(r.resource_class_id) == self.id]
-        return self._all_racks
+        return [rack for rack in Rack.list(self.request)
+            if rack.resource_class_id is None or
+            str(rack.resource_class_id) == self.id]
 
-    @property
+    @cached_property
     def nodes(self):
-        if not hasattr(self, '_nodes'):
-            self._nodes = [n for n in Node.list(self.request)
-                if n.rack_id in self.racks_ids]
-        return self._nodes
+        return [n for n in Node.list(self.request)
+            if n.rack_id in self.racks_ids]
 
     @property
     def nodes_count(self):
@@ -641,26 +641,25 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @property
     def flavors_ids(self):
-        """ List of unicode ids of flavors added to resource class."""
+        """List of unicode ids of flavors added to resource class."""
         return [unicode(flavor.id) for flavor in self.list_flavors]
 
-    @property
+    @cached_property
     def list_flavors(self):
-        if not hasattr(self, '_flavors'):
+        # FIXME just a mock of used instances, add real values
+        used_instances = 0
+
+        added_flavors = tuskarclient(self.request).flavors.list(self.id)
+        flavors = []
+        for flavor in added_flavors:
+            flavor_obj = Flavor(flavor, self.request)
+            #flavor_obj.max_vms = f.max_vms
+
             # FIXME just a mock of used instances, add real values
-            used_instances = 0
-
-            added_flavors = tuskarclient(self.request).flavors.list(self.id)
-            self._flavors = []
-            for flavor in added_flavors:
-                flavor_obj = Flavor(flavor, self.request)
-                #flavor_obj.max_vms = f.max_vms
-
-                # FIXME just a mock of used instances, add real values
-                used_instances += 5
-                flavor_obj.used_instances = used_instances
-                self._flavors.append(flavor_obj)
-        return self._flavors
+            used_instances += 5
+            flavor_obj.used_instances = used_instances
+            flavors.append(flavor_obj)
+        return flavors
 
     @property
     def all_used_instances(self):
@@ -676,41 +675,37 @@ class ResourceClass(StringIdAPIResourceWrapper):
         # FIXME just mock implementation, add proper one
         return 100 - self.total_instances
 
-    @property
+    @cached_property
     def capacities(self):
         """Aggregates Rack capacities values."""
-        if not hasattr(self, '_capacities'):
-            capacities = [rack.list_capacities for rack in self.list_racks]
 
-            def add_capacities(c1, c2):
-                return [Capacity({
-                    'name': a.name,
-                    'value': int(a.value) + int(b.value),
-                    'unit': a.unit},
-                ) for a, b in zip(c1, c2)]
+        def add_capacities(c1, c2):
+            return [Capacity({
+                'name': a.name,
+                'value': int(a.value) + int(b.value),
+                'unit': a.unit,
+            }) for a, b in zip(c1, c2)]
 
-            self._capacities = reduce(add_capacities, capacities)
-        return self._capacities
+        capacities = [rack.list_capacities for rack in self.list_racks]
+        return reduce(add_capacities, capacities)
 
-    @property
+    @cached_property
     def vm_capacity(self):
         """
         Resource Class VM Capacity is maximum value from It's Flavors
         max_vms (considering flavor sizes are multiples), multipled by
         number of Racks in Resource Class.
         """
-        if not hasattr(self, '_vm_capacity'):
-            try:
-                value = self.racks_count * max(flavor.max_vms
-                    for flavor in self.list_flavors)
-            except Exception:
-                value = _("Unable to retrieve vm capacity")
-            self._vm_capacity = Capacity({
-                'name': _("VM Capacity"),
-                'value': value,
-                'unit': _('VMs'),
-            })
-        return self._vm_capacity
+        try:
+            value = self.racks_count * max([flavor.max_vms
+                for flavor in self.list_flavors])
+        except Exception:
+            value = _("Unable to retrieve vm capacity")
+        return Capacity({
+            'name': _("VM Capacity"),
+            'value': value,
+            'unit': _('VMs'),
+        })
 
     @property
     def aggregated_alerts(self):
@@ -747,17 +742,14 @@ class Flavor(StringIdAPIResourceWrapper):
         tuskarclient(request).flavors.delete(kwargs['resource_class_id'],
             kwargs['flavor_id'])
 
-    @property
+    @cached_property
     def capacities(self):
-        if not hasattr(self, '_capacities'):
-            ## FIXME: should we distinguish between tuskar
-            ## capacities and our internal capacities?
-            CapacityStruct = collections.namedtuple('CapacityStruct',
-                'name value unit')
-            self._capacities = [Capacity(CapacityStruct(capacity['name'],
-                    capacity['value'], capacity['unit']))
-                for capacity in self._apiresource.capacities]
-        return self._capacities
+        # FIXME: should we distinguish between tuskar capacities and our
+        # internal capacities?
+        CapacityStruct = collections.namedtuple('CapacityStruct',
+            'name value unit')
+        return [Capacity(CapacityStruct(c['name'], c['value'], c['unit']))
+            for c in self._apiresource.capacities]
 
     def capacity(self, capacity_name):
         key = "_%s" % capacity_name
