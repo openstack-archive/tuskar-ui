@@ -26,27 +26,29 @@ class TuskarApiTests(test.APITestCase):
         node = self.baremetalclient_nodes.first()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'create')
-        baremetal.BareMetalNodeManager.create('node',
-                                              1,
-                                              1024,
-                                              10,
-                                              'aa:bb:cc:dd:ee',
-                                              '0.0.0.0',
-                                              'user',
-                                              'password',
-                                              0).AndReturn(node)
+        baremetal.BareMetalNodeManager.create(
+            'node',
+            1,
+            1024,
+            10,
+            'aa:bb:cc:dd:ee:ff',
+            '0.0.0.0',
+            'user',
+            'password',
+            0).AndReturn(node)
         self.mox.ReplayAll()
 
-        ret_val = api.BaremetalNode.create(self.request,
-                                           service_host='node',
-                                           cpus=1,
-                                           memory_mb=1024,
-                                           local_gb=10,
-                                           prov_mac_address='aa:bb:cc:dd:ee',
-                                           pm_address='0.0.0.0',
-                                           pm_user='user',
-                                           pm_password='password',
-                                           terminal_port=0)
+        ret_val = api.BaremetalNode.create(
+            self.request,
+            service_host='node',
+            cpus=1,
+            memory_mb=1024,
+            local_gb=10,
+            prov_mac_address='aa:bb:cc:dd:ee:ff',
+            pm_address='0.0.0.0',
+            pm_user='user',
+            pm_password='password',
+            terminal_port=0)
         self.assertIsInstance(ret_val, api.BaremetalNode)
 
     def test_baremetal_node_create_with_empty_pm(self):
@@ -59,12 +61,12 @@ class TuskarApiTests(test.APITestCase):
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'create')
         baremetal.BareMetalNodeManager.create('node', 1, 1024, 10,
-            'aa:bb:cc:dd:ee', None, None, '', None).AndReturn(node)
+            'aa:bb:cc:dd:ee:ff', None, None, '', None).AndReturn(node)
         self.mox.ReplayAll()
 
         ret_val = api.BaremetalNode.create(
             self.request, service_host='node', cpus=1,
-            memory_mb=1024, local_gb=10, prov_mac_address='aa:bb:cc:dd:ee',
+            memory_mb=1024, local_gb=10, prov_mac_address='aa:bb:cc:dd:ee:ff',
             pm_address='', pm_user='', pm_password='', terminal_port='')
         self.assertIsInstance(ret_val, api.BaremetalNode)
 
