@@ -103,10 +103,10 @@ class NodeCreateAction(workflows.Action):
             formset = table.get_formset()
             if formset.is_valid():
                 cleaned_data['nodes'] = [form.cleaned_data
-                                           for form in formset
-                                           if form.cleaned_data
-                                           and not
-                                           form.cleaned_data.get('DELETE')]
+                                         for form in formset
+                                         if form.cleaned_data
+                                         and not
+                                         form.cleaned_data.get('DELETE')]
             else:
                 raise forms.ValidationError(_("Errors in the nodes list."))
         return cleaned_data
@@ -157,7 +157,7 @@ class CreateRack(workflows.Workflow):
         """This url is used both as success and failure url"""
         return "%s?tab=resource_management_tabs__racks_tab" %\
             urlresolvers.reverse('horizon:infrastructure:resource_management:'
-                                        'index')
+                                 'index')
 
     def get_success_url(self):
         return self.get_index_url()

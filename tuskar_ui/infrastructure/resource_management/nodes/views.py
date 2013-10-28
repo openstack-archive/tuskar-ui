@@ -58,8 +58,8 @@ class DetailView(horizon_tabs.TabView):
                 exceptions.handle(self.request,
                                   _('Unable to retrieve details for '
                                     'node "%s".')
-                                    % node_id,
-                                    redirect=redirect)
+                                  % node_id,
+                                  redirect=redirect)
             self._node = node
         return self._node
 

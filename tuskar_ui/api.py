@@ -520,7 +520,7 @@ class Rack(StringIdAPIResourceWrapper):
             if not self.resource_class:
                 return []
             added_flavors = tuskarclient(self.request).flavors\
-                                .list(self.resource_class_id)
+                .list(self.resource_class_id)
             self._flavors = []
             if added_flavors:
                 for f in added_flavors:
@@ -589,7 +589,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @classmethod
     def update(cls, request, resource_class_id, name, service_type, image_id,
-                flavors):
+               flavors):
         resource_class = cls(tuskarclient(request).resource_classes.update(
             resource_class_id,
             name=name,
@@ -600,7 +600,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
         ## FIXME: flavors have to be updated separately, seems less than ideal
         for flavor_id in resource_class.flavors_ids:
             Flavor.delete(request, resource_class_id=resource_class.id,
-                                   flavor_id=flavor_id)
+                          flavor_id=flavor_id)
         for flavor in flavors:
             Flavor.create(request,
                           resource_class_id=resource_class.id,
