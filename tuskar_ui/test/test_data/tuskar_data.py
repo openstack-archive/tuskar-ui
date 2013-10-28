@@ -173,31 +173,31 @@ def data(TEST):
         {'instance_uuid': 'uuid_11',
          'id': '11',
          'name': 'node1',
-         'prov_mac_address': '00-B0-D0-86-AB-F7'})
+         'prov_mac_address': '00:B0:D0:86:AB:F7'})
     node_2 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'instance_uuid': 'uuid_12',
          'id': '12',
          'name': 'node2',
-         'prov_mac_address': '00-B0-D0-86-AB-F8'})
+         'prov_mac_address': '00:B0:D0:86:AB:F8'})
     node_3 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'instance_uuid': 'uuid_13',
          'id': '13',
          'name': 'node3',
-         'prov_mac_address': '00-B0-D0-86-AB-F9'})
+         'prov_mac_address': '00:B0:D0:86:AB:F9'})
     node_4 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'instance_uuid': 'uuid_14',
          'id': '14',
          'name': 'node4',
-         'prov_mac_address': '00-B0-D0-86-AB-F0'})
+         'prov_mac_address': '00:B0:D0:86:AB:F0'})
     node_5 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'instance_uuid': 'uuid_15',
          'id': '15',
          'name': 'node5',
-         'prov_mac_address': '00-B0-D0-86-AB-F1'})
+         'prov_mac_address': '00:B0:D0:86:AB:F1'})
 
     TEST.baremetalclient_nodes.add(node_1, node_2, node_3, node_4)
     TEST.baremetal_nodes.add(api.BaremetalNode(node_1),
