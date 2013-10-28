@@ -20,7 +20,8 @@ RACKS = r'^(?P<rack_id>[^/]+)/%s$'
 VIEW_MOD = 'tuskar_ui.infrastructure.resource_management.racks.views'
 
 
-urlpatterns = urls.patterns(VIEW_MOD,
+urlpatterns = urls.patterns(
+    VIEW_MOD,
     urls.url(r'^create/$', views.CreateView.as_view(), name='create'),
     urls.url(r'^upload/$', views.UploadView.as_view(), name='upload'),
     urls.url(r'^usage_data$',

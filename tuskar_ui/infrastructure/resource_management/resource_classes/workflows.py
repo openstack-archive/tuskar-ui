@@ -65,7 +65,7 @@ class ResourceClassInfoAction(workflows.Action):
             images, more = glance.image_list_detailed(self.request)
         except Exception:
             exceptions.handle(self.request,
-                _('Unable to retrieve image list.'))
+                              _('Unable to retrieve image list.'))
         else:
             self.fields['image_id'].choices = [
                 (image.id, image.name) for image in images]
@@ -141,7 +141,7 @@ class CreateResourceClassFlavors(tuskar_ui.workflows.TableStep):
         except Exception:
             flavors = []
             exceptions.handle(self.workflow.request,
-                _('Unable to retrieve resource flavors list.'))
+                              _('Unable to retrieve resource flavors list.'))
         return flavors
 
 

@@ -63,6 +63,7 @@ class FlavorsTests(test.BaseAdminViewTests):
                                    args=[resource_class.id, flavor.id])
         res = self.client.get(url)
 
-        self.assertRedirectsNoFollow(res,
+        self.assertRedirectsNoFollow(
+            res,
             urlresolvers.reverse('horizon:infrastructure:resource_management:'
                                  'index'))

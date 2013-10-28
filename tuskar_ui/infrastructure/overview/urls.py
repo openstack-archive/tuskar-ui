@@ -17,6 +17,7 @@ from django.conf.urls import defaults
 from tuskar_ui.infrastructure.overview import views
 
 
-urlpatterns = defaults.patterns('',
+urlpatterns = defaults.patterns(
+    '',
     defaults.url(r'^$', views.IndexView.as_view(), name='index'),
 )

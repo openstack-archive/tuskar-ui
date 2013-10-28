@@ -70,14 +70,15 @@ class ResourcesClassFilterAction(tables.FilterAction):
 
 
 class ResourceClassesTable(tables.DataTable):
-    name = tables.Column("name", link=("horizon:infrastructure:"
-            "resource_management:resource_classes:detail"),
+    name = tables.Column(
+        "name", link=("horizon:infrastructure:"
+                      "resource_management:resource_classes:detail"),
         verbose_name=_("Class Name"))
     service_type = tables.Column("service_type", verbose_name=_("Class Type"))
     racks_count = tables.Column("racks_count", verbose_name=_("Racks"),
-        empty_value="0")
+                                empty_value="0")
     nodes_count = tables.Column("nodes_count", verbose_name=_("Nodes"),
-        empty_value="0")
+                                empty_value="0")
 
     class Meta:
         name = "resource_classes"
@@ -130,7 +131,7 @@ class UpdateRacksClass(tables.LinkAction):
 
     def get_link_url(self, datum=None):
         url = ("horizon:infrastructure:resource_management:resource_classes:"
-            "update_racks")
+               "update_racks")
         return "%s?step=%s" % (
             urlresolvers.reverse(
                 url,
@@ -145,7 +146,7 @@ class UpdateFlavorsClass(tables.LinkAction):
 
     def get_link_url(self, datum=None):
         url = ("horizon:infrastructure:resource_management:resource_classes:"
-            "update_flavors")
+               "update_flavors")
         resource_class_id = self.table.kwargs.get('resource_class_id')
         return "%s?step=%s" % (
             urlresolvers.reverse(url, args=(resource_class_id,)),
@@ -200,7 +201,7 @@ class FlavorsTable(tables.DataTable):
 
 
 class FlavorsFormsetTable(tuskar_ui.tables.FormsetDataTableMixin,
-        FlavorsTable):
+                          FlavorsTable):
 
     name = tables.Column(
         'name',

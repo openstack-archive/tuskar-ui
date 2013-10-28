@@ -111,7 +111,7 @@ class FormsetCell(BaseCell):
         else:
             if self.field.errors:
                 self.attrs['class'] = (self.attrs.get('class', '') +
-                    ' error control-group')
+                                       ' error control-group')
                 self.attrs['title'] = ' '.join(
                     unicode(error) for error in self.field.errors)
 
@@ -137,7 +137,7 @@ class FormsetRow(BaseRow):
 
     def render(self):
         return loader.render_to_string(self.template_path,
-            {"row": self, "form": self.form})
+                                       {"row": self, "form": self.form})
 
 
 class FormsetDataTableMixin(object):

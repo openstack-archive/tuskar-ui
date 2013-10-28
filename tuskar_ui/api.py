@@ -47,11 +47,13 @@ def tuskarclient(request):
 
 def baremetalclient(request):
     def create_remote_nova_client_baremetal():
-        nc = nova.nova_client.Client(REMOTE_NOVA_BAREMETAL_CREDS['user'],
-                        REMOTE_NOVA_BAREMETAL_CREDS['password'],
-                        REMOTE_NOVA_BAREMETAL_CREDS['tenant'],
-                        auth_url=REMOTE_NOVA_BAREMETAL_CREDS['auth_url'],
-                        bypass_url=REMOTE_NOVA_BAREMETAL_CREDS['bypass_url'])
+        nc = nova.nova_client.Client(
+            REMOTE_NOVA_BAREMETAL_CREDS['user'],
+            REMOTE_NOVA_BAREMETAL_CREDS['password'],
+            REMOTE_NOVA_BAREMETAL_CREDS['tenant'],
+            auth_url=REMOTE_NOVA_BAREMETAL_CREDS['auth_url'],
+            bypass_url=REMOTE_NOVA_BAREMETAL_CREDS['bypass_url'],
+        )
         return nc
 
     def create_nova_client_baremetal():
@@ -205,7 +207,7 @@ class BaremetalNode(StringIdAPIResourceWrapper):
                 node.ip_address_other = (", "
                     .join([addr['addr'] for addr in addresses]))
             node.status = (nova_instance._apiresource.
-                _info['OS-EXT-STS:vm_state'])
+                           _info['OS-EXT-STS:vm_state'])
             node.power_management = ""
             if node.pm_user:
                 node.power_management = node.pm_user + "/********"
@@ -452,7 +454,7 @@ class Rack(StringIdAPIResourceWrapper):
     def list_baremetal_nodes(self):
         if not hasattr(self, '_baremetal_nodes'):
             self._baremetal_nodes = [node.nova_baremetal_node
-                for node in self.list_nodes]
+                                     for node in self.list_nodes]
         return self._baremetal_nodes
 
     @property
@@ -739,7 +741,7 @@ class ResourceClass(StringIdAPIResourceWrapper):
         # FIXME: for now return only list of racks (particular alerts are not
         # used)
         return [rack for rack in self.list_racks if (rack.alerts +
-            rack.aggregated_alerts)]
+                rack.aggregated_alerts)]
 
     @property
     def has_provisioned_rack(self):

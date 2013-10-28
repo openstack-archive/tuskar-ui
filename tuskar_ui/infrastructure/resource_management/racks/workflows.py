@@ -33,7 +33,8 @@ class RackCreateInfoAction(workflows.Action):
     name = forms.RegexField(label=_("Name"),
                             max_length=25,
                             regex=r'^[\w\.\- ]+$',
-                            error_messages={'invalid': _('Name may only '
+                            error_messages={'invalid': _(
+                                'Name may only '
                                 'contain letters, numbers, underscores, '
                                 'periods and hyphens.')})
     location = forms.CharField(label=_("Location"))
@@ -50,7 +51,7 @@ class RackCreateInfoAction(workflows.Action):
         except Exception:
             racks = []
             exceptions.check_message(['Connection', 'refused'],
-                _("Unable to retrieve rack list."))
+                                     _("Unable to retrieve rack list."))
             raise
 
         # Validations: detect duplicates
@@ -213,7 +214,8 @@ class CreateRack(workflows.Workflow):
                 node_ids.append({'id': node_id})
         try:
             # Then, register the Rack, including the nodes
-            tuskar.Rack.create(request, name=data['name'],
+            tuskar.Rack.create(
+                request, name=data['name'],
                 resource_class_id=data['resource_class_id'],
                 location=data['location'], subnet=data['subnet'],
                 nodes=node_ids)
@@ -239,7 +241,7 @@ class EditRack(CreateRack):
 
     def handle(self, request, data):
         node_ids = [{'id': self.create_or_update_node(node_data)}
-                for node_data in data['nodes']]
+                    for node_data in data['nodes']]
         try:
             rack_id = self.context['rack_id']
             data['nodes'] = node_ids

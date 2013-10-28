@@ -34,8 +34,9 @@ class NodeViewTests(test.BaseAdminViewTests):
         self.mox.ReplayAll()
 
         res = self.client.get(self.unracked_page)
-        self.assertTemplateUsed(res,
-                      'infrastructure/resource_management/nodes/unracked.html')
+        self.assertTemplateUsed(
+            res,
+            'infrastructure/resource_management/nodes/unracked.html')
 
         unracked_nodes_table = res.context['unracked_nodes_table'].data
         self.assertItemsEqual(unracked_nodes_table, unracked_nodes)
@@ -86,6 +87,7 @@ class NodeViewTests(test.BaseAdminViewTests):
                                    args=[node.id])
         res = self.client.get(url)
 
-        self.assertRedirectsNoFollow(res,
+        self.assertRedirectsNoFollow(
+            res,
             urlresolvers.reverse('horizon:infrastructure:resource_management:'
                                  'index'))

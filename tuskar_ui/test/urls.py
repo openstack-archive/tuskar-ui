@@ -16,6 +16,7 @@ from django.conf.urls import defaults
 from django.views import generic
 
 
-urlpatterns = defaults.patterns('', defaults.url(r'^$',
+urlpatterns = defaults.patterns('', defaults.url(
+    r'^$',
     generic.TemplateView.as_view(template_name="infrastructure/qunit.html"),
     name='qunit_tests'))

@@ -32,8 +32,8 @@ class DeleteNodes(tables.DeleteAction):
             node = tuskar.Node.get(request, obj_id)
             rack = node.rack
             nodes = [{'id': node_id}
-                for node_id in rack.node_ids
-                if node_id != obj_id]
+                     for node_id in rack.node_ids
+                     if node_id != obj_id]
             tuskar.Rack.update(request, rack.id, {'nodes': nodes})
         except Exception:
             exceptions.handle(request, _("Error deleting node."))
@@ -54,7 +54,7 @@ class NodesTable(tables.DataTable):
         link=("horizon:infrastructure:resource_management:nodes:detail"))
     mac_address = tables.Column("mac_address", verbose_name=_("MAC Address"))
     pm_address = tables.Column("pm_address",
-        verbose_name=_("Management Address"))
+                               verbose_name=_("Management Address"))
     status = tables.Column("status", verbose_name=_("Status"))
     usage = tables.Column("usage", verbose_name=_("Usage"))
 
@@ -87,13 +87,13 @@ class NodesFormsetTable(tuskar_ui.tables.FormsetDataTable):
     local_gb = tables.Column('local_gb', verbose_name=_("Local Disk (GB)"))
 
     pm_address = tables.Column('pm_address',
-        verbose_name=_("Power Management IP"))
+                               verbose_name=_("Power Management IP"))
     pm_user = tables.Column('pm_user', verbose_name=_("Power Management User"))
     pm_password = tables.Column('pm_password',
-        verbose_name=_("Power Management Password"))
+                                verbose_name=_("Power Management Password"))
 
     terminal_port = tables.Column('terminal_port',
-        verbose_name=_("Terminal Port"))
+                                  verbose_name=_("Terminal Port"))
 
     # This is needed for the formset with can_delete=True
     DELETE = tables.Column('DELETE', verbose_name=_("Delete"))

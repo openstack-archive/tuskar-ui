@@ -21,7 +21,8 @@ from tuskar_ui.infrastructure.resource_management.flavors import views
 VIEW_MOD = 'tuskar_ui.infrastructure.' \
            'resource_management.flavors.views'
 
-urlpatterns = defaults.patterns(VIEW_MOD,
+urlpatterns = defaults.patterns(
+    VIEW_MOD,
     defaults.url(r'^(?P<flavor_id>[^/]+)/$',
                  views.DetailView.as_view(),
                  name='detail')
