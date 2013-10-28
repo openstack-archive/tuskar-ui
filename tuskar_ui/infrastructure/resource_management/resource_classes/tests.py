@@ -446,7 +446,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         tuskar.ResourceClass: ('get', 'list_flavors',
-                                'racks_ids', 'all_racks'),
+                               'racks_ids', 'all_racks'),
         glance: ('image_list_detailed',),
     })
     def test_detail_edit_racks_get(self):
@@ -457,8 +457,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         glance.image_list_detailed(mox.IsA(http.HttpRequest)).AndReturn(
             (self.images.list(), False))
         tuskar.ResourceClass.get(mox.IsA(http.HttpRequest),
-                                 resource_class.id).\
-                                 AndReturn(resource_class)
+                                 resource_class.id).AndReturn(resource_class)
 
         # get_flavors_data in workflows.py
         tuskar.ResourceClass.get(
@@ -551,7 +550,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         tuskar.ResourceClass: ('get', 'list_flavors',
-                                'racks_ids', 'all_racks'),
+                               'racks_ids', 'all_racks'),
         glance: ('image_list_detailed',),
     })
     def test_detail_edit_flavors_get(self):
@@ -562,8 +561,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         glance.image_list_detailed(mox.IsA(http.HttpRequest)).AndReturn(
             (self.images.list(), False))
         tuskar.ResourceClass.get(mox.IsA(http.HttpRequest),
-                                 resource_class.id).\
-                                 AndReturn(resource_class)
+                                 resource_class.id).AndReturn(resource_class)
 
         # get_flavors_data in workflows.py
         tuskar.ResourceClass.get(
@@ -649,7 +647,7 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertMessageCount(success=1)
 
         redirect_url = ('horizon:infrastructure:resource_management:'
-                            'resource_classes:detail')
+                        'resource_classes:detail')
         redirect_url = "%s?tab=resource_class_details__flavors" % (
             urlresolvers.reverse(redirect_url, args=(resource_class.id,)))
         self.assertRedirectsNoFollow(res, redirect_url)

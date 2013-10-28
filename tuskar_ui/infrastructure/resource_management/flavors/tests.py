@@ -38,13 +38,13 @@ class FlavorsTests(test.BaseAdminViewTests):
         self.mox.ReplayAll()
 
         url = urlresolvers.reverse('horizon:infrastructure:'
-                                        'resource_management:resource_classes:'
-                                        'flavors:detail',
+                                   'resource_management:resource_classes:'
+                                   'flavors:detail',
                                    args=[resource_class.id, flavor.id])
         res = self.client.get(url)
         self.assertTemplateUsed(res,
                                 'infrastructure/resource_management/'
-                                    'flavors/detail.html')
+                                'flavors/detail.html')
 
     @test.create_stubs({tuskar.Flavor: ('get',)})
     def test_detail_flavor_exception(self):
@@ -52,17 +52,17 @@ class FlavorsTests(test.BaseAdminViewTests):
         resource_class = self.tuskar_resource_classes.first()
 
         tuskar.Flavor.get(mox.IsA(http.HttpRequest),
-                              resource_class.id,
-                              flavor.id).AndRaise(self.exceptions.tuskar)
+                          resource_class.id,
+                          flavor.id).AndRaise(self.exceptions.tuskar)
 
         self.mox.ReplayAll()
 
         url = urlresolvers.reverse('horizon:infrastructure:'
-                                        'resource_management:resource_classes:'
-                                        'flavors:detail',
+                                   'resource_management:resource_classes:'
+                                   'flavors:detail',
                                    args=[resource_class.id, flavor.id])
         res = self.client.get(url)
 
         self.assertRedirectsNoFollow(res,
             urlresolvers.reverse('horizon:infrastructure:resource_management:'
-                                        'index'))
+                                 'index'))

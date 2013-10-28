@@ -34,7 +34,7 @@ def create_stubs(stubs_to_create={}):
 
 
 @unittest.skipIf(os.environ.get('SKIP_UNITTESTS', False),
-                     "The SKIP_UNITTESTS env variable is set.")
+                 "The SKIP_UNITTESTS env variable is set.")
 class TestCase(openstack_dashboard_helpers.TestCase):
     """
     Specialized base test case class for Horizon which gives access to
