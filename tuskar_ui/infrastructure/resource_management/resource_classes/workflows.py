@@ -224,13 +224,13 @@ class ResourceClassWorkflowMixin:
         resource_class_name = data['name']
         for flavor in data.get('flavors') or []:
             capacities = []
-            for name, (label,
-                        unit, required) in flavors_forms.CAPACITIES.items():
+            for name, info in flavors_forms.CAPACITIES.items():
+                label, unit, required = info
                 value = flavor.get(name, '')
                 if value is None:
                     value = ''
                 capacities.append({'name': name, 'value': str(value),
-                                    'unit': unit})
+                                   'unit': unit})
             # FIXME: tuskar uses resource-class-name prefix for flavors,
             # e.g. m1.large, we add rc name to the template name:
             flavor_name = "%s.%s" % (resource_class_name, flavor['name'])

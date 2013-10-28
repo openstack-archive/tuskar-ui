@@ -114,8 +114,7 @@ class DetailView(horizon_tabs.TabView):
                 exceptions.handle(self.request,
                                   _('Unable to retrieve details for '
                                     'resource class "%s".')
-                                    % resource_class_id,
-                                    redirect=redirect)
+                                  % resource_class_id, redirect=redirect)
             self._resource_class = resource_class
         return self._resource_class
 

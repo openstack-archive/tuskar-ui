@@ -82,24 +82,31 @@ class RacksTable(tables.DataTable):
                                ":racks:detail"),
                          verbose_name=_("Rack Name"))
     subnet = tables.Column('subnet', verbose_name=_("IP Subnet"))
-    resource_class = tables.Column('resource_class',
-                                    verbose_name=_("Class"),
-                                    filters=(lambda resource_class:
-                                                 (resource_class and
-                                                  resource_class.name)
-                                             or None,))
+    resource_class = tables.Column(
+        'resource_class',
+        verbose_name=_("Class"),
+        filters=(lambda resource_class: getattr(resource_class, 'name', None),)
+    )
     node_count = tables.Column('nodes_count', verbose_name=_("Nodes"))
     state = tables.Column('state',
                           verbose_name=_("State"),
                           status=True,
                           status_choices=STATUS_CHOICES)
+
+    def _usage_filter(vm_capacity):
+        if not vm_capacity or not vm_capacity.value:
+            return
+
+        usage = "{0:.0f} %".format(
+            round((100.0 / vm_capacity.value) * vm_capacity.usage)
+        )
+        return usage
+
     usage = tables.Column(
         'vm_capacity',
         verbose_name=_("Usage"),
-        filters=(lambda vm_capacity:
-                     (vm_capacity and vm_capacity.value and
-                      "%s %%" % int(round((100 / float(vm_capacity.value)) *
-                                          vm_capacity.usage, 0))) or None,))
+        filters=(_usage_filter,),
+    )
 
     class Meta:
         name = "racks"

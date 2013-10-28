@@ -39,7 +39,7 @@ class RackViewTests(test.BaseAdminViewTests):
         self.mox.ReplayAll()
 
         url = urlresolvers.reverse('horizon:infrastructure:'
-                                        'resource_management:racks:create')
+                                   'resource_management:racks:create')
         rack = self.client.get(url)
 
         self.assertEqual(rack.status_code, 200)
@@ -97,7 +97,7 @@ class RackViewTests(test.BaseAdminViewTests):
             'nodes-0-local_gb': u'10',
         }
         url = urlresolvers.reverse('horizon:infrastructure:'
-                                        'resource_management:racks:create')
+                                   'resource_management:racks:create')
         resp = self.client.post(url, data)
         self.assertRedirectsNoFollow(resp, self.index_page_racks_tab)
 
@@ -222,13 +222,13 @@ class RackViewTests(test.BaseAdminViewTests):
         self.mox.ReplayAll()
         data = {'action': 'racks__delete__%s' % rack_id}
         url = urlresolvers.reverse('horizon:infrastructure:'
-                                        'resource_management:index')
+                                   'resource_management:index')
         result = self.client.post(url, data)
         self.assertRedirectsNoFollow(result, self.index_page)
 
     def test_upload_rack_get(self):
         url = urlresolvers.reverse('horizon:infrastructure:'
-                                        'resource_management:racks:upload')
+                                   'resource_management:racks:upload')
         rack = self.client.get(url)
 
         self.assertEqual(rack.status_code, 200)
@@ -245,7 +245,7 @@ class RackViewTests(test.BaseAdminViewTests):
 
         data = {'csv_file': temp_file, 'upload': '1'}
         url = urlresolvers.reverse('horizon:infrastructure:'
-                                        'resource_management:racks:upload')
+                                   'resource_management:racks:upload')
         resp = self.client.post(url, data)
         self.assertTemplateUsed(resp,
             'infrastructure/resource_management/racks/upload.html')
@@ -256,7 +256,7 @@ class RackViewTests(test.BaseAdminViewTests):
     def test_upload_rack_upload_with_error(self):
         data = {'upload': '1'}
         url = urlresolvers.reverse('horizon:infrastructure:'
-                                        'resource_management:racks:upload')
+                                   'resource_management:racks:upload')
         resp = self.client.post(url, data)
         self.assertTemplateUsed(resp,
             'infrastructure/resource_management/racks/upload.html')
@@ -281,7 +281,7 @@ class RackViewTests(test.BaseAdminViewTests):
 
         data = {'uploaded_data': base64.b64encode(csv_data), 'add_racks': '1'}
         url = urlresolvers.reverse('horizon:infrastructure:'
-                                        'resource_management:racks:upload')
+                                   'resource_management:racks:upload')
         resp = self.client.post(url, data)
         self.assertRedirectsNoFollow(resp, self.index_page)
         self.assertMessageCount(success=1)

@@ -26,9 +26,9 @@ from tuskar_ui.infrastructure.resource_management.resource_classes\
 
 def get_provision_racks_and_state(racks):
     unprovisioned_racks = [rack for rack in racks
-                            if not rack.is_provisioned]
+                           if not rack.is_provisioned]
     provisioning_racks = [rack for rack in racks
-                            if rack.is_provisioning]
+                          if rack.is_provisioning]
     if provisioning_racks:
         state = 'provisioning'
     elif unprovisioned_racks:

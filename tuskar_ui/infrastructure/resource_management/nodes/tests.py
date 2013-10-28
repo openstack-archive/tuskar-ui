@@ -88,4 +88,4 @@ class NodeViewTests(test.BaseAdminViewTests):
 
         self.assertRedirectsNoFollow(res,
             urlresolvers.reverse('horizon:infrastructure:resource_management:'
-                                    'index'))
+                                 'index'))
