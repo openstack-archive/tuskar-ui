@@ -21,7 +21,8 @@ NODES = r'^(?P<node_id>[^/]+)/%s$'
 VIEW_MOD = 'tuskar_ui.infrastructure.resource_management.nodes.views'
 
 
-urlpatterns = defaults.patterns(VIEW_MOD,
+urlpatterns = defaults.patterns(
+    VIEW_MOD,
     defaults.url(NODES % 'detail', views.DetailView.as_view(), name='detail'),
     defaults.url(r'^unracked/$',
                  views.UnrackedView.as_view(),

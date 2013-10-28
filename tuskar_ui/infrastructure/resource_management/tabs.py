@@ -71,7 +71,7 @@ class RacksTab(ProvisioningInfoMixin, tabs.TableTab):
     name = _("Racks")
     slug = "racks_tab"
     template_name = ("infrastructure/resource_management/"
-                    "racks/_index_table.html")
+                     "racks/_index_table.html")
 
     def get_racks_data(self):
         try:
@@ -98,7 +98,7 @@ class ResourceClassesTab(ProvisioningInfoMixin, tabs.TableTab):
     name = _("Classes")
     slug = "resource_classes_tab"
     template_name = ("infrastructure/resource_management/"
-                    "resource_classes/_index_table.html")
+                     "resource_classes/_index_table.html")
     #preload = False buggy, checkboxes doesn't work wit table actions
 
     def get_resource_classes_data(self):

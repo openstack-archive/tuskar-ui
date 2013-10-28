@@ -36,7 +36,8 @@ class FlavorForm(forms.Form):
     name = forms.RegexField(label=_("Name"),
                             max_length=25,
                             regex=r'^[\w\.\- ]+$',
-                            error_messages={'invalid': _('Name may only '
+                            error_messages={'invalid': _(
+                                'Name may only '
                                 'contain letters, numbers, underscores, '
                                 'periods and hyphens.')},
                             widget=forms.TextInput(attrs={

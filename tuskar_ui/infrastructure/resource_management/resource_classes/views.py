@@ -63,7 +63,7 @@ class UpdateView(tuskar_workflows.WorkflowView):
                                              resource_class_id)
             except Exception:
                 redirect = urlresolvers.reverse('horizon:infrastructure:'
-                                   'resource_management:index')
+                                                'resource_management:index')
                 msg = _('Unable to retrieve resource class details.')
                 exceptions.handle(self.request, msg, redirect=redirect)
 

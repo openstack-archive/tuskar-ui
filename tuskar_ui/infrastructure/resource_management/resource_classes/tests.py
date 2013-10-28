@@ -149,7 +149,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
             'racks-MAX_NUM_FORMS': 1000,
         }
         res = self.client.post(url, form_data)
-        self.assertRedirectsNoFollow(res,
+        self.assertRedirectsNoFollow(
+            res,
             ("%s?tab=resource_management_tabs__resource_classes_tab" %
              urlresolvers.
              reverse("horizon:infrastructure:resource_management:index")))
@@ -354,7 +355,8 @@ class ResourceClassViewTests(test.BaseAdminViewTests):
         self.assertItemsEqual(res.context['flavors_table_table'].data, flavors)
         self.assertItemsEqual(res.context['racks_table_table'].data, racks)
         self.assertEqual(res.status_code, 200)
-        self.assertTemplateUsed(res,
+        self.assertTemplateUsed(
+            res,
             'infrastructure/resource_management/resource_classes/detail.html')
 
     @test.create_stubs({

@@ -117,7 +117,7 @@ class RackViewTests(test.BaseAdminViewTests):
         self.mox.ReplayAll()
 
         url = urlresolvers.reverse('horizon:infrastructure:'
-            'resource_management:racks:edit', args=[1])
+                                   'resource_management:racks:edit', args=[1])
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
         self.assertTemplateUsed(res, 'infrastructure/_workflow_base.html')
@@ -232,12 +232,12 @@ class RackViewTests(test.BaseAdminViewTests):
         rack = self.client.get(url)
 
         self.assertEqual(rack.status_code, 200)
-        self.assertTemplateUsed(rack,
-            'infrastructure/resource_management/racks/upload.html')
+        self.assertTemplateUsed(
+            rack, 'infrastructure/resource_management/racks/upload.html')
 
     def test_upload_rack_upload(self):
         csv_data = ('Rack1,rclass1,192.168.111.0/24,regionX,f0:dd:f1:da:f9:b5 '
-                   'f2:de:f1:da:f9:66 f2:de:ff:da:f9:67')
+                    'f2:de:f1:da:f9:66 f2:de:ff:da:f9:67')
         temp_file = tempfile.TemporaryFile()
         temp_file.write(csv_data)
         temp_file.flush()
@@ -247,37 +247,37 @@ class RackViewTests(test.BaseAdminViewTests):
         url = urlresolvers.reverse('horizon:infrastructure:'
                                    'resource_management:racks:upload')
         resp = self.client.post(url, data)
-        self.assertTemplateUsed(resp,
-            'infrastructure/resource_management/racks/upload.html')
+        self.assertTemplateUsed(
+            resp, 'infrastructure/resource_management/racks/upload.html')
         self.assertNoFormErrors(resp)
         self.assertEqual(resp.context['form']['uploaded_data'].value(),
-            base64.b64encode(csv_data))
+                         base64.b64encode(csv_data))
 
     def test_upload_rack_upload_with_error(self):
         data = {'upload': '1'}
         url = urlresolvers.reverse('horizon:infrastructure:'
                                    'resource_management:racks:upload')
         resp = self.client.post(url, data)
-        self.assertTemplateUsed(resp,
-            'infrastructure/resource_management/racks/upload.html')
+        self.assertTemplateUsed(
+            resp, 'infrastructure/resource_management/racks/upload.html')
         self.assertFormErrors(resp, 1)
         self.assertEqual(resp.context['form']['uploaded_data'].value(),
-            None)
+                         None)
 
     @test.create_stubs({tuskar.Rack: ('create',),
                         tuskar.ResourceClass: ('list',)})
     def test_upload_rack_create(self):
         tuskar.Rack.create(mox.IsA(http.HttpRequest),
-                name='Rack1',
-                resource_class_id='1',
-                location='regionX',
-                subnet='192.168.111.0/24').AndReturn(None)
+                           name='Rack1',
+                           resource_class_id='1',
+                           location='regionX',
+                           subnet='192.168.111.0/24').AndReturn(None)
         tuskar.ResourceClass.list(
             mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
         self.mox.ReplayAll()
         csv_data = ('Rack1,rclass1,192.168.111.0/24,regionX,f0:dd:f1:da:f9:b5 '
-                   'f2:de:f1:da:f9:66 f2:de:ff:da:f9:67')
+                    'f2:de:f1:da:f9:66 f2:de:ff:da:f9:67')
 
         data = {'uploaded_data': base64.b64encode(csv_data), 'add_racks': '1'}
         url = urlresolvers.reverse('horizon:infrastructure:'
@@ -369,7 +369,7 @@ class RackViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({
         tuskar.Rack: ('get', 'list_nodes', 'list_flavors', 'update',
-            'node_ids'),
+                      'node_ids'),
         tuskar.ResourceClass: ('get',),
         tuskar.Node: ('get',),
         tuskar.BaremetalNode: ('get',),
@@ -387,12 +387,13 @@ class RackViewTests(test.BaseAdminViewTests):
 
         tuskar.Rack.get(mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
         tuskar.Node.get(mox.IsA(http.HttpRequest),
-            baremetal_node.id).AndReturn(tuskar_node)
+                        baremetal_node.id).AndReturn(tuskar_node)
         tuskar.Rack.get(None, rack.id).AndReturn(rack)  # called by node.rack
         tuskar.Rack.update(mox.IsA(http.HttpRequest), rack.id,
-            {'nodes': [{'id': node_id}
-                for node_id in tuskar.Rack.node_ids
-                if node_id != baremetal_node.id]}).AndReturn(rack)
+                           {'nodes': [{'id': node_id}
+                                      for node_id in tuskar.Rack.node_ids
+                                      if node_id != baremetal_node.id]}
+                           ).AndReturn(rack)
         self.mox.ReplayAll()
 
         url = urlresolvers.reverse(

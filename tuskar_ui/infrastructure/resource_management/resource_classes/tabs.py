@@ -56,7 +56,7 @@ class FlavorsTab(tabs.TableTab):
     name = _("Flavors")
     slug = "flavors"
     template_name = ("infrastructure/resource_management/resource_classes/"
-         "_detail_flavors.html")
+                     "_detail_flavors.html")
 
     def get_flavors_table_data(self):
         try:

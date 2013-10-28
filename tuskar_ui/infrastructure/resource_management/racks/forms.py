@@ -77,7 +77,7 @@ class UploadRack(forms.SelfHandlingForm):
             racks = CSVRack.from_str(base64.b64decode(racks_str))
             # get the resource class ids by resource class names
             rclass_ids = dict((rc.name, rc.id) for rc in
-                    tuskar.ResourceClass.list(request))
+                              tuskar.ResourceClass.list(request))
             for rack in racks:
                 try:
                     tuskar.Rack.create(

@@ -32,7 +32,8 @@ class OverviewTab(tabs.Tab):
             running_instances = len(node.running_virtual_machines)
         except requests.exceptions.ConnectionError:
             running_instances = _("Unknown")
-            messages.warning(request,
+            messages.warning(
+                request,
                 _("Can't retrieve the running instances from the overcloud."))
         return {
             'node': node,

@@ -37,7 +37,7 @@ class FormsetTableTests(test.TestCase):
             value = django.forms.IntegerField()
 
         TableFormset = django.forms.formsets.formset_factory(TableForm,
-            extra=0)
+                                                             extra=0)
 
         class Table(tuskar_ui.tables.FormsetDataTable):
             formset_class = TableFormset

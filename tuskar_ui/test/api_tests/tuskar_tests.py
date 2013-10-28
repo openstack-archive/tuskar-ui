@@ -58,7 +58,8 @@ class TuskarApiTests(test.APITestCase):
         node = self.baremetalclient_nodes.first()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'create')
-        baremetal.BareMetalNodeManager.create('node', 1, 1024, 10,
+        baremetal.BareMetalNodeManager.create(
+            'node', 1, 1024, 10,
             'aa:bb:cc:dd:ee', None, None, '', None).AndReturn(node)
         self.mox.ReplayAll()
 

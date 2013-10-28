@@ -25,7 +25,8 @@ from tuskar_ui.infrastructure.resource_management import views
 from tuskar_ui.test import urls as test_urls
 
 
-urlpatterns = defaults.patterns('',
+urlpatterns = defaults.patterns(
+    '',
     defaults.url(r'^$', views.IndexView.as_view(), name='index'),
     defaults.url(r'^provision$', views.ProvisionView.as_view(),
                  name='provision'),
@@ -39,5 +40,6 @@ urlpatterns = defaults.patterns('',
 )
 
 if conf.settings.DEBUG:
-    urlpatterns += defaults.patterns('', defaults.url(r'^qunit$',
-        defaults.include(test_urls, namespace='tests')))
+    urlpatterns += defaults.patterns(
+        '', defaults.url(r'^qunit$',
+                         defaults.include(test_urls, namespace='tests')))
