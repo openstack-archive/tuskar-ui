@@ -23,7 +23,7 @@ from tuskar_ui.test import helpers as test
 class TuskarApiTests(test.APITestCase):
 
     def test_baremetal_node_create(self):
-        node = self.baremetalclient_nodes.first()
+        baremetal_node = self.baremetalclient_nodes.first()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'create')
         baremetal.BareMetalNodeManager.create(
@@ -35,7 +35,7 @@ class TuskarApiTests(test.APITestCase):
             '0.0.0.0',
             'user',
             'password',
-            0).AndReturn(node)
+            0).AndReturn(baremetal_node)
         self.mox.ReplayAll()
 
         ret_val = api.BaremetalNode.create(
@@ -57,12 +57,13 @@ class TuskarApiTests(test.APITestCase):
         provided (empty), their values are set to None, as this is required
         by the baremetal VM.
         """
-        node = self.baremetalclient_nodes.first()
+        baremetal_node = self.baremetalclient_nodes.first()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'create')
         baremetal.BareMetalNodeManager.create(
             'node', 1, 1024, 10,
-            'AA:BB:CC:DD:EE:FF', None, None, '', None).AndReturn(node)
+            'AA:BB:CC:DD:EE:FF',
+            None, None, '', None).AndReturn(baremetal_node)
         self.mox.ReplayAll()
 
         ret_val = api.BaremetalNode.create(
@@ -72,31 +73,32 @@ class TuskarApiTests(test.APITestCase):
         self.assertIsInstance(ret_val, api.BaremetalNode)
 
     def test_baremetal_node_get(self):
-        node = self.baremetalclient_nodes.first()
+        baremetal_node = self.baremetalclient_nodes.first()
         server = self.servers.first()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
-        baremetal.BareMetalNodeManager.get(node.id).AndReturn(node)
+        baremetal.BareMetalNodeManager.get(
+            baremetal_node.id).AndReturn(baremetal_node)
 
         novaclient = self.stub_novaclient()
         novaclient.servers = self.mox.CreateMockAnything()
-        novaclient.servers.get(node.instance_uuid).AndReturn(server)
+        novaclient.servers.get(baremetal_node.instance_uuid).AndReturn(server)
 
         self.mox.ReplayAll()
 
-        ret_val = api.BaremetalNode.get(self.request, node.id)
+        ret_val = api.BaremetalNode.get(self.request, baremetal_node.id)
         self.assertIsInstance(ret_val, api.BaremetalNode)
 
     def test_baremetal_node_list(self):
-        nodes = self.baremetalclient_nodes_all.list()
+        baremetal_nodes = self.baremetalclient_nodes_all.list()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'list')
-        baremetal.BareMetalNodeManager.list().AndReturn(nodes)
+        baremetal.BareMetalNodeManager.list().AndReturn(baremetal_nodes)
         self.mox.ReplayAll()
 
         ret_val = api.BaremetalNode.list(self.request)
-        for node in ret_val:
-            self.assertIsInstance(node, api.BaremetalNode)
+        for baremetal_node in ret_val:
+            self.assertIsInstance(baremetal_node, api.BaremetalNode)
 
     def test_baremetal_node_list_unracked(self):
         tuskarclient_nodes = self.tuskarclient_nodes.list()
@@ -112,45 +114,45 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         ret_val = api.BaremetalNode.list_unracked(self.request)
-        for node in ret_val:
-            self.assertIsInstance(node, api.BaremetalNode)
+        for baremetal_node in ret_val:
+            self.assertIsInstance(baremetal_node, api.BaremetalNode)
         self.assertEquals(1, len(ret_val))
 
     def test_baremetal_node_running_instances(self):
-        node = self.baremetal_nodes.first()
+        baremetal_node = self.baremetal_nodes.first()
 
-        self.assertEquals(4, node.running_instances)
+        self.assertEquals(4, baremetal_node.running_instances)
 
     def test_baremetal_node_remaining_capacity(self):
-        node = self.baremetal_nodes.first()
+        baremetal_node = self.baremetal_nodes.first()
 
-        self.assertEquals(96, node.remaining_capacity)
+        self.assertEquals(96, baremetal_node.remaining_capacity)
 
     def test_node_get(self):
-        node = self.tuskarclient_nodes.first()
+        tuskar_node = self.tuskarclient_nodes.first()
 
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.nodes = self.mox.CreateMockAnything()
-        tuskarclient.nodes.get(node.id).AndReturn(node)
+        tuskarclient.nodes.get(tuskar_node.id).AndReturn(tuskar_node)
         self.mox.ReplayAll()
 
-        ret_val = api.Node.get(self.request, node.id)
-        self.assertIsInstance(ret_val, api.Node)
+        ret_val = api.TuskarNode.get(self.request, tuskar_node.id)
+        self.assertIsInstance(ret_val, api.TuskarNode)
 
     def test_node_list(self):
-        nodes = self.tuskarclient_nodes.list()
+        tuskar_nodes = self.tuskarclient_nodes.list()
 
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.nodes = self.mox.CreateMockAnything()
-        tuskarclient.nodes.list().AndReturn(nodes)
+        tuskarclient.nodes.list().AndReturn(tuskar_nodes)
         self.mox.ReplayAll()
 
-        ret_val = api.Node.list(self.request)
-        for node in ret_val:
-            self.assertIsInstance(node, api.Node)
+        ret_val = api.TuskarNode.list(self.request)
+        for tuskar_node in ret_val:
+            self.assertIsInstance(tuskar_node, api.TuskarNode)
 
     def test_node_rack(self):
-        node = self.tuskar_nodes.first()
+        tuskar_node = self.tuskar_nodes.first()
         rack = self.tuskarclient_racks.first()
 
         tuskarclient = self.stub_tuskarclient()
@@ -158,17 +160,17 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.racks.get(rack.id).AndReturn(rack)
         self.mox.ReplayAll()
 
-        node.request = self.request
-        self.assertIsInstance(node.rack, api.Rack)
-        self.assertEquals('1', node.rack_id)
+        tuskar_node.request = self.request
+        self.assertIsInstance(tuskar_node.rack, api.Rack)
+        self.assertEquals('1', tuskar_node.rack_id)
 
     def test_node_nova_baremetal_node(self):
-        node = self.tuskar_nodes.first()
+        tuskar_node = self.tuskar_nodes.first()
         bm_node = self.baremetalclient_nodes.first()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
         baremetal.BareMetalNodeManager.get(
-            node.nova_baremetal_node_id).AndReturn(bm_node)
+            tuskar_node.nova_baremetal_node_id).AndReturn(bm_node)
 
         novaclient = self.stub_novaclient()
         novaclient.servers = self.mox.CreateMockAnything()
@@ -177,13 +179,13 @@ class TuskarApiTests(test.APITestCase):
                                  'limit': 21}).AndReturn([])
         self.mox.ReplayAll()
 
-        node.request = self.request
-        n = node.nova_baremetal_node
-        self.assertIsInstance(n, api.BaremetalNode)
-        self.assertEquals('11', n.id)
+        tuskar_node.request = self.request
+        baremetal_node = tuskar_node.nova_baremetal_node
+        self.assertIsInstance(baremetal_node, api.BaremetalNode)
+        self.assertEquals('11', baremetal_node.id)
 
     def test_node_flavors(self):
-        node = self.tuskar_nodes.first()
+        tuskar_node = self.tuskar_nodes.first()
         rack = self.tuskarclient_racks.first()
         rc = self.tuskarclient_resource_classes.first()
         flavors = self.tuskarclient_flavors.list()
@@ -197,20 +199,20 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.flavors.list(rc.id).AndReturn(flavors)
         self.mox.ReplayAll()
 
-        node.request = self.request
-        ret_val = node.list_flavors
+        tuskar_node.request = self.request
+        ret_val = tuskar_node.list_flavors
         for flavor in ret_val:
             self.assertIsInstance(flavor, api.Flavor)
         self.assertEquals(2, len(ret_val))
 
     def test_node_is_provisioned(self):
-        node = self.tuskar_nodes.first()
-        node.request = self.request
+        tuskar_node = self.tuskar_nodes.first()
+        tuskar_node.request = self.request
         bm_node = self.baremetalclient_nodes.first()
 
         self.mox.StubOutWithMock(baremetal.BareMetalNodeManager, 'get')
         baremetal.BareMetalNodeManager.get(
-            node.nova_baremetal_node_id).AndReturn(bm_node)
+            tuskar_node.nova_baremetal_node_id).AndReturn(bm_node)
 
         novaclient = self.stub_novaclient()
         novaclient.servers = self.mox.CreateMockAnything()
@@ -219,12 +221,12 @@ class TuskarApiTests(test.APITestCase):
                                  'limit': 21}).AndReturn([])
         self.mox.ReplayAll()
 
-        self.assertFalse(node.is_provisioned)
+        self.assertFalse(tuskar_node.is_provisioned)
 
     def test_node_alerts(self):
-        node = self.tuskar_nodes.first()
+        tuskar_node = self.tuskar_nodes.first()
 
-        self.assertEquals([], node.alerts)
+        self.assertEquals([], tuskar_node.alerts)
 
     def test_resource_class_list(self):
         rcs = self.tuskarclient_resource_classes.list()
@@ -349,16 +351,16 @@ class TuskarApiTests(test.APITestCase):
 
     def test_resource_class_nodes(self):
         rc = self.tuskar_resource_classes.first()
-        nodes = self.tuskarclient_nodes.list()
+        tuskar_nodes = self.tuskarclient_nodes.list()
 
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.nodes = self.mox.CreateMockAnything()
-        tuskarclient.nodes.list().AndReturn(nodes)
+        tuskarclient.nodes.list().AndReturn(tuskar_nodes)
         self.mox.ReplayAll()
 
         rc.request = self.request
-        for node in rc.nodes:
-            self.assertIsInstance(node, api.Node)
+        for tuskar_node in rc.tuskar_nodes:
+            self.assertIsInstance(tuskar_node, api.TuskarNode)
         self.assertEquals(4, rc.nodes_count)
 
     def test_resource_class_flavors(self):
@@ -440,7 +442,7 @@ class TuskarApiTests(test.APITestCase):
     def test_resource_class_aggregated_alerts(self):
         rc = self.tuskar_resource_classes.list()[0]
         rc.request = self.request
-        nodes = self.tuskarclient_nodes.list()
+        tuskar_nodes = self.tuskarclient_nodes.list()
 
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.racks = self.mox.CreateMockAnything()
@@ -449,8 +451,8 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.racks.get('2').AndReturn(racks[1])
 
         tuskarclient.nodes = self.mox.CreateMockAnything()
-        for n in nodes:
-            tuskarclient.nodes.get(n.id).AndReturn(n)
+        for tuskar_node in tuskar_nodes:
+            tuskarclient.nodes.get(tuskar_node.id).AndReturn(tuskar_node)
 
         self.mox.ReplayAll()
 
@@ -527,18 +529,18 @@ class TuskarApiTests(test.APITestCase):
 
     def test_rack_nodes(self):
         rack = self.tuskar_racks.first()
-        nodes = self.tuskarclient_nodes.list()
+        tuskar_nodes = self.tuskarclient_nodes.list()
 
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.nodes = self.mox.CreateMockAnything()
-        for n in nodes:
-            tuskarclient.nodes.get(n.id).AndReturn(n)
+        for tuskar_node in tuskar_nodes:
+            tuskarclient.nodes.get(tuskar_node.id).AndReturn(tuskar_node)
         self.mox.ReplayAll()
 
         rack.request = self.request
-        for node in rack.list_nodes:
-            self.assertIsInstance(node, api.Node)
-        self.assertEquals(4, len(rack.node_ids))
+        for tuskar_node in rack.list_tuskar_nodes:
+            self.assertIsInstance(tuskar_node, api.TuskarNode)
+        self.assertEquals(4, len(rack.tuskar_node_ids))
         self.assertEquals(4, rack.nodes_count)
 
     def test_rack_resource_class(self):
@@ -646,16 +648,16 @@ class TuskarApiTests(test.APITestCase):
     def test_rack_aggregated_alerts(self):
         rack = self.tuskar_racks.first()
         rack.request = self.request
-        nodes = self.tuskarclient_nodes.list()
+        tuskar_nodes = self.tuskarclient_nodes.list()
 
         tuskarclient = self.stub_tuskarclient()
         tuskarclient.nodes = self.mox.CreateMockAnything()
-        for n in nodes:
-            tuskarclient.nodes.get(n.id).AndReturn(n)
+        for tuskar_node in tuskar_nodes:
+            tuskarclient.nodes.get(tuskar_node.id).AndReturn(tuskar_node)
         self.mox.ReplayAll()
 
-        for node in rack.aggregated_alerts:
-            self.assertIsInstance(node, api.Node)
+        for tuskar_node in rack.aggregated_alerts:
+            self.assertIsInstance(tuskar_node, api.TuskarNode)
         self.assertEquals(0, len(rack.aggregated_alerts))
 
     def test_flavor_create(self):

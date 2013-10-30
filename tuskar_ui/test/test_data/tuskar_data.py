@@ -16,7 +16,7 @@ from openstack_dashboard.test.test_data import utils as test_data_utils
 
 from novaclient.v1_1.contrib import baremetal
 from tuskarclient.v1 import flavors
-from tuskarclient.v1 import nodes
+from tuskarclient.v1 import nodes as tuskar_nodes
 from tuskarclient.v1 import racks
 from tuskarclient.v1 import resource_classes
 
@@ -131,23 +131,23 @@ def data(TEST):
     TEST.tuskarclient_nodes = test_data_utils.TestDataContainer()
     TEST.tuskar_nodes = test_data_utils.TestDataContainer()
 
-    tuskar_node_1 = nodes.Node(
-        nodes.NodeManager(None),
+    tuskar_node_1 = tuskar_nodes.Node(
+        tuskar_nodes.NodeManager(None),
         {'id': '1',
          'nova_baremetal_node_id': '11',
          'rack': {"id": "1"}})
-    tuskar_node_2 = nodes.Node(
-        nodes.NodeManager(None),
+    tuskar_node_2 = tuskar_nodes.Node(
+        tuskar_nodes.NodeManager(None),
         {'id': '2',
          'nova_baremetal_node_id': '12',
          'rack': {"id": "1"}})
-    tuskar_node_3 = nodes.Node(
-        nodes.NodeManager(None),
+    tuskar_node_3 = tuskar_nodes.Node(
+        tuskar_nodes.NodeManager(None),
         {'id': '3',
          'nova_baremetal_node_id': '13',
          'rack': {"id": "1"}})
-    tuskar_node_4 = nodes.Node(
-        nodes.NodeManager(None),
+    tuskar_node_4 = tuskar_nodes.Node(
+        tuskar_nodes.NodeManager(None),
         {'id': '4',
          'nova_baremetal_node_id': '14',
          'rack': {"id": "1"}})
@@ -156,10 +156,10 @@ def data(TEST):
                                 tuskar_node_2,
                                 tuskar_node_3,
                                 tuskar_node_4)
-    TEST.tuskar_nodes.add(api.Node(tuskar_node_1),
-                          api.Node(tuskar_node_2),
-                          api.Node(tuskar_node_3),
-                          api.Node(tuskar_node_4))
+    TEST.tuskar_nodes.add(api.TuskarNode(tuskar_node_1),
+                          api.TuskarNode(tuskar_node_2),
+                          api.TuskarNode(tuskar_node_3),
+                          api.TuskarNode(tuskar_node_4))
 
     TEST.baremetalclient_nodes = test_data_utils.TestDataContainer()
     TEST.baremetal_nodes = test_data_utils.TestDataContainer()
@@ -168,47 +168,50 @@ def data(TEST):
     TEST.baremetalclient_nodes_all = test_data_utils.TestDataContainer()
     TEST.baremetal_nodes_all = test_data_utils.TestDataContainer()
 
-    node_1 = baremetal.BareMetalNode(
+    baremetal_node_1 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'instance_uuid': 'uuid_11',
          'id': '11',
          'name': 'node1',
          'prov_mac_address': '00:B0:D0:86:AB:F7'})
-    node_2 = baremetal.BareMetalNode(
+    baremetal_node_2 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'instance_uuid': 'uuid_12',
          'id': '12',
          'name': 'node2',
          'prov_mac_address': '00:B0:D0:86:AB:F8'})
-    node_3 = baremetal.BareMetalNode(
+    baremetal_node_3 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'instance_uuid': 'uuid_13',
          'id': '13',
          'name': 'node3',
          'prov_mac_address': '00:B0:D0:86:AB:F9'})
-    node_4 = baremetal.BareMetalNode(
+    baremetal_node_4 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'instance_uuid': 'uuid_14',
          'id': '14',
          'name': 'node4',
          'prov_mac_address': '00:B0:D0:86:AB:F0'})
-    node_5 = baremetal.BareMetalNode(
+    baremetal_node_5 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'instance_uuid': 'uuid_15',
          'id': '15',
          'name': 'node5',
          'prov_mac_address': '00:B0:D0:86:AB:F1'})
 
-    TEST.baremetalclient_nodes.add(node_1, node_2, node_3, node_4)
-    TEST.baremetal_nodes.add(api.BaremetalNode(node_1),
-                             api.BaremetalNode(node_2),
-                             api.BaremetalNode(node_3),
-                             api.BaremetalNode(node_4))
-    TEST.baremetalclient_unracked_nodes.add(node_5)
-    TEST.baremetal_unracked_nodes.add(api.Node(node_5))
-    TEST.baremetalclient_nodes_all.add(node_1, node_2, node_3, node_4, node_5)
-    TEST.baremetal_nodes_all.add(api.BaremetalNode(node_1),
-                                 api.BaremetalNode(node_2),
-                                 api.BaremetalNode(node_3),
-                                 api.BaremetalNode(node_4),
-                                 api.BaremetalNode(node_5))
+    TEST.baremetalclient_nodes.add(baremetal_node_1, baremetal_node_2,
+                                   baremetal_node_3, baremetal_node_4)
+    TEST.baremetal_nodes.add(api.BaremetalNode(baremetal_node_1),
+                             api.BaremetalNode(baremetal_node_2),
+                             api.BaremetalNode(baremetal_node_3),
+                             api.BaremetalNode(baremetal_node_4))
+    TEST.baremetalclient_unracked_nodes.add(baremetal_node_5)
+    TEST.baremetal_unracked_nodes.add(api.TuskarNode(baremetal_node_5))
+    TEST.baremetalclient_nodes_all.add(baremetal_node_1, baremetal_node_2,
+                                       baremetal_node_3, baremetal_node_4,
+                                       baremetal_node_5)
+    TEST.baremetal_nodes_all.add(api.BaremetalNode(baremetal_node_1),
+                                 api.BaremetalNode(baremetal_node_2),
+                                 api.BaremetalNode(baremetal_node_3),
+                                 api.BaremetalNode(baremetal_node_4),
+                                 api.BaremetalNode(baremetal_node_5))
