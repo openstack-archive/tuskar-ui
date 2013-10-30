@@ -206,7 +206,6 @@ class FlavorsFormsetTable(tuskar_ui.tables.FormsetDataTableMixin,
     name = tables.Column(
         'name',
         verbose_name=_('Flavor Name'),
-        filters=(lambda n: (n or '.').split('.')[1],),
     )
     DELETE = tables.Column('DELETE', verbose_name=_("Delete"))
     formset_class = flavors_forms.FlavorFormset

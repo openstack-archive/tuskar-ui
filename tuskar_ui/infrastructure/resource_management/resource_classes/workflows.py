@@ -221,7 +221,6 @@ class ResourceClassWorkflowMixin:
 
     def _get_flavors(self, request, data):
         flavors = []
-        resource_class_name = data['name']
         for flavor in data.get('flavors') or []:
             capacities = []
             for name, info in flavors_forms.CAPACITIES.items():
@@ -231,11 +230,8 @@ class ResourceClassWorkflowMixin:
                     value = ''
                 capacities.append({'name': name, 'value': str(value),
                                    'unit': unit})
-            # FIXME: tuskar uses resource-class-name prefix for flavors,
-            # e.g. m1.large, we add rc name to the template name:
-            flavor_name = "%s.%s" % (resource_class_name, flavor['name'])
             # FIXME: for now just use blank max_vms
-            flavors.append({'name': flavor_name, 'capacities': capacities,
+            flavors.append({'name': flavor['name'], 'capacities': capacities,
                             'max_vms': None, 'id': data.get('id')})
         return flavors
 
