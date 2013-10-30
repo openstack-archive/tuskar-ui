@@ -103,11 +103,10 @@ class NodeCreateAction(workflows.Action):
         if table:
             formset = table.get_formset()
             if formset.is_valid():
-                cleaned_data['nodes'] = [form.cleaned_data
-                                         for form in formset
-                                         if form.cleaned_data
-                                         and not
-                                         form.cleaned_data.get('DELETE')]
+                cleaned_data['nodes'] = [
+                    form.cleaned_data for form in formset
+                    if form.cleaned_data
+                    and not form.cleaned_data.get('DELETE')]
             else:
                 raise forms.ValidationError(_("Errors in the nodes list."))
         return cleaned_data
@@ -166,59 +165,60 @@ class CreateRack(workflows.Workflow):
     def get_failure_url(self):
         return self.get_index_url()
 
-    def create_or_update_node(self, node_data):
+    def create_or_update_baremetal_node(self, baremetal_node_data):
         """Creates (if id=='') or updates (otherwise) a node."""
-        if node_data['id'] not in ('', None):
-            node_id = unicode(node_data['id'])
+        if baremetal_node_data['id'] not in ('', None):
+            baremetal_node_id = unicode(baremetal_node_data['id'])
             # TODO(rdopieralski) there is currently no way to update
             # a baremetal node
             #
             # tuskar.BaremetalNode.update(
             #    self.request,
             #    node_id=node_id,
-            #    service_host=node_data['service_host'],
-            #    cpus=node_data['cpus'],
-            #    memory_mb=node_data['memory_mb'],
-            #    local_gb=node_data['local_gb'],
-            #    prov_mac_address=node_data['mac_address'],
-            #    pm_address=node_data['pm_address'],
-            #    pm_user=node_data['pm_user'],
-            #    pm_password=node_data['pm_password'],
-            #    terminal_port=node_data['terminal_port'])
-            return node_id
+            #    service_host=baremetal_node_data['service_host'],
+            #    cpus=baremetal_node_data['cpus'],
+            #    memory_mb=baremetal_node_data['memory_mb'],
+            #    local_gb=baremetal_node_data['local_gb'],
+            #    prov_mac_address=baremetal_node_data['mac_address'],
+            #    pm_address=baremetal_node_data['pm_address'],
+            #    pm_user=baremetal_node_data['pm_user'],
+            #    pm_password=baremetal_node_data['pm_password'],
+            #    terminal_port=baremetal_node_data['terminal_port'])
+            return baremetal_node_id
         else:
-            node = tuskar.BaremetalNode.create(
+            baremetal_node = tuskar.BaremetalNode.create(
                 self.request,
-                service_host=node_data['service_host'],
-                cpus=node_data['cpus'],
-                memory_mb=node_data['memory_mb'],
-                local_gb=node_data['local_gb'],
-                prov_mac_address=node_data['mac_address'],
-                pm_address=node_data['pm_address'],
-                pm_user=node_data['pm_user'],
-                pm_password=node_data['pm_password'],
-                terminal_port=node_data['terminal_port'])
-            return node.id
+                service_host=baremetal_node_data['service_host'],
+                cpus=baremetal_node_data['cpus'],
+                memory_mb=baremetal_node_data['memory_mb'],
+                local_gb=baremetal_node_data['local_gb'],
+                prov_mac_address=baremetal_node_data['mac_address'],
+                pm_address=baremetal_node_data['pm_address'],
+                pm_user=baremetal_node_data['pm_user'],
+                pm_password=baremetal_node_data['pm_password'],
+                terminal_port=baremetal_node_data['terminal_port'])
+            return baremetal_node.id
 
     def handle(self, request, data):
         # First, create and/or update nodes
-        node_ids = []
-        for node_data in data['nodes']:
+        baremetal_node_ids = []
+        for baremetal_node_data in data['nodes']:
             try:
-                node_id = self.create_or_update_node(node_data)
+                baremetal_node_id = self.create_or_update_baremetal_node(
+                    baremetal_node_data)
             except Exception:
                 exceptions.handle(self.request, _("Unable to update node."))
                 return False
             else:
                 # Rack.create takes a list of dicts with BaremetalNode ids
-                node_ids.append({'id': node_id})
+                baremetal_node_ids.append({'id': baremetal_node_id})
         try:
             # Then, register the Rack, including the nodes
             tuskar.Rack.create(
                 request, name=data['name'],
                 resource_class_id=data['resource_class_id'],
                 location=data['location'], subnet=data['subnet'],
-                nodes=node_ids)
+                baremetal_nodes=baremetal_node_ids)
 
             return True
         except requests.ConnectionError:
@@ -240,11 +240,13 @@ class EditRack(CreateRack):
     failure_message = _("Unable to update rack.")
 
     def handle(self, request, data):
-        node_ids = [{'id': self.create_or_update_node(node_data)}
-                    for node_data in data['nodes']]
+        baremetal_nodes_data = data.pop('nodes')
+        baremetal_node_ids = [
+            {'id': self.create_or_update_baremetal_node(baremetal_node_data)}
+            for baremetal_node_data in baremetal_nodes_data]
         try:
             rack_id = self.context['rack_id']
-            data['nodes'] = node_ids
+            data['baremetal_nodes'] = baremetal_node_ids
             tuskar.Rack.update(request, rack_id, data)
             return True
         except Exception:

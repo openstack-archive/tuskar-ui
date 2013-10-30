@@ -30,12 +30,12 @@ class UnrackedView(horizon_tables.DataTableView):
 
     def get_data(self):
         try:
-            nodes = tuskar.BaremetalNode.list_unracked(self.request)
+            baremetal_nodes = tuskar.BaremetalNode.list_unracked(self.request)
         except Exception:
-            nodes = []
+            baremetal_nodes = []
             exceptions.handle(self.request,
                               _('Unable to retrieve nodes.'))
-        return nodes
+        return baremetal_nodes
 
 
 class DetailView(horizon_tabs.TabView):
@@ -44,26 +44,25 @@ class DetailView(horizon_tabs.TabView):
 
     def get_context_data(self, **kwargs):
             context = super(DetailView, self).get_context_data(**kwargs)
-            context["node"] = self.get_data()
+            context["tuskar_node"] = self.get_data()
             return context
 
     def get_data(self):
-        if not hasattr(self, "_node"):
+        if not hasattr(self, "_tuskar_node"):
+            tuskar_node_id = self.kwargs['node_id']
             try:
-                node_id = self.kwargs['node_id']
-                node = tuskar.Node.get(self.request, node_id)
+                tuskar_node = tuskar.TuskarNode.get(self.request,
+                                                    tuskar_node_id)
             except Exception:
                 redirect = urlresolvers.reverse(
                     'horizon:infrastructure:resource_management:index')
                 exceptions.handle(self.request,
                                   _('Unable to retrieve details for '
-                                    'node "%s".')
-                                  % node_id,
+                                    'node "%s".') % tuskar_node_id,
                                   redirect=redirect)
-            self._node = node
-        return self._node
+            self._tuskar_node = tuskar_node
+        return self._tuskar_node
 
     def get_tabs(self, request, *args, **kwargs):
-        node = self.get_data()
-        return self.tab_group_class(request, node=node,
-                                    **kwargs)
+        tuskar_node = self.get_data()
+        return self.tab_group_class(request, tuskar_node=tuskar_node, **kwargs)

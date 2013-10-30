@@ -167,10 +167,10 @@
      {% for alert in rack.alerts %}
        <li><i class="icon-warning-sign"></i>{{ alert.message }}</li>
      {% endfor %}
-     {% for node in rack.aggregated_alerts %}
+     {% for tuskar_node in rack.aggregated_alerts %}
          <li>
            <i class="icon-warning-sign"></i>
-           Node <a href="{% url 'horizon:infrastructure:resource_management:nodes:detail' node.id %}">{{ node.name }}</a> has some problems
+           Node <a href="{% url 'horizon:infrastructure:resource_management:nodes:detail' tuskar_node.id %}">{{ tuskar_node.name }}</a> has some problems
          </li>
      {% endfor %}
     </ul>

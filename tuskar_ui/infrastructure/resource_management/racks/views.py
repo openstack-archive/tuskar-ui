@@ -65,7 +65,7 @@ class EditView(tuskar_workflows.WorkflowView):
 
     def get_initial(self):
         obj = tuskar.Rack.get(self.request, self.kwargs['rack_id'])
-        # mac_str = "\n".join([x.mac_address for x in obj.list_nodes])
+        # mac_str = "\n".join(x.mac_address for x in obj.list_tuskar_nodes)
         return {'name': obj.name, 'resource_class_id': obj.resource_class_id,
                 'location': obj.location, 'subnet': obj.subnet,
                 'state': obj.state, 'rack_id': self.kwargs['rack_id']}
@@ -182,12 +182,12 @@ def top_communicating(request, rack_id=None):
                 "Low level of communication"]
 
     rack = tuskar.Rack.get(request, rack_id)
-    for node in rack.nodes:
+    for tuskar_node_data in rack.nodes:
         status = random.randint(0, 3)
         percentage = random.randint(0, 100)
 
         tooltip = ("<p>Node: <strong>{0}</strong></p><p>{1}</p>").format(
-            node['id'],
+            tuskar_node_data['id'],
             statuses[status])
 
         data.append({'tooltip': tooltip,
@@ -219,21 +219,21 @@ def node_health(request, rack_id=None):
 
     rack = tuskar.Rack.get(request, rack_id)
 
-    for node in rack.nodes:
+    for tuskar_node_data in rack.nodes:
         rand_index = random.randint(0, 2)
         percentage = (2 - rand_index) * 50
         color = colors[rand_index]
 
         tooltip = ("<p>Node: <strong>{0}</strong></p><p>{1}</p>").format(
-            node['id'],
+            tuskar_node_data['id'],
             statuses[rand_index])
 
         data.append({'tooltip': tooltip,
                      'color': color,
                      'status': statuses[rand_index],
                      'percentage': percentage,
-                     'id': node['id'],
-                     'name': node['id'],
+                     'id': tuskar_node_data['id'],
+                     'name': tuskar_node_data['id'],
                      'url': "FIXME url"})
 
         data.sort(key=lambda x: x['percentage'])

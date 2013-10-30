@@ -134,8 +134,8 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.nodes.get(node.id).AndReturn(node)
         self.mox.ReplayAll()
 
-        ret_val = api.Node.get(self.request, node.id)
-        self.assertIsInstance(ret_val, api.Node)
+        ret_val = api.TuskarNode.get(self.request, node.id)
+        self.assertIsInstance(ret_val, api.TuskarNode)
 
     def test_node_list(self):
         nodes = self.tuskarclient_nodes.list()
@@ -145,9 +145,9 @@ class TuskarApiTests(test.APITestCase):
         tuskarclient.nodes.list().AndReturn(nodes)
         self.mox.ReplayAll()
 
-        ret_val = api.Node.list(self.request)
+        ret_val = api.TuskarNode.list(self.request)
         for node in ret_val:
-            self.assertIsInstance(node, api.Node)
+            self.assertIsInstance(node, api.TuskarNode)
 
     def test_node_rack(self):
         node = self.tuskar_nodes.first()
@@ -357,8 +357,8 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         rc.request = self.request
-        for node in rc.nodes:
-            self.assertIsInstance(node, api.Node)
+        for tuskar_node in rc.tuskar_nodes:
+            self.assertIsInstance(tuskar_node, api.TuskarNode)
         self.assertEquals(4, rc.nodes_count)
 
     def test_resource_class_flavors(self):
@@ -536,9 +536,9 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         rack.request = self.request
-        for node in rack.list_nodes:
-            self.assertIsInstance(node, api.Node)
-        self.assertEquals(4, len(rack.node_ids))
+        for node in rack.list_tuskar_nodes:
+            self.assertIsInstance(node, api.TuskarNode)
+        self.assertEquals(4, len(rack.tuskar_node_ids))
         self.assertEquals(4, rack.nodes_count)
 
     def test_rack_resource_class(self):
@@ -655,7 +655,7 @@ class TuskarApiTests(test.APITestCase):
         self.mox.ReplayAll()
 
         for node in rack.aggregated_alerts:
-            self.assertIsInstance(node, api.Node)
+            self.assertIsInstance(node, api.TuskarNode)
         self.assertEquals(0, len(rack.aggregated_alerts))
 
     def test_flavor_create(self):
