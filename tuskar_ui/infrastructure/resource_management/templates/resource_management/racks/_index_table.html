@@ -1,4 +1,4 @@
 {% load i18n %}
 {% include "infrastructure/resource_management/_provision_info.html" with provisioning_state=provisioning_state %}
 {{ racks_table.render }}
-<a href="{% url 'horizon:infrastructure:resource_management:nodes:unracked' %}">{% trans "View Unracked Nodes"%} ({{nodes|length}})</a>
+<a href="{% url 'horizon:infrastructure:resource_management:nodes:unracked' %}">{% trans "View Unracked Nodes"%} ({{baremetal_nodes|length}})</a>
