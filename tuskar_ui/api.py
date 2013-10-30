@@ -172,47 +172,49 @@ class BaremetalNode(StringIdAPIResourceWrapper):
         terminal_port = kwargs['terminal_port']
         if terminal_port == '':
             terminal_port = None
-        node = baremetalclient(request).create(kwargs['service_host'],
-                                               kwargs['cpus'],
-                                               kwargs['memory_mb'],
-                                               kwargs['local_gb'],
-                                               kwargs['prov_mac_address'],
-                                               kwargs['pm_address'] or None,
-                                               kwargs['pm_user'] or None,
-                                               kwargs['pm_password'],
-                                               terminal_port)
-        return cls(node)
+        baremetal_node = baremetalclient(request).create(
+            kwargs['service_host'],
+            kwargs['cpus'],
+            kwargs['memory_mb'],
+            kwargs['local_gb'],
+            kwargs['prov_mac_address'],
+            kwargs['pm_address'] or None,
+            kwargs['pm_user'] or None,
+            kwargs['pm_password'],
+            terminal_port)
+        return cls(baremetal_node)
 
     @classmethod
-    def get(cls, request, node_id):
-        node = cls(baremetalclient(request).get(node_id))
-        node.request = request
+    def get(cls, request, baremetal_node_id):
+        baremetal_node = cls(baremetalclient(request).get(baremetal_node_id))
+        baremetal_node.request = request
 
         try:
             # Nova instance info will be added to baremetal node attributes
             nova_instance = nova.server_get(request,
-                                            node.instance_uuid)
+                                            baremetal_node.instance_uuid)
         except Exception:
             nova_instance = None
             LOG.debug("Couldn't obtain nova.server_get instance for "
-                      "baremetal node %s" % node_id)
+                      "baremetal node %s" % baremetal_node_id)
         if nova_instance:
             # If baremetal is provisioned, there is a nova instance.
             addresses = nova_instance._apiresource.addresses.get('ctlplane')
             if addresses:
-                node.ip_address_other = (", "
-                    .join([addr['addr'] for addr in addresses]))
-            node.status = (nova_instance._apiresource.
-                           _info['OS-EXT-STS:vm_state'])
-            node.power_management = ""
-            if node.pm_user:
-                node.power_management = node.pm_user + "/********"
+                baremetal_node.ip_address_other = ", ".join(
+                    [addr['addr'] for addr in addresses])
+            baremetal_node.status = nova_instance._apiresource._info[
+                'OS-EXT-STS:vm_state']
+            baremetal_node.power_management = ""
+            if baremetal_node.pm_user:
+                baremetal_node.power_management = (
+                    baremetal_node.pm_user + "/********")
         else:
             # If baremetal is unprovisioned, there is no nova instance.
-            node.status = 'unprovisioned'
+            baremetal_node.status = 'unprovisioned'
 
         # Returning baremetal node containing nova instance info
-        return node
+        return baremetal_node
 
     @classmethod
     def list(cls, request):
@@ -222,10 +224,12 @@ class BaremetalNode(StringIdAPIResourceWrapper):
     @classmethod
     def list_unracked(cls, request):
         try:
-            racked_node_ids = [node.nova_baremetal_node_id
-                               for node in Node.list(request)]
-            return [bn for bn in BaremetalNode.list(request)
-                    if bn.id not in racked_node_ids]
+            racked_baremetal_node_ids = [
+                tuskar_node.nova_baremetal_node_id
+                for tuskar_node in TuskarNode.list(request)]
+            return [baremetal_node
+                    for baremetal_node in BaremetalNode.list(request)
+                    if baremetal_node.id not in racked_baremetal_node_ids]
         except requests.ConnectionError:
             return []
 
@@ -261,18 +265,16 @@ class BaremetalNode(StringIdAPIResourceWrapper):
             return []
 
 
-class Node(StringIdAPIResourceWrapper):
-    """
-    Wrapper for the Node object  returned by the
-    dummy model.
-    """
+class TuskarNode(StringIdAPIResourceWrapper):
+    """Wrapper for the TuskarNode object returned by the dummy model."""
+
     _attrs = ['id', 'nova_baremetal_node_id']
 
     @classmethod
-    def get(cls, request, node_id):
-        node = cls(tuskarclient(request).nodes.get(node_id))
-        node.request = request
-        return node
+    def get(cls, request, tuskar_node_id):
+        tuskar_node = cls(tuskarclient(request).nodes.get(tuskar_node_id))
+        tuskar_node.request = request
+        return tuskar_node
 
     @classmethod
     def list(cls, request):
@@ -370,28 +372,32 @@ class Rack(StringIdAPIResourceWrapper):
     """Wrapper for the Rack object  returned by the
     dummy model.
     """
+
     _attrs = ['id', 'name', 'location', 'subnet', 'nodes', 'state',
               'capacities']
 
     @classmethod
     def create(cls, request, **kwargs):
-        nodes = kwargs.get('nodes', [])
+        baremetal_node_ids = kwargs.get('baremetal_nodes', [])
         ## FIXME: set nodes here
         rack = tuskarclient(request).racks.create(
             name=kwargs['name'],
             location=kwargs['location'],
             subnet=kwargs['subnet'],
-            nodes=nodes,
+            nodes=baremetal_node_ids,
             resource_class={'id': kwargs['resource_class_id']},
             slots=0)
         return cls(rack)
 
     @classmethod
     def update(cls, request, rack_id, rack_kwargs):
-        ## FIXME: set nodes here
         rack_args = copy.copy(rack_kwargs)
         # remove rack_id from kwargs (othervise it is duplicated)
         rack_args.pop('rack_id', None)
+        ## FIXME: set nodes here
+        baremetal_node_ids = rack_args.pop('baremetal_nodes', None)
+        if baremetal_node_ids:
+            rack_args['nodes'] = baremetal_node_ids
         # correct data mapping for resource_class
         if 'resource_class_id' in rack_args:
             rack_args['resource_class'] = {
@@ -421,20 +427,19 @@ class Rack(StringIdAPIResourceWrapper):
         tuskarclient(request).racks.delete(rack_id)
 
     @property
-    def node_ids(self):
-        """List of unicode ids of nodes added to rack."""
-        return [unicode(node['id']) for node in self.nodes]
+    def tuskar_node_ids(self):
+        """List of unicode ids of tuskar nodes added to rack."""
+        return [unicode(tuskar_node['id']) for tuskar_node in self.nodes]
 
     @cached_property
-    def list_nodes(self):
-        return [Node.get(self.request, node['id']) for node in self.nodes]
+    def list_tuskar_nodes(self):
+        return [TuskarNode.get(self.request, tuskar_node['id'])
+                for tuskar_node in self.nodes]
 
-    @property
+    @cached_property
     def list_baremetal_nodes(self):
-        if not hasattr(self, '_baremetal_nodes'):
-            self._baremetal_nodes = [node.nova_baremetal_node
-                                     for node in self.list_nodes]
-        return self._baremetal_nodes
+        return [tuskar_node.nova_baremetal_node
+                for tuskar_node in self.list_tuskar_nodes]
 
     @property
     def nodes_count(self):
@@ -479,7 +484,8 @@ class Rack(StringIdAPIResourceWrapper):
     def aggregated_alerts(self):
         # FIXME: for now return only list of nodes (particular alerts are not
         # used)
-        return [node for node in self.list_nodes if node.alerts]
+        return [tuskar_node for tuskar_node in self.list_tuskar_nodes
+                if tuskar_node.alerts]
 
     @cached_property
     def list_flavors(self):
@@ -617,8 +623,8 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @cached_property
     def nodes(self):
-        return [n for n in Node.list(self.request)
-                if n.rack_id in self.racks_ids]
+        return [tuskar_node for tuskar_node in TuskarNode.list(self.request)
+                if tuskar_node.rack_id in self.racks_ids]
 
     @property
     def nodes_count(self):

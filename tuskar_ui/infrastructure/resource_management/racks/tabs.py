@@ -39,12 +39,12 @@ class NodesTab(tabs.TableTab):
     def get_nodes_table_data(self):
         try:
             rack = self.tab_group.kwargs['rack']
-            nodes = rack.list_nodes
+            tuskar_nodes = rack.list_tuskar_nodes
         except Exception:
-            nodes = []
+            tuskar_nodes = []
             exceptions.handle(self.tab_group.request,
                               _('Unable to retrieve node list.'))
-        return nodes
+        return tuskar_nodes
 
 
 class RackDetailTabs(tabs.TabGroup):

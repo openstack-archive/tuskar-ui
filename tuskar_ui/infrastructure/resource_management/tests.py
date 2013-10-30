@@ -34,7 +34,7 @@ class ResourceManagementTests(test.BaseAdminViewTests):
             'list',
             'list_racks',
             'nodes'),
-        tuskar.Node: (
+        tuskar.TuskarNode: (
             'list',),
         tuskar.Rack: (
             'list',)})
@@ -64,7 +64,7 @@ class ResourceManagementTests(test.BaseAdminViewTests):
 
         tuskar.Rack.list(mox.IsA(http.HttpRequest)).AndReturn(racks)
         tuskar.Rack.list(mox.IsA(http.HttpRequest)).AndReturn(racks)
-        tuskar.Node.list(mox.IsA(http.HttpRequest)).AndReturn(nodes)
+        tuskar.TuskarNode.list(mox.IsA(http.HttpRequest)).AndReturn(nodes)
         # Rack stubs end
 
         self.mox.ReplayAll()

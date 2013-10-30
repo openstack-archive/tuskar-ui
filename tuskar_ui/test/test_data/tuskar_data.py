@@ -156,10 +156,10 @@ def data(TEST):
                                 tuskar_node_2,
                                 tuskar_node_3,
                                 tuskar_node_4)
-    TEST.tuskar_nodes.add(api.Node(tuskar_node_1),
-                          api.Node(tuskar_node_2),
-                          api.Node(tuskar_node_3),
-                          api.Node(tuskar_node_4))
+    TEST.tuskar_nodes.add(api.TuskarNode(tuskar_node_1),
+                          api.TuskarNode(tuskar_node_2),
+                          api.TuskarNode(tuskar_node_3),
+                          api.TuskarNode(tuskar_node_4))
 
     TEST.baremetalclient_nodes = test_data_utils.TestDataContainer()
     TEST.baremetal_nodes = test_data_utils.TestDataContainer()
@@ -205,7 +205,7 @@ def data(TEST):
                              api.BaremetalNode(node_3),
                              api.BaremetalNode(node_4))
     TEST.baremetalclient_unracked_nodes.add(node_5)
-    TEST.baremetal_unracked_nodes.add(api.Node(node_5))
+    TEST.baremetal_unracked_nodes.add(api.TuskarNode(node_5))
     TEST.baremetalclient_nodes_all.add(node_1, node_2, node_3, node_4, node_5)
     TEST.baremetal_nodes_all.add(api.BaremetalNode(node_1),
                                  api.BaremetalNode(node_2),

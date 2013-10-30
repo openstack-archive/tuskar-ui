@@ -27,10 +27,10 @@ class NodeViewTests(test.BaseAdminViewTests):
 
     @test.create_stubs({tuskar.BaremetalNode: ('list_unracked',), })
     def test_unracked(self):
-        unracked_nodes = self.baremetal_unracked_nodes.list()
+        unracked_baremetal_nodes = self.baremetal_unracked_nodes.list()
 
         tuskar.BaremetalNode.list_unracked(
-            mox.IsA(http.HttpRequest)).AndReturn(unracked_nodes)
+            mox.IsA(http.HttpRequest)).AndReturn(unracked_baremetal_nodes)
         self.mox.ReplayAll()
 
         res = self.client.get(self.unracked_page)
@@ -39,55 +39,52 @@ class NodeViewTests(test.BaseAdminViewTests):
             'infrastructure/resource_management/nodes/unracked.html')
 
         unracked_nodes_table = res.context['unracked_nodes_table'].data
-        self.assertItemsEqual(unracked_nodes_table, unracked_nodes)
+        self.assertItemsEqual(unracked_nodes_table, unracked_baremetal_nodes)
 
-    @test.create_stubs({tuskar.Node: ('get', 'running_virtual_machines',
-                                      'list_flavors'),
-                        tuskar.Rack: ('get',),
-                        tuskar.BaremetalNode: ('get',)})
+    @test.create_stubs({
+        tuskar.TuskarNode: ('get', 'running_virtual_machines', 'list_flavors'),
+        tuskar.Rack: ('get',),
+        tuskar.BaremetalNode: ('get',),
+    })
     def test_detail_node(self):
-        node = self.tuskar_nodes.first()
-        node.request = self.request
+        tuskar_node = self.tuskar_nodes.first()
+        tuskar_node.request = self.request
         rack = self.tuskar_racks.first()
-        bm_node = self.baremetal_nodes.first()
+        baremetal_node = self.baremetal_nodes.first()
 
-        tuskar.Node.get(mox.IsA(http.HttpRequest),
-                        node.id).AndReturn(node)
+        tuskar.TuskarNode.get(mox.IsA(http.HttpRequest),
+                              tuskar_node.id).AndReturn(tuskar_node)
         tuskar.Rack.get(mox.IsA(http.HttpRequest),
                         rack.id).AndReturn(rack)
         tuskar.BaremetalNode.get(mox.IsA(http.HttpRequest),
-                                 bm_node.id).AndReturn(bm_node)
+                                 baremetal_node.id).AndReturn(baremetal_node)
         self.mox.ReplayAll()
 
-        tuskar.Node.running_virtual_machines = []
-        tuskar.Node.list_flavors = []
+        tuskar.TuskarNode.running_virtual_machines = []
+        tuskar.TuskarNode.list_flavors = []
 
-        url = urlresolvers.reverse('horizon:infrastructure:'
-                                   'resource_management:nodes:'
-                                   'detail',
-                                   args=[node.id])
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:nodes:detail',
+            args=[tuskar_node.id])
         res = self.client.get(url)
-        self.assertTemplateUsed(res,
-                                'infrastructure/resource_management/'
-                                'nodes/detail.html')
+        self.assertTemplateUsed(
+            res, 'infrastructure/resource_management/nodes/detail.html')
 
-    @test.create_stubs({tuskar.Node: ('get',)})
+    @test.create_stubs({tuskar.TuskarNode: ('get',)})
     def test_detail_node_exception(self):
-        node = self.tuskar_nodes.first()
+        tuskar_node = self.tuskar_nodes.first()
 
-        tuskar.Node.get(
-            mox.IsA(http.HttpRequest),
-            node.id).AndRaise(self.exceptions.tuskar)
+        tuskar.TuskarNode.get(mox.IsA(http.HttpRequest),
+                              tuskar_node.id).AndRaise(self.exceptions.tuskar)
 
         self.mox.ReplayAll()
 
-        url = urlresolvers.reverse('horizon:infrastructure:'
-                                   'resource_management:nodes:'
-                                   'detail',
-                                   args=[node.id])
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:resource_management:nodes:detail',
+            args=[tuskar_node.id])
         res = self.client.get(url)
 
         self.assertRedirectsNoFollow(
             res,
-            urlresolvers.reverse('horizon:infrastructure:resource_management:'
-                                 'index'))
+            urlresolvers.reverse(
+                'horizon:infrastructure:resource_management:index'))
