@@ -53,7 +53,7 @@ class RackViewTests(test.BaseAdminViewTests):
                         tuskar.ResourceClass: ('list',),
                         tuskar.BaremetalNode: ('create',)})
     def test_create_rack_post(self):
-        node = self.baremetal_nodes.first()
+        baremetal_node = self.baremetal_nodes.first()
 
         tuskar.Rack.list(
             mox.IsA(http.HttpRequest)).AndReturn(
@@ -68,14 +68,14 @@ class RackViewTests(test.BaseAdminViewTests):
             pm_address=u'',
             pm_user=u'',
             pm_password=u'',
-            terminal_port=None).AndReturn(node)
+            terminal_port=None).AndReturn(baremetal_node)
         tuskar.Rack.create(
             mox.IsA(http.HttpRequest),
             name='New Rack',
             resource_class_id=u'1',
             location='Tokyo',
             subnet='1.2.3.4/24',
-            nodes=[{'id': '11'}]).AndReturn(None)
+            baremetal_nodes=[{'id': '11'}]).AndReturn(None)
         tuskar.ResourceClass.list(
             mox.IsA(http.HttpRequest)).AndReturn(
                 self.tuskar_resource_classes.list())
@@ -101,14 +101,14 @@ class RackViewTests(test.BaseAdminViewTests):
         resp = self.client.post(url, data)
         self.assertRedirectsNoFollow(resp, self.index_page_racks_tab)
 
-    @test.create_stubs({tuskar.Rack: ('get', 'list_nodes'),
+    @test.create_stubs({tuskar.Rack: ('get', 'list_tuskar_nodes'),
                         tuskar.ResourceClass: ('list',)})
     def test_edit_rack_get(self):
         rack = self.tuskar_racks.first()
 
         tuskar.Rack.get(
             mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
-        tuskar.Rack.list_nodes = []
+        tuskar.Rack.list_tuskar_nodes = []
         tuskar.Rack.get(mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
         tuskar.ResourceClass.list(
             mox.IsA(http.HttpRequest)).AndReturn(
@@ -122,8 +122,10 @@ class RackViewTests(test.BaseAdminViewTests):
         self.assertEqual(res.status_code, 200)
         self.assertTemplateUsed(res, 'infrastructure/_workflow_base.html')
 
-    @test.create_stubs({tuskar.Rack: ('get', 'list', 'update', 'list_nodes'),
-                        tuskar.ResourceClass: ('list',)})
+    @test.create_stubs({
+        tuskar.Rack: ('get', 'list', 'update', 'list_tuskar_nodes'),
+        tuskar.ResourceClass: ('list',),
+    })
     def test_edit_rack_post(self):
         rack = self.tuskar_racks.first()
 
@@ -133,7 +135,7 @@ class RackViewTests(test.BaseAdminViewTests):
             'rack_id': u'1',
             'location': 'New Location',
             'subnet': '127.10.10.0/24',
-            'nodes': [],
+            'baremetal_nodes': [],
         }
 
         data = {
@@ -149,7 +151,7 @@ class RackViewTests(test.BaseAdminViewTests):
 
         tuskar.Rack.get(
             mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
-        tuskar.Rack.list_nodes = []
+        tuskar.Rack.list_tuskar_nodes = []
         tuskar.Rack.get(
             mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
         tuskar.Rack.list(
@@ -287,8 +289,10 @@ class RackViewTests(test.BaseAdminViewTests):
         self.assertMessageCount(success=1)
         self.assertMessageCount(error=0)
 
-    @test.create_stubs({tuskar.Rack: ('get', 'list_nodes', 'list_flavors'),
-                        tuskar.ResourceClass: ('get',)})
+    @test.create_stubs({
+        tuskar.Rack: ('get', 'list_tuskar_nodes', 'list_flavors'),
+        tuskar.ResourceClass: ('get',),
+    })
     def test_detail_rack(self):
         rack = self.tuskar_racks.first()
         rack.request = self.request
@@ -300,7 +304,7 @@ class RackViewTests(test.BaseAdminViewTests):
                                  resource_class.id).AndReturn(resource_class)
         self.mox.ReplayAll()
 
-        tuskar.Rack.list_nodes = []
+        tuskar.Rack.list_tuskar_nodes = []
         tuskar.Rack.list_flavors = []
 
         url = urlresolvers.reverse('horizon:infrastructure:'
@@ -368,10 +372,10 @@ class RackViewTests(test.BaseAdminViewTests):
         self.assertEquals(res.content, state_json)
 
     @test.create_stubs({
-        tuskar.Rack: ('get', 'list_nodes', 'list_flavors', 'update',
-                      'node_ids'),
+        tuskar.Rack: ('get', 'list_tuskar_nodes', 'list_flavors', 'update',
+                      'tuskar_node_ids'),
         tuskar.ResourceClass: ('get',),
-        tuskar.Node: ('get',),
+        tuskar.TuskarNode: ('get',),
         tuskar.BaremetalNode: ('get',),
     })
     def test_node_delete(self):
@@ -381,19 +385,21 @@ class RackViewTests(test.BaseAdminViewTests):
         baremetal_node = baremetal_nodes[0]
         tuskar_node = self.tuskar_nodes.first()
 
-        tuskar.Rack.list_nodes = baremetal_nodes
-        tuskar.Rack.node_ids = [node.id for node in baremetal_nodes]
+        # FIXME: evidently something is wrong here
+        tuskar.Rack.list_tuskar_nodes = baremetal_nodes
+        tuskar.Rack.tuskar_node_ids = [bm_node.id
+                                       for bm_node in baremetal_nodes]
         tuskar.Rack.list_flavors = []
 
         tuskar.Rack.get(mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
-        tuskar.Node.get(mox.IsA(http.HttpRequest),
-                        baremetal_node.id).AndReturn(tuskar_node)
+        tuskar.TuskarNode.get(mox.IsA(http.HttpRequest),
+                              baremetal_node.id).AndReturn(tuskar_node)
         tuskar.Rack.get(None, rack.id).AndReturn(rack)  # called by node.rack
-        tuskar.Rack.update(mox.IsA(http.HttpRequest), rack.id,
-                           {'nodes': [{'id': node_id}
-                                      for node_id in tuskar.Rack.node_ids
-                                      if node_id != baremetal_node.id]}
-                           ).AndReturn(rack)
+        tuskar.Rack.update(mox.IsA(http.HttpRequest), rack.id, {
+            'baremetal_nodes': [{'id': node_id}
+                                for node_id in tuskar.Rack.tuskar_node_ids
+                                if node_id != baremetal_node.id],
+        }).AndReturn(rack)
         self.mox.ReplayAll()
 
         url = urlresolvers.reverse(
