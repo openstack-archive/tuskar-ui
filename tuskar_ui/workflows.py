@@ -30,8 +30,7 @@ class WorkflowView(horizon.workflows.WorkflowView):
 
 # FIXME: TableStep
 class TableStep(horizon.workflows.Step):
-    """
-    A :class:`~horizon.workflows.Step` class which knows how to deal with
+    """A :class:`~horizon.workflows.Step` class which knows how to deal with
     :class:`~horizon.tables.DataTable` classes rendered inside of it.
 
     This distinct class is required due to the complexity involved in handling
@@ -64,15 +63,14 @@ class TableStep(horizon.workflows.Step):
         self._table_data_loaded = False
 
     def prepare_action_context(self, request, context):
-        """
-        Passes the tables to the action for validation and data extraction.
+        """Passes the tables to the action for validation and data extraction.
         """
         self.load_table_data()
         context['_tables'] = self._tables
         return context
 
     def render(self):
-        """ Renders the step. """
+        """Renders the step."""
         step_template = template.loader.get_template(self.template_name)
         extra_context = {"form": self.action,
                          "step": self}
@@ -85,8 +83,7 @@ class TableStep(horizon.workflows.Step):
         return step_template.render(context)
 
     def load_table_data(self):
-        """
-        Calls the ``get_{{ table_name }}_data`` methods for each table class
+        """Calls the ``get_{{ table_name }}_data`` methods for each table class
         and sets the data on the tables.
         """
         # We only want the data to be loaded once, so we track if we have...
@@ -106,8 +103,7 @@ class TableStep(horizon.workflows.Step):
             self._table_data_loaded = True
 
     def get_context_data(self, request):
-        """
-        Adds a ``{{ table_name }}_table`` item to the context for each table
+        """Adds a ``{{ table_name }}_table`` item to the context for each table
         in the :attr:`~horizon.tabs.TableTab.table_classes` attribute.
 
         If only one table class is provided, a shortcut ``table`` context

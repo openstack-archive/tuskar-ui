@@ -262,10 +262,7 @@ class BaremetalNode(StringIdAPIResourceWrapper):
 
 
 class Node(StringIdAPIResourceWrapper):
-    """
-    Wrapper for the Node object  returned by the
-    dummy model.
-    """
+    """Wrapper for the Node object  returned by the dummy model."""
     _attrs = ['id', 'nova_baremetal_node_id']
 
     @classmethod
@@ -460,9 +457,10 @@ class Rack(StringIdAPIResourceWrapper):
 
     @cached_property
     def vm_capacity(self):
-        """
-        Rack VM Capacity is maximum value from its Resource Class's
-        Flavors max_vms (considering flavor sizes are multiples).
+        """Calculate Rack VM Capacity.
+
+        Rack VM Capacity is maximum value from its Resource Class's Flavors
+        max_vms (considering flavor sizes are multiples).
         """
         try:
             value = max([flavor.max_vms for flavor in
@@ -607,7 +605,8 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @cached_property
     def all_racks(self):
-        """
+        """List all racks suitable for the add/remove dialog.
+
         List of racks added to ResourceClass + list of free racks,
         meaning racks that don't belong to any ResourceClass.
         """
@@ -676,9 +675,11 @@ class ResourceClass(StringIdAPIResourceWrapper):
 
     @cached_property
     def vm_capacity(self):
-        """ Resource Class VM Capacity is maximum value from It's Flavors
-            max_vms (considering flavor sizes are multiples), multipled by
-            number of Racks in Resource Class.
+        """Calculate Class VM Capacity.
+
+        Resource Class VM Capacity is maximum value from its Flavors max_vms
+        (considering flavor sizes are multiples), multipled by number of Racks
+        in Resource Class.
         """
         try:
             value = self.racks_count * max([flavor.max_vms

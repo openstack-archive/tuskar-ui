@@ -52,10 +52,9 @@ class TuskarApiTests(test.APITestCase):
         self.assertIsInstance(ret_val, api.BaremetalNode)
 
     def test_baremetal_node_create_with_empty_pm(self):
-        """
-        Make sure that when pm_address, pm_user and terminal_port are not
-        provided (empty), their values are set to None, as this is required
-        by the baremetal VM.
+        """Make sure that when pm_address, pm_user and terminal_port are not
+        provided (empty), their values are set to None, as this is required by
+        the baremetal VM.
         """
         node = self.baremetalclient_nodes.first()
 
