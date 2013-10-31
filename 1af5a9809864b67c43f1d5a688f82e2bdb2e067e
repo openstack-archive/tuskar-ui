@@ -1,0 +1,10 @@
+Verified+2: Jenkins
+Approved+1: Tomas Sedovic <tomas@sedovic.cz>
+Code-Review+2: Tomas Sedovic <tomas@sedovic.cz>
+Code-Review+1: Victor Sergeyev <vsergeyev@mirantis.com>
+Code-Review+2: Radomir Dopieralski <openstack@sheep.art.pl>
+Submitted-by: Jenkins
+Submitted-at: Thu, 31 Oct 2013 15:25:25 +0000
+Reviewed-on: https://review.openstack.org/54728
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
