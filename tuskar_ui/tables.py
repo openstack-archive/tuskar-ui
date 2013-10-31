@@ -32,14 +32,14 @@ STRING_SEPARATOR = "__"
 # FIXME: Remove this class and use Row directly after it becomes easier to
 # extend it, see bug #1229677
 class BaseCell(horizon_tables.Cell):
-    """ Represents a single cell in the table. """
+    """Represents a single cell in the table."""
     def __init__(self, datum, column, row, attrs=None, classes=None):
         super(BaseCell, self).__init__(datum, None, column, row, attrs,
                                        classes)
         self.data = self.get_data(datum, column, row)
 
     def get_data(self, datum, column, row):
-        """ Fetches the data to be displayed in this cell. """
+        """Fetches the data to be displayed in this cell."""
         table = row.table
         if column.auto == "multi_select":
             widget = forms.CheckboxInput(check_test=lambda value: False)
@@ -58,8 +58,7 @@ class BaseCell(horizon_tables.Cell):
 # FIXME: Remove this class and use Row directly after it becomes easier to
 # extend it, see bug #1229677
 class BaseRow(horizon_tables.Row):
-    """
-    A DataTable Row class that is easier to extend.
+    """A DataTable Row class that is easier to extend.
 
     All of this code is lifted from ``horizon_tables.Row`` and just split into
     two separate methods, so that it is possible to override one of them
@@ -141,8 +140,7 @@ class FormsetRow(BaseRow):
 
 
 class FormsetDataTableMixin(object):
-    """
-    A mixin for DataTable to support Django Formsets.
+    """A mixin for DataTable to support Django Formsets.
 
     This works the same as the ``FormsetDataTable`` below, but can be used
     to add to existing DataTable subclasses.
@@ -183,8 +181,7 @@ class FormsetDataTableMixin(object):
         return data
 
     def get_formset(self):
-        """
-        Provide the formset corresponding to this DataTable.
+        """Provide the formset corresponding to this DataTable.
 
         Use this to validate the formset and to get the submitted data back.
         """
@@ -200,8 +197,7 @@ class FormsetDataTableMixin(object):
         return self._meta.row_class(self, None, self.get_formset().empty_form)
 
     def get_rows(self):
-        """
-        Return the row data for this table broken out by columns.
+        """Return the row data for this table broken out by columns.
 
         The row objects get an additional ``form`` parameter, with the
         formset form corresponding to that row.
@@ -236,8 +232,7 @@ class FormsetDataTableMixin(object):
 
 
 class FormsetDataTable(FormsetDataTableMixin, horizon_tables.DataTable):
-    """
-    A DataTable with support for Django Formsets.
+    """A DataTable with support for Django Formsets.
 
     Note that :attr:`~horizon.tables.DataTableOptions.row_class` and
     :attr:`~horizon.tables.DataTaleOptions.cell_class` are overwritten in this

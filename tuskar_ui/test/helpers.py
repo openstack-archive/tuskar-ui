@@ -36,8 +36,7 @@ def create_stubs(stubs_to_create={}):
 @unittest.skipIf(os.environ.get('SKIP_UNITTESTS', False),
                  "The SKIP_UNITTESTS env variable is set.")
 class TestCase(openstack_dashboard_helpers.TestCase):
-    """
-    Specialized base test case class for Horizon which gives access to
+    """Specialized base test case class for Horizon which gives access to
     numerous additional features:
 
       * A full suite of test data through various attached objects and
@@ -60,8 +59,7 @@ class TestCase(openstack_dashboard_helpers.TestCase):
 
 
 class BaseAdminViewTests(openstack_dashboard_helpers.BaseAdminViewTests):
-    """
-    A ``TestCase`` subclass which sets an active user with the "admin" role
+    """A ``TestCase`` subclass which sets an active user with the "admin" role
     for testing admin-only views and functionality.
     """
     def setUp(self):
@@ -72,8 +70,7 @@ class BaseAdminViewTests(openstack_dashboard_helpers.BaseAdminViewTests):
 
 
 class APITestCase(openstack_dashboard_helpers.APITestCase):
-    """
-    The ``APITestCase`` class is for use with tests which deal with the
+    """The ``APITestCase`` class is for use with tests which deal with the
     underlying clients rather than stubbing out the
     openstack_dashboard.api.* methods.
     """

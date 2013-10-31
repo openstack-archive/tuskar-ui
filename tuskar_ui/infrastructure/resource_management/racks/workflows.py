@@ -154,7 +154,7 @@ class CreateRack(workflows.Workflow):
     # tab it should redirect after action, until the coflict will
     # be fixed in Horizon.
     def get_index_url(self):
-        """This url is used both as success and failure url"""
+        """This URL is used both as success and failure URL."""
         return "%s?tab=resource_management_tabs__racks_tab" %\
             urlresolvers.reverse('horizon:infrastructure:resource_management:'
                                  'index')

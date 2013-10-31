@@ -49,10 +49,10 @@
 # So we have a copy of it here, with the bug fixed.
 # FIXME: Use django's version when the bug is fixed there.
 class cached_property(object):
+    """Decorator that creates converts a method with a single self argument
+    into a property cached on the instance.
     """
-    Decorator that creates converts a method with a single
-    self argument into a property cached on the instance.
-    """
+
     def __init__(self, func):
         self.func = func
 

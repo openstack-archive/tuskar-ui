@@ -56,7 +56,7 @@ class EditRack(tables.LinkAction):
 class RacksFilterAction(tables.FilterAction):
 
     def filter(self, table, racks, filter_string):
-        """ Naive case-insensitive search. """
+        """Naive case-insensitive search."""
         q = filter_string.lower()
         return [rack for rack in racks
                 if q in rack.name.lower()]

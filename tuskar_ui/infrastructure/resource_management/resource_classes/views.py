@@ -129,9 +129,7 @@ class DetailActionView(horizon_forms.ModalFormView):
                      'resource_classes/action.html')
 
     def get_form(self, form_class):
-        """
-        Returns an instance of the form to be used in this view.
-        """
+        """Returns an instance of the form to be used in this view."""
         try:
             action = self.request.GET.get('action')
             if action == "delete":

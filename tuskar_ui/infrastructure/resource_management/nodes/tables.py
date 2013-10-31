@@ -38,7 +38,7 @@ class DeleteNodes(tables.DeleteAction):
 
 class NodesFilterAction(tables.FilterAction):
     def filter(self, table, nodes, filter_string):
-        """ Naive case-insensitive search. """
+        """Naive case-insensitive search."""
         q = filter_string.lower()
         # This is used both for Tuskar and Baremetal nodes.
         return [node for node in nodes if q in node.name.lower()]
