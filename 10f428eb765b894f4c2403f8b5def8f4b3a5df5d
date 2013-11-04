@@ -1,0 +1,10 @@
+Verified+2: Jenkins
+Code-Review+2: Tzu-Mainn Chen <tzumainn@redhat.com>
+Code-Review+1: Victor Sergeyev <vsergeyev@mirantis.com>
+Approved+1: Ladislav Smola <lsmola@redhat.com>
+Code-Review+2: Ladislav Smola <lsmola@redhat.com>
+Submitted-by: Jenkins
+Submitted-at: Mon, 04 Nov 2013 07:36:09 +0000
+Reviewed-on: https://review.openstack.org/54564
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
