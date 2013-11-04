@@ -29,34 +29,28 @@ class ResourceManagementTests(test.BaseAdminViewTests):
         super(ResourceManagementTests, self).setUp()
 
     @test.create_stubs({
-        tuskar.ResourceClass: (
-            'get',
-            'list',
-            'list_racks',
-            'nodes'),
-        tuskar.Node: (
-            'list',),
-        tuskar.Rack: (
-            'list',)})
+        tuskar.ResourceClass: ('get', 'list', 'list_racks', 'tuskar_nodes'),
+        tuskar.TuskarNode: ('list',),
+        tuskar.Rack: ('list',),
+    })
     def test_index(self):
 
         # ResourceClass stubs
         resource_classes = self.tuskar_resource_classes.list()
         resource_class = self.tuskar_resource_classes.first()
-        nodes = []
+        tuskar_nodes = []
         racks = []
 
-        tuskar.ResourceClass.nodes = nodes
+        tuskar.ResourceClass.tuskar_nodes = tuskar_nodes
         tuskar.ResourceClass.list_racks = racks
 
         tuskar.Rack.list(mox.IsA(http.HttpRequest)).AndReturn(racks)
         tuskar.ResourceClass.list(
-            mox.IsA(http.HttpRequest)).\
-            AndReturn(resource_classes)
+            mox.IsA(http.HttpRequest)).AndReturn(resource_classes)
 
         tuskar.ResourceClass.get(
-            mox.IsA(http.HttpRequest), resource_class.id).\
-            AndReturn(resource_class)
+            mox.IsA(http.HttpRequest),
+            resource_class.id).AndReturn(resource_class)
         # ResourceClass stubs end
 
         # Rack stubs
@@ -64,7 +58,8 @@ class ResourceManagementTests(test.BaseAdminViewTests):
 
         tuskar.Rack.list(mox.IsA(http.HttpRequest)).AndReturn(racks)
         tuskar.Rack.list(mox.IsA(http.HttpRequest)).AndReturn(racks)
-        tuskar.Node.list(mox.IsA(http.HttpRequest)).AndReturn(nodes)
+        tuskar.TuskarNode.list(
+            mox.IsA(http.HttpRequest)).AndReturn(tuskar_nodes)
         # Rack stubs end
 
         self.mox.ReplayAll()
