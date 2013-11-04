@@ -372,9 +372,8 @@ class RackViewTests(test.BaseAdminViewTests):
         self.assertEquals(res.content, state_json)
 
     @test.create_stubs({
-        tuskar.Rack: ('get', 'list_tuskar_nodes', 'list_flavors', 'update',
-                      'tuskar_node_ids'),
-        tuskar.ResourceClass: ('get',),
+        tuskar.Rack: ('get', 'list_baremetal_nodes', 'list_flavors', 'update',
+                      'tuskar_node_ids', 'list_tuskar_nodes'),
         tuskar.TuskarNode: ('get',),
         tuskar.BaremetalNode: ('get',),
     })
@@ -383,29 +382,31 @@ class RackViewTests(test.BaseAdminViewTests):
         rack.request = self.request
         baremetal_nodes = self.baremetal_nodes.list()
         baremetal_node = baremetal_nodes[0]
-        tuskar_node = self.tuskar_nodes.first()
+        tuskar_nodes = self.tuskar_nodes.list()
+        tuskar_node = tuskar_nodes[0]
 
-        # FIXME: evidently something is wrong here
-        tuskar.Rack.list_tuskar_nodes = baremetal_nodes
-        tuskar.Rack.tuskar_node_ids = [bm_node.id
-                                       for bm_node in baremetal_nodes]
+        tuskar.Rack.list_baremetal_nodes = baremetal_nodes
+        tuskar.Rack.list_tuskar_nodes = tuskar_nodes
+        tuskar.Rack.tuskar_node_ids = [t_node.id for t_node in tuskar_nodes]
         tuskar.Rack.list_flavors = []
 
         tuskar.Rack.get(mox.IsA(http.HttpRequest), rack.id).AndReturn(rack)
         tuskar.TuskarNode.get(mox.IsA(http.HttpRequest),
-                              baremetal_node.id).AndReturn(tuskar_node)
+                              tuskar_node.id).AndReturn(tuskar_node)
+        tuskar.BaremetalNode.get(None,
+                                 baremetal_node.id).AndReturn(baremetal_node)
         tuskar.Rack.get(None, rack.id).AndReturn(rack)  # called by node.rack
         tuskar.Rack.update(mox.IsA(http.HttpRequest), rack.id, {
-            'baremetal_nodes': [{'id': node_id}
-                                for node_id in tuskar.Rack.tuskar_node_ids
-                                if node_id != baremetal_node.id],
+            'baremetal_nodes': [{'id': bm_node.id}
+                                for bm_node in baremetal_nodes
+                                if bm_node.id != baremetal_node.id],
         }).AndReturn(rack)
         self.mox.ReplayAll()
 
         url = urlresolvers.reverse(
             'horizon:infrastructure:resource_management:racks:detail',
             args=[rack.id])
-        form_data = {'action': 'nodes_table__delete__%s' % baremetal_node.id}
+        form_data = {'action': 'nodes_table__delete__%s' % tuskar_node.id}
         response = self.client.post(url, form_data)
         self.assertNoFormErrors(response)
         self.assertMessageCount(success=1)
