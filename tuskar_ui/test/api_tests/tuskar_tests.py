@@ -151,6 +151,25 @@ class TuskarApiTests(test.APITestCase):
         for tuskar_node in ret_val:
             self.assertIsInstance(tuskar_node, api.TuskarNode)
 
+    def test_node_remove_from_rack(self):
+        tuskar_nodes = self.tuskarclient_nodes.list()
+        tuskar_node = tuskar_nodes[0]
+        rack = self.tuskarclient_racks.first()
+
+        tuskarclient = self.stub_tuskarclient()
+        tuskarclient.racks = self.mox.CreateMockAnything()
+        tuskarclient.nodes = self.mox.CreateMockAnything()
+        tuskar_node.rack = rack
+
+        tuskarclient.nodes.list().AndReturn(tuskar_nodes)
+        tuskarclient.racks.get(rack.id).AndReturn(rack)
+        tuskarclient.racks.update(rack.id, nodes=[]).AndReturn(rack)
+        self.mox.ReplayAll()
+
+        tuskar_node.request = self.request
+        rack.request = self.request
+        tuskar_node.remove_from_rack(self.request)
+
     def test_node_rack(self):
         tuskar_node = self.tuskar_nodes.first()
         rack = self.tuskarclient_racks.first()

@@ -280,6 +280,13 @@ class TuskarNode(StringIdAPIResourceWrapper):
     def list(cls, request):
         return [cls(n, request) for n in (tuskarclient(request).nodes.list())]
 
+    def remove_from_rack(self, request):
+        rack = self.rack
+        baremetal_node_ids = [{'id': tuskar_node.nova_baremetal_node_id}
+                              for tuskar_node in rack.list_tuskar_nodes
+                              if tuskar_node.id != self.id]
+        Rack.update(request, rack.id, {'baremetal_nodes': baremetal_node_ids})
+
     @cached_property
     def rack(self):
         if self.rack_id:
@@ -396,7 +403,7 @@ class Rack(StringIdAPIResourceWrapper):
         rack_args.pop('rack_id', None)
         ## FIXME: set nodes here
         baremetal_node_ids = rack_args.pop('baremetal_nodes', None)
-        if baremetal_node_ids:
+        if baremetal_node_ids is not None:
             rack_args['nodes'] = baremetal_node_ids
         # correct data mapping for resource_class
         if 'resource_class_id' in rack_args:
