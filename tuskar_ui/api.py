@@ -233,6 +233,12 @@ class BaremetalNode(StringIdAPIResourceWrapper):
         except requests.ConnectionError:
             return []
 
+    @cached_property
+    def tuskar_node(self):
+        node = next((tuskar_node for tuskar_node in TuskarNode.list(self.request)
+                if tuskar_node.nova_baremetal_node_id == self.id), None)
+        return node
+
     @property
     def mac_address(self):
         try:

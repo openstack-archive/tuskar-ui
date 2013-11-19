@@ -44,25 +44,26 @@ class DetailView(horizon_tabs.TabView):
 
     def get_context_data(self, **kwargs):
             context = super(DetailView, self).get_context_data(**kwargs)
-            context["tuskar_node"] = self.get_data()
+            context["baremetal_node"] = self.get_data()
+            context["tuskar_node"] = self.get_data().tuskar_node
             return context
 
     def get_data(self):
-        if not hasattr(self, "_tuskar_node"):
-            tuskar_node_id = self.kwargs['node_id']
+        if not hasattr(self, "_baremetal_node"):
+            baremetal_node_id = self.kwargs['node_id']
             try:
-                tuskar_node = tuskar.TuskarNode.get(self.request,
-                                                    tuskar_node_id)
+                baremetal_node = tuskar.BaremetalNode.get(self.request,
+                                                          baremetal_node_id)
             except Exception:
                 redirect = urlresolvers.reverse(
                     'horizon:infrastructure:resource_management:index')
                 exceptions.handle(self.request,
                                   _('Unable to retrieve details for '
-                                    'node "%s".') % tuskar_node_id,
+                                    'node "%s".') % baremetal_node_id,
                                   redirect=redirect)
-            self._tuskar_node = tuskar_node
-        return self._tuskar_node
+            self._baremetal_node = baremetal_node
+        return self._baremetal_node
 
     def get_tabs(self, request, *args, **kwargs):
-        tuskar_node = self.get_data()
-        return self.tab_group_class(request, tuskar_node=tuskar_node, **kwargs)
+        baremetal_node = self.get_data()
+        return self.tab_group_class(request, baremetal_node=baremetal_node, **kwargs)

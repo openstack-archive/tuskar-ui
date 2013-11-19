@@ -16,6 +16,7 @@ from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import messages
 from horizon import tabs
+import novaclient
 import requests
 
 
@@ -27,15 +28,21 @@ class OverviewTab(tabs.Tab):
     preload = False
 
     def get_context_data(self, request):
-        tuskar_node = self.tab_group.kwargs['tuskar_node']
-        try:
-            running_instances = len(tuskar_node.running_virtual_machines)
-        except requests.exceptions.ConnectionError:
-            running_instances = _("Unknown")
-            messages.warning(
-                request,
-                _("Can't retrieve the running instances from the overcloud."))
+        baremetal_node = self.tab_group.kwargs['baremetal_node']
+        tuskar_node = baremetal_node.tuskar_node
+        if tuskar_node:
+            try:
+                running_instances = len(tuskar_node.running_virtual_machines)
+            except (requests.exceptions.ConnectionError, novaclient.exceptions.Unauthorized):
+                running_instances = _("Unknown")
+                messages.warning(
+                    request,
+                    _("Can't retrieve the running instances from the overcloud."))
+        else:
+            running_instances = _("None")
+
         return {
+            'baremetal_node': baremetal_node,
             'tuskar_node': tuskar_node,
             'running_instances': running_instances,
         }

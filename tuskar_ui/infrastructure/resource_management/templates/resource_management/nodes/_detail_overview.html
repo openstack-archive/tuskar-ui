@@ -8,15 +8,15 @@
     <hr class="header_rule">
     <dl>
       <dt>{% trans "MAC Address" %}</dt>
-      <dd>{{ tuskar_node.mac_address|default:_("None") }}</dd>
+      <dd>{{ baremetal_node.mac_address|default:_("None") }}</dd>
       <dt>{% trans "IPs" %}</dt>
-      <dd>{{ tuskar_node.ip_address_other|default:_("None") }}</dd>
+      <dd>{{ baremetal_node.ip_address_other|default:_("None") }}</dd>
       <dt>{% trans "Management IP" %}</dt>
-      <dd>{{ tuskar_node.pm_address|default:_("None") }}</dd>
+      <dd>{{ baremetal_node.pm_address|default:_("None") }}</dd>
       <dt>{% trans "Power Management" %}</dt>
       <dd>{{ tuskar_node.rack.power_management|default:_("-") }}</dd>
       <dt>{% trans "Status" %}</dt>
-      <dd>{{ tuskar_node.status|default:_("None") }}</dd>
+      <dd>{{ baremetal_node.status|default:_("None") }}</dd>
     </dl>
   </div>
   <div class="span4">
