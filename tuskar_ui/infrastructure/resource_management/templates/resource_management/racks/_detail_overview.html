@@ -174,7 +174,7 @@
      {% for tuskar_node in rack.aggregated_alerts %}
          <li>
            <i class="icon-warning-sign"></i>
-           Node <a href="{% url 'horizon:infrastructure:resource_management:nodes:detail' tuskar_node.id %}">{{ tuskar_node.name }}</a> has some problems
+           Node <a href="{% url 'horizon:infrastructure:resource_management:nodes:detail' tuskar_node.nova_baremetal_node_id %}">{{ tuskar_node.name }}</a> has some problems
          </li>
      {% endfor %}
     </ul>

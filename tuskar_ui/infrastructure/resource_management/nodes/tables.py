@@ -29,8 +29,8 @@ class DeleteNodes(tables.DeleteAction):
 
     def delete(self, request, obj_id):
         try:
-            tuskar_node = tuskar.TuskarNode.get(request, obj_id)
-            tuskar_node.remove_from_rack(request)
+            baremetal_node = tuskar.BaremetalNode.get(request, obj_id)
+            baremetal_node.tuskar_node.remove_from_rack(request)
         except Exception:
             exceptions.handle(request, _("Error deleting node."))
             return False
