@@ -1,0 +1,10 @@
+Verified+2: Jenkins
+Approved+1: Ladislav Smola <lsmola@redhat.com>
+Code-Review+2: Ladislav Smola <lsmola@redhat.com>
+Code-Review+1: Jiri Stransky <jistr@redhat.com>
+Code-Review+2: Jordan OMara <jomara@redhat.com>
+Submitted-by: Jenkins
+Submitted-at: Thu, 21 Nov 2013 16:20:36 +0000
+Reviewed-on: https://review.openstack.org/57549
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
