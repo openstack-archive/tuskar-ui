@@ -19,9 +19,9 @@ import horizon
 from tuskar_ui.infrastructure import dashboard
 
 
-class Overview(horizon.Panel):
+class DeploymentOverview(horizon.Panel):
     name = _("Overview")
-    slug = "overview"
+    slug = "deploy_overview"
 
 
-dashboard.Infrastructure.register(Overview)
+dashboard.Infrastructure.register(DeploymentOverview)
