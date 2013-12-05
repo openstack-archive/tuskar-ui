@@ -1,4 +1,4 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
+# -*- coding: utf8 -*-
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -19,9 +19,9 @@ import horizon
 from tuskar_ui.infrastructure import dashboard
 
 
-class Overview(horizon.Panel):
-    name = _("Overview")
-    slug = "overview"
+class BlockStorage(horizon.Panel):
+    name = _("Block Storage")
+    slug = "deploy_block_storage"
 
 
-dashboard.Infrastructure.register(Overview)
+dashboard.Infrastructure.register(BlockStorage)
