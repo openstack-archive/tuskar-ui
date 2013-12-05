@@ -17,11 +17,74 @@ from django.utils.translation import ugettext_lazy as _  # noqa
 import horizon
 
 
+class InfrastructureOverview(horizon.PanelGroup):
+    slug = "infrastructure_overview"
+    name = _("Overview")
+    panels = (
+        'overview',
+    )
+
+
+class Deployment(horizon.PanelGroup):
+    slug = "deploy"
+    name = _("Deployment")
+    panels = (
+        'deploy_overview',
+        'deploy_controller',
+        'deploy_compute',
+        'deploy_object_storage',
+        'deploy_block_storage',
+    )
+
+
+class Resources(horizon.PanelGroup):
+    slug = "nodes"
+    name = _("Resources")
+    panels = (
+        'resources_overview',
+        'resources_resource',
+        'resources_management',
+        'resources_unallocated',
+        'resources_archived',
+    )
+
+
+class Networks(horizon.PanelGroup):
+    slug = "networks"
+    name = _("Networks")
+    panels = (
+        'networks_overview',
+    )
+
+
+class Images(horizon.PanelGroup):
+    slug = "images"
+    name = _("Images")
+    panels = (
+        'images_overview',
+    )
+
+
+class Logs(horizon.PanelGroup):
+    slug = "logs"
+    name = _("Logs")
+    panels = (
+        'logs_overview',
+    )
+
+
 class Infrastructure(horizon.Dashboard):
     name = _("Infrastructure")
     slug = "infrastructure"
-    panels = ('resource_management',)
-    default_panel = 'resource_management'
+    panels = (
+        InfrastructureOverview,
+        Deployment,
+        Resources,
+        Networks,
+        Images,
+        Logs,
+    )
+    default_panel = 'overview'
     permissions = ('openstack.roles.admin',)
 
 
