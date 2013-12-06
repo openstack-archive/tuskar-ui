@@ -99,27 +99,6 @@ editor. You will want to customize several settings:
    OpenStack server to change them.)
 -  ``TUSKAR_ENDPOINT_URL`` should point to the Tuskar server you
    configured. It normally runs on port 8585.
--  ``REMOTE_NOVA_BAREMETAL_CREDS`` is optional. It's a dictionary of settings
-   for connecting to a remote Nova Baremetal. If not set, this information is
-   gathered from Keystone's service catalog, but a common configuration with
-   Tuskar and friends is to have Nova Baremetal reachable only from certain
-   machines, so the credentials are held separately right now. The
-   ``user``, ``password``, and ``tenant`` settings will very likely
-   match those of Keystone, and ``auth_url`` may also be the same.
-   ``bypass_url`` points directly to the Nova Baremetal API, with the
-   last parameter in the URL being your tenant ID.
-
-You can find the tenant ID by running the following from the command
-line:
-
-::
-
-    keystone --os-username=USERNAME --os-password=PASSWORD --os-tenant-name=TENANTNAME --os-auth-url=http://AUTHURL:5000/v2.0/ tenant-list
-
-and selecting the id column that matches your tenant name.
-
-(Of course, substituting the appropriate values in for ``USERNAME``,
-``PASSWORD``, ``TENANTNAME`` and ``AUTHURL``)
 
 Final setup
 -----------
