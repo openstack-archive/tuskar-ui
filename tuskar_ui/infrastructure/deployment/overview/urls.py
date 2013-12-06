@@ -20,4 +20,6 @@ from tuskar_ui.infrastructure.deployment.overview import views
 urlpatterns = defaults.patterns(
     '',
     defaults.url(r'^$', views.IndexView.as_view(), name='index'),
+    defaults.url(r'^register/$', views.RegisterView.as_view(),
+                 name='register'),
 )
