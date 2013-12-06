@@ -1,0 +1,14 @@
+<div class="row-fluid form-field control-group{% if field.errors %} error{% endif %}{% if required or field.required %} required{% endif %}">
+  <label class="span4 control-label">{{ field.label }}</label>
+  <div class="span6">{{ field }}</div>
+  {% if extra_text %}
+    <div class="span2 muted">{{ extra_text }}</div>
+  {% endif %}
+  {% if field.errors %}
+    <div class="help-block">
+      {% for error in field.errors %}
+        {{ error }}
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

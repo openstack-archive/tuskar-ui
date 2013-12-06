@@ -1,0 +1,36 @@
+{% load i18n %}
+
+{{ formset.management_form }}
+
+<div class="row-fluid register-nodes-formset">
+  <div class="span5">
+    <div class="clearfix register-nav-head">
+      <a class="pull-right add-node-link"
+         href="#"><i class="icon-plus"></i> {% trans 'Add Node' %}</a>
+      <h3>Nodes to register</h3>
+    </div>
+    <ul class="nav nav-tabs nav-stacked">
+      {% for form in formset %}
+      <li {% if forloop.first %}class="active"{% endif %}>
+        <span class="btn-small pull-right delete-icon">
+          <i class="icon-trash icon-white"></i>
+        </span>
+        <a href="#tab-{{ form.prefix }}" data-toggle="tab">
+          {{ form.mac_address.value|default:'Undefined node' }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="span7">
+    <div class="tab-content">
+      {% for form in formset %}
+        <div class="well well-small tab-pane{% if forloop.first %} active{% endif %}"
+             id="tab-{{ form.prefix }}">
+
+          {% include 'infrastructure/deploy_overview/_nodes_formset_form.html' with form=form %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+{% extends 'infrastructure/base.html' %}
+{% load i18n %}
+{% load url from future %}
+{% block title %}{% trans 'Deployment Overview' %}{% endblock %}
+
+{% block page_header %}
+  {% include 'horizon/common/_domain_page_header.html' with title=_('Deployment Overview') %}
+{% endblock page_header %}
+
+{% block main %}
+<a href="{% url 'horizon:infrastructure:deploy_overview:register' %}"
+   class="btn ajax-modal">Register nodes</a>
+{% endblock %}
