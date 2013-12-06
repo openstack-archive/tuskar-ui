@@ -16,6 +16,7 @@ from horizon import views
 
 
 class IndexView(views.APIView):
+    template_name = 'infrastructure/base.html'
     # A very simple class-based view...
     template_name = 'infrastructure/overview/index.html'
 
