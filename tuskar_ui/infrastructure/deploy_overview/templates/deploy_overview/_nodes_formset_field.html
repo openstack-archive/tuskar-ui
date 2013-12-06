@@ -1,0 +1,18 @@
+<div class="row-fluid control-group{% if field.errors %} error{% endif %}">
+  <label class="span3 control-label">{{ field.label }}</label>
+  <div class="span5">{{ field }}</div>
+  {% if extra_field %}
+    <label class="span4" style="font-weight:normal">
+        {{ extra_field }}<small> {{ extra_field.label }}</small>
+    </label>
+  {% elif extra_text %}
+    <div class="span4 muted">{{ extra_text }}</div>
+  {% endif %}
+  {% if field.errors %}
+    <div class="help-block">
+      {% for error in field.errors %}
+        {{ error }}
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

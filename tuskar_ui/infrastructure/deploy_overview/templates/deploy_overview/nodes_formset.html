@@ -1,0 +1,59 @@
+{% load i18n %}
+
+{{ formset.management_form }}
+
+<div class="row-fluid">
+  <div class="span4">
+    <div class="clearfix">
+      <a class="btn btn-small btn-create pull-right"
+         href="#">+ {% trans 'Add node' %}</a>
+      <h4>Nodes to register</h4>
+    </div>
+    <ul class="nav nav-pills nav-stacked">
+      {% for form in formset %}
+      <li {% if forloop.first %}class="active"{% endif %}>
+        <button class="btn btn-mini pull-right" style="margin:5px">×</button>
+        <a href="#tab-{{ form.prefix }}" data-toggle="tab">
+          {{ form.name.value|default:'Unnamed node' }}
+        </a></li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="span8">
+    <div class="tab-content">
+      {% for form in formset %}
+      <div class="tab-pane{% if forloop.first %} active{% endif %}"
+           id="tab-{{ form.prefix }}">
+        <div class="form form-inline">
+          <h4 style="margin-bottom:16px">Node Detail</h4>
+          <fieldset>
+            {% include 'infrastructure/deploy_overview/_nodes_formset_field.html' with field=form.name extra_field=form.name_from_ip %}
+            {% include 'infrastructure/deploy_overview/_nodes_formset_field.html' with field=form.management_ip extra_field=form.ip_from_dhcp %}
+            {% include 'infrastructure/deploy_overview/_nodes_formset_field.html' with field=form.description %}
+            {% include 'infrastructure/deploy_overview/_nodes_formset_field.html' with field=form.node_tags %}
+          </fieldset>
+          <h4 style="margin-bottom:16px">Power Management</h4>
+          <fieldset>
+            {% include 'infrastructure/deploy_overview/_nodes_formset_field.html' with field=form.mac_address %}
+            {% include 'infrastructure/deploy_overview/_nodes_formset_field.html' with field=form.ipmi_user %}
+            {% include 'infrastructure/deploy_overview/_nodes_formset_field.html' with field=form.ipmi_password %}
+          </fieldset>
+          <div class="row-fluid">
+            <div class="span8">
+              <h4 style="margin-bottom:16px">Hardware Specification</h4>
+            </div>
+            <label class="span4" style="font-weight:normal">
+              {{ form.introspect_hardware }}<small> {{ form.introspect_hardware.label }}</small>
+            </label>
+          </div>
+          <fieldset>
+            {% include 'infrastructure/deploy_overview/_nodes_formset_field.html' with field=form.cpus extra_text=_('units') %}
+            {% include 'infrastructure/deploy_overview/_nodes_formset_field.html' with field=form.memory extra_text=_('MB') %}
+            {% include 'infrastructure/deploy_overview/_nodes_formset_field.html' with field=form.local_disk extra_text=_('GB') %}
+          </fieldset>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
