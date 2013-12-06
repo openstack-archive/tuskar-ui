@@ -1,0 +1,34 @@
+{% load i18n %}
+{{ formset.management_form }}
+<div class="row-fluid register-nodes-formset" id="formset-{{ formset.prefix }}">
+  <div class="span5">
+    <div class="clearfix register-nav-head">
+      <a class="pull-right add-node-link"
+         href="#"><i class="icon-plus"></i> {% trans "Add Node" %}</a>
+      <h3>Nodes to register</h3>
+    </div>
+    <ul class="nav nav-tabs nav-stacked">
+      {% for form in formset %}
+      <li {% if forloop.first %}class="active"{% endif %}>
+        <a href="#tab-{{ form.prefix }}" data-toggle="tab">
+          {{ form.get_name }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="span7">
+    <div class="tab-content">
+      {% for form in formset %}
+        {% include form_template with form=form active=forloop.first %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+(window.$ || window.addHorizonLoadEvent)(function () {
+  var prefix = '{{ formset.prefix|escapejs }}';
+  var empty_form_html = '{% filter escapejs %}{% include form_template with form=formset.empty_form %}{% endfilter %}';
+  tuskar.menu_formset.init(prefix, empty_form_html);
+});
+</script>
