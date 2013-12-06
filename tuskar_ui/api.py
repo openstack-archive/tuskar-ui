@@ -32,9 +32,6 @@ from tuskar_ui.cached_property import cached_property  # noqa
 
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
-REMOTE_NOVA_BAREMETAL_CREDS = getattr(django.conf.settings,
-                                      'REMOTE_NOVA_BAREMETAL_CREDS',
-                                      False)
 OVERCLOUD_CREDS = getattr(django.conf.settings, 'OVERCLOUD_CREDS', False)
 
 
@@ -46,39 +43,20 @@ def tuskarclient(request):
 
 
 def baremetalclient(request):
-    def create_remote_nova_client_baremetal():
-        nc = nova.nova_client.Client(
-            REMOTE_NOVA_BAREMETAL_CREDS['user'],
-            REMOTE_NOVA_BAREMETAL_CREDS['password'],
-            REMOTE_NOVA_BAREMETAL_CREDS['tenant'],
-            auth_url=REMOTE_NOVA_BAREMETAL_CREDS['auth_url'],
-            bypass_url=REMOTE_NOVA_BAREMETAL_CREDS['bypass_url'],
-        )
-        return nc
+    insecure = getattr(django.conf.settings, 'OPENSTACK_SSL_NO_VERIFY', False)
+    nc = nova.nova_client.Client(
+        request.user.username,
+        request.user.token.id,
+        project_id=request.user.tenant_id,
+        auth_url=base.url_for(request, 'compute'),
+        insecure=insecure,
+        http_log_debug=django.conf.settings.DEBUG)
+    nc.client.auth_token = request.user.token.id
+    nc.client.management_url = base.url_for(request, 'compute')
 
-    def create_nova_client_baremetal():
-        insecure = getattr(django.conf.settings, 'OPENSTACK_SSL_NO_VERIFY',
-                           False)
-        nc = nova.nova_client.Client(
-            request.user.username,
-            request.user.token.id,
-            project_id=request.user.tenant_id,
-            auth_url=base.url_for(request, 'compute'),
-            insecure=insecure,
-            http_log_debug=django.conf.settings.DEBUG)
-        nc.client.auth_token = request.user.token.id
-        nc.client.management_url = base.url_for(request, 'compute')
-
-        return nc
-
-    if REMOTE_NOVA_BAREMETAL_CREDS:
-        LOG.debug('remote nova baremetal client connection created')
-        nc = create_remote_nova_client_baremetal()
-    else:
-        LOG.debug('nova baremetal client connection created using token "%s" '
-                  'and url "%s"' %
-                  (request.user.token.id, base.url_for(request, 'compute')))
-        nc = create_nova_client_baremetal()
+    LOG.debug('nova baremetal client connection created using token "%s" '
+              'and url "%s"' %
+              (request.user.token.id, base.url_for(request, 'compute')))
 
     return baremetal.BareMetalNodeManager(nc)
 
