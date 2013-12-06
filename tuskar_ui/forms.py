@@ -25,8 +25,8 @@ class MACField(forms.fields.Field):
     def clean(self, value):
         try:
             return str(netaddr.EUI(
-                value, version=48, dialect=netaddr.mac_unix)).upper()
-        except netaddr.AddrFormatError:
+                value.strip(), version=48, dialect=netaddr.mac_unix)).upper()
+        except (netaddr.AddrFormatError, TypeError):
             raise forms.ValidationError(_(u'Enter a valid MAC address.'))
 
 
