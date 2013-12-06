@@ -1,4 +1,5 @@
 /* Additional CSS for infrastructure. */
+@import "../../bootstrap/less/variables.less";
 
 // global layout
 html,
@@ -524,3 +525,49 @@ input {
     }
   }
 }
+
+// Register nodes formset
+.register-nodes-formset {
+  a.add-node-link {
+    display: block;
+    margin-top: 6px;
+  }
+  .nav-tabs > .active > a {
+    color: @white;
+    background-color: @linkColor;
+  }
+  ul.nav-tabs > li span.delete-icon {
+    display: none;
+  }
+  ul.nav-tabs > li.active span.delete-icon {
+    display: block;
+    margin: 4px 19px 4px 0;
+    cursor: pointer;
+  }
+  ul.nav-tabs > li {
+    position: relative;
+  }
+  ul.nav-tabs > li.active {
+    width: 107%;
+  }
+  ul.nav-tabs > li.active:after {
+    display: block;
+    content: '';
+    position: absolute;
+    top: 1px;
+    right: -7px;
+    border-top: 16px solid transparent;
+    border-bottom: 16px solid transparent;
+    border-left: 8px solid @linkColor;
+  }
+  .register-nav-head {
+    margin-top: 19px;
+  }
+  .form h4, .form h3 {
+    margin-bottom: 16px;
+  }
+  .form label.checkbox {
+    font-weight: normal;
+  }
+}
+

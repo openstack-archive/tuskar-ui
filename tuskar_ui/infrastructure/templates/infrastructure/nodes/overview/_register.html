@@ -1,0 +1,20 @@
+{% extends "horizon/common/_modal_form.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block form_id %}register_nodes_form{% endblock %}
+{% block form_action %}{% url 'horizon:infrastructure:nodes.overview:register' %}{% endblock %}
+{% block modal_id %}register_nodes_modal{% endblock %}
+{% block modal-header %}{% trans "Register Nodes" %}{% endblock %}
+
+{% block modal-body %}
+{% include "infrastructure/nodes/overview/nodes_formset.html" with formset=form %}
+{% endblock %}
+
+{% block modal-footer %}
+  <input class="btn btn-primary pull-right" type="submit"
+         value="{% trans "Register Nodes" %}" />
+  <a href="{% url 'horizon:infrastructure:nodes.overview:index' %}"
+     class="btn secondary cancel close">{% trans "Cancel" %}</a>
+{% endblock %}
+
