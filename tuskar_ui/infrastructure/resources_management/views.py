@@ -11,8 +11,26 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from django.views import generic
+
+from django.utils.translation import ugettext_lazy as _  # noqa
+
+from horizon import exceptions
+from horizon import tables as horizon_tables
+
+from tuskar_ui import api as tuskar
+from tuskar_ui.infrastructure.resources_management import tables
 
 
-class IndexView(generic.TemplateView):
-    template_name = 'infrastructure/base.html'
+class IndexView(horizon_tables.DataTableView):
+    table_class = tables.ManagementNodesTable
+    template_name = 'infrastructure/resources_management/index.html'
+
+    def get_data(self):
+        try:
+            management_nodes = tuskar.BaremetalNode.list(self.request)
+        except Exception:
+            management_nodes = []
+            exceptions.handle(self.request,
+                              _('Unable to retrieve management nodes.'))
+        return management_nodes
+

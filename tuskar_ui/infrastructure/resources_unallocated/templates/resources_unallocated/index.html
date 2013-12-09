@@ -1,0 +1,28 @@
+{% extends 'infrastructure/base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Unallocated Nodes" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Unallocated Nodes") %}
+{% endblock page_header %}
+
+{% block main %}
+<div class="row-fluid">
+  <div class="span12">
+    <div class="breadcrumbs">
+      <a href="{% url 'horizon:infrastructure:overview:index' %}" >Infrastructure</a>
+      <span class="separator"></span>
+      <a href="{% url 'horizon:infrastructure:resources_overview:index' %}" >Resources</a>
+      <span class="separator"></span>
+    </div>
+
+    <h3>{% trans "Unallocated Nodes" %}</h3>
+  </div>
+</div>
+
+<div class="row-fluid">
+  <div class="span12">
+    {{ table.render }}
+  </div>
+</div>
+{% endblock %}

@@ -14,22 +14,13 @@
 
 from django.utils.translation import ugettext_lazy as _  # noqa
 
-from horizon import exceptions
-from horizon import tables as horizon_tables
-
-from tuskar_ui import api as tuskar
-from tuskar_ui.infrastructure.resources_archived import tables
+from tuskar_ui.infrastructure.resources_management import tables
 
 
-class IndexView(horizon_tables.DataTableView):
-    table_class = tables.ArchivedNodesTable
-    template_name = 'infrastructure/resources_archived/index.html'
+class ResourceNodesTable(tables.NodesTable):
 
-    def get_data(self):
-        try:
-            archived_nodes = tuskar.BaremetalNode.list(self.request)
-        except Exception:
-            archived_nodes = []
-            exceptions.hanfle(self.request,
-                              _('Unable to retrieve archived nodes.'))
-        return archived_nodes
+    class Meta:
+        name = "resource_nodes"
+        verbose_name = _("Resource Nodes")
+        table_actions = (tables.NodesFilterAction, )
+        row_actions = ()
