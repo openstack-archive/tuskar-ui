@@ -14,7 +14,7 @@
 
 from django.conf.urls import defaults
 
-from tuskar_ui.infrastructure.resources.unallocated import views
+from tuskar_ui.infrastructure.deployment.compute import views
 
 
 urlpatterns = defaults.patterns(

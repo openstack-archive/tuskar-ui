@@ -12,16 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.utils.translation import ugettext_lazy as _  # noqa
+from django.conf.urls import defaults
 
-import horizon
-
-from tuskar_ui.infrastructure import dashboard
+from tuskar_ui.infrastructure.deployment.block_storage import views
 
 
-class Controller(horizon.Panel):
-    name = _("Controller")
-    slug = "deploy_controller"
-
-
-dashboard.Infrastructure.register(Controller)
+urlpatterns = defaults.patterns(
+    '',
+    defaults.url(r'^$', views.IndexView.as_view(), name='index'),
+)
