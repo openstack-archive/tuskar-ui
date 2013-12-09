@@ -26,26 +26,26 @@ class InfrastructureOverview(horizon.PanelGroup):
 
 
 class Deployment(horizon.PanelGroup):
-    slug = "deploy"
+    slug = "deployment"
     name = _("Deployment")
     panels = (
-        'deploy_overview',
-        'deploy_controller',
-        'deploy_compute',
-        'deploy_object_storage',
-        'deploy_block_storage',
+        'deployment.overview',
+        'deployment.controller',
+        'deployment.compute',
+        'deployment.object_storage',
+        'deployment.block_storage',
     )
 
 
 class Resources(horizon.PanelGroup):
-    slug = "nodes"
+    slug = "resources"
     name = _("Resources")
     panels = (
-        'resources_overview',
-        'resources_resource',
-        'resources_management',
-        'resources_unallocated',
-        'resources_archived',
+        'resources.overview',
+        'resources.resource',
+        'resources.management',
+        'resources.unallocated',
+        'resources.archived',
     )
 
 
