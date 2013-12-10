@@ -49,30 +49,6 @@ class Resources(horizon.PanelGroup):
     )
 
 
-class Networks(horizon.PanelGroup):
-    slug = "networks"
-    name = _("Networks")
-    panels = (
-        'networks_overview',
-    )
-
-
-class Images(horizon.PanelGroup):
-    slug = "images"
-    name = _("Images")
-    panels = (
-        'images_overview',
-    )
-
-
-class Logs(horizon.PanelGroup):
-    slug = "logs"
-    name = _("Logs")
-    panels = (
-        'logs_overview',
-    )
-
-
 class Infrastructure(horizon.Dashboard):
     name = _("Infrastructure")
     slug = "infrastructure"
