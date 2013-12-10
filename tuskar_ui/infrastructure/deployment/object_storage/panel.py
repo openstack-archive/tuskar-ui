@@ -12,12 +12,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls import defaults
+from django.utils.translation import ugettext_lazy as _  # noqa
 
-from tuskar_ui.infrastructure.resources.management import views
+import horizon
+
+from tuskar_ui.infrastructure import dashboard
 
 
-urlpatterns = defaults.patterns(
-    '',
-    defaults.url(r'^$', views.IndexView.as_view(), name='index'),
-)
+class ObjectStorage(horizon.Panel):
+    name = _("Object Storage")
+    slug = "deployment.object_storage"
+
+
+dashboard.Infrastructure.register(ObjectStorage)

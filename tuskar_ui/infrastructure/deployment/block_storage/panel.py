@@ -19,9 +19,9 @@ import horizon
 from tuskar_ui.infrastructure import dashboard
 
 
-class ObjectStorage(horizon.Panel):
-    name = _("Object Storage")
-    slug = "deploy_object_storage"
+class BlockStorage(horizon.Panel):
+    name = _("Block Storage")
+    slug = "deployment.block_storage"
 
 
-dashboard.Infrastructure.register(ObjectStorage)
+dashboard.Infrastructure.register(BlockStorage)

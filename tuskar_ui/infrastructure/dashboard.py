@@ -26,14 +26,14 @@ class InfrastructureOverview(horizon.PanelGroup):
 
 
 class Deployment(horizon.PanelGroup):
-    slug = "deploy"
+    slug = "deployment"
     name = _("Deployment")
     panels = (
-        'deploy_overview',
-        'deploy_controller',
-        'deploy_compute',
-        'deploy_object_storage',
-        'deploy_block_storage',
+        'deployment.overview',
+        'deployment.controller',
+        'deployment.compute',
+        'deployment.object_storage',
+        'deployment.block_storage',
     )
 
 
