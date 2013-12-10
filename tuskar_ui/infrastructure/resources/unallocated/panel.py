@@ -19,9 +19,9 @@ import horizon
 from tuskar_ui.infrastructure import dashboard
 
 
-class ResourcesOverview(horizon.Panel):
-    name = _("Overview")
-    slug = "resources_overview"
+class ResourcesUnallocated(horizon.Panel):
+    name = _("Unallocated")
+    slug = "resources.unallocated"
 
 
-dashboard.Infrastructure.register(ResourcesOverview)
+dashboard.Infrastructure.register(ResourcesUnallocated)
