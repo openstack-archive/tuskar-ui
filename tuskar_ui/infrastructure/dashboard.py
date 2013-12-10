@@ -38,14 +38,14 @@ class Deployment(horizon.PanelGroup):
 
 
 class Resources(horizon.PanelGroup):
-    slug = "nodes"
+    slug = "resources"
     name = _("Resources")
     panels = (
-        'resources_overview',
-        'resources_resource',
-        'resources_management',
-        'resources_unallocated',
-        'resources_archived',
+        'resources.overview',
+        'resources.resource',
+        'resources.management',
+        'resources.unallocated',
+        'resources.archived',
     )
 
 
