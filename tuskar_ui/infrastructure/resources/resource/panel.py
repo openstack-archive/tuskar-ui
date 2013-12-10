@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -19,9 +19,9 @@ import horizon
 from tuskar_ui.infrastructure import dashboard
 
 
-class ResourcesUnallocated(horizon.Panel):
-    name = _("Unallocated")
-    slug = "resources_unallocated"
+class ResourcesResource(horizon.Panel):
+    name = _("Resource Nodes")
+    slug = "resources.resource"
 
 
-dashboard.Infrastructure.register(ResourcesUnallocated)
+dashboard.Infrastructure.register(ResourcesResource)
