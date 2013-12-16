@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -11,8 +11,13 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from django.views import generic
+
+from django.conf.urls import defaults
+
+from tuskar_ui.infrastructure.resources.free import views
 
 
-class IndexView(generic.TemplateView):
-    template_name = 'infrastructure/base.html'
+urlpatterns = defaults.patterns(
+    '',
+    defaults.url(r'^$', views.IndexView.as_view(), name='index'),
+)
