@@ -11,8 +11,31 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from django.views import generic
+
+from django.core import urlresolvers
+from django.utils.translation import ugettext_lazy as _  # noqa
+
+from horizon import exceptions
+from horizon import tables as horizon_tables
+
+from tuskar_ui import api as tuskar
+from tuskar_ui.infrastructure.resources.unallocated import tables
 
 
-class IndexView(generic.TemplateView):
-    template_name = 'infrastructure/base.html'
+class IndexView(horizon_tables.DataTableView):
+    table_class = tables.UnallocatedNodesTable
+    template_name = 'infrastructure/resources.unallocated/index.html'
+
+    def get_data(self):
+        try:
+            # TODO(Jiri Tomasek): needs update when filtering by node type is
+            # available
+            unallocated_nodes = tuskar.BaremetalNode.list(self.request)
+        except Exception:
+            unallocated_nodes = []
+            redirect = urlresolvers.reverse(
+                'horizon:infrastructure:resources.overview:index')
+            exceptions.handle(self.request,
+                              _('Unable to retrieve unallocated nodes.'),
+                              redirect=redirect)
+        return unallocated_nodes

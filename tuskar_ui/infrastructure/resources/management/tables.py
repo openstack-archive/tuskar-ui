@@ -11,8 +11,16 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from django.views import generic
+
+from django.utils.translation import ugettext_lazy as _  # noqa
+
+from tuskar_ui.infrastructure.resources import tables
 
 
-class IndexView(generic.TemplateView):
-    template_name = 'infrastructure/base.html'
+class ManagementNodesTable(tables.NodesTable):
+
+    class Meta:
+        name = "management_nodes"
+        verbose_name = _("Management Nodes")
+        table_actions = (tables.NodesFilterAction, )
+        row_actions = ()

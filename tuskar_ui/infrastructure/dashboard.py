@@ -45,7 +45,6 @@ class Resources(horizon.PanelGroup):
         'resources.resource',
         'resources.management',
         'resources.unallocated',
-        'resources.archived',
     )
 
 
