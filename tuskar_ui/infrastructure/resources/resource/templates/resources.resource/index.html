@@ -1,0 +1,12 @@
+{% extends 'infrastructure/base_nodes_table.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Resource Nodes" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Resource Nodes") %}
+{% endblock page_header %}
+
+{% block name %}
+  {% trans "Resource Nodes" %}
+{% endblock %}
