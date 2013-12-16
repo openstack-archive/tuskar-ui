@@ -14,14 +14,13 @@
 
 from django.utils.translation import ugettext_lazy as _  # noqa
 
-import horizon
-
-from tuskar_ui.infrastructure import dashboard
+from tuskar_ui.infrastructure.resources import tables
 
 
-class ResourcesUnallocated(horizon.Panel):
-    name = _("Unallocated")
-    slug = "resources.unallocated"
+class FreeNodesTable(tables.NodesTable):
 
-
-dashboard.Infrastructure.register(ResourcesUnallocated)
+    class Meta:
+        name = "free_nodes"
+        verbose_name = _("Free Nodes")
+        table_actions = ()
+        row_actions = ()

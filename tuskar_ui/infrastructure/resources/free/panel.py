@@ -19,9 +19,9 @@ import horizon
 from tuskar_ui.infrastructure import dashboard
 
 
-class ResourcesArchived(horizon.Panel):
-    name = _("Archived")
-    slug = "resources.archived"
+class ResourcesFree(horizon.Panel):
+    name = _("Free Nodes")
+    slug = "resources.free"
 
 
-dashboard.Infrastructure.register(ResourcesArchived)
+dashboard.Infrastructure.register(ResourcesFree)
