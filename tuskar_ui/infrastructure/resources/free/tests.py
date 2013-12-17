@@ -30,9 +30,9 @@ class FreeNodesTests(test.BaseAdminViewTests):
         super(FreeNodesTests, self).setUp()
 
     def test_index(self):
-        free_nodes = self.baremetal_nodes.list()
+        free_nodes = self.ironicclient_nodes.list()
 
-        with patch('tuskar_ui.api.BaremetalNode', **{
+        with patch('tuskar_ui.api.Node', **{
             'spec_set': ['list'],  # Only allow these attributes
             'list.return_value': free_nodes,
         }) as mock:
@@ -46,7 +46,7 @@ class FreeNodesTests(test.BaseAdminViewTests):
                               free_nodes)
 
     def test_index_nodes_list_exception(self):
-        with patch('tuskar_ui.api.BaremetalNode', **{
+        with patch('tuskar_ui.api.Node', **{
             'spec_set': ['list'],
             'list.side_effect': self.exceptions.tuskar,
         }) as mock:

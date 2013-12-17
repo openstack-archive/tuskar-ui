@@ -18,15 +18,19 @@ from horizon import tables
 
 
 class NodesTable(tables.DataTable):
-    service_host = tables.Column(
-        "service_host",
-        verbose_name=_("Service Host"),
-        link=("horizon:infrastructure:resources.management:detail"))
-    mac_address = tables.Column("mac_address", verbose_name=_("MAC Address"))
-    pm_address = tables.Column("pm_address",
-                               verbose_name=_("Management Address"))
-    status = tables.Column("status", verbose_name=_("Status"))
-    usage = tables.Column("usage", verbose_name=_("Usage"))
+    uuid = tables.Column("uuid")
+
+    # TODO(Tzu-Mainn Chen): determine what attributes can be retrieved
+    #                       for a node
+    # service_host = tables.Column(
+    #     "service_host",
+    #     verbose_name=_("Service Host"),
+    #     link=("horizon:infrastructure:resources.management:detail"))
+    # mac_address = tables.Column("mac_address", verbose_name=_("MAC Address"))
+    # pm_address = tables.Column("pm_address",
+    #                             verbose_name=_("Management Address"))
+    # status = tables.Column("status", verbose_name=_("Status"))
+    #  usage = tables.Column("usage", verbose_name=_("Usage"))
 
     class Meta:
         name = "nodes_table"
@@ -34,5 +38,8 @@ class NodesTable(tables.DataTable):
         table_actions = ()
         row_actions = ()
 
+    def get_object_id(self, datum):
+        return datum.uuid
+
     def get_object_display(self, datum):
-        return datum.service_host
+        return datum.uuid

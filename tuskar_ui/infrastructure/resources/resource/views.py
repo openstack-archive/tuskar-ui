@@ -30,7 +30,7 @@ class IndexView(horizon_tables.DataTableView):
         try:
             # TODO(Jiri Tomasek): needs update when filtering by node type is
             # available
-            resource_nodes = tuskar.BaremetalNode.list(self.request)
+            resource_nodes = tuskar.Node.list(self.request)
         except Exception:
             resource_nodes = []
             redirect = urlresolvers.reverse(
