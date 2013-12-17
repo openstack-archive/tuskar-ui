@@ -12,21 +12,36 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from django.template import defaultfilters as filters
 from django.utils.translation import ugettext_lazy as _  # noqa
 
 from horizon import tables
 
 
 class NodesTable(tables.DataTable):
-    service_host = tables.Column(
-        "service_host",
-        verbose_name=_("Service Host"),
-        link=("horizon:infrastructure:resources.management:detail"))
-    mac_address = tables.Column("mac_address", verbose_name=_("MAC Address"))
-    pm_address = tables.Column("pm_address",
-                               verbose_name=_("Management Address"))
-    status = tables.Column("status", verbose_name=_("Status"))
-    usage = tables.Column("usage", verbose_name=_("Usage"))
+
+    uuid = tables.Column("uuid",
+                         verbose_name=_("UUID"))
+    mac_addresses = tables.Column("addresses",
+                                  verbose_name=_("MAC Addresses"),
+                                  wrap_list=True,
+                                  filters=(filters.unordered_list,))
+    ipmi_address = tables.Column(lambda node: node.driver_info['ipmi_address'],
+                                 verbose_name=_("IPMI Address"))
+    cpu = tables.Column(lambda node: node.properties['cpu'],
+                        verbose_name=_("CPU"))
+    ram = tables.Column(lambda node: node.properties['ram'],
+                        verbose_name=_("RAM (GB)"))
+    local_disk = tables.Column(lambda node: node.properties['local_disk'],
+                               verbose_name=_("Local Disk (TB)"))
+    status = tables.Column("power_state",
+                           verbose_name=_("Status"),
+                           status=True,
+                           status_choices=(
+                               ('on', True),
+                               ('off', False),
+                               ('rebooting', None)
+                           ))
 
     class Meta:
         name = "nodes_table"
@@ -34,5 +49,8 @@ class NodesTable(tables.DataTable):
         table_actions = ()
         row_actions = ()
 
+    def get_object_id(self, datum):
+        return datum.uuid
+
     def get_object_display(self, datum):
-        return datum.service_host
+        return datum.uuid
