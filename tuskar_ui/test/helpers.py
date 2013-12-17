@@ -17,7 +17,6 @@ import os
 from django.core.handlers import wsgi
 from django.utils import unittest
 
-from novaclient.v1_1.contrib import baremetal
 from tuskarclient.v1 import client as tuskar_client
 
 from openstack_dashboard.test import helpers as openstack_dashboard_helpers
@@ -82,25 +81,16 @@ class APITestCase(openstack_dashboard_helpers.APITestCase):
 
         # Store the original clients
         self._original_tuskarclient = tuskar_api.tuskarclient
-        self._original_baremetalclient = tuskar_api.baremetalclient
 
         # Replace the clients with our stubs.
         tuskar_api.tuskarclient = lambda request: self.stub_tuskarclient()
-        tuskar_api.baremetalclient = lambda request:\
-            self.stub_baremetalclient()
 
     def tearDown(self):
         super(APITestCase, self).tearDown()
         tuskar_api.tuskarclient = self._original_tuskarclient
-        tuskar_api.baremetalclient = self._original_baremetalclient
 
     def stub_tuskarclient(self):
         if not hasattr(self, "tuskarclient"):
             self.mox.StubOutWithMock(tuskar_client, 'Client')
             self.tuskarclient = self.mox.CreateMock(tuskar_client.Client)
         return self.tuskarclient
-
-    def stub_baremetalclient(self):
-        if not hasattr(self, "baremetalclient"):
-            self.baremetalclient = baremetal.BareMetalNodeManager(None)
-        return self.baremetalclient

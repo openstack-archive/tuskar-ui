@@ -16,6 +16,7 @@ from django.core import urlresolvers
 
 from mock import patch  # noqa
 
+from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 
 
@@ -30,9 +31,10 @@ class ResourceNodesTests(test.BaseAdminViewTests):
         super(ResourceNodesTests, self).setUp()
 
     def test_index(self):
-        resource_nodes = self.baremetal_nodes.list()
+        resource_nodes = [api.Node(node)
+                          for node in self.ironicclient_nodes.list()]
 
-        with patch('tuskar_ui.api.BaremetalNode', **{
+        with patch('tuskar_ui.api.Node', **{
             'spec_set': ['list'],  # Only allow these attributes
             'list.return_value': resource_nodes,
         }) as mock:
@@ -47,7 +49,7 @@ class ResourceNodesTests(test.BaseAdminViewTests):
                               resource_nodes)
 
     def test_index_nodes_list_exception(self):
-        with patch('tuskar_ui.api.BaremetalNode', **{
+        with patch('tuskar_ui.api.Node', **{
             'spec_set': ['list'],
             'list.side_effect': self.exceptions.tuskar,
         }) as mock:

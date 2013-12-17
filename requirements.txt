@@ -20,4 +20,5 @@ pytz>=2010h
 # for SECURE_KEY generation
 lockfile>=0.8
 
+python-ironicclient>=0.1.0
 -e git://github.com/openstack/python-tuskarclient.git#egg=python-tuskarclient
