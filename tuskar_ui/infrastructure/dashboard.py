@@ -43,7 +43,6 @@ class Resources(horizon.PanelGroup):
     panels = (
         'resources.overview',
         'resources.resource',
-        'resources.management',
         'resources.free',
     )
 
