@@ -13,13 +13,12 @@
 #    under the License.
 
 from openstack_dashboard.test.test_data import exceptions
-
-import tuskarclient.exc as tuskar_exceptions
+from tuskarclient.openstack.common.apiclient import exceptions as tuskarclient
 
 
 def data(TEST):
     TEST.exceptions = exceptions.data
 
-    tuskar_exception = tuskar_exceptions.ClientException
-    TEST.exceptions.tuskar = exceptions. \
-        create_stubbed_exception(tuskar_exception)
+    tuskar_exception = tuskarclient.ClientException
+    TEST.exceptions.tuskar = exceptions.create_stubbed_exception(
+        tuskar_exception)
