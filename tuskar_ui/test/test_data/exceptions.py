@@ -14,12 +14,12 @@
 
 from openstack_dashboard.test.test_data import exceptions
 
-import tuskarclient.exc as tuskar_exceptions
+from tuskarclient.openstack.common.apiclient import exceptions as tuskar_exc
 
 
 def data(TEST):
     TEST.exceptions = exceptions.data
 
-    tuskar_exception = tuskar_exceptions.ClientException
+    tuskar_exception = tuskar_exc.ClientException
     TEST.exceptions.tuskar = exceptions. \
         create_stubbed_exception(tuskar_exception)

@@ -13,8 +13,8 @@
 #    under the License.
 
 from openstack_dashboard import exceptions
-import tuskarclient.exc as tuskarclient
+from tuskarclient.openstack.common.apiclient import exceptions as tuskar_exc
 
 NOT_FOUND = exceptions.NOT_FOUND
-RECOVERABLE = exceptions.RECOVERABLE + (tuskarclient.ClientException,)
+RECOVERABLE = exceptions.RECOVERABLE + (tuskar_exc.ClientException,)
 UNAUTHORIZED = exceptions.UNAUTHORIZED
