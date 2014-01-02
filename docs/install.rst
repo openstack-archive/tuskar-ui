@@ -64,20 +64,12 @@ Begin by cloning the horizon and tuskar-ui repositories:
     git clone git://github.com/openstack/horizon.git
     git clone git://github.com/openstack/tuskar-ui.git
 
-Go into horizon and create a symlink to the tuskar-ui code:
-
-::
-
-    cd horizon
-    ln -s ../tuskar-ui/tuskar_ui
-
-Then, install a virtual environment for your setup:
-
-::
+Go into ``horizon`` and install a virtual environment for your setup::
 
     python tools/install_venv.py
 
-Next, run ``run_tests.sh`` to have pip install dependencies:
+
+Next, run ``run_tests.sh`` to have pip install Horizon dependencies:
 
 ::
 
@@ -100,23 +92,13 @@ editor. You will want to customize several settings:
 -  ``TUSKAR_ENDPOINT_URL`` should point to the Tuskar server you
    configured. It normally runs on port 8585.
 
-Final setup
------------
+Install Tuskar-UI with all dependencies in your virtual environment::
 
-Now that your configuration is in order, it's time to set up a couple
-other things.
+    tools/with_venv.sh pip install -e ../tuskar-ui/
 
-First, activate your virtual environment:
+And enable it in Horizon::
 
-::
-
-    source .venv/bin/activate
-
-tuskar-ui introduces one additional dependency - python-tuskarclient:
-
-::
-
-    pip install git+http://github.com/openstack/python-tuskarclient.git
+    cp ../tuskar-ui/_50_tuskar.py.example openstack_dashboard/local/enabled/_50_tuskar.py
 
 Starting the app
 ----------------
