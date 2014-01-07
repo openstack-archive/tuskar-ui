@@ -19,12 +19,12 @@ from horizon import exceptions
 from horizon import tables as horizon_tables
 
 from tuskar_ui import api as tuskar
-from tuskar_ui.infrastructure.resources.free import tables
+from tuskar_ui.infrastructure.nodes.free import tables
 
 
 class IndexView(horizon_tables.DataTableView):
     table_class = tables.FreeNodesTable
-    template_name = 'infrastructure/resources.free/index.html'
+    template_name = 'infrastructure/nodes.free/index.html'
 
     def get_data(self):
         try:
@@ -32,7 +32,7 @@ class IndexView(horizon_tables.DataTableView):
         except Exception:
             free_nodes = []
             redirect = urlresolvers.reverse(
-                'horizon:infrastructure:resources.overview:index')
+                'horizon:infrastructure:nodes.overview:index')
             exceptions.handle(self.request,
                               _('Unable to retrieve free nodes.'),
                               redirect=redirect)

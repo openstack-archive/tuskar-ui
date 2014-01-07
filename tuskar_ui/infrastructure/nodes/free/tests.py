@@ -20,10 +20,10 @@ from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 
 
-INDEX_URL = urlresolvers.reverse('horizon:infrastructure:resources.free'
+INDEX_URL = urlresolvers.reverse('horizon:infrastructure:nodes.free'
                                  ':index')
-RESOURCES_OVERVIEW_URL = urlresolvers.reverse('horizon:infrastructure:'
-                                              'resources.overview:index')
+NODES_OVERVIEW_URL = urlresolvers.reverse('horizon:infrastructure:'
+                                          'nodes.overview:index')
 
 
 class FreeNodesTests(test.BaseAdminViewTests):
@@ -43,7 +43,7 @@ class FreeNodesTests(test.BaseAdminViewTests):
 
         self.maxDiff = None
         self.assertTemplateUsed(res,
-                                'infrastructure/resources.free/index.html')
+                                'infrastructure/nodes.free/index.html')
         self.assertItemsEqual(res.context['free_nodes_table'].data,
                               free_nodes)
 
@@ -55,4 +55,4 @@ class FreeNodesTests(test.BaseAdminViewTests):
             res = self.client.get(INDEX_URL)
             self.assertEqual(mock.list.call_count, 1)
 
-        self.assertRedirectsNoFollow(res, RESOURCES_OVERVIEW_URL)
+        self.assertRedirectsNoFollow(res, NODES_OVERVIEW_URL)

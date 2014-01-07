@@ -1,4 +1,4 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
+# -*- coding: utf8 -*-
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -12,12 +12,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls import defaults
+from django.utils.translation import ugettext_lazy as _  # noqa
 
-from tuskar_ui.infrastructure.resources.overview import views
+import horizon
+
+from tuskar_ui.infrastructure import dashboard
 
 
-urlpatterns = defaults.patterns(
-    '',
-    defaults.url(r'^$', views.IndexView.as_view(), name='index'),
-)
+class NodesFree(horizon.Panel):
+    name = _("Free Nodes")
+    slug = "nodes.free"
+
+
+dashboard.Infrastructure.register(NodesFree)

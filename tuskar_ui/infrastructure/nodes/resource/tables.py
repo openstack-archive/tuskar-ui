@@ -1,4 +1,4 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
+# -*- coding: utf8 -*-
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -14,14 +14,13 @@
 
 from django.utils.translation import ugettext_lazy as _  # noqa
 
-import horizon
-
-from tuskar_ui.infrastructure import dashboard
+from tuskar_ui.infrastructure.nodes import tables
 
 
-class ResourcesResource(horizon.Panel):
-    name = _("Resource Nodes")
-    slug = "resources.resource"
+class ResourceNodesTable(tables.NodesTable):
 
-
-dashboard.Infrastructure.register(ResourcesResource)
+    class Meta:
+        name = "resource_nodes"
+        verbose_name = _("Resource Nodes")
+        table_actions = ()
+        row_actions = ()

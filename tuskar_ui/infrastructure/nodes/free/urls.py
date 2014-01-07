@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -12,15 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.utils.translation import ugettext_lazy as _  # noqa
+from django.conf.urls import defaults
 
-from tuskar_ui.infrastructure.resources import tables
+from tuskar_ui.infrastructure.nodes.free import views
 
 
-class FreeNodesTable(tables.NodesTable):
-
-    class Meta:
-        name = "free_nodes"
-        verbose_name = _("Free Nodes")
-        table_actions = ()
-        row_actions = ()
+urlpatterns = defaults.patterns(
+    '',
+    defaults.url(r'^$', views.IndexView.as_view(), name='index'),
+)

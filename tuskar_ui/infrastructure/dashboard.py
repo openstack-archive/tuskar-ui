@@ -37,13 +37,13 @@ class Deployment(horizon.PanelGroup):
     )
 
 
-class Resources(horizon.PanelGroup):
-    slug = "resources"
-    name = _("Resources")
+class Nodes(horizon.PanelGroup):
+    slug = "nodes"
+    name = _("Nodes")
     panels = (
-        'resources.overview',
-        'resources.resource',
-        'resources.free',
+        'nodes.overview',
+        'nodes.resource',
+        'nodes.free',
     )
 
 
@@ -53,7 +53,7 @@ class Infrastructure(horizon.Dashboard):
     panels = (
         InfrastructureOverview,
         Deployment,
-        Resources,
+        Nodes,
     )
     default_panel = 'overview'
     permissions = ('openstack.roles.admin',)

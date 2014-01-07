@@ -19,9 +19,9 @@ import horizon
 from tuskar_ui.infrastructure import dashboard
 
 
-class ResourcesFree(horizon.Panel):
-    name = _("Free Nodes")
-    slug = "resources.free"
+class NodesOverview(horizon.Panel):
+    name = _("Overview")
+    slug = "nodes.overview"
 
 
-dashboard.Infrastructure.register(ResourcesFree)
+dashboard.Infrastructure.register(NodesOverview)

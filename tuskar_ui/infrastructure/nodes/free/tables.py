@@ -14,13 +14,13 @@
 
 from django.utils.translation import ugettext_lazy as _  # noqa
 
-from tuskar_ui.infrastructure.resources import tables
+from tuskar_ui.infrastructure.nodes import tables
 
 
-class ResourceNodesTable(tables.NodesTable):
+class FreeNodesTable(tables.NodesTable):
 
     class Meta:
-        name = "resource_nodes"
-        verbose_name = _("Resource Nodes")
+        name = "free_nodes"
+        verbose_name = _("Free Nodes")
         table_actions = ()
         row_actions = ()

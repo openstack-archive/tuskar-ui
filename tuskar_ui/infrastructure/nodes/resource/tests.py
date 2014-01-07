@@ -20,10 +20,10 @@ from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 
 
-INDEX_URL = urlresolvers.reverse('horizon:infrastructure:resources.resource'
+INDEX_URL = urlresolvers.reverse('horizon:infrastructure:nodes.resource'
                                  ':index')
-RESOURCES_OVERVIEW_URL = urlresolvers.reverse('horizon:infrastructure:'
-                                              'resources.overview:index')
+NODES_OVERVIEW_URL = urlresolvers.reverse('horizon:infrastructure:'
+                                          'nodes.overview:index')
 
 
 class ResourceNodesTests(test.BaseAdminViewTests):
@@ -43,7 +43,7 @@ class ResourceNodesTests(test.BaseAdminViewTests):
 
         self.maxDiff = None
         self.assertTemplateUsed(
-            res, 'infrastructure/resources.resource/index.html')
+            res, 'infrastructure/nodes.resource/index.html')
 
         self.assertItemsEqual(res.context['resource_nodes_table'].data,
                               resource_nodes)
@@ -56,4 +56,4 @@ class ResourceNodesTests(test.BaseAdminViewTests):
             res = self.client.get(INDEX_URL)
             self.assertEqual(mock.list.call_count, 1)
 
-        self.assertRedirectsNoFollow(res, RESOURCES_OVERVIEW_URL)
+        self.assertRedirectsNoFollow(res, NODES_OVERVIEW_URL)
