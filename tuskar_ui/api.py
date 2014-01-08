@@ -119,16 +119,13 @@ class Node(base.APIResourceWrapper):
         #   * ipmi_username, ipmi_password
         # Side Effects:
         #   * call out to Ironic to registers a Node with the given
-        #     parameters.  Use a default chassis and create ports
-        #     as needed
+        #     parameters.  Create ports as needed.
         # Return:
         #   * the registered Node
 
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # TODO(Tzu-Mainn Chen): transactionality?
-        # chassis = Node.default_chassis
         # node = ironicclient(request).node.create(
-        #     chassis_uuid=chassis.uuid,
         #     driver='pxe_ipmitool',
         #     driver_info={'ipmi_address': ipmi_address,
         #                  'ipmi_username': ipmi_username,
@@ -191,26 +188,6 @@ class Node(base.APIResourceWrapper):
         # TODO(Tzu-Mainn Chen): uncomment when possible
         # ironicclient(request).nodes.delete(uuid)
         return
-
-    @classmethod
-    def default_chassis(cls, request):
-        # Return:
-        #   * the default chassis uses for all nodes in Tuskar
-        # Side Effects:
-        #   * if a chassis doesn't exist, creates it in Ironic
-        #     first
-
-        # TODO(Tzu-Mainn Chen): uncomment when possible
-        # TODO(Tzu-Mainn Chen): possible race condition
-        #chassis_list = ironicclient(request).chassis.list()
-        #if not chassis_list:
-        #    chassis = ironicclient(request).chassis.create(
-        #        description='Default Chassis')
-        #else:
-        #    chassis = chassis_list[0]
-        chassis = test_data().ironicclient_chassis.list()[0]
-
-        return chassis
 
     @cached_property
     def resource(self, stack):

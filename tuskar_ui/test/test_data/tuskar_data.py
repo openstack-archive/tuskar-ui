@@ -14,7 +14,6 @@ from openstack_dashboard.test.test_data import utils as test_data_utils
 
 from heatclient.v1 import resources
 from heatclient.v1 import stacks
-from ironicclient.v1 import chassis
 from ironicclient.v1 import node
 from ironicclient.v1 import port
 
@@ -35,7 +34,6 @@ def data(TEST):
     node_1 = node.Node(
         node.NodeManager(None),
         {'uuid': 'aa-11',
-         'chassis_id': 'chassis-id-1',
          'instance_uuid': 'aa',
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -52,7 +50,6 @@ def data(TEST):
     node_2 = node.Node(
         node.NodeManager(None),
         {'uuid': 'bb-22',
-         'chassis_id': 'chassis-id-1',
          'instance_uuid': 'bb',
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -69,7 +66,6 @@ def data(TEST):
     node_3 = node.Node(
         node.NodeManager(None),
         {'uuid': 'cc-33',
-         'chassis_id': 'chassis-id-1',
          'instance_uuid': None,
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -84,14 +80,6 @@ def data(TEST):
          },
          'power_state': 'rebooting'})
     TEST.ironicclient_nodes.add(node_1, node_2, node_3)
-
-    # Chassis
-    TEST.ironicclient_chassis = test_data_utils.TestDataContainer()
-    chassis_1 = chassis.Chassis(
-        chassis.ChassisManager(None),
-        {'uuid': 'chassis-id-1',
-         'description': 'default chassis'})
-    TEST.ironicclient_chassis.add(chassis_1)
 
     # Ports
     TEST.ironicclient_ports = test_data_utils.TestDataContainer()
