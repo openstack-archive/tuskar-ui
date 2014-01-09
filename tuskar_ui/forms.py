@@ -13,7 +13,7 @@
 #    under the License.
 
 from django import forms
-from django.utils.translation import ugettext_lazy as _  # noqa
+from django.utils.translation import ugettext_lazy as _
 import netaddr
 
 
