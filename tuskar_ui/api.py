@@ -40,11 +40,11 @@ def tuskarclient(request):
     return c
 
 
-class Stack(base.APIResourceWrapper):
+class Overcloud(base.APIResourceWrapper):
     _attrs = ('id', 'stack_name', 'stack_status')
 
     @classmethod
-    def create(cls, request, stack_sizing):
+    def create(cls, request, overcloud_sizing):
         # Assumptions:
         #   * hard-coded stack name ('overcloud')
         #   * there is a Tuskar API/library that puts
@@ -53,40 +53,40 @@ class Stack(base.APIResourceWrapper):
         #   * is the assumption correct, or does the UI have to
         #     do more heavy lifting?
         # Required:
-        #   * Stack sizing information
+        #   * Overcloud sizing information
         # Side Effects:
         #   * call out to Tuskar API/library, which deploys
-        #     an 'overcloud' Stack using the sizing information
+        #     an 'overcloud' stack using the sizing information
         # Return:
-        #   * the created Stack object
+        #   * the created stack object
 
         # TODO(Tzu-Mainn Chen): remove test data when possible
-        # stack = tuskarclient(request).stacks.create(
-        #    'overcloud',
-        #    stack_sizing)
-        stack = test_data().heatclient_stacks.first
+        # overcloud = tuskarclient(request).overclouds.create(
+        #                          'overcloud',
+        #                          overcloud_sizing)
+        overcloud = test_data().heatclient_stacks.first
 
-        return cls(stack)
+        return cls(overcloud)
 
     @classmethod
     def get(cls, request):
         # Assumptions:
         #   * hard-coded stack name ('overcloud')
         # Return:
-        #   * the 'overcloud' Stack object
+        #   * the 'overcloud' stack object
 
         # TODO(Tzu-Mainn Chen): remove test data when possible
-        # stack = heatclient(request).stacks.get('overcloud')
-        stack = test_data().heatclient_stacks.first
+        # overcloud = heatclient(request).stacks.get('overcloud')
+        overcloud = test_data().heatclient_stacks.first
 
-        return cls(stack)
+        return cls(overcloud)
 
     @cached_property
     def resources(self):
         # Assumptions:
         #   * hard-coded stack name ('overcloud')
         # Return:
-        #   * a list of Resources associated with the Stack
+        #   * a list of Resources associated with the Overcloud
 
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # resources = heatclient(request).resources.list(self.id)
@@ -99,7 +99,7 @@ class Stack(base.APIResourceWrapper):
         # Assumptions:
         #   * hard-coded stack name ('overcloud')
         # Return:
-        #   * a list of Nodes indirectly associated with the Stack
+        #   * a list of Nodes indirectly associated with the Overcloud
 
         return [resource.node for resource in self.resources]
 
@@ -190,16 +190,16 @@ class Node(base.APIResourceWrapper):
         return
 
     @cached_property
-    def resource(self, stack):
+    def resource(self, overcloud):
         # Questions:
         #   * can we assume one resource per Node?
         # Required:
-        #   * stack
+        #   * overcloud
         # Return:
         #   * return the node's associated Resource within the passed-in
-        #     stack, if any
+        #     overcloud, if any
 
-        return next((r for r in stack.resources
+        return next((r for r in overcloud.resources
                     if r.physical_resource_id == self.instance_uuid),
                     None)
 
@@ -220,19 +220,19 @@ class Resource(base.APIResourceWrapper):
               'physical_resource_id')
 
     @classmethod
-    def get(cls, request, stack, resource_name):
+    def get(cls, request, overcloud, resource_name):
         # Required:
-        #   * stack, resource_name
+        #   * overcloud, resource_name
         # Return:
-        #   * the matching Resource in the stack
+        #   * the matching Resource in the overcloud
 
         # TODO(Tzu-Mainn Chen): uncomment when possible
         # resource = heatclient(request).resources.get(
-        #     stack.id,
+        #     overcloud.id,
         #     resource_name)
         resources = test_data().heatclient_resources.list()
         resource = next((r for r in resources
-                         if stack.id == r.stack_id
+                         if overcloud.id == r.stack_id
                          and resource_name == r.resource_name),
                         None)
 
@@ -276,14 +276,14 @@ class ResourceCategory(base.APIResourceWrapper):
         return "image_name"
 
     @cached_property
-    def resources(self, stack):
+    def resources(self, overcloud):
         # Questions:
         #   * can we assume that the resource_type equals the
         #     category name?
         # Required:
-        #   * stack
+        #   * overcloud
         # Return:
         #   * the resources within the stack that match the
         #     resource category
 
-        return [r for r in stack.resources if r.resource_type == self.name]
+        return [r for r in overcloud.resources if r.resource_type == self.name]
