@@ -122,6 +122,12 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
                 pass
         return success
 
+    def clean(self):
+        for form in self:
+            if not form.cleaned_data:
+                raise django.forms.ValidationError(
+                    _("Please provide node data for all nodes."))
+
 
 NodeFormset = django.forms.formsets.formset_factory(NodeForm, extra=1,
                                                     formset=BaseNodeFormset)
