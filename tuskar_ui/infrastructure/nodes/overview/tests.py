@@ -17,6 +17,8 @@ from django.core import urlresolvers
 from mock import patch, call  # noqa
 
 from openstack_dashboard.test.test_data import utils
+
+from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import tuskar_data
 
@@ -25,15 +27,37 @@ INDEX_URL = urlresolvers.reverse(
     'horizon:infrastructure:nodes.overview:index')
 REGISTER_URL = urlresolvers.reverse(
     'horizon:infrastructure:nodes.overview:register')
+OVERVIEW_URL = urlresolvers.reverse(
+    'horizon:infrastructure:overview:index')
 TEST_DATA = utils.TestDataContainer()
 tuskar_data.data(TEST_DATA)
 
 
 class RegisterNodesTests(test.BaseAdminViewTests):
     def test_index_get(self):
-        res = self.client.get(INDEX_URL)
-        self.assertTemplateUsed(
-            res, 'infrastructure/nodes/overview/index.html')
+        nodes = [api.Node(node)
+                 for node in self.ironicclient_nodes.list()]
+
+        with patch('tuskar_ui.api.Node', **{
+            'spec_set': ['list'],  # Only allow these attributes
+            'list.return_value': nodes,
+        }) as mock:
+            res = self.client.get(INDEX_URL)
+            self.assertEqual(mock.list.call_count, 3)
+
+        self.maxDiff = None
+        self.assertTemplateUsed(res,
+                                'infrastructure/nodes/overview/index.html')
+
+    def test_index_get_nodes_list_exception(self):
+        with patch('tuskar_ui.api.Node', **{
+            'spec_set': ['list'],
+            'list.side_effect': self.exceptions.tuskar,
+        }) as mock:
+            res = self.client.get(INDEX_URL)
+            self.assertEqual(mock.list.call_count, 1)
+
+        self.assertRedirectsNoFollow(res, OVERVIEW_URL)
 
     def test_register_get(self):
         res = self.client.get(REGISTER_URL)

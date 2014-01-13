@@ -12,15 +12,37 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from django.core import urlresolvers
 from django.core.urlresolvers import reverse_lazy
+from django.utils.translation import ugettext_lazy as _
 from django.views import generic
+
+from horizon import exceptions
 import horizon.forms
 
+from tuskar_ui import api as tuskar
 from tuskar_ui.infrastructure.nodes import forms
 
 
 class IndexView(generic.TemplateView):
     template_name = 'infrastructure/nodes/overview/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        try:
+            context['nodes'] = tuskar.Node.list(self.request)
+            context['free_nodes'] = tuskar.Node.list(
+                self.request, associated=False)
+            context['resource_nodes'] = tuskar.Node.list(
+                self.request, associated=True)
+        except Exception:
+            redirect = urlresolvers.reverse(
+                'horizon:infrastructure:overview:index')
+            exceptions.handle(self.request,
+                              _('Unable to retrieve nodes.'),
+                              redirect=redirect)
+
+        return context
 
 
 class RegisterView(horizon.forms.ModalFormView):

@@ -8,6 +8,20 @@
 {% endblock page_header %}
 
 {% block main %}
-<a href="{% url 'horizon:infrastructure:nodes.overview:register' %}"
-   class="btn ajax-modal">Register nodes</a>
+<div class="row-fluid">
+  <div class="span12">
+    <div class="breadcrumbs">
+      <a href="{% url 'horizon:infrastructure:overview:index' %}">{% trans "Infrastructure" %}</a>
+    </div>
+
+    <h3>{% trans "Nodes Overview" %}</h3>
+
+    <h4>{{ nodes|length }} {% trans "nodes in total" %}</h4>
+    <hr />
+    <a href="{% url 'horizon:infrastructure:nodes.resource:index' %}"><h4>{{ resource_nodes|length }} {% trans "Resource Nodes" %}</h4></a>
+    <a href="{% url 'horizon:infrastructure:nodes.overview:register' %}" class="btn ajax-modal">Register nodes</a>
+    <hr />
+    <a href="{% url 'horizon:infrastructure:nodes.free:index' %}"><h4>{{ free_nodes|length }} {% trans "Free Nodes" %}</h4></a>
+  </div>
+</div>
 {% endblock %}
