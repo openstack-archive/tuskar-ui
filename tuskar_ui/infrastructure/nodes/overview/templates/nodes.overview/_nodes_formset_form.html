@@ -3,17 +3,17 @@
   <div class="form form-inline">
     <div class="row-fluid">
       <h3 style="margin-bottom:16px">Node Detail</h3>
-      {% include 'infrastructure/nodes/overview/_nodes_formset_field.html' with field=form.node_tags %}
+      {% include 'infrastructure/nodes.overview/_nodes_formset_field.html' with field=form.node_tags %}
     </div>
     <div class="row-fluid">
       <h4>Power Management</h4>
-      {% include 'infrastructure/nodes/overview/_nodes_formset_field.html' with field=form.ip_address required=True %}
-      {% include 'infrastructure/nodes/overview/_nodes_formset_field.html' with field=form.ipmi_user %}
-      {% include 'infrastructure/nodes/overview/_nodes_formset_field.html' with field=form.ipmi_password %}
+      {% include 'infrastructure/nodes.overview/_nodes_formset_field.html' with field=form.ip_address required=True %}
+      {% include 'infrastructure/nodes.overview/_nodes_formset_field.html' with field=form.ipmi_user %}
+      {% include 'infrastructure/nodes.overview/_nodes_formset_field.html' with field=form.ipmi_password %}
     </div>
     <div class="row-fluid">
       <h4>Networking</h4>
-      {% include 'infrastructure/nodes/overview/_nodes_formset_field.html' with field=form.mac_address required=True %}
+      {% include 'infrastructure/nodes.overview/_nodes_formset_field.html' with field=form.mac_address required=True %}
     </div>
     <div class="row-fluid">
       <div class="span4">
@@ -24,9 +24,9 @@
       </label>
     </div>
     <div class="row-fluid" id="register-hardware-fields">
-      {% include 'infrastructure/nodes/overview/_nodes_formset_field.html' with field=form.cpus extra_text=_('units') required=True %}
-      {% include 'infrastructure/nodes/overview/_nodes_formset_field.html' with field=form.memory extra_text=_('MB') required=True %}
-      {% include 'infrastructure/nodes/overview/_nodes_formset_field.html' with field=form.local_disk extra_text=_('GB') required=True %}
+      {% include 'infrastructure/nodes.overview/_nodes_formset_field.html' with field=form.cpus extra_text=_('units') required=True %}
+      {% include 'infrastructure/nodes.overview/_nodes_formset_field.html' with field=form.memory extra_text=_('MB') required=True %}
+      {% include 'infrastructure/nodes.overview/_nodes_formset_field.html' with field=form.local_disk extra_text=_('GB') required=True %}
     </div>
   </div>
 </div>

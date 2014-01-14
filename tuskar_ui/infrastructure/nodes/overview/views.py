@@ -23,7 +23,7 @@ from tuskar_ui.infrastructure.nodes import forms
 
 
 class IndexView(generic.TemplateView):
-    template_name = 'infrastructure/nodes/overview/index.html'
+    template_name = 'infrastructure/nodes.overview/index.html'
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
@@ -50,7 +50,7 @@ class IndexView(generic.TemplateView):
 class RegisterView(horizon.forms.ModalFormView):
     form_class = forms.NodeFormset
     form_prefix = 'register_nodes'
-    template_name = 'infrastructure/nodes/overview/register.html'
+    template_name = 'infrastructure/nodes.overview/register.html'
     success_url = reverse_lazy(
         'horizon:infrastructure:nodes.overview:index')
 

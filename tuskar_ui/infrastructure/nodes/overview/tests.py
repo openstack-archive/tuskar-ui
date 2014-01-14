@@ -33,12 +33,12 @@ class RegisterNodesTests(test.BaseAdminViewTests):
     def test_index_get(self):
         res = self.client.get(INDEX_URL)
         self.assertTemplateUsed(
-            res, 'infrastructure/nodes/overview/index.html')
+            res, 'infrastructure/nodes.overview/index.html')
 
     def test_register_get(self):
         res = self.client.get(REGISTER_URL)
         self.assertTemplateUsed(
-            res, 'infrastructure/nodes/overview/register.html')
+            res, 'infrastructure/nodes.overview/register.html')
 
     def test_register_post(self):
         node = TEST_DATA.ironicclient_nodes.first
@@ -104,4 +104,4 @@ class RegisterNodesTests(test.BaseAdminViewTests):
                      ['DE:AD:BE:EF:CA:FF'], None, u''),
             ])
         self.assertTemplateUsed(
-            res, 'infrastructure/nodes/overview/register.html')
+            res, 'infrastructure/nodes.overview/register.html')
