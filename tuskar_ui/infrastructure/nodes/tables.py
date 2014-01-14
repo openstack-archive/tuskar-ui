@@ -54,3 +54,21 @@ class NodesTable(tables.DataTable):
 
     def get_object_display(self, datum):
         return datum.uuid
+
+
+class FreeNodesTable(NodesTable):
+
+    class Meta:
+        name = "free_nodes"
+        verbose_name = _("Free Nodes")
+        table_actions = ()
+        row_actions = ()
+
+
+class ResourceNodesTable(NodesTable):
+
+    class Meta:
+        name = "resource_nodes"
+        verbose_name = _("Resource Nodes")
+        table_actions = ()
+        row_actions = ()

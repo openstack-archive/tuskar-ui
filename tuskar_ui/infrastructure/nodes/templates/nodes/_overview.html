@@ -1,0 +1,24 @@
+{% load i18n %}
+{% load url from future%}
+
+
+<div class="row-fluid"><div class="span12">
+<p>
+  <h4><span class="big-number">{{ nodes_total|default:0 }}</span> {% trans 'nodes in total' %}</h4>
+</p>
+<hr>
+<p>
+    <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__resource"
+        ><span class="big-number">{{ nodes_resources|default:0 }}</span> {% trans 'Resource Nodes' %}</a>
+</p>
+<hr>
+<p>
+<a href="{% url 'horizon:infrastructure:nodes:register' %}"
+   class="btn ajax-modal pull-right">{% trans 'Register Nodes' %}</a>
+    <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__free"
+        ><span class="big-number">{{ nodes_free|default:0 }}</span> {% trans 'Free Nodes' %}</a>
+</p>
+<hr>
+<h4>{% trans 'Statistics' %}</h4>
+<p>{% trans 'No statistics available' %}</p>
+</div></div>

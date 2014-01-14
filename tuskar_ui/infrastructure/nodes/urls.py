@@ -1,4 +1,4 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
+# -*- coding: utf8 -*-
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -12,28 +12,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.utils.translation import ugettext_lazy as _
+from django.conf import urls
 
-import horizon
-
-
-class BasePanels(horizon.PanelGroup):
-    slug = "infrastructure"
-    name = _("Infrastructure")
-    panels = (
-        'nodes',
-        'overcloud',
-    )
+from tuskar_ui.infrastructure.nodes import views
 
 
-class Infrastructure(horizon.Dashboard):
-    name = _("Infrastructure")
-    slug = "infrastructure"
-    panels = (
-        BasePanels,
-    )
-    default_panel = 'overcloud'
-    permissions = ('openstack.roles.admin',)
-
-
-horizon.register(Infrastructure)
+urlpatterns = urls.patterns(
+    '',
+    urls.url(r'^$', views.IndexView.as_view(), name='index'),
+    urls.url(r'^register/$', views.RegisterView.as_view(),
+             name='register'),
+)
