@@ -13,14 +13,38 @@
 #    under the License.
 
 from django.core.urlresolvers import reverse_lazy
+from django.utils.translation import ugettext_lazy as _
 from django.views import generic
+from horizon import exceptions
 import horizon.forms
 
+from tuskar_ui import api
 from tuskar_ui.infrastructure.nodes import forms
 
 
 class IndexView(generic.TemplateView):
     template_name = 'infrastructure/nodes/overview/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        try:
+            free_nodes = len(api.Node.list(self.request, associated=False))
+        except Exception:
+            free_nodes = 0
+            exceptions.handle(self.request,
+                              _('Unable to retrieve free nodes.'))
+        try:
+            allocated_nodes = len(api.Node.list(self.request, associated=True))
+        except Exception:
+            allocated_nodes = 0
+            exceptions.handle(self.request,
+                              _('Unable to retrieve allocated nodes.'))
+        context.update({
+            'nodes_total': free_nodes + allocated_nodes,
+            'nodes_allocated_resources': allocated_nodes,
+            'nodes_unallocated': free_nodes,
+        })
+        return context
 
 
 class RegisterView(horizon.forms.ModalFormView):
