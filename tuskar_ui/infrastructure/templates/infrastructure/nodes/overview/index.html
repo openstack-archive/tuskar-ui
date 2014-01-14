@@ -5,9 +5,32 @@
 
 {% block page_header %}
   {% include 'horizon/common/_domain_page_header.html' with title=_('Nodes Overview') %}
+  <div class="breadcrumbs">
+    <a href="{% url 'horizon:infrastructure:overview:index' %}"
+      >{% trans "Infrastructure" %}</a>
+    <span class="separator"></span>
+  </div>
 {% endblock page_header %}
 
 {% block main %}
+<div class="row-fluid"><div class="span12">
+<p>
+  <h4><span class="big-number">{{ nodes_total|default:0 }}</span> nodes in total</h4>
+</p>
+<hr>
+<p>
+    <a href="{% url 'horizon:infrastructure:nodes.resource:index' %}"
+        ><span class="big-number">{{ nodes_allocated_resources|default:0 }}</span> Allocated — Resource Nodes</a>
+</p>
+<hr>
+<p>
 <a href="{% url 'horizon:infrastructure:nodes.overview:register' %}"
-   class="btn ajax-modal">Register nodes</a>
+   class="btn ajax-modal pull-right">Register Nodes</a>
+    <a href="{% url 'horizon:infrastructure:nodes.free:index' %}"
+        ><span class="big-number">{{ nodes_unallocated|default:0 }}</span> Unallocated Nodes</a>
+</p>
+<hr>
+<h4>Statistics</h4>
+<p>No statistics available</p>
+</div></div>
 {% endblock %}
