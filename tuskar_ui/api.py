@@ -103,6 +103,16 @@ class Overcloud(base.APIResourceWrapper):
 
         return [resource.node for resource in self.resources]
 
+    @cached_property
+    def is_deployed(self):
+        # Assumptions:
+        #   * hard-coded stack name ('overcloud')
+        # Return:
+        #   * True if the overcloud deployed successfully
+        #   * False otherwise
+        # TODO(rdopieralski) Actually implement it
+        return False
+
 
 class Node(base.APIResourceWrapper):
     _attrs = ('uuid', 'instance_uuid', 'driver', 'driver_info',

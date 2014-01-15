@@ -11,17 +11,26 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+from django.utils.translation import ugettext_lazy as _
 import horizon.workflows
 
-from tuskar_ui import api
-from tuskar_ui.infrastructure.overcloud.workflows import deployed
-from tuskar_ui.infrastructure.overcloud.workflows import undeployed
+
+class OverviewAction(horizon.workflows.Action):
+    class Meta:
+        slug = 'deployed_overview'
+        name = _("Overview")
 
 
-class IndexView(horizon.workflows.WorkflowView):
-    workflow_class = deployed.Workflow
+class OverviewStep(horizon.workflows.Step):
+    action_class = OverviewAction
+    contributes = ()
 
-    def get_workflow(self):
-        if not api.Overcloud.get(self.request).is_deployed:
-            self.workflow_class = undeployed.Workflow
-        return super(IndexView, self).get_workflow()
+
+class Workflow(horizon.workflows.Workflow):
+    slug = 'deployed_overcloud'
+    name = _("My (Deployed) Deployment")
+    default_steps = (OverviewStep,)
+
+    def handle(self, request, context):
+        pass
