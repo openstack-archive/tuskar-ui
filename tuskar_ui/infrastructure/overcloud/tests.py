@@ -23,12 +23,17 @@ from tuskar_ui.test.test_data import tuskar_data
 
 INDEX_URL = urlresolvers.reverse(
     'horizon:infrastructure:overcloud:index')
+CREATE_URL = urlresolvers.reverse(
+    'horizon:infrastructure:overcloud:create')
+DETAIL_URL = urlresolvers.reverse(
+    'horizon:infrastructure:overcloud:create')
 TEST_DATA = utils.TestDataContainer()
 tuskar_data.data(TEST_DATA)
 
 
 class OvercloudTests(test.BaseAdminViewTests):
-    def test_index_get_undeployed(self):
+
+    def test_index_overcloud_undeployed(self):
         stack = api.Overcloud(TEST_DATA.heatclient_stacks.first)
         with patch('tuskar_ui.api.Overcloud', **{
             'spec_set': ['get', 'is_deployed'],
@@ -38,6 +43,24 @@ class OvercloudTests(test.BaseAdminViewTests):
             res = self.client.get(INDEX_URL)
             request = Overcloud.get.call_args_list[0][0][0]  # This is a hack.
             self.assertListEqual(Overcloud.get.call_args_list, [call(request)])
+
+        self.assertRedirectsNoFollow(res, CREATE_URL)
+
+    def test_index_overcloud_deployed(self):
+        stack = api.Overcloud(TEST_DATA.heatclient_stacks.first)
+        with patch('tuskar_ui.api.Overcloud', **{
+            'spec_set': ['get', 'is_deployed'],
+            'is_deployed': True,
+            'get.return_value': stack,
+        }) as Overcloud:
+            res = self.client.get(INDEX_URL)
+            request = Overcloud.get.call_args_list[0][0][0]  # This is a hack.
+            self.assertListEqual(Overcloud.get.call_args_list, [call(request)])
+
+        self.assertRedirectsNoFollow(res, DETAIL_URL)
+
+    def test_create_get(self):
+        res = self.client.get(CREATE_URL)
 
         self.assertTemplateUsed(
             res, 'infrastructure/_fullscreen_workflow_base.html')

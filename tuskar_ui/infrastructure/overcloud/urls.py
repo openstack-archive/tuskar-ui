@@ -20,4 +20,8 @@ from tuskar_ui.infrastructure.overcloud import views
 urlpatterns = defaults.patterns(
     '',
     defaults.url(r'^$', views.IndexView.as_view(), name='index'),
+    defaults.url(r'^create/$', views.CreateView.as_view(),
+                 name='create'),
+    defaults.url(r'^(?P<overcloud_id>[^/]+)/$',
+                 views.DetailView.as_view(), name='detail'),
 )

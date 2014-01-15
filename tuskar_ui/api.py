@@ -64,7 +64,7 @@ class Overcloud(base.APIResourceWrapper):
         # overcloud = tuskarclient(request).overclouds.create(
         #                          'overcloud',
         #                          overcloud_sizing)
-        overcloud = test_data().heatclient_stacks.first
+        overcloud = test_data().heatclient_stacks.first()
 
         return cls(overcloud)
 
@@ -77,8 +77,7 @@ class Overcloud(base.APIResourceWrapper):
 
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # overcloud = heatclient(request).stacks.get('overcloud')
-        overcloud = test_data().heatclient_stacks.first
-
+        overcloud = test_data().heatclient_stacks.first()
         return cls(overcloud)
 
     @cached_property
@@ -148,7 +147,7 @@ class Node(base.APIResourceWrapper):
         #         node_uuid=node.uuid,
         #         address=mac_address
         #     )
-        node = test_data().ironicclient_nodes.first
+        node = test_data().ironicclient_nodes.first()
 
         return cls(node)
 
@@ -161,7 +160,7 @@ class Node(base.APIResourceWrapper):
 
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # node = ironicclient(request).nodes.get(uuid)
-        node = test_data().ironicclient_nodes.first
+        node = test_data().ironicclient_nodes.first()
 
         return cls(node)
 

@@ -11,6 +11,10 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+from django.core.urlresolvers import reverse
+from django.views.generic import base as base_views
+
 import horizon.workflows
 
 from tuskar_ui import api
@@ -18,11 +22,24 @@ from tuskar_ui.infrastructure.overcloud.workflows import deployed
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed
 
 
-class IndexView(horizon.workflows.WorkflowView):
-    workflow_class = deployed.Workflow
+class IndexView(base_views.RedirectView):
+    permanent = False
+
+    def get_redirect_url(self):
+        overcloud = api.Overcloud.get(self.request)
+        if overcloud is not None and overcloud.is_deployed:
+            redirect = reverse('horizon:infrastructure:overcloud:detail',
+                               args=(overcloud.id,))
+        else:
+            redirect = reverse('horizon:infrastructure:overcloud:create')
+        return redirect
+
+
+class CreateView(horizon.workflows.WorkflowView):
+    workflow_class = undeployed.Workflow
     template_name = 'infrastructure/_fullscreen_workflow_base.html'
 
-    def get_workflow(self):
-        if not api.Overcloud.get(self.request).is_deployed:
-            self.workflow_class = undeployed.Workflow
-        return super(IndexView, self).get_workflow()
+
+class DetailView(horizon.workflows.WorkflowView):
+    workflow_class = deployed.Workflow
+    template_name = 'infrastructure/_fullscreen_workflow_base.html'
