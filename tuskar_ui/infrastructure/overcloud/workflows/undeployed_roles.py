@@ -11,18 +11,17 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+from django.utils.translation import ugettext_lazy as _
 import horizon.workflows
 
-from tuskar_ui import api
-from tuskar_ui.infrastructure.overcloud.workflows import deployed
-from tuskar_ui.infrastructure.overcloud.workflows import undeployed
+
+class Action(horizon.workflows.Action):
+    class Meta:
+        slug = 'undeployed_roles'
+        name = _("Roles")
 
 
-class IndexView(horizon.workflows.WorkflowView):
-    workflow_class = deployed.Workflow
-    template_name = 'infrastructure/_fullscreen_workflow_base.html'
-
-    def get_workflow(self):
-        if not api.Overcloud.get(self.request).is_deployed:
-            self.workflow_class = undeployed.Workflow
-        return super(IndexView, self).get_workflow()
+class Step(horizon.workflows.Step):
+    action_class = Action
+    contributes = ()
