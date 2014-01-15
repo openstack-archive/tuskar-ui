@@ -1,0 +1,13 @@
+{% load i18n %}
+<noscript><h3>{{ step }}</h3></noscript>
+<p>{{ step.get_help_text }}</p>
+
+<div class="row-fluid">
+  <div class="span6">
+    <h3>{% trans "Roles" %}</h3>
+    {% include "horizon/common/_form_fields.html" %}
+  </div>
+  <div class="span6">
+    <h3>{% trans "Configuration" %}</h3>
+  </div>
+</div>
