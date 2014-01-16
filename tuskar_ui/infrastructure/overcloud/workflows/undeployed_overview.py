@@ -22,16 +22,16 @@ import tuskar_ui.forms
 class Action(horizon.workflows.Action):
     controller = django.forms.IntegerField(
         _("Controller"), initial=1, min_value=1,
-        widget=tuskar_ui.forms.NumberInput)
+        widget=tuskar_ui.forms.NumberPickerInput(attrs={'readonly': 'readonly'}))
     compute = django.forms.IntegerField(
         _("Compute"), initial=0, min_value=0,
-        widget=tuskar_ui.forms.NumberInput)
+        widget=tuskar_ui.forms.NumberPickerInput)
     object_storage = django.forms.IntegerField(
         _("Object Storage"), initial=0, min_value=0,
-        widget=tuskar_ui.forms.NumberInput)
+        widget=tuskar_ui.forms.NumberPickerInput)
     block_storage = django.forms.IntegerField(
         _("Block Storage"), initial=0, min_value=0,
-        widget=tuskar_ui.forms.NumberInput)
+        widget=tuskar_ui.forms.NumberPickerInput)
 
     class Meta:
         slug = 'undeployed_overview'

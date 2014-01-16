@@ -1,0 +1,5 @@
+<div class="number_picker">
+  <a ng-click="decrementValue()" class="btn btn-link" ng-class="{disabled: disabledInput || disableArrow()}"><i ng-hide="disabledInput" class="icon-chevron-left"></i></a>
+  <input type="text" value="{$value$}" ng-model="value">
+  <a ng-click="incrementValue()" class="btn btn-link" ng-class="{disabled: disabledInput}"><i ng-hide="disabledInput" class="icon-chevron-right"></i></a>
+</div>
