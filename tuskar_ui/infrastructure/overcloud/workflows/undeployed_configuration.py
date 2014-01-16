@@ -12,16 +12,62 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import django.forms
 from django.utils.translation import ugettext_lazy as _
 import horizon.workflows
 
+import tuskar_ui.forms
+
 
 class Action(horizon.workflows.Action):
+    mysql_host_ip = django.forms.IPAddressField(
+        label=_("Hotst IP"), required=False,
+        widget=django.forms.TextInput(attrs={
+            'placeholder': _("auto-retrieve"),
+        }))
+    mysql_user = django.forms.CharField(_("User"))
+    mysql_password = django.forms.CharField(
+        label=_("Password"), widget=django.forms.PasswordInput)
+
+    amqp_host_ip = django.forms.IPAddressField(
+        label=_("Hotst IP"), required=False,
+        widget=django.forms.TextInput(attrs={
+            'placeholder': _("auto-retrieve"),
+        }))
+    amqp_password = django.forms.CharField(
+        label=_("Password"), widget=django.forms.PasswordInput)
+
+    keystone_host_ip = django.forms.IPAddressField(
+        label=_("Hotst IP"), required=False,
+        widget=django.forms.TextInput(attrs={
+            'placeholder': _("auto-retrieve"),
+        }))
+    keystone_db_password = django.forms.CharField(
+        label=_("DB Password"), widget=django.forms.PasswordInput)
+    keystone_admin_token = django.forms.CharField(
+        label=_("Admin Token"), widget=django.forms.PasswordInput)
+    keystone_admin_password = django.forms.CharField(
+        label=_("Admin Password"), widget=django.forms.PasswordInput)
+
     class Meta:
-        slug = 'undeployed_configuration'
+        slug = 'deployed_configuration'
         name = _("Configuration")
+
+    def mysql_fieldset(self):
+        return tuskar_ui.forms.fieldset(self, prefix="mysql_")
+
+    def amqp_fieldset(self):
+        return tuskar_ui.forms.fieldset(self, prefix="amqp_")
+
+    def keystone_fieldset(self):
+        return tuskar_ui.forms.fieldset(self, prefix="keystone_")
+
+    def handle(self, request, context):
+        context['configuration'] = self.cleaned_data
+        return context
 
 
 class Step(horizon.workflows.Step):
     action_class = Action
-    contributes = ()
+    contributes = ('configuration',)
+    template_name = 'infrastructure/overcloud/undeployed_configuration.html'

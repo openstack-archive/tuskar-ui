@@ -17,6 +17,16 @@ from django.utils.translation import ugettext_lazy as _
 import netaddr
 
 
+def fieldset(self, *args, **kwargs):
+    """A helper function for grouping fields based on their names."""
+
+    prefix = kwargs.pop('prefix', None)
+    names = args or self.fields.keys()
+    for name in names:
+        if prefix is None or name.startswith(prefix):
+            yield forms.forms.BoundField(self, self.fields[name], name)
+
+
 class NumberInput(forms.widgets.TextInput):
     input_type = 'number'
 
