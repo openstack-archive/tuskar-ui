@@ -33,7 +33,7 @@ tuskar_data.data(TEST_DATA)
 
 class OvercloudTests(test.BaseAdminViewTests):
 
-    def test_index_overcloud_undeployed(self):
+    def test_index_overcloud_undeployed_get(self):
         oc = api.Overcloud(TEST_DATA.tuskarclient_overclouds.first())
         with patch('tuskar_ui.api.Overcloud', **{
             'spec_set': ['get', 'is_deployed'],
@@ -44,8 +44,42 @@ class OvercloudTests(test.BaseAdminViewTests):
             request = Overcloud.get.call_args_list[0][0][0]  # This is a hack.
             self.assertListEqual(Overcloud.get.call_args_list,
                                  [call(request, 1)])
-
         self.assertRedirectsNoFollow(res, CREATE_URL)
+
+    def test_create_overcloud_undeployed_post(self):
+        oc = api.Overcloud(TEST_DATA.tuskarclient_overclouds.first())
+        data = {
+            'count__controller__default': '1',
+            'count__compute__default': '0',
+            'count__object_storage__default': '0',
+            'count__block_storage__default': '0',
+            'mysql_host_ip': '',
+            'mysql_user': 'admin',
+            'mysql_password': 'pass',
+            'amqp_host_ip': '',
+            'amqp_password': 'pass',
+            'keystone_host_ip': '',
+            'keystone_db_password': 'pass',
+            'keystone_admin_token': 'pass',
+            'keystone_admin_password': 'pass',
+        }
+        with patch('tuskar_ui.api.Overcloud', **{
+            'spec_set': ['create'],
+            'create.return_value': oc,
+        }) as Overcloud:
+            res = self.client.post(CREATE_URL, data)
+            request = Overcloud.create.call_args_list[0][0][0]
+            self.assertListEqual(
+                Overcloud.create.call_args_list,
+                [
+                    call(request, {
+                        ('controller', 'default'): 1,
+                        ('compute', 'default'): 0,
+                        ('object_storage', 'default'): 0,
+                        ('block_storage', 'default'): 0,
+                    }),
+                ])
+        self.assertRedirectsNoFollow(res, INDEX_URL)
 
     def test_index_overcloud_deployed(self):
         oc = api.Overcloud(TEST_DATA.tuskarclient_overclouds.first())

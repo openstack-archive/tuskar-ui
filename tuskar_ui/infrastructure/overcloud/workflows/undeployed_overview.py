@@ -19,27 +19,62 @@ import horizon.workflows
 import tuskar_ui.forms
 
 
-class Action(horizon.workflows.Action):
-    controller = django.forms.IntegerField(
-        _("Controller"), initial=1, min_value=1,
-        widget=tuskar_ui.forms.NumberInput)
-    compute = django.forms.IntegerField(
-        _("Compute"), initial=0, min_value=0,
-        widget=tuskar_ui.forms.NumberInput)
-    object_storage = django.forms.IntegerField(
-        _("Object Storage"), initial=0, min_value=0,
-        widget=tuskar_ui.forms.NumberInput)
-    block_storage = django.forms.IntegerField(
-        _("Block Storage"), initial=0, min_value=0,
-        widget=tuskar_ui.forms.NumberInput)
+CATEGORIES = [
+    ('controller', _("Controller")),
+    ('compute', _("Compute")),
+    ('object_storage', _("Object Storage")),
+    ('block_storage', _("Block Storage")),
+]
 
+
+class Action(horizon.workflows.Action):
     class Meta:
         slug = 'undeployed_overview'
         name = _("Overview")
 
+    def __init__(self, *args, **kwargs):
+        super(Action, self).__init__(*args, **kwargs)
+        for category, label in CATEGORIES:
+            # TODO(rdopieralski) Get a list of hardware profiles for each
+            # category here.
+            name = 'count__%s__%s' % (category, 'default')
+            if category == 'controller':
+                initial = 1
+            else:
+                initial = 0
+            self.fields[name] = django.forms.IntegerField(
+                label=_("Default"), initial=initial, min_value=initial,
+                widget=tuskar_ui.forms.NumberInput(attrs={
+                    'class': 'input-mini',
+                }))
+
+    def roles_fieldset(self):
+        for category, label in CATEGORIES:
+            yield (
+                category,
+                label,
+                list(tuskar_ui.forms.fieldset(
+                    self, prefix='count__%s__' % category)),
+            )
+
+    def handle(self, request, context):
+        counts = {}
+        for key, value in self.cleaned_data.iteritems():
+            if not key.startswith('count_'):
+                continue
+            _count, category, profile = key.split('__', 2)
+            counts[category, profile] = int(value)
+        context['category_counts'] = counts
+        return context
+
 
 class Step(horizon.workflows.Step):
     action_class = Action
-    contributes = ()
+    contributes = ('category_counts',)
     template_name = 'infrastructure/overcloud/undeployed_overview.html'
     help_text = _("Nothing deployed yet. Design your first deployment.")
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(Step, self).get_context_data(*args, **kwargs)
+        context['free_nodes'] = 3
+        return context
