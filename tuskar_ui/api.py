@@ -40,8 +40,10 @@ def tuskarclient(request):
     return c
 
 
-class Overcloud(base.APIResourceWrapper):
-    _attrs = ('id', 'stack_name', 'stack_status')
+# TODO(Tzu-Mainn Chen): change this to APIResourceWrapper once
+# ResourceCategory object exists in tuskar
+class Overcloud(base.APIDictWrapper):
+    _attrs = ('id', 'stack_id', 'name', 'description')
 
     @classmethod
     def create(cls, request, overcloud_sizing):
@@ -64,43 +66,42 @@ class Overcloud(base.APIResourceWrapper):
         # overcloud = tuskarclient(request).overclouds.create(
         #                          'overcloud',
         #                          overcloud_sizing)
-        overcloud = test_data().heatclient_stacks.first()
+        overcloud = test_data().tuskarclient_overclouds.first()
 
         return cls(overcloud)
 
     @classmethod
-    def get(cls, request):
-        # Assumptions:
-        #   * hard-coded stack name ('overcloud')
+    def list(cls, request):
+        # Return:
+        #   * a list of Overclouds in Tuskar
+
+        # TODO(Tzu-Mainn Chen): remove test data when possible
+        # ocs = tuskarclient(request).overclouds.list()
+        ocs = test_data().tuskarclient_overclouds.list()
+
+        return [cls(oc) for oc in ocs]
+
+    @classmethod
+    def get(cls, request, overcloud_id):
+        # Required:
+        #   * overcloud_id
         # Return:
         #   * the 'overcloud' stack object
 
         # TODO(Tzu-Mainn Chen): remove test data when possible
-        # overcloud = heatclient(request).stacks.get('overcloud')
-        overcloud = test_data().heatclient_stacks.first()
+        # overcloud = tuskarclient(request).overclouds.get(overcloud_id)
+        overcloud = test_data().tuskarclient_overclouds.first()
         return cls(overcloud)
 
     @cached_property
-    def resources(self):
-        # Assumptions:
-        #   * hard-coded stack name ('overcloud')
+    def stack(self, request):
         # Return:
-        #   * a list of Resources associated with the Overcloud
+        #   * the Heat stack associated with this overcoud
 
         # TODO(Tzu-Mainn Chen): remove test data when possible
-        # resources = heatclient(request).resources.list(self.id)
-        resources = test_data().heatclient_resources.list
-
-        return [Resource(r) for r in resources]
-
-    @cached_property
-    def nodes(self):
-        # Assumptions:
-        #   * hard-coded stack name ('overcloud')
-        # Return:
-        #   * a list of Nodes indirectly associated with the Overcloud
-
-        return [resource.node for resource in self.resources]
+        # stack = heatclient(request).stacks.get(self.stack_id)
+        stack = test_data().heatclient_stacks.first()
+        return stack
 
     @cached_property
     def is_deployed(self):
@@ -256,20 +257,22 @@ class Resource(base.APIResourceWrapper):
                      if self.physical_resource_id == n.instance_uuid),
                     None)
 
-    @cached_property
-    def resource_category(self):
-        # Questions:
-        #   * is a resource_type mapped directly to a ResourceCategory?
-        #   * can we assume that the resource_type equals the category
-        #     name?
+
+# TODO(Tzu-Mainn Chen): change this to APIResourceWrapper once
+# ResourceCategory object exists in tuskar
+class ResourceCategory(base.APIDictWrapper):
+    _attrs = ('id', 'name', 'description', 'image_id')
+
+    @classmethod
+    def list(cls, request):
         # Return:
-        #   * the ResourceCategory matching this resource
+        #   * a list of Resource Categories in Tuskar.
 
-        return ResourceCategory({'name': self.resource_type})
+        # TODO(Tzu-Mainn Chen): remove test data when possible
+        # categories = tuskarclient(request).resource_categories.list()
 
-
-class ResourceCategory(base.APIResourceWrapper):
-    _attrs = ('name')
+        rcs = test_data().tuskarclient_resource_categories.list()
+        return [cls(rc) for rc in rcs]
 
     @cached_property
     def image(self):
@@ -284,15 +287,37 @@ class ResourceCategory(base.APIResourceWrapper):
 
         return "image_name"
 
-    @cached_property
     def resources(self, overcloud):
-        # Questions:
-        #   * can we assume that the resource_type equals the
-        #     category name?
         # Required:
         #   * overcloud
         # Return:
         #   * the resources within the stack that match the
         #     resource category
 
-        return [r for r in overcloud.resources if r.resource_type == self.name]
+        # TODO(Tzu-Mainn Chen): uncomment when possible
+        #resources = tuskarclient(request).overclouds.get_resources(
+        #    overcloud.id, self.id)
+
+        return [r for r in test_data().heatclient_resources.list()
+                if r.logical_resource_id == self.name]
+
+    def instances(self, overcloud):
+        # Required:
+        #   * overcloud
+        # Return:
+        #   * the instances corresponding to the resources within the
+        #     stack that match the resource category
+        #resources = tuskarclient(request).overclouds.get_resources(
+        #    overcloud.id, self.id)
+
+        # TODO(Tzu-Mainn Chen): uncomment real api calls and remove test
+        # data when possible
+        instances = []
+        all_instances = test_data().novaclient_servers.list()
+        for r in self.resources(overcloud):
+            #instance = novaclient(request).servers.get(r.physical_resource_id)
+            instance = next((i for i in all_instances
+                             if i.id == r.physical_resource_id),
+                            None)
+            instances.append(instance)
+        return instances

@@ -34,28 +34,30 @@ tuskar_data.data(TEST_DATA)
 class OvercloudTests(test.BaseAdminViewTests):
 
     def test_index_overcloud_undeployed(self):
-        stack = api.Overcloud(TEST_DATA.heatclient_stacks.first)
+        oc = api.Overcloud(TEST_DATA.tuskarclient_overclouds.first())
         with patch('tuskar_ui.api.Overcloud', **{
             'spec_set': ['get', 'is_deployed'],
             'is_deployed': False,
-            'get.return_value': stack,
+            'get.return_value': oc,
         }) as Overcloud:
             res = self.client.get(INDEX_URL)
             request = Overcloud.get.call_args_list[0][0][0]  # This is a hack.
-            self.assertListEqual(Overcloud.get.call_args_list, [call(request)])
+            self.assertListEqual(Overcloud.get.call_args_list,
+                                 [call(request, 1)])
 
         self.assertRedirectsNoFollow(res, CREATE_URL)
 
     def test_index_overcloud_deployed(self):
-        stack = api.Overcloud(TEST_DATA.heatclient_stacks.first)
+        oc = api.Overcloud(TEST_DATA.tuskarclient_overclouds.first())
         with patch('tuskar_ui.api.Overcloud', **{
             'spec_set': ['get', 'is_deployed'],
             'is_deployed': True,
-            'get.return_value': stack,
+            'get.return_value': oc,
         }) as Overcloud:
             res = self.client.get(INDEX_URL)
             request = Overcloud.get.call_args_list[0][0][0]  # This is a hack.
-            self.assertListEqual(Overcloud.get.call_args_list, [call(request)])
+            self.assertListEqual(Overcloud.get.call_args_list,
+                                 [call(request, 1)])
 
         self.assertRedirectsNoFollow(res, DETAIL_URL)
 

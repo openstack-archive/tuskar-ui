@@ -16,6 +16,7 @@ from heatclient.v1 import resources
 from heatclient.v1 import stacks
 from ironicclient.v1 import node
 from ironicclient.v1 import port
+from novaclient.v1_1 import servers
 
 
 def data(TEST):
@@ -24,7 +25,7 @@ def data(TEST):
     TEST.heatclient_stacks = test_data_utils.TestDataContainer()
     stack_1 = stacks.Stack(
         stacks.StackManager(None),
-        {'id': '1',
+        {'id': 'stack-id-1',
          'stack_name': 'overcloud',
          'stack_status': 'RUNNING'})
     TEST.heatclient_stacks.add(stack_1)
@@ -79,7 +80,39 @@ def data(TEST):
              'local_disk': '1',
          },
          'power_state': 'rebooting'})
-    TEST.ironicclient_nodes.add(node_1, node_2, node_3)
+    node_4 = node.Node(
+        node.NodeManager(None),
+        {'uuid': 'cc-44',
+         'instance_uuid': 'cc',
+         'driver': 'pxe_ipmitool',
+         'driver_info': {
+             'ipmi_address': '4.4.4.4',
+             'ipmi_username': 'admin',
+             'ipmi_password': 'password',
+         },
+         'properties': {
+             'cpu': '8',
+             'ram': '16',
+             'local_disk': '10',
+         },
+         'power_state': 'on'})
+    node_5 = node.Node(
+        node.NodeManager(None),
+        {'uuid': 'dd-55',
+         'instance_uuid': 'dd',
+         'driver': 'pxe_ipmitool',
+         'driver_info': {
+             'ipmi_address': '5.5.5.5',
+             'ipmi_username': 'admin',
+             'ipmi_password': 'password',
+         },
+         'properties': {
+             'cpu': '8',
+             'ram': '16',
+             'local_disk': '10',
+         },
+         'power_state': 'on'})
+    TEST.ironicclient_nodes.add(node_1, node_2, node_3, node_4, node_5)
 
     # Ports
     TEST.ironicclient_ports = test_data_utils.TestDataContainer()
@@ -109,7 +142,8 @@ def data(TEST):
     TEST.heatclient_resources = test_data_utils.TestDataContainer()
     resource_1 = resources.Resource(
         resources.ResourceManager(None),
-        {'stack_id': '1',
+        {'id': '1-resource-id',
+         'stack_id': 'stack-id-1',
          'resource_name': 'Compute',
          'logical_resource_id': 'Compute',
          'physical_resource_id': 'aa',
@@ -117,12 +151,92 @@ def data(TEST):
          'resource_type': 'AWS::EC2::Instance'})
     resource_2 = resources.Resource(
         resources.ResourceManager(None),
-        {'stack_id': '1',
-         'resource_name': 'Control',
-         'logical_resource_id': 'Control',
+        {'id': '2-resource-id',
+         'stack_id': 'stack-id-1',
+         'resource_name': 'Controller',
+         'logical_resource_id': 'Controller',
          'physical_resource_id': 'bb',
          'resource_status': 'CREATE_COMPLETE',
          'resource_type': 'AWS::EC2::Instance'})
-    TEST.heatclient_resources.add(resource_1, resource_2)
+    resource_3 = resources.Resource(
+        resources.ResourceManager(None),
+        {'id': '3-resource-id',
+         'stack_id': 'stack-id-1',
+         'resource_name': 'Compute',
+         'logical_resource_id': 'Compute',
+         'physical_resource_id': 'cc',
+         'resource_status': 'CREATE_COMPLETE',
+         'resource_type': 'AWS::EC2::Instance'})
+    resource_4 = resources.Resource(
+        resources.ResourceManager(None),
+        {'id': '4-resource-id',
+         'stack_id': 'stack-id-4',
+         'resource_name': 'Compute',
+         'logical_resource_id': 'Compute',
+         'physical_resource_id': 'dd',
+         'resource_status': 'CREATE_COMPLETE',
+         'resource_type': 'AWS::EC2::Instance'})
+    TEST.heatclient_resources.add(resource_1,
+                                  resource_2,
+                                  resource_3,
+                                  resource_4)
+
+    # Server
+    TEST.novaclient_servers = test_data_utils.TestDataContainer()
+    s_1 = servers.Server(
+        servers.ServerManager(None),
+        {'id': 'aa',
+         'name': 'Compute',
+         'image': 'compute-image',
+         'status': 'ACTIVE'})
+    s_2 = servers.Server(
+        servers.ServerManager(None),
+        {'id': 'bb',
+         'name': 'Controller',
+         'image': 'controller-image',
+         'status': 'ACTIVE'})
+    s_3 = servers.Server(
+        servers.ServerManager(None),
+        {'id': 'cc',
+         'name': 'Compute',
+         'image': 'compute-image',
+         'status': 'BUILD'})
+    s_4 = servers.Server(
+        servers.ServerManager(None),
+        {'id': 'dd',
+         'name': 'Compute',
+         'image': 'compute-image',
+         'status': 'ERROR'})
+    TEST.novaclient_servers.add(s_1, s_2, s_3, s_4)
+
+    # Overcloud
+    TEST.tuskarclient_overclouds = test_data_utils.TestDataContainer()
+    # TODO(Tzu-Mainn Chen): fix these to create Tuskar Overcloud objects
+    # once the api supports it
+    oc_1 = {'id': 1,
+            'stack_id': 'stack-id-1',
+            'name': 'overcloud',
+            'description': 'overcloud'}
+    TEST.tuskarclient_overclouds.add(oc_1)
 
     # ResourceCategory
+    TEST.tuskarclient_resource_categories = test_data_utils.TestDataContainer()
+    # TODO(Tzu-Mainn Chen): fix these to create Tuskar ResourceCategory objects
+    # once the api supports it
+    rc_1 = {'id': 1,
+            'name': 'Controller',
+            'description': 'controller resource category',
+            'image_id': 'image-id-1'}
+    rc_2 = {'id': 2,
+            'name': 'Compute',
+            'description': 'compute resource category',
+            'image_id': 'image-id-2'}
+    rc_3 = {'id': 3,
+            'name': 'Object Storage',
+            'description': 'object storage resource category',
+            'image_id': 'image-id-3'}
+    rc_4 = {'id': 4,
+            'name': 'Block Storage',
+            'description': 'block storage resource category',
+            'image_id': 'image-id-4'}
+    TEST.tuskarclient_resource_categories.add(rc_1, rc_2, rc_3, rc_4)
