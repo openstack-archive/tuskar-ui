@@ -1,0 +1,28 @@
+{% load i18n %}
+{% load url from future%}
+
+<div class="row-fluid">
+  <div class="span6">
+    <h3>{% trans "Resource Categories" %}</h3>
+    <hr />
+    {% for category in categories %}
+      <h4>{{ category.instance_count }} {{ category.name }}</h4>
+      {% if category.error_instance_count > 0 %}
+         {{ category.error_instance_count }} {% trans "instances are down" %}
+         <br />
+      {% endif %}
+      {% if category.other_instance_count > 0 %}
+         {{ category.other_instance_count }} {% trans "instances are building" %}
+         <br />
+      {% endif %}
+      {% if category.running_instance_percentage %}
+         {{ category.running_instance_percentage }} {% trans "% of instances are running" %}
+         <br />
+      {% endif %}
+      <hr />
+    {% endfor %}
+  </div>
+  <div class="span6">
+    <h3>{% trans "Resource Categories Distribution" %}</h3>
+  </div>
+</div>
