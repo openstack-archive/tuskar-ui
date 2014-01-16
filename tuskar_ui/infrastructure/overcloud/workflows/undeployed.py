@@ -18,15 +18,13 @@ import horizon.workflows
 from tuskar_ui.infrastructure.overcloud.workflows\
     import undeployed_configuration
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed_overview
-from tuskar_ui.infrastructure.overcloud.workflows import undeployed_roles
 
 
 class Workflow(horizon.workflows.Workflow):
     slug = 'undeployed_overcloud'
-    name = _("My Deployment")
+    name = _("My Openstack Deployment")
     default_steps = (
         undeployed_overview.Step,
-        undeployed_roles.Step,
         undeployed_configuration.Step,
     )
     finalize_button_name = _("Deploy")

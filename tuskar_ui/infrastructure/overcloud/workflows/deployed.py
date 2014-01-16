@@ -17,15 +17,13 @@ import horizon.workflows
 
 from tuskar_ui.infrastructure.overcloud.workflows import deployed_configuration
 from tuskar_ui.infrastructure.overcloud.workflows import deployed_overview
-from tuskar_ui.infrastructure.overcloud.workflows import deployed_roles
 
 
 class Workflow(horizon.workflows.Workflow):
     slug = 'deployed_overcloud'
-    name = _("My Deployment")
+    name = _("My Openstack Deployment")
     default_steps = (
         deployed_overview.Step,
-        deployed_roles.Step,
         deployed_configuration.Step,
     )
     finalize_button_name = _("Scale Deployment")
