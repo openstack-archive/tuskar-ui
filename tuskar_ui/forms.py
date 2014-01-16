@@ -21,6 +21,14 @@ class NumberInput(forms.widgets.TextInput):
     input_type = 'number'
 
 
+class NumberPickerInput(NumberInput):
+    def __init__(self, attrs=None):
+        default_attrs = {'hr-number-picker': '', 'ng-cloak': '',}
+        if attrs:
+            default_attrs.update(attrs)
+        super(NumberPickerInput, self).__init__(default_attrs)
+
+
 class MACField(forms.fields.Field):
     def clean(self, value):
         try:

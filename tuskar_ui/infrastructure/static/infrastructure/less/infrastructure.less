@@ -246,6 +246,49 @@ table.table {
   }
 }
 
+table.number_picker {
+  input {
+    width: 35px;
+    height: 30px;
+    margin-bottom: 0;
+    text-align: center;
+  }
+}
+
+// BUTTONS
+// Make a button look and behave like a link - available in later bootstrap versions
+.btn.btn-link,
+.btn.btn-link:active,
+.btn.btn-link[disabled],
+.btn.btn-link:not(.btn-danger) {
+  background-color: transparent;
+  background-image: none;
+  .box-shadow(none); // mixin override does not work
+  -webkit-box-shadow: none;
+     -moz-box-shadow: none;
+          box-shadow: none;
+}
+.btn.btn-link {
+  border-color: transparent;
+  cursor: pointer;
+  color: @linkColor;
+  .border-radius(0);
+}
+.btn.btn-link:hover,
+.btn.btn-link:focus,
+.btn.btn-link:hover:not(.btn-danger),
+.btn.btn-link:focus:not(.btn-danger) {
+  color: @linkColorHover;
+  text-decoration: underline;
+  background-color: transparent;
+}
+.btn.btn-link[disabled]:hover,
+.btn.btn-link[disabled]:focus {
+  color: @linkColor;
+  text-decoration: none;
+}
+
+
 // detail pages
 #main_content {
   h3 {

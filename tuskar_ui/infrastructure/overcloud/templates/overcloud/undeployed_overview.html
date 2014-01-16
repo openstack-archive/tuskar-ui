@@ -11,3 +11,17 @@
     <h3>{% trans "Configuration" %}</h3>
   </div>
 </div>
+
+<script type="text/ng-template" id="numberpicker.html">
+  <table class="number_picker">
+    <tbody>
+      <tr>
+        <td><a ng-click="decrementValue()" class="btn btn-link" ng-class="{disabled: disabledInput}"><i class="icon-chevron-left"></i></a></td>
+        <td>
+          <input type="text" value="{$value$}" ng-model="value">
+        </td>
+        <td><a ng-click="incrementValue()" class="btn btn-link" ng-class="{disabled: disabledInput}"><i class="icon-chevron-right"></i></a></td>
+      </tr>
+    </tbody>
+  </table>
+</script>
