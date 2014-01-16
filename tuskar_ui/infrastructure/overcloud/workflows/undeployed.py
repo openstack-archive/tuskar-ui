@@ -13,8 +13,10 @@
 #    under the License.
 
 from django.utils.translation import ugettext_lazy as _
+from horizon import exceptions
 import horizon.workflows
 
+from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud.workflows\
     import undeployed_configuration
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed_overview
@@ -29,6 +31,12 @@ class Workflow(horizon.workflows.Workflow):
     )
     finalize_button_name = _("Deploy")
     success_url = 'horizon:infrastructure:overcloud:index'
-
     def handle(self, request, context):
-        pass
+        success = True
+        try:
+            api.Overcloud.create(self.request, context['category_counts'])
+            # TODO(rdopieralski) Use the configuration somehow?
+        except Exception:
+            success = False
+            exceptions.handle(request, _('Unable to start deployment.'))
+        return success
