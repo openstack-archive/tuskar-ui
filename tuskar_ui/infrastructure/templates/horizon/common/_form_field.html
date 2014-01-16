@@ -1,0 +1,12 @@
+<div class="control-group form-field clearfix{% if field.errors %} error{% endif %} {{ field.css_classes }}">
+  {{ field.label_tag }}
+  {% if field.errors %}
+    {% for error in field.errors %}
+      <span class="help-inline">{{ error }}</span>
+    {% endfor %}
+  {% endif %}
+  <span class="help-block">{{ field.help_text }}</span>
+  <div class="input">
+    {{ field }}
+  </div>
+</div>

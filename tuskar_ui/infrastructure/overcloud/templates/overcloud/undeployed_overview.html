@@ -3,11 +3,44 @@
 <p>{{ step.get_help_text }}</p>
 
 <div class="row-fluid">
-  <div class="span6">
-    <h3>{% trans "Roles" %}</h3>
-    {% include "horizon/common/_form_fields.html" %}
+  <div class="span8">
+    <div class="pull-right">
+      {{ free_nodes|default:0 }} {% trans "free nodes" %}
+    </div>
+    <h2>{% trans "Resource Categories" %}</h2>
+    <div class="widget">
+      <table class="table">
+        <tr>
+          <th>{% trans "Name" %}</th>
+          <th>{% trans "Node profiles" %}</th>
+          <th>{% trans "Instances" %}</th>
+        </tr>
+        {% for category, label, fields in form.roles_fieldset %}
+          <tbody>
+          {% for field in fields %}
+            <tr>
+              {% if forloop.first %}
+                <td rowspan="{{ fields|length }}">
+                  <i class="icon-pencil"></i>
+                  <a href="#">{{ label }}</a>
+                </td>
+              {% endif %}
+              <td>{{ field.label }}</td>
+              <td>{{ field }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        {% endfor %}
+      </table>
+    </div>
   </div>
-  <div class="span6">
-    <h3>{% trans "Configuration" %}</h3>
+  <div class="span4">
+    <div class="widget">
+      <h2>Horiozn Connection</h2>
+      <p><a href="#">horizon</a></p>
+    </div>
+    <div class="widget">
+      <h2>Resource Categories Distribution</h2>
+    </div>
   </div>
 </div>

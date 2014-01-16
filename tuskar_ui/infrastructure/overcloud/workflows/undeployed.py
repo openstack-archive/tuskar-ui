@@ -29,6 +29,5 @@ class Workflow(horizon.workflows.Workflow):
     )
     finalize_button_name = _("Deploy")
     success_url = 'horizon:infrastructure:overcloud:index'
-
     def handle(self, request, context):
         pass
