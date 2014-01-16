@@ -18,7 +18,6 @@ import horizon.workflows
 from tuskar_ui.infrastructure.overcloud.workflows\
     import undeployed_configuration
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed_overview
-from tuskar_ui.infrastructure.overcloud.workflows import undeployed_roles
 
 
 class Workflow(horizon.workflows.Workflow):
@@ -26,11 +25,9 @@ class Workflow(horizon.workflows.Workflow):
     name = _("My Deployment")
     default_steps = (
         undeployed_overview.Step,
-        undeployed_roles.Step,
         undeployed_configuration.Step,
     )
     finalize_button_name = _("Deploy")
     success_url = 'horizon:infrastructure:overcloud:index'
-
     def handle(self, request, context):
         pass
