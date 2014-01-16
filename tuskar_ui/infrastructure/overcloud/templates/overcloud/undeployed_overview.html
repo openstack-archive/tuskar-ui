@@ -3,11 +3,52 @@
 <p>{{ step.get_help_text }}</p>
 
 <div class="row-fluid">
-  <div class="span6">
-    <h3>{% trans "Roles" %}</h3>
-    {% include "horizon/common/_form_fields.html" %}
+  <div class="span8">
+    <div class="pull-right">
+      {{ free_nodes|default:0 }} {% trans "free nodes" %}
+    </div>
+    <h2>{% trans "Resource Categories" %}</h2>
+    <div class="widget">
+      {% include 'horizon/common/_form_errors.html' with form=form %}
+      <table class="table">
+        <tr>
+          <th>{% trans "Name" %}</th>
+          <th>{% trans "Node profiles" %}</th>
+          <th>{% trans "Instances" %}</th>
+        </tr>
+        {% for category, label, fields in form.roles_fieldset %}
+          <tbody>
+          {% for field in fields %}
+            <tr>
+              {% if forloop.first %}
+                <td rowspan="{{ fields|length }}">
+                  <i class="icon-pencil"></i>
+                  {{ label }}
+                </td>
+              {% endif %}
+              <td>{{ field.label }}</td>
+              <td>{{ field }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        {% endfor %}
+      </table>
+    </div>
   </div>
-  <div class="span6">
-    <h3>{% trans "Configuration" %}</h3>
+  <div class="span4">
+    <div class="widget">
+      <h2>Configuration</h2>
+      <p>{% trans "Configuration options will be auto-detected." %}</p>
+      <p><a href="#undeployed_overcloud__deployed_configuration"
+            data-toggle="tab">{% trans "See and change defaults." %}</a></p>
+    </div>
   </div>
 </div>
+<script type="text/javascript">
+(window.$ || window.addHorizonLoadEvent)(function () {
+    $('p > a[href="#undeployed_overcloud__deployed_configuration"]'
+     ).click(function () {
+       $('li > a[href="#undeployed_overcloud__deployed_configuration"]').tab('show');
+    });
+});
+</script>
