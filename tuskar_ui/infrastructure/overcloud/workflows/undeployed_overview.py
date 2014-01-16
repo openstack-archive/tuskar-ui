@@ -40,13 +40,16 @@ class Action(horizon.workflows.Action):
             name = 'count__%s__%s' % (category, 'default')
             if category == 'controller':
                 initial = 1
+                self.fields[name] = django.forms.IntegerField(
+                    label=_("Default"), initial=initial, min_value=initial,
+                    widget=tuskar_ui.forms.NumberPickerInput(attrs={
+                        'readonly': 'readonly',
+                    }))
             else:
                 initial = 0
-            self.fields[name] = django.forms.IntegerField(
-                label=_("Default"), initial=initial, min_value=initial,
-                widget=tuskar_ui.forms.NumberInput(attrs={
-                    'class': 'input-mini',
-                }))
+                self.fields[name] = django.forms.IntegerField(
+                    label=_("Default"), initial=initial, min_value=initial,
+                    widget=tuskar_ui.forms.NumberPickerInput)
 
     def roles_fieldset(self):
         for category, label in CATEGORIES:
