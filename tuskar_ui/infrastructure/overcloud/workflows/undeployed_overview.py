@@ -19,19 +19,75 @@ import horizon.workflows
 import tuskar_ui.forms
 
 
+def fieldset(self, *args, **kwargs):
+    prefix=kwargs.pop('prefix', None)
+    names = args or self.fields.keys()
+    for name in names:
+        if prefix is None or name.startswith(prefix):
+            yield django.forms.forms.BoundField(
+                self, self.fields[name], name)
+
+
 class Action(horizon.workflows.Action):
-    controller = django.forms.IntegerField(
-        _("Controller"), initial=1, min_value=1,
-        widget=tuskar_ui.forms.NumberInput)
-    compute = django.forms.IntegerField(
-        _("Compute"), initial=0, min_value=0,
-        widget=tuskar_ui.forms.NumberInput)
-    object_storage = django.forms.IntegerField(
-        _("Object Storage"), initial=0, min_value=0,
-        widget=tuskar_ui.forms.NumberInput)
-    block_storage = django.forms.IntegerField(
-        _("Block Storage"), initial=0, min_value=0,
-        widget=tuskar_ui.forms.NumberInput)
+    controller_default = django.forms.IntegerField(
+        label=_("Default"), initial=1, min_value=1,
+        widget=tuskar_ui.forms.NumberInput(attrs={'class': 'input-mini', }))
+    compute_default = django.forms.IntegerField(
+        label=_("Default"), initial=0, min_value=0,
+        widget=tuskar_ui.forms.NumberInput(attrs={'class': 'input-mini', }))
+    object_storage_default = django.forms.IntegerField(
+        label=_("Default"), initial=0, min_value=0,
+        widget=tuskar_ui.forms.NumberInput(attrs={'class': 'input-mini', }))
+    block_storage_default = django.forms.IntegerField(
+        label=_("Default"), initial=0, min_value=0,
+        widget=tuskar_ui.forms.NumberInput(attrs={'class': 'input-mini', }))
+
+    mysql_host_ip = django.forms.IPAddressField(
+        label=_("Hotst IP"), required=False,
+        widget=django.forms.TextInput(attrs={
+            'placeholder': _("auto-retrieve"),
+        }))
+    mysql_user = django.forms.CharField(_("User"))
+    mysql_password = django.forms.CharField(
+        label=_("Password"), widget=django.forms.PasswordInput)
+
+    amqp_host_ip = django.forms.IPAddressField(
+        label=_("Hotst IP"), required=False,
+        widget=django.forms.TextInput(attrs={
+            'placeholder': _("auto-retrieve"),
+        }))
+    amqp_password = django.forms.CharField(
+        label=_("Password"), widget=django.forms.PasswordInput)
+
+    keystone_host_ip = django.forms.IPAddressField(
+        label=_("Hotst IP"), required=False,
+        widget=django.forms.TextInput(attrs={
+            'placeholder': _("auto-retrieve"),
+        }))
+    keystone_db_password = django.forms.CharField(
+        label=_("DB Password"), widget=django.forms.PasswordInput)
+    keystone_admin_token = django.forms.CharField(
+        label=_("Admin Token"), widget=django.forms.PasswordInput)
+    keystone_admin_password = django.forms.CharField(
+        label=_("Admin Password"), widget=django.forms.PasswordInput)
+
+    def roles_fieldset(self):
+        for category, label in [
+            ('controller', _("Controller")),
+            ('compute', _("Compute")),
+            ('object_storage', _("Object Storage")),
+            ('block_storage', _("Block Storage")),
+        ]:
+            yield label, fieldset(self, prefix=category + '_')
+
+    def mysql_fieldset(self):
+        return fieldset(self, prefix="mysql_")
+
+    def amqp_fieldset(self):
+        return fieldset(self, prefix="amqp_")
+
+    def keystone_fieldset(self):
+        return fieldset(self, prefix="keystone_")
 
     class Meta:
         slug = 'undeployed_overview'

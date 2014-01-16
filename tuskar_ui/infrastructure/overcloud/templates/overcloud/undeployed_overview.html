@@ -4,10 +4,46 @@
 
 <div class="row-fluid">
   <div class="span6">
-    <h3>{% trans "Roles" %}</h3>
-    {% include "horizon/common/_form_fields.html" %}
+    <div class="pull-right">65 free nodes</div>
+    <h3>{% trans "Resource Categories" %}</h3>
+    <table class="table">
+      <tr><th>Name</th><th>Node profiles</th><th>Instances</th></tr>
+      {% for label, fields in form.roles_fieldset %}
+        <tbody>
+        {% for field in fields %}
+          <tr>
+          {% if forloop.first %}
+            <td rowspan="{{ fields|length }}">
+              <i class="icon-pencil"></i>
+              {{ label }}
+            </td>
+          {% endif %}
+          <td>{{ field.label }}</td>
+          <td>{{ field }}</td>
+        {% endfor %}
+        </tbody>
+      {% endfor %}
+    </table>
   </div>
   <div class="span6">
     <h3>{% trans "Configuration" %}</h3>
+    <fieldset>
+      <legend>{% trans "MySQL" %}</legend>
+      {% for field in form.mysql_fieldset %}
+        {% include 'horizon/common/_horizontal_field.html' with field=field %}
+      {% endfor %}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "AMQP" %}</legend>
+      {% for field in form.amqp_fieldset %}
+        {% include 'horizon/common/_horizontal_field.html' with field=field %}
+      {% endfor %}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Keystone" %}</legend>
+      {% for field in form.keystone_fieldset %}
+        {% include 'horizon/common/_horizontal_field.html' with field=field %}
+      {% endfor %}
+    </fieldset>
   </div>
 </div>
