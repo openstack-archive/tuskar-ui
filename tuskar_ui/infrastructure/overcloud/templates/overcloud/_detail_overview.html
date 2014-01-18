@@ -6,7 +6,7 @@
     <h3>{% trans "Resource Categories" %}</h3>
     <hr />
     {% for category in categories %}
-      <h4>{{ category.instance_count }} {{ category.name }}</h4>
+      <h4><a href="{% url 'horizon:infrastructure:overcloud:resource_category' overcloud.id category.id%}">{{ category.instance_count }} {{ category.name }}</a></h4>
       {% if category.error_instance_count > 0 %}
          {{ category.error_instance_count }} {% trans "instances are down" %}
          <br />

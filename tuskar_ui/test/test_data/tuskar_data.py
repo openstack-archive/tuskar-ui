@@ -12,6 +12,7 @@
 
 from openstack_dashboard.test.test_data import utils as test_data_utils
 
+from glanceclient.v1 import images
 from heatclient.v1 import resources
 from heatclient.v1 import stacks
 from ironicclient.v1 import node
@@ -240,3 +241,23 @@ def data(TEST):
             'description': 'block storage resource category',
             'image_id': 'image-id-4'}
     TEST.tuskarclient_resource_categories.add(rc_1, rc_2, rc_3, rc_4)
+
+    # Image
+    TEST.glanceclient_images = test_data_utils.TestDataContainer()
+    image_1 = images.Image(
+        images.ImageManager(None),
+        {'id': 'image-id-1',
+         'name': 'Controller Image'})
+    image_2 = images.Image(
+        images.ImageManager(None),
+        {'id': 'image-id-2',
+         'name': 'Compute Image'})
+    image_3 = images.Image(
+        images.ImageManager(None),
+        {'id': 'image-id-3',
+         'name': 'Object Storage Image'})
+    image_4 = images.Image(
+        images.ImageManager(None),
+        {'id': 'image-id-4',
+         'name': 'Block Storage Image'})
+    TEST.glanceclient_images.add(image_1, image_2, image_3, image_4)
