@@ -17,10 +17,12 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base as base_views
 
 from horizon import exceptions
+from horizon import tables as horizon_tables
 from horizon import tabs as horizon_tabs
 import horizon.workflows
 
 from tuskar_ui import api
+from tuskar_ui.infrastructure.overcloud import tables
 from tuskar_ui.infrastructure.overcloud import tabs
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed
 
@@ -59,3 +61,51 @@ class DetailView(horizon_tabs.TabView):
     def get_tabs(self, request, **kwargs):
         overcloud = self.get_data(request, **kwargs)
         return self.tab_group_class(request, overcloud=overcloud, **kwargs)
+
+
+class ResourceCategoryView(horizon_tables.DataTableView):
+    table_class = tables.ResourceCategoryInstanceTable
+    template_name = 'infrastructure/overcloud/resource_category.html'
+
+    def get_data(self):
+        overcloud = self._get_overcloud()
+        category = self._get_category(overcloud)
+
+        return overcloud.instances(category)
+
+    def get_context_data(self, **kwargs):
+        context = super(ResourceCategoryView, self).get_context_data(**kwargs)
+
+        overcloud = self._get_overcloud()
+        category = self._get_category(overcloud)
+
+        context['category'] = category
+        context['image'] = category.image
+        context['instances'] = overcloud.instances(category)
+
+        return context
+
+    def _get_overcloud(self):
+        overcloud_id = self.kwargs['overcloud_id']
+
+        try:
+            overcloud = api.Overcloud.get(self.request, overcloud_id)
+        except Exception:
+            msg = _("Unable to retrieve deployment.")
+            redirect = reverse('horizon:infrastructure:overcloud:index')
+            exceptions.handle(self.request, msg, redirect=redirect)
+
+        return overcloud
+
+    def _get_category(self, overcloud):
+        category_id = self.kwargs['category_id']
+
+        try:
+            category = api.ResourceCategory.get(self.request, category_id)
+        except Exception:
+            msg = _("Unable to retrieve resource category.")
+            redirect = reverse('horizon:infrastructure:overcloud:detail',
+                               args=(overcloud.id,))
+            exceptions.handle(self.request, msg, redirect=redirect)
+
+        return category
