@@ -16,6 +16,8 @@ import logging
 
 import django.conf
 
+from horizon.utils import memoized
+
 from openstack_dashboard.api import base
 from openstack_dashboard.test.test_data import utils
 from tuskar_ui.cached_property import cached_property  # noqa
@@ -91,6 +93,7 @@ class Overcloud(base.APIDictWrapper):
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # overcloud = tuskarclient(request).overclouds.get(overcloud_id)
         overcloud = test_data().tuskarclient_overclouds.first()
+
         return cls(overcloud)
 
     @cached_property
@@ -112,6 +115,74 @@ class Overcloud(base.APIDictWrapper):
         #   * False otherwise
         # TODO(rdopieralski) Actually implement it
         return False
+
+    @memoized.memoized
+    def resources(self, resource_category, with_joins=False):
+        # Required:
+        #   * resource_category
+        # Return:
+        #   * the resources within the overcloud that match the
+        #     resource category
+
+        # TODO(Tzu-Mainn Chen): uncomment when possible
+        #resources = tuskarclient(request).overclouds.get_resources(
+        #    self.id, resource_category.id)
+
+        resources = [r for r in test_data().heatclient_resources.list()
+                     if r.logical_resource_id == resource_category.name]
+
+        if not with_joins:
+            return [Resource(r) for r in resources]
+
+        # servers = novaclient(request).servers.list(detailed=True)
+        # nodes = ironicclient(request).nodes.list()
+        servers = test_data().novaclient_servers.list()
+        nodes = test_data().ironicclient_nodes.list()
+
+        joined_resources = []
+        for r in resources:
+            server = next((s for s in servers
+                           if s.id == r.physical_resource_id),
+                          None)
+            node = next((n for n in nodes
+                         if n.instance_uuid == r.physical_resource_id),
+                        None)
+            joined_resources.append(Resource(r,
+                                             instance=Instance(server),
+                                             node=Node(node)))
+        return joined_resources
+
+    @memoized.memoized
+    def instances(self, resource_category):
+        # Required:
+        #   * resource_category
+        # Return:
+        #   * the instances that match the resource category
+        resources = self.resources(resource_category, with_joins=True)
+        return [r.instance for r in resources]
+
+
+class Instance(base.APIResourceWrapper):
+    _attrs = ('id', 'name', 'image', 'status')
+
+    @classmethod
+    def get(cls, request, instance_id):
+        # Required:
+        #   * instance_id
+        # Return:
+        #   * the Server associated with the instace_id
+
+        # TODO(Tzu-Mainn Chen): remove test data when possible
+        # instance = novaclient(request).servers.get(instance_id)
+        servers = test_data().novaclient_servers.list()
+        server = next((s for s in servers if instance_id == s.id),
+                      None)
+
+        return cls(server)
+
+    @cached_property
+    def node(self):
+        return Node.get_by_instance_uuid(None, self.id)
 
 
 class Node(base.APIResourceWrapper):
@@ -161,7 +232,25 @@ class Node(base.APIResourceWrapper):
 
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # node = ironicclient(request).nodes.get(uuid)
-        node = test_data().ironicclient_nodes.first()
+        nodes = test_data().ironicclient_nodes.list()
+        node = next((n for n in nodes if uuid == n.uuid),
+                    None)
+
+        return cls(node)
+
+    @classmethod
+    def get_by_instance_uuid(cls, request, instance_uuid):
+        # Required:
+        #   * instance_uuid
+        # Return:
+        #   * the Node associated with the instance_uuid
+
+        # TODO(Tzu-Mainn Chen): remove test data when possible
+        #node = ironicclient(request).nodes.get_by_instance_uuid(
+        #    instance_uuid)
+        nodes = test_data().ironicclient_nodes.list()
+        node = next((n for n in nodes if instance_uuid == n.instance_uuid),
+                    None)
 
         return cls(node)
 
@@ -229,6 +318,11 @@ class Resource(base.APIResourceWrapper):
     _attrs = ('resource_name', 'resource_type', 'resource_status',
               'physical_resource_id')
 
+    def __init__(self, apiresource, instance=None, node=None):
+        super(Resource, self).__init__(apiresource)
+        self.instance = instance
+        self.node = node
+
     @classmethod
     def get(cls, request, overcloud, resource_name):
         # Required:
@@ -249,13 +343,16 @@ class Resource(base.APIResourceWrapper):
         return cls(resource)
 
     @cached_property
+    def instance(self):
+        # Return:
+        #   * return resource's associated instance
+        return Instance.get(None, self.physical_resource_id)
+
+    @cached_property
     def node(self):
         # Return:
         #   * return resource's associated Node
-
-        return next((n for n in Node.list
-                     if self.physical_resource_id == n.instance_uuid),
-                    None)
+        return Node.get_by_instance_uuid(self.physical_resource_id)
 
 
 # TODO(Tzu-Mainn Chen): change this to APIResourceWrapper once
@@ -270,54 +367,33 @@ class ResourceCategory(base.APIDictWrapper):
 
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # categories = tuskarclient(request).resource_categories.list()
-
         rcs = test_data().tuskarclient_resource_categories.list()
         return [cls(rc) for rc in rcs]
 
+    @classmethod
+    def get(cls, request, category_id):
+        # Required:
+        #   * category_id
+        # Return:
+        #   * the 'resource_category' stack object
+
+        # TODO(Tzu-Mainn Chen): remove test data when possible
+        # category = tuskarclient(request).resource_categories.get(category_id)
+        categories = ResourceCategory.list(request)
+        category = next((c for c in categories if category_id == str(c.id)),
+                        None)
+
+        return cls(category)
+
     @cached_property
     def image(self):
-        # Questions:
-        #   * when a user uploads an image, how do we enforce
-        #     that it matches the image name?
         # Return:
         #   * the image name associated with the ResourceCategory
 
-        # TODO(Tzu-Mainn Chen): uncomment when possible
-        # return some-api-call-to-tuskarclient
+        # TODO(Tzu-Mainn Chen): remove test data when possible
+        # image = glanceclient(request).images.get(self.image_id)
+        images = test_data().glanceclient_images.list()
+        image = next((i for i in images if self.image_id == i.id),
+                     None)
 
-        return "image_name"
-
-    def resources(self, overcloud):
-        # Required:
-        #   * overcloud
-        # Return:
-        #   * the resources within the stack that match the
-        #     resource category
-
-        # TODO(Tzu-Mainn Chen): uncomment when possible
-        #resources = tuskarclient(request).overclouds.get_resources(
-        #    overcloud.id, self.id)
-
-        return [r for r in test_data().heatclient_resources.list()
-                if r.logical_resource_id == self.name]
-
-    def instances(self, overcloud):
-        # Required:
-        #   * overcloud
-        # Return:
-        #   * the instances corresponding to the resources within the
-        #     stack that match the resource category
-        #resources = tuskarclient(request).overclouds.get_resources(
-        #    overcloud.id, self.id)
-
-        # TODO(Tzu-Mainn Chen): uncomment real api calls and remove test
-        # data when possible
-        instances = []
-        all_instances = test_data().novaclient_servers.list()
-        for r in self.resources(overcloud):
-            #instance = novaclient(request).servers.get(r.physical_resource_id)
-            instance = next((i for i in all_instances
-                             if i.id == r.physical_resource_id),
-                            None)
-            instances.append(instance)
-        return instances
+        return image
