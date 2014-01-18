@@ -38,6 +38,7 @@ class OverviewTab(tabs.Tab):
             exceptions.handle(request,
                               _('Unable to retrieve resource categories.'))
 
+        context['overcloud'] = overcloud
         context['categories'] = []
         for category in categories:
             context['categories'].append(
@@ -47,7 +48,7 @@ class OverviewTab(tabs.Tab):
         return context
 
     def _get_category_data(self, overcloud, category):
-        instances = category.instances(overcloud)
+        instances = overcloud.instances(category)
         category.instance_count = len(instances)
         if category.instance_count > 0:
             category.running_instance_count = len(

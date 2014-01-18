@@ -24,4 +24,8 @@ urlpatterns = defaults.patterns(
                  name='create'),
     defaults.url(r'^(?P<overcloud_id>[^/]+)/$',
                  views.DetailView.as_view(), name='detail'),
+    defaults.url(r'^(?P<overcloud_id>[^/]+)/resource_category/'
+                 '(?P<category_id>[^/]+)$',
+                 views.ResourceCategoryView.as_view(),
+                 name='resource_category'),
 )
