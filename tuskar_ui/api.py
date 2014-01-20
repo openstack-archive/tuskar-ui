@@ -94,7 +94,7 @@ class Overcloud(base.APIDictWrapper):
         return cls(overcloud)
 
     @cached_property
-    def stack(self, request):
+    def stack(self):
         # Return:
         #   * the Heat stack associated with this overcoud
 
@@ -120,7 +120,7 @@ class Node(base.APIResourceWrapper):
 
     @classmethod
     def create(cls, request, ipmi_address, cpu, ram, local_disk,
-               mac_addresses, ipmi_username=None, ipm_password=None):
+               mac_addresses, ipmi_username=None, ipmi_password=None):
         # Questions:
         #   * what parameters can we pass in?
         # Required:
@@ -200,20 +200,6 @@ class Node(base.APIResourceWrapper):
         return
 
     @cached_property
-    def resource(self, overcloud):
-        # Questions:
-        #   * can we assume one resource per Node?
-        # Required:
-        #   * overcloud
-        # Return:
-        #   * return the node's associated Resource within the passed-in
-        #     overcloud, if any
-
-        return next((r for r in overcloud.resources
-                    if r.physical_resource_id == self.instance_uuid),
-                    None)
-
-    @cached_property
     def addresses(self):
         # Return:
         #   * return a list of the node's port addresses
@@ -242,7 +228,7 @@ class Resource(base.APIResourceWrapper):
         #     resource_name)
         resources = test_data().heatclient_resources.list()
         resource = next((r for r in resources
-                         if overcloud.id == r.stack_id
+                         if overcloud['id'] == r.stack_id
                          and resource_name == r.resource_name),
                         None)
 
@@ -253,7 +239,7 @@ class Resource(base.APIResourceWrapper):
         # Return:
         #   * return resource's associated Node
 
-        return next((n for n in Node.list
+        return next((n for n in Node.list(None)
                      if self.physical_resource_id == n.instance_uuid),
                     None)
 
@@ -298,7 +284,7 @@ class ResourceCategory(base.APIDictWrapper):
         #resources = tuskarclient(request).overclouds.get_resources(
         #    overcloud.id, self.id)
 
-        return [r for r in test_data().heatclient_resources.list()
+        return [Resource(r) for r in test_data().heatclient_resources.list()
                 if r.logical_resource_id == self.name]
 
     def instances(self, overcloud):
