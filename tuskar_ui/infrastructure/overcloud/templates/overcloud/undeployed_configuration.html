@@ -1,0 +1,27 @@
+{% load i18n %}
+<noscript><h3>{{ step }}</h3></noscript>
+<p>{{ step.get_help_text }}</p>
+
+<div class="row-fluid">
+  <div class="span12">
+    {% include 'horizon/common/_form_errors.html' with form=form %}
+    <fieldset>
+      <legend>{% trans "MySQL" %}</legend>
+      {% for field in form.mysql_fieldset %}
+        {% include 'horizon/common/_horizontal_field.html' with field=field %}
+      {% endfor %}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "AMQP" %}</legend>
+      {% for field in form.amqp_fieldset %}
+        {% include 'horizon/common/_horizontal_field.html' with field=field %}
+      {% endfor %}
+    </fieldset>
+    <fieldset>
+      <legend>{% trans "Keystone" %}</legend>
+      {% for field in form.keystone_fieldset %}
+        {% include 'horizon/common/_horizontal_field.html' with field=field %}
+      {% endfor %}
+    </fieldset>
+  </div>
+</div>
