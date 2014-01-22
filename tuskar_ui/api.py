@@ -43,12 +43,17 @@ def tuskarclient(request):
 
 
 def list_to_dict(object_list, key_attribute='id'):
-    # Required:
-    #   * object_list
-    # Optional:
-    #   * key_attribute
-    # Return:
-    #   * a dict of the objects indexed by key_attribute
+    """Converts an object list to a dict
+
+    :param object_list: list of objects to be put into a dict
+    :type  object_list: list
+
+    :param key_attribute: object attribute used as index by dict
+    :type  key_attribute: string
+
+    :return: dict containing the objects in the list
+    :rtype: dict
+    """
     return dict((getattr(o, key_attribute), o) for o in object_list)
 
 
@@ -59,21 +64,17 @@ class Overcloud(base.APIDictWrapper):
 
     @classmethod
     def create(cls, request, overcloud_sizing):
-        # Assumptions:
-        #   * hard-coded stack name ('overcloud')
-        #   * there is a Tuskar API/library that puts
-        #     together the Heat template
-        # Questions:
-        #   * is the assumption correct, or does the UI have to
-        #     do more heavy lifting?
-        # Required:
-        #   * Overcloud sizing information
-        # Side Effects:
-        #   * call out to Tuskar API/library, which deploys
-        #     an 'overcloud' stack using the sizing information
-        # Return:
-        #   * the created stack object
+        """Create an Overcloud in Tuskar
 
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param overcloud_sizing: overcloud sizing information
+        :type  overcloud_sizing: dict
+
+        :return: the created Overcloud object
+        :rtype:  tuskar_ui.api.Overcloud
+        """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # overcloud = tuskarclient(request).overclouds.create(
         #                          'overcloud',
@@ -84,9 +85,14 @@ class Overcloud(base.APIDictWrapper):
 
     @classmethod
     def list(cls, request):
-        # Return:
-        #   * a list of Overclouds in Tuskar
+        """Return a list of Overclouds in Tuskar
 
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :return: list of Overclouds
+        :rtype:  list of tuskar_ui.api.Overcloud
+        """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # ocs = tuskarclient(request).overclouds.list()
         ocs = test_data().tuskarclient_overclouds.list()
@@ -95,11 +101,17 @@ class Overcloud(base.APIDictWrapper):
 
     @classmethod
     def get(cls, request, overcloud_id):
-        # Required:
-        #   * overcloud_id
-        # Return:
-        #   * the 'overcloud' stack object
+        """Return the Tuskar Overcloud that matches the ID
 
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param overcloud_id: ID of Overcloud to be retrieved
+        :type  overcloud_id: int
+
+        :return: matching Overcloud
+        :rtype:  tuskar_ui.api.Overcloud
+        """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # overcloud = tuskarclient(request).overclouds.get(overcloud_id)
         overcloud = test_data().tuskarclient_overclouds.first()
@@ -108,9 +120,11 @@ class Overcloud(base.APIDictWrapper):
 
     @cached_property
     def stack(self):
-        # Return:
-        #   * the Heat stack associated with this overcoud
+        """Return the Heat Stack associated with this Overcloud
 
+        :return: Heat Stack associated with this Overcloud
+        :rtype:  heatclient.v1.stacks.Stack
+        """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # stack = heatclient(request).stacks.get(self.stack_id)
         stack = test_data().heatclient_stacks.first()
@@ -118,22 +132,29 @@ class Overcloud(base.APIDictWrapper):
 
     @cached_property
     def is_deployed(self):
-        # Assumptions:
-        #   * hard-coded stack name ('overcloud')
-        # Return:
-        #   * True if the overcloud deployed successfully
-        #   * False otherwise
+        """Check if this Overcloud is successfully deployed.
+
+        :return: True if this Overcloud is successfully deployed;
+                 False otherwise
+        :rtype:  boolean
+        """
         # TODO(rdopieralski) Actually implement it
         return False
 
     @memoized.memoized
     def resources(self, resource_category, with_joins=False):
-        # Required:
-        #   * resource_category
-        # Return:
-        #   * the resources within the overcloud that match the
-        #     resource category
+        """Return a list of Overcloud Resources that match a Resource Category
 
+        :param resource_category: category of resources to be returned
+        :type  resource_category: tuskar_ui.api.ResourceCategory
+
+        :param with_joins: should we also retrieve objects associated with each
+                           retrieved Resource?
+        :type  with_joins: boolean
+
+        :return: list of Overcloud Resources that match the Resource Category
+        :rtype:  list of tuskar_ui.api.Resource
+        """
         # TODO(Tzu-Mainn Chen): uncomment when possible
         #resources = tuskarclient(request).overclouds.get_resources(
         #    self.id, resource_category.id)
@@ -158,10 +179,17 @@ class Overcloud(base.APIDictWrapper):
 
     @memoized.memoized
     def instances(self, resource_category):
-        # Required:
-        #   * resource_category
-        # Return:
-        #   * the instances that match the resource category
+        """Return a list of Instances in the Overcloud that match a
+        Resource Category
+
+        :param resource_category: category of resources to retrieve
+                                  instances from
+        :type  resource_category: tuskar_ui.api.ResourceCategory
+
+        :return: list of Instances in the Overcloud that match a Resource
+                 Category
+        :rtype:  list of tuskar_ui.api.Instance
+        """
         resources = self.resources(resource_category, with_joins=True)
         return [r.instance for r in resources]
 
@@ -176,11 +204,17 @@ class Instance(base.APIResourceWrapper):
 
     @classmethod
     def get(cls, request, instance_id):
-        # Required:
-        #   * instance_id
-        # Return:
-        #   * the Server associated with the instace_id
+        """Return the Nova Instance that matches the ID
 
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param instance_id: ID of Instance to be retrieved
+        :type  instance_id: string
+
+        :return: matching Instance
+        :rtype:  tuskar_ui.api.Instance
+        """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # instance = novaclient(request).servers.get(instance_id)
         servers = test_data().novaclient_servers.list()
@@ -191,9 +225,18 @@ class Instance(base.APIResourceWrapper):
 
     @classmethod
     def list(cls, request, with_joins=False):
-        # Return:
-        #   * a list of Servers registered in Nova.
+        """Return a list of Instances in Nova
 
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param with_joins: should we also retrieve objects associated with each
+                           retrieved Instance?
+        :type  with_joins: boolean
+
+        :return: list of Instances
+        :rtype:  list of tuskar_ui.api.Instance
+        """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # servers = novaclient(request).servers.list(detailed=True)
         servers = test_data().novaclient_servers.list()
@@ -211,6 +254,11 @@ class Instance(base.APIResourceWrapper):
 
     @cached_property
     def node(self):
+        """Return the Ironic Node associated with this Instance
+
+        :return: Ironic Node associated with this Instance
+        :rtype:  tuskar_ui.api.Node
+        """
         if hasattr(self, '_node'):
             return self._node
         return Node.get_by_instance_uuid(None, self.id)
@@ -223,18 +271,35 @@ class Node(base.APIResourceWrapper):
     @classmethod
     def create(cls, request, ipmi_address, cpu, ram, local_disk,
                mac_addresses, ipmi_username=None, ipmi_password=None):
-        # Questions:
-        #   * what parameters can we pass in?
-        # Required:
-        #   * ipmi_address, cpu, ram (GB), local_disk (TB), mac_address
-        # Optional:
-        #   * ipmi_username, ipmi_password
-        # Side Effects:
-        #   * call out to Ironic to registers a Node with the given
-        #     parameters.  Create ports as needed.
-        # Return:
-        #   * the registered Node
+        """Create a Node in Ironic
 
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param ipmi_address: IPMI address
+        :type  ipmi_address: string
+
+        :param cpu: number of cores
+        :type  cpu: int
+
+        :param ram: RAM in GB
+        :type  ram: int
+
+        :param local_disk: Local disk in TB
+        :type  local_disk: int
+
+        :param mac_addresses: list of mac addresses
+        :type  mac_addresses: list of string
+
+        :param ipmi_username: IPMI username
+        :type  ipmi_username: string
+
+        :param ipmi_password: IPMI password
+        :type  ipmi_password: string
+
+        :return: the created Node object
+        :rtype:  tuskar_ui.api.Node
+        """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # TODO(Tzu-Mainn Chen): transactionality?
         # node = ironicclient(request).node.create(
@@ -256,11 +321,17 @@ class Node(base.APIResourceWrapper):
 
     @classmethod
     def get(cls, request, uuid):
-        # Required:
-        #   * uuid
-        # Return:
-        #   * the Node associated with the uuid
+        """Return the Node in Ironic that matches the ID
 
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param uuid: ID of Node to be retrieved
+        :type  uuid: string
+
+        :return: matching Node
+        :rtype:  tuskar_ui.api.Node
+        """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # node = ironicclient(request).nodes.get(uuid)
         nodes = test_data().ironicclient_nodes.list()
@@ -271,11 +342,18 @@ class Node(base.APIResourceWrapper):
 
     @classmethod
     def get_by_instance_uuid(cls, request, instance_uuid):
-        # Required:
-        #   * instance_uuid
-        # Return:
-        #   * the Node associated with the instance_uuid
+        """Return the Node in Ironic associated with the instance ID
 
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param instance_uuid: ID of Instance that is deployed on the Node
+                              to be retrieved
+        :type  instance_uuid: string
+
+        :return: matching Node
+        :rtype:  tuskar_ui.api.Node
+        """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         #node = ironicclient(request).nodes.get_by_instance_uuid(
         #    instance_uuid)
@@ -287,11 +365,19 @@ class Node(base.APIResourceWrapper):
 
     @classmethod
     def list(cls, request, associated=None):
-        # Optional:
-        #   * associated
-        # Return:
-        #   * a list of Nodes registered in Ironic.
+        """Return a list of Nodes in Ironic
 
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param associated: should we also retrieve all Nodes, only those
+                           associated with an Instance, or only those not
+                           associated with an Instance?
+        :type  associated: boolean
+
+        :return: list of Nodes
+        :rtype:  list of tuskar_ui.api.Node
+        """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # nodes = ironicclient(request).nodes.list(
         #    associated=associated)
@@ -309,21 +395,25 @@ class Node(base.APIResourceWrapper):
 
     @classmethod
     def delete(cls, request, uuid):
-        # Required:
-        #   * uuid
-        # Side Effects:
-        #   * remove the Node with the associated uuid from
-        #     Ironic
+        """Remove the Node matching the ID from Ironic
 
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param uuid: ID of Node to be removed
+        :type  uuid: string
+        """
         # TODO(Tzu-Mainn Chen): uncomment when possible
         # ironicclient(request).nodes.delete(uuid)
         return
 
     @cached_property
     def addresses(self):
-        # Return:
-        #   * return a list of the node's port addresses
+        """Return a list of port addresses associated with this Node
 
+        :return: list of port addresses associated with this Node
+        :rtype:  list of string
+        """
         # TODO(Tzu-Mainn Chen): uncomment when possible
         # ports = self.list_ports()
         ports = test_data().ironicclient_ports.list()[:2]
@@ -344,11 +434,20 @@ class Resource(base.APIResourceWrapper):
 
     @classmethod
     def get(cls, request, overcloud, resource_name):
-        # Required:
-        #   * overcloud, resource_name
-        # Return:
-        #   * the matching Resource in the overcloud
+        """Return the specified Heat Resource within an Overcloud
 
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param overcloud: the Overcloud from which to retrieve the resource
+        :type  overcloud: tuskar_ui.api.Overcloud
+
+        :param resource_name: name of the Resource to retrieve
+        :type  resource_name: string
+
+        :return: matching Resource
+        :rtype:  tuskar_ui.api.Resource
+        """
         # TODO(Tzu-Mainn Chen): uncomment when possible
         # resource = heatclient(request).resources.get(
         #     overcloud.id,
@@ -363,16 +462,22 @@ class Resource(base.APIResourceWrapper):
 
     @cached_property
     def instance(self):
-        # Return:
-        #   * return resource's associated instance
+        """Return the Nova Instance associated with this Resource
+
+        :return: Nova Instance associated with this Resource
+        :rtype:  tuskar_ui.api.Instance
+        """
         if hasattr(self, '_instance'):
             return self._instance
         return Instance.get(None, self.physical_resource_id)
 
     @cached_property
     def node(self):
-        # Return:
-        #   * return resource's associated Node
+        """Return the Ironic Node associated with this Resource
+
+        :return: Ironic Node associated with this Resource
+        :rtype:  tuskar_ui.api.Node
+        """
         if hasattr(self, '_node'):
             return self._node
         return Node.get_by_instance_uuid(None, self.physical_resource_id)
@@ -385,9 +490,14 @@ class ResourceCategory(base.APIDictWrapper):
 
     @classmethod
     def list(cls, request):
-        # Return:
-        #   * a list of Resource Categories in Tuskar.
+        """Return a list of Resource Categories in Tuskar
 
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :return: list of Resource Categories
+        :rtype:  list of tuskar_ui.api.ResourceCategory
+        """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # categories = tuskarclient(request).resource_categories.list()
         rcs = test_data().tuskarclient_resource_categories.list()
@@ -395,11 +505,17 @@ class ResourceCategory(base.APIDictWrapper):
 
     @classmethod
     def get(cls, request, category_id):
-        # Required:
-        #   * category_id
-        # Return:
-        #   * the 'resource_category' stack object
+        """Return the Tuskar ResourceCategory that matches the ID
 
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param category_id: ID of ResourceCategory to be retrieved
+        :type  category_id: int
+
+        :return: matching ResourceCategory
+        :rtype:  tuskar_ui.api.ResourceCategory
+        """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # category = tuskarclient(request).resource_categories.get(category_id)
         categories = ResourceCategory.list(request)
@@ -410,9 +526,11 @@ class ResourceCategory(base.APIDictWrapper):
 
     @cached_property
     def image(self):
-        # Return:
-        #   * the image name associated with the ResourceCategory
+        """Return the Glance Image associated with this ResourceCategory
 
+        :return: Glance Image associated with this ResourceCategory
+        :rtype:  glanceclient.v1.images.Image
+        """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # image = glanceclient(request).images.get(self.image_id)
         images = test_data().glanceclient_images.list()
