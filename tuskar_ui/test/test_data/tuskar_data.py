@@ -13,6 +13,7 @@
 from openstack_dashboard.test.test_data import utils as test_data_utils
 
 from glanceclient.v1 import images
+from heatclient.v1 import events
 from heatclient.v1 import resources
 from heatclient.v1 import stacks
 from ironicclient.v1 import node
@@ -30,6 +31,75 @@ def data(TEST):
          'stack_name': 'overcloud',
          'stack_status': 'RUNNING'})
     TEST.heatclient_stacks.add(stack_1)
+
+    # Events
+    TEST.heatclient_events = test_data_utils.TestDataContainer()
+    event_1 = events.Event(
+        events.EventManager(None),
+        {'id': 1,
+         'stack_id': 'stack-id-1',
+         'resource_name': 'Controller',
+         'resource_status': 'CREATE_IN_PROGRESS',
+         'resource_status_reason': 'state changed',
+         'event_time': '2014-01-01T07:26:15Z'})
+    event_2 = events.Event(
+        events.EventManager(None),
+        {'id': 2,
+         'stack_id': 'stack-id-1',
+         'resource_name': 'Compute0',
+         'resource_status': 'CREATE_IN_PROGRESS',
+         'resource_status_reason': 'state changed',
+         'event_time': '2014-01-01T07:26:27Z'})
+    event_3 = events.Event(
+        events.EventManager(None),
+        {'id': 3,
+         'stack_id': 'stack-id-1',
+         'resource_name': 'Compute1',
+         'resource_status': 'CREATE_IN_PROGRESS',
+         'resource_status_reason': 'state changed',
+         'event_time': '2014-01-01T07:26:44Z'})
+    event_4 = events.Event(
+        events.EventManager(None),
+        {'id': 4,
+         'stack_id': 'stack-id-1',
+         'resource_name': 'Compute0',
+         'resource_status': 'CREATE_COMPLETE',
+         'resource_status_reason': 'state changed',
+         'event_time': '2014-01-01T07:27:14Z'})
+    event_5 = events.Event(
+        events.EventManager(None),
+        {'id': 5,
+         'stack_id': 'stack-id-1',
+         'resource_name': 'Compute2',
+         'resource_status': 'CREATE_IN_PROGRESS',
+         'resource_status_reason': 'state changed',
+         'event_time': '2014-01-01T07:27:31Z'})
+    event_6 = events.Event(
+        events.EventManager(None),
+        {'id': 6,
+         'stack_id': 'stack-id-1',
+         'resource_name': 'Compute1',
+         'resource_status': 'CREATE_COMPLETE',
+         'resource_status_reason': 'state changed',
+         'event_time': '2014-01-01T07:28:01Z'})
+    event_7 = events.Event(
+        events.EventManager(None),
+        {'id': 7,
+         'stack_id': 'stack-id-1',
+         'resource_name': 'Controller',
+         'resource_status': 'CREATE_COMPLETE',
+         'resource_status_reason': 'state changed',
+         'event_time': '2014-01-01T07:28:59Z'})
+    event_8 = events.Event(
+        events.EventManager(None),
+        {'id': 8,
+         'stack_id': 'stack-id-1',
+         'resource_name': 'Compute2',
+         'resource_status': 'CREATE_COMPLETE',
+         'resource_status_reason': 'state changed',
+         'event_time': '2014-01-01T07:29:11Z'})
+    TEST.heatclient_events.add(event_1, event_2, event_3, event_4,
+                               event_5, event_6, event_7, event_8)
 
     # Node
     TEST.ironicclient_nodes = test_data_utils.TestDataContainer()
@@ -145,8 +215,8 @@ def data(TEST):
         resources.ResourceManager(None),
         {'id': '1-resource-id',
          'stack_id': 'stack-id-1',
-         'resource_name': 'Compute',
-         'logical_resource_id': 'Compute',
+         'resource_name': 'Compute0',
+         'logical_resource_id': 'Compute0',
          'physical_resource_id': 'aa',
          'resource_status': 'CREATE_COMPLETE',
          'resource_type': 'AWS::EC2::Instance'})
@@ -163,8 +233,8 @@ def data(TEST):
         resources.ResourceManager(None),
         {'id': '3-resource-id',
          'stack_id': 'stack-id-1',
-         'resource_name': 'Compute',
-         'logical_resource_id': 'Compute',
+         'resource_name': 'Compute1',
+         'logical_resource_id': 'Compute1',
          'physical_resource_id': 'cc',
          'resource_status': 'CREATE_COMPLETE',
          'resource_type': 'AWS::EC2::Instance'})
@@ -172,8 +242,8 @@ def data(TEST):
         resources.ResourceManager(None),
         {'id': '4-resource-id',
          'stack_id': 'stack-id-4',
-         'resource_name': 'Compute',
-         'logical_resource_id': 'Compute',
+         'resource_name': 'Compute2',
+         'logical_resource_id': 'Compute2',
          'physical_resource_id': 'dd',
          'resource_status': 'CREATE_COMPLETE',
          'resource_type': 'AWS::EC2::Instance'})

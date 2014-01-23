@@ -12,10 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import iso8601
+import pytz
+
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
-
+from horizon.utils import filters
 
 class ResourceCategoryInstanceTable(tables.DataTable):
 
@@ -42,5 +45,21 @@ class ResourceCategoryInstanceTable(tables.DataTable):
     class Meta:
         name = "resource_category__instancetable"
         verbose_name = _("Instances")
+        table_actions = ()
+        row_actions = ()
+
+
+class LogTable(tables.DataTable):
+
+    timestamp = tables.Column('event_time',
+                              verbose_name=_("Timestamp"))
+    resource_name = tables.Column('resource_name',
+                              verbose_name=_("Resource Name"))
+    resource_status = tables.Column('resource_status',
+                                    verbose_name=_("Status"))
+
+    class Meta:
+        name = "log"
+        verbose_name = _("Log")
         table_actions = ()
         row_actions = ()
