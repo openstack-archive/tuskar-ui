@@ -20,6 +20,7 @@ from horizon import exceptions
 from horizon import tabs
 
 from tuskar_ui import api
+from tuskar_ui.infrastructure.overcloud import tables
 
 
 class OverviewTab(tabs.Tab):
@@ -72,7 +73,18 @@ class ConfigurationTab(tabs.Tab):
         return {}
 
 
+class LogTab(tabs.TableTab):
+    table_classes = (tables.LogTable,)
+    name = _("Log")
+    slug = "log"
+    template_name = "horizon/common/_detail_table.html"
+
+    def get_log_data(self):
+        overcloud = self.tab_group.kwargs['overcloud']
+        return overcloud.stack_events
+
+
 class DetailTabs(tabs.TabGroup):
     slug = "detail"
-    tabs = (OverviewTab, ConfigurationTab)
+    tabs = (OverviewTab, ConfigurationTab, LogTab)
     sticky = True

@@ -44,3 +44,19 @@ class ResourceCategoryInstanceTable(tables.DataTable):
         verbose_name = _("Instances")
         table_actions = ()
         row_actions = ()
+
+
+class LogTable(tables.DataTable):
+
+    timestamp = tables.Column('event_time',
+                              verbose_name=_("Timestamp"))
+    resource_name = tables.Column('resource_name',
+                                  verbose_name=_("Resource Name"))
+    resource_status = tables.Column('resource_status',
+                                    verbose_name=_("Status"))
+
+    class Meta:
+        name = "log"
+        verbose_name = _("Log")
+        table_actions = ()
+        row_actions = ()
