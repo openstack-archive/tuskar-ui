@@ -13,9 +13,6 @@ angular.module('horizonApp').directive('hrNumberPicker', function() {
         }
       });
 
-      // prevent text selection on doubleclick
-      element.disableSelection();
-
       scope.value = scope.initial_value;
       scope.disabledInput = (angular.isDefined(attrs.readonly)) ? true : false;
 
