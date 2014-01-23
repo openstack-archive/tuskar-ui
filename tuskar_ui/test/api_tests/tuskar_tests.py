@@ -15,6 +15,7 @@
 from __future__ import absolute_import
 
 from glanceclient.v1 import images
+from heatclient.v1 import events
 from heatclient.v1 import stacks
 
 from tuskar_ui import api
@@ -51,6 +52,21 @@ class TuskarAPITests(test.APITestCase):
 
         ret_val = api.Overcloud(overcloud).stack
         self.assertIsInstance(ret_val, stacks.Stack)
+
+    def test_overcloud_stack_events(self):
+        overcloud = self.tuskarclient_overclouds.first()
+
+        ret_val = api.Overcloud(overcloud).stack_events
+        for e in ret_val:
+            self.assertIsInstance(e, events.Event)
+        self.assertEqual(8, len(ret_val))
+
+    def test_overcloud_stack_events_empty(self):
+        overcloud = self.tuskarclient_overclouds.first()
+        overcloud['stack_id'] = None
+
+        ret_val = api.Overcloud(overcloud).stack_events
+        self.assertListEqual([], ret_val)
 
     def test_overcloud_is_deployed(self):
         overcloud = self.tuskarclient_overclouds.first()

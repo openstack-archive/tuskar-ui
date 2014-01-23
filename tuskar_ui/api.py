@@ -137,6 +137,22 @@ class Overcloud(base.APIDictWrapper):
         return None
 
     @cached_property
+    def stack_events(self):
+        """Return the Heat Events associated with this Overcloud
+
+        :return: list of Heat Events associated with this Overcloud;
+                 or an empty list if there is no Stack associated with
+                 this Overcloud, or there are no Events
+        :rtype:  list of heatclient.v1.events.Event
+        """
+        if self.stack_id:
+            # TODO(Tzu-Mainn Chen): remove test data when possible
+            # events = heatclient(request).events.get(self.stack_id)
+            events = test_data().heatclient_events.list()
+            return events
+        return []
+
+    @cached_property
     def is_deployed(self):
         """Check if this Overcloud is successfully deployed.
 
@@ -165,9 +181,9 @@ class Overcloud(base.APIDictWrapper):
         # TODO(Tzu-Mainn Chen): uncomment when possible
         #resources = tuskarclient(request).overclouds.get_resources(
         #    self.id, resource_category.id)
-
         resources = [r for r in test_data().heatclient_resources.list()
-                     if r.logical_resource_id == resource_category.name]
+                     if r.logical_resource_id.startswith(
+                         resource_category.name)]
 
         if not with_joins:
             return [Resource(r) for r in resources]
