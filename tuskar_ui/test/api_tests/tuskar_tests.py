@@ -14,6 +14,8 @@
 
 from __future__ import absolute_import
 
+from mock import patch  # noqa
+
 from glanceclient.v1 import images
 from heatclient.v1 import events
 from heatclient.v1 import stacks
@@ -27,16 +29,11 @@ from tuskar_ui.test import helpers as test
 
 
 class TuskarAPITests(test.APITestCase):
-
     def test_overcloud_create(self):
-        #overcloud = self.tuskarclient_overclouds.first()
-
         ret_val = api.Overcloud.create(self.request, [])
         self.assertIsInstance(ret_val, api.Overcloud)
 
     def test_overcloud_list(self):
-        #overclouds = self.tuskarclient_overclouds.list()
-
         ret_val = api.Overcloud.list(self.request)
         for oc in ret_val:
             self.assertIsInstance(oc, api.Overcloud)
@@ -49,10 +46,12 @@ class TuskarAPITests(test.APITestCase):
         self.assertIsInstance(ret_val, api.Overcloud)
 
     def test_overcloud_stack(self):
-        overcloud = self.tuskarclient_overclouds.first()
-
-        ret_val = api.Overcloud(overcloud).stack
-        self.assertIsInstance(ret_val, stacks.Stack)
+        stack = self.heatclient_stacks.first()
+        oc = api.Overcloud(self.tuskarclient_overclouds.first(), request=None)
+        with patch('openstack_dashboard.api.heat.stack_get',
+                   return_value=stack):
+            ret_val = oc.stack
+            self.assertIsInstance(ret_val, stacks.Stack)
 
     def test_overcloud_stack_events(self):
         overcloud = self.tuskarclient_overclouds.first()
@@ -70,76 +69,185 @@ class TuskarAPITests(test.APITestCase):
         self.assertListEqual([], ret_val)
 
     def test_overcloud_is_deployed(self):
-        overcloud = self.tuskarclient_overclouds.first()
+        stack = self.heatclient_stacks.first()
+        oc = api.Overcloud(self.tuskarclient_overclouds.first(), request=None)
+        with patch('openstack_dashboard.api.heat.stack_get',
+                   return_value=stack):
+            ret_val = oc.is_deployed
+            self.assertFalse(ret_val)
 
-        ret_val = api.Overcloud(overcloud).is_deployed
-        self.assertFalse(ret_val)
+    def test_overcloud_all_resources(self):
+        oc = api.Overcloud(self.tuskarclient_overclouds.first(), request=None)
 
-    def test_overcloud_resources(self):
-        overcloud = self.tuskarclient_overclouds.first()
-        category = self.tuskarclient_resource_categories.first()
+        # FIXME(lsmola) the stack call should not be tested in this unit test
+        # anybody has idea how to do it?
+        stack = self.heatclient_stacks.first()
+        resources = self.heatclient_resources.list()
+        nodes = self.ironicclient_nodes.list()
+        instances = []
 
-        ret_val = api.Overcloud(overcloud).resources(
-            api.ResourceCategory(category))
+        with patch('openstack_dashboard.api.heat.resources_list',
+                   return_value=resources):
+            with patch('openstack_dashboard.api.nova.server_list',
+                       return_value=(instances, None)):
+                with patch('novaclient.v1_1.contrib.baremetal.'
+                           'BareMetalNodeManager.list',
+                           return_value=nodes):
+                    with patch('openstack_dashboard.api.heat.stack_get',
+                               return_value=stack):
+                        ret_val = oc.all_resources()
+
         for i in ret_val:
             self.assertIsInstance(i, api.Resource)
-        self.assertEqual(1, len(ret_val))
+        self.assertEqual(4, len(ret_val))
+
+    def test_overcloud_resources(self):
+        oc = api.Overcloud(self.tuskarclient_overclouds.first(), request=None)
+        category = api.ResourceCategory(self.tuskarclient_resource_categories.
+                                        first())
+
+        # FIXME(lsmola) only all_resources and image_name should be tested
+        # here, anybody has idea how to do that?
+        image = self.glanceclient_images.first()
+        stack = self.heatclient_stacks.first()
+        resources = self.heatclient_resources.list()
+        instances = self.novaclient_servers.list()
+        nodes = self.ironicclient_nodes.list()
+        with patch('openstack_dashboard.api.heat.resources_list',
+                   return_value=resources) as resource_list:
+            with patch('openstack_dashboard.api.nova.server_list',
+                       return_value=(instances, None)) as server_list:
+                with patch('openstack_dashboard.api.glance.image_get',
+                           return_value=image) as image_get:
+                    with patch('novaclient.v1_1.contrib.baremetal.'
+                               'BareMetalNodeManager.list',
+                               return_value=nodes) as node_list:
+                        with patch('openstack_dashboard.api.heat.stack_get',
+                                   return_value=stack) as stack_get:
+                            ret_val = oc.resources(category)
+                            self.assertEqual(resource_list.call_count, 1)
+                            self.assertEqual(server_list.call_count, 1)
+                            # TODO(lsmola) isn't it better to call image_list?
+                            # this will call image_get for every unique image
+                            # used that should not be much (4 images should be
+                            # there for start)
+                            # FIXME(lsmola) testing caching here is bad,
+                            # because it gets cached for the whole tests run
+                            self.assertEqual(image_get.call_count, 2)
+                            # FIXME(lsmola) optimize this, it's enough to call
+                            # node_list once
+                            self.assertEqual(node_list.call_count, 1)
+                            self.assertEqual(stack_get.call_count, 1)
+
+        for i in ret_val:
+            self.assertIsInstance(i, api.Resource)
+        self.assertEqual(4, len(ret_val))
 
     def test_overcloud_nodes(self):
-        overcloud = self.tuskarclient_overclouds.first()
-        category = self.tuskarclient_resource_categories.first()
+        oc = api.Overcloud(self.tuskarclient_overclouds.first(), request=None)
+        category = api.ResourceCategory(self.tuskarclient_resource_categories.
+                                        first())
 
-        ret_val = api.Overcloud(overcloud).nodes(
-            api.ResourceCategory(category))
+        # FIXME(lsmola) only resources() should be tested anybody has idea how
+        # to do that?
+        image = self.glanceclient_images.first()
+        stack = self.heatclient_stacks.first()
+        resources = self.heatclient_resources.list()
+        instances = self.novaclient_servers.list()
+        nodes = self.ironicclient_nodes.list()
+        with patch('openstack_dashboard.api.heat.resources_list',
+                   return_value=resources) as resource_list:
+            with patch('openstack_dashboard.api.nova.server_list',
+                       return_value=(instances, None)) as server_list:
+                with patch('tuskar_ui.api.image_get',
+                           return_value=image) as image_get:
+                    with patch('novaclient.v1_1.contrib.baremetal.'
+                               'BareMetalNodeManager.list',
+                               return_value=nodes) as node_list:
+                        with patch('openstack_dashboard.api.heat.stack_get',
+                                   return_value=stack) as stack_get:
+                            ret_val = oc.nodes(category)
+                            self.assertEqual(resource_list.call_count, 1)
+                            self.assertEqual(server_list.call_count, 1)
+                            self.assertEqual(image_get.call_count, 4)
+                            self.assertEqual(node_list.call_count, 1)
+                            self.assertEqual(stack_get.call_count, 1)
+
         for n in ret_val:
             self.assertIsInstance(n, api.Node)
             self.assertIsInstance(n.instance, servers.Server)
-        self.assertEqual(1, len(ret_val))
+        self.assertEqual(4, len(ret_val))
 
     def test_node_create(self):
-        node = self.ironicclient_nodes.first()
+        node = api.Node(self.ironicclient_nodes.first())
 
-        ret_val = api.Node.create(
-            self.request,
-            node.driver_info['ipmi_address'],
-            node.properties['cpu'],
-            node.properties['ram'],
-            node.properties['local_disk'],
-            ['aa:aa:aa:aa:aa:aa'],
-            ipmi_username='admin',
-            ipmi_password='password')
-        ret_val.instance_uuid = None
+        # FIXME(lsmola) this should be mocking client call no Node
+        with patch('novaclient.v1_1.contrib.baremetal.'
+                   'BareMetalNodeManager.create',
+                   return_value=node):
+            ret_val = api.Node.create(
+                self.request,
+                node.driver_info['ipmi_address'],
+                node.properties['cpu'],
+                node.properties['ram'],
+                node.properties['local_disk'],
+                ['aa:aa:aa:aa:aa:aa'],
+                ipmi_username='admin',
+                ipmi_password='password')
 
         self.assertIsInstance(ret_val, api.Node)
-        self.assertIsNone(ret_val.instance)
 
     def test_node_get(self):
         node = self.ironicclient_nodes.first()
+        instance = self.novaclient_servers.first()
 
-        ret_val = api.Node.get(self.request, node.uuid)
+        with patch('openstack_dashboard.api.nova.server_get',
+                   return_value=instance):
+            with patch('novaclient.v1_1.contrib.baremetal.'
+                       'BareMetalNodeManager.get',
+                       return_value=node):
+                ret_val = api.Node.get(self.request, node.uuid)
+
         self.assertIsInstance(ret_val, api.Node)
         self.assertIsInstance(ret_val.instance, servers.Server)
 
     def test_node_get_by_instance_uuid(self):
+        instance = self.novaclient_servers.first()
         node = self.ironicclient_nodes.first()
+        nodes = self.ironicclient_nodes.list()
 
-        ret_val = api.Node.get_by_instance_uuid(self.request,
-                                                node.instance_uuid)
+        with patch('openstack_dashboard.api.nova.server_get',
+                   return_value=instance):
+            with patch('novaclient.v1_1.contrib.baremetal.'
+                       'BareMetalNodeManager.list',
+                       return_value=nodes):
+                ret_val = api.Node.get_by_instance_uuid(self.request,
+                                                        node.instance_uuid)
+
         self.assertIsInstance(ret_val, api.Node)
         self.assertIsInstance(ret_val.instance, servers.Server)
 
     def test_node_list(self):
-        #nodes = self.tuskarclient_overclouds.list()
+        instances = self.novaclient_servers.list()
+        nodes = self.ironicclient_nodes.list()
 
-        ret_val = api.Node.list(self.request)
+        with patch('openstack_dashboard.api.nova.server_list',
+                   return_value=(instances, None)):
+            with patch('novaclient.v1_1.contrib.baremetal.'
+                       'BareMetalNodeManager.list',
+                       return_value=nodes):
+                ret_val = api.Node.list(self.request)
+
         for node in ret_val:
             self.assertIsInstance(node, api.Node)
         self.assertEqual(5, len(ret_val))
 
     def test_node_delete(self):
         node = self.ironicclient_nodes.first()
-
-        api.Node.delete(self.request, node.uuid)
+        with patch('novaclient.v1_1.contrib.baremetal.'
+                   'BareMetalNodeManager.delete',
+                   return_value=None):
+            api.Node.delete(self.request, node.uuid)
 
     def test_node_addresses(self):
         node = self.ironicclient_nodes.first()
@@ -148,17 +256,30 @@ class TuskarAPITests(test.APITestCase):
         self.assertEqual(2, len(ret_val))
 
     def test_resource_get(self):
-        overcloud = self.tuskarclient_overclouds.first()
+        stack = self.heatclient_stacks.first()
+        overcloud = api.Overcloud(self.tuskarclient_overclouds.first(),
+                                  request=None)
         resource = self.heatclient_resources.first()
 
-        ret_val = api.Resource.get(self.request, overcloud,
-                                   resource.resource_name)
+        with patch('openstack_dashboard.api.heat.resource_get',
+                   return_value=resource):
+            with patch('openstack_dashboard.api.heat.stack_get',
+                       return_value=stack):
+                ret_val = api.Resource.get(None, overcloud,
+                                           resource.resource_name)
         self.assertIsInstance(ret_val, api.Resource)
 
     def test_resource_node(self):
         resource = self.heatclient_resources.first()
+        nodes = self.ironicclient_nodes.list()
+        instance = self.novaclient_servers.first()
 
-        ret_val = api.Resource(resource).node
+        with patch('openstack_dashboard.api.nova.server_get',
+                   return_value=instance):
+            with patch('novaclient.v1_1.contrib.baremetal.'
+                       'BareMetalNodeManager.list',
+                       return_value=nodes):
+                ret_val = api.Resource(resource, request=None).node
         self.assertIsInstance(ret_val, api.Node)
         self.assertIsInstance(ret_val.instance, servers.Server)
 
