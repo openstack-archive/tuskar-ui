@@ -31,7 +31,14 @@ tuskar_data.data(TEST_DATA)
 
 class NodesTests(test.BaseAdminViewTests):
     def test_index_get(self):
-        res = self.client.get(INDEX_URL)
+
+        with patch('tuskar_ui.api.Node', **{
+            'spec_set': ['list'],  # Only allow these attributes
+            'list.return_value': [],
+        }) as mock:
+            res = self.client.get(INDEX_URL)
+            self.assertEqual(mock.list.call_count, 4)
+
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
         self.assertTemplateUsed(res, 'infrastructure/nodes/_overview.html')
@@ -102,13 +109,13 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-INITIAL_FORMS': 1,
             'register_nodes-MAX_NUM_FORMS': 1000,
 
-            'register_nodes-0-ip_address': '127.0.0.1',
+            'register_nodes-0-ipmi_address': '127.0.0.1',
             'register_nodes-0-mac_address': 'de:ad:be:ef:ca:fe',
             'register_nodes-0-cpus': '1',
             'register_nodes-0-memory': '2',
             'register_nodes-0-local_disk': '3',
 
-            'register_nodes-1-ip_address': '127.0.0.2',
+            'register_nodes-1-ipmi_address': '127.0.0.2',
             'register_nodes-1-mac_address': 'de:ad:be:ef:ca:ff',
             'register_nodes-1-cpus': '4',
             'register_nodes-1-memory': '5',
@@ -122,9 +129,9 @@ class NodesTests(test.BaseAdminViewTests):
             request = Node.create.call_args_list[0][0][0]  # This is a hack.
             self.assertListEqual(Node.create.call_args_list, [
                 call(request, '127.0.0.1', 1, 2, 3,
-                     ['DE:AD:BE:EF:CA:FE'], None, u''),
+                     'DE:AD:BE:EF:CA:FE', None, u''),
                 call(request, '127.0.0.2', 4, 5, 6,
-                     ['DE:AD:BE:EF:CA:FF'], None, u''),
+                     'DE:AD:BE:EF:CA:FF', None, u''),
             ])
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
@@ -134,13 +141,13 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-INITIAL_FORMS': 1,
             'register_nodes-MAX_NUM_FORMS': 1000,
 
-            'register_nodes-0-ip_address': '127.0.0.1',
+            'register_nodes-0-ipmi_address': '127.0.0.1',
             'register_nodes-0-mac_address': 'de:ad:be:ef:ca:fe',
             'register_nodes-0-cpus': '1',
             'register_nodes-0-memory': '2',
             'register_nodes-0-local_disk': '3',
 
-            'register_nodes-1-ip_address': '127.0.0.2',
+            'register_nodes-1-ipmi_address': '127.0.0.2',
             'register_nodes-1-mac_address': 'de:ad:be:ef:ca:ff',
             'register_nodes-1-cpus': '4',
             'register_nodes-1-memory': '5',
@@ -154,9 +161,9 @@ class NodesTests(test.BaseAdminViewTests):
             request = Node.create.call_args_list[0][0][0]  # This is a hack.
             self.assertListEqual(Node.create.call_args_list, [
                 call(request, '127.0.0.1', 1, 2, 3,
-                     ['DE:AD:BE:EF:CA:FE'], None, u''),
+                     'DE:AD:BE:EF:CA:FE', None, u''),
                 call(request, '127.0.0.2', 4, 5, 6,
-                     ['DE:AD:BE:EF:CA:FF'], None, u''),
+                     'DE:AD:BE:EF:CA:FF', None, u''),
             ])
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/register.html')
