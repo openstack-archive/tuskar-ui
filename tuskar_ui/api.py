@@ -19,13 +19,22 @@ import django.conf
 from horizon.utils import memoized
 
 from openstack_dashboard.api import base
+
+from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.test.test_data import utils
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.test.test_data import tuskar_data
 from tuskarclient.v1 import client as tuskar_client
 
+from openstack_dashboard.api import nova
+
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
+
+
+def baremetalclient(request):
+    nc = nova.novaclient(request)
+    return baremetal.BareMetalNodeManager(nc)
 
 
 # TODO(Tzu-Mainn Chen): remove test data when possible
@@ -345,7 +354,8 @@ class Node(base.APIResourceWrapper):
         """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # node = ironicclient(request).nodes.get(uuid)
-        nodes = test_data().ironicclient_nodes.list()
+        # nodes = test_data().ironicclient_nodes.list()
+        nodes = baremetalclient(request).list()
         node = next((n for n in nodes if uuid == n.uuid),
                     None)
 
@@ -396,7 +406,9 @@ class Node(base.APIResourceWrapper):
         # nodes = ironicclient(request).nodes.list(
         #    associated=associated)
 
-        nodes = test_data().ironicclient_nodes.list()
+        # nodes = test_data().ironicclient_nodes.list()
+        nodes = baremetalclient(request).list()
+        print dir(nodes)
         if associated is not None:
             if associated:
                 nodes = [node for node in nodes

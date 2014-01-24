@@ -20,6 +20,7 @@ from horizon import tables
 
 class NodesTable(tables.DataTable):
 
+    """ IRONIC attrs
     uuid = tables.Column("uuid",
                          verbose_name=_("UUID"))
     mac_addresses = tables.Column("addresses",
@@ -42,6 +43,30 @@ class NodesTable(tables.DataTable):
                                ('off', False),
                                ('rebooting', None)
                            ))
+    """
+    """ FIXME(lsmola) just temporary baremetal info, should be replaced with Ironic above """
+    uuid = tables.Column("uuid",
+                         verbose_name=_("UUID"))
+    mac_addresses = tables.Column(lambda node: node._apiresource.interfaces[0]["address"],
+                                 verbose_name=_("MAC Addresses"),
+                                 )
+    ipmi_address = tables.Column(lambda node: node._apiresource.pxe_config_path,
+                                 verbose_name=_("IPMI Address"))
+    cpu = tables.Column(lambda node: node._apiresource.cpus,
+                        verbose_name=_("CPU"))
+    ram = tables.Column(lambda node: node._apiresource.memory_mb,
+                        verbose_name=_("RAM (GB)"))
+    local_disk = tables.Column(lambda node: node._apiresource.local_gb,
+                               verbose_name=_("Local Disk (GB)"))
+    status = tables.Column(lambda node: node._apiresource.task_state,
+                           verbose_name=_("Status"),
+                           status=True,
+                           status_choices=(
+                               ('on', True),
+                               ('off', False),
+                               ('rebooting', None)
+                           ))
+
 
     class Meta:
         name = "nodes_table"
