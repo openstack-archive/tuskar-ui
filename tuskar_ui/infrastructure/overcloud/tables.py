@@ -41,7 +41,7 @@ class ResourceCategoryNodeTable(tables.DataTable):
                                 ))
 
     def get_object_id(self, datum):
-        return datum.uuid
+        return datum.id
 
     class Meta:
         name = "resource_category__nodetable"
