@@ -26,9 +26,9 @@ class NodeForm(django.forms.Form):
         required=False,
         widget=django.forms.HiddenInput(),
     )
-
-    ip_address = django.forms.IPAddressField(
-        label=_("IP Address"),
+    ipmi_address = django.forms.IPAddressField(
+        label=_("IPMI Address"),
+        required=False,
         widget=django.forms.TextInput(attrs={'class': 'input input-medium'}),
     )
     ipmi_user = django.forms.CharField(
@@ -42,25 +42,11 @@ class NodeForm(django.forms.Form):
         widget=django.forms.PasswordInput(
             render_value=False, attrs={'class': 'input input-medium'}),
     )
-
     mac_address = tuskar_ui.forms.MACField(
         label=_("NIC MAC Address"),
-        widget=django.forms.Textarea(attrs={
-            'class': 'input input-medium',
-            'rows': 2,
+        widget=django.forms.TextInput(attrs={
+            'class': 'input input-medium'
         }),
-    )
-
-    ipmi_user = django.forms.CharField(
-        label=_("IPMI User"),
-        required=False,
-        widget=django.forms.TextInput(attrs={'class': 'input input-medium'}),
-    )
-    ipmi_password = django.forms.CharField(
-        label=_("IPMI Password"),
-        required=False,
-        widget=django.forms.PasswordInput(
-            render_value=False, attrs={'class': 'input input-medium'}),
     )
     cpus = django.forms.IntegerField(
         label=_("CPUs"),
@@ -89,7 +75,8 @@ class NodeForm(django.forms.Form):
 
     def get_name(self):
         try:
-            name = self.fields['ip_address'].value()
+            # FIXME(lsmola) show somethign meaningful here
+            name = self.fields['ipmi_address'].value()
         except AttributeError:
             # when the field is not bound
             name = _("Undefined node")
@@ -103,11 +90,11 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
             try:
                 api.Node.create(
                     request,
-                    form.cleaned_data['ip_address'],
+                    form.cleaned_data['ipmi_address'],
                     form.cleaned_data.get('cpus'),
                     form.cleaned_data.get('memory'),
                     form.cleaned_data.get('local_disk'),
-                    [form.cleaned_data['mac_address']],
+                    form.cleaned_data['mac_address'],
                     form.cleaned_data.get('ipmi_username'),
                     form.cleaned_data.get('ipmi_password'),
                 )

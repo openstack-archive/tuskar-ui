@@ -105,7 +105,8 @@ def data(TEST):
     TEST.ironicclient_nodes = test_data_utils.TestDataContainer()
     node_1 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'aa-11',
+        {'id': '1',
+         'uuid': 'aa-11',
          'instance_uuid': 'aa',
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -118,10 +119,23 @@ def data(TEST):
              'ram': '16',
              'local_disk': '10',
          },
-         'power_state': 'on'})
+         'power_state': 'on',
+
+         # nova-baremetal test attrs
+         "pm_address": None,
+         "pm_user": None,
+         "task_state": "active",
+         "interfaces": [{"address": "52:54:00:90:38:01"},
+                        {"address": "52:54:00:90:38:01"}],
+         "cpus": 1,
+         "memory_mb": 4096,
+         "service_host": "undercloud",
+         "local_gb": 20,
+         })
     node_2 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'bb-22',
+        {'id': '2',
+         'uuid': 'bb-22',
          'instance_uuid': 'bb',
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -134,10 +148,22 @@ def data(TEST):
              'ram': '32',
              'local_disk': '100',
          },
-         'power_state': 'on'})
+         'power_state': 'on',
+
+         # nova-baremetal test attrs
+         "pm_address": None,
+         "pm_user": None,
+         "task_state": "active",
+         "interfaces": [{"address": "52:54:00:90:38:01"}],
+         "cpus": 1,
+         "memory_mb": 4096,
+         "service_host": "undercloud",
+         "local_gb": 20,
+         })
     node_3 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'cc-33',
+        {'id': '3',
+         'uuid': 'cc-33',
          'instance_uuid': None,
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -150,10 +176,22 @@ def data(TEST):
              'ram': '64',
              'local_disk': '1',
          },
-         'power_state': 'rebooting'})
+         'power_state': 'rebooting',
+
+         # nova-baremetal test attrs
+         "pm_address": None,
+         "pm_user": None,
+         "task_state": "active",
+         "interfaces": [{"address": "52:54:00:90:38:01"}],
+         "cpus": 1,
+         "memory_mb": 4096,
+         "service_host": "undercloud",
+         "local_gb": 20,
+         })
     node_4 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'cc-44',
+        {'id': '4',
+         'uuid': 'cc-44',
          'instance_uuid': 'cc',
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -166,10 +204,22 @@ def data(TEST):
              'ram': '16',
              'local_disk': '10',
          },
-         'power_state': 'on'})
+         'power_state': 'on',
+
+         # nova-baremetal test attrs
+         "pm_address": None,
+         "pm_user": None,
+         "task_state": "active",
+         "interfaces": [{"address": "52:54:00:90:38:01"}],
+         "cpus": 1,
+         "memory_mb": 4096,
+         "service_host": "undercloud",
+         "local_gb": 20,
+         })
     node_5 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'dd-55',
+        {'id': '5',
+         'uuid': 'dd-55',
          'instance_uuid': 'dd',
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -182,7 +232,18 @@ def data(TEST):
              'ram': '16',
              'local_disk': '10',
          },
-         'power_state': 'on'})
+         'power_state': 'on',
+
+         # nova-baremetal test attrs
+         "pm_address": None,
+         "pm_user": None,
+         "task_state": "active",
+         "interfaces": [{"address": "52:54:00:90:38:01"}],
+         "cpus": 1,
+         "memory_mb": 4096,
+         "service_host": "undercloud",
+         "local_gb": 20,
+         })
     TEST.ironicclient_nodes.add(node_1, node_2, node_3, node_4, node_5)
 
     # Ports
