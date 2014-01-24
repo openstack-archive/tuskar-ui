@@ -19,13 +19,22 @@ import django.conf
 from horizon.utils import memoized
 
 from openstack_dashboard.api import base
+
+from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.test.test_data import utils
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.test.test_data import tuskar_data
 from tuskarclient.v1 import client as tuskar_client
 
+from openstack_dashboard.api import nova
+
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
+
+
+def baremetalclient(request):
+    nc = nova.novaclient(request)
+    return baremetal.BareMetalNodeManager(nc)
 
 
 # TODO(Tzu-Mainn Chen): remove test data when possible
@@ -292,8 +301,26 @@ class Instance(base.APIResourceWrapper):
 
 
 class Node(base.APIResourceWrapper):
-    _attrs = ('uuid', 'instance_uuid', 'driver', 'driver_info',
-              'properties', 'power_state')
+    # FIXME(lsmola) uncomment this and delete equivalent methods
+    #_attrs = ('uuid', 'instance_uuid', 'driver', 'driver_info',
+    #          'properties', 'power_state')
+    _attrs = ('id', 'uuid',)
+
+    @classmethod
+    def nova_baremetal_format(cls, ipmi_address, cpu, ram, local_disk,
+                              mac_addresses, ipmi_username=None,
+                              ipmi_password=None):
+        """Converts Ironic parameters to Nova-baremetal format
+        """
+        return {'service_host': 'undercloud',
+                'cpus': cpu,
+                'memory_mb': ram,
+                'local_gb': local_disk,
+                'prov_mac_address': mac_addresses,
+                'pm_address': ipmi_address,
+                'pm_user': ipmi_username,
+                'pm_password': ipmi_password,
+                'terminal_port': None}
 
     @classmethod
     def create(cls, request, ipmi_address, cpu, ram, local_disk,
@@ -342,7 +369,9 @@ class Node(base.APIResourceWrapper):
         #         node_uuid=node.uuid,
         #         address=mac_address
         #     )
-        node = test_data().ironicclient_nodes.first()
+        node = baremetalclient(request).create(**cls.nova_baremetal_format(
+            ipmi_address, cpu, ram, local_disk, mac_addresses,
+            ipmi_username=None, ipmi_password=None))
 
         return cls(node)
 
@@ -361,10 +390,8 @@ class Node(base.APIResourceWrapper):
         """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # node = ironicclient(request).nodes.get(uuid)
-        nodes = test_data().ironicclient_nodes.list()
-        node = next((n for n in nodes if uuid == n.uuid),
-                    None)
-
+        # nodes = test_data().ironicclient_nodes.list()
+        node = baremetalclient(request).get(uuid)
         return cls(node)
 
     @classmethod
@@ -387,7 +414,7 @@ class Node(base.APIResourceWrapper):
         # TODO(Tzu-Mainn Chen): remove test data when possible
         #node = ironicclient(request).nodes.get_by_instance_uuid(
         #    instance_uuid)
-        nodes = test_data().ironicclient_nodes.list()
+        nodes = baremetalclient(request).list()
         node = next((n for n in nodes if instance_uuid == n.instance_uuid),
                     None)
 
@@ -412,7 +439,8 @@ class Node(base.APIResourceWrapper):
         # nodes = ironicclient(request).nodes.list(
         #    associated=associated)
 
-        nodes = test_data().ironicclient_nodes.list()
+        # nodes = test_data().ironicclient_nodes.list()
+        nodes = baremetalclient(request).list()
         if associated is not None:
             if associated:
                 nodes = [node for node in nodes
@@ -436,6 +464,7 @@ class Node(base.APIResourceWrapper):
         """
         # TODO(Tzu-Mainn Chen): uncomment when possible
         # ironicclient(request).nodes.delete(uuid)
+        baremetalclient(request).delete(uuid)
         return
 
     @cached_property
@@ -449,9 +478,46 @@ class Node(base.APIResourceWrapper):
         """
         # TODO(Tzu-Mainn Chen): uncomment when possible
         # ports = self.list_ports()
-        ports = test_data().ironicclient_ports.list()[:2]
+        # ports = test_data().ironicclient_ports.list()[:2]
 
-        return [port.address for port in ports]
+        # return [port.address for port in ports]
+
+        return [interface["address"] for interface in
+                self._apiresource.interfaces]
+
+    @cached_property
+    def power_state(self):
+        """Return a power state of this Node
+
+        :return: power state of this node
+        :rtype:  str
+        """
+        return self._apiresource.task_state
+
+    @cached_property
+    def properties(self):
+        """Return properties of this Node
+
+        :return: return memory, cpus and local_disk properties
+                 of this Node
+        :rtype:  dict of str
+        """
+        return {
+            'ram': self._apiresource.memory_mb / 1024.0,
+            'cpu': self._apiresource.cpus,
+            'local_disk': self._apiresource.local_gb / 1000.0
+        }
+
+    @cached_property
+    def driver_info(self):
+        """Return driver_info this Node
+
+        :return: return pm_address property of this Node
+        :rtype:  dict of str
+        """
+        return {
+            'ipmi_address': self._apiresource.pm_address
+        }
 
 
 class Resource(base.APIResourceWrapper):

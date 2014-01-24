@@ -105,7 +105,8 @@ def data(TEST):
     TEST.ironicclient_nodes = test_data_utils.TestDataContainer()
     node_1 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'aa-11',
+        {'id': '1',
+         'uuid': 'aa-11',
          'instance_uuid': 'aa',
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -121,7 +122,8 @@ def data(TEST):
          'power_state': 'on'})
     node_2 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'bb-22',
+        {'id': '2',
+         'uuid': 'bb-22',
          'instance_uuid': 'bb',
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -137,7 +139,8 @@ def data(TEST):
          'power_state': 'on'})
     node_3 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'cc-33',
+        {'id': '3',
+         'uuid': 'cc-33',
          'instance_uuid': None,
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -153,7 +156,8 @@ def data(TEST):
          'power_state': 'rebooting'})
     node_4 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'cc-44',
+        {'id': '4',
+         'uuid': 'cc-44',
          'instance_uuid': 'cc',
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -169,7 +173,8 @@ def data(TEST):
          'power_state': 'on'})
     node_5 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'dd-55',
+        {'id': '5',
+         'uuid': 'dd-55',
          'instance_uuid': 'dd',
          'driver': 'pxe_ipmitool',
          'driver_info': {
