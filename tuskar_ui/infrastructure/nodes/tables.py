@@ -17,9 +17,25 @@ from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
 
+from tuskar_ui import api
+
+
+class DeleteNode(tables.BatchAction):
+    name = "delete"
+    action_present = _("Delete")
+    action_past = _("Deleting")
+    data_type_singular = _("Node")
+    data_type_plural = _("Nodes")
+    classes = ('btn-danger',)
+
+    def allowed(self, request, obj=None):
+        return getattr(obj, 'instance', None) is None
+
+    def action(self, request, obj_id):
+        api.Node.delete(request, obj_id)
+
 
 class NodesTable(tables.DataTable):
-
     uuid = tables.Column("uuid",
                          link="horizon:infrastructure:nodes:detail",
                          verbose_name=_("UUID"))
@@ -51,7 +67,7 @@ class NodesTable(tables.DataTable):
         row_actions = ()
 
     def get_object_id(self, datum):
-        return datum.uuid
+        return datum.id
 
     def get_object_display(self, datum):
         return datum.uuid
@@ -62,8 +78,8 @@ class FreeNodesTable(NodesTable):
     class Meta:
         name = "free_nodes"
         verbose_name = _("Free Nodes")
-        table_actions = ()
-        row_actions = ()
+        table_actions = (DeleteNode,)
+        row_actions = (DeleteNode,)
 
 
 class ResourceNodesTable(NodesTable):

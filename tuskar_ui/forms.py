@@ -41,9 +41,13 @@ class NumberPickerInput(NumberInput):
 
 class MACField(forms.fields.Field):
     def clean(self, value):
+        class mac_dialect(netaddr.mac_eui48):
+            """Same validation as Nova uses."""
+            word_fmt = '%.02x'
+            word_sep = ':'
         try:
             return str(netaddr.EUI(
-                value.strip(), version=48, dialect=netaddr.mac_unix)).upper()
+                value.strip(), version=48, dialect=mac_dialect)).upper()
         except (netaddr.AddrFormatError, TypeError):
             raise forms.ValidationError(_(u'Enter a valid MAC address.'))
 
