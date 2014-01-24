@@ -105,7 +105,8 @@ def data(TEST):
     TEST.ironicclient_nodes = test_data_utils.TestDataContainer()
     node_1 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'aa-11',
+        {'id': '1',
+         'uuid': 'aa-11',
          'instance_uuid': 'aa',
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -118,10 +119,23 @@ def data(TEST):
              'ram': '16',
              'local_disk': '10',
          },
-         'power_state': 'on'})
+         'power_state': 'on',
+
+         # FIXME(lsmola) nova-baremetal test attrs, delete when Ironic is in
+         "pm_address": None,
+         "pm_user": None,
+         "task_state": "active",
+         "interfaces": [{"address": "52:54:00:90:38:01"},
+                        {"address": "52:54:00:90:38:01"}],
+         "cpus": 1,
+         "memory_mb": 4096,
+         "service_host": "undercloud",
+         "local_gb": 20,
+         })
     node_2 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'bb-22',
+        {'id': '2',
+         'uuid': 'bb-22',
          'instance_uuid': 'bb',
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -134,10 +148,22 @@ def data(TEST):
              'ram': '32',
              'local_disk': '100',
          },
-         'power_state': 'on'})
+         'power_state': 'on',
+
+         # FIXME(lsmola) nova-baremetal test attrs, delete when Ironic is in
+         "pm_address": None,
+         "pm_user": None,
+         "task_state": "active",
+         "interfaces": [{"address": "52:54:00:90:38:01"}],
+         "cpus": 1,
+         "memory_mb": 4096,
+         "service_host": "undercloud",
+         "local_gb": 20,
+         })
     node_3 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'cc-33',
+        {'id': '3',
+         'uuid': 'cc-33',
          'instance_uuid': None,
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -150,10 +176,22 @@ def data(TEST):
              'ram': '64',
              'local_disk': '1',
          },
-         'power_state': 'rebooting'})
+         'power_state': 'rebooting',
+
+         # FIXME(lsmola) nova-baremetal test attrs, delete when Ironic is in
+         "pm_address": None,
+         "pm_user": None,
+         "task_state": "active",
+         "interfaces": [{"address": "52:54:00:90:38:01"}],
+         "cpus": 1,
+         "memory_mb": 4096,
+         "service_host": "undercloud",
+         "local_gb": 20,
+         })
     node_4 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'cc-44',
+        {'id': '4',
+         'uuid': 'cc-44',
          'instance_uuid': 'cc',
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -166,10 +204,22 @@ def data(TEST):
              'ram': '16',
              'local_disk': '10',
          },
-         'power_state': 'on'})
+         'power_state': 'on',
+
+         # FIXME(lsmola) nova-baremetal test attrs, delete when Ironic is in
+         "pm_address": None,
+         "pm_user": None,
+         "task_state": "active",
+         "interfaces": [{"address": "52:54:00:90:38:01"}],
+         "cpus": 1,
+         "memory_mb": 4096,
+         "service_host": "undercloud",
+         "local_gb": 20,
+         })
     node_5 = node.Node(
         node.NodeManager(None),
-        {'uuid': 'dd-55',
+        {'id': '5',
+         'uuid': 'dd-55',
          'instance_uuid': 'dd',
          'driver': 'pxe_ipmitool',
          'driver_info': {
@@ -182,7 +232,18 @@ def data(TEST):
              'ram': '16',
              'local_disk': '10',
          },
-         'power_state': 'on'})
+         'power_state': 'on',
+
+         # FIXME(lsmola) nova-baremetal test attrs, delete when Ironic is in
+         "pm_address": None,
+         "pm_user": None,
+         "task_state": "active",
+         "interfaces": [{"address": "52:54:00:90:38:01"}],
+         "cpus": 1,
+         "memory_mb": 4096,
+         "service_host": "undercloud",
+         "local_gb": 20,
+         })
     TEST.ironicclient_nodes.add(node_1, node_2, node_3, node_4, node_5)
 
     # Ports
@@ -258,25 +319,25 @@ def data(TEST):
         servers.ServerManager(None),
         {'id': 'aa',
          'name': 'Compute',
-         'image': 'compute-image',
+         'image': {'id': 1},
          'status': 'ACTIVE'})
     s_2 = servers.Server(
         servers.ServerManager(None),
         {'id': 'bb',
          'name': 'Controller',
-         'image': 'controller-image',
+         'image': {'id': 2},
          'status': 'ACTIVE'})
     s_3 = servers.Server(
         servers.ServerManager(None),
         {'id': 'cc',
          'name': 'Compute',
-         'image': 'compute-image',
+         'image': {'id': 1},
          'status': 'BUILD'})
     s_4 = servers.Server(
         servers.ServerManager(None),
         {'id': 'dd',
          'name': 'Compute',
-         'image': 'compute-image',
+         'image': {'id': 1},
          'status': 'ERROR'})
     TEST.novaclient_servers.add(s_1, s_2, s_3, s_4)
 
@@ -297,37 +358,41 @@ def data(TEST):
     rc_1 = {'id': 1,
             'name': 'Controller',
             'description': 'controller resource category',
-            'image_id': 'image-id-1'}
+            'image_id': '2',
+            'image_name': 'overcloud-control'}
     rc_2 = {'id': 2,
             'name': 'Compute',
             'description': 'compute resource category',
-            'image_id': 'image-id-2'}
+            'image_id': '1',
+            'image_name': 'overcloud-compute'}
     rc_3 = {'id': 3,
             'name': 'Object Storage',
             'description': 'object storage resource category',
-            'image_id': 'image-id-3'}
+            'image_id': '3',
+            'image_name': 'overcloud-object-storage'}
     rc_4 = {'id': 4,
             'name': 'Block Storage',
             'description': 'block storage resource category',
-            'image_id': 'image-id-4'}
+            'image_id': '4',
+            'image_name': 'overcloud-block-storage'}
     TEST.tuskarclient_resource_categories.add(rc_1, rc_2, rc_3, rc_4)
 
     # Image
     TEST.glanceclient_images = test_data_utils.TestDataContainer()
     image_1 = images.Image(
         images.ImageManager(None),
-        {'id': 'image-id-1',
-         'name': 'Controller Image'})
+        {'id': '2',
+         'name': 'overcloud-control'})
     image_2 = images.Image(
         images.ImageManager(None),
-        {'id': 'image-id-2',
-         'name': 'Compute Image'})
+        {'id': '1',
+         'name': 'overcloud-compute'})
     image_3 = images.Image(
         images.ImageManager(None),
-        {'id': 'image-id-3',
+        {'id': '3',
          'name': 'Object Storage Image'})
     image_4 = images.Image(
         images.ImageManager(None),
-        {'id': 'image-id-4',
+        {'id': '4',
          'name': 'Block Storage Image'})
     TEST.glanceclient_images.add(image_1, image_2, image_3, image_4)
