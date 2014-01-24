@@ -7,7 +7,7 @@
     </div>
     <div class="row-fluid">
       <h4>Power Management</h4>
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ip_address required=True %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_address %}
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_user %}
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_password %}
     </div>
@@ -38,7 +38,8 @@
   var $nav_link = $('a[href="#' + $form.attr('id') + '"]');
   var undefined_name = '{{ form.get_name|escapejs }}';
 
-  $form.find('input[name$="-ip_address"]').change(function () {
+  // FIXME(lsmola) what is this good for exactly?
+  $form.find('input[name$="-ipmi_address"]').change(function () {
     $nav_link.html($(this).val() || undefined_name);
   });
 });

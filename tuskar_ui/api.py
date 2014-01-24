@@ -19,13 +19,24 @@ import django.conf
 from horizon.utils import memoized
 
 from openstack_dashboard.api import base
+
+from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.test.test_data import utils
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.test.test_data import tuskar_data
 from tuskarclient.v1 import client as tuskar_client
 
+from openstack_dashboard.api import glance
+from openstack_dashboard.api import heat
+from openstack_dashboard.api import nova
+
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
+
+
+def baremetalclient(request):
+    nc = nova.novaclient(request)
+    return baremetal.BareMetalNodeManager(nc)
 
 
 # TODO(Tzu-Mainn Chen): remove test data when possible
@@ -35,8 +46,8 @@ def test_data():
     return test_data
 
 
-# FIXME: request isn't used right in the tuskar client right now, but looking
-# at other clients, it seems like it will be in the future
+# FIXME: request isn't used right in the tuskar client right now,
+# but looking at other clients, it seems like it will be in the future
 def tuskarclient(request):
     c = tuskar_client.Client(TUSKAR_ENDPOINT_URL)
     return c
@@ -57,10 +68,27 @@ def list_to_dict(object_list, key_attribute='id'):
     return dict((getattr(o, key_attribute), o) for o in object_list)
 
 
+# FIXME(lsmola) This should be done in Horizon
+# but i want to test that the real api is not called every time
+# and I don't know how to mock client call
+@memoized.memoized
+def image_get(request, image_id):
+    """Returns an Image object populated with metadata for image
+    with supplied identifier.
+    """
+    image = glance.image_get(request, image_id)
+    return image
+
+
 # TODO(Tzu-Mainn Chen): change this to APIResourceWrapper once
 # ResourceCategory object exists in tuskar
 class Overcloud(base.APIDictWrapper):
     _attrs = ('id', 'stack_id', 'name', 'description')
+
+    def __init__(self, apiresource, **kwargs):
+        super(Overcloud, self).__init__(apiresource)
+        if 'request' in kwargs:
+            self._request = kwargs['request']
 
     @classmethod
     def create(cls, request, overcloud_sizing):
@@ -82,7 +110,7 @@ class Overcloud(base.APIDictWrapper):
         #                          overcloud_sizing)
         overcloud = test_data().tuskarclient_overclouds.first()
 
-        return cls(overcloud)
+        return cls(overcloud, request=request)
 
     @classmethod
     def list(cls, request):
@@ -98,7 +126,7 @@ class Overcloud(base.APIDictWrapper):
         # ocs = tuskarclient(request).overclouds.list()
         ocs = test_data().tuskarclient_overclouds.list()
 
-        return [cls(oc) for oc in ocs]
+        return [cls(oc, request=request) for oc in ocs]
 
     @classmethod
     def get(cls, request, overcloud_id):
@@ -118,7 +146,7 @@ class Overcloud(base.APIDictWrapper):
         # overcloud = tuskarclient(request).overclouds.get(overcloud_id)
         overcloud = test_data().tuskarclient_overclouds.first()
 
-        return cls(overcloud)
+        return cls(overcloud, request=request)
 
     @cached_property
     def stack(self):
@@ -132,7 +160,8 @@ class Overcloud(base.APIDictWrapper):
         if self.stack_id:
             # TODO(Tzu-Mainn Chen): remove test data when possible
             # stack = heatclient(request).stacks.get(self.stack_id)
-            stack = test_data().heatclient_stacks.first()
+            # stack = test_data().heatclient_stacks.first()
+            stack = heat.stack_get(self._request, 'overcloud')
             return stack
         return None
 
@@ -160,8 +189,32 @@ class Overcloud(base.APIDictWrapper):
                  False otherwise
         :rtype:  bool
         """
-        # TODO(rdopieralski) Actually implement it
-        return False
+        return self.stack.stack_status in ('CREATE_COMPLETE',
+                                           'UPDATE_COMPLETE')
+
+    @memoized.memoized
+    def all_resources(self, with_joins=False):
+        resources = [r for r in heat.resources_list(self._request,
+                                                    self.stack.stack_name)]
+
+        if not with_joins:
+            return [Resource(r) for r in resources]
+
+        instances_dict = list_to_dict(Instance.list(self._request,
+                                                    with_joins=True))
+        nodes_dict = list_to_dict(Node.list(self._request, associated=True),
+                                  key_attribute='instance_uuid')
+
+        joined_resources = []
+        for r in resources:
+            instance = instances_dict.get(r.physical_resource_id, None)
+            node = nodes_dict.get(r.physical_resource_id, None)
+            joined_resources.append(Resource(r,
+                                             instance=instance,
+                                             node=node))
+
+        # I want just resources with nova instance
+        return [r for r in joined_resources if r.instance is not None]
 
     @memoized.memoized
     def resources(self, resource_category, with_joins=False):
@@ -178,30 +231,23 @@ class Overcloud(base.APIDictWrapper):
                  or an empty list if there are none
         :rtype:  list of tuskar_ui.api.Resource
         """
-        # TODO(Tzu-Mainn Chen): uncomment when possible
-        #resources = tuskarclient(request).overclouds.get_resources(
-        #    self.id, resource_category.id)
-        resources = [r for r in test_data().heatclient_resources.list()
-                     if r.logical_resource_id.startswith(
-                         resource_category.name)]
+        # FIXME(lsmola) with_joins is not necessary here, I need at least
+        # nova instance
+        all_resources = self.all_resources(with_joins=True)
+        filtered_resources = [resource for resource in all_resources if
+                              (resource.instance.image_name ==
+                               resource_category.image_name)]
 
-        if not with_joins:
-            return [Resource(r) for r in resources]
-
-        instances_dict = list_to_dict(Instance.list(None, with_joins=True))
-        nodes_dict = list_to_dict(Node.list(None, associated=True),
-                                  key_attribute='instance_uuid')
-        joined_resources = []
-        for r in resources:
-            instance = instances_dict.get(r.physical_resource_id, None)
-            node = nodes_dict.get(r.physical_resource_id, None)
-            joined_resources.append(Resource(r,
-                                             instance=instance,
-                                             node=node))
-        return joined_resources
+        return filtered_resources
 
     @memoized.memoized
     def instances(self, resource_category):
+    # FIXME(lsmola) we don't need this, we don't even need Instance class
+    # deleting in follow up patch. We will not access instance without
+    # resource context anywhere. (we shouldn't it complicate things-> number
+    # of requests), for this reason, there are 2 Node.list queries instead on
+    # 1. All we need is Resource and Node as separate entities.
+
         """Return a list of Instances in the Overcloud that match a
         Resource Category
 
@@ -217,13 +263,19 @@ class Overcloud(base.APIDictWrapper):
         return [r.instance for r in resources]
 
 
-class Instance(base.APIResourceWrapper):
+# FIXME(lsmola) get rid of this class, or make it just dumb wrapper
+class Instance(object):
     _attrs = ('id', 'name', 'image', 'status')
 
     def __init__(self, apiresource, **kwargs):
-        super(Instance, self).__init__(apiresource)
         if 'node' in kwargs:
             self._node = kwargs['node']
+        if 'request' in kwargs:
+            self._request = kwargs['request']
+
+        # setting _attrs on this object
+        for attr in Instance._attrs:
+            setattr(self, attr, getattr(apiresource, attr, None))
 
     @classmethod
     def get(cls, request, instance_id):
@@ -241,11 +293,9 @@ class Instance(base.APIResourceWrapper):
         """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # instance = novaclient(request).servers.get(instance_id)
-        servers = test_data().novaclient_servers.list()
-        server = next((s for s in servers if instance_id == s.id),
-                      None)
+        server = nova.server_get(request, instance_id)
 
-        return cls(server)
+        return cls(server, request=request)
 
     @classmethod
     def list(cls, request, with_joins=False):
@@ -263,17 +313,19 @@ class Instance(base.APIResourceWrapper):
         """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # servers = novaclient(request).servers.list(detailed=True)
-        servers = test_data().novaclient_servers.list()
+        servers, has_more_data = nova.server_list(request)
 
         if not with_joins:
             return [cls(s) for s in servers]
 
-        nodes_dict = list_to_dict(Node.list(None, associated=True),
+        # FIXME(lsmola) this is doing extra api request, that is why i will
+        # delete this whole class. Alternatively, optimize this.
+        nodes_dict = list_to_dict(Node.list(request, associated=True),
                                   key_attribute='instance_uuid')
         joined_servers = []
         for s in servers:
             node = nodes_dict.get(s.id, None)
-            joined_servers.append(Instance(s, node=node))
+            joined_servers.append(Instance(s, node=node, request=request))
         return joined_servers
 
     @cached_property
@@ -288,12 +340,34 @@ class Instance(base.APIResourceWrapper):
         """
         if hasattr(self, '_node'):
             return self._node
-        return Node.get_by_instance_uuid(None, self.id)
+        return Node.get_by_instance_uuid(self._request, self.id)
+
+    @cached_property
+    def image_name(self):
+        return image_get(self._request, self.image['id']).name
 
 
 class Node(base.APIResourceWrapper):
-    _attrs = ('uuid', 'instance_uuid', 'driver', 'driver_info',
-              'properties', 'power_state')
+    # FIXME(lsmola) uncomment this and delete equivalent methods
+    #_attrs = ('uuid', 'instance_uuid', 'driver', 'driver_info',
+    #          'properties', 'power_state')
+    _attrs = ('id', 'uuid', 'instance_uuid')
+
+    @classmethod
+    def nova_baremetal_format(cls, ipmi_address, cpu, ram, local_disk,
+                              mac_addresses, ipmi_username=None,
+                              ipmi_password=None):
+        """Converts Ironic parameters to Nova-baremetal format
+        """
+        return {'service_host': 'undercloud',
+                'cpus': cpu,
+                'memory_mb': ram,
+                'local_gb': local_disk,
+                'prov_mac_address': mac_addresses,
+                'pm_address': ipmi_address,
+                'pm_user': ipmi_username,
+                'pm_password': ipmi_password,
+                'terminal_port': None}
 
     @classmethod
     def create(cls, request, ipmi_address, cpu, ram, local_disk,
@@ -342,7 +416,9 @@ class Node(base.APIResourceWrapper):
         #         node_uuid=node.uuid,
         #         address=mac_address
         #     )
-        node = test_data().ironicclient_nodes.first()
+        node = baremetalclient(request).create(**cls.nova_baremetal_format(
+            ipmi_address, cpu, ram, local_disk, mac_addresses,
+            ipmi_username=None, ipmi_password=None))
 
         return cls(node)
 
@@ -361,10 +437,8 @@ class Node(base.APIResourceWrapper):
         """
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # node = ironicclient(request).nodes.get(uuid)
-        nodes = test_data().ironicclient_nodes.list()
-        node = next((n for n in nodes if uuid == n.uuid),
-                    None)
-
+        # nodes = test_data().ironicclient_nodes.list()
+        node = baremetalclient(request).get(uuid)
         return cls(node)
 
     @classmethod
@@ -387,11 +461,11 @@ class Node(base.APIResourceWrapper):
         # TODO(Tzu-Mainn Chen): remove test data when possible
         #node = ironicclient(request).nodes.get_by_instance_uuid(
         #    instance_uuid)
-        nodes = test_data().ironicclient_nodes.list()
+        nodes = Node.list(request, associated=True)
         node = next((n for n in nodes if instance_uuid == n.instance_uuid),
                     None)
 
-        return cls(node)
+        return node
 
     @classmethod
     def list(cls, request, associated=None):
@@ -412,7 +486,8 @@ class Node(base.APIResourceWrapper):
         # nodes = ironicclient(request).nodes.list(
         #    associated=associated)
 
-        nodes = test_data().ironicclient_nodes.list()
+        # nodes = test_data().ironicclient_nodes.list()
+        nodes = baremetalclient(request).list()
         if associated is not None:
             if associated:
                 nodes = [node for node in nodes
@@ -436,6 +511,7 @@ class Node(base.APIResourceWrapper):
         """
         # TODO(Tzu-Mainn Chen): uncomment when possible
         # ironicclient(request).nodes.delete(uuid)
+        baremetalclient(request).delete(uuid)
         return
 
     @cached_property
@@ -449,9 +525,45 @@ class Node(base.APIResourceWrapper):
         """
         # TODO(Tzu-Mainn Chen): uncomment when possible
         # ports = self.list_ports()
-        ports = test_data().ironicclient_ports.list()[:2]
+        # ports = test_data().ironicclient_ports.list()[:2]
 
-        return [port.address for port in ports]
+        # return [port.address for port in ports]
+        return [interface["address"] for interface in
+                self._apiresource.interfaces]
+
+    @cached_property
+    def power_state(self):
+        """Return a power state of this Node
+
+        :return: power state of this node
+        :rtype:  str
+        """
+        return self._apiresource.task_state
+
+    @cached_property
+    def properties(self):
+        """Return properties of this Node
+
+        :return: return memory, cpus and local_disk properties
+                 of this Node
+        :rtype:  dict of str
+        """
+        return {
+            'ram': self._apiresource.memory_mb / 1024.0,
+            'cpu': self._apiresource.cpus,
+            'local_disk': self._apiresource.local_gb / 1000.0
+        }
+
+    @cached_property
+    def driver_info(self):
+        """Return driver_info this Node
+
+        :return: return pm_address property of this Node
+        :rtype:  dict of str
+        """
+        return {
+            'ipmi_address': self._apiresource.pm_address
+        }
 
 
 class Resource(base.APIResourceWrapper):
@@ -460,6 +572,8 @@ class Resource(base.APIResourceWrapper):
 
     def __init__(self, apiresource, **kwargs):
         super(Resource, self).__init__(apiresource)
+        if 'request' in kwargs:
+            self._request = kwargs['request']
         if 'instance' in kwargs:
             self._instance = kwargs['instance']
         if 'node' in kwargs:
@@ -482,17 +596,9 @@ class Resource(base.APIResourceWrapper):
                  stack matches the resource name
         :rtype:  tuskar_ui.api.Resource
         """
-        # TODO(Tzu-Mainn Chen): uncomment when possible
-        # resource = heatclient(request).resources.get(
-        #     overcloud.id,
-        #     resource_name)
-        resources = test_data().heatclient_resources.list()
-        resource = next((r for r in resources
-                         if overcloud['id'] == r.stack_id
-                         and resource_name == r.resource_name),
-                        None)
-
-        return cls(resource)
+        resource = heat.resource_get(overcloud.stack.id,
+                                     resource_name)
+        return cls(resource, request=request)
 
     @cached_property
     def instance(self):
@@ -506,7 +612,7 @@ class Resource(base.APIResourceWrapper):
         if hasattr(self, '_instance'):
             return self._instance
         if self.physical_resource_id:
-            return Instance.get(None, self.physical_resource_id)
+            return Instance.get(self._request, self.physical_resource_id)
         return None
 
     @cached_property
@@ -523,14 +629,15 @@ class Resource(base.APIResourceWrapper):
         if hasattr(self, '_node'):
             return self._node
         if self.physical_resource_id:
-            return Node.get_by_instance_uuid(None, self.physical_resource_id)
+            return Node.get_by_instance_uuid(self._request,
+                                             self.physical_resource_id)
         return None
 
 
 # TODO(Tzu-Mainn Chen): change this to APIResourceWrapper once
 # ResourceCategory object exists in tuskar
 class ResourceCategory(base.APIDictWrapper):
-    _attrs = ('id', 'name', 'description', 'image_id')
+    _attrs = ('id', 'name', 'description', 'image_id', 'image_name')
 
     @classmethod
     def list(cls, request):
