@@ -312,7 +312,14 @@ function run_tests_all {
   # Remove the leftover coverage files from the -p flag earlier.
   rm -f .coverage.*
 
-  if [ $(($TUSKAR_UI_RESULT)) -eq 0 ]; then
+  PEP8_RESULT=0
+  if [ $only_selenium -eq 0 ]; then
+    run_pep8
+    PEP8_RESULT=$?
+  fi
+
+  TEST_RESULT=$(($TUSKAR_UI_RESULT || $PEP8_RESULT))
+  if [ $TEST_RESULT -eq 0 ]; then
     echo "Tests completed successfully."
   else
     echo "Tests failed."
