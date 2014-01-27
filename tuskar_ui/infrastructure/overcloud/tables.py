@@ -12,9 +12,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from django.core import urlresolvers
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
+
+
+def get_node_link(datum):
+    return urlresolvers.reverse("horizon:infrastructure:nodes:detail",
+                                args=(datum.node.uuid,))
 
 
 class ResourceCategoryInstanceTable(tables.DataTable):
@@ -25,6 +31,7 @@ class ResourceCategoryInstanceTable(tables.DataTable):
                                     verbose_name=_("Instance Status"))
     node_uuid = tables.Column(
         transform=lambda i: i.node.uuid,
+        link=get_node_link,
         verbose_name=_("Node UUID"))
     node_cpu = tables.Column(
         transform=lambda i: i.node.properties['cpu'],
