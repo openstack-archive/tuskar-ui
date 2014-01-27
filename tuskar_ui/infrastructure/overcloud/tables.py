@@ -18,9 +18,11 @@ from horizon import tables
 
 
 class ResourceCategoryNodeTable(tables.DataTable):
-
+    node = tables.Column("uuid",
+                         link="horizon:infrastructure:nodes:detail",
+                         verbose_name=_("Node"))
     ipmi_address = tables.Column(lambda node: node.driver_info['ipmi_address'],
-                                 verbose_name=_("Node"))
+                                 verbose_name=_("IPMI address"))
     cpu = tables.Column(lambda node: node.properties['cpu'],
                         verbose_name=_("CPU (cores)"))
     ram = tables.Column(lambda node: node.properties['ram'],

@@ -22,10 +22,9 @@ from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import tuskar_data
 
 
-INDEX_URL = urlresolvers.reverse(
-    'horizon:infrastructure:nodes:index')
-REGISTER_URL = urlresolvers.reverse(
-    'horizon:infrastructure:nodes:register')
+INDEX_URL = urlresolvers.reverse('horizon:infrastructure:nodes:index')
+REGISTER_URL = urlresolvers.reverse('horizon:infrastructure:nodes:register')
+DETAIL_VIEW = 'horizon:infrastructure:nodes:detail'
 TEST_DATA = utils.TestDataContainer()
 tuskar_data.data(TEST_DATA)
 
@@ -48,7 +47,6 @@ class NodesTests(test.BaseAdminViewTests):
             res = self.client.get(INDEX_URL + '?tab=nodes__free')
             self.assertEqual(mock.list.call_count, 4)
 
-        self.maxDiff = None
         self.assertTemplateUsed(res,
                                 'infrastructure/nodes/index.html')
         self.assertTemplateUsed(res, 'horizon/common/_detail_table.html')
@@ -76,7 +74,6 @@ class NodesTests(test.BaseAdminViewTests):
             res = self.client.get(INDEX_URL + '?tab=nodes__resource')
             self.assertEqual(mock.list.call_count, 4)
 
-        self.maxDiff = None
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
         self.assertTemplateUsed(res, 'horizon/common/_detail_table.html')
@@ -163,3 +160,30 @@ class NodesTests(test.BaseAdminViewTests):
             ])
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/register.html')
+
+    def test_node_detail(self):
+        node = api.Node(self.ironicclient_nodes.list()[0])
+
+        with patch('tuskar_ui.api.Node', **{
+            'spec_set': ['get'],  # Only allow these attributes
+            'get.return_value': node,
+        }) as mock:
+            res = self.client.get(
+                urlresolvers.reverse(DETAIL_VIEW, args=(node.uuid,))
+            )
+            self.assertEqual(mock.get.call_count, 1)
+
+        self.assertTemplateUsed(res, 'infrastructure/nodes/details.html')
+        self.assertEqual(res.context['node'], node)
+
+    def test_node_detail_exception(self):
+        with patch('tuskar_ui.api.Node', **{
+            'spec_set': ['get'],
+            'get.side_effect': self.exceptions.tuskar,
+        }) as mock:
+            res = self.client.get(
+                urlresolvers.reverse(DETAIL_VIEW, args=('no-such-node',))
+            )
+            self.assertEqual(mock.get.call_count, 1)
+
+        self.assertRedirectsNoFollow(res, INDEX_URL)
