@@ -21,6 +21,7 @@ from horizon import tables
 class NodesTable(tables.DataTable):
 
     uuid = tables.Column("uuid",
+                         link="horizon:infrastructure:nodes:detail",
                          verbose_name=_("UUID"))
     mac_addresses = tables.Column("addresses",
                                   verbose_name=_("MAC Addresses"),
