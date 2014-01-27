@@ -1,0 +1,14 @@
+{% load i18n %}
+{% block page_header %}
+  <div class='page-header'>
+    <h2>
+    {% if request.session.domain_context_name %}
+      <em>{{ request.session.domain_context_name }}:</em>
+    {% endif %}
+    {% if items_count %}
+      {{ items_count }}
+    {% endif %}
+    {{ title }}
+    </h2>
+  </div>
+{% endblock %}

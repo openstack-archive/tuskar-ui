@@ -2,23 +2,78 @@
 {% load url from future%}
 
 
-<div class="row-fluid"><div class="span12">
-<p>
-  <h4><span class="big-number">{{ nodes_total|default:0 }}</span> {% trans 'nodes in total' %}</h4>
-</p>
-<hr>
-<p>
-    <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__resource"
-        ><span class="big-number">{{ nodes_resources|default:0 }}</span> {% trans 'Resource Nodes' %}</a>
-</p>
-<hr>
-<p>
-<a href="{% url 'horizon:infrastructure:nodes:register' %}"
-   class="btn ajax-modal pull-right">{% trans 'Register Nodes' %}</a>
-    <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__free"
-        ><span class="big-number">{{ nodes_free|default:0 }}</span> {% trans 'Free Nodes' %}</a>
-</p>
-<hr>
-<h4>{% trans 'Statistics' %}</h4>
-<p>{% trans 'No statistics available' %}</p>
-</div></div>
+<div class="row-fluid">
+  <div class="span8">
+    <div class="widget">
+      <h2>{% trans 'Health Status' %}</h2>
+      <table class="table">
+        <tbody>
+          <tr>
+            <td>
+              <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__deployed">
+                {% trans 'Deployed Nodes' %}
+                ({{ deployed_nodes|length|default:0 }})
+              </a>
+            </td>
+            <td>
+              {% if deployed_nodes_down %}
+                <i class="icon-exclamation-sign"></i>
+                {% if deployed_nodes_down|length == 1 %}
+                  {% url 'horizon:infrastructure:nodes:detail' deployed_nodes_down.0.uuid as node_detail_url %}
+                {% else %}
+                  {% url 'horizon:infrastructure:nodes:index' as nodes_index_url %}
+                {% endif %}
+
+                {% blocktrans count down_count=deployed_nodes_down|length %}
+                  <a href="{{ node_detail_url }}">{{ down_count }} node</a> is down
+                {% plural %}
+                  <a href="{{ nodes_index_url }}?tab=nodes__deployed">{{ down_count }} nodes</a> are down
+                {% endblocktrans %}
+              {% else %}
+                <i class="icon-ok"></i>
+                {% trans 'All nodes are performing correctly' %}
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__free">
+                {% trans 'Free Nodes' %}
+                ({{ free_nodes|length|default:0 }})
+              </a>
+            </td>
+            <td>
+              {% if free_nodes_down %}
+                <i class="icon-exclamation-sign"></i>
+                {% if free_nodes_down|length == 1 %}
+                  {% url 'horizon:infrastructure:nodes:detail' free_nodes_down.0.uuid as node_detail_url %}
+                {% else %}
+                  {% url 'horizon:infrastructure:nodes:index' as nodes_index_url %}
+                {% endif %}
+
+                {% blocktrans count down_count=free_nodes_down|length %}
+                  <a href="{{ node_detail_url }}">{{ down_count }} node</a> is down
+                {% plural %}
+                  <a href="{{ nodes_index_url }}?tab=nodes__free">{{ down_count }} nodes</a> are down
+                {% endblocktrans %}
+              {% else %}
+                <i class="icon-ok"></i>
+                {% trans 'All nodes are performing correctly' %}
+              {% endif %}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="widget">
+      <h2>{% trans 'Provisioning Status' %}</h2>
+      <p>{% trans 'No statistics available' %}</p>
+    </div>
+    <div class="widget">
+      <h2>{% trans 'Power Status' %}</h2>
+      <p>{% trans 'No statistics available' %}</p>
+    </div>
+  </div>
+</div>
