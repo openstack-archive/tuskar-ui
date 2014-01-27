@@ -2,23 +2,56 @@
 {% load url from future%}
 
 
-<div class="row-fluid"><div class="span12">
-<p>
-  <h4><span class="big-number">{{ nodes_total|default:0 }}</span> {% trans 'nodes in total' %}</h4>
-</p>
-<hr>
-<p>
-    <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__resource"
-        ><span class="big-number">{{ nodes_resources|default:0 }}</span> {% trans 'Resource Nodes' %}</a>
-</p>
-<hr>
-<p>
-<a href="{% url 'horizon:infrastructure:nodes:register' %}"
-   class="btn ajax-modal pull-right">{% trans 'Register Nodes' %}</a>
-    <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__free"
-        ><span class="big-number">{{ nodes_free|default:0 }}</span> {% trans 'Free Nodes' %}</a>
-</p>
-<hr>
-<h4>{% trans 'Statistics' %}</h4>
-<p>{% trans 'No statistics available' %}</p>
-</div></div>
+<div class="row-fluid">
+  <div class="span8">
+    <div class="widget">
+      <h2>{% trans 'Health Status' %}</h2>
+      <table class="table">
+        <tbody>
+          <tr>
+            <td>
+              <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__deployed">
+                {% trans 'Deployed Nodes' %}
+                ({{ nodes_deployed|default:0 }})
+              </a>
+            </td>
+            <td>
+              <i class="icon-exclamation-sign"></i>
+              <strong>1 node</strong>
+              is down
+            </td>
+            <td>
+              <i class="icon-ok"></i>
+              <strong>75% of nodes</strong>
+              are performing correctly
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__free">
+                {% trans 'Free Nodes' %}
+                ({{ nodes_free|default:0 }})
+              </a>
+            </td>
+            <td>
+              <i class="icon-ok"></i>
+              <strong>100% of nodes</strong>
+              are performing correctly
+            </td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="widget">
+      <h2>{% trans 'Provisioning Status' %}</h2>
+      <p>{% trans 'No statistics available' %}</p>
+    </div>
+    <div class="widget">
+      <h2>{% trans 'Power Status' %}</h2>
+      <p>{% trans 'No statistics available' %}</p>
+    </div>
+  </div>
+</div>

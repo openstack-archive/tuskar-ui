@@ -45,7 +45,7 @@ class NodesTests(test.BaseAdminViewTests):
             'list.return_value': free_nodes,
         }) as mock:
             res = self.client.get(INDEX_URL + '?tab=nodes__free')
-            self.assertEqual(mock.list.call_count, 4)
+            self.assertEqual(mock.list.call_count, 6)
 
         self.assertTemplateUsed(res,
                                 'infrastructure/nodes/index.html')
@@ -63,29 +63,29 @@ class NodesTests(test.BaseAdminViewTests):
 
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
-    def test_resource_nodes(self):
-        resource_nodes = [api.Node(node)
+    def test_deployed_nodes(self):
+        deployed_nodes = [api.Node(node)
                           for node in self.ironicclient_nodes.list()]
 
         with patch('tuskar_ui.api.Node', **{
             'spec_set': ['list'],  # Only allow these attributes
-            'list.return_value': resource_nodes,
+            'list.return_value': deployed_nodes,
         }) as mock:
-            res = self.client.get(INDEX_URL + '?tab=nodes__resource')
-            self.assertEqual(mock.list.call_count, 4)
+            res = self.client.get(INDEX_URL + '?tab=nodes__deployed')
+            self.assertEqual(mock.list.call_count, 6)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
         self.assertTemplateUsed(res, 'horizon/common/_detail_table.html')
-        self.assertItemsEqual(res.context['resource_nodes_table'].data,
-                              resource_nodes)
+        self.assertItemsEqual(res.context['deployed_nodes_table'].data,
+                              deployed_nodes)
 
-    def test_resource_nodes_list_exception(self):
+    def test_deployed_nodes_list_exception(self):
         with patch('tuskar_ui.api.Node', **{
             'spec_set': ['list'],
             'list.side_effect': self.exceptions.tuskar,
         }) as mock:
-            res = self.client.get(INDEX_URL + '?tab=nodes__resource')
+            res = self.client.get(INDEX_URL + '?tab=nodes__deployed')
             self.assertEqual(mock.list.call_count, 3)
 
         self.assertRedirectsNoFollow(res, INDEX_URL)
