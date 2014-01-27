@@ -37,35 +37,36 @@ class OverviewTab(tabs.Tab):
             exceptions.handle(request,
                               _('Unable to retrieve free nodes.'))
         try:
-            resource_nodes = len(api.Node.list(request, associated=True))
+            deployed_nodes = len(api.Node.list(request, associated=True))
         except Exception:
-            resource_nodes = 0
+            deployed_nodes = 0
             exceptions.handle(request,
-                              _('Unable to retrieve resource nodes.'))
+                              _('Unable to retrieve deployed nodes.'))
         return {
-            'nodes_total': free_nodes + resource_nodes,
-            'nodes_resources': resource_nodes,
+            'nodes_deployed': deployed_nodes,
             'nodes_free': free_nodes,
         }
 
 
-class ResourceTab(tabs.TableTab):
-    table_classes = (tables.ResourceNodesTable,)
-    name = _("Resource")
-    slug = "resource"
+class DeployedTab(tabs.TableTab):
+    table_classes = (tables.DeployedNodesTable,)
+    name = _("Deployed")
+    slug = "deployed"
     template_name = ("horizon/common/_detail_table.html")
 
-    def get_resource_nodes_data(self):
+    def get_deployed_nodes_data(self):
         try:
-            resource_nodes = api.Node.list(self.request, associated=True)
+            deployed_nodes = api.Node.list(self.request, associated=True)
+            self.name = "%s (%s)" % (self.name, len(deployed_nodes))
         except Exception:
-            resource_nodes = []
+            deployed_nodes = []
+            self.name = "%s (0)" % self.name
             redirect = urlresolvers.reverse(
                 'horizon:infrastructure:nodes:index')
             exceptions.handle(self.request,
-                              _('Unable to retrieve resource nodes.'),
+                              _('Unable to retrieve deployed nodes.'),
                               redirect=redirect)
-        return resource_nodes
+        return deployed_nodes
 
 
 class FreeTab(tabs.TableTab):
@@ -77,8 +78,10 @@ class FreeTab(tabs.TableTab):
     def get_free_nodes_data(self):
         try:
             free_nodes = api.Node.list(self.request, associated=False)
+            self.name = "%s (%s)" % (self.name, len(free_nodes))
         except Exception:
             free_nodes = []
+            self.name = "%s (0)" % self.name
             redirect = urlresolvers.reverse(
                 'horizon:infrastructure:nodes:index')
             exceptions.handle(self.request,
@@ -89,5 +92,5 @@ class FreeTab(tabs.TableTab):
 
 class NodeTabs(tabs.TabGroup):
     slug = "nodes"
-    tabs = (OverviewTab, ResourceTab, FreeTab)
+    tabs = (OverviewTab, DeployedTab, FreeTab)
     sticky = True

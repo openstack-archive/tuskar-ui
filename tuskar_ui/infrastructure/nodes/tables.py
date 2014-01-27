@@ -65,10 +65,10 @@ class FreeNodesTable(NodesTable):
         row_actions = ()
 
 
-class ResourceNodesTable(NodesTable):
+class DeployedNodesTable(NodesTable):
 
     class Meta:
-        name = "resource_nodes"
-        verbose_name = _("Resource Nodes")
+        name = "deployed_nodes"
+        verbose_name = _("Deployed Nodes")
         table_actions = ()
         row_actions = ()

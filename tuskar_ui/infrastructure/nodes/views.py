@@ -13,10 +13,13 @@
 #    under the License.
 
 from django.core.urlresolvers import reverse_lazy
+from django.utils.translation import ugettext_lazy as _
 
+from horizon import exceptions
 import horizon.forms
 from horizon import tabs as horizon_tabs
 
+from tuskar_ui import api
 from tuskar_ui.infrastructure.nodes import forms
 from tuskar_ui.infrastructure.nodes import tabs
 
@@ -24,6 +27,29 @@ from tuskar_ui.infrastructure.nodes import tabs
 class IndexView(horizon_tabs.TabbedTableView):
     tab_group_class = tabs.NodeTabs
     template_name = 'infrastructure/nodes/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+
+        try:
+            context['free_nodes'] = len(api.Node.list(self.request,
+                                                      associated=False))
+        except Exception:
+            context['free_nodes'] = 0
+            exceptions.handle(self.request,
+                              _('Unable to retrieve free nodes.'))
+        try:
+            context['deployed_nodes'] = len(api.Node.list(self.request,
+                                                          associated=True))
+        except Exception:
+            context['deployed_nodes'] = 0
+            exceptions.handle(self.request,
+                              _('Unable to retrieve deployed nodes.'))
+
+        context['nodes_total'] = \
+            context['free_nodes'] + context['deployed_nodes']
+
+        return context
 
 
 class RegisterView(horizon.forms.ModalFormView):
