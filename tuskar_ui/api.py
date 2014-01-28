@@ -188,112 +188,40 @@ class Overcloud(base.APIDictWrapper):
         if not with_joins:
             return [Resource(r) for r in resources]
 
-        instances_dict = list_to_dict(Instance.list(None, with_joins=True))
         nodes_dict = list_to_dict(Node.list(None, associated=True),
                                   key_attribute='instance_uuid')
         joined_resources = []
         for r in resources:
-            instance = instances_dict.get(r.physical_resource_id, None)
             node = nodes_dict.get(r.physical_resource_id, None)
             joined_resources.append(Resource(r,
-                                             instance=instance,
                                              node=node))
         return joined_resources
 
     @memoized.memoized
-    def instances(self, resource_category):
-        """Return a list of Instances in the Overcloud that match a
+    def nodes(self, resource_category):
+        """Return a list of Nodes in the Overcloud that match a
         Resource Category
 
         :param resource_category: category of resources to retrieve
                                   instances from
         :type  resource_category: tuskar_ui.api.ResourceCategory
 
-        :return: list of Instances in the Overcloud that match a Resource
+        :return: list of Nodes in the Overcloud that match a Resource
                  Category, or an empty list if there are none
-        :rtype:  list of tuskar_ui.api.Instance
+        :rtype:  list of tuskar_ui.api.Node
         """
         resources = self.resources(resource_category, with_joins=True)
-        return [r.instance for r in resources]
-
-
-class Instance(base.APIResourceWrapper):
-    _attrs = ('id', 'name', 'image', 'status')
-
-    def __init__(self, apiresource, **kwargs):
-        super(Instance, self).__init__(apiresource)
-        if 'node' in kwargs:
-            self._node = kwargs['node']
-
-    @classmethod
-    def get(cls, request, instance_id):
-        """Return the Nova Instance that matches the ID
-
-        :param request: request object
-        :type  request: django.http.HttpRequest
-
-        :param instance_id: ID of Instance to be retrieved
-        :type  instance_id: str
-
-        :return: matching Instance, or None if no Instance matches
-                 the ID
-        :rtype:  tuskar_ui.api.Instance
-        """
-        # TODO(Tzu-Mainn Chen): remove test data when possible
-        # instance = novaclient(request).servers.get(instance_id)
-        servers = test_data().novaclient_servers.list()
-        server = next((s for s in servers if instance_id == s.id),
-                      None)
-
-        return cls(server)
-
-    @classmethod
-    def list(cls, request, with_joins=False):
-        """Return a list of Instances in Nova
-
-        :param request: request object
-        :type  request: django.http.HttpRequest
-
-        :param with_joins: should we also retrieve objects associated with each
-                           retrieved Instance?
-        :type  with_joins: bool
-
-        :return: list of Instances, or an empty list if there are none
-        :rtype:  list of tuskar_ui.api.Instance
-        """
-        # TODO(Tzu-Mainn Chen): remove test data when possible
-        # servers = novaclient(request).servers.list(detailed=True)
-        servers = test_data().novaclient_servers.list()
-
-        if not with_joins:
-            return [cls(s) for s in servers]
-
-        nodes_dict = list_to_dict(Node.list(None, associated=True),
-                                  key_attribute='instance_uuid')
-        joined_servers = []
-        for s in servers:
-            node = nodes_dict.get(s.id, None)
-            joined_servers.append(Instance(s, node=node))
-        return joined_servers
-
-    @cached_property
-    def node(self):
-        """Return the Ironic Node associated with this Instance
-
-        :return: Ironic Node associated with this Instance
-        :rtype:  tuskar_ui.api.Node
-
-        :raises: ironicclient.exc.HTTPNotFound if there is no Node with the
-                 matching instance UUID
-        """
-        if hasattr(self, '_node'):
-            return self._node
-        return Node.get_by_instance_uuid(None, self.id)
+        return [r.node for r in resources]
 
 
 class Node(base.APIResourceWrapper):
     _attrs = ('uuid', 'instance_uuid', 'driver', 'driver_info',
               'properties', 'power_state')
+
+    def __init__(self, apiresource, instance=None):
+        super(Node, self).__init__(apiresource)
+        if instance is not None:
+            self._instance = instance
 
     @classmethod
     def create(cls, request, ipmi_address, cpu, ram, local_disk,
@@ -364,6 +292,12 @@ class Node(base.APIResourceWrapper):
         nodes = test_data().ironicclient_nodes.list()
         node = next((n for n in nodes if uuid == n.uuid),
                     None)
+        if node.instance_uuid is not None:
+            # server = novaclient(request).servers.get(node.instance_uuid)
+            servers = test_data().novaclient_servers.list()
+            server = next((s for s in servers if node.instance_uuid == s.id),
+                          None)
+            return cls(node, instance=server)
 
         return cls(node)
 
@@ -387,11 +321,15 @@ class Node(base.APIResourceWrapper):
         # TODO(Tzu-Mainn Chen): remove test data when possible
         #node = ironicclient(request).nodes.get_by_instance_uuid(
         #    instance_uuid)
+        #server = novaclient(request).servers.get(instance_id)
         nodes = test_data().ironicclient_nodes.list()
         node = next((n for n in nodes if instance_uuid == n.instance_uuid),
                     None)
+        servers = test_data().novaclient_servers.list()
+        server = next((s for s in servers if instance_uuid == s.id),
+                      None)
 
-        return cls(node)
+        return cls(node, instance=server)
 
     @classmethod
     def list(cls, request, associated=None):
@@ -411,8 +349,8 @@ class Node(base.APIResourceWrapper):
         # TODO(Tzu-Mainn Chen): remove test data when possible
         # nodes = ironicclient(request).nodes.list(
         #    associated=associated)
-
         nodes = test_data().ironicclient_nodes.list()
+
         if associated is not None:
             if associated:
                 nodes = [node for node in nodes
@@ -420,8 +358,16 @@ class Node(base.APIResourceWrapper):
             else:
                 nodes = [node for node in nodes
                          if node.instance_uuid is None]
+                return [cls(node) for node in nodes]
 
-        return [cls(node) for node in nodes]
+        # servers = novaclient(request).servers.list(detailed=True)
+        servers_dict = list_to_dict(test_data().novaclient_servers.list())
+        nodes_with_instance = []
+        for n in nodes:
+            server = servers_dict.get(n.instance_uuid, None)
+            nodes_with_instance.append(cls(n, instance=server))
+
+        return nodes_with_instance
 
     @classmethod
     def delete(cls, request, uuid):
@@ -437,6 +383,27 @@ class Node(base.APIResourceWrapper):
         # TODO(Tzu-Mainn Chen): uncomment when possible
         # ironicclient(request).nodes.delete(uuid)
         return
+
+    @cached_property
+    def instance(self):
+        """Return the Nova Instance associated with this Resource
+
+        :return: Nova Instance associated with this Resource; or
+                 None if there is no Instance associated with this
+                 Resource, or no matching Instance is found
+        :rtype:  tuskar_ui.api.Instance
+        """
+        if hasattr(self, '_instance'):
+            return self._instance
+        if self.instance_uuid:
+            # TODO(Tzu-Mainn Chen): remove test data when possible
+            # server = novaclient(request).servers.get(self.instance_uuid)
+            servers = test_data().novaclient_servers.list()
+            server = next((s for s in servers if self.instance_uuid == s.id),
+                          None)
+
+            return server
+        return None
 
     @cached_property
     def addresses(self):
@@ -460,8 +427,6 @@ class Resource(base.APIResourceWrapper):
 
     def __init__(self, apiresource, **kwargs):
         super(Resource, self).__init__(apiresource)
-        if 'instance' in kwargs:
-            self._instance = kwargs['instance']
         if 'node' in kwargs:
             self._node = kwargs['node']
 
@@ -493,21 +458,6 @@ class Resource(base.APIResourceWrapper):
                         None)
 
         return cls(resource)
-
-    @cached_property
-    def instance(self):
-        """Return the Nova Instance associated with this Resource
-
-        :return: Nova Instance associated with this Resource; or
-                 None if there is no Instance associated with this
-                 Resource, or no matching Instance is found
-        :rtype:  tuskar_ui.api.Instance
-        """
-        if hasattr(self, '_instance'):
-            return self._instance
-        if self.physical_resource_id:
-            return Instance.get(None, self.physical_resource_id)
-        return None
 
     @cached_property
     def node(self):

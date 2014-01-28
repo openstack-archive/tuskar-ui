@@ -6,17 +6,17 @@
     <h3>{% trans "Resource Categories" %}</h3>
     <hr />
     {% for category in categories %}
-      <h4><a href="{% url 'horizon:infrastructure:overcloud:resource_category' overcloud.id category.id%}">{{ category.instance_count }} {{ category.name }}</a></h4>
-      {% if category.error_instance_count > 0 %}
-         {{ category.error_instance_count }} {% trans "instances are down" %}
+      <h4><a href="{% url 'horizon:infrastructure:overcloud:resource_category' overcloud.id category.id%}">{{ category.node_count }} {{ category.name }}</a></h4>
+      {% if category.error_node_count > 0 %}
+         {{ category.error_node_count }} {% trans "nodes are down" %}
          <br />
       {% endif %}
-      {% if category.other_instance_count > 0 %}
-         {{ category.other_instance_count }} {% trans "instances are building" %}
+      {% if category.other_node_count > 0 %}
+         {{ category.other_node_count }} {% trans "nodes are building" %}
          <br />
       {% endif %}
-      {% if category.running_instance_percentage %}
-         {{ category.running_instance_percentage }} {% trans "% of instances are running" %}
+      {% if category.running_node_percentage %}
+         {{ category.running_node_percentage }} {% trans "% of nodes are running" %}
          <br />
       {% endif %}
       <hr />
