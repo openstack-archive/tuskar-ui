@@ -17,31 +17,33 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import tables
 
 
-class ResourceCategoryInstanceTable(tables.DataTable):
+class ResourceCategoryNodeTable(tables.DataTable):
 
-    instance_name = tables.Column("name",
-                                  verbose_name=_("Instance Name"))
-    instance_status = tables.Column("status",
+    ipmi_address = tables.Column(lambda node: node.driver_info['ipmi_address'],
+                                 verbose_name=_("Node"))
+    cpu = tables.Column(lambda node: node.properties['cpu'],
+                        verbose_name=_("CPU (cores)"))
+    ram = tables.Column(lambda node: node.properties['ram'],
+                        verbose_name=_("Memory (GB)"))
+    local_disk = tables.Column(lambda node: node.properties['local_disk'],
+                               verbose_name=_("Local Disk (TB)"))
+    instance_status = tables.Column(lambda node: node.instance.status,
                                     verbose_name=_("Instance Status"))
-    node_uuid = tables.Column(
-        transform=lambda i: i.node.uuid,
-        verbose_name=_("Node UUID"))
-    node_cpu = tables.Column(
-        transform=lambda i: i.node.properties['cpu'],
-        verbose_name=_("Node CPU"))
-    node_ram = tables.Column(
-        transform=lambda i: i.node.properties['ram'],
-        verbose_name=_("Node RAM (GB)"))
-    node_local_disk = tables.Column(
-        transform=lambda i: i.node.properties['local_disk'],
-        verbose_name=_("Node Local Disk (TB)"))
-    node_power_state = tables.Column(
-        transform=lambda i: i.node.power_state,
-        verbose_name=_("Power State"))
+    power_state = tables.Column("power_state",
+                                verbose_name=_("Power"),
+                                status=True,
+                                status_choices=(
+                                    ('on', True),
+                                    ('off', False),
+                                    ('rebooting', None)
+                                ))
+
+    def get_object_id(self, datum):
+        return datum.uuid
 
     class Meta:
-        name = "resource_category__instancetable"
-        verbose_name = _("Instances")
+        name = "resource_category__nodetable"
+        verbose_name = _("Nodes")
         table_actions = ()
         row_actions = ()
 

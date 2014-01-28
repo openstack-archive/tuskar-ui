@@ -45,22 +45,22 @@ class OverviewTab(tabs.Tab):
             context['categories'].append(
                 self._get_category_data(overcloud, category))
 
-        # also get expected instance counts
+        # also get expected node counts
         return context
 
     def _get_category_data(self, overcloud, category):
-        instances = overcloud.instances(category)
-        category.instance_count = len(instances)
-        if category.instance_count > 0:
-            category.running_instance_count = len(
-                [i for i in instances if i.status == 'ACTIVE'])
-            category.error_instance_count = len(
-                [i for i in instances if i.status == 'ERROR'])
-            category.other_instance_count = category.instance_count - \
-                (category.running_instance_count +
-                 category.error_instance_count)
-            category.running_instance_percentage = 100 * \
-                category.running_instance_count / category.instance_count
+        nodes = overcloud.nodes(category)
+        category.node_count = len(nodes)
+        if category.node_count > 0:
+            category.running_node_count = len(
+                [n for n in nodes if n.instance.status == 'ACTIVE'])
+            category.error_node_count = len(
+                [n for n in nodes if n.instance.status == 'ERROR'])
+            category.other_node_count = category.node_count - \
+                (category.running_node_count +
+                 category.error_node_count)
+            category.running_node_percentage = 100 * \
+                category.running_node_count / category.node_count
         return category
 
 
