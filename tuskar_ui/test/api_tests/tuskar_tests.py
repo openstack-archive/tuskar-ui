@@ -17,6 +17,7 @@ from __future__ import absolute_import
 from glanceclient.v1 import images
 from heatclient.v1 import events
 from heatclient.v1 import stacks
+from novaclient.v1_1 import servers
 
 from tuskar_ui import api
 from tuskar_ui.test import helpers as test
@@ -84,35 +85,16 @@ class TuskarAPITests(test.APITestCase):
             self.assertIsInstance(i, api.Resource)
         self.assertEqual(1, len(ret_val))
 
-    def test_overcloud_instances(self):
+    def test_overcloud_nodes(self):
         overcloud = self.tuskarclient_overclouds.first()
         category = self.tuskarclient_resource_categories.first()
 
-        ret_val = api.Overcloud(overcloud).instances(
+        ret_val = api.Overcloud(overcloud).nodes(
             api.ResourceCategory(category))
-        for i in ret_val:
-            self.assertIsInstance(i, api.Instance)
+        for n in ret_val:
+            self.assertIsInstance(n, api.Node)
+            self.assertIsInstance(n.instance, servers.Server)
         self.assertEqual(1, len(ret_val))
-
-    def test_instance_get(self):
-        server = self.novaclient_servers.first()
-
-        ret_val = api.Instance.get(self.request, server.id)
-        self.assertIsInstance(ret_val, api.Instance)
-
-    def test_instance_list(self):
-        #servers = self.novaclient_servers.list()
-
-        ret_val = api.Instance.list(self.request)
-        for i in ret_val:
-            self.assertIsInstance(i, api.Instance)
-        self.assertEqual(4, len(ret_val))
-
-    def test_instance_node(self):
-        server = self.novaclient_servers.first()
-
-        ret_val = api.Instance(server).node
-        self.assertIsInstance(ret_val, api.Node)
 
     def test_node_create(self):
         node = self.ironicclient_nodes.first()
@@ -126,20 +108,25 @@ class TuskarAPITests(test.APITestCase):
             ['aa:aa:aa:aa:aa:aa'],
             ipmi_username='admin',
             ipmi_password='password')
+        ret_val.instance_uuid = None
 
         self.assertIsInstance(ret_val, api.Node)
+        self.assertIsNone(ret_val.instance)
 
     def test_node_get(self):
         node = self.ironicclient_nodes.first()
 
         ret_val = api.Node.get(self.request, node.uuid)
         self.assertIsInstance(ret_val, api.Node)
+        self.assertIsInstance(ret_val.instance, servers.Server)
 
     def test_node_get_by_instance_uuid(self):
         node = self.ironicclient_nodes.first()
 
-        ret_val = api.Node.get(self.request, node.instance_uuid)
+        ret_val = api.Node.get_by_instance_uuid(self.request,
+                                                node.instance_uuid)
         self.assertIsInstance(ret_val, api.Node)
+        self.assertIsInstance(ret_val.instance, servers.Server)
 
     def test_node_list(self):
         #nodes = self.tuskarclient_overclouds.list()
@@ -148,11 +135,6 @@ class TuskarAPITests(test.APITestCase):
         for node in ret_val:
             self.assertIsInstance(node, api.Node)
         self.assertEqual(5, len(ret_val))
-
-    def test_node_delete(self):
-        node = self.ironicclient_nodes.first()
-
-        api.Node.delete(self.request, node.uuid)
 
     def test_node_addresses(self):
         node = self.ironicclient_nodes.first()
@@ -168,17 +150,12 @@ class TuskarAPITests(test.APITestCase):
                                    resource.resource_name)
         self.assertIsInstance(ret_val, api.Resource)
 
-    def test_resource_instance(self):
-        resource = self.heatclient_resources.first()
-
-        ret_val = api.Resource(resource).instance
-        self.assertIsInstance(ret_val, api.Instance)
-
     def test_resource_node(self):
         resource = self.heatclient_resources.first()
 
         ret_val = api.Resource(resource).node
         self.assertIsInstance(ret_val, api.Node)
+        self.assertIsInstance(ret_val.instance, servers.Server)
 
     def test_resource_category_list(self):
         #categories = self.tuskarclient_resource_categories.list()

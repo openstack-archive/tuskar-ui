@@ -65,14 +65,14 @@ class DetailView(horizon_tabs.TabView):
 
 
 class ResourceCategoryView(horizon_tables.DataTableView):
-    table_class = tables.ResourceCategoryInstanceTable
+    table_class = tables.ResourceCategoryNodeTable
     template_name = 'infrastructure/overcloud/resource_category.html'
 
     def get_data(self):
         overcloud = self._get_overcloud()
         category = self._get_category(overcloud)
 
-        return overcloud.instances(category)
+        return overcloud.nodes(category)
 
     def get_context_data(self, **kwargs):
         context = super(ResourceCategoryView, self).get_context_data(**kwargs)
@@ -82,7 +82,7 @@ class ResourceCategoryView(horizon_tables.DataTableView):
 
         context['category'] = category
         context['image'] = category.image
-        context['instances'] = overcloud.instances(category)
+        context['nodes'] = overcloud.nodes(category)
 
         return context
 
