@@ -49,7 +49,9 @@ class OverviewTab(tabs.Tab):
         return context
 
     def _get_category_data(self, overcloud, category):
-        nodes = overcloud.nodes(category)
+        resources = overcloud.resources(category, with_joins=True)
+        nodes = [r.node for r in resources]
+
         category.node_count = len(nodes)
         if category.node_count > 0:
             category.running_node_count = len(

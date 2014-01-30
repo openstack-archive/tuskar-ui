@@ -72,7 +72,7 @@ class ResourceCategoryView(horizon_tables.DataTableView):
         overcloud = self._get_overcloud()
         category = self._get_category(overcloud)
 
-        return overcloud.nodes(category)
+        return self._get_nodes(overcloud, category)
 
     def get_context_data(self, **kwargs):
         context = super(ResourceCategoryView, self).get_context_data(**kwargs)
@@ -82,9 +82,14 @@ class ResourceCategoryView(horizon_tables.DataTableView):
 
         context['category'] = category
         context['image'] = category.image
-        context['nodes'] = overcloud.nodes(category)
+        context['nodes'] = self._get_nodes(overcloud, category)
 
         return context
+
+    @memoized.memoized
+    def _get_nodes(self, overcloud, category):
+        resources = overcloud.resources(category, with_joins=True)
+        return [r.node for r in resources]
 
     @memoized.memoized
     def _get_overcloud(self):

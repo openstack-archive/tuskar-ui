@@ -197,22 +197,6 @@ class Overcloud(base.APIDictWrapper):
                                              node=node))
         return joined_resources
 
-    @memoized.memoized
-    def nodes(self, resource_category):
-        """Return a list of Nodes in the Overcloud that match a
-        Resource Category
-
-        :param resource_category: category of resources to retrieve
-                                  nodes from
-        :type  resource_category: tuskar_ui.api.ResourceCategory
-
-        :return: list of Nodes in the Overcloud that match a Resource
-                 Category, or an empty list if there are none
-        :rtype:  list of tuskar_ui.api.Node
-        """
-        resources = self.resources(resource_category, with_joins=True)
-        return [r.node for r in resources]
-
 
 class Node(base.APIResourceWrapper):
     _attrs = ('uuid', 'instance_uuid', 'driver', 'driver_info',

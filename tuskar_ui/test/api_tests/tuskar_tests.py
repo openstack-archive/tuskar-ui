@@ -85,17 +85,6 @@ class TuskarAPITests(test.APITestCase):
             self.assertIsInstance(i, api.Resource)
         self.assertEqual(1, len(ret_val))
 
-    def test_overcloud_nodes(self):
-        overcloud = self.tuskarclient_overclouds.first()
-        category = self.tuskarclient_resource_categories.first()
-
-        ret_val = api.Overcloud(overcloud).nodes(
-            api.ResourceCategory(category))
-        for n in ret_val:
-            self.assertIsInstance(n, api.Node)
-            self.assertIsInstance(n.instance, servers.Server)
-        self.assertEqual(1, len(ret_val))
-
     def test_node_create(self):
         node = self.ironicclient_nodes.first()
 
