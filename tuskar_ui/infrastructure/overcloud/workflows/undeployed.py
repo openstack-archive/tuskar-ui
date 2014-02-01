@@ -24,7 +24,7 @@ from tuskar_ui.infrastructure.overcloud.workflows import undeployed_overview
 
 class Workflow(horizon.workflows.Workflow):
     slug = 'undeployed_overcloud'
-    name = _("My Openstack Deployment")
+    name = _("My OpenStack Deployment")
     default_steps = (
         undeployed_overview.Step,
         undeployed_configuration.Step,
