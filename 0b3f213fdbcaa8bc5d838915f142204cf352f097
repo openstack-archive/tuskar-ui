@@ -1,0 +1,10 @@
+Verified+2: Jenkins
+Approved+1: James Slagle <jslagle@redhat.com>
+Code-Review+2: James Slagle <jslagle@redhat.com>
+Code-Review+2: Tzu-Mainn Chen <tzumainn@redhat.com>
+Code-Review+2: Jordan OMara <jomara@redhat.com>
+Submitted-by: Jenkins
+Submitted-at: Tue, 04 Feb 2014 01:16:28 +0000
+Reviewed-on: https://review.openstack.org/70480
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
