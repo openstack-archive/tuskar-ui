@@ -29,6 +29,36 @@ class IndexView(horizon_tabs.TabbedTableView):
     tab_group_class = tabs.NodeTabs
     template_name = 'infrastructure/nodes/index.html'
 
+    def get_free_nodes_count(self):
+        try:
+            free_nodes_count = len(api.Node.list(self.request,
+                                                 associated=False))
+        except Exception:
+            free_nodes_count = 0
+            exceptions.handle(self.request,
+                              _('Unable to retrieve free nodes.'))
+        return free_nodes_count
+
+    def get_deployed_nodes_count(self):
+        try:
+            deployed_nodes_count = len(api.Node.list(self.request,
+                                                     associated=True))
+        except Exception:
+            deployed_nodes_count = 0
+            exceptions.handle(self.request,
+                              _('Unable to retrieve deployed nodes.'))
+        return deployed_nodes_count
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+
+        context['free_nodes_count'] = self.get_free_nodes_count()
+        context['deployed_nodes_count'] = self.get_deployed_nodes_count()
+        context['nodes_count'] = (context['free_nodes_count'] +
+                                  context['deployed_nodes_count'])
+
+        return context
+
 
 class RegisterView(horizon_forms.ModalFormView):
     form_class = forms.NodeFormset
