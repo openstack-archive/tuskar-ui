@@ -502,7 +502,12 @@ class Node(base.APIResourceWrapper):
         :return: power state of this node
         :rtype:  str
         """
-        return self._apiresource.task_state
+        task_state = self._apiresource.task_state
+        task_state_dict = {
+            'active': 'on',
+            'reboot': 'rebooting'
+        }
+        return task_state_dict.get(task_state, 'off')
 
     @cached_property
     def properties(self):
