@@ -35,7 +35,7 @@ class Workflow(horizon.workflows.Workflow):
     def handle(self, request, context):
         success = True
         try:
-            api.Overcloud.create(self.request, context['category_counts'])
+            api.Overcloud.create(self.request, context['role_counts'])
             # TODO(rdopieralski) Use the configuration somehow?
         except Exception:
             success = False

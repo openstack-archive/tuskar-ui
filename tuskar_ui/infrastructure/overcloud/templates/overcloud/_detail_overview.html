@@ -3,26 +3,26 @@
 
 <div class="row-fluid">
   <div class="span6">
-    <h3>{% trans "Resource Categories" %}</h3>
+    <h3>{% trans "Roles" %}</h3>
     <hr />
-    {% for category in categories %}
-      <h4><a href="{% url 'horizon:infrastructure:overcloud:resource_category' overcloud.id category.id%}">{{ category.node_count }} {{ category.name }}</a></h4>
-      {% if category.error_node_count > 0 %}
-         {{ category.error_node_count }} {% trans "nodes are down" %}
+    {% for role in roles %}
+      <h4><a href="{% url 'horizon:infrastructure:overcloud:role' overcloud.id role.id%}">{{ role.node_count }} {{ role.name }}</a></h4>
+      {% if role.error_node_count > 0 %}
+         {{ role.error_node_count }} {% trans "nodes are down" %}
          <br />
       {% endif %}
-      {% if category.other_node_count > 0 %}
-         {{ category.other_node_count }} {% trans "nodes are building" %}
+      {% if role.other_node_count > 0 %}
+         {{ role.other_node_count }} {% trans "nodes are building" %}
          <br />
       {% endif %}
-      {% if category.running_node_percentage %}
-         {{ category.running_node_percentage }} {% trans "% of nodes are running" %}
+      {% if role.running_node_percentage %}
+         {{ role.running_node_percentage }} {% trans "% of nodes are running" %}
          <br />
       {% endif %}
       <hr />
     {% endfor %}
   </div>
   <div class="span6">
-    <h3>{% trans "Resource Categories Distribution" %}</h3>
+    <h3>{% trans "Role Distribution" %}</h3>
   </div>
 </div>

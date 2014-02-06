@@ -7,7 +7,7 @@
     <div class="pull-right">
       {{ free_nodes|default:0 }} {% trans "free nodes" %}
     </div>
-    <h2>{% trans "Resource Categories" %}</h2>
+    <h2>{% trans "Roles" %}</h2>
     <div class="widget">
       {% include 'horizon/common/_form_errors.html' with form=form %}
       <table class="table">
@@ -16,7 +16,7 @@
           <th>{% trans "Node profiles" %}</th>
           <th>{% trans "Nodes" %}</th>
         </tr>
-        {% for category, label, fields in form.roles_fieldset %}
+        {% for role, label, fields in form.roles_fieldset %}
           <tbody>
           {% for field in fields %}
             <tr>
