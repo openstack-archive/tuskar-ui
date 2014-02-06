@@ -1,10 +1,10 @@
 {% extends 'infrastructure/base.html' %}
 {% load i18n %}
 {% load url from future %}
-{% block title %}{% trans 'Resource Category' %}: {{ category.name }}{% endblock %}
+{% block title %}{% trans 'Role' %}: {{ role.name }}{% endblock %}
 
 {% block page_header %}
-  {% include 'horizon/common/_domain_page_header.html' with title=_('Resource Category: ')|add:category.name %}
+  {% include 'horizon/common/_domain_page_header.html' with title=_('Role: ')|add:role.name %}
 {% endblock page_header %}
 
 {% block main %}
@@ -13,7 +13,7 @@
     <hr />
     <h4>{{ nodes|length }} {% trans 'nodes' %}</h4>
     <br />
-    <h4>{{ image.name }}</h4>
+    <h4>{{ image_name }}</h4>
 
     {{ table.render }}
   </div>

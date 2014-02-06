@@ -17,7 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import tables
 
 
-class ResourceCategoryNodeTable(tables.DataTable):
+class OvercloudRoleNodeTable(tables.DataTable):
     node = tables.Column("uuid",
                          link="horizon:infrastructure:nodes:detail",
                          verbose_name=_("Node"))
@@ -44,7 +44,7 @@ class ResourceCategoryNodeTable(tables.DataTable):
         return datum.id
 
     class Meta:
-        name = "resource_category__nodetable"
+        name = "overcloud_role__nodetable"
         verbose_name = _("Nodes")
         table_actions = ()
         row_actions = ()

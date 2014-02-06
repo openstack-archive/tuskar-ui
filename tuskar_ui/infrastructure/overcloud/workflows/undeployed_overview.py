@@ -19,7 +19,7 @@ import horizon.workflows
 import tuskar_ui.forms
 
 
-CATEGORIES = [
+ROLES = [
     ('controller', _("Controller")),
     ('compute', _("Compute")),
     ('object_storage', _("Object Storage")),
@@ -34,11 +34,11 @@ class Action(horizon.workflows.Action):
 
     def __init__(self, *args, **kwargs):
         super(Action, self).__init__(*args, **kwargs)
-        for category, label in CATEGORIES:
+        for role, label in ROLES:
             # TODO(rdopieralski) Get a list of hardware profiles for each
-            # category here.
-            name = 'count__%s__%s' % (category, 'default')
-            if category == 'controller':
+            # role here.
+            name = 'count__%s__%s' % (role, 'default')
+            if role == 'controller':
                 initial = 1
                 self.fields[name] = django.forms.IntegerField(
                     label=_("Default"), initial=initial, min_value=initial,
@@ -52,12 +52,12 @@ class Action(horizon.workflows.Action):
                     widget=tuskar_ui.forms.NumberPickerInput)
 
     def roles_fieldset(self):
-        for category, label in CATEGORIES:
+        for role, label in ROLES:
             yield (
-                category,
+                role,
                 label,
                 list(tuskar_ui.forms.fieldset(
-                    self, prefix='count__%s__' % category)),
+                    self, prefix='count__%s__' % role)),
             )
 
     def handle(self, request, context):
@@ -65,15 +65,15 @@ class Action(horizon.workflows.Action):
         for key, value in self.cleaned_data.iteritems():
             if not key.startswith('count_'):
                 continue
-            _count, category, profile = key.split('__', 2)
-            counts[category, profile] = int(value)
-        context['category_counts'] = counts
+            _count, role, profile = key.split('__', 2)
+            counts[role, profile] = int(value)
+        context['role_counts'] = counts
         return context
 
 
 class Step(horizon.workflows.Step):
     action_class = Action
-    contributes = ('category_counts',)
+    contributes = ('role_counts',)
     template_name = 'infrastructure/overcloud/undeployed_overview.html'
     help_text = _("Nothing deployed yet. Design your first deployment.")
 

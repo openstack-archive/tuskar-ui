@@ -86,7 +86,7 @@ def image_get(request, image_id):
 
 
 # TODO(Tzu-Mainn Chen): change this to APIResourceWrapper once
-# ResourceCategory object exists in tuskar
+# Overcloud object exists in tuskar
 class Overcloud(base.APIDictWrapper):
     _attrs = ('id', 'stack_id', 'name', 'description')
 
@@ -228,17 +228,17 @@ class Overcloud(base.APIDictWrapper):
         return [r for r in joined_resources if r.node is not None]
 
     @memoized.memoized
-    def resources(self, resource_category, with_joins=True):
-        """Return a list of Overcloud Resources that match a Resource Category
+    def resources(self, overcloud_role, with_joins=True):
+        """Return a list of Overcloud Resources that match an Overcloud Role
 
-        :param resource_category: category of resources to be returned
-        :type  resource_category: tuskar_ui.api.ResourceCategory
+        :param overcloud_role: role of resources to be returned
+        :type  overcloud_role: tuskar_ui.api.OvercloudRole
 
         :param with_joins: should we also retrieve objects associated with each
                            retrieved Resource?
         :type  with_joins: bool
 
-        :return: list of Overcloud Resources that match the Resource Category,
+        :return: list of Overcloud Resources that match the Overcloud Role,
                  or an empty list if there are none
         :rtype:  list of tuskar_ui.api.Resource
         """
@@ -247,7 +247,7 @@ class Overcloud(base.APIDictWrapper):
         all_resources = self.all_resources(with_joins)
         filtered_resources = [resource for resource in all_resources if
                               (resource.image_name ==
-                               resource_category.image_name)]
+                               overcloud_role.image_name)]
 
         return filtered_resources
 
@@ -611,62 +611,44 @@ class Resource(base.APIResourceWrapper):
 
 
 # TODO(Tzu-Mainn Chen): change this to APIResourceWrapper once
-# ResourceCategory object exists in tuskar
-class ResourceCategory(base.APIDictWrapper):
-    _attrs = ('id', 'name', 'description', 'image_id', 'image_name')
+# OvercloudRole object exists in tuskar
+class OvercloudRole(base.APIDictWrapper):
+    _attrs = ('id', 'name', 'description', 'image_name', 'flavor_id')
 
     @classmethod
     def list(cls, request):
-        """Return a list of Resource Categories in Tuskar
+        """Return a list of Overcloud Roles in Tuskar
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :return: list of Resource Categories, or an empty list if there
+        :return: list of Overcloud Roles, or an empty list if there
                  are none
-        :rtype:  list of tuskar_ui.api.ResourceCategory
+        :rtype:  list of tuskar_ui.api.OvercloudRole
         """
         # TODO(Tzu-Mainn Chen): remove test data when possible
-        # categories = tuskarclient(request).resource_categories.list()
-        rcs = test_data().tuskarclient_resource_categories.list()
-        return [cls(rc) for rc in rcs]
+        # roles = tuskarclient(request).overcloud_roles.list()
+        roles = test_data().tuskarclient_overcloud_roles.list()
+        return [cls(role) for role in roles]
 
     @classmethod
-    def get(cls, request, category_id):
-        """Return the Tuskar ResourceCategory that matches the ID
+    def get(cls, request, role_id):
+        """Return the Tuskar OvercloudRole that matches the ID
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param category_id: ID of ResourceCategory to be retrieved
-        :type  category_id: int
+        :param role_id: ID of OvercloudRole to be retrieved
+        :type  role_id: int
 
-        :return: matching ResourceCategory, or None if no matching
-                 ResourceCategory can be found
-        :rtype:  tuskar_ui.api.ResourceCategory
+        :return: matching OvercloudRole, or None if no matching
+                 OvercloudRole can be found
+        :rtype:  tuskar_ui.api.OvercloudRole
         """
         # TODO(Tzu-Mainn Chen): remove test data when possible
-        # category = tuskarclient(request).resource_categories.get(category_id)
-        categories = ResourceCategory.list(request)
-        category = next((c for c in categories if category_id == str(c.id)),
-                        None)
+        # roles = tuskarclient(request).overcloud_roles.get(role_id)
+        roles = OvercloudRole.list(request)
+        role = next((r for r in roles if role_id == str(r.id)),
+                    None)
 
-        return cls(category)
-
-    @cached_property
-    def image(self):
-        """Return the Glance Image associated with this ResourceCategory
-
-        :return: Glance Image associated with this ResourceCategory; or
-                 None if no Image is associated, or if no matching Image
-                 can be found
-        :rtype:  glanceclient.v1.images.Image
-        """
-        if self.image_id:
-            # TODO(Tzu-Mainn Chen): remove test data when possible
-            # image = glanceclient(request).images.get(self.image_id)
-            images = test_data().glanceclient_images.list()
-            image = next((i for i in images if self.image_id == i.id),
-                         None)
-            return image
-        return None
+        return cls(role)

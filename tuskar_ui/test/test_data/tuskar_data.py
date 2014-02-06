@@ -351,31 +351,27 @@ def data(TEST):
             'description': 'overcloud'}
     TEST.tuskarclient_overclouds.add(oc_1)
 
-    # ResourceCategory
-    TEST.tuskarclient_resource_categories = test_data_utils.TestDataContainer()
-    # TODO(Tzu-Mainn Chen): fix these to create Tuskar ResourceCategory objects
+    # OvercloudRole
+    TEST.tuskarclient_overcloud_roles = test_data_utils.TestDataContainer()
+    # TODO(Tzu-Mainn Chen): fix these to create Tuskar OvercloudRole objects
     # once the api supports it
-    rc_1 = {'id': 1,
-            'name': 'Controller',
-            'description': 'controller resource category',
-            'image_id': '2',
-            'image_name': 'overcloud-control'}
-    rc_2 = {'id': 2,
-            'name': 'Compute',
-            'description': 'compute resource category',
-            'image_id': '1',
-            'image_name': 'overcloud-compute'}
-    rc_3 = {'id': 3,
-            'name': 'Object Storage',
-            'description': 'object storage resource category',
-            'image_id': '3',
-            'image_name': 'overcloud-object-storage'}
-    rc_4 = {'id': 4,
-            'name': 'Block Storage',
-            'description': 'block storage resource category',
-            'image_id': '4',
-            'image_name': 'overcloud-block-storage'}
-    TEST.tuskarclient_resource_categories.add(rc_1, rc_2, rc_3, rc_4)
+    r_1 = {'id': 1,
+           'name': 'Controller',
+           'description': 'controller overcloud role',
+           'image_name': 'overcloud-control'}
+    r_2 = {'id': 2,
+           'name': 'Compute',
+           'description': 'compute overcloud role',
+           'image_name': 'overcloud-compute'}
+    r_3 = {'id': 3,
+           'name': 'Object Storage',
+           'description': 'object storage overcloud role',
+           'image_name': 'overcloud-object-storage'}
+    r_4 = {'id': 4,
+           'name': 'Block Storage',
+           'description': 'block storage overcloud role',
+           'image_name': 'overcloud-block-storage'}
+    TEST.tuskarclient_overcloud_roles.add(r_1, r_2, r_3, r_4)
 
     # Image
     TEST.glanceclient_images = test_data_utils.TestDataContainer()
