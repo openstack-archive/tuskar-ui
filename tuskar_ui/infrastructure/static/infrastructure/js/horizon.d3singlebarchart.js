@@ -226,7 +226,7 @@ horizon.d3_single_bar_chart = {
     var self = this;
     self.base_component = base_component;
 
-    // FIXME woud be good to abstract all atributes and resolve orientation inside
+    // FIXME would be good to abstract all attributes and resolve orientation inside
     if (base_component.horizontal_orientation()){
       // Horizontal Bars
       self.y = 0;
@@ -278,7 +278,7 @@ horizon.d3_single_bar_chart = {
     var self = this;
     self.base_component = base_component;
 
-    // FIXME woud be good to abstract all atributes and resolve orientation inside
+    // FIXME would be good to abstract all attributes and resolve orientation inside
     if (base_component.horizontal_orientation()){
       // Horizontal Bars
       self.y = 1;

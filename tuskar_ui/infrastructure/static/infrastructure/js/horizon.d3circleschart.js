@@ -25,7 +25,7 @@
            data-size="22">
       </div>
 
-    There are controll elements for the cirles chart, implementing some commands
+    There are control elements for the cirles chart, implementing some commands
     that will be executed over the chart.
 
     1. The selectbox for time change, implements ChangeTime command. It has to
