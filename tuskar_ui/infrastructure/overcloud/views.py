@@ -64,31 +64,31 @@ class DetailView(horizon_tabs.TabView):
         return self.tab_group_class(request, overcloud=overcloud, **kwargs)
 
 
-class ResourceCategoryView(horizon_tables.DataTableView):
-    table_class = tables.ResourceCategoryNodeTable
-    template_name = 'infrastructure/overcloud/resource_category.html'
+class OvercloudRoleView(horizon_tables.DataTableView):
+    table_class = tables.OvercloudRoleNodeTable
+    template_name = 'infrastructure/overcloud/overcloud_role.html'
 
     def get_data(self):
         overcloud = self._get_overcloud()
-        category = self._get_category(overcloud)
+        role = self._get_role(overcloud)
 
-        return self._get_nodes(overcloud, category)
+        return self._get_nodes(overcloud, role)
 
     def get_context_data(self, **kwargs):
-        context = super(ResourceCategoryView, self).get_context_data(**kwargs)
+        context = super(OvercloudRoleView, self).get_context_data(**kwargs)
 
         overcloud = self._get_overcloud()
-        category = self._get_category(overcloud)
+        role = self._get_role(overcloud)
 
-        context['category'] = category
-        context['image'] = category.image
-        context['nodes'] = self._get_nodes(overcloud, category)
+        context['role'] = role
+        context['image_name'] = role.image_name
+        context['nodes'] = self._get_nodes(overcloud, role)
 
         return context
 
     @memoized.memoized
-    def _get_nodes(self, overcloud, category):
-        resources = overcloud.resources(category, with_joins=True)
+    def _get_nodes(self, overcloud, role):
+        resources = overcloud.resources(role, with_joins=True)
         return [r.node for r in resources]
 
     @memoized.memoized
@@ -105,15 +105,15 @@ class ResourceCategoryView(horizon_tables.DataTableView):
         return overcloud
 
     @memoized.memoized
-    def _get_category(self, overcloud):
-        category_id = self.kwargs['category_id']
+    def _get_role(self, overcloud):
+        role_id = self.kwargs['role_id']
 
         try:
-            category = api.ResourceCategory.get(self.request, category_id)
+            role = api.OvercloudRole.get(self.request, role_id)
         except Exception:
-            msg = _("Unable to retrieve resource category.")
+            msg = _("Unable to retrieve overcloud role.")
             redirect = reverse('horizon:infrastructure:overcloud:detail',
                                args=(overcloud.id,))
             exceptions.handle(self.request, msg, redirect=redirect)
 
-        return category
+        return role

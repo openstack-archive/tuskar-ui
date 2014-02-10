@@ -16,7 +16,6 @@ from __future__ import absolute_import
 
 from mock import patch  # noqa
 
-from glanceclient.v1 import images
 from heatclient.v1 import events
 from heatclient.v1 import stacks
 from novaclient.v1_1 import servers
@@ -103,8 +102,7 @@ class TuskarAPITests(test.APITestCase):
 
     def test_overcloud_resources(self):
         oc = api.Overcloud(self.tuskarclient_overclouds.first(), request=None)
-        category = api.ResourceCategory(self.tuskarclient_resource_categories.
-                                        first())
+        role = api.OvercloudRole(self.tuskarclient_overcloud_roles.first())
 
         # FIXME(lsmola) only all_resources and image_name should be tested
         # here, anybody has idea how to do that?
@@ -124,7 +122,7 @@ class TuskarAPITests(test.APITestCase):
                                return_value=nodes) as node_list:
                         with patch('openstack_dashboard.api.heat.stack_get',
                                    return_value=stack) as stack_get:
-                            ret_val = oc.resources(category)
+                            ret_val = oc.resources(role)
                             self.assertEqual(resource_list.call_count, 1)
                             self.assertEqual(server_list.call_count, 1)
                             # TODO(lsmola) isn't it better to call image_list?
@@ -248,22 +246,16 @@ class TuskarAPITests(test.APITestCase):
         self.assertIsInstance(ret_val, api.Node)
         self.assertIsInstance(ret_val.instance, servers.Server)
 
-    def test_resource_category_list(self):
-        #categories = self.tuskarclient_resource_categories.list()
+    def test_overcloud_role_list(self):
+        #roles = self.tuskarclient_overcloud_roles.list()
 
-        ret_val = api.ResourceCategory.list(self.request)
-        for c in ret_val:
-            self.assertIsInstance(c, api.ResourceCategory)
+        ret_val = api.OvercloudRole.list(self.request)
+        for r in ret_val:
+            self.assertIsInstance(r, api.OvercloudRole)
         self.assertEqual(4, len(ret_val))
 
-    def test_resource_category_get(self):
-        category = self.tuskarclient_resource_categories.first()
+    def test_overcloud_role_get(self):
+        role = self.tuskarclient_overcloud_roles.first()
 
-        ret_val = api.ResourceCategory.get(self.request, category['id'])
-        self.assertIsInstance(ret_val, api.ResourceCategory)
-
-    def test_resource_category_image(self):
-        category = self.tuskarclient_resource_categories.first()
-
-        ret_val = api.ResourceCategory(category).image
-        self.assertIsInstance(ret_val, images.Image)
+        ret_val = api.OvercloudRole.get(self.request, role['id'])
+        self.assertIsInstance(ret_val, api.OvercloudRole)

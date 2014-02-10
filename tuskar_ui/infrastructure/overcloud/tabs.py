@@ -33,37 +33,37 @@ class OverviewTab(tabs.Tab):
         overcloud = self.tab_group.kwargs['overcloud']
 
         try:
-            categories = api.ResourceCategory.list(request)
+            roles = api.OvercloudRole.list(request)
         except Exception:
-            categories = {}
+            roles = {}
             exceptions.handle(request,
-                              _('Unable to retrieve resource categories.'))
+                              _('Unable to retrieve overcloud roles.'))
 
         context['overcloud'] = overcloud
-        context['categories'] = []
-        for category in categories:
-            context['categories'].append(
-                self._get_category_data(overcloud, category))
+        context['roles'] = []
+        for role in roles:
+            context['roles'].append(
+                self._get_role_data(overcloud, role))
 
         # also get expected node counts
         return context
 
-    def _get_category_data(self, overcloud, category):
-        resources = overcloud.resources(category, with_joins=True)
+    def _get_role_data(self, overcloud, role):
+        resources = overcloud.resources(role, with_joins=True)
         nodes = [r.node for r in resources]
 
-        category.node_count = len(nodes)
-        if category.node_count > 0:
-            category.running_node_count = len(
+        role.node_count = len(nodes)
+        if role.node_count > 0:
+            role.running_node_count = len(
                 [n for n in nodes if n.instance.status == 'ACTIVE'])
-            category.error_node_count = len(
+            role.error_node_count = len(
                 [n for n in nodes if n.instance.status == 'ERROR'])
-            category.other_node_count = category.node_count - \
-                (category.running_node_count +
-                 category.error_node_count)
-            category.running_node_percentage = 100 * \
-                category.running_node_count / category.node_count
-        return category
+            role.other_node_count = role.node_count - \
+                (role.running_node_count +
+                 role.error_node_count)
+            role.running_node_percentage = 100 * \
+                role.running_node_count / role.node_count
+        return role
 
 
 class ConfigurationTab(tabs.Tab):
