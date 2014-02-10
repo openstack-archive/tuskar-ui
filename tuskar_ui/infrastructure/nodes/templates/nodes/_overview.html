@@ -19,7 +19,10 @@
               {% if deployed_nodes_down %}
                 <i class="icon-exclamation-sign"></i>
                 {% if deployed_nodes_down|length == 1 %}
-                  {% url 'horizon:infrastructure:nodes:detail' deployed_nodes_down.0.uuid as node_detail_url %}
+                  {% comment %}
+                    Replace id with uuid when ironicclient is used instead baremetalclient
+                  {% endcomment %}
+                  {% url 'horizon:infrastructure:nodes:detail' deployed_nodes_down.0.id as node_detail_url %}
                 {% else %}
                   {% url 'horizon:infrastructure:nodes:index' as nodes_index_url %}
                 {% endif %}
@@ -46,7 +49,10 @@
               {% if free_nodes_down %}
                 <i class="icon-exclamation-sign"></i>
                 {% if free_nodes_down|length == 1 %}
-                  {% url 'horizon:infrastructure:nodes:detail' free_nodes_down.0.uuid as node_detail_url %}
+                  {% comment %}
+                    Replace id with uuid when ironicclient is used instead baremetalclient
+                  {% endcomment %}
+                  {% url 'horizon:infrastructure:nodes:detail' free_nodes_down.0.id as node_detail_url %}
                 {% else %}
                   {% url 'horizon:infrastructure:nodes:index' as nodes_index_url %}
                 {% endif %}
