@@ -55,17 +55,31 @@ class TuskarAPITests(test.APITestCase):
 
     def test_overcloud_stack_events(self):
         overcloud = self.tuskarclient_overclouds.first()
+        event_list = self.heatclient_events.list()
+        stack = self.heatclient_stacks.first()
 
-        ret_val = api.Overcloud(overcloud).stack_events
+        with patch('openstack_dashboard.api.heat.stack_get',
+                   return_value=stack):
+            with patch('openstack_dashboard.api.heat.events_list',
+                       return_value=event_list):
+                ret_val = api.Overcloud(overcloud).stack_events
         for e in ret_val:
             self.assertIsInstance(e, events.Event)
         self.assertEqual(8, len(ret_val))
 
     def test_overcloud_stack_events_empty(self):
         overcloud = self.tuskarclient_overclouds.first()
+        event_list = self.heatclient_events.list()
         overcloud['stack_id'] = None
 
-        ret_val = api.Overcloud(overcloud).stack_events
+        stack = self.heatclient_stacks.first()
+
+        with patch('openstack_dashboard.api.heat.stack_get',
+                   return_value=stack):
+            with patch('openstack_dashboard.api.heat.events_list',
+                       return_value=event_list):
+                ret_val = api.Overcloud(overcloud).stack_events
+
         self.assertListEqual([], ret_val)
 
     def test_overcloud_is_deployed(self):

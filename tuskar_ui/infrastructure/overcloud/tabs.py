@@ -80,6 +80,7 @@ class LogTab(tabs.TableTab):
     name = _("Log")
     slug = "log"
     template_name = "horizon/common/_detail_table.html"
+    preload = False
 
     def get_log_data(self):
         overcloud = self.tab_group.kwargs['overcloud']

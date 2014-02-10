@@ -180,9 +180,8 @@ class Overcloud(base.APIDictWrapper):
         """
         if self.stack_id:
             # TODO(Tzu-Mainn Chen): remove test data when possible
-            # events = heatclient(request).events.get(self.stack_id)
-            events = test_data().heatclient_events.list()
-            return events
+            return heat.events_list(self._request,
+                                    self.stack.stack_name)
         return []
 
     @cached_property
