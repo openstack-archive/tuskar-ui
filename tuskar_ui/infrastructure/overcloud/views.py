@@ -33,7 +33,7 @@ class IndexView(base_views.RedirectView):
 
     def get_redirect_url(self):
         overcloud = api.Overcloud.get(self.request, 1)
-        if overcloud is not None and overcloud.is_deployed:
+        if overcloud is not None and overcloud.stack is not None:
             redirect = reverse('horizon:infrastructure:overcloud:detail',
                                args=(overcloud.id,))
         else:
