@@ -1,28 +1,74 @@
 {% load i18n %}
 {% load url from future%}
 
-<div class="row-fluid">
-  <div class="span6">
-    <h3>{% trans "Roles" %}</h3>
-    <hr />
-    {% for role in roles %}
-      <h4><a href="{% url 'horizon:infrastructure:overcloud:role' overcloud.id role.id%}">{{ role.node_count }} {{ role.name }}</a></h4>
-      {% if role.error_node_count > 0 %}
-         {{ role.error_node_count }} {% trans "nodes are down" %}
-         <br />
-      {% endif %}
-      {% if role.other_node_count > 0 %}
-         {{ role.other_node_count }} {% trans "nodes are building" %}
-         <br />
-      {% endif %}
-      {% if role.running_node_percentage %}
-         {{ role.running_node_percentage }} {% trans "% of nodes are running" %}
-         <br />
-      {% endif %}
-      <hr />
-    {% endfor %}
+<div class="alert alert-info">
+  <div class="row-fluid">
+    <div class="span2">
+      <strong>Deploying...</strong>
+      <div class="progress progress-striped active progress-info">
+        <div class="bar bar-info" style="width:{{ progress }}%"></div>
+      </div>
+    </div>
+    <div class="span10">
+      <strong>Last update:</strong>
+      <p>ziew</p>
+      <a href="?tab=detail__log" data-toggle="tab" data-target="#detail__log" class="pull-right">See full log</a>
+    </div>
   </div>
-  <div class="span6">
-    <h3>{% trans "Role Distribution" %}</h3>
+</div>
+
+<div class="row-fluid">
+  <div class="span8">
+    <h2>{% trans "Deployment Roles" %}</h2>
+    <div class="widget">
+      <table class="table">
+      {% for role in roles %}
+        <tr>
+          <td><a
+              href="{% url 'horizon:infrastructure:overcloud:role' overcloud.id role.role.id %}"
+              >{{ role.name }} <span class="badge">({{ role.node_count }})</span></a>
+          </td><td>
+          {% if role.deploying_node_count %}
+            <i class="icon-cog"></i>
+            {{ role.deploying_node_count }} / {{ role.node_count }}
+            {{ role.deploying_node_message }}
+          {% elif role.error_node_count %}
+            <i class="icon-warning"></i>
+            {{ role.error_node_count }} / {{ role.node_count }}
+            {{ role.error_node_message }}
+          {% elif role.node_count %}
+            <i class="icon-ok"></i>
+            {% trans "All nodes run correctly" %}
+          {% else %}
+            <i class="icon-minus"></i>
+            {% trans "No nodes" %}
+          {% endif %}
+          </td><td>
+            {% if role.capacity %}
+            <div class="row-fluid">
+              <div class="span6"><p>{{ role.capacity }}%</p></div>
+              <div class="span6">
+                <div class="progress active progress-info">
+                  <div class="bar bar-info" style="width:{{ role.capacity }}%"></div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="widget">
+      <h2>{% trans "Deployment Role Distribution" %}</h2>
+      <p>{% trans "Statistics currently not available." %}</p>
+    </div>
+    <div class="widget">
+      <h2>{% trans "Horizon UI Connection" %}</h2>
+      <p><a href="{{ dashboard_url }}"
+        >{% trans "Horizon UI" %} ({{ dashboard_url }}).</a></p>
+    </div>
   </div>
 </div>

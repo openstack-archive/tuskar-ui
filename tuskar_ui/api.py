@@ -251,6 +251,11 @@ class Overcloud(base.APIDictWrapper):
 
         return filtered_resources
 
+    @cached_property
+    def dashboard_url(self):
+        # TODO(rdopieralski) Implement this.
+        return "http://horizon.example.com"
+
 
 class Node(base.APIResourceWrapper):
     # FIXME(lsmola) uncomment this and delete equivalent methods
