@@ -1,28 +1,109 @@
 {% load i18n %}
 {% load url from future%}
 
-<div class="row-fluid">
-  <div class="span6">
-    <h3>{% trans "Roles" %}</h3>
-    <hr />
-    {% for role in roles %}
-      <h4><a href="{% url 'horizon:infrastructure:overcloud:role' overcloud.id role.id%}">{{ role.node_count }} {{ role.name }}</a></h4>
-      {% if role.error_node_count > 0 %}
-         {{ role.error_node_count }} {% trans "nodes are down" %}
-         <br />
+{% if overcloud.is_deploying or overcloud.is_failed or 1 %}
+  {% if overcloud.is_deploying %}
+    <div class="alert alert-info">
+      <div class="row-fluid">
+        <div class="span2">
+          <strong>Deploying...</strong>
+          <div class="progress progress-striped active progress-info">
+            <div class="bar bar-info" style="width:{{ progress }}%"></div>
+          </div>
+        </div>
+  {% else %}
+    <div class="alert alert-error">
+      <div class="row-fluid">
+        <div class="span2">
+          <strong>Deployment failed</strong>
+          <div class="progress progress-striped progress-danger">
+            <div class="bar bar-info" style="width:{{ progress }}%"></div>
+          </div>
+        </div>
+  {% endif %}
+    <div class="span10">
+      {% if last_event %}
+        <strong>Last update:</strong>
+        <p>
+          <time datetime="{{ last_event.event_time }}">{{ last_event.event_time }}</time>
+          {{ last_event.resource_name }}
+          {{ last_event.resource_status }}
+        </p>
       {% endif %}
-      {% if role.other_node_count > 0 %}
-         {{ role.other_node_count }} {% trans "nodes are building" %}
-         <br />
-      {% endif %}
-      {% if role.running_node_percentage %}
-         {{ role.running_node_percentage }} {% trans "% of nodes are running" %}
-         <br />
-      {% endif %}
-      <hr />
-    {% endfor %}
-  </div>
-  <div class="span6">
-    <h3>{% trans "Role Distribution" %}</h3>
+      <a href="?tab=detail__log" data-toggle="tab" data-target="#detail__log" class="pull-right">See full log</a>
+    </div>
   </div>
 </div>
+{% endif %}
+
+<div class="row-fluid">
+  <div class="span8">
+    <h2>{% trans "Deployment Roles" %}</h2>
+    <div class="widget">
+      <table class="table">
+      {% for role in roles %}
+        <tr>
+          <td><a
+              href="{% url 'horizon:infrastructure:overcloud:role' overcloud.id role.role.id %}"
+              >{{ role.name }} <span class="badge">({{ role.node_count }})</span></a>
+          </td><td>
+          {% if role.deploying_node_count %}
+            <div class="text-warning">
+              <i class="icon-cog"></i>
+              {{ role.deploying_node_count }} / {{ role.node_count }}
+              {{ role.deploying_node_message }}
+            </div>
+          {% elif role.error_node_count %}
+            <div class="text-error">
+              <i class="icon-warning"></i>
+              {{ role.error_node_count }} / {{ role.node_count }}
+              {{ role.error_node_message }}
+            </div>
+          {% elif role.node_count %}
+            <div class="text-success">
+              <i class="icon-ok"></i>
+              {% trans "All nodes run correctly" %}
+            </div>
+          {% else %}
+            <div class="muted">
+              <i class="icon-minus"></i>
+              {% trans "No nodes" %}
+            </div>
+          {% endif %}
+          </td><td>
+            {% if role.capacity %}
+            <div class="row-fluid">
+              <div class="span6"><p>{{ role.capacity }}%</p></div>
+              <div class="span6">
+                <div class="progress active progress-info">
+                  <div class="bar bar-info" style="width:{{ role.capacity }}%"></div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="widget">
+      <h2>{% trans "Deployment Role Distribution" %}</h2>
+      <p>{% trans "Statistics currently not available." %}</p>
+    </div>
+    <div class="widget">
+      <h2>{% trans "Horizon UI Connection" %}</h2>
+      <p><a href="{{ dashboard_url }}"
+        >{% trans "Horizon UI" %} ({{ dashboard_url }}).</a></p>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+(window.$ || window.addHorizonLoadEvent)(function () {
+  $('div > a[data-target="#detail__log"]').click(function () {
+     $('li > a[data-target="#detail__log"]').tab('show');
+  });
+});
+</script>
