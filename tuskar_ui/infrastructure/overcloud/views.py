@@ -33,7 +33,11 @@ class IndexView(base_views.RedirectView):
 
     def get_redirect_url(self):
         overcloud = api.Overcloud.get(self.request, 1)
-        if overcloud is not None and overcloud.stack is not None:
+        if overcloud is not None and overcloud.stack is not None and any([
+            overcloud.is_deployed,
+            overcloud.is_deploying,
+            overcloud.is_failed,
+        ]):
             redirect = reverse('horizon:infrastructure:overcloud:detail',
                                args=(overcloud.id,))
         else:
@@ -50,18 +54,24 @@ class DetailView(horizon_tabs.TabView):
     tab_group_class = tabs.DetailTabs
     template_name = 'infrastructure/overcloud/detail.html'
 
-    def get_data(self, request, **kwargs):
-        overcloud_id = kwargs['overcloud_id']
+    @memoized.memoized_method
+    def get_data(self):
+        overcloud_id = self.kwargs['overcloud_id']
         try:
-            return api.Overcloud.get(request, overcloud_id)
+            return api.Overcloud.get(self.request, overcloud_id)
         except Exception:
             msg = _("Unable to retrieve deployment.")
             redirect = reverse('horizon:infrastructure:overcloud:index')
-            exceptions.handle(request, msg, redirect=redirect)
+            exceptions.handle(self.request, msg, redirect=redirect)
 
     def get_tabs(self, request, **kwargs):
-        overcloud = self.get_data(request, **kwargs)
+        overcloud = self.get_data()
         return self.tab_group_class(request, overcloud=overcloud, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        context['overcloud'] = self.get_data()
+        return context
 
 
 class OvercloudRoleView(horizon_tables.DataTableView):
