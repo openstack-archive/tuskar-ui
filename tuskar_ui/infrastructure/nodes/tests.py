@@ -38,7 +38,7 @@ class NodesTests(test.BaseAdminViewTests):
         }) as mock:
             res = self.client.get(INDEX_URL)
             # FIXME(lsmola) optimize, this should call 1 time, what the hell
-            self.assertEqual(mock.list.call_count, 8)
+            self.assertEqual(mock.list.call_count, 6)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
@@ -53,7 +53,8 @@ class NodesTests(test.BaseAdminViewTests):
             'list.return_value': free_nodes,
         }) as mock:
             res = self.client.get(INDEX_URL + '?tab=nodes__free')
-            self.assertEqual(mock.list.call_count, 10)
+            # FIXME(lsmola) horrible count, optimize
+            self.assertEqual(mock.list.call_count, 9)
 
         self.assertTemplateUsed(res,
                                 'infrastructure/nodes/index.html')
@@ -74,13 +75,16 @@ class NodesTests(test.BaseAdminViewTests):
     def test_deployed_nodes(self):
         deployed_nodes = [api.Node(node)
                           for node in self.ironicclient_nodes.list()]
+        instance = TEST_DATA.novaclient_servers.first()
 
         with patch('tuskar_ui.api.Node', **{
-            'spec_set': ['list'],  # Only allow these attributes
+            'spec_set': ['list', 'instance'],  # Only allow these attributes
+            'instance': instance,
             'list.return_value': deployed_nodes,
         }) as mock:
             res = self.client.get(INDEX_URL + '?tab=nodes__deployed')
-            self.assertEqual(mock.list.call_count, 10)
+            # FIXME(lsmola) horrible count, optimize
+            self.assertEqual(mock.list.call_count, 9)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
@@ -89,8 +93,10 @@ class NodesTests(test.BaseAdminViewTests):
                               deployed_nodes)
 
     def test_deployed_nodes_list_exception(self):
+        instance = TEST_DATA.novaclient_servers.first()
         with patch('tuskar_ui.api.Node', **{
-            'spec_set': ['list'],
+            'spec_set': ['list', 'instance'],
+            'instance': instance,
             'list.side_effect': self.exceptions.tuskar,
         }) as mock:
             res = self.client.get(INDEX_URL + '?tab=nodes__deployed')
