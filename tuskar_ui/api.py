@@ -194,6 +194,26 @@ class Overcloud(base.APIDictWrapper):
         return self.stack.stack_status in ('CREATE_COMPLETE',
                                            'UPDATE_COMPLETE')
 
+    @cached_property
+    def is_deploying(self):
+        """Check if this Overcloud is currently deploying or updating.
+
+        :return: True if deployment is in progress, False otherwise.
+        :rtype: bool
+        """
+        return self.stack.stack_status in ('CREATE_IN_PROGRESS',
+                                           'UPDATE_IN_PROGRESS')
+
+    @cached_property
+    def is_failed(self):
+        """Check if this Overcloud failed to update or deploy.
+
+        :return: True if deployment there was an error, False otherwise.
+        :rtype: bool
+        """
+        return self.stack.stack_status in ('CREATE_FAILED',
+                                           'UPDATE_FAILED')
+
     @memoized.memoized
     def all_resources(self, with_joins=True):
         """Return a list of all Overcloud Resources
@@ -248,6 +268,11 @@ class Overcloud(base.APIDictWrapper):
                                overcloud_role.image_name)]
 
         return filtered_resources
+
+    @cached_property
+    def dashboard_url(self):
+        # TODO(rdopieralski) Implement this.
+        return "http://horizon.example.com"
 
 
 class Node(base.APIResourceWrapper):
