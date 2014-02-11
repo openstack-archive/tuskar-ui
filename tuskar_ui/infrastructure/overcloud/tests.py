@@ -36,8 +36,8 @@ class OvercloudTests(test.BaseAdminViewTests):
     def test_index_overcloud_undeployed_get(self):
         oc = None
         with patch('tuskar_ui.api.Overcloud', **{
-            'spec_set': ['get', 'is_deployed'],
-            'is_deployed': False,
+            'spec_set': ['get', 'stack'],
+            'stack': None,
             'get.side_effect': lambda request, overcloud_id: oc,
         }) as Overcloud:
             oc = api.Overcloud
@@ -84,9 +84,10 @@ class OvercloudTests(test.BaseAdminViewTests):
 
     def test_index_overcloud_deployed(self):
         oc = None
+        stack = TEST_DATA.heatclient_stacks.first()
         with patch('tuskar_ui.api.Overcloud', **{
-            'spec_set': ['get', 'is_deployed', 'id'],
-            'is_deployed': True,
+            'spec_set': ['get', 'stack', 'id'],
+            'stack': stack,
             'id': 1,
             'get.side_effect': lambda request, overcloud_id: oc,
         }) as Overcloud:
