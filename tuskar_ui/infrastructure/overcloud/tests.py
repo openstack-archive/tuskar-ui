@@ -36,8 +36,17 @@ class OvercloudTests(test.BaseAdminViewTests):
     def test_index_overcloud_undeployed_get(self):
         oc = None
         with patch('tuskar_ui.api.Overcloud', **{
-            'spec_set': ['get', 'stack'],
+            'spec_set': [
+                'get',
+                'is_deployed',
+                'is_deploying',
+                'is_failed',
+                'stack',
+            ],
             'stack': None,
+            'is_deployed': False,
+            'is_deploying': False,
+            'is_failed': False,
             'get.side_effect': lambda request, overcloud_id: oc,
         }) as Overcloud:
             oc = api.Overcloud
@@ -47,7 +56,39 @@ class OvercloudTests(test.BaseAdminViewTests):
                                  [call(request, 1)])
         self.assertRedirectsNoFollow(res, CREATE_URL)
 
-    def test_create_overcloud_undeployed_post(self):
+    def test_index_overcloud_deployed(self):
+        oc = None
+        with patch('tuskar_ui.api.Overcloud', **{
+            'spec_set': [
+                'get',
+                'is_deployed',
+                'is_deploying',
+                'is_failed',
+                'id',
+            ],
+            'is_deployed': True,
+            'is_deploying': False,
+            'is_failed': False,
+            'id': 1,
+            'get.side_effect': lambda request, overcloud_id: oc,
+        }) as Overcloud:
+            oc = Overcloud
+            res = self.client.get(INDEX_URL)
+            request = Overcloud.get.call_args_list[0][0][0]  # This is a hack.
+            self.assertListEqual(Overcloud.get.call_args_list,
+                                 [call(request, 1)])
+
+        self.assertRedirectsNoFollow(res, DETAIL_URL)
+
+    def test_create_get(self):
+        res = self.client.get(CREATE_URL)
+
+        self.assertTemplateUsed(
+            res, 'infrastructure/_fullscreen_workflow_base.html')
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/undeployed_overview.html')
+
+    def test_create_post(self):
         oc = api.Overcloud(TEST_DATA.tuskarclient_overclouds.first())
         data = {
             'count__controller__default': '1',
@@ -82,27 +123,37 @@ class OvercloudTests(test.BaseAdminViewTests):
                 ])
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
-    def test_index_overcloud_deployed(self):
+    def test_detail_get(self):
         oc = None
         stack = TEST_DATA.heatclient_stacks.first()
         with patch('tuskar_ui.api.Overcloud', **{
-            'spec_set': ['get', 'stack', 'id'],
+            'spec_set': [
+                'get',
+                'is_deployed',
+                'is_deploying',
+                'is_failed',
+                'resources',
+                'dashboard_url',
+                'stack_events',
+                'stack',
+                'id',
+            ],
             'stack': stack,
             'id': 1,
+            'is_deployed': True,
+            'is_deploying': False,
+            'is_failed': False,
             'get.side_effect': lambda request, overcloud_id: oc,
+            'resources.return_value': [],
+            'dashboard_url.return_value': '',
+            'stack_events.return_value': [],
         }) as Overcloud:
             oc = Overcloud
-            res = self.client.get(INDEX_URL)
-            request = Overcloud.get.call_args_list[0][0][0]  # This is a hack.
-            self.assertListEqual(Overcloud.get.call_args_list,
-                                 [call(request, 1)])
-
-        self.assertRedirectsNoFollow(res, DETAIL_URL)
-
-    def test_create_get(self):
-        res = self.client.get(CREATE_URL)
+            res = self.client.get(DETAIL_URL)
 
         self.assertTemplateUsed(
-            res, 'infrastructure/_fullscreen_workflow_base.html')
+            res, 'infrastructure/overcloud/detail.html')
         self.assertTemplateUsed(
-            res, 'infrastructure/overcloud/undeployed_overview.html')
+            res, 'infrastructure/overcloud/_detail_overview.html')
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/_detail_configuration.html')
