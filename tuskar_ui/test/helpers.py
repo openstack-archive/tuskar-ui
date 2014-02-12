@@ -17,10 +17,7 @@ import os
 from django.core.handlers import wsgi
 from django.utils import unittest
 
-from tuskarclient.v1 import client as tuskar_client
-
 from openstack_dashboard.test import helpers as openstack_dashboard_helpers
-from tuskar_ui import api as tuskar_api
 from tuskar_ui.test.test_data import utils as test_data_utils
 
 
@@ -78,19 +75,3 @@ class APITestCase(openstack_dashboard_helpers.APITestCase):
 
         # load tuskar-specfic test data
         test_data_utils.load_test_data(self)
-
-        # Store the original clients
-        self._original_tuskarclient = tuskar_api.tuskarclient
-
-        # Replace the clients with our stubs.
-        tuskar_api.tuskarclient = lambda request: self.stub_tuskarclient()
-
-    def tearDown(self):
-        super(APITestCase, self).tearDown()
-        tuskar_api.tuskarclient = self._original_tuskarclient
-
-    def stub_tuskarclient(self):
-        if not hasattr(self, "tuskarclient"):
-            self.mox.StubOutWithMock(tuskar_client, 'Client')
-            self.tuskarclient = self.mox.CreateMock(tuskar_client.Client)
-        return self.tuskarclient

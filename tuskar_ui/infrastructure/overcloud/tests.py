@@ -48,12 +48,13 @@ class OvercloudTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(res, CREATE_URL)
 
     def test_create_overcloud_undeployed_post(self):
+        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         oc = api.Overcloud(TEST_DATA.tuskarclient_overclouds.first())
         data = {
-            'count__controller__default': '1',
-            'count__compute__default': '0',
-            'count__object_storage__default': '0',
-            'count__block_storage__default': '0',
+            'count__1__default': '1',
+            'count__2__default': '0',
+            'count__3__default': '0',
+            'count__4__default': '0',
             'mysql_host_ip': '',
             'mysql_user': 'admin',
             'mysql_password': 'pass',
@@ -64,22 +65,26 @@ class OvercloudTests(test.BaseAdminViewTests):
             'keystone_admin_token': 'pass',
             'keystone_admin_password': 'pass',
         }
-        with patch('tuskar_ui.api.Overcloud', **{
-            'spec_set': ['create'],
-            'create.return_value': oc,
-        }) as Overcloud:
-            res = self.client.post(CREATE_URL, data)
-            request = Overcloud.create.call_args_list[0][0][0]
-            self.assertListEqual(
-                Overcloud.create.call_args_list,
-                [
-                    call(request, {
-                        ('controller', 'default'): 1,
-                        ('compute', 'default'): 0,
-                        ('object_storage', 'default'): 0,
-                        ('block_storage', 'default'): 0,
-                    }),
-                ])
+        with patch('tuskar_ui.api.OvercloudRole', **{
+            'spec_set': ['list'],
+            'list.side_effect': lambda request: roles,
+        }):
+            with patch('tuskar_ui.api.Overcloud', **{
+                    'spec_set': ['create'],
+                    'create.return_value': oc,
+            }) as Overcloud:
+                res = self.client.post(CREATE_URL, data)
+                request = Overcloud.create.call_args_list[0][0][0]
+                self.assertListEqual(
+                    Overcloud.create.call_args_list,
+                    [
+                        call(request, {
+                            ('1', 'default'): 1,
+                            ('2', 'default'): 0,
+                            ('3', 'default'): 0,
+                            ('4', 'default'): 0,
+                        }),
+                    ])
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
     def test_index_overcloud_deployed(self):
@@ -100,7 +105,13 @@ class OvercloudTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(res, DETAIL_URL)
 
     def test_create_get(self):
-        res = self.client.get(CREATE_URL)
+        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+
+        with patch('tuskar_ui.api.OvercloudRole', **{
+            'spec_set': ['list'],
+            'list.side_effect': lambda request: roles,
+        }):
+            res = self.client.get(CREATE_URL)
 
         self.assertTemplateUsed(
             res, 'infrastructure/_fullscreen_workflow_base.html')
