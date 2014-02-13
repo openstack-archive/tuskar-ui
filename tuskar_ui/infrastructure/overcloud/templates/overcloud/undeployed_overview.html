@@ -1,11 +1,13 @@
 {% load i18n %}
+{% load url from future%}
+
 <noscript><h3>{{ step }}</h3></noscript>
 <p>{{ step.get_help_text }}</p>
 
 <div class="row-fluid">
   <div class="span8">
     <div class="pull-right">
-      {{ free_nodes|default:0 }} {% trans "free nodes" %}
+      <span id="free-nodes">{{ step.get_free_nodes }}</span> {% trans "free nodes" %}
     </div>
     <h2>{% trans "Roles" %}</h2>
     <div class="widget">

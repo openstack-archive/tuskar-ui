@@ -12,25 +12,26 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls import defaults
+from django.conf import urls
 
 from tuskar_ui.infrastructure.overcloud import views
 
 
-urlpatterns = defaults.patterns(
+urlpatterns = urls.patterns(
     '',
-    defaults.url(r'^$', views.IndexView.as_view(), name='index'),
-    defaults.url(r'^create/$', views.CreateView.as_view(),
-                 name='create'),
-    defaults.url(r'^(?P<overcloud_id>[^/]+)/$',
-                 views.DetailView.as_view(), name='detail'),
-    defaults.url(r'^(?P<overcloud_id>[^/]+)/scale$',
-                 views.Scale.as_view(), name='scale'),
-    defaults.url(r'^(?P<overcloud_id>[^/]+)/role/'
-                 '(?P<role_id>[^/]+)$',
-                 views.OvercloudRoleView.as_view(),
-                 name='role'),
-    defaults.url(r'^(?P<overcloud_id>[^/]+)/undeploy-confirmation$',
-                 views.UndeployConfirmationView.as_view(),
-                 name='undeploy_confirmation'),
+    urls.url(r'^$', views.IndexView.as_view(), name='index'),
+    urls.url(r'^create/$', views.CreateView.as_view(), name='create'),
+    urls.url(r'^create/role-edit/(?P<role_id>[^/]+)$',
+             views.OvercloudRoleEdit.as_view(), name='role_edit'),
+    urls.url(r'^(?P<overcloud_id>[^/]+)/$', views.DetailView.as_view(),
+             name='detail'),
+    urls.url(r'^(?P<overcloud_id>[^/]+)/scale$', views.Scale.as_view(),
+             name='scale'),
+    urls.url(r'^(?P<overcloud_id>[^/]+)/role/(?P<role_id>[^/]+)$',
+             views.OvercloudRoleView.as_view(), name='role'),
+    urls.url(r'^(?P<overcloud_id>[^/]+)/role/(?P<role_id>[^/]+)$',
+             views.OvercloudRoleView.as_view(), name='role'),
+    urls.url(r'^(?P<overcloud_id>[^/]+)/undeploy-confirmation$',
+             views.UndeployConfirmationView.as_view(),
+             name='undeploy_confirmation'),
 )
