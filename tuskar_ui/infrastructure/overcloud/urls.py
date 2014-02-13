@@ -28,4 +28,7 @@ urlpatterns = defaults.patterns(
                  '(?P<role_id>[^/]+)$',
                  views.OvercloudRoleView.as_view(),
                  name='role'),
+    defaults.url(r'^(?P<overcloud_id>[^/]+)/undeploy-confirmation$',
+                 views.UndeployConfirmationView.as_view(),
+                 name='undeploy_confirmation'),
 )

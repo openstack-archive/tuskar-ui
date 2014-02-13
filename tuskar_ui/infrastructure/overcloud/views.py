@@ -23,6 +23,7 @@ from horizon.utils import memoized
 import horizon.workflows
 
 from tuskar_ui import api
+from tuskar_ui.infrastructure.overcloud import forms
 from tuskar_ui.infrastructure.overcloud import tables
 from tuskar_ui.infrastructure.overcloud import tabs
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed
@@ -32,12 +33,15 @@ class IndexView(base_views.RedirectView):
     permanent = False
 
     def get_redirect_url(self):
-        overcloud = api.Overcloud.get(self.request, 1)
-        if overcloud is not None and overcloud.stack is not None and any([
-            overcloud.is_deployed,
-            overcloud.is_deploying,
-            overcloud.is_failed,
-        ]):
+        overcloud = next(iter(api.Overcloud.list(self.request)), None)
+
+        if overcloud is not None:
+            # FIXME(lsmola) there can be a short period when overcloud
+            # is created, but stack not. So we have to make sure we have
+            # missing stack under control as a new STATE
+            # Also when deleting now, it first deletes Overcloud then Stack
+            # because stack takes much longer to delete. But we can probably
+            # ignore it for now and fix the worflow on API side.
             redirect = reverse('horizon:infrastructure:overcloud:detail',
                                args=(overcloud.id,))
         else:
@@ -72,6 +76,25 @@ class DetailView(horizon_tabs.TabView):
         context = super(DetailView, self).get_context_data(**kwargs)
         context['overcloud'] = self.get_data()
         return context
+
+
+class UndeployConfirmationView(horizon.forms.ModalFormView):
+    form_class = forms.UndeployOvercloud
+    template_name = 'infrastructure/overcloud/undeploy_confirmation.html'
+
+    def get_success_url(self):
+        return reverse('horizon:infrastructure:overcloud:index')
+
+    def get_context_data(self, **kwargs):
+        context = super(UndeployConfirmationView,
+                        self).get_context_data(**kwargs)
+        context['overcloud_id'] = self.kwargs['overcloud_id']
+        return context
+
+    def get_initial(self, **kwargs):
+        initial = super(UndeployConfirmationView, self).get_initial(**kwargs)
+        initial['overcloud_id'] = self.kwargs['overcloud_id']
+        return initial
 
 
 class OvercloudRoleView(horizon_tables.DataTableView):
