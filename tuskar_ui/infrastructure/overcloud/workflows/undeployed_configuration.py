@@ -25,9 +25,10 @@ class Action(horizon.workflows.Action):
         widget=django.forms.TextInput(attrs={
             'placeholder': _("auto-retrieve"),
         }))
-    mysql_user = django.forms.CharField(_("User"))
+    mysql_user = django.forms.CharField(
+        required=False, label=_("User"))
     mysql_password = django.forms.CharField(
-        label=_("Password"), widget=django.forms.PasswordInput)
+        required=False, label=_("Password"), widget=django.forms.PasswordInput)
 
     amqp_host_ip = django.forms.IPAddressField(
         label=_("Host IP"), required=False,
@@ -35,7 +36,7 @@ class Action(horizon.workflows.Action):
             'placeholder': _("auto-retrieve"),
         }))
     amqp_password = django.forms.CharField(
-        label=_("Password"), widget=django.forms.PasswordInput)
+        required=False, label=_("Password"), widget=django.forms.PasswordInput)
 
     keystone_host_ip = django.forms.IPAddressField(
         label=_("Host IP"), required=False,
@@ -43,10 +44,13 @@ class Action(horizon.workflows.Action):
             'placeholder': _("auto-retrieve"),
         }))
     keystone_db_password = django.forms.CharField(
+        required=False,
         label=_("DB Password"), widget=django.forms.PasswordInput)
     keystone_admin_token = django.forms.CharField(
+        required=False,
         label=_("Admin Token"), widget=django.forms.PasswordInput)
     keystone_admin_password = django.forms.CharField(
+        required=False,
         label=_("Admin Password"), widget=django.forms.PasswordInput)
 
     class Meta:
