@@ -357,10 +357,13 @@ def data(TEST):
     TEST.tuskarclient_overcloud_roles = test_data_utils.TestDataContainer()
     r_1 = overcloud_roles.OvercloudRole(
         overcloud_roles.OvercloudRoleManager(None),
-        {'id': 1,
-         'name': 'Controller',
-         'description': 'controller overcloud role',
-         'image_name': 'overcloud-control'})
+        {
+            'id': 1,
+            'name': 'Controller',
+            'description': 'controller overcloud role',
+            'image_name': 'overcloud-control',
+            'flavor_id': None,
+        })
     r_2 = overcloud_roles.OvercloudRole(
         overcloud_roles.OvercloudRoleManager(None),
         {'id': 2,
