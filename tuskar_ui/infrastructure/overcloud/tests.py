@@ -98,10 +98,13 @@ class OvercloudTests(test.BaseAdminViewTests):
 
     def test_create_get(self):
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
-        with patch('tuskar_ui.api.OvercloudRole', **{
+        with contextlib.nested(patch('tuskar_ui.api.OvercloudRole', **{
             'spec_set': ['list'],
-            'list.side_effect': lambda request: roles,
-        }):
+            'list.return_value': roles,
+        }), patch('tuskar_ui.api.Node', **{
+            'spec_set': ['list'],
+            'list.return_value': [],
+        })):
             res = self.client.get(CREATE_URL)
         self.assertTemplateUsed(
             res, 'infrastructure/_fullscreen_workflow_base.html')
@@ -109,15 +112,15 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'infrastructure/overcloud/undeployed_overview.html')
 
     def test_create_post(self):
-        oc = api.Overcloud(TEST_DATA.tuskarclient_overclouds.first())
+        oc = None
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         data = {
-            'count__1__default': '1',
-            'count__2__default': '0',
-            'count__3__default': '0',
-            'count__4__default': '0',
+            'count__1__': '1',
+            'count__2__': '0',
+            'count__3__': '0',
+            'count__4__': '0',
         }
-        with patch('tuskar_ui.api.OvercloudRole', **{
+        with contextlib.nested(patch('tuskar_ui.api.OvercloudRole', **{
             'spec_set': ['list'],
             'list.side_effect': lambda request: roles,
         }):
@@ -190,7 +193,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             'stack_events': [],
         }), patch('tuskar_ui.api.OvercloudRole', **{
             'spec_set': ['list'],
-            'list.side_effect': lambda request: roles,
+            'list.return_value': roles,
         })) as (Overcloud, OvercloudRole):
             oc = Overcloud
             res = self.client.get(DETAIL_URL)
@@ -245,10 +248,10 @@ class OvercloudTests(test.BaseAdminViewTests):
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         data = {
             'overcloud_id': '1',
-            'count__1__default': '1',
-            'count__2__default': '0',
-            'count__3__default': '0',
-            'count__4__default': '0',
+            'count__1__': '1',
+            'count__2__': '0',
+            'count__3__': '0',
+            'count__4__': '0',
         }
         with contextlib.nested(
             patch('tuskar_ui.api.OvercloudRole', **{
@@ -283,3 +286,33 @@ class OvercloudTests(test.BaseAdminViewTests):
             #        }),
             #    ])
         self.assertRedirectsNoFollow(res, DETAIL_URL)
+
+    def test_role_edit_get(self):
+        role = TEST_DATA.tuskarclient_overcloud_roles.first()
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:overcloud:role_edit', args=(role.id,))
+        with patch('tuskar_ui.api.OvercloudRole', **{
+            'spec_set': ['get'],
+            'get.return_value': role,
+        }):
+            res = self.client.get(url)
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/role_edit.html')
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/_role_edit.html')
+
+    def test_role_edit_post(self):
+        role = TEST_DATA.tuskarclient_overcloud_roles.first()
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:overcloud:role_edit', args=(role.id,))
+        data = {
+            'id': '1',
+            'flavor_id': 'xxx',
+        }
+        with patch('tuskar_ui.api.OvercloudRole', **{
+            'spec_set': ['get'],
+            'get.return_value': role,
+        }):
+            # TODO(rdopieralski) Check if the role got associated with flavor.
+            res = self.client.post(url, data)
+        self.assertRedirectsNoFollow(res, CREATE_URL)
