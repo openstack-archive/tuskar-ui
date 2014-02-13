@@ -17,4 +17,4 @@ sphinx>=1.1.2,<1.2
 docutils==0.9.1
 oslo.sphinx
 
--e git://github.com/openstack/horizon.git#egg=horizon
+-e git://git.openstack.org/openstack/horizon.git#egg=horizon
