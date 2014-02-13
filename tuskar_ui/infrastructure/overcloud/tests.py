@@ -29,6 +29,8 @@ CREATE_URL = urlresolvers.reverse(
     'horizon:infrastructure:overcloud:create')
 DETAIL_URL = urlresolvers.reverse(
     'horizon:infrastructure:overcloud:detail', args=(1,))
+DELETE_URL = urlresolvers.reverse(
+    'horizon:infrastructure:overcloud:undeploy_confirmation', args=(1,))
 TEST_DATA = utils.TestDataContainer()
 tuskar_data.data(TEST_DATA)
 
@@ -36,34 +38,43 @@ tuskar_data.data(TEST_DATA)
 class OvercloudTests(test.BaseAdminViewTests):
 
     def test_index_overcloud_undeployed_get(self):
+        with patch('tuskar_ui.api.Overcloud.list',
+                   return_value=[]):
+            res = self.client.get(INDEX_URL)
+
+        self.assertRedirectsNoFollow(res, CREATE_URL)
+
+    def test_index_overcloud_deployed_stack_not_created(self):
         oc = None
         with patch('tuskar_ui.api.Overcloud', **{
             'spec_set': [
-                'get',
+                'list',
                 'is_deployed',
                 'is_deploying',
                 'is_failed',
                 'stack',
+                'id',
             ],
+            'id': 1,
             'stack': None,
             'is_deployed': False,
             'is_deploying': False,
             'is_failed': False,
-            'get.side_effect': lambda request, overcloud_id: oc,
+            'list.side_effect': lambda request: [oc],
         }) as Overcloud:
             oc = api.Overcloud
             res = self.client.get(INDEX_URL)
-            request = Overcloud.get.call_args_list[0][0][0]  # This is a hack.
-            self.assertListEqual(Overcloud.get.call_args_list,
-                                 [call(request, 1)])
-        self.assertRedirectsNoFollow(res, CREATE_URL)
+            request = Overcloud.list.call_args_list[0][0][0]  # This is a hack.
+            self.assertListEqual(Overcloud.list.call_args_list,
+                                 [call(request)])
+        self.assertRedirectsNoFollow(res, DETAIL_URL)
 
     def test_index_overcloud_deployed(self):
         oc = None
         stack = TEST_DATA.heatclient_stacks.first()
         with patch('tuskar_ui.api.Overcloud', **{
             'spec_set': [
-                'get',
+                'list',
                 'is_deployed',
                 'is_deploying',
                 'is_failed',
@@ -75,13 +86,13 @@ class OvercloudTests(test.BaseAdminViewTests):
             'is_deploying': False,
             'is_failed': False,
             'id': 1,
-            'get.side_effect': lambda request, overcloud_id: oc,
+            'list.side_effect': lambda request: [oc],
         }) as Overcloud:
             oc = Overcloud
             res = self.client.get(INDEX_URL)
-            request = Overcloud.get.call_args_list[0][0][0]  # This is a hack.
-            self.assertListEqual(Overcloud.get.call_args_list,
-                                 [call(request, 1)])
+            request = Overcloud.list.call_args_list[0][0][0]  # This is a hack.
+            self.assertListEqual(Overcloud.list.call_args_list,
+                                 [call(request)])
 
         self.assertRedirectsNoFollow(res, DETAIL_URL)
 
@@ -170,3 +181,16 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'infrastructure/overcloud/_detail_overview.html')
         self.assertTemplateUsed(
             res, 'infrastructure/overcloud/_detail_configuration.html')
+
+    def test_delete_get(self):
+        res = self.client.get(DELETE_URL)
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/undeploy_confirmation.html')
+
+    def test_delete_post(self):
+        with patch('tuskar_ui.api.Overcloud', **{
+            'spec_set': ['delete'],
+            'delete.side_effect': lambda request, overcloud_id: None,
+        }):
+            res = self.client.post(DELETE_URL)
+        self.assertRedirectsNoFollow(res, INDEX_URL)
