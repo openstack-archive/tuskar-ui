@@ -29,21 +29,26 @@ class Action(horizon.workflows.Action):
     def __init__(self, *args, **kwargs):
         super(Action, self).__init__(*args, **kwargs)
         for role in self._get_roles():
-            # TODO(rdopieralski) Get a list of hardware profiles for each
-            # role here.
-            name = 'count__%s__%s' % (str(role.id), 'default')
             if role.name == 'Controller':
                 initial = 1
-                self.fields[name] = django.forms.IntegerField(
-                    label=_("Default"), initial=initial, min_value=initial,
-                    widget=tuskar_ui.forms.NumberPickerInput(attrs={
-                        'readonly': 'readonly',
-                    }))
+                attrs = {'readonly': 'readonly'}
             else:
                 initial = 0
+                attrs = {}
+            # TODO(rdopieralski) Get a list of hardware profiles for each
+            # role here.
+            profiles = [(_("Default"), 'default')]
+            if not profiles:
+                name = 'count__%s__' % str(role.id)
+                attrs = {'readonly': 'readonly'}
                 self.fields[name] = django.forms.IntegerField(
-                    label=_("Default"), initial=initial, min_value=initial,
-                    widget=tuskar_ui.forms.NumberPickerInput)
+                    label='', initial=initial, min_value=initial,
+                    widget=tuskar_ui.forms.NumberPickerInput(attrs=attrs))
+            for label, profile in profiles:
+                name = 'count__%s__%s' % (str(role.id), profile)
+                self.fields[name] = django.forms.IntegerField(
+                    label=label, initial=initial, min_value=initial,
+                    widget=tuskar_ui.forms.NumberPickerInput(attrs=attrs))
 
     def roles_fieldset(self):
         for role in self._get_roles():
@@ -58,12 +63,22 @@ class Action(horizon.workflows.Action):
     def _get_roles(self):
         return api.OvercloudRole.list(self.request)
 
+    def clean(self):
+        for key, value in self.cleaned_data.iteritems():
+            if not key.startswith('count_'):
+                continue
+            _count, role_id, profile = key.split('__', 2)
+            if int(value) and not profile:
+                raise django.forms.ValidationError(
+                    _("Can't deploy nodes without a node profile assigned."))
+        return self.cleaned_data
+
     def handle(self, request, context):
         counts = {}
         for key, value in self.cleaned_data.iteritems():
             if not key.startswith('count_'):
                 continue
-            _count, role_id, profile = key.split('__', 2)
+            count, role_id, profile = key.split('__', 2)
             counts[role_id, profile] = int(value)
         context['role_counts'] = counts
         return context
@@ -75,7 +90,5 @@ class Step(horizon.workflows.Step):
     template_name = 'infrastructure/overcloud/undeployed_overview.html'
     help_text = _("Nothing deployed yet. Design your first deployment.")
 
-    def get_context_data(self, *args, **kwargs):
-        context = super(Step, self).get_context_data(*args, **kwargs)
-        context['free_nodes'] = 3
-        return context
+    def get_free_nodes(self):
+        return len(api.Node.list(self.workflow.request, False))
