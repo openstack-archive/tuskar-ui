@@ -13,16 +13,19 @@
 #    under the License.
 
 from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base as base_views
 
 from horizon import exceptions
+from horizon import forms as horizon_forms
 from horizon import tables as horizon_tables
 from horizon import tabs as horizon_tabs
 from horizon.utils import memoized
 import horizon.workflows
 
 from tuskar_ui import api
+from tuskar_ui.infrastructure.overcloud import forms
 from tuskar_ui.infrastructure.overcloud import tables
 from tuskar_ui.infrastructure.overcloud import tabs
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed
@@ -127,3 +130,27 @@ class OvercloudRoleView(horizon_tables.DataTableView):
             exceptions.handle(self.request, msg, redirect=redirect)
 
         return role
+
+
+class OvercloudRoleUpdateView(horizon_forms.ModalFormView):
+    form_class = forms.UpdateOvercloudRoleForm
+    template_name = 'infrastructure/overcloud/role_update.html'
+    success_url = reverse_lazy('horizon:infrastructure:overcloud:create')
+
+    def get_initial(self):
+        role_id = self.kwargs['role_id']
+        try:
+            role = api.OvercloudRole.get(self.request, role_id)
+        except Exception:
+            redirect = self.success_url
+            msg = _('Unable to retrieve role details.')
+            exceptions.handle(self.request, msg, redirect=redirect)
+
+        return {'name': role.name,
+                'image_name': role.image_name}
+
+    def get_context_data(self, **kwargs):
+        context = super(OvercloudRoleUpdateView, self).get_context_data(
+            **kwargs)
+        context['role_id'] = self.kwargs['role_id']
+        return context

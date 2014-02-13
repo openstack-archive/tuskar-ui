@@ -16,13 +16,15 @@
           <th>{% trans "Node profiles" %}</th>
           <th>{% trans "Nodes" %}</th>
         </tr>
-        {% for role, label, fields in form.roles_fieldset %}
+        {% for role_id, label, fields in form.roles_fieldset %}
           <tbody>
           {% for field in fields %}
             <tr>
               {% if forloop.first %}
                 <td rowspan="{{ fields|length }}">
-                  <i class="icon-pencil"></i>
+                  <a class="ajax-modal" href="{% url 'horizon:infrastructure:overcloud:role_update' role_id %}">
+		    <i class="icon-pencil"></i>
+		  </a>
                   {{ label }}
                 </td>
               {% endif %}

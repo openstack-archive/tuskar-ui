@@ -29,6 +29,8 @@ CREATE_URL = urlresolvers.reverse(
     'horizon:infrastructure:overcloud:create')
 DETAIL_URL = urlresolvers.reverse(
     'horizon:infrastructure:overcloud:detail', args=(1,))
+ROLE_UPDATE_URL = urlresolvers.reverse(
+    'horizon:infrastructure:overcloud:role_update', args=(1,))
 TEST_DATA = utils.TestDataContainer()
 tuskar_data.data(TEST_DATA)
 
@@ -170,3 +172,26 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'infrastructure/overcloud/_detail_overview.html')
         self.assertTemplateUsed(
             res, 'infrastructure/overcloud/_detail_configuration.html')
+
+    def test_role_update_get(self):
+        role = TEST_DATA.tuskarclient_overcloud_roles.first()
+        with patch('tuskar_ui.api.OvercloudRole', **{
+            'spec_set': ['get'],
+            'get.side_effect': lambda request, role_id: role,
+        }):
+            res = self.client.get(ROLE_UPDATE_URL)
+
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/role_update.html')
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/_role_update.html')
+
+    def test_role_update_post(self):
+        role = TEST_DATA.tuskarclient_overcloud_roles.first()
+        data = {
+            'name': role.name,
+            'image_name': role.image_name
+        }
+        res = self.client.post(ROLE_UPDATE_URL, data)
+
+        self.assertRedirectsNoFollow(res, CREATE_URL)

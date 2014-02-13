@@ -28,4 +28,7 @@ urlpatterns = defaults.patterns(
                  '(?P<role_id>[^/]+)$',
                  views.OvercloudRoleView.as_view(),
                  name='role'),
+    defaults.url(r'^(?P<role_id>[^/]+)/role_update/$',
+                 views.OvercloudRoleUpdateView.as_view(),
+                 name='role_update'),
 )

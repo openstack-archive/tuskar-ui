@@ -1,0 +1,21 @@
+{% extends "horizon/common/_modal_form.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block form_id %}update_overcloud_role_form{% endblock %}
+{% block form_action %}{% url 'horizon:infrastructure:overcloud:role_update' role_id %}{% endblock %}
+
+{% block modal-header %}{% trans "Edit Deployment Role" %}{% endblock %}
+
+{% block modal-body %}
+<div class="left">
+    <fieldset>
+    {% include "horizon/common/_form_fields.html" %}
+    </fieldset>
+</div>
+{% endblock %}
+
+{% block modal-footer %}
+  <input class="btn btn-primary pull-right" type="submit" value="{% trans "Save Changes" %}" />
+  <a href="{% url 'horizon:infrastructure:overcloud:create' %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
+{% endblock %}

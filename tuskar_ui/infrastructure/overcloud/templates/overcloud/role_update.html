@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Register Nodes" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Update Deployment Role") %}
+{% endblock %}
+
+{% block main %}
+  {% include "infrastructure/overcloud/_role_update.html" %}
+{% endblock %}
