@@ -18,19 +18,19 @@ angular.module('horizonApp').directive('hrNumberPicker', function() {
 
       scope.disableArrow = function() {
         return (scope.value === 0) ? true : false;
-      }
+      };
 
       scope.incrementValue = function() {
         if(!scope.disabledInput) {
           scope.value++;
         }
-      }
+      };
 
       scope.decrementValue = function() {
         if(!scope.disabledInput && scope.value !== 0) {
           scope.value--;
         }
-      }
+      };
     }
   };
-})
+});
