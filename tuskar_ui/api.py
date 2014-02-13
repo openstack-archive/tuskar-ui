@@ -613,9 +613,7 @@ class Resource(base.APIResourceWrapper):
         return None
 
 
-# TODO(Tzu-Mainn Chen): change this to APIResourceWrapper once
-# OvercloudRole object exists in tuskar
-class OvercloudRole(base.APIDictWrapper):
+class OvercloudRole(base.APIResourceWrapper):
     _attrs = ('id', 'name', 'description', 'image_name', 'flavor_id')
 
     @classmethod
@@ -629,9 +627,7 @@ class OvercloudRole(base.APIDictWrapper):
                  are none
         :rtype:  list of tuskar_ui.api.OvercloudRole
         """
-        # TODO(Tzu-Mainn Chen): remove test data when possible
-        # roles = tuskarclient(request).overcloud_roles.list()
-        roles = test_data().tuskarclient_overcloud_roles.list()
+        roles = tuskarclient(request).overcloud_roles.list()
         return [cls(role) for role in roles]
 
     @classmethod
@@ -648,10 +644,5 @@ class OvercloudRole(base.APIDictWrapper):
                  OvercloudRole can be found
         :rtype:  tuskar_ui.api.OvercloudRole
         """
-        # TODO(Tzu-Mainn Chen): remove test data when possible
-        # roles = tuskarclient(request).overcloud_roles.get(role_id)
-        roles = cls.list(request)
-        role = next((r for r in roles if role_id == str(r.id)),
-                    None)
-
+        role = tuskarclient(request).overcloud_roles.get(role_id)
         return cls(role)

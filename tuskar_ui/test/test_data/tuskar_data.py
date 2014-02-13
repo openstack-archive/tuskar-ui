@@ -19,6 +19,7 @@ from heatclient.v1 import stacks
 from ironicclient.v1 import node
 from ironicclient.v1 import port
 from novaclient.v1_1 import servers
+from tuskarclient.v1 import overcloud_roles
 
 
 def data(TEST):
@@ -353,24 +354,30 @@ def data(TEST):
 
     # OvercloudRole
     TEST.tuskarclient_overcloud_roles = test_data_utils.TestDataContainer()
-    # TODO(Tzu-Mainn Chen): fix these to create Tuskar OvercloudRole objects
-    # once the api supports it
-    r_1 = {'id': 1,
-           'name': 'Controller',
-           'description': 'controller overcloud role',
-           'image_name': 'overcloud-control'}
-    r_2 = {'id': 2,
-           'name': 'Compute',
-           'description': 'compute overcloud role',
-           'image_name': 'overcloud-compute'}
-    r_3 = {'id': 3,
-           'name': 'Object Storage',
-           'description': 'object storage overcloud role',
-           'image_name': 'overcloud-object-storage'}
-    r_4 = {'id': 4,
-           'name': 'Block Storage',
-           'description': 'block storage overcloud role',
-           'image_name': 'overcloud-block-storage'}
+    r_1 = overcloud_roles.OvercloudRole(
+        overcloud_roles.OvercloudRoleManager(None),
+        {'id': 1,
+         'name': 'Controller',
+         'description': 'controller overcloud role',
+         'image_name': 'overcloud-control'})
+    r_2 = overcloud_roles.OvercloudRole(
+        overcloud_roles.OvercloudRoleManager(None),
+        {'id': 2,
+         'name': 'Compute',
+         'description': 'compute overcloud role',
+         'image_name': 'overcloud-compute'})
+    r_3 = overcloud_roles.OvercloudRole(
+        overcloud_roles.OvercloudRoleManager(None),
+        {'id': 3,
+         'name': 'Object Storage',
+         'description': 'object storage overcloud role',
+         'image_name': 'overcloud-object-storage'})
+    r_4 = overcloud_roles.OvercloudRole(
+        overcloud_roles.OvercloudRoleManager(None),
+        {'id': 4,
+         'name': 'Block Storage',
+         'description': 'block storage overcloud role',
+         'image_name': 'overcloud-block-storage'})
     TEST.tuskarclient_overcloud_roles.add(r_1, r_2, r_3, r_4)
 
     # Image
