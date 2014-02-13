@@ -17,7 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 import horizon.workflows
 
-from tuskar_ui import api
+# from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud.workflows import scale_node_counts
 
 
@@ -30,19 +30,18 @@ class Workflow(horizon.workflows.Workflow):
     finalize_button_name = _("Apply Changes")
 
     def handle(self, request, context):
-        success = True
-        overcloud_id = self.context['overcloud_id']
+        # overcloud_id = self.context['overcloud_id']
         try:
             # TODO(rdopieralski) Actually update it when possible.
-            overcloud = api.Overcloud.get(request, overcloud_id)  # noqa
+            # overcloud = api.Overcloud.get(request, overcloud_id)
             # overcloud.update(self.request, context['role_counts'])
             pass
         except Exception:
-            success = False
             exceptions.handle(request, _('Unable to update deployment.'))
-        return success
+            return False
+        return True
 
     def get_success_url(self):
-        overcloud_id = self.context.get('overcloud_id')
+        overcloud_id = self.context.get('overcloud_id', 1)
         return reverse('horizon:infrastructure:overcloud:detail',
                        args=(overcloud_id,))
