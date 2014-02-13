@@ -114,11 +114,10 @@ class Overcloud(base.APIResourceWrapper):
         # TODO(lsmola) for now we have to transform the sizing to simpler
         # format, till API will accept the more complex with flavors,
         # then we delete this
-        transformed_sizing = []
-        for role_flavor_list, sizing in overcloud_sizing.items():
-            transformed_sizing.append(
-                {'overcloud_role_id': role_flavor_list[0],
-                 'num_nodes': sizing})
+        transformed_sizing = [{
+            'overcloud_role_id': role,
+            'num_nodes': sizing,
+        } for (role, flavor), sizing in overcloud_sizing.items()]
 
         overcloud = tuskarclient(request).overclouds.create(
             name='overcloud', description="Openstack cloud providing VMs",

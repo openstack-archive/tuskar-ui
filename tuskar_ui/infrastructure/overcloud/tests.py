@@ -98,10 +98,13 @@ class OvercloudTests(test.BaseAdminViewTests):
 
     def test_create_get(self):
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
-        with patch('tuskar_ui.api.OvercloudRole', **{
+        with contextlib.nested(patch('tuskar_ui.api.OvercloudRole', **{
             'spec_set': ['list'],
-            'list.side_effect': lambda request: roles,
-        }):
+            'list.return_value': roles,
+        }), patch('tuskar_ui.api.Node', **{
+            'spec_set': ['list'],
+            'list.return_value': [],
+        })):
             res = self.client.get(CREATE_URL)
         self.assertTemplateUsed(
             res, 'infrastructure/_fullscreen_workflow_base.html')
@@ -109,7 +112,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'infrastructure/overcloud/undeployed_overview.html')
 
     def test_create_post(self):
-        oc = api.Overcloud(TEST_DATA.tuskarclient_overclouds.first())
+        oc = None
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         data = {
             'count__1__default': '1',
@@ -117,55 +120,58 @@ class OvercloudTests(test.BaseAdminViewTests):
             'count__3__default': '0',
             'count__4__default': '0',
         }
-        with patch('tuskar_ui.api.OvercloudRole', **{
-            'spec_set': ['list'],
-            'list.side_effect': lambda request: roles,
-        }):
-            with patch('tuskar_ui.api.Overcloud', **{
-                    'spec_set': ['create'],
-                    'create.return_value': oc,
-            }) as Overcloud:
-                res = self.client.post(CREATE_URL, data)
-                request = Overcloud.create.call_args_list[0][0][0]
-                self.assertListEqual(
-                    Overcloud.create.call_args_list,
-                    [
-                        call(request, {
-                            ('1', 'default'): 1,
-                            ('2', 'default'): 0,
-                            ('3', 'default'): 0,
-                            ('4', 'default'): 0,
-                        }, {
-                            'NeutronPublicInterfaceRawDevice': '',
-                            'NovaComputeDriver': '',
-                            'NeutronPassword': '',
-                            'NeutronFlatNetworks': '',
-                            'NeutronPublicInterfaceDefaultRoute': '',
-                            'HeatPassword': '',
-                            'notcomputeImage': '',
-                            'NovaImage': '',
-                            'SSLKey': '',
-                            'KeyName': '',
-                            'GlancePassword': '',
-                            'CeilometerPassword': '',
-                            'NtpServer': '',
-                            'CinderPassword': '',
-                            'ImageUpdatePolicy': '',
-                            'NeutronPublicInterface': '',
-                            'NovaPassword': '',
-                            'AdminToken': '',
-                            'SwiftHashSuffix': '',
-                            'NeutronPublicInterfaceIP': '',
-                            'NovaComputeLibvirtType': '',
-                            'AdminPassword': '',
-                            'CeilometerComputeAgent': '',
-                            'NeutronBridgeMappings': '',
-                            'SwiftPassword': '',
-                            'CeilometerMeteringSecret': '',
-                            'SSLCertificate': '',
-                            'Flavor': '',
-                        }),
-                    ])
+        with contextlib.nested(
+            patch('tuskar_ui.api.OvercloudRole', **{
+                'spec_set': ['list'],
+                'list.side_effect': lambda request: roles,
+            }),
+            patch('tuskar_ui.api.Overcloud', **{
+                'spec_set': ['create'],
+                'create.return_value': oc,
+            }),
+        ) as (OvercloudRole, Overcloud):
+            oc = Overcloud
+            res = self.client.post(CREATE_URL, data)
+            request = Overcloud.create.call_args_list[0][0][0]
+            self.assertListEqual(
+                Overcloud.create.call_args_list,
+                [
+                    call(request, {
+                        ('1', 'default'): 1,
+                        ('2', 'default'): 0,
+                        ('3', 'default'): 0,
+                        ('4', 'default'): 0,
+                    }, {
+                        'NeutronPublicInterfaceRawDevice': '',
+                        'NovaComputeDriver': '',
+                        'NeutronPassword': '',
+                        'NeutronFlatNetworks': '',
+                        'NeutronPublicInterfaceDefaultRoute': '',
+                        'HeatPassword': '',
+                        'notcomputeImage': '',
+                        'NovaImage': '',
+                        'SSLKey': '',
+                        'KeyName': '',
+                        'GlancePassword': '',
+                        'CeilometerPassword': '',
+                        'NtpServer': '',
+                        'CinderPassword': '',
+                        'ImageUpdatePolicy': '',
+                        'NeutronPublicInterface': '',
+                        'NovaPassword': '',
+                        'AdminToken': '',
+                        'SwiftHashSuffix': '',
+                        'NeutronPublicInterfaceIP': '',
+                        'NovaComputeLibvirtType': '',
+                        'AdminPassword': '',
+                        'CeilometerComputeAgent': '',
+                        'NeutronBridgeMappings': '',
+                        'SwiftPassword': '',
+                        'CeilometerMeteringSecret': '',
+                        'SSLCertificate': '',
+                        'Flavor': '',
+                    }),
+                ])
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
     def test_detail_get(self):
@@ -190,7 +196,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             'stack_events': [],
         }), patch('tuskar_ui.api.OvercloudRole', **{
             'spec_set': ['list'],
-            'list.side_effect': lambda request: roles,
+            'list.return_value': roles,
         })) as (Overcloud, OvercloudRole):
             oc = Overcloud
             res = self.client.get(DETAIL_URL)
@@ -283,3 +289,33 @@ class OvercloudTests(test.BaseAdminViewTests):
             #        }),
             #    ])
         self.assertRedirectsNoFollow(res, DETAIL_URL)
+
+    def test_role_edit_get(self):
+        role = TEST_DATA.tuskarclient_overcloud_roles.first()
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:overcloud:role_edit', args=(role.id,))
+        with patch('tuskar_ui.api.OvercloudRole', **{
+            'spec_set': ['get'],
+            'get.return_value': role,
+        }):
+            res = self.client.get(url)
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/role_edit.html')
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/_role_edit.html')
+
+    def test_role_edit_post(self):
+        role = TEST_DATA.tuskarclient_overcloud_roles.first()
+        url = urlresolvers.reverse(
+            'horizon:infrastructure:overcloud:role_edit', args=(role.id,))
+        data = {
+            'id': '1',
+            'flavor_id': 'xxx',
+        }
+        with patch('tuskar_ui.api.OvercloudRole', **{
+            'spec_set': ['get'],
+            'get.return_value': role,
+        }):
+            # TODO(rdopieralski) Check if the role got associated with flavor.
+            res = self.client.post(url, data)
+        self.assertRedirectsNoFollow(res, CREATE_URL)
