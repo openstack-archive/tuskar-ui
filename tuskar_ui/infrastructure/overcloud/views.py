@@ -25,6 +25,7 @@ import horizon.workflows
 from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud import tables
 from tuskar_ui.infrastructure.overcloud import tabs
+from tuskar_ui.infrastructure.overcloud.workflows import scale
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed
 
 
@@ -73,6 +74,8 @@ class DetailView(horizon_tabs.TabView):
         context['overcloud'] = self.get_data()
         return context
 
+class Scale(horizon.workflows.WorkflowView):
+    workflow_class = scale.Workflow
 
 class OvercloudRoleView(horizon_tables.DataTableView):
     table_class = tables.OvercloudRoleNodeTable
