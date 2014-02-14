@@ -86,7 +86,7 @@ def image_get(request, image_id):
 
 
 class Overcloud(base.APIResourceWrapper):
-    _attrs = ('id', 'stack_id', 'name', 'description')
+    _attrs = ('id', 'stack_id', 'name', 'description', 'counts', 'attributes')
 
     def __init__(self, apiresource, request=None):
         super(Overcloud, self).__init__(apiresource)

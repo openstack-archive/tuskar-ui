@@ -26,7 +26,26 @@ from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud import forms
 from tuskar_ui.infrastructure.overcloud import tables
 from tuskar_ui.infrastructure.overcloud import tabs
+from tuskar_ui.infrastructure.overcloud.workflows import scale
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed
+
+
+INDEX_URL = 'horizon:infrastructure:overcloud:index'
+
+
+class OvercloudMixin(object):
+    @memoized.memoized
+    def get_overcloud(self, redirect=None):
+        if redirect is None:
+            redirect = reverse(INDEX_URL)
+        overcloud_id = self.kwargs['overcloud_id']
+        try:
+            overcloud = api.Overcloud.get(self.request, overcloud_id)
+        except Exception:
+            msg = _("Unable to retrieve deployment.")
+            exceptions.handle(self.request, msg, redirect=redirect)
+
+        return overcloud
 
 
 class IndexView(base_views.RedirectView):
@@ -74,7 +93,7 @@ class DetailView(horizon_tabs.TabView):
 
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)
-        context['overcloud'] = self.get_data()
+        context['overcloud_id'] = self.kwargs['overcloud_id']
         return context
 
 
@@ -95,6 +114,21 @@ class UndeployConfirmationView(horizon.forms.ModalFormView):
         initial = super(UndeployConfirmationView, self).get_initial(**kwargs)
         initial['overcloud_id'] = self.kwargs['overcloud_id']
         return initial
+
+
+class Scale(horizon.workflows.WorkflowView, OvercloudMixin):
+    workflow_class = scale.Workflow
+
+    def get_initial(self):
+        overcloud = self.get_overcloud()
+        role_counts = dict((
+            (count['overcloud_role_id'], 'default'),
+            count['num_nodes'],
+        ) for count in overcloud.counts)
+        return {
+            'overcloud_id': overcloud.id,
+            'role_counts': role_counts,
+        }
 
 
 class OvercloudRoleView(horizon_tables.DataTableView):

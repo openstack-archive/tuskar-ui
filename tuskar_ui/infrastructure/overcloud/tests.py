@@ -194,3 +194,72 @@ class OvercloudTests(test.BaseAdminViewTests):
         }):
             res = self.client.post(DELETE_URL)
         self.assertRedirectsNoFollow(res, INDEX_URL)
+
+    def test_scale_get(self):
+        oc = None
+        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        with contextlib.nested(
+            patch('tuskar_ui.api.OvercloudRole', **{
+                'spec_set': ['list'],
+                'list.return_value': roles,
+            }),
+            patch('tuskar_ui.api.Overcloud', **{
+                'spec_set': ['get', 'id', 'counts'],
+                'get.side_effect': lambda *args: oc,
+                'id': 1,
+                'counts': [
+                    {"overcloud_role_id": role.id, "num_nodes": 0}
+                    for role in roles
+                ],
+            }),
+        ) as (OvercloudRole, Overcloud):
+            oc = Overcloud
+            url = urlresolvers.reverse(
+                'horizon:infrastructure:overcloud:scale', args=(oc.id,))
+            res = self.client.get(url)
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/scale_node_counts.html')
+
+    def test_scale_post(self):
+        oc = None
+        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        data = {
+            'overcloud_id': '1',
+            'count__1__default': '1',
+            'count__2__default': '0',
+            'count__3__default': '0',
+            'count__4__default': '0',
+        }
+        with contextlib.nested(
+            patch('tuskar_ui.api.OvercloudRole', **{
+                'spec_set': ['list'],
+                'list.return_value': roles,
+            }),
+            patch('tuskar_ui.api.Overcloud', **{
+                'spec_set': ['update', 'id', 'get', 'counts'],
+                'get.side_effect': lambda *args: oc,
+                'update.side_effect': lambda *args: oc,
+                'id': 1,
+                'counts': [
+                    {"overcloud_role_id": role.id, "num_nodes": 0}
+                    for role in roles
+                ],
+            }),
+        ) as (OvercloudRole, Overcloud):
+            oc = Overcloud
+            url = urlresolvers.reverse(
+                'horizon:infrastructure:overcloud:scale', args=(oc.id,))
+            res = self.client.post(url, data)
+            # TODO(rdopieralski) Check it when it's actually called.
+            #request = Overcloud.update.call_args_list[0][0][0]
+            #self.assertListEqual(
+            #    Overcloud.update.call_args_list,
+            #    [
+            #        call(request, {
+            #            ('1', 'default'): 1,
+            #            ('2', 'default'): 0,
+            #            ('3', 'default'): 0,
+            #            ('4', 'default'): 0,
+            #        }),
+            #    ])
+        self.assertRedirectsNoFollow(res, DETAIL_URL)
