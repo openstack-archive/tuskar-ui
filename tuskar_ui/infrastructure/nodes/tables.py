@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.template import defaultfilters as filters
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
@@ -36,29 +35,29 @@ class DeleteNode(tables.BatchAction):
 
 
 class NodesTable(tables.DataTable):
-    uuid = tables.Column("uuid",
+    node = tables.Column(lambda node: node.driver_info['ip_address'],
                          link="horizon:infrastructure:nodes:detail",
-                         verbose_name=_("UUID"))
-    mac_addresses = tables.Column("addresses",
-                                  verbose_name=_("MAC Addresses"),
-                                  wrap_list=True,
-                                  filters=(filters.unordered_list,))
-    ipmi_address = tables.Column(lambda node: node.driver_info['ipmi_address'],
-                                 verbose_name=_("IPMI Address"))
+                         verbose_name=_("Node"))
+
+    # TODO(lsmola) waits for Ironic
+    # architecture = tables.Column(
+    #     lambda node: "",
+    #     verbose_name=_("Architecture"))
+
     cpu = tables.Column(lambda node: node.properties['cpu'],
-                        verbose_name=_("CPU"))
+                        verbose_name=_("CPU (cores)"))
     ram = tables.Column(lambda node: node.properties['ram'],
                         verbose_name=_("RAM (GB)"))
     local_disk = tables.Column(lambda node: node.properties['local_disk'],
                                verbose_name=_("Local Disk (TB)"))
-    status = tables.Column("power_state",
-                           verbose_name=_("Status"),
-                           status=True,
-                           status_choices=(
-                               ('on', True),
-                               ('off', False),
-                               ('rebooting', None)
-                           ))
+    power_state = tables.Column("power_state",
+                                verbose_name=_("Power"),
+                                status=True,
+                                status_choices=(
+                                    ('on', True),
+                                    ('off', False),
+                                    ('rebooting', None)
+                                ))
 
     class Meta:
         name = "nodes_table"
@@ -75,6 +74,14 @@ class NodesTable(tables.DataTable):
 
 class FreeNodesTable(NodesTable):
 
+    # TODO(jtomasek): waits for Ironic to expose IP
+    # node = tables.Column(lambda node: node.driver_info['ipmi_address'],
+    #                      link="horizon:infrastructure:nodes:detail",
+    #                      verbose_name=_("Node"))
+    node = tables.Column("uuid",
+                         link="horizon:infrastructure:nodes:detail",
+                         verbose_name=_("Node"))
+
     class Meta:
         name = "free_nodes"
         verbose_name = _("Free Nodes")
@@ -83,9 +90,23 @@ class FreeNodesTable(NodesTable):
 
 
 class DeployedNodesTable(NodesTable):
+    # TODO(lsmola) change of API structure required
+    # deployment_role = tables.Column(
+    #     lambda node: "",
+    #     verbose_name=_("Deployment Role"))
+
+    # TODO(lsmola) waits for Ceilometer baremetal metrics
+    # capacity = tables.Column(
+    #     lambda node: "",
+    #     verbose_name=_("Capacity"))
+
+    health = tables.Column('instance_status',
+                           verbose_name=_("Health"))
 
     class Meta:
         name = "deployed_nodes"
         verbose_name = _("Deployed Nodes")
         table_actions = ()
         row_actions = ()
+        columns = ('node', 'deployment_role', 'capacity', 'architecture',
+                   'cpu', 'ram', 'local_disk', 'health', 'power_state')
