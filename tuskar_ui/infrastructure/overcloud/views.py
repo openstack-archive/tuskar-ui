@@ -26,6 +26,7 @@ from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud import forms
 from tuskar_ui.infrastructure.overcloud import tables
 from tuskar_ui.infrastructure.overcloud import tabs
+from tuskar_ui.infrastructure.overcloud.workflows import scale
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed
 
 
@@ -74,7 +75,7 @@ class DetailView(horizon_tabs.TabView):
 
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)
-        context['overcloud'] = self.get_data()
+        context['overcloud_id'] = self.kwargs['overcloud_id']
         return context
 
 
@@ -95,6 +96,17 @@ class UndeployConfirmationView(horizon.forms.ModalFormView):
         initial = super(UndeployConfirmationView, self).get_initial(**kwargs)
         initial['overcloud_id'] = self.kwargs['overcloud_id']
         return initial
+
+
+class Scale(horizon.workflows.WorkflowView):
+    workflow_class = scale.Workflow
+
+    def get_initial(self):
+        # TODO(rdopieralski) Get the initial node counts here.
+        overcloud_id = self.kwargs['overcloud_id']
+        return {
+            'overcloud_id': overcloud_id,
+        }
 
 
 class OvercloudRoleView(horizon_tables.DataTableView):
