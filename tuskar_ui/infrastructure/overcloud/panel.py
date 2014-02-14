@@ -20,7 +20,7 @@ from tuskar_ui.infrastructure import dashboard
 
 
 class Overcloud(horizon.Panel):
-    name = _("Openstack Deployment")
+    name = _("OpenStack Deployment")
     slug = "overcloud"
 
 
