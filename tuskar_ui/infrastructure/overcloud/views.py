@@ -25,6 +25,7 @@ import horizon.workflows
 from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud import tables
 from tuskar_ui.infrastructure.overcloud import tabs
+from tuskar_ui.infrastructure.overcloud.workflows import scale
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed
 
 
@@ -72,6 +73,16 @@ class DetailView(horizon_tabs.TabView):
         context = super(DetailView, self).get_context_data(**kwargs)
         context['overcloud'] = self.get_data()
         return context
+
+
+class Scale(horizon.workflows.WorkflowView):
+    workflow_class = scale.Workflow
+
+    def get_initial(self):
+        # TODO(rdopieralski) Get the initial node counts here.
+        return {
+            'overcloud_id': self.kwargs['overcloud_id'],
+        }
 
 
 class OvercloudRoleView(horizon_tables.DataTableView):

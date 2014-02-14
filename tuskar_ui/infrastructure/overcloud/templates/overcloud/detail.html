@@ -16,7 +16,8 @@
             <i class="icon-fire icon-white"></i>
             {% trans "Undeploy" %}
         </a>
-        <a href="#" class="btn
+        <a href="{% url 'horizon:infrastructure:overcloud:scale' overcloud.id %}"
+           class="btn ajax-modal
             {% if not overcloud.is_deployed %}disabled{% endif %}">
             <i class="icon-resize-full"></i>
             {% trans "Scale deployment" %}
