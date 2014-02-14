@@ -11,8 +11,9 @@
 <div class="row-fluid">
   <div class="span12">
     <div class="actions pull-right">
-        <a href="#"class="btn btn-danger
-            {% if not overcloud.is_deployed %}disabled{% endif %}">
+        <a href="{% url 'horizon:infrastructure:overcloud:undeploy_confirmation' overcloud_id %}"
+           class="btn btn-danger ajax-modal
+            {% if not overcloud.is_deployed and not overcloud.is_failed %}disabled{% endif %}">
             <i class="icon-fire icon-white"></i>
             {% trans "Undeploy" %}
         </a>

@@ -85,9 +85,7 @@ def image_get(request, image_id):
     return image
 
 
-# TODO(Tzu-Mainn Chen): change this to APIResourceWrapper once
-# Overcloud object exists in tuskar
-class Overcloud(base.APIDictWrapper):
+class Overcloud(base.APIResourceWrapper):
     _attrs = ('id', 'stack_id', 'name', 'description')
 
     def __init__(self, apiresource, request=None):
@@ -108,11 +106,8 @@ class Overcloud(base.APIDictWrapper):
         :return: the created Overcloud object
         :rtype:  tuskar_ui.api.Overcloud
         """
-        # TODO(Tzu-Mainn Chen): remove test data when possible
-        # overcloud = tuskarclient(request).overclouds.create(
-        #                          'overcloud',
-        #                          overcloud_sizing)
-        overcloud = test_data().tuskarclient_overclouds.first()
+        #FIXME(lsmola) pass the parameters
+        overcloud = tuskarclient(request).overclouds.create()
 
         return cls(overcloud, request=request)
 
@@ -126,9 +121,7 @@ class Overcloud(base.APIDictWrapper):
         :return: list of Overclouds, or an empty list if there are none
         :rtype:  list of tuskar_ui.api.Overcloud
         """
-        # TODO(Tzu-Mainn Chen): remove test data when possible
-        # ocs = tuskarclient(request).overclouds.list()
-        ocs = test_data().tuskarclient_overclouds.list()
+        ocs = tuskarclient(request).overclouds.list()
 
         return [cls(oc, request=request) for oc in ocs]
 
@@ -146,11 +139,21 @@ class Overcloud(base.APIDictWrapper):
                  the ID
         :rtype:  tuskar_ui.api.Overcloud
         """
-        # TODO(Tzu-Mainn Chen): remove test data when possible
-        # overcloud = tuskarclient(request).overclouds.get(overcloud_id)
-        overcloud = test_data().tuskarclient_overclouds.first()
+        overcloud = tuskarclient(request).overclouds.get(overcloud_id)
 
         return cls(overcloud, request=request)
+
+    @classmethod
+    def delete(cls, request, overcloud_id):
+        """Create an Overcloud in Tuskar
+
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param overcloud_id: overcloud id
+        :type  overcloud_id: int
+        """
+        tuskarclient(request).overclouds.delete(overcloud_id)
 
     @cached_property
     def stack(self):
@@ -159,15 +162,11 @@ class Overcloud(base.APIDictWrapper):
         :return: Heat Stack associated with this Overcloud; or None
                  if no Stack is associated, or no Stack can be
                  found
-        :rtype:  heatclient.v1.stacks.Stack
+        :rtype:  heatclient.v1.stacks.Stack or None
         """
-        if self.stack_id:
-            # TODO(Tzu-Mainn Chen): remove test data when possible
-            # stack = heatclient(request).stacks.get(self.stack_id)
-            # stack = test_data().heatclient_stacks.first()
-            stack = heat.stack_get(self._request, 'overcloud')
-            return stack
-        return None
+        # FIXME(lsmola) load it properly, once the stack_is is filled
+        # properly in API
+        return heat.stack_get(self._request, 'overcloud')
 
     @cached_property
     def stack_events(self):
@@ -178,7 +177,7 @@ class Overcloud(base.APIDictWrapper):
                  this Overcloud, or there are no Events
         :rtype:  list of heatclient.v1.events.Event
         """
-        if self.stack_id:
+        if self.stack:
             return heat.events_list(self._request,
                                     self.stack.stack_name)
         return []
