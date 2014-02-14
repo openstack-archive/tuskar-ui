@@ -18,6 +18,7 @@ from heatclient.v1 import resources
 from heatclient.v1 import stacks
 from ironicclient.v1 import node
 from ironicclient.v1 import port
+from novaclient.v1_1 import flavors
 from novaclient.v1_1 import servers
 from tuskarclient.v1 import overcloud_roles
 
@@ -399,3 +400,24 @@ def data(TEST):
         {'id': '4',
          'name': 'Block Storage Image'})
     TEST.glanceclient_images.add(image_1, image_2, image_3, image_4)
+
+    # Nova flavors aka node profiles
+    # Do not include fields irrelevent for node profiles
+    TEST.novaclient_flavors = test_data_utils.TestDataContainer()
+    flavor_1 = flavors.Flavor(
+        flavors.FlavorManager(None),
+        {'id': '1',
+         'name': 'flavor-1',
+         'vcpus': 2,
+         'ram': 2048,
+         'disk': 20})
+    flavor_1.get_keys = lambda: {'cpu_arch': 'amd64'}
+    flavor_2 = flavors.Flavor(
+        flavors.FlavorManager(None),
+        {'id': '2',
+         'name': 'flavor-2',
+         'vcpus': 4,
+         'ram': 4096,
+         'disk': 60})
+    flavor_2.get_keys = lambda: {'cpu_arch': 'i386'}
+    TEST.novaclient_flavors.add(flavor_1, flavor_2)
