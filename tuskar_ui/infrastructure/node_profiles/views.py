@@ -1,4 +1,4 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
+# -*- coding: utf8 -*-
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -12,29 +12,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.utils.translation import ugettext_lazy as _
+from openstack_dashboard.dashboards.admin.flavors \
+    import views as flavor_views
 
-import horizon
-
-
-class BasePanels(horizon.PanelGroup):
-    slug = "infrastructure"
-    name = _("Infrastructure")
-    panels = (
-        'nodes',
-        'overcloud',
-        'node_profiles',
-    )
+from tuskar_ui.infrastructure.node_profiles import tables
+from tuskar_ui.infrastructure.node_profiles import workflows
 
 
-class Infrastructure(horizon.Dashboard):
-    name = _("Infrastructure")
-    slug = "infrastructure"
-    panels = (
-        BasePanels,
-    )
-    default_panel = 'overcloud'
-    permissions = ('openstack.roles.admin',)
+class IndexView(flavor_views.IndexView):
+    table_class = tables.NodeProfilesTable
+    template_name = 'infrastructure/node_profiles/index.html'
 
 
-horizon.register(Infrastructure)
+class CreateView(flavor_views.CreateView):
+    workflow_class = workflows.CreateNodeProfile
+    template_name = 'infrastructure/node_profiles/create.html'
