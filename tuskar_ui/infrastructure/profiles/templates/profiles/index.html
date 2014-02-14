@@ -1,0 +1,16 @@
+{% extends 'infrastructure/base.html' %}
+{% load i18n %}
+{% load url from future %}
+{% block title %}{% trans 'Node Profiles' %}{% endblock %}
+
+{% block page_header %}
+  {% include 'horizon/common/_domain_page_header.html' with title=_('Node Profiles') %}
+{% endblock page_header %}
+
+{% block main %}
+<div class="row-fluid">
+<div class="span12">
+  {{ table.render }}
+</div>
+</div>
+{% endblock %}
