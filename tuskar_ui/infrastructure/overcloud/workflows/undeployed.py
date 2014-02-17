@@ -35,8 +35,8 @@ class Workflow(horizon.workflows.Workflow):
     def handle(self, request, context):
         success = True
         try:
-            api.Overcloud.create(self.request, context['role_counts'])
-            # TODO(rdopieralski) Use the configuration somehow?
+            api.Overcloud.create(self.request, context['role_counts'],
+                                 context['configuration'])
         except Exception:
             success = False
             exceptions.handle(request, _('Unable to start deployment.'))

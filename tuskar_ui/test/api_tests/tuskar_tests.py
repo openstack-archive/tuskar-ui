@@ -32,7 +32,7 @@ class TuskarAPITests(test.APITestCase):
         overcloud = self.tuskarclient_overclouds.first()
         with patch('tuskarclient.v1.overclouds.OvercloudManager.create',
                    return_value=overcloud):
-            ret_val = api.Overcloud.create(self.request, [])
+            ret_val = api.Overcloud.create(self.request, {}, {})
         self.assertIsInstance(ret_val, api.Overcloud)
 
     def test_overcloud_list(self):

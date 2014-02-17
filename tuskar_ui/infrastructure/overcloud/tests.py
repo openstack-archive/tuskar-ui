@@ -144,6 +144,14 @@ class OvercloudTests(test.BaseAdminViewTests):
                             ('2', 'default'): 0,
                             ('3', 'default'): 0,
                             ('4', 'default'): 0,
+                        }, {
+                            'mysql_password': u'pass', 'amqp_host_ip': u'',
+                            'keystone_db_password': u'pass',
+                            'mysql_user': u'admin',
+                            'keystone_admin_password': u'pass',
+                            'mysql_host_ip': u'', 'amqp_password': u'pass',
+                            'keystone_admin_token': u'pass',
+                            'keystone_host_ip': u''
                         }),
                     ])
         self.assertRedirectsNoFollow(res, INDEX_URL)

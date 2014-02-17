@@ -93,7 +93,7 @@ class Overcloud(base.APIResourceWrapper):
         self._request = request
 
     @classmethod
-    def create(cls, request, overcloud_sizing):
+    def create(cls, request, overcloud_sizing, overcloud_configuration):
         """Create an Overcloud in Tuskar
 
         :param request: request object
@@ -103,11 +103,25 @@ class Overcloud(base.APIResourceWrapper):
         :type  overcloud_sizing: dict (structure to be determined
                                  by tuskar api)
 
+        :param overcloud_configuration: overcloud configuration
+        :type  overcloud_configuration: dict (structure to be determined
+                                 by tuskar api)
+
         :return: the created Overcloud object
         :rtype:  tuskar_ui.api.Overcloud
         """
-        #FIXME(lsmola) pass the parameters
-        overcloud = tuskarclient(request).overclouds.create()
+        # TODO(lsmola) for now we have to transform the sizing to simpler
+        # format, till API will accept the more complex with flavors,
+        # then we delete this
+        transformed_sizing = []
+        for role_flavor_list, sizing in overcloud_sizing.items():
+            transformed_sizing.append(
+                {'overcloud_role_id': role_flavor_list[0],
+                 'num_nodes': sizing})
+
+        overcloud = tuskarclient(request).overclouds.create(
+            name='overcloud', description="Openstack cloud providing VMs",
+            counts=transformed_sizing, attributes=overcloud_configuration)
 
         return cls(overcloud, request=request)
 
