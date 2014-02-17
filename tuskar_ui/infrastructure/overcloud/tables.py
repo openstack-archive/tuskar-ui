@@ -16,32 +16,10 @@ from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
 
+from tuskar_ui.infrastructure.nodes import tables as nodes_tables
 
-class OvercloudRoleNodeTable(tables.DataTable):
-    node = tables.Column("uuid",
-                         link="horizon:infrastructure:nodes:detail",
-                         verbose_name=_("Node"))
-    ipmi_address = tables.Column(lambda node: node.driver_info['ipmi_address'],
-                                 verbose_name=_("IPMI address"))
-    cpu = tables.Column(lambda node: node.properties['cpu'],
-                        verbose_name=_("CPU (cores)"))
-    ram = tables.Column(lambda node: node.properties['ram'],
-                        verbose_name=_("Memory (GB)"))
-    local_disk = tables.Column(lambda node: node.properties['local_disk'],
-                               verbose_name=_("Local Disk (TB)"))
-    instance_status = tables.Column(lambda node: node.instance.status,
-                                    verbose_name=_("Instance Status"))
-    power_state = tables.Column("power_state",
-                                verbose_name=_("Power"),
-                                status=True,
-                                status_choices=(
-                                    ('on', True),
-                                    ('off', False),
-                                    ('rebooting', None)
-                                ))
 
-    def get_object_id(self, datum):
-        return datum.id
+class OvercloudRoleNodeTable(nodes_tables.DeployedNodesTable):
 
     class Meta:
         name = "overcloud_role__nodetable"

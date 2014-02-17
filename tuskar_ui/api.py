@@ -549,14 +549,29 @@ class Node(base.APIResourceWrapper):
     @cached_property
     def driver_info(self):
         # FIXME(lsmola) remove when Ironic is in
-        """Return driver_info this Node
+        """Return driver_info for this Node
 
         :return: return pm_address property of this Node
         :rtype:  dict of str
         """
+        # FIXME(lsmola) Ironic doc is missing, so I don't know
+        # whether this belongs here
+        try:
+            ip_address = (self.instance._apiresource.addresses['ctlplane'][0]
+                          ['addr'])
+        except Exception:
+            LOG.error("Couldn't obtain IP address")
+            ip_address = None
+
         return {
-            'ipmi_address': self._apiresource.pm_address
+            'ipmi_address': self._apiresource.pm_address,
+            'ip_address': ip_address
         }
+
+    @cached_property
+    def instance_status(self):
+        return getattr(getattr(self, 'instance', None),
+                       'status', None)
 
 
 class Resource(base.APIResourceWrapper):
