@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from django.template import defaultfilters
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
@@ -46,10 +47,12 @@ class NodesTable(tables.DataTable):
 
     cpu = tables.Column(lambda node: node.properties['cpu'],
                         verbose_name=_("CPU (cores)"))
-    ram = tables.Column(lambda node: node.properties['ram'],
-                        verbose_name=_("RAM (GB)"))
-    local_disk = tables.Column(lambda node: node.properties['local_disk'],
-                               verbose_name=_("Local Disk (TB)"))
+    ram = tables.Column(lambda node: defaultfilters.filesizeformat(
+                        node.properties['ram']),
+                        verbose_name=_("RAM"))
+    local_disk = tables.Column(lambda node: defaultfilters.filesizeformat(
+                               node.properties['local_disk']),
+                               verbose_name=_("Local Disk"))
     power_state = tables.Column("power_state",
                                 verbose_name=_("Power"),
                                 status=True,
