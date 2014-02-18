@@ -30,9 +30,9 @@
       <h4>{% trans "Properties" %}</h4>
       <dl>
         <dt>{% trans "Local disk" %}</dt>
-        <dd>{{ node.properties.local_disk }}</dd>
+        <dd>{{ node.properties.local_disk|filesizeformat }}</dd>
         <dt>{% trans "RAM" %}</dt>
-        <dd>{{ node.properties.ram }}</dd>
+        <dd>{{ node.properties.ram|filesizeformat }}</dd>
         <dt>{% trans "CPU" %}</dt>
         <dd>{{ node.properties.cpu }}</dd>
       </dl>
