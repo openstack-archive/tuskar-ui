@@ -33,10 +33,14 @@ class IndexView(base_views.RedirectView):
     permanent = False
 
     def get_redirect_url(self):
-        overcloud = next(iter(api.Overcloud.list(self.request)), None)
+        try:
+             # TODO(lsmola) implement this properly when supported by API
+            overcloud = api.Overcloud.get_the_overcloud(self.request)
+        except Exception:
+            overcloud = None
 
         if overcloud is not None:
-            # FIXME(lsmola) there can be a short period when overcloud
+            # TODO(lsmola) there can be a short period when overcloud
             # is created, but stack not. So we have to make sure we have
             # missing stack under control as a new STATE
             # Also when deleting now, it first deletes Overcloud then Stack
@@ -60,9 +64,9 @@ class DetailView(horizon_tabs.TabView):
 
     @memoized.memoized_method
     def get_data(self):
-        overcloud_id = self.kwargs['overcloud_id']
         try:
-            return api.Overcloud.get(self.request, overcloud_id)
+            # TODO(lsmola) implement this properly when supported by API
+            return api.Overcloud.get_the_overcloud(self.request)
         except Exception:
             msg = _("Unable to retrieve deployment.")
             redirect = reverse('horizon:infrastructure:overcloud:index')

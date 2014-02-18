@@ -1,7 +1,7 @@
 {% load i18n %}
 {% load url from future%}
 
-{% if overcloud.is_deploying or overcloud.is_failed %}
+{% if overcloud.is_deploying or overcloud.is_failed or overcloud.is_deleting %}
   {% if overcloud.is_deploying %}
     <div class="alert alert-info">
       <div class="row-fluid">
@@ -12,14 +12,25 @@
           </div>
         </div>
   {% else %}
-    <div class="alert alert-error">
-      <div class="row-fluid">
-        <div class="span2">
-          <strong>Deployment failed</strong>
-          <div class="progress progress-striped progress-danger">
-            <div class="bar bar-info" style="width:{{ progress }}%"></div>
+    {% if overcloud.is_deleting %}
+      <div class="alert alert-error">
+        <div class="row-fluid">
+          <div class="span2">
+            <strong>Undeploying...</strong>
+            <div class="progress progress-striped progress-danger">
+              <div class="bar bar-info" style="width:{{ progress }}%"></div>
+            </div>
           </div>
-        </div>
+    {% else %}
+      <div class="alert alert-error">
+        <div class="row-fluid">
+          <div class="span2">
+            <strong>Deployment failed</strong>
+            <div class="progress progress-striped progress-danger">
+              <div class="bar bar-info" style="width:{{ progress }}%"></div>
+            </div>
+          </div>
+    {% endif %}
   {% endif %}
     <div class="span10">
       {% if last_event %}
