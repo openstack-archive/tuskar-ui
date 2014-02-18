@@ -21,6 +21,7 @@ from ironicclient.v1 import port
 from novaclient.v1_1 import flavors
 from novaclient.v1_1 import servers
 from tuskarclient.v1 import overcloud_roles
+from tuskarclient.v1 import overclouds
 
 
 def data(TEST):
@@ -347,10 +348,12 @@ def data(TEST):
     TEST.tuskarclient_overclouds = test_data_utils.TestDataContainer()
     # TODO(Tzu-Mainn Chen): fix these to create Tuskar Overcloud objects
     # once the api supports it
-    oc_1 = {'id': 1,
-            'stack_id': 'stack-id-1',
-            'name': 'overcloud',
-            'description': 'overcloud'}
+    oc_1 = overclouds.Overcloud(
+        overclouds.OvercloudManager(None),
+        {'id': 1,
+         'stack_id': 'stack-id-1',
+         'name': 'overcloud',
+         'description': 'overcloud'})
     TEST.tuskarclient_overclouds.add(oc_1)
 
     # OvercloudRole

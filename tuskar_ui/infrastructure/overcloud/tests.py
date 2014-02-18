@@ -48,7 +48,7 @@ class OvercloudTests(test.BaseAdminViewTests):
         oc = None
         with patch('tuskar_ui.api.Overcloud', **{
             'spec_set': [
-                'list',
+                'get_the_overcloud',
                 'is_deployed',
                 'is_deploying',
                 'is_failed',
@@ -60,12 +60,12 @@ class OvercloudTests(test.BaseAdminViewTests):
             'is_deployed': False,
             'is_deploying': False,
             'is_failed': False,
-            'list.side_effect': lambda request: [oc],
+            'get_the_overcloud.side_effect': lambda request: oc,
         }) as Overcloud:
             oc = api.Overcloud
             res = self.client.get(INDEX_URL)
-            request = Overcloud.list.call_args_list[0][0][0]  # This is a hack.
-            self.assertListEqual(Overcloud.list.call_args_list,
+            request = Overcloud.get_the_overcloud.call_args_list[0][0][0]
+            self.assertListEqual(Overcloud.get_the_overcloud.call_args_list,
                                  [call(request)])
         self.assertRedirectsNoFollow(res, DETAIL_URL)
 
@@ -74,7 +74,7 @@ class OvercloudTests(test.BaseAdminViewTests):
         stack = TEST_DATA.heatclient_stacks.first()
         with patch('tuskar_ui.api.Overcloud', **{
             'spec_set': [
-                'list',
+                'get_the_overcloud',
                 'is_deployed',
                 'is_deploying',
                 'is_failed',
@@ -86,12 +86,12 @@ class OvercloudTests(test.BaseAdminViewTests):
             'is_deploying': False,
             'is_failed': False,
             'id': 1,
-            'list.side_effect': lambda request: [oc],
+            'get_the_overcloud.side_effect': lambda request: oc,
         }) as Overcloud:
             oc = Overcloud
             res = self.client.get(INDEX_URL)
-            request = Overcloud.list.call_args_list[0][0][0]  # This is a hack.
-            self.assertListEqual(Overcloud.list.call_args_list,
+            request = Overcloud.get_the_overcloud.call_args_list[0][0][0]
+            self.assertListEqual(Overcloud.get_the_overcloud.call_args_list,
                                  [call(request)])
 
         self.assertRedirectsNoFollow(res, DETAIL_URL)
@@ -172,7 +172,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             'is_deployed': True,
             'is_deploying': False,
             'is_failed': False,
-            'get.side_effect': lambda request, overcloud_id: oc,
+            'get': lambda request, overcloud_id: oc,
             'resources.return_value': [],
             'dashboard_url': '',
             'stack_events': [],
