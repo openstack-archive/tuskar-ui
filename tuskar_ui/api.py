@@ -11,23 +11,23 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
+import django.conf
+import heatclient
 import logging
 
-import django.conf
-
 from horizon.utils import memoized
+
+from novaclient.v1_1.contrib import baremetal
+from tuskarclient.v1 import client as tuskar_client
 
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from openstack_dashboard.api import heat
 from openstack_dashboard.api import nova
-
-from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.test.test_data import utils
+
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.test.test_data import tuskar_data
-from tuskarclient.v1 import client as tuskar_client
 
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
@@ -154,9 +154,35 @@ class Overcloud(base.APIResourceWrapper):
                  the ID
         :rtype:  tuskar_ui.api.Overcloud
         """
-        overcloud = tuskarclient(request).overclouds.get(overcloud_id)
+        # FIXME(lsmola) hack for Icehouse, only one Overcloud is allowed
+        # TODO(lsmola) uncomment when possible
+        # overcloud = tuskarclient(request).overclouds.get(overcloud_id)
+        # return cls(overcloud, request=request)
+        return cls.get_the_overcloud(request)
 
-        return cls(overcloud, request=request)
+    # TODO(lsmola) before will will support multiple overclouds, we
+    # can work only with overcloud that is named overcloud. Delete
+    # this once we have more overclouds. Till then, this is the overcloud
+    # that rules them all.
+    # This is how API supports it now, so we have to have it this way.
+    # Also till Overcloud workflow is done properly, we have to work
+    # with situations that overcloud is deleted, but stack is still
+    # there. So overcloud will pretend to exist when stack exist.
+    @classmethod
+    def get_the_overcloud(cls, request):
+        overcloud_list = cls.list(request)
+        for overcloud in overcloud_list:
+            if overcloud.name == 'overcloud':
+                return overcloud
+
+        the_overcloud = cls(object(), request=request)
+        # I need to mock attributes of overcloud that is being deleted.
+        the_overcloud.id = "deleting_in_progress"
+
+        if the_overcloud.stack and the_overcloud.is_deleting:
+            return the_overcloud
+        else:
+            raise heatclient.exc.HTTPNotFound()
 
     @classmethod
     def delete(cls, request, overcloud_id):
@@ -179,9 +205,16 @@ class Overcloud(base.APIResourceWrapper):
                  found
         :rtype:  heatclient.v1.stacks.Stack or None
         """
-        # FIXME(lsmola) load it properly, once the stack_is is filled
-        # properly in API
-        return heat.stack_get(self._request, 'overcloud')
+        # TODO(lsmola) load it properly, once the API has finished workflow
+        # and for example there can't be a situation when I delete Overcloud
+        # but Stack is still deleting. So the Overcloud will represent the
+        # state of all inner entities and operations correctly.
+        # Then also delete the try/except, it should not be caught on this
+        # level.
+        try:
+            return heat.stack_get(self._request, 'overcloud')
+        except heatclient.exc.HTTPNotFound:
+            return None
 
     @cached_property
     def stack_events(self):
@@ -227,6 +260,15 @@ class Overcloud(base.APIResourceWrapper):
         """
         return self.stack.stack_status in ('CREATE_FAILED',
                                            'UPDATE_FAILED')
+
+    @cached_property
+    def is_deleting(self):
+        """Check if this Overcloud is deleting.
+
+        :return: True if Overcloud is deleting, False otherwise.
+        :rtype: bool
+        """
+        return self.stack.stack_status in ('DELETE_IN_PROGRESS', )
 
     @memoized.memoized
     def all_resources(self, with_joins=True):
