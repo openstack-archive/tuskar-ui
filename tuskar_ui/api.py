@@ -552,13 +552,14 @@ class Node(base.APIResourceWrapper):
         """Return properties of this Node
 
         :return: return memory, cpus and local_disk properties
-                 of this Node
+                 of this Node, ram and local_disk properties
+                 are in bytes
         :rtype:  dict of str
         """
         return {
-            'ram': self._apiresource.memory_mb / 1024.0,
+            'ram': self._apiresource.memory_mb * 1024.0 * 1024.0,
             'cpu': self._apiresource.cpus,
-            'local_disk': self._apiresource.local_gb / 1000.0
+            'local_disk': self._apiresource.local_gb * 1024.0 * 1024.0 * 1024.0
         }
 
     @cached_property
