@@ -161,7 +161,7 @@ class OvercloudTests(test.BaseAdminViewTests):
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         with contextlib.nested(patch('tuskar_ui.api.Overcloud', **{
             'spec_set': [
-                'get',
+                'get_the_overcloud',
                 'is_deployed',
                 'is_deploying',
                 'is_failed',
@@ -172,7 +172,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             'is_deployed': True,
             'is_deploying': False,
             'is_failed': False,
-            'get.side_effect': lambda request, overcloud_id: oc,
+            'get_the_overcloud.side_effect': lambda request: oc,
             'resources.return_value': [],
             'dashboard_url': '',
             'stack_events': [],
