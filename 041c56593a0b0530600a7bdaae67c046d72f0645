@@ -1,0 +1,12 @@
+Verified+2: Jenkins
+Approved+1: Tihomir Trifonov <t.trifonov@gmail.com>
+Code-Review+2: Tihomir Trifonov <t.trifonov@gmail.com>
+Code-Review+2: Matthias Runge <mrunge@redhat.com>
+Code-Review+1: Tzu-Mainn Chen <tzumainn@redhat.com>
+Code-Review+1: Radomir Dopieralski <openstack@sheep.art.pl>
+Code-Review+1: Ana Krivokapic <akrivoka@redhat.com>
+Submitted-by: Jenkins
+Submitted-at: Tue, 18 Feb 2014 16:21:22 +0000
+Reviewed-on: https://review.openstack.org/74380
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
