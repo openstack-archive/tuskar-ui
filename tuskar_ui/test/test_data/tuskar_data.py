@@ -362,25 +362,28 @@ def data(TEST):
             'name': 'Controller',
             'description': 'controller overcloud role',
             'image_name': 'overcloud-control',
-            'flavor_id': None,
+            'flavor_id': '',
         })
     r_2 = overcloud_roles.OvercloudRole(
         overcloud_roles.OvercloudRoleManager(None),
         {'id': 2,
          'name': 'Compute',
          'description': 'compute overcloud role',
+         'flavor_id': '',
          'image_name': 'overcloud-compute'})
     r_3 = overcloud_roles.OvercloudRole(
         overcloud_roles.OvercloudRoleManager(None),
         {'id': 3,
          'name': 'Object Storage',
          'description': 'object storage overcloud role',
+         'flavor_id': '',
          'image_name': 'overcloud-object-storage'})
     r_4 = overcloud_roles.OvercloudRole(
         overcloud_roles.OvercloudRoleManager(None),
         {'id': 4,
          'name': 'Block Storage',
          'description': 'block storage overcloud role',
+         'flavor_id': '',
          'image_name': 'overcloud-block-storage'})
     TEST.tuskarclient_overcloud_roles.add(r_1, r_2, r_3, r_4)
 
