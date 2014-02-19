@@ -17,6 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
 import horizon.forms
 import horizon.messages
+from openstack_dashboard import api as horizon_api
 
 from tuskar_ui import api
 
@@ -35,11 +36,15 @@ class UndeployOvercloud(horizon.forms.SelfHandlingForm):
             return True
 
 
-# TODO(rdopieralski) Get the list of flavors
-def get_flavors():
-    yield (None, '----')
-    yield ('xxx', 'Some Hardware Profile')
-    yield ('yyy', 'Other Hardware Profile')
+def get_flavor_choices(request):
+    empty = [('', '----')]
+    try:
+        flavors = horizon_api.nova.flavor_list(request, None)
+    except Exception:
+        horizon.exceptions.handle(request,
+                                  _('Unable to retrieve flavor list.'))
+        return empty
+    return empty + [(flavor.id, flavor.name) for flavor in flavors]
 
 
 class OvercloudRoleForm(horizon.forms.SelfHandlingForm):
@@ -58,8 +63,18 @@ class OvercloudRoleForm(horizon.forms.SelfHandlingForm):
         widget=django.forms.TextInput(
             attrs={'readonly': 'readonly', 'disabled': 'disabled'}))
     flavor_id = django.forms.ChoiceField(
-        label=_("Node Profile"), required=False, choices=get_flavors())
+        label=_("Node Profile"), required=False, choices=())
+
+    def __init__(self, *args, **kwargs):
+        super(OvercloudRoleForm, self).__init__(*args, **kwargs)
+        self.fields['flavor_id'].choices = get_flavor_choices(self.request)
 
     def handle(self, request, context):
-        # TODO(rdopieralski) Associate the flavor with the role
+        try:
+            role = api.OvercloudRole.get(request, context['id'])
+            role.update(request, flavor_id=context['flavor_id'])
+        except Exception:
+            horizon.exceptions.handle(request,
+                                      _('Unable to update the role.'))
+            return False
         return True
