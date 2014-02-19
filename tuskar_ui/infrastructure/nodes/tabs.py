@@ -44,7 +44,14 @@ class OverviewTab(tabs.Tab):
         deployed_nodes_down = [node for node in deployed_nodes
                                if node.power_state != 'on']
 
+        total_nodes = deployed_nodes + free_nodes
+        total_nodes_down = deployed_nodes_down + free_nodes_down
+        total_nodes_up = list(set(total_nodes) - set(total_nodes_down))
+
         return {
+            'total_nodes': total_nodes,
+            'total_nodes_down': total_nodes_down,
+            'total_nodes_up': total_nodes_up,
             'deployed_nodes': deployed_nodes,
             'deployed_nodes_down': deployed_nodes_down,
             'free_nodes': free_nodes,
