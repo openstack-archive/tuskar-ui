@@ -16,21 +16,25 @@
       <tr>
         {% if forloop.first %}
           <td rowspan="{{ fields|length }}">
-            <a
-              href="{% url 'horizon:infrastructure:overcloud:role_edit' role_id %}"
-              class="ajax-modal"
-            ><i class="icon-pencil"></i></a>
+            {% if editable %}
+              <a
+                href="{% url 'horizon:infrastructure:overcloud:role_edit' role_id %}"
+                class="ajax-modal"
+              ><i class="icon-pencil"></i></a>
+            {% endif %}
             {{ label }}
           </td>
         {% endif %}
         <td>
           {% if field.field.label %}
             {{ field.label }}
-          {% else %}
+          {% elif editable %}
             (<a
               href="{% url 'horizon:infrastructure:overcloud:role_edit' role_id %}"
               class="ajax-modal"
              >{% trans "Add a node profile" %}</a>)
+          {% else %}
+            ({% trans "No node profile" %})
           {% endif %}
         </td>
         <td>

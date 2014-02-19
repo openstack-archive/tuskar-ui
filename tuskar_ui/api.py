@@ -749,3 +749,14 @@ class OvercloudRole(base.APIResourceWrapper):
         """
         role = tuskarclient(request).overcloud_roles.get(role_id)
         return cls(role)
+
+    def update(self, request, **kwargs):
+        """Update the selected attributes of Tuskar OvercloudRole.
+
+        :param request: request object
+        :type  request: django.http.HttpRequest
+        """
+        for attr in kwargs:
+            if attr not in self._attrs:
+                raise TypeError('Invalid parameter %r' % attr)
+        tuskarclient(request).overcloud_roles.update(self.id, **kwargs)
