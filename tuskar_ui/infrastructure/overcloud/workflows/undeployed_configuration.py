@@ -11,13 +11,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
-import re
-
 import django.forms
 from django.utils.translation import ugettext_lazy as _
 import horizon.workflows
 
+from tuskar_ui import utils
 
 # TODO(rdopieralski) Get this from the Heat template.
 TEMPLATE_DATA = {
@@ -221,20 +219,12 @@ TEMPLATE_DATA = {
     },
 }
 
-CAMEL_RE = re.compile(r'([a-z]|SSL)([A-Z])')
-
-
-def deCamelCase(text):
-    """Convert CamelCase names to human-readable format."""
-
-    return CAMEL_RE.sub(lambda m: m.group(1) + ' ' + m.group(2), text)
-
 
 def make_field(name, Type, NoEcho, Default, Description, AllowedValues=None,
                **kwargs):
     """Create a form field using the parameters from a Heat template."""
 
-    label = deCamelCase(name)
+    label = utils.de_camel_case(name)
     Widget = django.forms.TextInput
     attrs = {}
     widget_kwargs = {}

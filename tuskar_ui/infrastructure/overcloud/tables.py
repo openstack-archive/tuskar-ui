@@ -28,6 +28,24 @@ class OvercloudRoleNodeTable(nodes_tables.DeployedNodesTable):
         row_actions = ()
 
 
+class ConfigurationTable(tables.DataTable):
+
+    key = tables.Column(lambda parameter: parameter[0],
+                        verbose_name=_("Attribute Name"))
+    value = tables.Column(lambda parameter: parameter[1],
+                          verbose_name=_("Attribute Value"))
+
+    class Meta:
+        name = "configuration"
+        verbose_name = _("Configuration")
+        multi_select = False
+        table_actions = ()
+        row_actions = ()
+
+    def get_object_id(self, datum):
+        return datum[0]
+
+
 class LogTable(tables.DataTable):
 
     timestamp = tables.Column('event_time',
