@@ -100,7 +100,15 @@
     <div class="widget">
       <h2>{% trans "Deployment Role Distribution" %}</h2>
       <p class="muted">{% trans "Statistics currently not available." %}</p>
+      <!--
+      <div class="d3_pie_chart pull-left" data-used="{% widthratio controller_count total_count 100 %}"></div>
+      <div class="pull-left">
+	{% widthratio controller_count total_count 100 %}% {% trans 'Controller' %} <br />
+	{% widthratio compute_count total_count 100 %}% {% trans 'Compute' %}
+      </div>
+      -->
     </div>
+    <div class="clear"></div>
     <div class="widget">
       <h2>{% trans "Horizon UI Connection" %}</h2>
       <p><a href="{{ dashboard_url }}"
