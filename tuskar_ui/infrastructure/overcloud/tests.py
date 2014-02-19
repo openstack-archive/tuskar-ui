@@ -180,7 +180,9 @@ class OvercloudTests(test.BaseAdminViewTests):
                 'resources',
                 'dashboard_url',
                 'stack_events',
+                'id'
             ],
+            'id': 1,
             'is_deployed': True,
             'is_deploying': False,
             'is_failed': False,
