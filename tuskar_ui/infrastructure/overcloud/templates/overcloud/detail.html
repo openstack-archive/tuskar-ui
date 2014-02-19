@@ -11,13 +11,13 @@
 <div class="row-fluid">
   <div class="span12">
     <div class="actions pull-right">
-        <a href="{% url 'horizon:infrastructure:overcloud:undeploy_confirmation' overcloud_id %}"
+        <a href="{% url 'horizon:infrastructure:overcloud:undeploy_confirmation' overcloud.id %}"
            class="btn btn-danger ajax-modal
             {% if not overcloud.is_deployed and not overcloud.is_failed %}disabled{% endif %}">
             <i class="icon-fire icon-white"></i>
             {% trans "Undeploy" %}
         </a>
-        <a href="{% url 'horizon:infrastructure:overcloud:scale' overcloud_id %}"
+        <a href="{% url 'horizon:infrastructure:overcloud:scale' overcloud.id %}"
            class="btn ajax-modal
             {% if not overcloud.is_deployed %}disabled{% endif %}">
             <i class="icon-resize-full"></i>
