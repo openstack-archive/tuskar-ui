@@ -29,6 +29,9 @@ CREATE_URL = urlresolvers.reverse(
     'horizon:infrastructure:overcloud:create')
 DETAIL_URL = urlresolvers.reverse(
     'horizon:infrastructure:overcloud:detail', args=(1,))
+DETAIL_URL_CONFIGURATION_TAB = (DETAIL_URL +
+                                "?tab=detail__configuration")
+DETAIL_URL_LOG_TAB = (DETAIL_URL + "?tab=detail__log")
 DELETE_URL = urlresolvers.reverse(
     'horizon:infrastructure:overcloud:undeploy_confirmation', args=(1,))
 TEST_DATA = utils.TestDataContainer()
@@ -187,8 +190,76 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'infrastructure/overcloud/detail.html')
         self.assertTemplateUsed(
             res, 'infrastructure/overcloud/_detail_overview.html')
+
+    def test_detail_get_configuration_tab(self):
+        oc = None
+        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        stack = TEST_DATA.heatclient_stacks.first()
+        with contextlib.nested(patch('tuskar_ui.api.Overcloud', **{
+            'spec_set': [
+                'get',
+                'is_deployed',
+                'is_deploying',
+                'is_failed',
+                'resources',
+                'dashboard_url',
+                'stack',
+                'stack_events',
+            ],
+            'is_deployed': True,
+            'is_deploying': False,
+            'is_failed': False,
+            'get.side_effect': lambda request, overcloud_id: oc,
+            'resources.return_value': [],
+            'dashboard_url': '',
+            'stack': stack,
+            'stack_events': [],
+        }), patch('tuskar_ui.api.OvercloudRole', **{
+            'spec_set': ['list'],
+            'list.side_effect': lambda request: roles,
+        })) as (Overcloud, OvercloudRole):
+            oc = Overcloud
+            res = self.client.get(DETAIL_URL_CONFIGURATION_TAB)
+
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/detail.html')
         self.assertTemplateUsed(
             res, 'infrastructure/overcloud/_detail_configuration.html')
+
+    def test_detail_get_log_tab(self):
+        oc = None
+        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        stack = TEST_DATA.heatclient_stacks.first()
+        with contextlib.nested(patch('tuskar_ui.api.Overcloud', **{
+            'spec_set': [
+                'get',
+                'is_deployed',
+                'is_deploying',
+                'is_failed',
+                'resources',
+                'dashboard_url',
+                'stack',
+                'stack_events',
+            ],
+            'is_deployed': True,
+            'is_deploying': False,
+            'is_failed': False,
+            'get.side_effect': lambda request, overcloud_id: oc,
+            'resources.return_value': [],
+            'dashboard_url': '',
+            'stack': stack,
+            'stack_events': [],
+        }), patch('tuskar_ui.api.OvercloudRole', **{
+            'spec_set': ['list'],
+            'list.side_effect': lambda request: roles,
+        })) as (Overcloud, OvercloudRole):
+            oc = Overcloud
+            res = self.client.get(DETAIL_URL_LOG_TAB)
+
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/detail.html')
+        self.assertTemplateUsed(
+            res, 'horizon/common/_detail_table.html')
 
     def test_delete_get(self):
         res = self.client.get(DELETE_URL)

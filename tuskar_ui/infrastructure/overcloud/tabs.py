@@ -13,6 +13,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import re
 
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext_lazy
@@ -90,9 +91,22 @@ class ConfigurationTab(tabs.Tab):
     name = _("Configuration")
     slug = "configuration"
     template_name = ("infrastructure/overcloud/_detail_configuration.html")
+    preload = False
 
     def get_context_data(self, request):
-        return {}
+        # TODO(lsmola) used on 2 places now, would be nice to extract it
+        # as a util fuction
+
+        def deCamelCase(text):
+            """Convert CamelCase names to human-readable format."""
+            CAMEL_RE = re.compile(r'([a-z]|SSL)([A-Z])')
+            return CAMEL_RE.sub(lambda m: m.group(1) + ' ' + m.group(2), text)
+
+        overcloud = self.tab_group.kwargs['overcloud']
+
+        parameters = dict([(deCamelCase(key), value) for key, value in
+                           overcloud.stack.parameters.items()])
+        return {'parameters': parameters}
 
 
 class LogTab(tabs.TableTab):

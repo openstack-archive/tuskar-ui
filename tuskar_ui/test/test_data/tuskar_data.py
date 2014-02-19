@@ -31,7 +31,11 @@ def data(TEST):
         stacks.StackManager(None),
         {'id': 'stack-id-1',
          'stack_name': 'overcloud',
-         'stack_status': 'RUNNING'})
+         'stack_status': 'RUNNING',
+         'parameters': {
+             'one': 'one',
+             'two': 'two'
+         }})
     TEST.heatclient_stacks.add(stack_1)
 
     # Events
