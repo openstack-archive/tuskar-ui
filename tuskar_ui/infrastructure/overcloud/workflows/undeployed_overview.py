@@ -16,6 +16,7 @@ import django.forms
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
 import horizon.workflows
+from openstack_dashboard import api as horizon_api
 
 from tuskar_ui import api
 import tuskar_ui.forms
@@ -26,8 +27,31 @@ class Action(horizon.workflows.Action):
         slug = 'undeployed_overview'
         name = _("Overview")
 
+    def _get_profile_names(self):
+        # Get all flavors in one call, instead of getting them one by one.
+        try:
+            flavors = horizon_api.nova.flavor_list(self.request, None)
+        except Exception:
+            horizon.exceptions.handle(self.request,
+                                      _('Unable to retrieve flavor list.'))
+            flavors = []
+        return dict((str(flavor.id), flavor.name) for flavor in flavors)
+
+    def _get_profiles(self, role, profile_names):
+        # TODO(rdopieralski) Get a list of hardware profiles for each
+        # role here, when we support multiple profiles per role.
+        if role.flavor_id:
+            profiles = [(
+                role.flavor_id,
+                profile_names.get(str(role.flavor_id), role.flavor_id),
+            )]
+        else:
+            profiles = []
+        return profiles
+
     def __init__(self, *args, **kwargs):
         super(Action, self).__init__(*args, **kwargs)
+        profile_names = self._get_profile_names()
         for role in self._get_roles():
             if role.name == 'Controller':
                 initial = 1
@@ -35,18 +59,15 @@ class Action(horizon.workflows.Action):
             else:
                 initial = 0
                 attrs = {}
-            # TODO(rdopieralski) Get a list of hardware profiles for each
-            # role here.
-            profiles = [(_("Default"), 'default')]
-            profiles = []
+            profiles = self._get_profiles(role, profile_names)
             if not profiles:
                 name = 'count__%s__' % str(role.id)
                 attrs = {'readonly': 'readonly'}
                 self.fields[name] = django.forms.IntegerField(
                     label='', initial=initial, min_value=initial,
                     widget=tuskar_ui.forms.NumberPickerInput(attrs=attrs))
-            for label, profile in profiles:
-                name = 'count__%s__%s' % (str(role.id), profile)
+            for profile_id, label in profiles:
+                name = 'count__%s__%s' % (str(role.id), profile_id)
                 self.fields[name] = django.forms.IntegerField(
                     label=label, initial=initial, min_value=initial,
                     widget=tuskar_ui.forms.NumberPickerInput(attrs=attrs))
