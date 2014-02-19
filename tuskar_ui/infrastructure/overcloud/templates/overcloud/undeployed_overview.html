@@ -9,35 +9,12 @@
     </div>
     <h2>{% trans "Roles" %}</h2>
     <div class="widget">
-      {% include 'horizon/common/_form_errors.html' with form=form %}
-      <table class="table">
-        <tr>
-          <th>{% trans "Name" %}</th>
-          <th>{% trans "Node profiles" %}</th>
-          <th>{% trans "Nodes" %}</th>
-        </tr>
-        {% for role, label, fields in form.roles_fieldset %}
-          <tbody>
-          {% for field in fields %}
-            <tr>
-              {% if forloop.first %}
-                <td rowspan="{{ fields|length }}">
-                  <i class="icon-pencil"></i>
-                  {{ label }}
-                </td>
-              {% endif %}
-              <td>{{ field.label }}</td>
-              <td>{{ field }}</td>
-            </tr>
-          {% endfor %}
-          </tbody>
-        {% endfor %}
-      </table>
+    {% include 'infrastructure/overcloud/node_counts.html' with form=form %}
     </div>
   </div>
   <div class="span4">
+    <h2>Configuration</h2>
     <div class="widget">
-      <h2>Configuration</h2>
       <p>{% trans "Configuration options will be auto-detected." %}</p>
       <p><a href="#undeployed_overcloud__deployed_configuration"
             data-toggle="tab">{% trans "See and change defaults." %}</a></p>

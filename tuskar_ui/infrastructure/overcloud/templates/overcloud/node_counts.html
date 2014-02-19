@@ -1,0 +1,32 @@
+{% load i18n %}
+
+{% include 'horizon/common/_form_errors.html' with form=form %}
+<table class="table">
+  <tr>
+    <th>{% trans "Name" %}</th>
+    <th>{% trans "Node profiles" %}</th>
+    <th>{% trans "Nodes" %}</th>
+    {% if show_change %}
+    <th>{% trans "Change" %}</th>
+    {% endif %}
+  </tr>
+  {% for role_id, label, fields in form.roles_fieldset %}
+    <tbody>
+    {% for field in fields %}
+      <tr>
+        {% if forloop.first %}
+          <td rowspan="{{ fields|length }}">
+            <i class="icon-pencil"></i>
+            {{ label }}
+          </td>
+        {% endif %}
+        <td>{{ field.label }}</td>
+        <td>{{ field }}</td>
+        {% if show_change %}
+          <td class="changed"><span class="muted">no change</span></td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  {% endfor %}
+</table>
