@@ -13,7 +13,6 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext_lazy
 
@@ -22,6 +21,7 @@ from horizon import tabs
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud import tables
+from tuskar_ui import utils
 
 
 def _get_role_data(overcloud, role):
@@ -60,6 +60,7 @@ class OverviewTab(tabs.Tab):
     name = _("Overview")
     slug = "overview"
     template_name = ("infrastructure/overcloud/_detail_overview.html")
+    preload = False
 
     def get_context_data(self, request, **kwargs):
         overcloud = self.tab_group.kwargs['overcloud']
@@ -86,13 +87,18 @@ class OverviewTab(tabs.Tab):
         }
 
 
-class ConfigurationTab(tabs.Tab):
+class ConfigurationTab(tabs.TableTab):
+    table_classes = (tables.ConfigurationTable,)
     name = _("Configuration")
     slug = "configuration"
-    template_name = ("infrastructure/overcloud/_detail_configuration.html")
+    template_name = "horizon/common/_detail_table.html"
+    preload = False
 
-    def get_context_data(self, request):
-        return {}
+    def get_configuration_data(self):
+        overcloud = self.tab_group.kwargs['overcloud']
+
+        return [(utils.deCamelCase(key), value) for key, value in
+                 overcloud.stack.parameters.items()]
 
 
 class LogTab(tabs.TableTab):
