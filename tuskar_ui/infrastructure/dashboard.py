@@ -21,8 +21,8 @@ class BasePanels(horizon.PanelGroup):
     slug = "infrastructure"
     name = _("Infrastructure")
     panels = (
-        'nodes',
         'overcloud',
+        'nodes',
         'node_profiles',
     )
 
