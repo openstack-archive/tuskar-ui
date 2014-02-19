@@ -1,6 +1,6 @@
 {% load i18n %}
 <noscript><h3>{{ step }}</h3></noscript>
-<p>{{ step.get_help_text }}</p>
+<div class="widget disabled">{{ step.get_help_text }}</div>
 
 <div class="row-fluid">
   <div class="span8">
@@ -13,9 +13,9 @@
     </div>
   </div>
   <div class="span4">
-    <h2>Configuration</h2>
     <div class="widget">
-      <p>{% trans "Configuration options will be auto-detected." %}</p>
+      <h2>Configuration</h2>
+      <p class="disabled">{% trans "Configuration options will be auto-detected." %}</p>
       <p><a href="#undeployed_overcloud__deployed_configuration"
             data-toggle="tab">{% trans "See and change defaults." %}</a></p>
     </div>
