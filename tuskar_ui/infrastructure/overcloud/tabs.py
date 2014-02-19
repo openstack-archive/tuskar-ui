@@ -77,12 +77,27 @@ class OverviewTab(tabs.Tab):
             last_event = overcloud.stack_events[-1]
         except IndexError:
             last_event = None
+
+        # TODO (akrivoka): Simplified version for now, only send controller
+        # and compute node counts to template, as pie chart cannot handle
+        # more anyway. Fix this when pie chart supports more than 2 values.
+
+        controller_count = compute_count = 0
+        for rd in role_data:
+            if rd['name'] == 'Controller':
+                controller_count = rd['running_node_count']
+            elif rd['name'] == 'Compute':
+                compute_count = rd['running_node_count']
+
         return {
             'overcloud': overcloud,
             'roles': role_data,
             'progress': progress,
             'dashboard_url': overcloud.dashboard_url,
             'last_event': last_event,
+            'controller_count': controller_count,
+            'compute_count': compute_count,
+            'total_count': controller_count + compute_count,
         }
 
 

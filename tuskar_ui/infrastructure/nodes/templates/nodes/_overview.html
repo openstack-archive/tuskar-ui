@@ -73,13 +73,17 @@
     </div>
   </div>
   <div class="span4">
-    <div class="widget">
+    <div class="widget pull-left">
       <h2>{% trans 'Provisioning Status' %}</h2>
-      <p>{% trans 'No statistics available' %}</p>
+      <div class="d3_pie_chart" data-used="{% widthratio deployed_nodes|length total_nodes|length 100 %}"></div>
+	  {% widthratio deployed_nodes|length total_nodes|length 100 %}% {% trans 'Deployed' %} <br />
+	  {% widthratio free_nodes|length total_nodes|length 100 %}% {% trans 'Free' %}
     </div>
     <div class="widget">
       <h2>{% trans 'Power Status' %}</h2>
-      <p>{% trans 'No statistics available' %}</p>
+      <div class="d3_pie_chart" data-used="{% widthratio total_nodes_up|length total_nodes|length 100 %}"></div>
+      {% widthratio total_nodes_up|length total_nodes|length 100 %}% {% trans 'Running' %} <br />
+	  {% widthratio total_nodes_down|length total_nodes|length 100 %}% {% trans 'Stopped' %}
     </div>
   </div>
 </div>
