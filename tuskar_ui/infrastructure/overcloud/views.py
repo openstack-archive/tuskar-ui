@@ -77,27 +77,17 @@ class CreateView(horizon.workflows.WorkflowView):
     template_name = 'infrastructure/_fullscreen_workflow_base.html'
 
 
-class DetailView(horizon_tabs.TabView):
+class DetailView(horizon_tabs.TabView, OvercloudMixin):
     tab_group_class = tabs.DetailTabs
     template_name = 'infrastructure/overcloud/detail.html'
 
-    @memoized.memoized_method
-    def get_data(self):
-        overcloud_id = self.kwargs['overcloud_id']
-        try:
-            return api.Overcloud.get(self.request, overcloud_id)
-        except Exception:
-            msg = _("Unable to retrieve deployment.")
-            redirect = reverse('horizon:infrastructure:overcloud:index')
-            exceptions.handle(self.request, msg, redirect=redirect)
-
     def get_tabs(self, request, **kwargs):
-        overcloud = self.get_data()
+        overcloud = self.get_overcloud()
         return self.tab_group_class(request, overcloud=overcloud, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)
-        context['overcloud_id'] = self.kwargs['overcloud_id']
+        context['overcloud'] = self.get_overcloud()
         return context
 
 
