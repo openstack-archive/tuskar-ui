@@ -12,59 +12,259 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import re
+
 import django.forms
 from django.utils.translation import ugettext_lazy as _
 import horizon.workflows
 
-import tuskar_ui.forms
+
+# TODO(rdopieralski) Get this from the Heat template.
+TEMPLATE_DATA = {
+    "Description": ("Nova API,Keystone,Heat Engine and API,Glance,Neutron,"
+                    "Dedicated MySQL server,Dedicated RabbitMQ Server,"
+                    "Group of Nova Computes,"
+                    "ssl-source: SSL endpoint metadata for openstack,"
+                    "Swift-common: OpenStack object storage common "
+                    "configurations"),
+
+    "Parameters": {
+        "NeutronPublicInterfaceRawDevice": {
+            "Default": "",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": ("If set, the public interface is a vlan with this "
+                            "device as the raw device."),
+        },
+        "HeatPassword": {
+            "Default": "unset",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": ("The password for the Heat service account, used "
+                            "by the Heat services.")
+        },
+        "NovaComputeDriver": {
+            "Default": "libvirt.LibvirtDriver",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": ""
+        },
+        "NeutronPassword": {
+            "Default": "unset",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": ("The password for the neutron service account, "
+                            "used by neutron agents."),
+        },
+        "NeutronBridgeMappings": {
+            "Default": "",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": "The OVS logical->physical bridge mappings to use.",
+        },
+        "NeutronPublicInterfaceDefaultRoute": {
+            "Default": "",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": ("A custom default route for the "
+                            "NeutronPublicInterface."),
+        },
+        "GlancePassword": {
+            "Default": "unset",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": ("The password for the glance service account, "
+                            "used by the glance services."),
+        },
+        "notcomputeImage": {
+            "Default": "overcloud-control",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": "",
+        },
+        "NovaImage": {
+            "Default": "overcloud-compute",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": ""
+        },
+        "SSLKey": {
+            "Default": "",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": ("If set, the contents of an SSL certificate .key "
+                            "file for encrypting SSL endpoints."),
+        },
+        "KeyName": {
+            "Default": "default",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": ("Name of an existing EC2 KeyPair to enable SSH "
+                            "access to the instances"),
+        },
+        "CeilometerPassword": {
+            "Default": "unset",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": "The password for the ceilometer service account.",
+        },
+        "NtpServer": {
+            "Default": "",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": "",
+        },
+        "CinderPassword": {
+            "Default": "unset",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": ("The password for the cinder service account, "
+                            "used by cinder-api."),
+        },
+        "ImageUpdatePolicy": {
+            "Default": "REPLACE",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": ("What policy to use when reconstructing "
+                            "instances. REBUILD for rebuilds, "
+                            "REBUILD_PRESERVE_EPHEMERAL to preserve /mnt."),
+        },
+        "NeutronPublicInterface": {
+            "Default": "eth0",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": ("What interface to bridge onto br-ex for network "
+                            "nodes."),
+        },
+        "NovaPassword": {
+            "Default": "unset",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": ("The password for the nova service account, used "
+                            "by nova-api."),
+        },
+        "AdminToken": {
+            "Default": "unset",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": "The keystone auth secret."
+        },
+        "NovaComputeLibvirtType": {
+            "Default": "",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": "",
+        },
+        "NeutronPublicInterfaceIP": {
+            "Default": "",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": ("A custom IP address to put onto the "
+                            "NeutronPublicInterface."),
+        },
+        "SwiftHashSuffix": {
+            "Default": "unset",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": ("A random string to be used as a salt when "
+                            "hashing to determine mappings in the ring."),
+        },
+        "AdminPassword": {
+            "Default": "unset",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": ("The password for the keystone admin account, "
+                            "used for monitoring, querying neutron etc."),
+        },
+        "CeilometerComputeAgent": {
+            "Default": "",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": ("Indicates whether the Compute agent is present "
+                            "and expects nova-compute to be configured "
+                            "accordingly"),
+            "AllowedValues": ["", "Present"],
+        },
+        "NeutronFlatNetworks": {
+            "Default": "",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": ("If set, flat networks to configure in neutron "
+                            "plugins."),
+        },
+        "SwiftPassword": {
+            "Default": "unset",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": ("The password for the swift service account, "
+                            "used by the swift proxy services."),
+        },
+        "CeilometerMeteringSecret": {
+            "Default": "unset",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": "Secret shared by the ceilometer services.",
+        },
+        "SSLCertificate": {
+            "Default": "",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": ("If set, the contents of an SSL certificate .crt "
+                            "file for encrypting SSL endpoints."),
+        },
+        "Flavor": {
+            "Default": "baremetal",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": "Flavor to request when deploying.",
+        },
+    },
+}
+
+CAMEL_RE = re.compile(r'([a-z]|SSL)([A-Z])')
+
+
+def deCamelCase(text):
+    """Convert CamelCase names to human-readable format."""
+
+    return CAMEL_RE.sub(lambda m: m.group(1) + ' ' + m.group(2), text)
+
+
+def make_field(name, Type, NoEcho, Default, Description, AllowedValues=None,
+               **kwargs):
+    """Create a form field using the parameters from a Heat template."""
+
+    label = deCamelCase(name)
+    Widget = django.forms.TextInput
+    if Type == 'String':
+        Field = django.forms.CharField
+    elif Type == 'Integer':
+        Field = django.forms.IntegerField
+    else:
+        raise ValueError("Unsupported parameter type in Heat template.")
+    if 'NoEcho' == 'true':
+        Widget = django.forms.PasswordInput
+    if Default == 'unset':
+        Default = None
+    if AllowedValues is not None:
+        return django.forms.ChoiceField(initial=Default, choices=[
+            (value, value) for value in AllowedValues
+        ], help_text=Description, required=False, label=label)
+    return Field(widget=Widget, initial=Default, help_text=Description,
+                 required=False, label=label)
 
 
 class Action(horizon.workflows.Action):
-    mysql_host_ip = django.forms.IPAddressField(
-        label=_("Host IP"), required=False,
-        widget=django.forms.TextInput(attrs={
-            'placeholder': _("auto-retrieve"),
-        }))
-    mysql_user = django.forms.CharField(
-        required=False, label=_("User"))
-    mysql_password = django.forms.CharField(
-        required=False, label=_("Password"), widget=django.forms.PasswordInput)
-
-    amqp_host_ip = django.forms.IPAddressField(
-        label=_("Host IP"), required=False,
-        widget=django.forms.TextInput(attrs={
-            'placeholder': _("auto-retrieve"),
-        }))
-    amqp_password = django.forms.CharField(
-        required=False, label=_("Password"), widget=django.forms.PasswordInput)
-
-    keystone_host_ip = django.forms.IPAddressField(
-        label=_("Host IP"), required=False,
-        widget=django.forms.TextInput(attrs={
-            'placeholder': _("auto-retrieve"),
-        }))
-    keystone_db_password = django.forms.CharField(
-        required=False,
-        label=_("DB Password"), widget=django.forms.PasswordInput)
-    keystone_admin_token = django.forms.CharField(
-        required=False,
-        label=_("Admin Token"), widget=django.forms.PasswordInput)
-    keystone_admin_password = django.forms.CharField(
-        required=False,
-        label=_("Admin Password"), widget=django.forms.PasswordInput)
-
     class Meta:
         slug = 'deployed_configuration'
         name = _("Configuration")
 
-    def mysql_fieldset(self):
-        return tuskar_ui.forms.fieldset(self, prefix="mysql_")
-
-    def amqp_fieldset(self):
-        return tuskar_ui.forms.fieldset(self, prefix="amqp_")
-
-    def keystone_fieldset(self):
-        return tuskar_ui.forms.fieldset(self, prefix="keystone_")
+    def __init__(self, *args, **kwargs):
+        super(Action, self).__init__(*args, **kwargs)
+        parameters = TEMPLATE_DATA['Parameters'].items()
+        parameters.sort()
+        for name, data in parameters:
+            self.fields[name] = make_field(name, **data)
 
     def handle(self, request, context):
         context['configuration'] = self.cleaned_data
