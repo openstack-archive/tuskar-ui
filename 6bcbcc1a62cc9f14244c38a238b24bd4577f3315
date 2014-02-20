@@ -1,0 +1,13 @@
+Verified+2: Jenkins
+Approved+1: David Lyle <david.lyle@hp.com>
+Code-Review+2: David Lyle <david.lyle@hp.com>
+Code-Review+1: Tzu-Mainn Chen <tzumainn@redhat.com>
+Code-Review+1: Jiri Tomasek <jtomasek@redhat.com>
+Code-Review+1: Ladislav Smola <lsmola@redhat.com>
+Code-Review+1: Jaromir Coufal <jcoufal@redhat.com>
+Code-Review+1: Ana Krivokapic <akrivoka@redhat.com>
+Submitted-by: Jenkins
+Submitted-at: Thu, 20 Feb 2014 18:12:05 +0000
+Reviewed-on: https://review.openstack.org/74761
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
