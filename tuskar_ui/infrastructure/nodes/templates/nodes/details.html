@@ -9,6 +9,8 @@
     <div class="status row-fluid detail">
       <h4>{% trans "Info" %}</h4>
       <dl>
+        <dt>{% trans "MAC Addresses" %}</dt>
+        <dd>{{ node.addresses|join:", " }}</dd>
         <dt>{% trans "UUID" %}</dt>
         <dd>{{ node.uuid }}</dd>
         <dt>{% trans "Instance UUID" %}</dt>
