@@ -85,6 +85,64 @@ def image_get(request, image_id):
     return image
 
 
+class NodeProfile(object):
+
+    def __init__(self, flavor):
+        """Construct node profile by wrapping flavor
+
+        :param flavor: Nova flavor
+        :type  flavor: novaclient.v1_1.flavors.Flavor
+        """
+        self._flavor = flavor
+
+    def __getattr__(self, name):
+        return getattr(self._flavor, name)
+
+    @property
+    @memoized.memoized
+    def extras_dict(self):
+        """Return extra parameters of node profile
+
+        :return: Nova flavor keys
+        :rtype: dict
+        """
+        return self._flavor.get_keys()
+
+    @property
+    def cpu_arch(self):
+        return self.extras_dict.get('cpu_arch', '')
+
+    @property
+    def kernel_image_id(self):
+        return self.extras_dict.get('baremetal:deploy_kernel_id', '')
+
+    @property
+    def ramdisk_image_id(self):
+        return self.extras_dict.get('baremetal:deploy_ramdisk_id', '')
+
+
+def node_profile_create(request, name, memory, vcpus, disk, cpu_arch,
+                        kernel_image_id, ramdisk_image_id):
+    extras_dict = {'cpu_arch': cpu_arch,
+                   'baremetal:deploy_kernel_id': kernel_image_id,
+                   'baremetal:deploy_ramdisk_id': ramdisk_image_id}
+    return NodeProfile(nova.flavor_create(request, name, memory, vcpus, disk,
+                                          metadata=extras_dict))
+
+
+def node_profile_get(request, node_profile_id):
+    return NodeProfile(nova.flavor_get(request, node_profile_id))
+
+
+def node_profile_list(request):
+    return [NodeProfile(item) for item in nova.flavor_list(request)]
+
+
+def node_profile_delete(request, node_profile_id):
+    # Just wrapper for API consistency
+    nova.flavor_delete(request, node_profile_id)
+
+
 class Overcloud(base.APIResourceWrapper):
     _attrs = ('id', 'stack_id', 'name', 'description', 'counts', 'attributes')
 
