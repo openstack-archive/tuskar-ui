@@ -15,6 +15,7 @@
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
+from horizon.utils import memoized
 
 from openstack_dashboard.dashboards.admin.flavors \
     import tables as flavor_tables
@@ -35,14 +36,19 @@ class DeleteNodeProfile(flavor_tables.DeleteFlavor):
         self.data_type_plural = _("Node Profiles")
 
 
-def get_arch(flavor):
-    extra_specs = flavor.get_keys()
-    return extra_specs.get('cpu_arch', '')
+@memoized.memoized
+def memoized_extras(flavor):
+    return flavor.get_keys()
+
+
+def extras_getter(key):
+    return lambda flavor: memoized_extras(flavor).get(key, '')
 
 
 class NodeProfilesTable(tables.DataTable):
     name = tables.Column('name', verbose_name=_('Node'))
-    arch = tables.Column(get_arch, verbose_name=_('Architecture'))
+    arch = tables.Column(extras_getter('cpu_arch'),
+                         verbose_name=_('Architecture'))
     vcpus = tables.Column('vcpus', verbose_name=_('CPUs'))
     ram = tables.Column(flavor_tables.get_size,
                         verbose_name=_('Memory'),
@@ -50,6 +56,11 @@ class NodeProfilesTable(tables.DataTable):
     disk = tables.Column(flavor_tables.get_disk_size,
                          verbose_name=_('Disk'),
                          attrs={'data-type': 'size'})
+    # FIXME(dtantsur): would be much better to have names here
+    kernel_id = tables.Column(extras_getter('baremetal:deploy_kernel_id'),
+                              verbose_name=_('Deploy Kernel Image ID'))
+    ramdisk_id = tables.Column(extras_getter('baremetal:deploy_ramdisk_id'),
+                               verbose_name=_('Deploy Ramdisk Image ID'))
 
     class Meta:
         name = "node_profiles"
