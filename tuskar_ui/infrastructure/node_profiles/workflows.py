@@ -18,17 +18,38 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import workflows
 
-from openstack_dashboard import api
+from openstack_dashboard.api import glance
 from openstack_dashboard.dashboards.admin.flavors \
     import workflows as flavor_workflows
+from tuskar_ui import api
 
 
 class CreateNodeProfileAction(flavor_workflows.CreateFlavorInfoAction):
     arch = fields.ChoiceField(choices=(('i386', 'i386'), ('amd64', 'amd64')),
                               label=_("Architecture"))
+    kernel_image_id = fields.ChoiceField(choices=(),
+                                         label=_("Deploy Kernel Image"))
+    ramdisk_image_id = fields.ChoiceField(choices=(),
+                                          label=_("Deploy Ramdisk Image"))
 
     def __init__(self, *args, **kwrds):
         super(CreateNodeProfileAction, self).__init__(*args, **kwrds)
+        try:
+            kernel_images = glance.image_list_detailed(
+                self.request,
+                filters={'disk_format': 'aki'}
+            )[0]
+            ramdisk_images = glance.image_list_detailed(
+                self.request,
+                filters={'disk_format': 'ari'}
+            )[0]
+        except Exception:
+            exceptions.handle(self.request,
+                              _('Unable to retrieve images list.'))
+        self.fields['kernel_image_id'].choices = [(img.id, img.name)
+                                                  for img in kernel_images]
+        self.fields['ramdisk_image_id'].choices = [(img.id, img.name)
+                                                   for img in ramdisk_images]
         # Delete what is not applicable to hardware
         del self.fields['eph_gb']
         del self.fields['swap_mb']
@@ -51,7 +72,9 @@ class CreateNodeProfileStep(workflows.Step):
                    "vcpus",
                    "memory_mb",
                    "disk_gb",
-                   "arch")
+                   "arch",
+                   "kernel_image_id",
+                   "ramdisk_image_id")
 
 
 class CreateNodeProfile(flavor_workflows.CreateFlavor):
@@ -64,20 +87,18 @@ class CreateNodeProfile(flavor_workflows.CreateFlavor):
     default_steps = (CreateNodeProfileStep,)
 
     def handle(self, request, data):
-        data = dict(data, flavor_access=(), eph_gb=0, swap_mb=0,
-                    flavor_id='auto')
-        if not super(CreateNodeProfile, self).handle(request, data):
-            return False
-
         try:
-            extras_dict = api.nova.flavor_get_extras(request,
-                                                     self.object.id,
-                                                     raw=True) or {}
-            extras_dict['cpu_arch'] = data['arch']
-            api.nova.flavor_extra_set(request,
-                                      self.object.id,
-                                      extras_dict)
+            self.object = api.NodeProfile.create(
+                request,
+                name=data['name'],
+                memory=data['memory_mb'],
+                vcpus=data['vcpus'],
+                disk=data['disk_gb'],
+                cpu_arch=data['arch'],
+                kernel_image_id=data['kernel_image_id'],
+                ramdisk_image_id=data['ramdisk_image_id']
+            )
         except Exception:
-            exceptions.handle(request, ignore=True)
+            exceptions.handle(request, _("Unable to create node profile"))
             return False
         return True

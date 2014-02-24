@@ -85,6 +85,58 @@ def image_get(request, image_id):
     return image
 
 
+class NodeProfile(object):
+
+    def __init__(self, flavor):
+        """Construct node profile by wrapping flavor
+
+        :param flavor: Nova flavor
+        :type  flavor: novaclient.v1_1.flavors.Flavor
+        """
+        self._flavor = flavor
+
+    def __getattr__(self, name):
+        return getattr(self._flavor, name)
+
+    @cached_property
+    def extras_dict(self):
+        """Return extra parameters of node profile
+
+        :return: Nova flavor keys
+        :rtype: dict
+        """
+        return self._flavor.get_keys()
+
+    @property
+    def cpu_arch(self):
+        return self.extras_dict.get('cpu_arch', '')
+
+    @property
+    def kernel_image_id(self):
+        return self.extras_dict.get('baremetal:deploy_kernel_id', '')
+
+    @property
+    def ramdisk_image_id(self):
+        return self.extras_dict.get('baremetal:deploy_ramdisk_id', '')
+
+    @classmethod
+    def create(cls, request, name, memory, vcpus, disk, cpu_arch,
+               kernel_image_id, ramdisk_image_id):
+        extras_dict = {'cpu_arch': cpu_arch,
+                       'baremetal:deploy_kernel_id': kernel_image_id,
+                       'baremetal:deploy_ramdisk_id': ramdisk_image_id}
+        return cls(nova.flavor_create(request, name, memory, vcpus, disk,
+                                      metadata=extras_dict))
+
+    @classmethod
+    def get(cls, request, node_profile_id):
+        return cls(nova.flavor_get(request, node_profile_id))
+
+    @classmethod
+    def list(cls, request):
+        return [cls(item) for item in nova.flavor_list(request)]
+
+
 class Overcloud(base.APIResourceWrapper):
     _attrs = ('id', 'stack_id', 'name', 'description', 'counts', 'attributes')
 

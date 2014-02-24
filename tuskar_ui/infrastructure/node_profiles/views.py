@@ -12,18 +12,33 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from openstack_dashboard.dashboards.admin.flavors \
-    import views as flavor_views
+from django.utils.translation import ugettext_lazy as _
 
-from tuskar_ui.infrastructure.node_profiles import tables
-from tuskar_ui.infrastructure.node_profiles import workflows
+from horizon import exceptions
+from horizon import tables
+from horizon import workflows
+
+from tuskar_ui import api
+from tuskar_ui.infrastructure.node_profiles \
+    import tables as node_profiles_tables
+from tuskar_ui.infrastructure.node_profiles \
+    import workflows as node_profiles_workflows
 
 
-class IndexView(flavor_views.IndexView):
-    table_class = tables.NodeProfilesTable
+class IndexView(tables.DataTableView):
+    table_class = node_profiles_tables.NodeProfilesTable
     template_name = 'infrastructure/node_profiles/index.html'
 
+    def get_data(self):
+        try:
+            node_profiles = api.NodeProfile.list(self.request)
+        except Exception:
+            exceptions.handle(self.request,
+                              _('Unable to retrieve node profile list.'))
+        node_profiles.sort(key=lambda np: (np.vcpus, np.ram, np.disk))
+        return node_profiles
 
-class CreateView(flavor_views.CreateView):
-    workflow_class = workflows.CreateNodeProfile
+
+class CreateView(workflows.WorkflowView):
+    workflow_class = node_profiles_workflows.CreateNodeProfile
     template_name = 'infrastructure/node_profiles/create.html'

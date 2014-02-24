@@ -34,59 +34,63 @@ CREATE_URL = urlresolvers.reverse(
 @contextlib.contextmanager
 def _prepare_create():
     flavor = TEST_DATA.novaclient_flavors.first()
+    all_flavors = TEST_DATA.novaclient_flavors.list()
+    images = TEST_DATA.glanceclient_images.list()
     data = {'name': 'foobar',
             'vcpus': 3,
             'memory_mb': 1024,
             'disk_gb': 40,
-            'arch': 'amd64'}
-    with patch('openstack_dashboard.api.nova', **{
-            'spec_set': ['flavor_create', 'flavor_list', 'flavor_get_extras',
-                         'flavor_extra_set'],
-            'flavor_create.return_value': flavor,
-            'flavor_list.return_value': TEST_DATA.novaclient_flavors.list(),
-            'flavor_get_extras.return_value': {},
-    }) as mock:
-        yield mock, data
+            'arch': 'amd64',
+            'kernel_image_id': images[0].id,
+            'ramdisk_image_id': images[1].id}
+    with contextlib.nested(
+            patch('tuskar_ui.api.NodeProfile', spec_set=['create', 'list'],
+                  **{'create.return_value': flavor,
+                     'list.return_value': all_flavors}),
+            patch('openstack_dashboard.api.glance.image_list_detailed',
+                  return_value=(TEST_DATA.glanceclient_images.list(), False)),
+            # Inherited code calls this directly
+            patch('openstack_dashboard.api.nova.flavor_list',
+                  return_value=all_flavors),
+    ) as mocks:
+            yield mocks[0], data
 
 
 class NodeProfilesTest(test.BaseAdminViewTests):
 
     def test_index(self):
-        with patch('openstack_dashboard.api.nova', **{
-                'spec_set': ['flavor_list'],
-                'flavor_list.return_value':
-                TEST_DATA.novaclient_flavors.list(),
-        }) as mock:
+        with patch('openstack_dashboard.api.nova.flavor_list',
+                   return_value=TEST_DATA.novaclient_flavors.list()) as mock:
             res = self.client.get(INDEX_URL)
-            self.assertEqual(mock.flavor_list.call_count, 1)
+            self.assertEqual(mock.call_count, 1)
 
         self.assertTemplateUsed(res,
                                 'infrastructure/node_profiles/index.html')
 
     def test_create_get(self):
-        res = self.client.get(CREATE_URL)
+        with patch('openstack_dashboard.api.glance.image_list_detailed',
+                   return_value=([], False)) as mock:
+            res = self.client.get(CREATE_URL)
+            self.assertEqual(mock.call_count, 2)
         self.assertTemplateUsed(res,
                                 'infrastructure/node_profiles/create.html')
 
     def test_create_post_ok(self):
-        flavor = TEST_DATA.novaclient_flavors.first()
-        with _prepare_create() as (nova_mock, data):
+        images = TEST_DATA.glanceclient_images.list()
+        with _prepare_create() as (node_profile_mock, data):
             res = self.client.post(CREATE_URL, data)
             self.assertNoFormErrors(res)
             self.assertRedirectsNoFollow(res, INDEX_URL)
-            request = nova_mock.flavor_create.call_args_list[0][0][0]
-            self.assertListEqual(nova_mock.flavor_create.call_args_list, [
-                call(request, name=u'foobar', memory=1024, vcpu=3, disk=40,
-                     flavorid='auto', ephemeral=0, swap=0, is_public=True)
-            ])
-            self.assertEqual(nova_mock.flavor_list.call_count, 1)
-            self.assertListEqual(nova_mock.flavor_extra_set.call_args_list, [
-                call(request, flavor.id, {'cpu_arch': 'amd64'}),
+            request = node_profile_mock.create.call_args_list[0][0][0]
+            self.assertListEqual(node_profile_mock.create.call_args_list, [
+                call(request, name=u'foobar', memory=1024, vcpus=3, disk=40,
+                     cpu_arch='amd64', kernel_image_id=images[0].id,
+                     ramdisk_image_id=images[1].id)
             ])
 
     def test_create_post_name_exists(self):
         flavor = TEST_DATA.novaclient_flavors.first()
-        with _prepare_create() as (nova_mock, data):
+        with _prepare_create() as (node_profile_mock, data):
             data['name'] = flavor.name
             res = self.client.post(CREATE_URL, data)
             self.assertFormErrors(res)
