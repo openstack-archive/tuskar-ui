@@ -4,16 +4,16 @@
 {% block title %}{% trans 'Role' %}: {{ role.name }}{% endblock %}
 
 {% block page_header %}
-  {% include 'horizon/common/_domain_page_header.html' with title=_('Role: ')|add:role.name %}
+  {% include 'horizon/common/_domain_page_header.html' with title=_('Deployment Role: ')|add:role.name %}
 {% endblock page_header %}
 
 {% block main %}
 <div class="row-fluid">
   <div class="span12">
-    <hr />
-    <h4>{{ nodes|length }} {% trans 'nodes' %}</h4>
-    <br />
-    <h4>{{ image_name }}</h4>
+    <p><strong>{% blocktrans count counter=nodes|length %}{{ counter }} instance{% plural %}{{ counter }} instances{% endblocktrans %}</strong></p>
+    <p><strong>node profile</strong>
+    {{ flavor.name }}: {{ flavor.get_keys.cpu_arch }} | {{ flavor.vcpus }} {% trans "CPU" %} | {{ flavor.ram }} {% trans "MB RAM" %} | {{ flavor.disk }} {% trans "GB HDD" %}</p>
+    <p><strong>image</strong> {{ image_name }}</p>
 
     {{ table.render }}
   </div>
