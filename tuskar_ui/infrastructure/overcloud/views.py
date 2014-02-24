@@ -17,6 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base as base_views
 
 from horizon import exceptions
+import horizon.forms
 from horizon import tables as horizon_tables
 from horizon import tabs as horizon_tabs
 from horizon.utils import memoized
@@ -46,6 +47,18 @@ class OvercloudMixin(object):
             exceptions.handle(self.request, msg, redirect=redirect)
 
         return overcloud
+
+
+class OvercloudRoleMixin(object):
+    @memoized.memoized
+    def get_role(self, redirect=None):
+        role_id = self.kwargs['role_id']
+        try:
+            role = api.OvercloudRole.get(self.request, role_id)
+        except Exception:
+            msg = _("Unable to retrieve overcloud role.")
+            exceptions.handle(self.request, msg, redirect=redirect)
+        return role
 
 
 class IndexView(base_views.RedirectView):
@@ -125,56 +138,49 @@ class Scale(horizon.workflows.WorkflowView, OvercloudMixin):
         }
 
 
-class OvercloudRoleView(horizon_tables.DataTableView):
+class OvercloudRoleView(horizon_tables.DataTableView,
+                        OvercloudRoleMixin, OvercloudMixin):
     table_class = tables.OvercloudRoleNodeTable
     template_name = 'infrastructure/overcloud/overcloud_role.html'
-
-    def get_data(self):
-        overcloud = self._get_overcloud()
-        role = self._get_role(overcloud)
-
-        return self._get_nodes(overcloud, role)
-
-    def get_context_data(self, **kwargs):
-        context = super(OvercloudRoleView, self).get_context_data(**kwargs)
-
-        overcloud = self._get_overcloud()
-        role = self._get_role(overcloud)
-
-        context['role'] = role
-        context['image_name'] = role.image_name
-        context['nodes'] = self._get_nodes(overcloud, role)
-
-        return context
 
     @memoized.memoized
     def _get_nodes(self, overcloud, role):
         resources = overcloud.resources(role, with_joins=True)
         return [r.node for r in resources]
 
-    @memoized.memoized
-    def _get_overcloud(self):
-        overcloud_id = self.kwargs['overcloud_id']
+    def get_data(self):
+        overcloud = self.get_overcloud()
+        redirect = reverse('horizon:infrastructure:overcloud:detail',
+                           args=(overcloud.id,))
+        role = self.get_role(redirect)
+        return self._get_nodes(overcloud, role)
 
-        try:
-            overcloud = api.Overcloud.get(self.request, overcloud_id)
-        except Exception:
-            msg = _("Unable to retrieve deployment.")
-            redirect = reverse('horizon:infrastructure:overcloud:index')
-            exceptions.handle(self.request, msg, redirect=redirect)
+    def get_context_data(self, **kwargs):
+        context = super(OvercloudRoleView, self).get_context_data(**kwargs)
 
-        return overcloud
+        overcloud = self.get_overcloud()
+        redirect = reverse('horizon:infrastructure:overcloud:detail',
+                           args=(overcloud.id,))
+        role = self.get_role(redirect)
+        context['role'] = role
+        context['image_name'] = role.image_name
+        context['nodes'] = self._get_nodes(overcloud, role)
+        return context
 
-    @memoized.memoized
-    def _get_role(self, overcloud):
-        role_id = self.kwargs['role_id']
 
-        try:
-            role = api.OvercloudRole.get(self.request, role_id)
-        except Exception:
-            msg = _("Unable to retrieve overcloud role.")
-            redirect = reverse('horizon:infrastructure:overcloud:detail',
-                               args=(overcloud.id,))
-            exceptions.handle(self.request, msg, redirect=redirect)
+class OvercloudRoleEdit(horizon.forms.ModalFormView, OvercloudRoleMixin):
+    form_class = forms.OvercloudRoleForm
+    template_name = 'infrastructure/overcloud/role_edit.html'
 
-        return role
+    def get_success_url(self):
+        return reverse('horizon:infrastructure:overcloud:create')
+
+    def get_initial(self):
+        role = self.get_role()
+        return {
+            'id': role.id,
+            'name': role.name,
+            'description': role.description,
+            'image_name': role.image_name,
+            'flavor_id': role.flavor_id,
+        }
