@@ -35,9 +35,26 @@ class DeleteNodeProfile(flavor_tables.DeleteFlavor):
         self.data_type_plural = _("Node Profiles")
 
 
+def get_extra(flavor, key):
+    # NOTE(dtantsur): get_keys() always makes HTTP call, thus cache
+    try:
+        extra_specs = flavor.cached_extra_specs
+    except AttributeError:
+        flavor.cached_extra_specs = flavor.get_keys()
+        extra_specs = flavor.cached_extra_specs
+    return extra_specs.get(key, '')
+
+
 def get_arch(flavor):
-    extra_specs = flavor.get_keys()
-    return extra_specs.get('cpu_arch', '')
+    return get_extra(flavor, key='cpu_arch')
+
+
+def get_kernel_id(flavor):
+    return get_extra(flavor, key='baremetal:deploy_kernel_id')
+
+
+def get_ramdisk_id(flavor):
+    return get_extra(flavor, key='baremetal:deploy_ramdisk_id')
 
 
 class NodeProfilesTable(tables.DataTable):
@@ -50,6 +67,10 @@ class NodeProfilesTable(tables.DataTable):
     disk = tables.Column(flavor_tables.get_disk_size,
                          verbose_name=_('Disk'),
                          attrs={'data-type': 'size'})
+    kernel_id = tables.Column(get_kernel_id,
+                              verbose_name=_('Kernel Image ID'))
+    ramdisk_id = tables.Column(get_ramdisk_id,
+                               verbose_name=_('Ramdisk Image ID'))
 
     class Meta:
         name = "node_profiles"
