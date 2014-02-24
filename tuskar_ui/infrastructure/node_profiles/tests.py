@@ -34,19 +34,27 @@ CREATE_URL = urlresolvers.reverse(
 @contextlib.contextmanager
 def _prepare_create():
     flavor = TEST_DATA.novaclient_flavors.first()
+    images = TEST_DATA.glanceclient_images.list()
     data = {'name': 'foobar',
             'vcpus': 3,
             'memory_mb': 1024,
             'disk_gb': 40,
-            'arch': 'amd64'}
+            'arch': 'amd64',
+            'kernel_id': images[0].id,
+            'ramdisk_id': images[1].id}
     with patch('openstack_dashboard.api.nova', **{
             'spec_set': ['flavor_create', 'flavor_list', 'flavor_get_extras',
                          'flavor_extra_set'],
             'flavor_create.return_value': flavor,
             'flavor_list.return_value': TEST_DATA.novaclient_flavors.list(),
             'flavor_get_extras.return_value': {},
-    }) as mock:
-        yield mock, data
+    }) as nova_mock:
+        with patch('openstack_dashboard.api.glance', **{
+                'spec_set': ['image_list_detailed'],
+                'image_list_detailed.return_value':
+                (TEST_DATA.glanceclient_images.list(), False)
+        }) as glance_mock:
+            yield nova_mock, glance_mock, data
 
 
 class NodeProfilesTest(test.BaseAdminViewTests):
@@ -64,13 +72,18 @@ class NodeProfilesTest(test.BaseAdminViewTests):
                                 'infrastructure/node_profiles/index.html')
 
     def test_create_get(self):
-        res = self.client.get(CREATE_URL)
+        with patch('openstack_dashboard.api.glance', **{
+                'spec_set': ['image_list_detailed'],
+                'image_list_detailed.return_value': ([], False)
+        }):
+            res = self.client.get(CREATE_URL)
         self.assertTemplateUsed(res,
                                 'infrastructure/node_profiles/create.html')
 
     def test_create_post_ok(self):
         flavor = TEST_DATA.novaclient_flavors.first()
-        with _prepare_create() as (nova_mock, data):
+        images = TEST_DATA.glanceclient_images.list()
+        with _prepare_create() as (nova_mock, glance_mock, data):
             res = self.client.post(CREATE_URL, data)
             self.assertNoFormErrors(res)
             self.assertRedirectsNoFollow(res, INDEX_URL)
@@ -80,13 +93,16 @@ class NodeProfilesTest(test.BaseAdminViewTests):
                      flavorid='auto', ephemeral=0, swap=0, is_public=True)
             ])
             self.assertEqual(nova_mock.flavor_list.call_count, 1)
+            expected_extras = {'cpu_arch': 'amd64',
+                               'baremetal:deploy_kernel_id': images[0].id,
+                               'baremetal:deploy_ramdisk_id': images[1].id}
             self.assertListEqual(nova_mock.flavor_extra_set.call_args_list, [
-                call(request, flavor.id, {'cpu_arch': 'amd64'}),
+                call(request, flavor.id, expected_extras),
             ])
 
     def test_create_post_name_exists(self):
         flavor = TEST_DATA.novaclient_flavors.first()
-        with _prepare_create() as (nova_mock, data):
+        with _prepare_create() as (nova_mock, glance_mock, data):
             data['name'] = flavor.name
             res = self.client.post(CREATE_URL, data)
             self.assertFormErrors(res)

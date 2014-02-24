@@ -26,9 +26,29 @@ from openstack_dashboard.dashboards.admin.flavors \
 class CreateNodeProfileAction(flavor_workflows.CreateFlavorInfoAction):
     arch = fields.ChoiceField(choices=(('i386', 'i386'), ('amd64', 'amd64')),
                               label=_("Architecture"))
+    kernel_id = fields.ChoiceField(choices=(),
+                                   label=_("Deploy Kernel Image"))
+    ramdisk_id = fields.ChoiceField(choices=(),
+                                    label=_("Deploy Ramdisk Image"))
 
     def __init__(self, *args, **kwrds):
         super(CreateNodeProfileAction, self).__init__(*args, **kwrds)
+        try:
+            kernel_images = api.glance.image_list_detailed(
+                self.request,
+                filters={'disk_format': 'aki'}
+            )[0]
+            ramdisk_images = api.glance.image_list_detailed(
+                self.request,
+                filters={'disk_format': 'ari'}
+            )[0]
+        except Exception:
+            exceptions.handle(self.request,
+                              _('Unable to retrieve images list.'))
+        self.fields['kernel_id'].choices = [(img.id, img.name)
+                                            for img in kernel_images]
+        self.fields['ramdisk_id'].choices = [(img.id, img.name)
+                                             for img in ramdisk_images]
         # Delete what is not applicable to hardware
         del self.fields['eph_gb']
         del self.fields['swap_mb']
@@ -51,7 +71,9 @@ class CreateNodeProfileStep(workflows.Step):
                    "vcpus",
                    "memory_mb",
                    "disk_gb",
-                   "arch")
+                   "arch",
+                   "kernel_id",
+                   "ramdisk_id")
 
 
 class CreateNodeProfile(flavor_workflows.CreateFlavor):
@@ -74,6 +96,8 @@ class CreateNodeProfile(flavor_workflows.CreateFlavor):
                                                      self.object.id,
                                                      raw=True) or {}
             extras_dict['cpu_arch'] = data['arch']
+            extras_dict['baremetal:deploy_kernel_id'] = data['kernel_id']
+            extras_dict['baremetal:deploy_ramdisk_id'] = data['ramdisk_id']
             api.nova.flavor_extra_set(request,
                                       self.object.id,
                                       extras_dict)
