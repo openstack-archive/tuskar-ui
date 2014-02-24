@@ -22,6 +22,7 @@ from horizon import tables as horizon_tables
 from horizon import tabs as horizon_tabs
 from horizon.utils import memoized
 import horizon.workflows
+from openstack_dashboard.api import nova
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud import forms
@@ -165,6 +166,12 @@ class OvercloudRoleView(horizon_tables.DataTableView,
         context['role'] = role
         context['image_name'] = role.image_name
         context['nodes'] = self._get_nodes(overcloud, role)
+
+        try:
+            context['flavor'] = nova.flavor_get(self.request, role.flavor_id)
+        except Exception:
+            msg = _('Unable to retrieve node profile.')
+            horizon.exceptions.handle(self.request, msg)
         return context
 
 
