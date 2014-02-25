@@ -90,16 +90,6 @@ class Action(horizon.workflows.Action):
                     _("Can't deploy nodes without a node profile assigned."))
         return self.cleaned_data
 
-    def handle(self, request, context):
-        counts = {}
-        for key, value in self.cleaned_data.iteritems():
-            if not key.startswith('count_'):
-                continue
-            count, role_id, profile = key.split('__', 2)
-            counts[role_id, profile] = int(value)
-        context['role_counts'] = counts
-        return context
-
 
 class Step(horizon.workflows.Step):
     action_class = Action
@@ -110,3 +100,13 @@ class Step(horizon.workflows.Step):
     def get_free_nodes(self):
         """Get the count of nodes that are not assigned yet."""
         return len(api.Node.list(self.workflow.request, False))
+
+    def contribute(self, data, context):
+        counts = {}
+        for key, value in data.iteritems():
+            if not key.startswith('count_'):
+                continue
+            count, role_id, profile = key.split('__', 2)
+            counts[role_id, profile] = int(value)
+        context['role_counts'] = counts
+        return context
