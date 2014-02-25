@@ -157,7 +157,7 @@ class TuskarAPITests(test.APITestCase):
                             # there for start)
                             # FIXME(lsmola) testing caching here is bad,
                             # because it gets cached for the whole tests run
-                            self.assertEqual(image_get.call_count, 2)
+                            self.assertEqual(image_get.call_count, 1)
                             # FIXME(lsmola) optimize this, it's enough to call
                             # node_list once
                             self.assertEqual(node_list.call_count, 1)
@@ -237,6 +237,43 @@ class TuskarAPITests(test.APITestCase):
                    'BareMetalNodeManager.delete',
                    return_value=None):
             api.Node.delete(self.request, node.uuid)
+
+    def test_node_instance(self):
+        node = self.ironicclient_nodes.first()
+        instance = self.novaclient_servers.first()
+
+        with patch('openstack_dashboard.api.nova.server_get',
+                   return_value=instance):
+            ret_val = api.Node(node).instance
+        self.assertIsInstance(ret_val, servers.Server)
+
+    def test_node_image_name(self):
+        node = self.ironicclient_nodes.first()
+        instance = self.novaclient_servers.first()
+        image = self.glanceclient_images.first()
+
+        with patch('openstack_dashboard.api.nova.server_get',
+                   return_value=instance):
+            with patch('openstack_dashboard.api.glance.image_get',
+                       return_value=image):
+                ret_val = api.Node(node).image_name
+        self.assertEqual(ret_val, 'overcloud-control')
+
+    def test_node_overcloud_role(self):
+        node = self.ironicclient_nodes.first()
+        instance = self.novaclient_servers.first()
+        image = self.glanceclient_images.first()
+        roles = self.tuskarclient_overcloud_roles.list()
+
+        with patch('openstack_dashboard.api.nova.server_get',
+                   return_value=instance):
+            with patch('openstack_dashboard.api.glance.image_get',
+                       return_value=image):
+                with patch('tuskarclient.v1.overcloud_roles.'
+                           'OvercloudRoleManager.list',
+                           return_value=roles):
+                    ret_val = api.Node(node).overcloud_role
+        self.assertEqual(ret_val.name, 'Controller')
 
     def test_node_addresses(self):
         node = self.ironicclient_nodes.first()
