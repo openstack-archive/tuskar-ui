@@ -11,9 +11,9 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
+from django.core import exceptions as django_exceptions
 from django.utils.translation import ugettext_lazy as _
-from horizon import exceptions
+
 import horizon.workflows
 
 from tuskar_ui import api
@@ -33,11 +33,14 @@ class Workflow(horizon.workflows.Workflow):
     success_url = 'horizon:infrastructure:overcloud:index'
 
     def handle(self, request, context):
-        success = True
         try:
             api.Overcloud.create(self.request, context['role_counts'],
                                  context['configuration'])
-        except Exception:
-            success = False
-            exceptions.handle(request, _('Unable to start deployment.'))
-        return success
+        except Exception as e:
+            # Showing error in both workflow tabs, because from the exception
+            # type we can't recognize where it should show
+            self.add_error_to_step(e.message, 'undeployed_overview')
+            self.add_error_to_step(e.message, 'deployed_configuration')
+            raise django_exceptions.ValidationError(e.message)
+
+        return True

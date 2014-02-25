@@ -210,10 +210,7 @@ class Overcloud(base.APIResourceWrapper):
         # state of all inner entities and operations correctly.
         # Then also delete the try/except, it should not be caught on this
         # level.
-        try:
-            return heat.stack_get(self._request, 'overcloud')
-        except heatclient.exc.HTTPNotFound:
-            return None
+        return heat.stack_get(self._request, 'overcloud')
 
     @cached_property
     def stack_events(self):

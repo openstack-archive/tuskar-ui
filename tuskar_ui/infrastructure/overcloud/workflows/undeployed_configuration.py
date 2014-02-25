@@ -260,12 +260,12 @@ class Action(horizon.workflows.Action):
         for name, data in parameters:
             self.fields[name] = make_field(name, **data)
 
-    def handle(self, request, context):
-        context['configuration'] = self.cleaned_data
-        return context
-
 
 class Step(horizon.workflows.Step):
     action_class = Action
     contributes = ('configuration',)
     template_name = 'infrastructure/overcloud/undeployed_configuration.html'
+
+    def contribute(self, data, context):
+        context['configuration'] = self.action.cleaned_data
+        return context
