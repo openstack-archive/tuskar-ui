@@ -49,7 +49,7 @@ class MACField(forms.fields.Field):
             return str(netaddr.EUI(
                 value.strip(), version=48, dialect=mac_dialect)).upper()
         except (netaddr.AddrFormatError, TypeError):
-            raise forms.ValidationError(_(u'Enter a valid MAC address.'))
+            raise forms.ValidationError(u'Enter a valid MAC address.')
 
 
 class NetworkField(forms.fields.Field):
@@ -57,4 +57,4 @@ class NetworkField(forms.fields.Field):
         try:
             return str(netaddr.IPNetwork(value, version=4))
         except netaddr.AddrFormatError:
-            raise forms.ValidationError(_("Enter valid IPv4 network address."))
+            raise forms.ValidationError("Enter valid IPv4 network address.")
