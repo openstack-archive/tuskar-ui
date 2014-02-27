@@ -16,7 +16,6 @@
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext_lazy
 
-from horizon import exceptions
 from horizon import tabs
 
 from tuskar_ui import api
@@ -64,12 +63,7 @@ class OverviewTab(tabs.Tab):
 
     def get_context_data(self, request, **kwargs):
         overcloud = self.tab_group.kwargs['overcloud']
-        try:
-            roles = api.OvercloudRole.list(request)
-        except Exception:
-            roles = []
-            exceptions.handle(request,
-                              _("Unable to retrieve overcloud roles."))
+        roles = api.OvercloudRole.list(request)
         role_data = [_get_role_data(overcloud, role) for role in roles]
         total = sum(d['node_count'] for d in role_data)
         progress = 100 * sum(d.get('running_node_count', 0)
