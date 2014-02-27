@@ -18,6 +18,8 @@ from django.core import urlresolvers
 
 from mock import patch, call  # noqa
 
+from novaclient.v1_1 import servers
+
 from horizon import exceptions
 from openstack_dashboard.test.test_data import utils
 from tuskar_ui.test import helpers as test
@@ -59,10 +61,15 @@ def _prepare_create():
 class NodeProfilesTest(test.BaseAdminViewTests):
 
     def test_index(self):
-        with patch('openstack_dashboard.api.nova.flavor_list',
-                   return_value=TEST_DATA.novaclient_flavors.list()) as mock:
+        with contextlib.nested(
+                patch('openstack_dashboard.api.nova.flavor_list',
+                      return_value=TEST_DATA.novaclient_flavors.list()),
+                patch('openstack_dashboard.api.nova.server_list',
+                      return_value=([], False)),
+        ) as (flavors_mock, servers_mock):
             res = self.client.get(INDEX_URL)
-            self.assertEqual(mock.call_count, 1)
+            self.assertEqual(flavors_mock.call_count, 1)
+            self.assertEqual(servers_mock.call_count, 1)
 
         self.assertTemplateUsed(res,
                                 'infrastructure/node_profiles/index.html')
@@ -107,3 +114,50 @@ class NodeProfilesTest(test.BaseAdminViewTests):
             data['name'] = flavor.name
             res = self.client.post(CREATE_URL, data)
             self.assertFormErrors(res)
+
+    def test_delete_ok(self):
+        flavors = TEST_DATA.novaclient_flavors.list()
+        data = {'action': 'node_profiles__delete',
+                'object_ids': [flavors[0].id, flavors[1].id]}
+        with contextlib.nested(
+                patch('openstack_dashboard.api.nova.flavor_delete'),
+                patch('openstack_dashboard.api.nova.server_list',
+                      return_value=([], False)),
+                patch('openstack_dashboard.api.glance.image_list_detailed',
+                      return_value=([], False)),
+                patch('openstack_dashboard.api.nova.flavor_list',
+                      return_value=TEST_DATA.novaclient_flavors.list())
+        ) as (delete_mock, server_list_mock, glance_mock, flavors_mock):
+            res = self.client.post(INDEX_URL, data)
+            self.assertNoFormErrors(res)
+            self.assertRedirectsNoFollow(res, INDEX_URL)
+            self.assertEqual(delete_mock.call_count, 2)
+            self.assertEqual(server_list_mock.call_count, 1)
+
+    def test_delete_deployed(self):
+        flavors = TEST_DATA.novaclient_flavors.list()
+        server = servers.Server(
+            servers.ServerManager(None),
+            {'id': 'aa',
+             'name': 'Compute',
+             'image': {'id': 1},
+             'status': 'ACTIVE',
+             'flavor': {'id': flavors[0].id}}
+        )
+        data = {'action': 'node_profiles__delete',
+                'object_ids': [flavors[0].id, flavors[1].id]}
+        with contextlib.nested(
+                patch('openstack_dashboard.api.nova.flavor_delete'),
+                patch('openstack_dashboard.api.nova.server_list',
+                      return_value=([server], False)),
+                patch('openstack_dashboard.api.glance.image_list_detailed',
+                      return_value=([], False)),
+                patch('openstack_dashboard.api.nova.flavor_list',
+                      return_value=TEST_DATA.novaclient_flavors.list())
+        ) as (delete_mock, server_list_mock, glance_mock, flavors_mock):
+            res = self.client.post(INDEX_URL, data)
+            self.assertMessageCount(error=1, warning=0)
+            self.assertNoFormErrors(res)
+            self.assertRedirectsNoFollow(res, INDEX_URL)
+            self.assertEqual(delete_mock.call_count, 1)
+            self.assertEqual(server_list_mock.call_count, 1)
