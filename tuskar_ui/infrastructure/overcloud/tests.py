@@ -60,11 +60,11 @@ def _mock_overcloud(**kwargs):
             'update',
         ],
         'counts': [],
-        'create.side_effect': lambda *args: oc,
+        'create.side_effect': lambda *args, **kwargs: oc,
         'dashboard_url': '',
         'delete.return_value': None,
-        'get.side_effect': lambda *args: oc,
-        'get_the_overcloud.side_effect': lambda *args: oc,
+        'get.side_effect': lambda *args, **kwargs: oc,
+        'get_the_overcloud.side_effect': lambda *args, **kwargs: oc,
         'id': 1,
         'is_deployed': True,
         'is_deploying': False,
@@ -72,7 +72,7 @@ def _mock_overcloud(**kwargs):
         'resources.return_value': [],
         'stack_events': [],
         'stack': stack,
-        'update.side_effect': lambda *args: oc,
+        'update.side_effect': lambda *args, **kwargs: oc,
     }
     params.update(kwargs)
     with patch('tuskar_ui.api.Overcloud', **params) as Overcloud:
@@ -348,7 +348,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                     'image_name',
                     'flavor_id',
                 ],
-                'get.side_effect': lambda *args: role,
+                'get.side_effect': lambda *args, **kwargs: role,
                 'name': 'Compute',
                 'description': '...',
                 'image_name': '',

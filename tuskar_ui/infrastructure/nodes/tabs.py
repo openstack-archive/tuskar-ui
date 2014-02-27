@@ -17,7 +17,6 @@
 from django.core import urlresolvers
 from django.utils.translation import ugettext_lazy as _
 
-from horizon import exceptions
 from horizon import tabs
 
 from tuskar_ui import api
@@ -30,14 +29,8 @@ class OverviewTab(tabs.Tab):
     template_name = ("infrastructure/nodes/_overview.html")
 
     def get_context_data(self, request):
-        try:
-            free_nodes = api.Node.list(request, associated=False)
-            deployed_nodes = api.Node.list(request, associated=True)
-        except Exception:
-            free_nodes = []
-            deployed_nodes = []
-            exceptions.handle(request,
-                              _('Unable to retrieve nodes.'))
+        free_nodes = api.Node.list(request, associated=False)
+        deployed_nodes = api.Node.list(request, associated=True)
 
         free_nodes_down = [node for node in free_nodes
                            if node.power_state != 'on']
@@ -67,25 +60,14 @@ class DeployedTab(tabs.TableTab):
     template_name = ("horizon/common/_detail_table.html")
 
     def get_items_count(self):
-        try:
-            deployed_nodes_count = len(api.Node.list(self.request,
-                                                     associated=True))
-        except Exception:
-            deployed_nodes_count = 0
-            exceptions.handle(self.request,
-                              _('Unable to retrieve deployed nodes count.'))
+        deployed_nodes_count = len(api.Node.list(self.request,
+                                                 associated=True))
         return deployed_nodes_count
 
     def get_deployed_nodes_data(self):
-        try:
-            deployed_nodes = api.Node.list(self.request, associated=True)
-        except Exception:
-            deployed_nodes = []
-            redirect = urlresolvers.reverse(
-                'horizon:infrastructure:nodes:index')
-            exceptions.handle(self.request,
-                              _('Unable to retrieve deployed nodes.'),
-                              redirect=redirect)
+        redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
+        deployed_nodes = api.Node.list(self.request, associated=True,
+                                       _error_redirect=redirect)
         return deployed_nodes
 
 
@@ -97,25 +79,14 @@ class FreeTab(tabs.TableTab):
     template_name = ("horizon/common/_detail_table.html")
 
     def get_items_count(self):
-        try:
-            free_nodes_count = len(api.Node.list(self.request,
-                                                 associated=False))
-        except Exception:
-            free_nodes_count = "0"
-            exceptions.handle(self.request,
-                              _('Unable to retrieve free nodes count.'))
+        free_nodes_count = len(api.Node.list(self.request,
+                                             associated=False))
         return free_nodes_count
 
     def get_free_nodes_data(self):
-        try:
-            free_nodes = api.Node.list(self.request, associated=False)
-        except Exception:
-            free_nodes = []
-            redirect = urlresolvers.reverse(
-                'horizon:infrastructure:nodes:index')
-            exceptions.handle(self.request,
-                              _('Unable to retrieve free nodes.'),
-                              redirect=redirect)
+        redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
+        free_nodes = api.Node.list(self.request, associated=False,
+                                   _error_redirect=redirect)
         return free_nodes
 
 
