@@ -20,14 +20,12 @@ from tuskar_ui.infrastructure.overcloud.workflows import undeployed_overview
 
 
 class Action(undeployed_overview.Action):
-    overcloud_id = django.forms.IntegerField(widget=django.forms.HiddenInput)
-
     class Meta:
         slug = 'scale_node_counts'
         name = _("Node Counts")
 
 
-class Step(horizon.workflows.Step):
+class Step(undeployed_overview.Step):
     action_class = Action
     contributes = ('role_counts', 'overcloud_id')
     template_name = 'infrastructure/overcloud/scale_node_counts.html'
