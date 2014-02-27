@@ -16,7 +16,6 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base as base_views
 
-from horizon import exceptions
 import horizon.forms
 from horizon import tables as horizon_tables
 from horizon import tabs as horizon_tabs
@@ -41,12 +40,8 @@ class OvercloudMixin(object):
         if redirect is None:
             redirect = reverse(INDEX_URL)
         overcloud_id = self.kwargs['overcloud_id']
-        try:
-            overcloud = api.Overcloud.get(self.request, overcloud_id)
-        except Exception:
-            msg = _("Unable to retrieve deployment.")
-            exceptions.handle(self.request, msg, redirect=redirect)
-
+        overcloud = api.Overcloud.get(self.request, overcloud_id,
+                                      _error_redirect=redirect)
         return overcloud
 
 
@@ -54,11 +49,8 @@ class OvercloudRoleMixin(object):
     @memoized.memoized
     def get_role(self, redirect=None):
         role_id = self.kwargs['role_id']
-        try:
-            role = api.OvercloudRole.get(self.request, role_id)
-        except Exception:
-            msg = _("Unable to retrieve overcloud role.")
-            exceptions.handle(self.request, msg, redirect=redirect)
+        role = api.OvercloudRole.get(self.request, role_id,
+                                     _error_redirect=redirect)
         return role
 
 

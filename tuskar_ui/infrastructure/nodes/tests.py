@@ -18,6 +18,7 @@ from mock import patch, call  # noqa
 
 from openstack_dashboard.test.test_data import utils
 from tuskar_ui import api as api
+from tuskar_ui.handle_errors import handle_errors  # noqa
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import tuskar_data
 
@@ -30,6 +31,10 @@ tuskar_data.data(TEST_DATA)
 
 
 class NodesTests(test.BaseAdminViewTests):
+    @handle_errors("Error!", [])
+    def _raise_tuskar_exception(self, request, *args, **kwargs):
+        raise self.exceptions.tuskar
+
     def test_index_get(self):
 
         with patch('tuskar_ui.api.Node', **{
@@ -65,10 +70,10 @@ class NodesTests(test.BaseAdminViewTests):
     def test_free_nodes_list_exception(self):
         with patch('tuskar_ui.api.Node', **{
             'spec_set': ['list'],
-            'list.side_effect': self.exceptions.tuskar,
+            'list.side_effect': self._raise_tuskar_exception,
         }) as mock:
             res = self.client.get(INDEX_URL + '?tab=nodes__free')
-            self.assertEqual(mock.list.call_count, 2)
+            self.assertEqual(mock.list.call_count, 3)
 
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
@@ -101,10 +106,10 @@ class NodesTests(test.BaseAdminViewTests):
         with patch('tuskar_ui.api.Node', **{
             'spec_set': ['list', 'instance'],
             'instance': instance,
-            'list.side_effect': self.exceptions.tuskar,
+            'list.side_effect': self._raise_tuskar_exception,
         }) as mock:
             res = self.client.get(INDEX_URL + '?tab=nodes__deployed')
-            self.assertEqual(mock.list.call_count, 2)
+            self.assertEqual(mock.list.call_count, 3)
 
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
@@ -197,7 +202,7 @@ class NodesTests(test.BaseAdminViewTests):
     def test_node_detail_exception(self):
         with patch('tuskar_ui.api.Node', **{
             'spec_set': ['get'],
-            'get.side_effect': self.exceptions.tuskar,
+            'get.side_effect': self._raise_tuskar_exception,
         }) as mock:
             res = self.client.get(
                 urlresolvers.reverse(DETAIL_VIEW, args=('no-such-node',))

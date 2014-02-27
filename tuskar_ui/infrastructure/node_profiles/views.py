@@ -12,9 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.utils.translation import ugettext_lazy as _
-
-from horizon import exceptions
 from horizon import tables
 from horizon import workflows
 
@@ -30,12 +27,7 @@ class IndexView(tables.DataTableView):
     template_name = 'infrastructure/node_profiles/index.html'
 
     def get_data(self):
-        try:
-            node_profiles = api.NodeProfile.list(self.request)
-        except Exception:
-            exceptions.handle(self.request,
-                              _('Unable to retrieve node profile list.'))
-            return []
+        node_profiles = api.NodeProfile.list(self.request)
         node_profiles.sort(key=lambda np: (np.vcpus, np.ram, np.disk))
         return node_profiles
 
