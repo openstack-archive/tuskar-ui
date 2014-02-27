@@ -127,10 +127,21 @@ class UndeployConfirmationView(horizon.forms.ModalFormView):
 class Scale(horizon.workflows.WorkflowView, OvercloudMixin):
     workflow_class = scale.Workflow
 
+    def get_context_data(self, **kwargs):
+        context = super(Scale,
+                        self).get_context_data(**kwargs)
+        context['overcloud_id'] = self.kwargs['overcloud_id']
+        return context
+
     def get_initial(self):
         overcloud = self.get_overcloud()
+        overcloud_roles = dict((overcloud_role.id, overcloud_role)
+                               for overcloud_role in
+                               api.OvercloudRole.list(self.request))
+
         role_counts = dict((
-            (count['overcloud_role_id'], 'default'),
+            (count['overcloud_role_id'],
+             overcloud_roles[count['overcloud_role_id']].flavor_id),
             count['num_nodes'],
         ) for count in overcloud.counts)
         return {
