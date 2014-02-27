@@ -64,7 +64,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             'is_deployed': False,
             'is_deploying': False,
             'is_failed': False,
-            'get_the_overcloud.side_effect': lambda request: oc,
+            'get_the_overcloud.side_effect': lambda *args, **kwargs: oc,
         }) as Overcloud:
             oc = api.Overcloud
             res = self.client.get(INDEX_URL)
@@ -90,7 +90,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             'is_deploying': False,
             'is_failed': False,
             'id': 1,
-            'get_the_overcloud.side_effect': lambda request: oc,
+            'get_the_overcloud.side_effect': lambda *args, **kwargs: oc,
         }) as Overcloud:
             oc = Overcloud
             res = self.client.get(INDEX_URL)
@@ -139,7 +139,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                 'list.return_value': roles,
             }), patch('tuskar_ui.api.Overcloud', **{
                 'spec_set': ['create'],
-                'create.side_effect': lambda *args: oc,
+                'create.side_effect': lambda *args, **kwargs: oc,
             }), patch('tuskar_ui.api.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': [],
@@ -212,7 +212,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             'is_deployed': True,
             'is_deploying': False,
             'is_failed': False,
-            'get': lambda request, overcloud_id: oc,
+            'get': lambda *args, **kwargs: oc,
             'resources.return_value': [],
             'dashboard_url': '',
             'stack_events': [],
@@ -248,7 +248,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             'is_deployed': True,
             'is_deploying': False,
             'is_failed': False,
-            'get.side_effect': lambda request, overcloud_id: oc,
+            'get.side_effect': lambda *args, **kwargs: oc,
             'resources.return_value': [],
             'dashboard_url': '',
             'stack': stack,
@@ -280,7 +280,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             'is_deployed': True,
             'is_deploying': False,
             'is_failed': False,
-            'get.side_effect': lambda request, overcloud_id: oc,
+            'get.side_effect': lambda *args, **kwargs: oc,
             'resources.return_value': [],
             'dashboard_url': '',
             'stack_events': [],
@@ -303,7 +303,7 @@ class OvercloudTests(test.BaseAdminViewTests):
     def test_delete_post(self):
         with patch('tuskar_ui.api.Overcloud', **{
             'spec_set': ['delete'],
-            'delete.side_effect': lambda request, overcloud_id: None,
+            'delete.side_effect': lambda *args, **kwargs: None,
         }):
             res = self.client.post(DELETE_URL)
         self.assertRedirectsNoFollow(res, INDEX_URL)
@@ -318,7 +318,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             }),
             patch('tuskar_ui.api.Overcloud', **{
                 'spec_set': ['get', 'id', 'counts'],
-                'get.side_effect': lambda *args: oc,
+                'get.side_effect': lambda *args, **kwargs: oc,
                 'id': 1,
                 'counts': [
                     {"overcloud_role_id": role.id, "num_nodes": 0}
@@ -356,8 +356,8 @@ class OvercloudTests(test.BaseAdminViewTests):
             }),
             patch('tuskar_ui.api.Overcloud', **{
                 'spec_set': ['update', 'id', 'get', 'counts'],
-                'get.side_effect': lambda *args: oc,
-                'update.side_effect': lambda *args: oc,
+                'get.side_effect': lambda *args, **kwargs: oc,
+                'update.side_effect': lambda *args, **kwargs: oc,
                 'id': 1,
                 'counts': [
                     {"overcloud_role_id": role.id, "num_nodes": 0}
@@ -423,7 +423,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                     'image_name',
                     'flavor_id',
                 ],
-                'get.side_effect': lambda *args: role,
+                'get.side_effect': lambda *args, **kwargs: role,
                 'name': 'Compute',
                 'description': '...',
                 'image_name': '',

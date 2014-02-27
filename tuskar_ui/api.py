@@ -15,18 +15,18 @@ import django.conf
 import heatclient
 import logging
 
+from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
-
 from novaclient.v1_1.contrib import baremetal
-from tuskarclient.v1 import client as tuskar_client
-
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from openstack_dashboard.api import heat
 from openstack_dashboard.api import nova
 from openstack_dashboard.test.test_data import utils
+from tuskarclient.v1 import client as tuskar_client
 
 from tuskar_ui.cached_property import cached_property  # noqa
+from tuskar_ui.handle_errors import handle_errors  # noqa
 from tuskar_ui.test.test_data import tuskar_data
 
 LOG = logging.getLogger(__name__)
@@ -140,6 +140,7 @@ class Overcloud(base.APIResourceWrapper):
         return [cls(oc, request=request) for oc in ocs]
 
     @classmethod
+    @handle_errors(_("Unable to retrieve deployment"))
     def get(cls, request, overcloud_id):
         """Return the Tuskar Overcloud that matches the ID
 
@@ -430,6 +431,7 @@ class Node(base.APIResourceWrapper):
         return cls(node)
 
     @classmethod
+    @handle_errors(_("Unable to retrieve node"))
     def get(cls, request, uuid):
         """Return the Node in Ironic that matches the ID
 
@@ -483,6 +485,7 @@ class Node(base.APIResourceWrapper):
         return cls(node, instance=server, request=request)
 
     @classmethod
+    @handle_errors(_("Unable to retrieve nodes"), [])
     def list(cls, request, associated=None):
         """Return a list of Nodes in Ironic
 
@@ -740,6 +743,7 @@ class OvercloudRole(base.APIResourceWrapper):
     _attrs = ('id', 'name', 'description', 'image_name', 'flavor_id')
 
     @classmethod
+    @handle_errors(_("Unable to retrieve overcloud roles"), [])
     def list(cls, request):
         """Return a list of Overcloud Roles in Tuskar
 
@@ -754,6 +758,7 @@ class OvercloudRole(base.APIResourceWrapper):
         return [cls(role) for role in roles]
 
     @classmethod
+    @handle_errors(_("Unable to retrieve overcloud role"))
     def get(cls, request, role_id):
         """Return the Tuskar OvercloudRole that matches the ID
 
