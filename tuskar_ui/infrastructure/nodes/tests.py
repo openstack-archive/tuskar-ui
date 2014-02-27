@@ -76,6 +76,10 @@ class NodesTests(test.BaseAdminViewTests):
         deployed_nodes = [api.Node(node)
                           for node in self.ironicclient_nodes.list()]
         instance = TEST_DATA.novaclient_servers.first()
+        overcloud_role = api.OvercloudRole(
+            TEST_DATA.tuskarclient_overcloud_roles.first())
+        for node in deployed_nodes:
+            node.overcloud_role = overcloud_role
 
         with patch('tuskar_ui.api.Node', **{
             'spec_set': ['list', 'instance'],  # Only allow these attributes

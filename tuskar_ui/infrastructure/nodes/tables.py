@@ -93,10 +93,10 @@ class FreeNodesTable(NodesTable):
 
 
 class DeployedNodesTable(NodesTable):
-    # TODO(lsmola) change of API structure required
-    # deployment_role = tables.Column(
-    #     lambda node: "",
-    #     verbose_name=_("Deployment Role"))
+
+    deployment_role = tables.Column(
+        lambda node: node.overcloud_role.name,
+        verbose_name=_("Deployment Role"))
 
     # TODO(lsmola) waits for Ceilometer baremetal metrics
     # capacity = tables.Column(

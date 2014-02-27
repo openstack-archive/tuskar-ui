@@ -323,8 +323,8 @@ class Overcloud(base.APIResourceWrapper):
         # nova instance
         all_resources = self.all_resources(with_joins)
         filtered_resources = [resource for resource in all_resources if
-                              (resource.image_name ==
-                               overcloud_role.image_name)]
+                              (resource.node.is_overcloud_role(
+                                  overcloud_role))]
 
         return filtered_resources
 
@@ -559,6 +559,43 @@ class Node(base.APIResourceWrapper):
         return None
 
     @cached_property
+    def image_name(self):
+        """Return image name of associated instance
+
+        Returns image name of instance associated with node
+
+        :return: Image name of instance
+        :rtype:  string
+        """
+        if self.instance is None:
+            return
+        return image_get(self._request, self.instance.image['id']).name
+
+    def is_overcloud_role(self, overcloud_role):
+        """Determine whether a node matches an overcloud role
+
+        :param overcloud_role: overcloud role to check against
+        :type  overcloud_role: tuskar_ui.api.OvercloudRole
+
+        :return: does this node match the overcloud_role?
+        :rtype:  bool
+        """
+        return self.image_name == overcloud_role.image_name
+
+    @cached_property
+    def overcloud_role(self):
+        """Return overcloud role of associated instance
+
+        :return: OvercloudRole of associated instance, or None if
+                 none exists
+        :rtype:  tuskar_ui.api.OvercloudRole
+        """
+        roles = OvercloudRole.list(self._request)
+        for role in roles:
+            if self.is_overcloud_role(role):
+                return role
+
+    @cached_property
     def addresses(self):
         # FIXME(lsmola) remove when Ironic is in
         """Return a list of port addresses associated with this Node
@@ -696,20 +733,6 @@ class Resource(base.APIResourceWrapper):
         if self.physical_resource_id:
             return Node.get_by_instance_uuid(self._request,
                                              self.physical_resource_id)
-        return None
-
-    @cached_property
-    def image_name(self):
-        """Return image name of resource
-
-        Returns image name of instance associated with resource
-
-        :return: Image name of resources
-        :rtype:  string
-        """
-        instance = getattr(getattr(self, 'node', None), 'instance', None)
-        if instance is not None:
-            return image_get(self._request, instance.image['id']).name
         return None
 
 
