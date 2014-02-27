@@ -329,18 +329,18 @@ class OvercloudTests(test.BaseAdminViewTests):
             url = urlresolvers.reverse(
                 'horizon:infrastructure:overcloud:scale', args=(Overcloud.id,))
             res = self.client.post(url, data)
-            # TODO(rdopieralski) Check it when it's actually called.
-            #request = Overcloud.update.call_args_list[0][0][0]
-            #self.assertListEqual(
-            #    Overcloud.update.call_args_list,
-            #    [
-            #        call(request, {
-            #            ('1', flavor.id): 1,
-            #            ('2', ''): 0,
-            #            ('3', ''): 0,
-            #            ('4', ''): 0,
-            #        }),
-            #    ])
+
+            request = Overcloud.update.call_args_list[0][0][0]
+            self.assertListEqual(
+                Overcloud.update.call_args_list,
+                [
+                    call(request, Overcloud.id, {
+                        ('1', flavor.id): 1,
+                        ('2', ''): 0,
+                        ('3', ''): 0,
+                        ('4', ''): 0,
+                    }, {}),
+                ])
         roles[0].flavor_id = old_flavor_id
         self.assertRedirectsNoFollow(res, DETAIL_URL)
 
