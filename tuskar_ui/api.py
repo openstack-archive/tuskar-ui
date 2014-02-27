@@ -136,6 +136,13 @@ class NodeProfile(object):
     def list(cls, request):
         return [cls(item) for item in nova.flavor_list(request)]
 
+    @staticmethod
+    @memoized.memoized
+    def list_deployed_ids(request):
+        """Get and memoize ID's of deployed node profiles."""
+        servers = nova.server_list(request)[0]
+        return set(server.flavor['id'] for server in servers)
+
 
 class Overcloud(base.APIResourceWrapper):
     _attrs = ('id', 'stack_id', 'name', 'description', 'counts', 'attributes')

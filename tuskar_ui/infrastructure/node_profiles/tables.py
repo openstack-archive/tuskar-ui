@@ -14,10 +14,13 @@
 
 from django.utils.translation import ugettext_lazy as _
 
+from horizon import exceptions
 from horizon import tables
 
 from openstack_dashboard.dashboards.admin.flavors \
     import tables as flavor_tables
+
+from tuskar_ui import api
 
 
 class CreateNodeProfile(flavor_tables.CreateFlavor):
@@ -33,6 +36,25 @@ class DeleteNodeProfile(flavor_tables.DeleteFlavor):
         # probably due to metaclass magic in actions
         self.data_type_singular = _("Node Profile")
         self.data_type_plural = _("Node Profiles")
+
+    def allowed(self, request, datum=None):
+        """Check that action is allowed on node profile
+
+        This is overrided method from horizon.tables.BaseAction.
+
+        :param datum: node profile we're operating on
+        :type  datum: tuskar_ui.api.NodeProfile
+        """
+        if datum is not None:
+            try:
+                deployed_profiles = api.NodeProfile.list_deployed_ids(request)
+            except Exception:
+                msg = _('Unable to retrieve existing servers list.')
+                exceptions.handle(request, msg)
+                return False
+            if datum.id in deployed_profiles:
+                return False
+        return super(DeleteNodeProfile, self).allowed(request, datum)
 
 
 class NodeProfilesTable(tables.DataTable):
