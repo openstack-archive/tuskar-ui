@@ -382,9 +382,17 @@ class Overcloud(base.APIResourceWrapper):
 
     @cached_property
     def dashboard_url(self):
-        # TODO(rdopieralski) Implement this.
-        return "http://horizon.example.com"
+        url = self.stack.parameters['NeutronPublicInterfaceIP']
 
+        if not url:
+            try:
+                control_role = next((role for role in OvercloudRole.list(self._request) if role.image_name=='overcloud-control'), None)
+                resource = self.resources(control_role)[0]
+                url = resource.node.driver_info['ip_address']
+            except Exception:
+                LOG.exception()
+                url = ""
+        return url
 
 class Node(base.APIResourceWrapper):
     # FIXME(lsmola) uncomment this and delete equivalent methods
