@@ -99,14 +99,7 @@
   <div class="span4">
     <div class="widget">
       <h2>{% trans "Deployment Role Distribution" %}</h2>
-      <p class="muted">{% trans "Statistics currently not available." %}</p>
-      {% comment %}
-      <div class="d3_pie_chart pull-left" data-used="{% widthratio controller_count total_count 100 %}"></div>
-      <div class="pull-left">
-	{% widthratio controller_count total_count 100 %}% {% trans 'Controller' %} <br />
-	{% widthratio compute_count total_count 100 %}% {% trans 'Compute' %}
-      </div>
-      {% endcomment %}
+      <div class="d3_pie_chart_distribution pull-left" data-used="{% for role in roles %}{{ role.name }}={{ role.node_count }}{% if not forloop.last %}|{% endif %}{% endfor %}"></div>
     </div>
     <div class="clear"></div>
     <div class="widget">
