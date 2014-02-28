@@ -382,8 +382,28 @@ class Overcloud(base.APIResourceWrapper):
 
     @cached_property
     def dashboard_url(self):
-        # TODO(rdopieralski) Implement this.
-        return "http://horizon.example.com"
+        """Return url of Overcloud Horizon
+
+        :return: Return url of Overcloud Horizon or ""
+        :rtype:  string
+        """
+
+        # TODO(lsmola) For Icehouse we are assuming that Horizon
+        # is on overcloud control node. Later, we should get this
+        # information from the Keystone.
+        url = self.stack.parameters['NeutronPublicInterfaceIP']
+
+        if not url:
+            try:
+                control_role = next((
+                    role for role in OvercloudRole.list(self._request)
+                    if role.image_name == 'overcloud-control'), None)
+                resource = self.resources(control_role)[0]
+                url = resource.node.driver_info['ip_address']
+            except Exception:
+                LOG.exception()
+                url = ""
+        return url
 
 
 class Node(base.APIResourceWrapper):
