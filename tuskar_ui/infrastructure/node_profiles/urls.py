@@ -21,4 +21,6 @@ urlpatterns = urls.patterns(
     'tuskar_ui.infrastructure.node_profiles.views',
     urls.url(r'^$', views.IndexView.as_view(), name='index'),
     urls.url(r'^create/$', views.CreateView.as_view(), name='create'),
+    urls.url(r'^(?P<flavor_id>[^/]+)/$', views.DetailView.as_view(),
+             name='details'),
 )

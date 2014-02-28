@@ -53,7 +53,8 @@ class DeleteNodeProfile(flavor_tables.DeleteFlavor):
 
 
 class NodeProfilesTable(tables.DataTable):
-    name = tables.Column('name', verbose_name=_('Node'))
+    name = tables.Column('name', verbose_name=_('Node Profile'),
+                         link="horizon:infrastructure:node_profiles:details")
     arch = tables.Column('cpu_arch', verbose_name=_('Architecture'))
     vcpus = tables.Column('vcpus', verbose_name=_('CPUs'))
     ram = tables.Column(flavor_tables.get_size,
@@ -75,3 +76,21 @@ class NodeProfilesTable(tables.DataTable):
                          DeleteNodeProfile,
                          flavor_tables.FlavorFilterAction)
         row_actions = (DeleteNodeProfile,)
+
+
+class NodeProfileRolesTable(tables.DataTable):
+    name = tables.Column('name', verbose_name=_('Role Name'))
+
+    def __init__(self, request, *args, **kwargs):
+        # TODO(dtantsur): support multiple overclouds
+        try:
+            overcloud = api.Overcloud.get_the_overcloud(request)
+        except Exception:
+            count_getter = lambda role: _("Not deployed")
+        else:
+            count_getter = overcloud.resources_count
+        self._columns['count'] = tables.Column(
+            count_getter,
+            verbose_name=_("Instances Count")
+        )
+        super(NodeProfileRolesTable, self).__init__(request, *args, **kwargs)
