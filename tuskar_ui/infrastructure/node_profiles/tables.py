@@ -75,3 +75,21 @@ class NodeProfilesTable(tables.DataTable):
                          DeleteNodeProfile,
                          flavor_tables.FlavorFilterAction)
         row_actions = (DeleteNodeProfile,)
+
+
+class NodeProfileRolesTable(tables.DataTable):
+    name = tables.Column('name', verbose_name=_('Role Name'))
+
+    def __init__(self, request, *args, **kwargs):
+        # TODO(dtantsur): support multiple overclouds
+        try:
+            overcloud = api.Overcloud.get_the_overcloud(request)
+        except Exception:
+            count_getter = lambda role: _("Not deployed")
+        else:
+            count_getter = overcloud.resources_count
+        self._columns['count'] = tables.Column(
+            count_getter,
+            verbose_name=_("Instances Count")
+        )
+        super(NodeProfileRolesTable, self).__init__(request, *args, **kwargs)
