@@ -98,6 +98,14 @@ class NodeProfile(object):
     def __getattr__(self, name):
         return getattr(self._flavor, name)
 
+    @property
+    def ram_bytes(self):
+        return self.ram * 1024 * 1024
+
+    @property
+    def disk_bytes(self):
+        return self.disk * 1024 * 1024 * 1024
+
     @cached_property
     def extras_dict(self):
         """Return extra parameters of node profile
@@ -129,6 +137,7 @@ class NodeProfile(object):
                                       metadata=extras_dict))
 
     @classmethod
+    @handle_errors(_("Unable to load node profile"))
     def get(cls, request, node_profile_id):
         return cls(nova.flavor_get(request, node_profile_id))
 

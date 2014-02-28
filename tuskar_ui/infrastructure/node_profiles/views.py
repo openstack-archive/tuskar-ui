@@ -12,7 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from django.core.urlresolvers import reverse_lazy
+
 from horizon import tables
+from horizon import views
 from horizon import workflows
 
 from tuskar_ui import api
@@ -35,3 +38,16 @@ class IndexView(tables.DataTableView):
 class CreateView(workflows.WorkflowView):
     workflow_class = node_profiles_workflows.CreateNodeProfile
     template_name = 'infrastructure/node_profiles/create.html'
+
+
+class DetailView(views.APIView):
+    template_name = 'infrastructure/node_profiles/details.html'
+    error_redirect = reverse_lazy('horizon:infrastructure:node_profiles:index')
+
+    def get_data(self, request, context, *args, **kwargs):
+        context['node_profile'] = api.NodeProfile.get(
+            request,
+            kwargs.get('flavor_id'),
+            _error_redirect=self.error_redirect
+        )
+        return context
