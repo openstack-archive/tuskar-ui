@@ -1,4 +1,4 @@
-angular.module('horizonApp').directive('hrNumberPicker', function() {
+angular.module('hz').directive('hrNumberPicker', function() {
   return {
     restrict: 'A',
     replace: true,

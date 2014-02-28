@@ -75,7 +75,7 @@
   <div class="span4">
     <div class="widget">
       <h2>{% trans 'Provisioning Status' %}</h2>
-      <div class="d3_pie_chart pull-left" data-used="{% widthratio deployed_nodes|length total_nodes|length 100 %}"></div>
+      <div class="d3_pie_chart_usage pull-left" data-used="{% widthratio deployed_nodes|length total_nodes|length 100 %}"></div>
       <div class="pull-left">
 	{% widthratio deployed_nodes|length total_nodes|length 100 %}% {% trans 'Deployed' %} <br />
 	{% widthratio free_nodes|length total_nodes|length 100 %}% {% trans 'Free' %}
@@ -84,7 +84,7 @@
     <div class="clear"></div>
     <div class="widget">
       <h2>{% trans 'Power Status' %}</h2>
-      <div class="d3_pie_chart pull-left" data-used="{% widthratio total_nodes_up|length total_nodes|length 100 %}"></div>
+      <div class="d3_pie_chart_usage pull-left" data-used="{% widthratio total_nodes_up|length total_nodes|length 100 %}"></div>
       <div class="pull-left">
 	{% widthratio total_nodes_up|length total_nodes|length 100 %}% {% trans 'Running' %} <br />
 	{% widthratio total_nodes_down|length total_nodes|length 100 %}% {% trans 'Stopped' %}
