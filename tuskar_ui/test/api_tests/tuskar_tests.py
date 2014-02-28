@@ -15,6 +15,7 @@
 from __future__ import absolute_import
 
 import contextlib
+import mock
 from mock import patch  # noqa
 
 from heatclient.v1 import events
@@ -167,6 +168,47 @@ class TuskarAPITests(test.APITestCase):
         for i in ret_val:
             self.assertIsInstance(i, api.Resource)
         self.assertEqual(4, len(ret_val))
+
+
+    def test_overcloud_dasboard_url_from_params(self):
+        oc = api.Overcloud(self.tuskarclient_overclouds.first(), request=None)
+        stack = self.heatclient_stacks.first()
+        with contextlib.nested(
+            patch('openstack_dashboard.api.heat.stack_get',
+                  return_value=stack),
+        ) as stack_get:
+            ret_val = oc.dashboard_url
+            self.assertEqual(stack_get.call_count, 1)
+
+            self.assertEqual(ret_val, 'http://192.0.2.22')
+
+    def test_overcloud_dasboard_url_from_control_node(self):
+        resources = [mock.Mock(**{
+            'node': mock.Mock(**{
+                'driver_info': {'ip_address': '192.0.2.25'}})
+        })]
+
+        with contextlib.nested(
+            patch('tuskar_ui.api.Overcloud.stack',
+                  return_value=mock.Mock(**{
+                      'spec_set': ['parameters'],
+                      'parameters': {'NeutronPublicInterfaceIP': ''}
+            })),
+            patch('tuskar_ui.api.Overcloud.resources',
+                return_value=[resources]
+            ),
+            patch('tuskar_ui.api.OvercloudRole', **{
+                'spec_set': ['list'],
+                'list.return_value': mock.Mock(**{
+                    'image_name': 'overcloud-control'
+                }),
+            }),
+        ):
+            oc = api.Overcloud(self.tuskarclient_overclouds.first(),
+                               request=object())
+            ret_val = oc.dashboard_url
+
+            self.assertEqual(ret_val, 'http://192.0.2.25')
 
     def test_node_create(self):
         node = api.Node(self.ironicclient_nodes.first())
