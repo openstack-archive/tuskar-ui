@@ -12,10 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
 from horizon import tables
+from horizon import views
 from horizon import workflows
 
 from tuskar_ui import api
@@ -43,3 +45,20 @@ class IndexView(tables.DataTableView):
 class CreateView(workflows.WorkflowView):
     workflow_class = node_profiles_workflows.CreateNodeProfile
     template_name = 'infrastructure/node_profiles/create.html'
+
+
+class DetailView(views.APIView):
+    template_name = 'infrastructure/node_profiles/details.html'
+
+    def get_data(self, request, context, *args, **kwargs):
+        flavor_id = kwargs.get('flavor_id')
+        try:
+            node_profile = api.NodeProfile.get(request, flavor_id)
+        except Exception:
+            node_profile = None
+            redirect = 'horizon:infrastructure:node_profiles:index'
+            msg = _('Unable to retrieve node profile with ID "%s"') % flavor_id
+            exceptions.handle(request, msg, redirect=reverse_lazy(redirect))
+
+        context['node_profile'] = node_profile
+        return context
