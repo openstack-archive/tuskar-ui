@@ -98,6 +98,14 @@ class NodeProfile(object):
     def __getattr__(self, name):
         return getattr(self._flavor, name)
 
+    @property
+    def ram_bytes(self):
+        return self.ram * 1024 * 1024
+
+    @property
+    def disk_bytes(self):
+        return self.disk * 1024 * 1024 * 1024
+
     @cached_property
     def extras_dict(self):
         """Return extra parameters of node profile
@@ -129,6 +137,7 @@ class NodeProfile(object):
                                       metadata=extras_dict))
 
     @classmethod
+    @handle_errors(_("Unable to load node profile"))
     def get(cls, request, node_profile_id):
         return cls(nova.flavor_get(request, node_profile_id))
 
@@ -389,6 +398,24 @@ class Overcloud(base.APIResourceWrapper):
                                   overcloud_role))]
 
         return filtered_resources
+
+    @memoized.memoized
+    def resources_count(self, overcloud_role=None):
+        """Return count of Overcloud Resorces
+
+        :param overcloud_role: role of resources to be counted, None means all
+        :type  overcloud_role: tuskar_ui.api.OvercloudRole
+
+        :return: Number of matches resources
+        :rtype:  int
+        """
+        # TODO(dtantsur): there should be better way to do it, rather than
+        # fetching and calling len()
+        if overcloud_role is None:
+            resources = self.all_resources()
+        else:
+            resources = self.resources(overcloud_role)
+        return len(resources)
 
     @cached_property
     def dashboard_url(self):

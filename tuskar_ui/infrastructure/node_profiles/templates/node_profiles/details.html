@@ -1,0 +1,35 @@
+{% extends 'infrastructure/base.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Node Profile Details' %}{% endblock %}
+
+{% block page_header %}
+  {% include 'horizon/common/_page_header.html' with title=_('Node Profile Details') %}
+{% endblock page_header %}
+
+{% block main %}
+<div class="row-fluid">
+  <div class="span12">
+    <h4>{% trans "Hardware Info" %}</h4>
+    <dl class="clearfix">
+        <dt>{% trans "Architecture" %}</dt>
+        <dd>{{ node_profile.cpu_arch|default:"&mdash;" }}</dd>
+        <dt>{% trans "CPUs" %}</dt>
+        <dd>{{ node_profile.vcpus|default:"&mdash;" }}</dd>
+        <dt>{% trans "Memory" %}</dt>
+        <dd>{{ node_profile.ram_bytes|filesizeformat|default:"&mdash;" }}</dd>
+        <dt>{% trans "Disk" %}</dt>
+        <dd>{{ node_profile.disk_bytes|filesizeformat|default:"&mdash;" }}</dd>
+    </dl>
+    <h4>{% trans "Deploy Images" %}</h4>
+    <dl class="clearfix">
+        <dt>{% trans "Kernel" %}</dt>
+        <dd>{{ kernel_image.name|default:"&mdash;" }}</dd>
+        <dt>{% trans "Ramdisk" %}</dt>
+        <dd>{{ ramdisk_image.name|default:"&mdash;" }}</dd>
+    </dl>
+    <h4>{% trans "Overcloud Roles" %}</h4>
+    {{ table.render }}
+  </div>
+</div>
+
+{% endblock %}
