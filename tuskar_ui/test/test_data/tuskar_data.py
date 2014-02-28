@@ -35,7 +35,8 @@ def data(TEST):
          'stack_status': 'RUNNING',
          'parameters': {
              'one': 'one',
-             'two': 'two'
+             'two': 'two',
+             'NeutronPublicInterfaceIP': '192.0.2.22'
          }})
     TEST.heatclient_stacks.add(stack_1)
 
