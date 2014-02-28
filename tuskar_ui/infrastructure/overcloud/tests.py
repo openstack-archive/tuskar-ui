@@ -129,10 +129,11 @@ class OvercloudTests(test.BaseAdminViewTests):
 
     def test_create_post(self):
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        flavor = TEST_DATA.novaclient_flavors.first()
         old_flavor_id = roles[0].flavor_id
-        roles[0].flavor_id = 'default'
+        roles[0].flavor_id = flavor.id
         data = {
-            'count__1__default': '1',
+            'count__1__%s' % flavor.id: '1',
             'count__2__': '0',
             'count__3__': '0',
             'count__4__': '0',
@@ -149,7 +150,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             }),
             patch('openstack_dashboard.api.nova', **{
                 'spec_set': ['flavor_list'],
-                'flavor_list.return_value': [],
+                'flavor_list.return_value': [flavor],
             }),
         ) as (OvercloudRole, Overcloud, Node, nova):
             res = self.client.post(CREATE_URL, data)
@@ -158,7 +159,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                 Overcloud.create.call_args_list,
                 [
                     call(request, {
-                        ('1', 'default'): 1,
+                        ('1', flavor.id): 1,
                         ('2', ''): 0,
                         ('3', ''): 0,
                         ('4', ''): 0,
@@ -272,11 +273,12 @@ class OvercloudTests(test.BaseAdminViewTests):
 
     def test_scale_post(self):
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        flavor = TEST_DATA.novaclient_flavors.first()
         old_flavor_id = roles[0].flavor_id
-        roles[0].flavor_id = 'default'
+        roles[0].flavor_id = flavor.id
         data = {
             'overcloud_id': '1',
-            'count__1__default': '1',
+            'count__1__%s' % flavor.id: '1',
             'count__2__': '0',
             'count__3__': '0',
             'count__4__': '0',
@@ -292,7 +294,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             } for role in roles]),
             patch('openstack_dashboard.api.nova', **{
                 'spec_set': ['flavor_list'],
-                'flavor_list.return_value': [],
+                'flavor_list.return_value': [flavor],
             }),
         ) as (OvercloudRole, Overcloud, nova):
             url = urlresolvers.reverse(
@@ -304,7 +306,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             #    Overcloud.update.call_args_list,
             #    [
             #        call(request, {
-            #            ('1', 'default'): 1,
+            #            ('1', flavor.id): 1,
             #            ('2', ''): 0,
             #            ('3', ''): 0,
             #            ('4', ''): 0,

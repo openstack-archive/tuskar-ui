@@ -53,10 +53,10 @@ class Action(horizon.workflows.Action):
     def _get_profiles(self, role, profile_names):
         # TODO(rdopieralski) Get a list of hardware profiles for each
         # role here, when we support multiple profiles per role.
-        if role.flavor_id:
+        if role.flavor_id and role.flavor_id in profile_names:
             profiles = [(
                 role.flavor_id,
-                profile_names.get(str(role.flavor_id), role.flavor_id),
+                profile_names[role.flavor_id],
             )]
         else:
             profiles = []
