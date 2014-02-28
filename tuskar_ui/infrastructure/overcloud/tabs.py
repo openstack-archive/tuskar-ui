@@ -79,11 +79,16 @@ class OverviewTab(tabs.Tab):
         except IndexError:
             last_event = None
 
+        try:
+            dashboard_url = overcloud.get_dashboard_url(request)
+        except api.MissingError:
+            dashboard_url = ''
+
         return {
             'overcloud': overcloud,
             'roles': role_data,
             'progress': progress,
-            'dashboard_url': overcloud.dashboard_url,
+            'dashboard_url': dashboard_url,
             'last_event': last_event,
         }
 

@@ -46,7 +46,7 @@ def _mock_overcloud(**kwargs):
         'spec_set': [
             'counts',
             'create',
-            'dashboard_url',
+            'get_dashboard_url',
             'delete',
             'get',
             'get_the_overcloud',
@@ -61,7 +61,7 @@ def _mock_overcloud(**kwargs):
         ],
         'counts': [],
         'create.side_effect': lambda *args: oc,
-        'dashboard_url': '',
+        'get_dashboard_url.return_value': 'http://dashboard.example.com',
         'delete.return_value': None,
         'get.side_effect': lambda *args: oc,
         'get_the_overcloud.side_effect': lambda *args: oc,
