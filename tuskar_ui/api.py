@@ -33,6 +33,14 @@ LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
 
 
+class Error(Exception):
+    pass
+
+
+class MissingError(Error):
+    """Thrown when the thing you are trying to get is not there."""
+
+
 def baremetalclient(request):
     nc = nova.novaclient(request)
     return baremetal.BareMetalNodeManager(nc)
@@ -389,8 +397,30 @@ class Overcloud(base.APIResourceWrapper):
 
     @cached_property
     def dashboard_url(self):
-        # TODO(rdopieralski) Implement this.
-        return "http://horizon.example.com"
+        """Return url of Overcloud Horizon
+
+        :return: Return url of Overcloud Horizon or ""
+        :rtype:  string
+        """
+
+        # TODO(lsmola) For Icehouse we are assuming that Horizon
+        # is on overcloud control node. Later, we should get this
+        # information from the Keystone.
+        prefix = 'http://'
+        url = self.stack.parameters['NeutronPublicInterfaceIP']
+        if url:
+            return prefix + url
+        for control_role in OvercloudRole.list(self._request):
+            if control_role.image_name == 'overcloud-control':
+                break
+        else:
+            raise MissingError("No control role defined.")
+        resources = self.resources(control_role)
+        try:
+            url = resources[0].node.driver_info['ip_address']
+        except (KeyError, IndexError):
+            raise MissingError("No dashboard URL defined.")
+        return prefix + url
 
 
 class Node(base.APIResourceWrapper):
