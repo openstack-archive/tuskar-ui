@@ -22,6 +22,7 @@ from novaclient.v1_1 import servers
 
 from horizon import exceptions
 from openstack_dashboard.test.test_data import utils
+from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import tuskar_data
 
@@ -32,6 +33,7 @@ INDEX_URL = urlresolvers.reverse(
     'horizon:infrastructure:node_profiles:index')
 CREATE_URL = urlresolvers.reverse(
     'horizon:infrastructure:node_profiles:create')
+DETAILS_VIEW = 'horizon:infrastructure:node_profiles:details'
 
 
 @contextlib.contextmanager
@@ -161,3 +163,19 @@ class NodeProfilesTest(test.BaseAdminViewTests):
             self.assertRedirectsNoFollow(res, INDEX_URL)
             self.assertEqual(delete_mock.call_count, 1)
             self.assertEqual(server_list_mock.call_count, 1)
+
+    def test_details(self):
+        flavor = api.NodeProfile(TEST_DATA.novaclient_flavors.first())
+        images = TEST_DATA.glanceclient_images.list()[:2]
+        with contextlib.nested(
+                patch('openstack_dashboard.api.glance.image_get',
+                      side_effect=images),
+                patch('tuskar_ui.api.NodeProfile.get',
+                      return_value=flavor)
+        ) as (image_mock, get_mock):
+            res = self.client.get(urlresolvers.reverse(DETAILS_VIEW,
+                                                       args=(flavor.id,)))
+            self.assertEqual(image_mock.call_count, 2)
+            self.assertEqual(get_mock.call_count, 1)
+        self.assertTemplateUsed(res,
+                                'infrastructure/node_profiles/details.html')
