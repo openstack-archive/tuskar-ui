@@ -22,6 +22,7 @@ from novaclient.v1_1 import servers
 
 from horizon import exceptions
 from openstack_dashboard.test.test_data import utils
+from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import tuskar_data
 
@@ -32,6 +33,7 @@ INDEX_URL = urlresolvers.reverse(
     'horizon:infrastructure:node_profiles:index')
 CREATE_URL = urlresolvers.reverse(
     'horizon:infrastructure:node_profiles:create')
+DETAILS_VIEW = 'horizon:infrastructure:node_profiles:details'
 
 
 @contextlib.contextmanager
@@ -161,3 +163,57 @@ class NodeProfilesTest(test.BaseAdminViewTests):
             self.assertRedirectsNoFollow(res, INDEX_URL)
             self.assertEqual(delete_mock.call_count, 1)
             self.assertEqual(server_list_mock.call_count, 1)
+
+    def test_details_no_overcloud(self):
+        flavor = api.NodeProfile(TEST_DATA.novaclient_flavors.first())
+        images = TEST_DATA.glanceclient_images.list()[:2]
+        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        roles[0].flavor_id = flavor.id
+        with contextlib.nested(
+                patch('openstack_dashboard.api.glance.image_get',
+                      side_effect=images),
+                patch('tuskar_ui.api.NodeProfile.get',
+                      return_value=flavor),
+                patch('tuskar_ui.api.OvercloudRole.list',
+                      return_value=roles),
+                patch('tuskar_ui.api.Overcloud.get_the_overcloud',
+                      side_effect=Exception)
+        ) as (image_mock, get_mock, roles_mock, overcloud_mock):
+            res = self.client.get(urlresolvers.reverse(DETAILS_VIEW,
+                                                       args=(flavor.id,)))
+            self.assertEqual(image_mock.call_count, 2)
+            self.assertEqual(get_mock.call_count, 1)
+            self.assertEqual(roles_mock.call_count, 1)
+            self.assertEqual(overcloud_mock.call_count, 1)
+        self.assertTemplateUsed(res,
+                                'infrastructure/node_profiles/details.html')
+
+    def test_details(self):
+        flavor = api.NodeProfile(TEST_DATA.novaclient_flavors.first())
+        images = TEST_DATA.glanceclient_images.list()[:2]
+        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        roles[0].flavor_id = flavor.id
+        overcloud = api.Overcloud(TEST_DATA.tuskarclient_overclouds.first())
+        with contextlib.nested(
+                patch('openstack_dashboard.api.glance.image_get',
+                      side_effect=images),
+                patch('tuskar_ui.api.NodeProfile.get',
+                      return_value=flavor),
+                patch('tuskar_ui.api.OvercloudRole.list',
+                      return_value=roles),
+                patch('tuskar_ui.api.Overcloud.get_the_overcloud',
+                      return_value=overcloud),
+                # __name__ is required for horizon.tables
+                patch('tuskar_ui.api.Overcloud.resources_count',
+                      return_value=42, __name__='')
+        ) as (image_mock, get_mock, roles_mock, overcloud_mock, count_mock):
+            res = self.client.get(urlresolvers.reverse(DETAILS_VIEW,
+                                                       args=(flavor.id,)))
+            self.assertEqual(image_mock.call_count, 2)
+            self.assertEqual(get_mock.call_count, 1)
+            self.assertEqual(roles_mock.call_count, 1)
+            self.assertEqual(overcloud_mock.call_count, 1)
+            self.assertEqual(count_mock.call_count, 1)
+            self.assertListEqual(count_mock.call_args_list, [call(roles[0])])
+        self.assertTemplateUsed(res,
+                                'infrastructure/node_profiles/details.html')
