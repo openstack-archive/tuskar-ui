@@ -12,8 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 from django.core import exceptions as django_exceptions
+from django.utils import translation
 from django.utils.translation import ugettext_lazy as _
 
+from horizon import exceptions
 import horizon.workflows
 
 from tuskar_ui import api
@@ -31,6 +33,27 @@ class Workflow(horizon.workflows.Workflow):
     )
     finalize_button_name = _("Deploy")
     success_url = 'horizon:infrastructure:overcloud:index'
+
+    def validate(self, context):
+        requested = sum(context['role_counts'].values())
+        free = len(api.Node.list(self.request, associated=False))
+
+        if requested > free:
+            m1 = translation.ungettext_lazy('This configuration requires '
+                                            '%(requested)d node, ',
+                                            'This configuration requires '
+                                            '%(requested)d nodes, ',
+                                            requested)
+            m1 %= {'requested': requested}
+            m2 = translation.ungettext_lazy('but only %(free)d is available.',
+                                            'but only %(free)d are available.',
+                                            free)
+            m2 %= {'free': free}
+            message = unicode(translation.string_concat(m1, m2))
+            self.add_error_to_step(message, 'undeployed_overview')
+            raise exceptions.WorkflowValidationError(message)
+
+        return True
 
     def handle(self, request, context):
         try:
