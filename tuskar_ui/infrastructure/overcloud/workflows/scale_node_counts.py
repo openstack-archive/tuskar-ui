@@ -37,3 +37,13 @@ class Step(horizon.workflows.Step):
             name = 'count__%s__%s' % (role_id, profile_id)
             context[name] = count
         return context
+
+    def contribute(self, data, context):
+        counts = {}
+        for key, value in data.iteritems():
+            if not key.startswith('count_'):
+                continue
+            count, role_id, profile = key.split('__', 2)
+            counts[role_id, profile] = int(value)
+        context['role_counts'] = counts
+        return context

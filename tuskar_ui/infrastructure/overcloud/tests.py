@@ -18,6 +18,8 @@ import contextlib
 from django.core import urlresolvers
 from mock import patch, call  # noqa
 
+from horizon import exceptions
+
 from openstack_dashboard.test.test_data import utils
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import tuskar_data
@@ -128,6 +130,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'infrastructure/overcloud/undeployed_overview.html')
 
     def test_create_post(self):
+        node = TEST_DATA.ironicclient_nodes.first
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         flavor = TEST_DATA.novaclient_flavors.first()
         old_flavor_id = roles[0].flavor_id
@@ -146,7 +149,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             _mock_overcloud(),
             patch('tuskar_ui.api.Node', **{
                 'spec_set': ['list'],
-                'list.return_value': [],
+                'list.return_value': [node],
             }),
             patch('openstack_dashboard.api.nova', **{
                 'spec_set': ['flavor_list'],
@@ -226,6 +229,37 @@ class OvercloudTests(test.BaseAdminViewTests):
             self.assertFormErrors(res)
         roles[0].flavor_id = old_flavor_id
 
+    def test_create_post_not_enough_nodes(self):
+        node = TEST_DATA.ironicclient_nodes.first
+        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        flavor = TEST_DATA.novaclient_flavors.first()
+        roles[0].flavor_id = flavor.id
+        data = {
+            'count__1__%s' % flavor.id: '2',
+            'count__2__': '0',
+            'count__3__': '0',
+            'count__4__': '0',
+        }
+        with contextlib.nested(
+            patch('tuskar_ui.api.OvercloudRole', **{
+                'spec_set': ['list'],
+                'list.return_value': roles,
+            }),
+            patch('tuskar_ui.api.Node', **{
+                'spec_set': ['list'],
+                'list.return_value': [node],
+            }),
+            patch('openstack_dashboard.api.nova', **{
+                'spec_set': ['flavor_list'],
+                'flavor_list.return_value': [flavor],
+            }),
+            self.assertRaisesMessage(
+                exceptions.WorkflowValidationError,
+                'This configuration requires 2 nodes, but only 1 is available.'
+            )
+        ):
+            self.client.post(CREATE_URL, data)
+
     def test_detail_get(self):
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         with contextlib.nested(
@@ -301,6 +335,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'infrastructure/overcloud/scale_node_counts.html')
 
     def test_scale_post(self):
+        node = TEST_DATA.ironicclient_nodes.first
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         flavor = TEST_DATA.novaclient_flavors.first()
         old_flavor_id = roles[0].flavor_id
@@ -321,11 +356,15 @@ class OvercloudTests(test.BaseAdminViewTests):
                 "overcloud_role_id": role.id,
                 "num_nodes": 0,
             } for role in roles]),
+            patch('tuskar_ui.api.Node', **{
+                'spec_set': ['list'],
+                'list.return_value': [node],
+            }),
             patch('openstack_dashboard.api.nova', **{
                 'spec_set': ['flavor_list'],
                 'flavor_list.return_value': [flavor],
             }),
-        ) as (OvercloudRole, Overcloud, nova):
+        ) as (OvercloudRole, Overcloud, Node, nova):
             url = urlresolvers.reverse(
                 'horizon:infrastructure:overcloud:scale', args=(Overcloud.id,))
             res = self.client.post(url, data)

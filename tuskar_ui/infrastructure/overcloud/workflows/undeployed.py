@@ -12,8 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 from django.core import exceptions as django_exceptions
+from django.utils import translation
 from django.utils.translation import ugettext_lazy as _
 
+from horizon import exceptions
 import horizon.workflows
 
 from tuskar_ui import api
@@ -22,7 +24,30 @@ from tuskar_ui.infrastructure.overcloud.workflows\
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed_overview
 
 
-class Workflow(horizon.workflows.Workflow):
+class DeploymentValidationMixin(object):
+    def validate(self, context):
+        requested = sum(context['role_counts'].values())
+        free = len(api.Node.list(self.request, associated=False))
+
+        if requested > free:
+            m1 = translation.ungettext_lazy('This configuration requires '
+                                            '%(requested)d node, ',
+                                            'This configuration requires '
+                                            '%(requested)d nodes, ',
+                                            requested)
+            m1 %= {'requested': requested}
+            m2 = translation.ungettext_lazy('but only %(free)d is available.',
+                                            'but only %(free)d are available.',
+                                            free)
+            m2 %= {'free': free}
+            message = unicode(translation.string_concat(m1, m2))
+            self.add_error_to_step(message, 'undeployed_overview')
+            raise exceptions.WorkflowValidationError(message)
+
+        return True
+
+
+class Workflow(DeploymentValidationMixin, horizon.workflows.Workflow):
     slug = 'undeployed_overcloud'
     name = _("My OpenStack Deployment")
     default_steps = (
