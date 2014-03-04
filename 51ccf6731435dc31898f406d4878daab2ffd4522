@@ -1,0 +1,10 @@
+Verified+2: Jenkins
+Approved+1: Julie Pichon <jpichon@redhat.com>
+Code-Review+2: Julie Pichon <jpichon@redhat.com>
+Code-Review+1: Tzu-Mainn Chen <tzumainn@redhat.com>
+Code-Review+1: Radomir Dopieralski <openstack@sheep.art.pl>
+Submitted-by: Jenkins
+Submitted-at: Tue, 04 Mar 2014 18:06:19 +0000
+Reviewed-on: https://review.openstack.org/77214
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
