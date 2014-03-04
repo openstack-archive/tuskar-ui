@@ -13,9 +13,7 @@
 #    under the License.
 
 from django.core.urlresolvers import reverse_lazy
-from django.utils.translation import ugettext_lazy as _
 
-from horizon import exceptions
 from horizon import forms as horizon_forms
 from horizon import tabs as horizon_tabs
 from horizon import views as horizon_views
@@ -30,23 +28,12 @@ class IndexView(horizon_tabs.TabbedTableView):
     template_name = 'infrastructure/nodes/index.html'
 
     def get_free_nodes_count(self):
-        try:
-            free_nodes_count = len(api.Node.list(self.request,
-                                                 associated=False))
-        except Exception:
-            free_nodes_count = 0
-            exceptions.handle(self.request,
-                              _('Unable to retrieve free nodes.'))
+        free_nodes_count = len(api.Node.list(self.request, associated=False))
         return free_nodes_count
 
     def get_deployed_nodes_count(self):
-        try:
-            deployed_nodes_count = len(api.Node.list(self.request,
-                                                     associated=True))
-        except Exception:
-            deployed_nodes_count = 0
-            exceptions.handle(self.request,
-                              _('Unable to retrieve deployed nodes.'))
+        deployed_nodes_count = len(api.Node.list(self.request,
+                                                 associated=True))
         return deployed_nodes_count
 
     def get_context_data(self, **kwargs):
@@ -81,14 +68,7 @@ class DetailView(horizon_views.APIView):
 
     def get_data(self, request, context, *args, **kwargs):
         node_uuid = kwargs.get('node_uuid')
-
-        try:
-            node = api.Node.get(request, node_uuid)
-        except Exception:
-            node = None
-            redirect = reverse_lazy('horizon:infrastructure:nodes:index')
-            msg = _('Unable to retrieve node with UUID "%s"') % node_uuid
-            exceptions.handle(request, msg, redirect=redirect)
-
+        redirect = reverse_lazy('horizon:infrastructure:nodes:index')
+        node = api.Node.get(request, node_uuid, _error_redirect=redirect)
         context['node'] = node
         return context

@@ -14,7 +14,6 @@
 
 from django.utils.translation import ugettext_lazy as _
 
-from horizon import exceptions
 from horizon import tables
 
 from openstack_dashboard.dashboards.admin.flavors \
@@ -46,13 +45,9 @@ class DeleteNodeProfile(flavor_tables.DeleteFlavor):
         :type  datum: tuskar_ui.api.NodeProfile
         """
         if datum is not None:
-            try:
-                deployed_profiles = api.NodeProfile.list_deployed_ids(request)
-            except Exception:
-                msg = _('Unable to retrieve existing servers list.')
-                exceptions.handle(request, msg)
-                return False
-            if datum.id in deployed_profiles:
+            deployed_profiles = api.NodeProfile.list_deployed_ids(
+                request, _error_default=None)
+            if deployed_profiles is None or datum.id in deployed_profiles:
                 return False
         return super(DeleteNodeProfile, self).allowed(request, datum)
 
