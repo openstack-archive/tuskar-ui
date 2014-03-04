@@ -128,6 +128,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'infrastructure/overcloud/undeployed_overview.html')
 
     def test_create_post(self):
+        node = TEST_DATA.ironicclient_nodes.first
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         flavor = TEST_DATA.novaclient_flavors.first()
         old_flavor_id = roles[0].flavor_id
@@ -146,7 +147,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             _mock_overcloud(),
             patch('tuskar_ui.api.Node', **{
                 'spec_set': ['list'],
-                'list.return_value': [],
+                'list.return_value': [node],
             }),
             patch('openstack_dashboard.api.nova', **{
                 'spec_set': ['flavor_list'],
