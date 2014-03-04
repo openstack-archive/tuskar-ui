@@ -14,6 +14,7 @@
 from django.core import exceptions as django_exceptions
 from django.utils.translation import ugettext_lazy as _
 
+from horizon import exceptions
 import horizon.workflows
 
 from tuskar_ui import api
@@ -31,6 +32,28 @@ class Workflow(horizon.workflows.Workflow):
     )
     finalize_button_name = _("Deploy")
     success_url = 'horizon:infrastructure:overcloud:index'
+
+    def validate(self, context):
+        node_config = {'requested': sum(context['role_counts'].values())}
+        try:
+            node_config['free'] = len(api.Node.list(self.request,
+                                                    associated=False))
+        except Exception:
+            node_config['free'] = 0
+            raise exceptions.WorkflowValidationError(
+                _('Unable to retrieve free nodes count.'))
+
+        if node_config['requested'] > node_config['free']:
+            if node_config['free'] == 1:
+                e = _('This configuration requires %(requested)d nodes, but '
+                      'only %(free)d is available.') % node_config
+            else:
+                e = _('This configuration requires %(requested)d nodes, but '
+                      'only %(free)d are available.') % node_config
+            self.add_error_to_step(unicode(e), 'undeployed_overview')
+            raise exceptions.WorkflowValidationError(unicode(e))
+
+        return True
 
     def handle(self, request, context):
         try:
