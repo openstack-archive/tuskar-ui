@@ -54,6 +54,8 @@ class LogTable(tables.DataTable):
                                   verbose_name=_("Resource Name"))
     resource_status = tables.Column('resource_status',
                                     verbose_name=_("Status"))
+    resource_status_reason = tables.Column('resource_status_reason',
+                                           verbose_name=_("Reason"))
 
     class Meta:
         name = "log"
