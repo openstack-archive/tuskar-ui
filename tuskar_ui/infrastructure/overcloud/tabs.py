@@ -69,16 +69,19 @@ class OverviewTab(tabs.Tab):
         progress = 100 * sum(d.get('running_node_count', 0)
                              for d in role_data) // (total or 1)
         try:
-            last_event = overcloud.stack_events[-1]
+            events = overcloud.stack_events
         except IndexError:
-            last_event = None
+            events = []
+
+        failed_events = [e for e in events
+                         if e.resource_status == 'CREATE_FAILED'][-3:]
 
         return {
             'overcloud': overcloud,
             'roles': role_data,
             'progress': progress,
             'dashboard_url': overcloud.dashboard_url,
-            'last_event': last_event,
+            'failed_events': failed_events,
         }
 
 

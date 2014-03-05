@@ -31,13 +31,22 @@
         </div>
   {% endif %}
     <div class="span10">
-      {% if last_event %}
-        <strong>Last update:</strong>
-        <p>
-          <time datetime="{{ last_event.event_time }}">{{ last_event.event_time }}</time>
-          {{ last_event.resource_name }}
-          {{ last_event.resource_status }}
-        </p>
+      {% if failed_events %}
+        <strong>{% trans "Last failed events:" %}</strong>
+        {% for event in failed_events %}
+        <div>
+          <dl>
+            <dt>{% trans "Timestamp" %}</dt>
+            <dd><time datetime="{{ event.event_time }}">{{ event.event_time }}</time></dd>
+            <dt>{% trans "Resource Name" %}</dt>
+            <dd>{{ event.resource_name }}</dd>
+            <dt>{% trans "Status" %}</dt>
+            <dd>{{ event.resource_status }}</dd>
+            <dt>{% trans "Reason" %}</dt>
+            <dd>{{ event.resource_status_reason }}</dd>
+          </dl>
+        </div>
+        {% endfor %}
       {% endif %}
       <a href="?tab=detail__log" data-toggle="tab" data-target="#detail__log" class="pull-right">See full log</a>
     </div>
