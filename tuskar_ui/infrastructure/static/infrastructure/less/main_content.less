@@ -1,0 +1,49 @@
+
+// right part
+#main_content {
+  padding: 30px 0 25px 0;
+  margin-left: 240px;
+
+  // topbar
+  .topbar {
+    padding: 0 30px 0 30px;
+    margin: 0;
+    background: white;
+    color: rgb(180, 180, 180);
+    border: 0 none;
+
+    .page-header {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    h2 {
+      font-size: 30px;
+      border-bottom: 1px solid rgb(230,230,230);
+    }
+
+    #user_info {
+      position: relative;
+      color: inherit;
+      top: 10px;
+
+      a {
+        color: rgb(130, 190, 245);
+      }
+    }
+  }
+
+  .row-fluid {
+    margin: 15px 0 40px;
+  }
+
+  // content area
+  & > .row-fluid {
+    padding: 0 30px;
+    margin: 0;
+    width: auto;
+  }
+
+  .widget:not(:last-child) {
+    margin: 0 0 30px 0;
+  }
+}

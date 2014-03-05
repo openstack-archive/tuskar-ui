@@ -1,0 +1,25 @@
+// formsets
+.datatable {
+  th.narrow {
+    width: 1em;
+  }
+
+  input {
+    padding: 2px 5px;
+    margin: 0;
+  }
+
+  input.number_input_slim {
+    width: 4em;
+    text-align: right;
+  }
+
+  th span.required:after {
+    // Copied from horizon.less, because there is no way to reuse their class.
+    content: "*";
+    font-weight: bold;
+    line-height: 0;
+    padding-left: 4px;
+    color: #3290c0;
+  }
+}
