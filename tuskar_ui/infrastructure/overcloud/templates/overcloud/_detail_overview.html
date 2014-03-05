@@ -33,11 +33,18 @@
     <div class="span10">
       {% if last_event %}
         <strong>Last update:</strong>
-        <p>
-          <time datetime="{{ last_event.event_time }}">{{ last_event.event_time }}</time>
-          {{ last_event.resource_name }}
-          {{ last_event.resource_status }}
-        </p>
+        <div>
+          <dl>
+            <dt>Timestamp</dt>
+            <dd><time datetime="{{ last_event.event_time }}">{{ last_event.event_time }}</time></dd>
+            <dt>Resource Name</dt>
+            <dd>{{ last_event.resource_name }}</dd>
+            <dt>Status</dt>
+            <dd>{{ last_event.resource_status }}</dd>
+            <dt>Reason</dt>
+            <dd>{{ last_event.resource_status_reason }}</dd>
+          </dl>
+        </div>
       {% endif %}
       <a href="?tab=detail__log" data-toggle="tab" data-target="#detail__log" class="pull-right">See full log</a>
     </div>
