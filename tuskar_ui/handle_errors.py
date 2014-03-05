@@ -13,18 +13,20 @@
 #    under the License.
 
 import functools
+import inspect
 
 import horizon.exceptions
 
 
-def handle_errors(error_message, error_default=None):
+def handle_errors(error_message, error_default=None, request_arg=None):
     """A decorator for adding default error handling to API calls.
 
     It wraps the original method in a try-except block, with horizon's
     error handling added.
 
-    Note: it should only be used on methods that take request as the first
-    (second after self or cls) argument.
+    Note: it should only be used on functions or methods that take request as
+    their argument (it has to be named "request", or ``request_arg`` has to be
+    provided, indicating which argument is the request).
 
     The decorated method accepts a number of additional parameters:
 
@@ -35,18 +37,31 @@ def handle_errors(error_message, error_default=None):
         :param _error_ignore: ignore known errors
     """
     def decorator(func):
+        # XXX This is an ugly hack for finding the 'request' argument.
+        if request_arg is None:
+            for _request_arg, name in enumerate(inspect.getargspec(func).args):
+                if name == 'request':
+                    break
+            else:
+                raise RuntimeError(
+                    "The handle_errors decorator requires 'request' as "
+                    "argument of the function or method")
+        else:
+            _request_arg = request_arg
+
         @functools.wraps(func)
-        def wrapper(self, request, *args, **kwargs):
+        def wrapper(*args, **kwargs):
             _error_handle = kwargs.pop('_error_handle', True)
             _error_message = kwargs.pop('_error_message', error_message)
             _error_default = kwargs.pop('_error_default', error_default)
             _error_redirect = kwargs.pop('_error_redirect', None)
             _error_ignore = kwargs.pop('_error_ignore', False)
             if not _error_handle:
-                return func(self, request, *args, **kwargs)
+                return func(*args, **kwargs)
             try:
-                return func(self, request, *args, **kwargs)
+                return func(*args, **kwargs)
             except Exception:
+                request = args[_request_arg]
                 horizon.exceptions.handle(request, _error_message,
                                           ignore=_error_ignore,
                                           redirect=_error_redirect)
