@@ -13,18 +13,19 @@
 #    under the License.
 
 import functools
+import inspect
 
 import horizon.exceptions
 
 
-def handle_errors(error_message, error_default=None):
+def handle_errors(error_message, error_default=None, has_self=False):
     """A decorator for adding default error handling to API calls.
 
     It wraps the original method in a try-except block, with horizon's
     error handling added.
 
-    Note: it should only be used on methods that take request as the first
-    (second after self or cls) argument.
+    Note: it should only be used on functions or methods that take
+    request as the first (or second after self or cls) argument.
 
     The decorated method accepts a number of additional parameters:
 
@@ -35,18 +36,27 @@ def handle_errors(error_message, error_default=None):
         :param _error_ignore: ignore known errors
     """
     def decorator(func):
+        args = inspect.getargspec(func).args
+        request_argument_position = 0
+        if args[0] in ('cls', 'self') or has_self:
+            request_argument_position = 1
+        if args[request_argument_position] != 'request':
+            raise RuntimeError(
+                "The handle_errors decorator requires 'request' as the first "
+                "argument of the function or method")
         @functools.wraps(func)
-        def wrapper(self, request, *args, **kwargs):
+        def wrapper(*args, **kwargs):
             _error_handle = kwargs.pop('_error_handle', True)
             _error_message = kwargs.pop('_error_message', error_message)
             _error_default = kwargs.pop('_error_default', error_default)
             _error_redirect = kwargs.pop('_error_redirect', None)
             _error_ignore = kwargs.pop('_error_ignore', False)
             if not _error_handle:
-                return func(self, request, *args, **kwargs)
+                return func(*args, **kwargs)
             try:
-                return func(self, request, *args, **kwargs)
+                return func(*args, **kwargs)
             except Exception:
+                request = args[request_argument_position]
                 horizon.exceptions.handle(request, _error_message,
                                           ignore=_error_ignore,
                                           redirect=_error_redirect)
