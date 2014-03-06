@@ -741,6 +741,7 @@ class Node(base.APIResourceWrapper):
             'building': 'building',
             'deploying': 'deploying',
             'prepared': 'prepared',
+            'deleting': 'deleting',
         }
         return task_state_dict.get(task_state, 'off')
 
