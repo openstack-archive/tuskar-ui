@@ -688,7 +688,8 @@ class Node(base.APIResourceWrapper):
         task_state = self._apiresource.task_state
         task_state_dict = {
             'active': 'on',
-            'reboot': 'rebooting'
+            'reboot': 'rebooting',
+            'deleting': 'deleting',
         }
         return task_state_dict.get(task_state, 'off')
 
