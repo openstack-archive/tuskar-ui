@@ -83,6 +83,26 @@ def image_get(request, image_id):
     return image
 
 
+def transform_sizing(overcloud_sizing):
+    """Transform the sizing to simpler format
+
+    We need this till API will accept the more complex format with flavors,
+    then we delete this.
+
+    :param overcloud_sizing: overcloud sizing information with structure
+                             {('overcloud_role_id',
+                               'flavor_name'): count, ...}
+    :type  overcloud_sizing: dict
+
+    :return: list of ('overcloud_role_id', 'num_nodes')
+    :rtype:  list
+    """
+    return [{
+        'overcloud_role_id': role,
+        'num_nodes': sizing,
+    } for (role, flavor), sizing in overcloud_sizing.items()]
+
+
 class NodeProfile(object):
 
     def __init__(self, flavor):
@@ -173,14 +193,45 @@ class Overcloud(base.APIResourceWrapper):
         # TODO(lsmola) for now we have to transform the sizing to simpler
         # format, till API will accept the more complex with flavors,
         # then we delete this
-        transformed_sizing = [{
-            'overcloud_role_id': role,
-            'num_nodes': sizing,
-        } for (role, flavor), sizing in overcloud_sizing.items()]
+        transformed_sizing = transform_sizing(overcloud_sizing)
 
         overcloud = tuskarclient(request).overclouds.create(
             name='overcloud', description="Openstack cloud providing VMs",
             counts=transformed_sizing, attributes=overcloud_configuration)
+
+        return cls(overcloud, request=request)
+
+    @classmethod
+    def update(cls, request, overcloud_id, overcloud_sizing,
+               overcloud_configuration):
+        """Update an Overcloud in Tuskar
+
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param overcloud_id: id of the overcloud we want to update
+        :type  overcloud_id: string
+
+        :param overcloud_sizing: overcloud sizing information with structure
+                                 {('overcloud_role_id',
+                                   'flavor_name'): count, ...}
+        :type  overcloud_sizing: dict
+
+        :param overcloud_configuration: overcloud configuration with structure
+                                        {'key': 'value', ...}
+        :type  overcloud_configuration: dict
+
+        :return: the updated Overcloud object
+        :rtype:  tuskar_ui.api.Overcloud
+        """
+        # TODO(lsmola) for now we have to transform the sizing to simpler
+        # format, till API will accept the more complex with flavors,
+        # then we delete this
+        transformed_sizing = transform_sizing(overcloud_sizing)
+
+        overcloud = tuskarclient(request).overclouds.update(
+            overcloud_id, counts=transformed_sizing,
+            attributes=overcloud_configuration)
 
         return cls(overcloud, request=request)
 
