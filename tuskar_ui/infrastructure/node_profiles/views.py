@@ -15,48 +15,59 @@
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
-from horizon import exceptions
-from horizon import tables
-from horizon import workflows
+import horizon.exceptions
+import horizon.tables
+import horizon.tabs
+import horizon.workflows
 
-from tuskar_ui import api
-from tuskar_ui.infrastructure.node_profiles \
-    import tables as node_profiles_tables
-from tuskar_ui.infrastructure.node_profiles \
-    import workflows as node_profiles_workflows
+import tuskar_ui.api
+from tuskar_ui.infrastructure.node_profiles import tables
+from tuskar_ui.infrastructure.node_profiles import tabs
+from tuskar_ui.infrastructure.node_profiles import workflows
 
 
 def image_get(request, image_id, error_message):
     # TODO(dtantsur): there should be generic way to handle exceptions
     try:
-        return api.image_get(request, image_id)
+        return tuskar_ui.api.image_get(request, image_id)
     except Exception:
-        exceptions.handle(request, error_message)
+        horizon.exceptions.handle(request, error_message)
 
 
-class IndexView(tables.DataTableView):
-    table_class = node_profiles_tables.NodeProfilesTable
+class IndexView(horizon.tabs.TabbedTableView):
+    tab_group_class = tabs.NodeProfileTabs
     template_name = 'infrastructure/node_profiles/index.html'
 
-    def get_data(self):
-        node_profiles = api.NodeProfile.list(self.request)
-        node_profiles.sort(key=lambda np: (np.vcpus, np.ram, np.disk))
-        return node_profiles
 
-
-class CreateView(workflows.WorkflowView):
-    workflow_class = node_profiles_workflows.CreateNodeProfile
+class CreateView(horizon.workflows.WorkflowView):
+    workflow_class = workflows.CreateNodeProfile
     template_name = 'infrastructure/node_profiles/create.html'
 
+    def get_initial(self):
+        suggestion_id = self.kwargs.get('suggestion_id')
+        if not suggestion_id:
+            return super(CreateView, self).get_initial()
+        for suggestion in tabs.get_profile_suggestions(self.request):
+            if suggestion_id == suggestion.id:
+                break
+        else:
+            return super(CreateView, self).get_initial()
+        return {
+            'vcpus': suggestion.vcpus,
+            'memory_mb': suggestion.ram,
+            'disk_gb': suggestion.disk,
+            'arch': suggestion.cpu_arch,
+        }
 
-class DetailView(tables.DataTableView):
-    table_class = node_profiles_tables.NodeProfileRolesTable
+
+class DetailView(horizon.tables.DataTableView):
+    table_class = tables.NodeProfileRolesTable
     template_name = 'infrastructure/node_profiles/details.html'
     error_redirect = reverse_lazy('horizon:infrastructure:node_profiles:index')
 
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)
-        context['node_profile'] = api.NodeProfile.get(
+        context['node_profile'] = tuskar_ui.api.NodeProfile.get(
             self.request,
             kwargs.get('flavor_id'),
             _error_redirect=self.error_redirect
@@ -74,5 +85,5 @@ class DetailView(tables.DataTableView):
         return context
 
     def get_data(self):
-        return [role for role in api.OvercloudRole.list(self.request)
+        return [role for role in tuskar_ui.api.OvercloudRole.list(self.request)
                 if role.flavor_id == str(self.kwargs.get('flavor_id'))]
