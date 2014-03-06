@@ -75,3 +75,18 @@ class NodeProfilesTable(tables.DataTable):
                          DeleteNodeProfile,
                          flavor_tables.FlavorFilterAction)
         row_actions = (DeleteNodeProfile,)
+
+
+class ProfileSuggestionsTable(tables.DataTable):
+    arch = tables.Column('cpu_arch', verbose_name=_('Architecture'))
+    vcpus = tables.Column('vcpus', verbose_name=_('CPUs'))
+    ram = tables.Column('ram', verbose_name=_('Memory'),
+                        attrs={'data-type': 'size'})
+    disk = tables.Column('disk', verbose_name=_('Disk'),
+                         attrs={'data-type': 'size'})
+
+    class Meta:
+        name = "profile_suggestions"
+        verbose_name = _("Profile Suggestions")
+        table_actions = ()
+        row_actions = (CreateNodeProfile,)
