@@ -12,26 +12,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from horizon import tables
-from horizon import workflows
+import horizon.tabs
+import horizon.workflows
 
-from tuskar_ui import api
-from tuskar_ui.infrastructure.node_profiles \
-    import tables as node_profiles_tables
-from tuskar_ui.infrastructure.node_profiles \
-    import workflows as node_profiles_workflows
+from tuskar_ui.infrastructure.node_profiles import workflows
+from tuskar_ui.infrastructure.node_profiles import tabs
 
 
-class IndexView(tables.DataTableView):
-    table_class = node_profiles_tables.NodeProfilesTable
+class IndexView(horizon.tabs.TabbedTableView):
+    tab_group_class = tabs.NodeProfileTabs
     template_name = 'infrastructure/node_profiles/index.html'
 
-    def get_data(self):
-        node_profiles = api.NodeProfile.list(self.request)
-        node_profiles.sort(key=lambda np: (np.vcpus, np.ram, np.disk))
-        return node_profiles
 
-
-class CreateView(workflows.WorkflowView):
-    workflow_class = node_profiles_workflows.CreateNodeProfile
+class CreateView(horizon.workflows.WorkflowView):
+    workflow_class = workflows.CreateNodeProfile
     template_name = 'infrastructure/node_profiles/create.html'
