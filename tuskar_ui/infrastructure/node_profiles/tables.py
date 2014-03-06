@@ -13,7 +13,6 @@
 #    under the License.
 
 from django.utils.translation import ugettext_lazy as _
-
 from horizon import tables
 
 from openstack_dashboard.dashboards.admin.flavors \
@@ -25,6 +24,10 @@ from tuskar_ui import api
 class CreateNodeProfile(flavor_tables.CreateFlavor):
     verbose_name = _("New Node Profile")
     url = "horizon:infrastructure:node_profiles:create"
+
+
+class CreateSuggestedNodeProfile(CreateNodeProfile):
+    verbose_name = _("Create")
 
 
 class DeleteNodeProfile(flavor_tables.DeleteFlavor):
@@ -39,7 +42,7 @@ class DeleteNodeProfile(flavor_tables.DeleteFlavor):
     def allowed(self, request, datum=None):
         """Check that action is allowed on node profile
 
-        This is overrided method from horizon.tables.BaseAction.
+        This is overridden method from horizon.tables.BaseAction.
 
         :param datum: node profile we're operating on
         :type  datum: tuskar_ui.api.NodeProfile
@@ -94,3 +97,18 @@ class NodeProfileRolesTable(tables.DataTable):
             verbose_name=_("Instances Count")
         )
         super(NodeProfileRolesTable, self).__init__(request, *args, **kwargs)
+
+
+class ProfileSuggestionsTable(tables.DataTable):
+    arch = tables.Column('cpu_arch', verbose_name=_('Architecture'))
+    vcpus = tables.Column('vcpus', verbose_name=_('CPUs'))
+    ram = tables.Column(flavor_tables.get_size, verbose_name=_('Memory'),
+                        attrs={'data-type': 'size'})
+    disk = tables.Column(flavor_tables.get_disk_size, verbose_name=_('Disk'),
+                         attrs={'data-type': 'size'})
+
+    class Meta:
+        name = "profile_suggestions"
+        verbose_name = _("Profile Suggestions")
+        table_actions = ()
+        row_actions = (CreateSuggestedNodeProfile,)
