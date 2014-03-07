@@ -415,7 +415,7 @@ def data(TEST):
     TEST.glanceclient_images.add(image_1, image_2, image_3, image_4)
 
     # Nova flavors aka node profiles
-    # Do not include fields irrelavent for node profiles
+    # Do not include fields irrelevant for node profiles
     TEST.novaclient_flavors = test_data_utils.TestDataContainer()
     flavor_1 = flavors.Flavor(
         flavors.FlavorManager(None),
