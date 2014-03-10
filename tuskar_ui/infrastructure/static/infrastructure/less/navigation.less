@@ -1,0 +1,41 @@
+// navigations
+#main_content {
+  .nav-tabs {
+    margin: 0 0 30px;
+    border: 0 none;
+
+    li a {
+      font-weight: 500;
+      position: relative;
+      top: -1px;
+      padding: 10px 15px;
+      border-radius: 0 0 4px 4px;
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+      border-top-width: 0;
+      border-color: transparent;
+      color: #43A1D6;
+    }
+
+    li.active a {
+      border: 1px solid rgb(220, 220, 220);
+      background: #43A1D6;
+      color: white;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+
+      &:after {
+        color: inherit;
+      }
+    }
+
+    li:not(.active) a:hover {
+      border: 1px solid rgb(240, 240, 240);
+      border-top-width: 0;
+      background: rgb(244, 244, 244);
+    }
+  }
+
+  .tab-content {
+    padding: 0;
+    border: 0 none;
+  }
+}

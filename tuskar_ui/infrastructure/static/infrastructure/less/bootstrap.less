@@ -1,0 +1,36 @@
+/* Bootstrap buttons overrides/additions */
+
+// Make a button look and behave like a link - available in later
+// bootstrap versions
+.btn {
+  &.btn-link,
+  &.btn-link:active,
+  &.btn-link[disabled],
+  &.btn-link:not(.btn-danger) {
+    background-color: transparent;
+    background-image: none;
+    .box-shadow(none); // mixin override does not work
+    -webkit-box-shadow: none;
+       -moz-box-shadow: none;
+            box-shadow: none;
+  }
+  &.btn-link {
+    border-color: transparent;
+    cursor: pointer;
+    color: @linkColor;
+    .border-radius(0);
+  }
+  &.btn-link:hover,
+  &.btn-link:focus,
+  &.btn-link:hover:not(.btn-danger),
+  &.btn-link:focus:not(.btn-danger) {
+    color: @linkColorHover;
+    text-decoration: underline;
+    background-color: transparent;
+  }
+  &.btn-link[disabled]:hover,
+  &.btn-link[disabled]:focus {
+    color: @linkColor;
+    text-decoration: none;
+  }
+}

@@ -1,0 +1,74 @@
+/* Sidebar */
+
+.sidebar {
+  font-size: 95%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 240px;
+  border-right: 1px solid rgb(210,210,210);
+  background: rgb(235,235,235);
+
+  h1.brand {
+    text-align: center;
+
+    a {
+      display: inline-block;
+      width: 80px;
+      height: 85px;
+      background-size: 80px 85px;
+      float: none;
+      margin: 20px 0;
+    }
+  }
+
+  .nav-tabs {
+    margin-top: -30px;
+    border-bottom: 1px solid rgb(200,200,200);
+
+    a {
+      position: relative;
+      top: 1px;
+      padding: 7px 10px;
+    }
+
+    li.active a,
+    li a:hover {
+      background: rgb(235,235,235);
+      border: 1px solid rgb(200,200,200);
+      border-bottom: 0 none;
+    }
+  }
+
+  .main_nav {
+    text-align: right;
+    margin-right: 0;
+    width: 100%;
+
+    li {
+      display: inline-block;
+      text-align: left;
+    }
+
+    a {
+      margin: 0;
+      position: relative;
+      right: -1px;
+      border: 1px solid transparent;
+      border-right: 0 none;
+      border-radius: 4px 0 0 4px;
+      color: rgb(140, 140, 140);
+
+      &.active {
+        color: rgb(60, 60, 60);
+        border-color: rgb(180, 180, 180);
+      }
+    }
+  }
+
+  h4 {
+    font-weight: 400;
+    color: rgb(160, 160, 160);
+  }
+}
