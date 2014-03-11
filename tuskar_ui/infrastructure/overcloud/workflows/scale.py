@@ -20,9 +20,11 @@ import horizon.workflows
 # from tuskar_ui import api
 from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud.workflows import scale_node_counts
+from tuskar_ui.infrastructure.overcloud.workflows import undeployed
 
 
-class Workflow(horizon.workflows.Workflow):
+class Workflow(undeployed.DeploymentValidationMixin,
+               horizon.workflows.Workflow):
     slug = 'scale_overcloud'
     name = _("Scale Deployment")
     default_steps = (
