@@ -49,7 +49,8 @@ class ConfigurationTable(tables.DataTable):
 class LogTable(tables.DataTable):
 
     timestamp = tables.Column('event_time',
-                              verbose_name=_("Timestamp"))
+                              verbose_name=_("Timestamp"),
+                              attrs={'data-type': 'timestamp'})
     resource_name = tables.Column('resource_name',
                                   verbose_name=_("Resource Name"))
     resource_status = tables.Column('resource_status',
