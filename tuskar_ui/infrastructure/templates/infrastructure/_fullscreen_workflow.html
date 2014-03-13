@@ -4,13 +4,15 @@
   <form class="form form-horizontal" {{ workflow.attr_string|safe }} action="{{ workflow.get_absolute_url }}" {% if add_to_field %}data-add-to-field="{{ add_to_field }}"{% endif %} method="POST"{% if workflow.multipart %} enctype="multipart/form-data"{% endif %}>
     {% csrf_token %}
     {% if REDIRECT_URL %}<input type="hidden" name="{{ workflow.redirect_param_name }}" value="{{ REDIRECT_URL }}"/>{% endif %}
-    <div class="actions pull-right">
-    {% block workflow-buttons %}
-        <input class="btn btn-primary pull-right" type="submit" value="{{ workflow.finalize_button_name }}">
-    {% endblock %}
-    </div>
     <div class="fullscreen-workflow-body">
-    {% block workflow-body %}
+      <div class="actions pull-right">
+      {% block workflow-buttons %}
+        <input class="btn btn-primary pull-right"
+               type="submit"
+               value="{{ workflow.finalize_button_name }}">
+      {% endblock %}
+      </div>
+      {% block workflow-body %}
       <ul class="nav nav-tabs">
         {% for step in workflow.steps %}
         <li class="{% if entry_point == step.slug %}active{% endif %}{% if step.has_errors %} error{% endif %}{% if step.has_required_fields %} required{% endif %}">
@@ -28,7 +30,7 @@
           {% endif %}
         {% endfor %}
       </div>
-    {% endblock %}
+      {% endblock %}
     </div>
   </form>
 </div>
