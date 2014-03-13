@@ -1,7 +1,15 @@
 {% extends 'infrastructure/base.html' %}
 {% load i18n %}
 {% load url from future %}
+
 {% block title %}{% trans 'My OpenStack Deployment' %}{% endblock %}
+
+{% block css %}
+  {% if overcloud.is_deploying %}
+    <meta http-equiv="refresh" content="30">
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
 
 {% block page_header %}
   {% include 'horizon/common/_domain_page_header.html' with title=_('My OpenStack Deployment') %}
