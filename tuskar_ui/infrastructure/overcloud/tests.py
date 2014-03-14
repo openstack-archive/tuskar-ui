@@ -17,10 +17,8 @@ import contextlib
 
 from django.core import urlresolvers
 from mock import patch, call  # noqa
-
-from horizon import exceptions
-
 from openstack_dashboard.test.test_data import utils
+
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import tuskar_data
 
@@ -253,12 +251,12 @@ class OvercloudTests(test.BaseAdminViewTests):
                 'spec_set': ['flavor_list'],
                 'flavor_list.return_value': [flavor],
             }),
-            self.assertRaisesMessage(
-                exceptions.WorkflowValidationError,
-                'This configuration requires 2 nodes, but only 1 is available.'
-            )
         ):
-            self.client.post(CREATE_URL, data)
+            response = self.client.post(CREATE_URL, data)
+        self.assertFormErrors(
+            response,
+            1,
+            'This configuration requires 2 nodes, but only 1 is available.')
 
     def test_detail_get(self):
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
