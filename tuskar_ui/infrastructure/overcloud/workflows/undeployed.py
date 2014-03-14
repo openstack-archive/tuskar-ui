@@ -11,17 +11,20 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from django.core import exceptions as django_exceptions
+import logging
+
+import django.forms
 from django.utils import translation
 from django.utils.translation import ugettext_lazy as _
-
-from horizon import exceptions
 import horizon.workflows
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud.workflows\
     import undeployed_configuration
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed_overview
+
+
+LOG = logging.getLogger(__name__)
 
 
 class DeploymentValidationMixin(object):
@@ -31,22 +34,21 @@ class DeploymentValidationMixin(object):
         # will have to obtain actual free nodes and compare them to
         # number of newly created.
         free = len(api.Node.list(self.request))
-
         if requested > free:
-            m1 = translation.ungettext_lazy('This configuration requires '
-                                            '%(requested)d node, ',
-                                            'This configuration requires '
-                                            '%(requested)d nodes, ',
-                                            requested)
+            m1 = translation.ungettext_lazy(
+                'This configuration requires %(requested)d node, ',
+                'This configuration requires %(requested)d nodes, ',
+                requested)
             m1 %= {'requested': requested}
-            m2 = translation.ungettext_lazy('but only %(free)d is available.',
-                                            'but only %(free)d are available.',
-                                            free)
+            m2 = translation.ungettext_lazy(
+                'but only %(free)d is available.',
+                'but only %(free)d are available.',
+                free)
             m2 %= {'free': free}
             message = unicode(translation.string_concat(m1, m2))
             self.add_error_to_step(message, 'undeployed_overview')
-            raise exceptions.WorkflowValidationError(message)
-
+            self.add_error_to_step(message, 'scale_node_counts')
+            return False
         return super(DeploymentValidationMixin, self).validate(context)
 
 
@@ -69,6 +71,6 @@ class Workflow(DeploymentValidationMixin, horizon.workflows.Workflow):
             # type we can't recognize where it should show
             self.add_error_to_step(unicode(e), 'undeployed_overview')
             self.add_error_to_step(unicode(e), 'deployed_configuration')
-            raise django_exceptions.ValidationError(unicode(e))
-
+            LOG.exception()
+            raise django.forms.ValidationError(unicode(e))
         return True
