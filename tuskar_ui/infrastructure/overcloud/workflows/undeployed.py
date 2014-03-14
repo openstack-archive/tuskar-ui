@@ -27,7 +27,10 @@ from tuskar_ui.infrastructure.overcloud.workflows import undeployed_overview
 class DeploymentValidationMixin(object):
     def validate(self, context):
         requested = sum(context['role_counts'].values())
-        free = len(api.Node.list(self.request, associated=False))
+        # TODO(lsmola) change this when we support more overclouds. It
+        # will have to obtain actual free nodes and compare them to
+        # number of newly created.
+        free = len(api.Node.list(self.request))
 
         if requested > free:
             m1 = translation.ungettext_lazy('This configuration requires '
