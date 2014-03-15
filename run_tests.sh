@@ -298,16 +298,16 @@ function run_tests_all {
   if [ "$NOSE_WITH_HTML_OUTPUT" = '1' ]; then
     export NOSE_HTML_OUT_FILE='tuskar_ui_nose_results.html'
   fi
-  ${command_wrapper} coverage erase
-  ${command_wrapper} coverage run -p $root/manage.py test tuskar_ui --settings=tuskar_ui.test.settings $testopts
+  ${command_wrapper} python -m coverage erase
+  ${command_wrapper} python -m coverage run -p $root/manage.py test tuskar_ui --settings=tuskar_ui.test.settings $testopts
   # get results of the Horizon tests
   TUSKAR_UI_RESULT=$?
 
   if [ $with_coverage -eq 1 ]; then
     echo "Generating coverage reports"
-    ${command_wrapper} coverage combine
-    ${command_wrapper} coverage xml -i --omit='/usr*,setup.py,*egg*,.venv/*'
-    ${command_wrapper} coverage html -i --omit='/usr*,setup.py,*egg*,.venv/*' -d reports
+    ${command_wrapper} python -m coverage combine
+    ${command_wrapper} python -m coverage xml -i --omit='/usr*,setup.py,*egg*,.venv/*'
+    ${command_wrapper} python -m coverage html -i --omit='/usr*,setup.py,*egg*,.venv/*' -d reports
   fi
   # Remove the leftover coverage files from the -p flag earlier.
   rm -f .coverage.*
