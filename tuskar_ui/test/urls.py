@@ -11,11 +11,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf.urls import defaults
+from django.conf import urls
 from django.views import generic
 
 
-urlpatterns = defaults.patterns('', defaults.url(
+urlpatterns = urls.patterns('', urls.url(
     r'^$',
     generic.TemplateView.as_view(template_name="infrastructure/qunit.html"),
     name='qunit_tests'))
