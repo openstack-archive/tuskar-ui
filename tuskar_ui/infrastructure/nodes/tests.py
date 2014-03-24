@@ -43,15 +43,19 @@ class NodesTests(test.BaseAdminViewTests):
         }) as mock:
             res = self.client.get(INDEX_URL)
             # FIXME(lsmola) optimize, this should call 1 time, what the hell
-            self.assertEqual(mock.list.call_count, 6)
+            self.assertEqual(mock.list.call_count, 8)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
         self.assertTemplateUsed(res, 'infrastructure/nodes/_overview.html')
 
     def test_free_nodes(self):
+        overcloud_role = api.OvercloudRole(
+            TEST_DATA.tuskarclient_overcloud_roles.first())
         free_nodes = [api.Node(node)
                       for node in self.ironicclient_nodes.list()]
+        for node in free_nodes:
+            node.overcloud_role = overcloud_role
 
         with patch('tuskar_ui.api.Node', **{
             'spec_set': ['list'],  # Only allow these attributes
@@ -59,7 +63,7 @@ class NodesTests(test.BaseAdminViewTests):
         }) as mock:
             res = self.client.get(INDEX_URL + '?tab=nodes__free')
             # FIXME(lsmola) horrible count, optimize
-            self.assertEqual(mock.list.call_count, 9)
+            self.assertEqual(mock.list.call_count, 10)
 
         self.assertTemplateUsed(res,
                                 'infrastructure/nodes/index.html')
@@ -93,7 +97,7 @@ class NodesTests(test.BaseAdminViewTests):
         }) as mock:
             res = self.client.get(INDEX_URL + '?tab=nodes__deployed')
             # FIXME(lsmola) horrible count, optimize
-            self.assertEqual(mock.list.call_count, 9)
+            self.assertEqual(mock.list.call_count, 10)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
