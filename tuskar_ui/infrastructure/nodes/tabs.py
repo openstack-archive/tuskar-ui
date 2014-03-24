@@ -51,7 +51,6 @@ class OverviewTab(tabs.Tab):
 
 
 class DeployedTab(tabs.TableTab):
-    preload = False
     table_classes = (tables.DeployedNodesTable,)
     name = _("Deployed")
     slug = "deployed"
@@ -70,7 +69,6 @@ class DeployedTab(tabs.TableTab):
 
 
 class FreeTab(tabs.TableTab):
-    preload = False
     table_classes = (tables.FreeNodesTable,)
     name = _("Free")
     slug = "free"

@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import contextlib
+
 from django.core import urlresolvers
 
 from mock import patch, call  # noqa
@@ -43,7 +45,7 @@ class NodesTests(test.BaseAdminViewTests):
         }) as mock:
             res = self.client.get(INDEX_URL)
             # FIXME(lsmola) optimize, this should call 1 time, what the hell
-            self.assertEqual(mock.list.call_count, 6)
+            self.assertEqual(mock.list.call_count, 8)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
@@ -52,14 +54,31 @@ class NodesTests(test.BaseAdminViewTests):
     def test_free_nodes(self):
         free_nodes = [api.Node(node)
                       for node in self.ironicclient_nodes.list()]
+        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        instance = TEST_DATA.novaclient_servers.first()
+        image = TEST_DATA.glanceclient_images.first()
 
-        with patch('tuskar_ui.api.Node', **{
-            'spec_set': ['list'],  # Only allow these attributes
-            'list.return_value': free_nodes,
-        }) as mock:
+        with contextlib.nested(
+            patch('tuskar_ui.api.OvercloudRole', **{
+                'spec_set': ['list', 'name'],
+                'list.return_value': roles,
+            }),
+            patch('tuskar_ui.api.Node', **{
+                'spec_set': ['list'],
+                'list.return_value': free_nodes,
+            }),
+            patch('tuskar_ui.api.nova', **{
+                'spec_set': ['server_get'],
+                'server_get.return_value': instance,
+            }),
+            patch('tuskar_ui.api.glance', **{
+                'spec_set': ['image_get'],
+                'image_get.return_value': image,
+            }),
+        ) as (_OvercloudRole, Node, _nova, _glance):
             res = self.client.get(INDEX_URL + '?tab=nodes__free')
             # FIXME(lsmola) horrible count, optimize
-            self.assertEqual(mock.list.call_count, 9)
+            self.assertEqual(Node.list.call_count, 10)
 
         self.assertTemplateUsed(res,
                                 'infrastructure/nodes/index.html')
@@ -80,20 +99,31 @@ class NodesTests(test.BaseAdminViewTests):
     def test_deployed_nodes(self):
         deployed_nodes = [api.Node(node)
                           for node in self.ironicclient_nodes.list()]
+        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         instance = TEST_DATA.novaclient_servers.first()
-        overcloud_role = api.OvercloudRole(
-            TEST_DATA.tuskarclient_overcloud_roles.first())
-        for node in deployed_nodes:
-            node.overcloud_role = overcloud_role
+        image = TEST_DATA.glanceclient_images.first()
 
-        with patch('tuskar_ui.api.Node', **{
-            'spec_set': ['list', 'instance'],  # Only allow these attributes
-            'instance': instance,
-            'list.return_value': deployed_nodes,
-        }) as mock:
+        with contextlib.nested(
+            patch('tuskar_ui.api.OvercloudRole', **{
+                'spec_set': ['list', 'name'],
+                'list.return_value': roles,
+            }),
+            patch('tuskar_ui.api.Node', **{
+                'spec_set': ['list'],
+                'list.return_value': deployed_nodes,
+            }),
+            patch('tuskar_ui.api.nova', **{
+                'spec_set': ['server_get'],
+                'server_get.return_value': instance,
+            }),
+            patch('tuskar_ui.api.glance', **{
+                'spec_set': ['image_get'],
+                'image_get.return_value': image,
+            }),
+        ) as (_OvercloudRole, Node, _nova, _glance):
             res = self.client.get(INDEX_URL + '?tab=nodes__deployed')
             # FIXME(lsmola) horrible count, optimize
-            self.assertEqual(mock.list.call_count, 9)
+            self.assertEqual(Node.list.call_count, 10)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
