@@ -4,8 +4,8 @@ set -o errexit
 
 # ---------------UPDATE ME-------------------------------#
 # Increment me any time the environment should be rebuilt.
-# This includes dependncy changes, directory renames, etc.
-# Simple integer secuence: 1, 2, 3...
+# This includes dependency changes, directory renames, etc.
+# Simple integer sequence: 1, 2, 3...
 environment_version=41
 #--------------------------------------------------------#
 
@@ -37,7 +37,7 @@ function usage {
   echo "  --docs                   Just build the documentation"
   echo "  --backup-environment     Make a backup of the environment on exit"
   echo "  --restore-environment    Restore the environment before running"
-  echo "  --destroy-environment    DEstroy the environment and exit"
+  echo "  --destroy-environment    Destroy the environment and exit"
   echo "  -h, --help               Print this usage message"
   echo ""
   echo "Note: with no options specified, the script will try to run the tests in"
