@@ -53,7 +53,50 @@
   </div>
 </div>
 {% endif %}
+<div class="row-fluid">
+  <div class="span8">
 
+<pre>
+export TRIPLEO_ROOT=~/tripleo
+cd $TRIPLEO_ROOT
+
+source $TRIPLEO_ROOT/tripleorc
+
+export OVERCLOUD_IP=192.0.2.22
+
+export OVERCLOUD_ADMIN_TOKEN=unset
+export OVERCLOUD_ADMIN_PASSWORD=unset
+export OVERCLOUD_CEILOMETER_PASSWORD=unset
+export OVERCLOUD_CINDER_PASSWORD=unset
+export OVERCLOUD_GLANCE_PASSWORD=unset
+export OVERCLOUD_HEAT_PASSWORD=unset
+export OVERCLOUD_NEUTRON_PASSWORD=unset
+export OVERCLOUD_NOVA_PASSWORD=unset
+export OVERCLOUD_SWIFT_PASSWORD=unset
+export OVERCLOUD_SWIFT_HASH=unset
+
+source ./tripleo-incubator/overcloudrc
+
+
+init-keystone -p $OVERCLOUD_ADMIN_PASSWORD $OVERCLOUD_ADMIN_TOKEN \
+    $OVERCLOUD_IP admin@example.com heat-admin@$OVERCLOUD_IP \
+    ${SSLBASE:+--ssl $PUBLIC_API_URL}
+setup-endpoints $OVERCLOUD_IP --cinder-password $OVERCLOUD_CINDER_PASSWORD \
+    --glance-password $OVERCLOUD_GLANCE_PASSWORD \
+    --heat-password $OVERCLOUD_HEAT_PASSWORD \
+    --neutron-password $OVERCLOUD_NEUTRON_PASSWORD \
+    --nova-password $OVERCLOUD_NOVA_PASSWORD \
+    --swift-password $OVERCLOUD_SWIFT_PASSWORD \
+    --enable-horizon \
+    ${SSLBASE:+--ssl $PUBLIC_API_URL}
+keystone role-create --name heat_stack_user
+# Creating these roles to be used by tenants using swift
+keystone role-create --name=swiftoperator
+keystone role-create --name=ResellerAdmin
+</pre>
+
+  </div>
+<div>
 <div class="row-fluid">
   <div class="span8">
     <h2>{% trans "Deployment Roles" %}</h2>
