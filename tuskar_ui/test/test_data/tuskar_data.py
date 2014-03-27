@@ -171,7 +171,7 @@ def data(TEST):
         node.NodeManager(None),
         {'id': '3',
          'uuid': 'cc-33',
-         'instance_uuid': None,
+         'instance_uuid': 'cc',
          'driver': 'pxe_ipmitool',
          'driver_info': {
              'ipmi_address': '3.3.3.3',
