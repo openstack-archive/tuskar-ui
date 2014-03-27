@@ -69,8 +69,9 @@ class Workflow(DeploymentValidationMixin, horizon.workflows.Workflow):
         except Exception as e:
             # Showing error in both workflow tabs, because from the exception
             # type we can't recognize where it should show
-            self.add_error_to_step(unicode(e), 'undeployed_overview')
-            self.add_error_to_step(unicode(e), 'deployed_configuration')
-            LOG.exception()
-            raise django.forms.ValidationError(unicode(e))
+            msg = unicode(e)
+            self.add_error_to_step(msg, 'undeployed_overview')
+            self.add_error_to_step(msg, 'deployed_configuration')
+            LOG.exception(msg)
+            raise django.forms.ValidationError(msg)
         return True
