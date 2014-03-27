@@ -74,7 +74,7 @@ class OverviewTab(tabs.Tab):
             'overcloud': overcloud,
             'roles': role_data,
             'progress': progress,
-            'dashboard_url': overcloud.dashboard_url,
+            'dashboard_urls': overcloud.dashboard_urls,
             'last_failed_events': last_failed_events,
         }
 
