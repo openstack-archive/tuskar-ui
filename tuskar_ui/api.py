@@ -212,6 +212,12 @@ class Overcloud(base.APIResourceWrapper):
         # then we delete this
         transformed_sizing = transform_sizing(overcloud_sizing)
 
+        # Do not send blank values, rather not send the parameter at all
+        # so they are made default on heat side.
+        overcloud_configuration = dict((key, value) for key, value
+                                        in overcloud_configuration.items()
+                                        if value != "")
+
         overcloud = tuskarclient(request).overclouds.create(
             name='overcloud', description="Openstack cloud providing VMs",
             counts=transformed_sizing, attributes=overcloud_configuration)
