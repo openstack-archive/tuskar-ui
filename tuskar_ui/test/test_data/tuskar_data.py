@@ -33,9 +33,13 @@ def data(TEST):
         {'id': 'stack-id-1',
          'stack_name': 'overcloud',
          'stack_status': 'RUNNING',
+         'outputs': [{
+             'output_key': 'KeystoneURL',
+             'output_value': 'http://192.0.2.23:5000/v2',
+         }],
          'parameters': {
              'one': 'one',
-             'two': 'two'
+             'two': 'two',
          }})
     TEST.heatclient_stacks.add(stack_1)
 
@@ -357,7 +361,10 @@ def data(TEST):
         {'id': 1,
          'stack_id': 'stack-id-1',
          'name': 'overcloud',
-         'description': 'overcloud'})
+         'description': 'overcloud',
+         'attributes': {
+             'AdminToken': "unset"
+         }})
     TEST.tuskarclient_overclouds.add(oc_1)
 
     # OvercloudRole
