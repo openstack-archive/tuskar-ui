@@ -12,6 +12,7 @@
 import django.conf
 import heatclient
 import logging
+import re
 
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
@@ -476,10 +477,20 @@ class Overcloud(base.APIResourceWrapper):
             resources = self.resources(overcloud_role)
         return len(resources)
 
+
+    @cached_property
+    def keystone_ip(self):
+        for output in self.stack.outputs:
+            if output['output_key'] == 'KeystoneURL':
+                ip=re.match(r"^.*?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*?$",
+                            output['output_value'])
+                return ip.group(1)
+        return None
+
     @cached_property
     def dashboard_url(self):
         # TODO(rdopieralski) Implement this.
-        return "http://horizon.example.com"
+        return ""
 
 
 class Node(base.APIResourceWrapper):
