@@ -54,6 +54,62 @@
 </div>
 {% endif %}
 
+{% if not overcloud.dashboard_url %}
+<div class="row-fluid">
+  <div class="span8">
+    <p>Your Overcloud has been successfully deployed. It needs to be initialized first, before you will be able to use it.
+    <p/>
+
+    <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#demo">
+    Initialize
+    </button>
+    <div id="demo" class="collapse">
+      <p>You need to run below commands on the machine where you have tripleo source code and
+         direct access through ssh to control node ({{overcloud.keystone_ip}})
+      </p>
+      <pre>
+  export TRIPLEO_ROOT=~/tripleo
+  cd $TRIPLEO_ROOT
+
+  # Be careful to source tripleorc here, some variables are rewritten below
+  source $TRIPLEO_ROOT/tripleorc
+
+  export OVERCLOUD_IP={{overcloud.keystone_ip}}
+
+  export OVERCLOUD_ADMIN_TOKEN={{overcloud.attributes.AdminToken}}
+  export OVERCLOUD_ADMIN_PASSWORD={{overcloud.attributes.AdminPassword}}
+  export OVERCLOUD_CEILOMETER_PASSWORD={{overcloud.attributes.CeilometerPassword}}
+  export OVERCLOUD_CINDER_PASSWORD={{overcloud.attributes.CinderPassword}}
+  export OVERCLOUD_GLANCE_PASSWORD={{overcloud.attributes.GlancePassword}}
+  export OVERCLOUD_HEAT_PASSWORD={{overcloud.attributes.HeatPassword}}
+  export OVERCLOUD_NEUTRON_PASSWORD={{overcloud.attributes.NeutronPassword}}
+  export OVERCLOUD_NOVA_PASSWORD={{overcloud.attributes.NovaPassword}}
+  export OVERCLOUD_SWIFT_PASSWORD={{overcloud.attributes.SwiftPassword}}
+  export OVERCLOUD_SWIFT_HASH={{overcloud.attributes.SwiftHashSuffix}}
+
+  source ./tripleo-incubator/overcloudrc
+
+  init-keystone -p $OVERCLOUD_ADMIN_PASSWORD $OVERCLOUD_ADMIN_TOKEN \
+      $OVERCLOUD_IP admin@example.com heat-admin@$OVERCLOUD_IP \
+      ${SSLBASE:+--ssl $PUBLIC_API_URL}
+  setup-endpoints $OVERCLOUD_IP --cinder-password $OVERCLOUD_CINDER_PASSWORD \
+      --glance-password $OVERCLOUD_GLANCE_PASSWORD \
+      --heat-password $OVERCLOUD_HEAT_PASSWORD \
+      --neutron-password $OVERCLOUD_NEUTRON_PASSWORD \
+      --nova-password $OVERCLOUD_NOVA_PASSWORD \
+      --swift-password $OVERCLOUD_SWIFT_PASSWORD \
+      --enable-horizon \
+      ${SSLBASE:+--ssl $PUBLIC_API_URL}
+  keystone role-create --name heat_stack_user
+  # Creating these roles to be used by tenants using swift
+  keystone role-create --name=swiftoperator
+  keystone role-create --name=ResellerAdmin
+      </pre>
+    </div>
+  </div>
+<div>
+{% endif %}
+
 <div class="row-fluid">
   <div class="span8">
     <h2>{% trans "Deployment Roles" %}</h2>
@@ -113,8 +169,12 @@
     <div class="clear"></div>
     <div class="widget">
       <h2>{% trans "Horizon UI Connection" %}</h2>
-      <p><a href="{{ dashboard_url }}"
-        >{% trans "Horizon UI" %} ({{ dashboard_url }}).</a></p>
+      {% if overcloud.dashboard_url %}
+      <p><a href="{{ overcloud.dashboard_url }}"
+        >{% trans "Horizon UI" %} ({{ overcloud.dashboard_url }}).</a></p>
+      {% else %}
+         You need to initialize you Overcloud first.
+      {% endif %}
     </div>
   </div>
 </div>
