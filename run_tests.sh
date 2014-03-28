@@ -255,7 +255,9 @@ function restore_environment {
 
 function install_venv {
   # Install with install_venv.py
-  export PIP_DOWNLOAD_CACHE=${PIP_DOWNLOAD_CACHE-/tmp/.pip_download_cache}
+  if ! grep -qs -E "^\s*download-cache\s*=\s*.+$" "$HOME/.pip/pip.conf"; then
+    export PIP_DOWNLOAD_CACHE=${PIP_DOWNLOAD_CACHE-/tmp/.pip_download_cache}
+  fi
   export PIP_USE_MIRRORS=true
   if [ $quiet -eq 1 ]; then
     export PIP_NO_INPUT=true
