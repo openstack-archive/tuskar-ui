@@ -60,7 +60,8 @@ class TuskarAPITests(test.APITestCase):
 
     def test_overcloud_stack(self):
         stack = self.heatclient_stacks.first()
-        oc = api.Overcloud(self.tuskarclient_overclouds.first(), request=None)
+        oc = api.Overcloud(self.tuskarclient_overclouds.first(),
+                           request=object())
         with patch('openstack_dashboard.api.heat.stack_get',
                    return_value=stack):
             ret_val = oc.stack
@@ -95,14 +96,16 @@ class TuskarAPITests(test.APITestCase):
 
     def test_overcloud_is_deployed(self):
         stack = self.heatclient_stacks.first()
-        oc = api.Overcloud(self.tuskarclient_overclouds.first(), request=None)
+        oc = api.Overcloud(self.tuskarclient_overclouds.first(),
+                           request=object())
         with patch('openstack_dashboard.api.heat.stack_get',
                    return_value=stack):
             ret_val = oc.is_deployed
             self.assertFalse(ret_val)
 
     def test_overcloud_all_resources(self):
-        oc = api.Overcloud(self.tuskarclient_overclouds.first(), request=None)
+        oc = api.Overcloud(self.tuskarclient_overclouds.first(),
+                           request=object())
 
         # FIXME(lsmola) the stack call should not be tested in this unit test
         # anybody has idea how to do it?
@@ -127,7 +130,8 @@ class TuskarAPITests(test.APITestCase):
         self.assertEqual(4, len(ret_val))
 
     def test_overcloud_resources(self):
-        oc = api.Overcloud(self.tuskarclient_overclouds.first(), request=None)
+        oc = api.Overcloud(self.tuskarclient_overclouds.first(),
+                           request=object())
         role = api.OvercloudRole(self.tuskarclient_overcloud_roles.first())
 
         # FIXME(lsmola) only all_resources and image_name should be tested
@@ -151,15 +155,7 @@ class TuskarAPITests(test.APITestCase):
                             ret_val = oc.resources(role)
                             self.assertEqual(resource_list.call_count, 1)
                             self.assertEqual(server_list.call_count, 1)
-                            # TODO(lsmola) isn't it better to call image_list?
-                            # this will call image_get for every unique image
-                            # used that should not be much (4 images should be
-                            # there for start)
-                            # FIXME(lsmola) testing caching here is bad,
-                            # because it gets cached for the whole tests run
-                            self.assertEqual(image_get.call_count, 1)
-                            # FIXME(lsmola) optimize this, it's enough to call
-                            # node_list once
+                            self.assertEqual(image_get.call_count, 2)
                             self.assertEqual(node_list.call_count, 1)
                             self.assertEqual(stack_get.call_count, 1)
 
@@ -285,7 +281,7 @@ class TuskarAPITests(test.APITestCase):
     def test_resource_get(self):
         stack = self.heatclient_stacks.first()
         overcloud = api.Overcloud(self.tuskarclient_overclouds.first(),
-                                  request=None)
+                                  request=object())
         resource = self.heatclient_resources.first()
 
         with patch('openstack_dashboard.api.heat.resource_get',
@@ -306,7 +302,7 @@ class TuskarAPITests(test.APITestCase):
             with patch('novaclient.v1_1.contrib.baremetal.'
                        'BareMetalNodeManager.list',
                        return_value=nodes):
-                ret_val = api.Resource(resource, request=None).node
+                ret_val = api.Resource(resource, request=object()).node
         self.assertIsInstance(ret_val, api.Node)
         self.assertIsInstance(ret_val.instance, servers.Server)
 
