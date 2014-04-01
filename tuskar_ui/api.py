@@ -530,9 +530,34 @@ class Overcloud(base.APIResourceWrapper):
         return len(resources)
 
     @cached_property
-    def dashboard_url(self):
-        # TODO(rdopieralski) Implement this.
-        return "http://horizon.example.com"
+    def stack_outputs(self):
+        return getattr(self.stack, 'outputs', [])
+
+    @cached_property
+    def keystone_ip(self):
+        for output in self.stack_outputs:
+            if output['output_key'] == 'KeystoneURL':
+                ip = re.match(r"^.*?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*?$",
+                              output['output_value'])
+                return ip.group(1)
+
+        return None
+
+    @cached_property
+    def dashboard_urls(self):
+        services = self.overcloud_keystone.services.list()
+
+        for service in services:
+            if service.name == 'horizon':
+                break
+        else:
+            return []
+
+        admin_urls = [endpoint.adminurl for endpoint
+                      in self.overcloud_keystone.endpoints.list()
+                      if endpoint.service_id == service.id]
+
+        return admin_urls
 
 
 class Node(base.APIResourceWrapper):
