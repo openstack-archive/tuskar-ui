@@ -80,9 +80,9 @@ manage=0
 # though using "python -m coverage" will fail in a
 # python 2.6 venv. Which is why we do what's below,
 # to make sure it works everywhere.
-COVERAGE_CMD=`which coverage`
+COVERAGE_CMD=`which coverage || true`
 if [ -z "${COVERAGE_CMD}" ] ; then
-	COVERAGE_CMD=`which python-coverage`
+	COVERAGE_CMD=`which python-coverage || true`
 fi
 if [ -z "${COVERAGE_CMD}" ] ; then
 	COVERAGE_CMD="python -m coverage"
