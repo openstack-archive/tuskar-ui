@@ -267,6 +267,21 @@ class Overcloud(base.APIResourceWrapper):
         return [cls(oc, request=request) for oc in ocs]
 
     @classmethod
+    def template_parameters(cls, request):
+        """Return a list of needed template parameters
+
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :return: dict with key/value parameters
+        :rtype:  dict
+        """
+        parameters = tuskarclient(request).overclouds.template_parameters()
+        # FIXME(lsmola) python client is converting the result to
+        # object, we have to return it better from client or API
+        return parameters._info
+
+    @classmethod
     @handle_errors(_("Unable to retrieve deployment"))
     def get(cls, request, overcloud_id):
         """Return the Tuskar Overcloud that matches the ID
