@@ -25,12 +25,14 @@
             <i class="icon-fire icon-white"></i>
             {% trans "Undeploy" %}
         </a>
+        <!-- no scaling for Icehouse, uncomment when ready
         <a href="{% url 'horizon:infrastructure:overcloud:scale' overcloud.id %}"
            class="btn ajax-modal
             {% if not overcloud.is_deployed %}disabled{% endif %}">
             <i class="icon-resize-full"></i>
             {% trans "Scale deployment" %}
         </a>
+        -->
     </div>
     {{ tab_group.render }}
   </div>
