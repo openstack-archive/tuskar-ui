@@ -15,6 +15,7 @@ import django.forms
 from django.utils.translation import ugettext_lazy as _
 import horizon.workflows
 
+from tuskar_ui import api
 from tuskar_ui import utils
 
 # TODO(rdopieralski) Get this from the Heat template.
@@ -253,10 +254,12 @@ class Action(horizon.workflows.Action):
         slug = 'deployed_configuration'
         name = _("Configuration")
 
-    def __init__(self, *args, **kwargs):
-        super(Action, self).__init__(*args, **kwargs)
-        parameters = TEMPLATE_DATA['Parameters'].items()
+    def __init__(self, request, *args, **kwargs):
+        super(Action, self).__init__(request, *args, **kwargs)
+        parameters = api.Overcloud.template_parameters(request)
+        parameters = parameters.items()
         parameters.sort()
+
         for name, data in parameters:
             self.fields[name] = make_field(name, **data)
 
