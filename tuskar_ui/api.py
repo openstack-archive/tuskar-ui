@@ -20,12 +20,10 @@ from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from openstack_dashboard.api import heat
 from openstack_dashboard.api import nova
-from openstack_dashboard.test.test_data import utils
 from tuskarclient.v1 import client as tuskar_client
 
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
-from tuskar_ui.test.test_data import tuskar_data
 
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
@@ -34,13 +32,6 @@ TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
 def baremetalclient(request):
     nc = nova.novaclient(request)
     return baremetal.BareMetalNodeManager(nc)
-
-
-# TODO(Tzu-Mainn Chen): remove test data when possible
-def test_data():
-    test_data = utils.TestDataContainer()
-    tuskar_data.data(test_data)
-    return test_data
 
 
 # FIXME: request isn't used right in the tuskar client right now,
