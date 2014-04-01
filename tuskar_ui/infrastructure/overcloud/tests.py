@@ -42,6 +42,23 @@ tuskar_data.data(TEST_DATA)
 def _mock_overcloud(**kwargs):
     oc = None
     stack = TEST_DATA.heatclient_stacks.first()
+    template_parameters = {
+        "NeutronPublicInterfaceRawDevice": {
+            "Default": "",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": ("If set, the public interface is a vlan with this "
+                            "device as the raw device."),
+        },
+        "HeatPassword": {
+            "Default": "unset",
+            "Type": "String",
+            "NoEcho": "true",
+            "Description": ("The password for the Heat service account, used "
+                            "by the Heat services.")
+        },
+    }
+
     params = {
         'spec_set': [
             'counts',
@@ -58,6 +75,7 @@ def _mock_overcloud(**kwargs):
             'stack',
             'stack_events',
             'update',
+            'template_parameters',
         ],
         'counts': [],
         'create.side_effect': lambda *args, **kwargs: oc,
@@ -73,6 +91,7 @@ def _mock_overcloud(**kwargs):
         'stack_events': [],
         'stack': stack,
         'update.side_effect': lambda *args, **kwargs: oc,
+        'template_parameters.return_value': template_parameters,
     }
     params.update(kwargs)
     with patch('tuskar_ui.api.Overcloud', **params) as Overcloud:
@@ -112,6 +131,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
+            _mock_overcloud(),
             patch('tuskar_ui.api.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': [],
@@ -166,33 +186,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                         ('4', ''): 0,
                     }, {
                         'NeutronPublicInterfaceRawDevice': '',
-                        'NovaComputeDriver': '',
-                        'NeutronPassword': '',
-                        'NeutronFlatNetworks': '',
-                        'NeutronPublicInterfaceDefaultRoute': '',
                         'HeatPassword': '',
-                        'notcomputeImage': '',
-                        'NovaImage': '',
-                        'SSLKey': '',
-                        'KeyName': '',
-                        'GlancePassword': '',
-                        'CeilometerPassword': '',
-                        'NtpServer': '',
-                        'CinderPassword': '',
-                        'ImageUpdatePolicy': '',
-                        'NeutronPublicInterface': '',
-                        'NovaPassword': '',
-                        'AdminToken': '',
-                        'SwiftHashSuffix': '',
-                        'NeutronPublicInterfaceIP': '',
-                        'NovaComputeLibvirtType': '',
-                        'AdminPassword': '',
-                        'CeilometerComputeAgent': '',
-                        'NeutronBridgeMappings': '',
-                        'SwiftPassword': '',
-                        'CeilometerMeteringSecret': '',
-                        'SSLCertificate': '',
-                        'Flavor': '',
                     }),
                 ])
         roles[0].flavor_id = old_flavor_id
@@ -243,6 +237,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
+            _mock_overcloud(),
             patch('tuskar_ui.api.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': [node],
