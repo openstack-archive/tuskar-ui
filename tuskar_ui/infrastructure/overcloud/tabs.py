@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import ungettext_lazy
 
 from horizon import tabs
 
@@ -21,32 +20,37 @@ from tuskar_ui.infrastructure.overcloud import tables
 from tuskar_ui import utils
 
 
-def _get_role_data(overcloud, role):
+def _get_role_data(overcloud, role, counts):
     resources = overcloud.resources(role, with_joins=True)
     nodes = [r.node for r in resources]
-    node_count = len(nodes)
+
+    for c in counts:
+        if c['overcloud_role_id'] == role.id:
+            node_count = c['num_nodes']
+            break
+    else:
+        node_count = len(nodes)
+
     data = {
         'role': role,
         'name': role.name,
-        'node_count': node_count,
+        'total_node_count': node_count,
     }
     if nodes:
-        running_node_count = sum(1 for node in nodes
-                                 if node.instance.status == 'ACTIVE')
+        deployed_node_count = sum(1 for node in nodes
+                                  if node.instance.status == 'ACTIVE')
+        deploying_node_count = sum(1 for node in nodes
+                                   if node.instance.status == 'BUILD')
         error_node_count = sum(1 for node in nodes
                                if node.instance.status == 'ERROR')
-        deploying_node_count = (node_count - error_node_count -
-                                running_node_count)
+        waiting_node_count = (node_count - deployed_node_count -
+                              deploying_node_count - error_node_count)
+
         data.update({
-            'running_node_count': running_node_count,
-            'error_node_count': error_node_count,
-            'error_node_message': ungettext_lazy("node is down",
-                                                 "nodes are down",
-                                                 error_node_count),
+            'deployed_node_count': deployed_node_count,
             'deploying_node_count': deploying_node_count,
-            'deploying_node_message': ungettext_lazy("node is deploying",
-                                                     "nodes are deploying",
-                                                     deploying_node_count),
+            'waiting_node_count': waiting_node_count,
+            'error_node_count': error_node_count,
         })
         # TODO(rdopieralski) get this from ceilometer
         # data['capacity'] = 20
@@ -62,9 +66,10 @@ class OverviewTab(tabs.Tab):
     def get_context_data(self, request, **kwargs):
         overcloud = self.tab_group.kwargs['overcloud']
         roles = api.OvercloudRole.list(request)
-        role_data = [_get_role_data(overcloud, role) for role in roles]
-        total = sum(d['node_count'] for d in role_data)
-        progress = 100 * sum(d.get('running_node_count', 0)
+        counts = getattr(overcloud, 'counts', [])
+        role_data = [_get_role_data(overcloud, role, counts) for role in roles]
+        total = sum(d['total_node_count'] for d in role_data)
+        progress = 100 * sum(d.get('deployed_node_count', 0)
                              for d in role_data) // (total or 1)
 
         events = overcloud.stack_events
