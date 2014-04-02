@@ -19,6 +19,7 @@ from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from openstack_dashboard.api import heat
+from openstack_dashboard.api import keystone
 from openstack_dashboard.api import nova
 from tuskarclient.v1 import client as tuskar_client
 
@@ -27,6 +28,45 @@ from tuskar_ui.handle_errors import handle_errors  # noqa
 
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
+
+
+def overcloud_keystoneclient(request, endpoint, password):
+    """Returns a client connected to the Keystone backend.
+
+    Several forms of authentication are supported:
+
+        * Username + password -> Unscoped authentication
+        * Username + password + tenant id -> Scoped authentication
+        * Unscoped token -> Unscoped authentication
+        * Unscoped token + tenant id -> Scoped authentication
+        * Scoped token -> Scoped authentication
+
+    Available services and data from the backend will vary depending on
+    whether the authentication was scoped or unscoped.
+
+    Lazy authentication if an ``endpoint`` parameter is provided.
+
+    Calls requiring the admin endpoint should have ``admin=True`` passed in
+    as a keyword argument.
+
+    The client is cached so that subsequent API calls during the same
+    request/response cycle don't have to be re-authenticated.
+    """
+    api_version = keystone.VERSIONS.get_active_version()
+
+    # TODO(lsmola) add support of certificates and secured http and rest of
+    # parameters according to horizon and add configuration to local settings
+    # (somehow plugin based, we should not maintain a copy of settings)
+    LOG.debug("Creating a new keystoneclient connection to %s." % endpoint)
+
+    # TODO(lsmola) we should create tripleo-admin user for this purpose
+    # this needs to be done first on tripleo side
+    conn = api_version['client'].Client(username="admin",
+                                        password=password,
+                                        tenant_name="admin",
+                                        auth_url=endpoint)
+
+    return conn
 
 
 def baremetalclient(request):
@@ -178,6 +218,18 @@ class Overcloud(base.APIResourceWrapper):
     def __init__(self, apiresource, request=None):
         super(Overcloud, self).__init__(apiresource)
         self._request = request
+
+    @cached_property
+    def overcloud_keystone(self):
+        for output in self.stack_outputs:
+            if output['output_key'] == 'KeystoneURL':
+                break
+        else:
+            return None
+
+        return overcloud_keystoneclient(self._request,
+                                        output['output_value'],
+                                        self.attributes['AdminPassword'])
 
     @classmethod
     def create(cls, request, overcloud_sizing, overcloud_configuration):
