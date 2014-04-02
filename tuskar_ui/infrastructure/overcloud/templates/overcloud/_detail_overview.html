@@ -120,32 +120,41 @@
         <tr>
           <td><a
               href="{% url 'horizon:infrastructure:overcloud:role' overcloud.id role.role.id %}"
-              >{{ role.name }} <span class="badge">({{ role.node_count }})</span></a>
-          </td><td>
-          {% if role.deploying_node_count %}
-            <div class="text-warning">
-              <i class="icon-cog"></i>
-              {{ role.deploying_node_count }} / {{ role.node_count }}
-              {{ role.deploying_node_message }}
-            </div>
-          {% elif role.error_node_count %}
-            <div class="text-error">
-              <i class="icon-warning"></i>
-              {{ role.error_node_count }} / {{ role.node_count }}
-              {{ role.error_node_message }}
-            </div>
-          {% elif role.node_count %}
-            <div class="text-success">
-              <i class="icon-ok"></i>
-              {% trans "All nodes run correctly" %}
-            </div>
-          {% else %}
+              >{{ role.name }} <span class="badge">({{ role.total_node_count }})</span></a>
+          </td>
+          <td>
+          {% if not role.total_node_count %}
             <div class="muted">
               <i class="icon-minus"></i>
               {% trans "No nodes" %}
             </div>
+          {% else %}
+            {% if role.error_node_count %}
+              <div class="text-error">
+                <i class="icon-exclamation-sign"></i>
+            {% elif role.deploying_node_count or role.waiting_node_count %}
+              <div class="text-warning">
+                <i class="icon-cog"></i>
+            {% else %}
+              <div class="text-success">
+                <i class="icon-ok"></i>
+            {% endif %}
+            {% if role.total_node_count == role.deployed_node_count %}
+              {% trans "All nodes are running" %}
+            {% else %}
+              {{ role.deployed_node_count }} {% trans "deployed" %} /
+              {{ role.deploying_node_count }} {% trans "deploying" %} /
+              {{ role.waiting_node_count }} {% trans "waiting" %}
+              {% if role.error_node_count %}
+                <span style="color: red">
+                  / {{ role.error_node_count }} {% trans "error" %}
+                </span>
+              {% endif %}
+            {% endif %}
+              </div>
           {% endif %}
-          </td><td>
+          </td>
+          <td>
             {% if role.capacity %}
             <div class="row-fluid">
               <div class="span6"><p>{{ role.capacity }}%</p></div>
@@ -165,7 +174,7 @@
   <div class="span4">
     <div class="widget">
       <h2>{% trans "Deployment Role Distribution" %}</h2>
-      <div class="d3_pie_chart_distribution pull-left" data-used="{% for role in roles %}{{ role.name }}={{ role.node_count }}{% if not forloop.last %}|{% endif %}{% endfor %}"></div>
+      <div class="d3_pie_chart_distribution pull-left" data-used='{% for role in roles %}{{ role.name }}={{ role.deployed_node_count|default:"0" }}{% if not forloop.last %}|{% endif %}{% endfor %}'></div>
     </div>
     <div class="clear"></div>
     <div class="widget">
