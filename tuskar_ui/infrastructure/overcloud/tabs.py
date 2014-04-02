@@ -21,10 +21,17 @@ from tuskar_ui.infrastructure.overcloud import tables
 from tuskar_ui import utils
 
 
-def _get_role_data(overcloud, role):
+def _get_role_data(overcloud, role, counts):
     resources = overcloud.resources(role, with_joins=True)
     nodes = [r.node for r in resources]
-    node_count = len(nodes)
+
+    for c in counts:
+        if c['overcloud_role_id'] == role.id:
+            node_count = c['num_nodes']
+            break
+    else:
+        node_count = len(nodes)
+
     data = {
         'role': role,
         'name': role.name,
@@ -35,8 +42,9 @@ def _get_role_data(overcloud, role):
                                  if node.instance.status == 'ACTIVE')
         error_node_count = sum(1 for node in nodes
                                if node.instance.status == 'ERROR')
-        deploying_node_count = (node_count - error_node_count -
-                                running_node_count)
+        deploying_node_count = sum(1 for node in nodes
+                                   if node.instance.status == 'BUILD')
+
         data.update({
             'running_node_count': running_node_count,
             'error_node_count': error_node_count,
@@ -62,7 +70,8 @@ class OverviewTab(tabs.Tab):
     def get_context_data(self, request, **kwargs):
         overcloud = self.tab_group.kwargs['overcloud']
         roles = api.OvercloudRole.list(request)
-        role_data = [_get_role_data(overcloud, role) for role in roles]
+        counts = getattr(overcloud, 'counts', [])
+        role_data = [_get_role_data(overcloud, role, counts) for role in roles]
         total = sum(d['node_count'] for d in role_data)
         progress = 100 * sum(d.get('running_node_count', 0)
                              for d in role_data) // (total or 1)
