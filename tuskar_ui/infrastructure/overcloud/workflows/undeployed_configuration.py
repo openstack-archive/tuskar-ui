@@ -67,12 +67,25 @@ TEMPLATE_DATA = {
             "Description": ("A custom default route for the "
                             "NeutronPublicInterface."),
         },
+        "NeutronDnsmasqOptions": {
+            "Default": "dhcp-option-force=26,1400",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": ("Dnsmasq options for neutron-dhcp-agent."),
+        },
         "GlancePassword": {
             "Default": "unset",
             "Type": "String",
             "NoEcho": "true",
             "Description": ("The password for the glance service account, "
                             "used by the glance services."),
+        },
+        "GlanceLogFile": {
+            "Default": "",
+            "Type": "String",
+            "NoEcho": "false",
+            "Description": ("The filepath of the file to use for logging "
+                            "messages from Glance."),
         },
         "notcomputeImage": {
             "Default": "overcloud-control",
