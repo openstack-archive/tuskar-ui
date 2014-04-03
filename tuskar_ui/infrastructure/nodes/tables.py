@@ -35,6 +35,21 @@ class DeleteNode(tables.BatchAction):
         api.Node.delete(request, obj_id)
 
 
+class NodeFilterAction(tables.FilterAction):
+    def filter(self, table, nodes, filter_string):
+        """Really naive case-insensitive search."""
+        q = filter_string.lower()
+
+        def comp(node):
+            return any(q in attr for attr in
+                       (node.ip_address,
+                        node.properties['cpu'],
+                        node.properties['ram'],
+                        node.properties['local_disk'],))
+
+        return filter(comp, nodes)
+
+
 class NodesTable(tables.DataTable):
     node = tables.Column(lambda node: node.driver_info['ip_address'],
                          link="horizon:infrastructure:nodes:detail",
@@ -88,7 +103,8 @@ class FreeNodesTable(NodesTable):
     class Meta:
         name = "free_nodes"
         verbose_name = _("Free Nodes")
-        table_actions = (DeleteNode,)
+        table_actions = (DeleteNode,
+                         NodeFilterAction,)
         row_actions = (DeleteNode,)
 
 
@@ -109,7 +125,7 @@ class DeployedNodesTable(NodesTable):
     class Meta:
         name = "deployed_nodes"
         verbose_name = _("Deployed Nodes")
-        table_actions = ()
+        table_actions = (NodeFilterAction,)
         row_actions = ()
         columns = ('node', 'deployment_role', 'capacity', 'architecture',
                    'cpu', 'ram', 'local_disk', 'health', 'power_state')
