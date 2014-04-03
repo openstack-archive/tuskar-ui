@@ -459,6 +459,11 @@ class Overcloud(base.APIResourceWrapper):
                                                         self.stack.stack_name)]
         except heatclient.exc.HTTPNotFound:
             resources = []
+        except heatclient.exc.HTTPInternalServerError:
+            # TODO(lsmola) There is a weird bug in heat, that after
+            # stack-create it returns 500 for a little while. This can be
+            # removed once the bug is fixed.
+            resources = []
 
         if not with_joins:
             return [Resource(r, request=self._request) for r in resources]
