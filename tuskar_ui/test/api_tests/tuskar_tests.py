@@ -14,6 +14,7 @@
 from __future__ import absolute_import
 
 import contextlib
+import mock
 from mock import patch  # noqa
 
 from heatclient.v1 import events
@@ -166,6 +167,50 @@ class TuskarAPITests(test.APITestCase):
         for i in ret_val:
             self.assertIsInstance(i, api.Resource)
         self.assertEqual(4, len(ret_val))
+
+    def test_overcloud_keystone_ip(self):
+        oc = api.Overcloud(self.tuskarclient_overclouds.first(),
+                           request=object())
+        stack = self.heatclient_stacks.first()
+
+        with contextlib.nested(
+            patch('openstack_dashboard.api.heat.stack_get',
+                  return_value=stack)) as (stack_get, ):
+                self.assertEqual('192.0.2.23', oc.keystone_ip)
+                self.assertEqual(stack_get.call_count, 1)
+
+    def test_overcloud_dashboard_url(self):
+        oc = api.Overcloud(self.tuskarclient_overclouds.first(),
+                           request=object())
+        stack = self.heatclient_stacks.first()
+
+        mocked_service = mock.Mock(id='horizon_id')
+        mocked_service.name = 'horizon'
+
+        services = [mocked_service]
+        endpoints = [mock.Mock(service_id='horizon_id',
+                               adminurl='http://192.0.2.23:/admin'), ]
+
+        services_obj = mock.Mock(
+            **{'list.return_value': services, })
+
+        endpoints_obj = mock.Mock(
+            **{'list.return_value': endpoints, })
+
+        overcloud_keystone_client = mock.Mock(
+            services=services_obj,
+            endpoints=endpoints_obj)
+
+        with contextlib.nested(
+            patch('openstack_dashboard.api.heat.stack_get',
+                  return_value=stack),
+            patch('tuskar_ui.api.overcloud_keystoneclient',
+                  return_value=overcloud_keystone_client)
+        ) as (stack_get, client_get):
+            self.assertEqual(['http://192.0.2.23:/admin'],
+                             oc.dashboard_urls)
+            self.assertEqual(stack_get.call_count, 1)
+            self.assertEqual(client_get.call_count, 1)
 
     def test_node_create(self):
         node = api.Node(self.ironicclient_nodes.first())

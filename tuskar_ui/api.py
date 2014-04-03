@@ -12,6 +12,7 @@
 import django.conf
 import heatclient
 import logging
+import urlparse
 
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
@@ -520,9 +521,34 @@ class Overcloud(base.APIResourceWrapper):
         return len(resources)
 
     @cached_property
-    def dashboard_url(self):
-        # TODO(rdopieralski) Implement this.
-        return "http://horizon.example.com"
+    def stack_outputs(self):
+        return getattr(self.stack, 'outputs', [])
+
+    @cached_property
+    def keystone_ip(self):
+        for output in self.stack_outputs:
+            if output['output_key'] == 'KeystoneURL':
+                return urlparse.urlparse(output['output_value']).hostname
+
+    @cached_property
+    def dashboard_urls(self):
+        client = self.overcloud_keystone
+        if not client:
+            return []
+
+        services = client.services.list()
+
+        for service in services:
+            if service.name == 'horizon':
+                break
+        else:
+            return []
+
+        admin_urls = [endpoint.adminurl for endpoint
+                      in client.endpoints.list()
+                      if endpoint.service_id == service.id]
+
+        return admin_urls
 
 
 class Node(base.APIResourceWrapper):
