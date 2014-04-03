@@ -145,6 +145,8 @@ class OvercloudTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(
             res, 'infrastructure/_fullscreen_workflow_base.html')
         self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/node_counts.html')
+        self.assertTemplateUsed(
             res, 'infrastructure/overcloud/undeployed_overview.html')
 
     def test_create_post(self):
