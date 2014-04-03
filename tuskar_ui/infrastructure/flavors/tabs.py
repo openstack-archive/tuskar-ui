@@ -16,41 +16,41 @@ from django.utils.translation import ugettext_lazy as _
 import horizon.tabs
 
 from tuskar_ui import api
-from tuskar_ui.infrastructure.node_profiles import tables
+from tuskar_ui.infrastructure.flavors import tables
 
 
 def _get_unmatched_suggestions(request):
     unmatched_suggestions = []
-    profile_suggestions = [ProfileSuggestion.from_node_profile(node_profile)
-                           for node_profile in api.NodeProfile.list(request)]
+    flavor_suggestions = [FlavorSuggestion.from_flavor(flavor)
+                          for flavor in api.Flavor.list(request)]
     for node in api.Node.list(request):
-        node_suggestion = ProfileSuggestion.from_node(node)
-        for profile_suggestion in profile_suggestions:
-            if profile_suggestion == node_suggestion:
+        node_suggestion = FlavorSuggestion.from_node(node)
+        for flavor_suggestion in flavor_suggestions:
+            if flavor_suggestion == node_suggestion:
                 break
         else:
             unmatched_suggestions.append(node_suggestion)
     return unmatched_suggestions
 
 
-def get_profile_suggestions(request):
+def get_flavor_suggestions(request):
     return set(_get_unmatched_suggestions(request))
 
 
-class NodeProfilesTab(horizon.tabs.TableTab):
-    name = _("Node Profiles")
-    slug = 'node_profiles'
-    table_classes = (tables.NodeProfilesTable,)
+class FlavorsTab(horizon.tabs.TableTab):
+    name = _("Flavors")
+    slug = 'flavors'
+    table_classes = (tables.FlavorsTable,)
     template_name = ("horizon/common/_detail_table.html")
     preload = False
 
-    def get_node_profiles_data(self):
-        node_profiles = api.NodeProfile.list(self.request)
-        node_profiles.sort(key=lambda np: (np.vcpus, np.ram, np.disk))
-        return node_profiles
+    def get_flavors_data(self):
+        flavors = api.Flavor.list(self.request)
+        flavors.sort(key=lambda np: (np.vcpus, np.ram, np.disk))
+        return flavors
 
 
-class ProfileSuggestion(object):
+class FlavorSuggestion(object):
     """Describe node parameters in a way that is easy to compare."""
 
     def __init__(self, vcpus=None, ram=None, disk=None, cpu_arch=None,
@@ -72,11 +72,11 @@ class ProfileSuggestion(object):
         )
 
     @classmethod
-    def from_node_profile(cls, node_profile):
+    def from_flavor(cls, flavor):
         return cls(
-            vcpus=node_profile.vcpus,
-            ram_bytes=node_profile.ram_bytes,
-            disk_bytes=node_profile.disk_bytes,
+            vcpus=flavor.vcpus,
+            ram_bytes=flavor.ram_bytes,
+            disk_bytes=flavor.disk_bytes,
             # TODO(rdopieralski) Add architecture when available.
         )
 
@@ -120,21 +120,21 @@ class ProfileSuggestion(object):
         )
 
 
-class ProfileSuggestionsTab(horizon.tabs.TableTab):
-    name = _("Profile Suggestions")
-    slug = 'profile_suggestions'
-    table_classes = (tables.ProfileSuggestionsTable,)
+class FlavorSuggestionsTab(horizon.tabs.TableTab):
+    name = _("Flavor Suggestions")
+    slug = 'flavor_suggestions'
+    table_classes = (tables.FlavorSuggestionsTable,)
     template_name = ("horizon/common/_detail_table.html")
     preload = False
 
-    def get_profile_suggestions_data(self):
-        return list(get_profile_suggestions(self.request))
+    def get_flavor_suggestions_data(self):
+        return list(get_flavor_suggestions(self.request))
 
 
-class NodeProfileTabs(horizon.tabs.TabGroup):
-    slug = 'node_profile_tabs'
+class FlavorTabs(horizon.tabs.TabGroup):
+    slug = 'flavor_tabs'
     tabs = (
-        NodeProfilesTab,
-        ProfileSuggestionsTab,
+        FlavorsTab,
+        FlavorSuggestionsTab,
     )
     sticky = True

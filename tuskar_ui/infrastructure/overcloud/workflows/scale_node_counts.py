@@ -29,7 +29,7 @@ class Step(undeployed_overview.Step):
     template_name = 'infrastructure/overcloud/scale_node_counts.html'
 
     def prepare_action_context(self, request, context):
-        for (role_id, profile_id), count in context['role_counts'].items():
-            name = 'count__%s__%s' % (role_id, profile_id)
+        for (role_id, flavor_id), count in context['role_counts'].items():
+            name = 'count__%s__%s' % (role_id, flavor_id)
             context[name] = count
         return context
