@@ -60,6 +60,7 @@ class Workflow(DeploymentValidationMixin, horizon.workflows.Workflow):
         undeployed_configuration.Step,
     )
     finalize_button_name = _("Deploy")
+    success_message = _("OpenStack deployment launched")
     success_url = 'horizon:infrastructure:overcloud:index'
 
     def handle(self, request, context):
