@@ -135,10 +135,10 @@ def transform_sizing(overcloud_sizing):
     } for (role, flavor), sizing in overcloud_sizing.items()]
 
 
-class NodeProfile(object):
+class Flavor(object):
 
     def __init__(self, flavor):
-        """Construct node profile by wrapping flavor
+        """Construct by wrapping Nova flavor
 
         :param flavor: Nova flavor
         :type  flavor: novaclient.v1_1.flavors.Flavor
@@ -166,7 +166,7 @@ class NodeProfile(object):
 
     @cached_property
     def extras_dict(self):
-        """Return extra parameters of node profile
+        """Return extra flavor parameters
 
         :return: Nova flavor keys
         :rtype: dict
@@ -195,12 +195,12 @@ class NodeProfile(object):
                                       metadata=extras_dict))
 
     @classmethod
-    @handle_errors(_("Unable to load node profile"))
-    def get(cls, request, node_profile_id):
-        return cls(nova.flavor_get(request, node_profile_id))
+    @handle_errors(_("Unable to load flavor"))
+    def get(cls, request, flavor_id):
+        return cls(nova.flavor_get(request, flavor_id))
 
     @classmethod
-    @handle_errors(_("Unable to retrieve node profile list."), [])
+    @handle_errors(_("Unable to retrieve flavor list."), [])
     def list(cls, request):
         return [cls(item) for item in nova.flavor_list(request)]
 
@@ -208,7 +208,7 @@ class NodeProfile(object):
     @memoized.memoized
     @handle_errors(_("Unable to retrieve existing servers list."), [])
     def list_deployed_ids(cls, request):
-        """Get and memoize ID's of deployed node profiles."""
+        """Get and memoize ID's of deployed flavors."""
         servers = nova.server_list(request)[0]
         return set(server.flavor['id'] for server in servers)
 

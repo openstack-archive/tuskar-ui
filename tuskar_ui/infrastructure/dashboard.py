@@ -22,7 +22,7 @@ class BasePanels(horizon.PanelGroup):
     panels = (
         'overcloud',
         'nodes',
-        'node_profiles',
+        'flavors',
     )
 
 

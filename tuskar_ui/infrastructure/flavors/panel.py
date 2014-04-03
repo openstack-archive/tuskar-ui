@@ -19,9 +19,9 @@ import horizon
 from tuskar_ui.infrastructure import dashboard
 
 
-class NodeProfiles(horizon.Panel):
-    name = _("Node Profiles")
-    slug = "node_profiles"
+class Flavors(horizon.Panel):
+    name = _("Flavors")
+    slug = "flavors"
 
 
-dashboard.Infrastructure.register(NodeProfiles)
+dashboard.Infrastructure.register(Flavors)

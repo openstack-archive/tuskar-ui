@@ -22,17 +22,17 @@ from tuskar_ui import api
 import tuskar_ui.forms
 
 
-def get_role_id_and_profile_id_from_field_name(field_name):
-    """Extract the ids of overcloud role and node profile from the field
+def get_role_id_and_flavor_id_from_field_name(field_name):
+    """Extract the ids of overcloud role and flavor from the field
     name.
     """
-    _count, role_id, profile_id = field_name.split('__', 2)
-    return role_id, profile_id
+    _count, role_id, flavor_id = field_name.split('__', 2)
+    return role_id, flavor_id
 
 
-def get_field_name_from_role_id_and_profile_id(role_id, profile_id=''):
-    """Compose the ids of overcloud role and node profile into a field name."""
-    return 'count__%s__%s' % (role_id, profile_id)
+def get_field_name_from_role_id_and_flavor_id(role_id, flavor_id=''):
+    """Compose the ids of overcloud role and flavor into a field name."""
+    return 'count__%s__%s' % (role_id, flavor_id)
 
 
 class Action(horizon.workflows.Action):
@@ -40,7 +40,7 @@ class Action(horizon.workflows.Action):
         slug = 'undeployed_overview'
         name = _("Overview")
 
-    def _get_profile_names(self):
+    def _get_flavor_names(self):
         # Get all flavors in one call, instead of getting them one by one.
         try:
             flavors = horizon_api.nova.flavor_list(self.request, None)
@@ -50,21 +50,21 @@ class Action(horizon.workflows.Action):
             flavors = []
         return dict((str(flavor.id), flavor.name) for flavor in flavors)
 
-    def _get_profiles(self, role, profile_names):
-        # TODO(rdopieralski) Get a list of hardware profiles for each
-        # role here, when we support multiple profiles per role.
-        if role.flavor_id and role.flavor_id in profile_names:
-            profiles = [(
+    def _get_flavors(self, role, flavor_names):
+        # TODO(rdopieralski) Get a list of flavors for each
+        # role here, when we support multiple flavors per role.
+        if role.flavor_id and role.flavor_id in flavor_names:
+            flavors = [(
                 role.flavor_id,
-                profile_names[role.flavor_id],
+                flavor_names[role.flavor_id],
             )]
         else:
-            profiles = []
-        return profiles
+            flavors = []
+        return flavors
 
     def __init__(self, *args, **kwargs):
         super(Action, self).__init__(*args, **kwargs)
-        profile_names = self._get_profile_names()
+        flavor_names = self._get_flavor_names()
         for role in self._get_roles():
             if role.name == 'Controller':
                 initial = 1
@@ -72,16 +72,16 @@ class Action(horizon.workflows.Action):
             else:
                 initial = 0
                 attrs = {}
-            profiles = self._get_profiles(role, profile_names)
-            if not profiles:
-                name = get_field_name_from_role_id_and_profile_id(str(role.id))
+            flavors = self._get_flavors(role, flavor_names)
+            if not flavors:
+                name = get_field_name_from_role_id_and_flavor_id(str(role.id))
                 attrs = {'readonly': 'readonly'}
                 self.fields[name] = django.forms.IntegerField(
                     label='', initial=initial, min_value=initial,
                     widget=tuskar_ui.forms.NumberPickerInput(attrs=attrs))
-            for profile_id, label in profiles:
-                name = get_field_name_from_role_id_and_profile_id(
-                    str(role.id), profile_id)
+            for flavor_id, label in flavors:
+                name = get_field_name_from_role_id_and_flavor_id(
+                    str(role.id), flavor_id)
                 self.fields[name] = django.forms.IntegerField(
                     label=label, initial=initial, min_value=initial,
                     widget=tuskar_ui.forms.NumberPickerInput(attrs=attrs))
@@ -93,7 +93,7 @@ class Action(horizon.workflows.Action):
                 role.id,
                 role.name,
                 list(tuskar_ui.forms.fieldset(
-                    self, prefix=get_field_name_from_role_id_and_profile_id(
+                    self, prefix=get_field_name_from_role_id_and_flavor_id(
                         str(role.id)))),
             )
 
@@ -106,10 +106,10 @@ class Action(horizon.workflows.Action):
         for key, value in self.cleaned_data.iteritems():
             if not key.startswith('count_'):
                 continue
-            role_id, profile = get_role_id_and_profile_id_from_field_name(key)
-            if int(value) and not profile:
+            role_id, flavor = get_role_id_and_flavor_id_from_field_name(key)
+            if int(value) and not flavor:
                 raise django.forms.ValidationError(
-                    _("Can't deploy nodes without a node profile assigned."))
+                    _("Can't deploy nodes without a flavor assigned."))
         return self.cleaned_data
 
 
@@ -128,7 +128,7 @@ class Step(horizon.workflows.Step):
         for key, value in data.iteritems():
             if not key.startswith('count_'):
                 continue
-            count, role_id, profile = key.split('__', 2)
-            counts[role_id, profile] = int(value)
+            count, role_id, flavor = key.split('__', 2)
+            counts[role_id, flavor] = int(value)
         context['role_counts'] = counts
         return context

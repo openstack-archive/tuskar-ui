@@ -30,10 +30,10 @@ from tuskar_ui.test.test_data import tuskar_data
 TEST_DATA = utils.TestDataContainer()
 tuskar_data.data(TEST_DATA)
 INDEX_URL = urlresolvers.reverse(
-    'horizon:infrastructure:node_profiles:index')
+    'horizon:infrastructure:flavors:index')
 CREATE_URL = urlresolvers.reverse(
-    'horizon:infrastructure:node_profiles:create')
-DETAILS_VIEW = 'horizon:infrastructure:node_profiles:details'
+    'horizon:infrastructure:flavors:create')
+DETAILS_VIEW = 'horizon:infrastructure:flavors:details'
 
 
 @contextlib.contextmanager
@@ -49,7 +49,7 @@ def _prepare_create():
             'kernel_image_id': images[0].id,
             'ramdisk_image_id': images[1].id}
     with contextlib.nested(
-            patch('tuskar_ui.api.NodeProfile.create',
+            patch('tuskar_ui.api.Flavor.create',
                   return_value=flavor),
             patch('openstack_dashboard.api.glance.image_list_detailed',
                   return_value=(TEST_DATA.glanceclient_images.list(), False)),
@@ -60,7 +60,7 @@ def _prepare_create():
             yield mocks[0], data
 
 
-class NodeProfilesTest(test.BaseAdminViewTests):
+class FlavorsTest(test.BaseAdminViewTests):
 
     def test_index(self):
         with contextlib.nested(
@@ -74,7 +74,7 @@ class NodeProfilesTest(test.BaseAdminViewTests):
             self.assertEqual(servers_mock.call_count, 1)
 
         self.assertTemplateUsed(res,
-                                'infrastructure/node_profiles/index.html')
+                                'infrastructure/flavors/index.html')
 
     def test_index_recoverable_failure(self):
         with patch('openstack_dashboard.api.nova.flavor_list',
@@ -89,7 +89,7 @@ class NodeProfilesTest(test.BaseAdminViewTests):
             res = self.client.get(CREATE_URL)
             self.assertEqual(mock.call_count, 2)
         self.assertTemplateUsed(res,
-                                'infrastructure/node_profiles/create.html')
+                                'infrastructure/flavors/create.html')
 
     def test_create_get_recoverable_failure(self):
         with patch('openstack_dashboard.api.glance.image_list_detailed',
@@ -119,7 +119,7 @@ class NodeProfilesTest(test.BaseAdminViewTests):
 
     def test_delete_ok(self):
         flavors = TEST_DATA.novaclient_flavors.list()
-        data = {'action': 'node_profiles__delete',
+        data = {'action': 'flavors__delete',
                 'object_ids': [flavors[0].id, flavors[1].id]}
         with contextlib.nested(
                 patch('openstack_dashboard.api.nova.flavor_delete'),
@@ -146,7 +146,7 @@ class NodeProfilesTest(test.BaseAdminViewTests):
              'status': 'ACTIVE',
              'flavor': {'id': flavors[0].id}}
         )
-        data = {'action': 'node_profiles__delete',
+        data = {'action': 'flavors__delete',
                 'object_ids': [flavors[0].id, flavors[1].id]}
         with contextlib.nested(
                 patch('openstack_dashboard.api.nova.flavor_delete'),
@@ -165,14 +165,14 @@ class NodeProfilesTest(test.BaseAdminViewTests):
             self.assertEqual(server_list_mock.call_count, 1)
 
     def test_details_no_overcloud(self):
-        flavor = api.NodeProfile(TEST_DATA.novaclient_flavors.first())
+        flavor = api.Flavor(TEST_DATA.novaclient_flavors.first())
         images = TEST_DATA.glanceclient_images.list()[:2]
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         roles[0].flavor_id = flavor.id
         with contextlib.nested(
                 patch('openstack_dashboard.api.glance.image_get',
                       side_effect=images),
-                patch('tuskar_ui.api.NodeProfile.get',
+                patch('tuskar_ui.api.Flavor.get',
                       return_value=flavor),
                 patch('tuskar_ui.api.OvercloudRole.list',
                       return_value=roles),
@@ -186,10 +186,10 @@ class NodeProfilesTest(test.BaseAdminViewTests):
             self.assertEqual(roles_mock.call_count, 1)
             self.assertEqual(overcloud_mock.call_count, 1)
         self.assertTemplateUsed(res,
-                                'infrastructure/node_profiles/details.html')
+                                'infrastructure/flavors/details.html')
 
     def test_details(self):
-        flavor = api.NodeProfile(TEST_DATA.novaclient_flavors.first())
+        flavor = api.Flavor(TEST_DATA.novaclient_flavors.first())
         images = TEST_DATA.glanceclient_images.list()[:2]
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         roles[0].flavor_id = flavor.id
@@ -197,7 +197,7 @@ class NodeProfilesTest(test.BaseAdminViewTests):
         with contextlib.nested(
                 patch('openstack_dashboard.api.glance.image_get',
                       side_effect=images),
-                patch('tuskar_ui.api.NodeProfile.get',
+                patch('tuskar_ui.api.Flavor.get',
                       return_value=flavor),
                 patch('tuskar_ui.api.OvercloudRole.list',
                       return_value=roles),
@@ -216,4 +216,4 @@ class NodeProfilesTest(test.BaseAdminViewTests):
             self.assertEqual(count_mock.call_count, 1)
             self.assertListEqual(count_mock.call_args_list, [call(roles[0])])
         self.assertTemplateUsed(res,
-                                'infrastructure/node_profiles/details.html')
+                                'infrastructure/flavors/details.html')

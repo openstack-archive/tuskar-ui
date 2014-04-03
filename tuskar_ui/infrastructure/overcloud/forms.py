@@ -63,7 +63,7 @@ class OvercloudRoleForm(horizon.forms.SelfHandlingForm):
         widget=django.forms.TextInput(
             attrs={'readonly': 'readonly', 'disabled': 'disabled'}))
     flavor_id = django.forms.ChoiceField(
-        label=_("Node Profile"), required=False, choices=())
+        label=_("Flavor"), required=False, choices=())
 
     def __init__(self, *args, **kwargs):
         super(OvercloudRoleForm, self).__init__(*args, **kwargs)
