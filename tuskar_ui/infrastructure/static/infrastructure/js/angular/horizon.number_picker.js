@@ -3,7 +3,7 @@ angular.module('hz').directive('hrNumberPicker', function() {
     restrict: 'A',
     replace: true,
     scope: { initial_value: '=value' },
-    templateUrl: '../../static/infrastructure/angular_templates/numberpicker.html',
+    templateUrl: '/static/infrastructure/angular_templates/numberpicker.html',
     link: function(scope, element, attrs) {
       input = element.find('input').first();
       angular.forEach(element[0].attributes, function(attribute) {
