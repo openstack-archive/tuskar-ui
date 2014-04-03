@@ -14,11 +14,11 @@
 
 from django.conf import urls
 
-from tuskar_ui.infrastructure.node_profiles import views
+from tuskar_ui.infrastructure.flavors import views
 
 
 urlpatterns = urls.patterns(
-    'tuskar_ui.infrastructure.node_profiles.views',
+    'tuskar_ui.infrastructure.flavors.views',
     urls.url(r'^$', views.IndexView.as_view(), name='index'),
     urls.url(r'^create/(?P<suggestion_id>[^/]+)$', views.CreateView.as_view(),
              name='create'),

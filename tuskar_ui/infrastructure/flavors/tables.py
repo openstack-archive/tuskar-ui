@@ -21,43 +21,43 @@ from openstack_dashboard.dashboards.admin.flavors \
 from tuskar_ui import api
 
 
-class CreateNodeProfile(flavor_tables.CreateFlavor):
-    verbose_name = _("New Node Profile")
-    url = "horizon:infrastructure:node_profiles:create"
+class CreateFlavor(flavor_tables.CreateFlavor):
+    verbose_name = _("New Flavor")
+    url = "horizon:infrastructure:flavors:create"
 
 
-class CreateSuggestedNodeProfile(CreateNodeProfile):
+class CreateSuggestedFlavor(CreateFlavor):
     verbose_name = _("Create")
 
 
-class DeleteNodeProfile(flavor_tables.DeleteFlavor):
+class DeleteFlavor(flavor_tables.DeleteFlavor):
 
     def __init__(self, **kwargs):
-        super(DeleteNodeProfile, self).__init__(**kwargs)
+        super(DeleteFlavor, self).__init__(**kwargs)
         # NOTE(dtantsur): setting class attributes doesn't work
         # probably due to metaclass magic in actions
-        self.data_type_singular = _("Node Profile")
-        self.data_type_plural = _("Node Profiles")
+        self.data_type_singular = _("Flavor")
+        self.data_type_plural = _("Flavors")
 
     def allowed(self, request, datum=None):
-        """Check that action is allowed on node profile
+        """Check that action is allowed on flavor
 
         This is overridden method from horizon.tables.BaseAction.
 
-        :param datum: node profile we're operating on
-        :type  datum: tuskar_ui.api.NodeProfile
+        :param datum: flavor we're operating on
+        :type  datum: tuskar_ui.api.Flavor
         """
         if datum is not None:
-            deployed_profiles = api.NodeProfile.list_deployed_ids(
+            deployed_flavors = api.Flavor.list_deployed_ids(
                 request, _error_default=None)
-            if deployed_profiles is None or datum.id in deployed_profiles:
+            if deployed_flavors is None or datum.id in deployed_flavors:
                 return False
-        return super(DeleteNodeProfile, self).allowed(request, datum)
+        return super(DeleteFlavor, self).allowed(request, datum)
 
 
-class NodeProfilesTable(tables.DataTable):
-    name = tables.Column('name', verbose_name=_('Node Profile'),
-                         link="horizon:infrastructure:node_profiles:details")
+class FlavorsTable(tables.DataTable):
+    name = tables.Column('name', verbose_name=_('Flavor'),
+                         link="horizon:infrastructure:flavors:details")
     arch = tables.Column('cpu_arch', verbose_name=_('Architecture'))
     vcpus = tables.Column('vcpus', verbose_name=_('CPUs'))
     ram = tables.Column(flavor_tables.get_size,
@@ -73,15 +73,15 @@ class NodeProfilesTable(tables.DataTable):
                                      verbose_name=_('Deploy Ramdisk Image ID'))
 
     class Meta:
-        name = "node_profiles"
-        verbose_name = _("Node Profiles")
-        table_actions = (CreateNodeProfile,
-                         DeleteNodeProfile,
+        name = "flavors"
+        verbose_name = _("Flavors")
+        table_actions = (CreateFlavor,
+                         DeleteFlavor,
                          flavor_tables.FlavorFilterAction)
-        row_actions = (DeleteNodeProfile,)
+        row_actions = (DeleteFlavor,)
 
 
-class NodeProfileRolesTable(tables.DataTable):
+class FlavorRolesTable(tables.DataTable):
     name = tables.Column('name', verbose_name=_('Role Name'))
 
     def __init__(self, request, *args, **kwargs):
@@ -96,10 +96,10 @@ class NodeProfileRolesTable(tables.DataTable):
             count_getter,
             verbose_name=_("Instances Count")
         )
-        super(NodeProfileRolesTable, self).__init__(request, *args, **kwargs)
+        super(FlavorRolesTable, self).__init__(request, *args, **kwargs)
 
 
-class ProfileSuggestionsTable(tables.DataTable):
+class FlavorSuggestionsTable(tables.DataTable):
     arch = tables.Column('cpu_arch', verbose_name=_('Architecture'))
     vcpus = tables.Column('vcpus', verbose_name=_('CPUs'))
     ram = tables.Column(flavor_tables.get_size, verbose_name=_('Memory'),
@@ -108,7 +108,7 @@ class ProfileSuggestionsTable(tables.DataTable):
                          verbose_name=_('Disk'), attrs={'data-type': 'size'})
 
     class Meta:
-        name = "profile_suggestions"
-        verbose_name = _("Profile Suggestions")
+        name = "flavor_suggestions"
+        verbose_name = _("Flavor Suggestions")
         table_actions = ()
-        row_actions = (CreateSuggestedNodeProfile,)
+        row_actions = (CreateSuggestedFlavor,)

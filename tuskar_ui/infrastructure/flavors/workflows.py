@@ -24,7 +24,7 @@ from openstack_dashboard.dashboards.admin.flavors \
 from tuskar_ui import api
 
 
-class CreateNodeProfileAction(flavor_workflows.CreateFlavorInfoAction):
+class CreateFlavorAction(flavor_workflows.CreateFlavorInfoAction):
     arch = fields.ChoiceField(choices=(('i386', 'i386'), ('amd64', 'amd64')),
                               label=_("Architecture"))
     kernel_image_id = fields.ChoiceField(choices=(),
@@ -33,7 +33,7 @@ class CreateNodeProfileAction(flavor_workflows.CreateFlavorInfoAction):
                                           label=_("Deploy Ramdisk Image"))
 
     def __init__(self, *args, **kwrds):
-        super(CreateNodeProfileAction, self).__init__(*args, **kwrds)
+        super(CreateFlavorAction, self).__init__(*args, **kwrds)
         try:
             kernel_images = glance.image_list_detailed(
                 self.request,
@@ -62,14 +62,14 @@ class CreateNodeProfileAction(flavor_workflows.CreateFlavorInfoAction):
         del self.fields['flavor_id']
 
     class Meta:
-        name = _("Node Profile")
+        name = _("Flavor")
         # FIXME(dtantsur): maybe better help text?
         help_text = _("From here you can create a new "
-                      "node profile to organize instance resources.")
+                      "flavor to organize instance resources.")
 
 
-class CreateNodeProfileStep(workflows.Step):
-    action_class = CreateNodeProfileAction
+class CreateFlavorStep(workflows.Step):
+    action_class = CreateFlavorAction
     contributes = ("name",
                    "vcpus",
                    "memory_mb",
@@ -79,18 +79,18 @@ class CreateNodeProfileStep(workflows.Step):
                    "ramdisk_image_id")
 
 
-class CreateNodeProfile(flavor_workflows.CreateFlavor):
-    slug = "create_node_profile"
-    name = _("Create Node Profile")
-    finalize_button_name = _("Create Node Profile")
-    success_message = _('Created new node profile "%s".')
-    failure_message = _('Unable to create node profile "%s".')
-    success_url = "horizon:infrastructure:node_profiles:index"
-    default_steps = (CreateNodeProfileStep,)
+class CreateFlavor(flavor_workflows.CreateFlavor):
+    slug = "create_flavor"
+    name = _("Create Flavor")
+    finalize_button_name = _("Create Flavor")
+    success_message = _('Created new flavor "%s".')
+    failure_message = _('Unable to create flavor "%s".')
+    success_url = "horizon:infrastructure:flavors:index"
+    default_steps = (CreateFlavorStep,)
 
     def handle(self, request, data):
         try:
-            self.object = api.NodeProfile.create(
+            self.object = api.Flavor.create(
                 request,
                 name=data['name'],
                 memory=data['memory_mb'],
@@ -101,6 +101,6 @@ class CreateNodeProfile(flavor_workflows.CreateFlavor):
                 ramdisk_image_id=data['ramdisk_image_id']
             )
         except Exception:
-            exceptions.handle(request, _("Unable to create node profile"))
+            exceptions.handle(request, _("Unable to create flavor"))
             return False
         return True

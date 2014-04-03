@@ -172,7 +172,7 @@ class OvercloudRoleView(horizon_tables.DataTableView,
         try:
             context['flavor'] = nova.flavor_get(self.request, role.flavor_id)
         except Exception:
-            msg = _('Unable to retrieve node profile.')
+            msg = _('Unable to retrieve flavor.')
             horizon.exceptions.handle(self.request, msg)
         return context
 
