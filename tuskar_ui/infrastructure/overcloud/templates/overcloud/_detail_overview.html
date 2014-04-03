@@ -57,14 +57,14 @@
 {% if not dashboard_urls and not overcloud.is_deploying and not overcloud.is_failed and not overcloud.is_deleting %}
 <div class="row-fluid">
   <div class="span8">
-    <p>Your Overcloud has been successfully deployed. It needs to be initialized first, before you will be able to use it.
+    <p>Your OpenStack Deployment has been successfully deployed. It needs to be initialized before you will be able to use it.
     <p/>
 
     <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#demo">
     Initialize
     </button>
     <div id="demo" class="collapse">
-      <p>You need to run below commands on the machine where you have tripleo source code and
+      <p>You need to run the below commands on the machine where you have tripleo source code and
          direct access through ssh to control node ({{overcloud.keystone_ip}})
       </p>
       <pre>
@@ -179,7 +179,7 @@
           </p>
         {% endfor %}
       {% else %}
-         You need to initialize you Overcloud first.
+         You need to initialize your OpenStack Deployment first.
       {% endif %}
     </div>
   </div>
