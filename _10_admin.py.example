@@ -1,0 +1,2 @@
+DASHBOARD = 'admin'
+DISABLED = True

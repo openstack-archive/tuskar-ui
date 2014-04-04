@@ -9,3 +9,4 @@ ADD_EXCEPTIONS = {
     'not_found': exceptions.NOT_FOUND,
     'unauthorized': exceptions.UNAUTHORIZED,
 }
+DEFAULT = True
