@@ -21,6 +21,9 @@ urlpatterns = urls.patterns(
     '',
     urls.url(r'^$', views.IndexView.as_view(), name='index'),
     urls.url(r'^create/$', views.CreateView.as_view(), name='create'),
+    urls.url(r'^(?P<overcloud_id>[^/]+)/undeploy-in-progress$',
+             views.UndeployInProgressView.as_view(),
+             name='undeploy_in_progress'),
     urls.url(r'^create/role-edit/(?P<role_id>[^/]+)$',
              views.OvercloudRoleEdit.as_view(), name='role_edit'),
     urls.url(r'^(?P<overcloud_id>[^/]+)/$', views.DetailView.as_view(),
@@ -32,4 +35,5 @@ urlpatterns = urls.patterns(
     urls.url(r'^(?P<overcloud_id>[^/]+)/undeploy-confirmation$',
              views.UndeployConfirmationView.as_view(),
              name='undeploy_confirmation'),
+
 )
