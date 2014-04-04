@@ -21,9 +21,9 @@ import horizon.tabs
 import horizon.workflows
 
 import tuskar_ui.api
-from tuskar_ui.infrastructure.node_profiles import tables
-from tuskar_ui.infrastructure.node_profiles import tabs
-from tuskar_ui.infrastructure.node_profiles import workflows
+from tuskar_ui.infrastructure.flavors import tables
+from tuskar_ui.infrastructure.flavors import tabs
+from tuskar_ui.infrastructure.flavors import workflows
 
 
 def image_get(request, image_id, error_message):
@@ -35,20 +35,20 @@ def image_get(request, image_id, error_message):
 
 
 class IndexView(horizon.tabs.TabbedTableView):
-    tab_group_class = tabs.NodeProfileTabs
-    template_name = 'infrastructure/node_profiles/index.html'
+    tab_group_class = tabs.FlavorTabs
+    template_name = 'infrastructure/flavors/index.html'
 
 
 class CreateView(horizon.workflows.WorkflowView):
-    workflow_class = workflows.CreateNodeProfile
-    template_name = 'infrastructure/node_profiles/create.html'
+    workflow_class = workflows.CreateFlavor
+    template_name = 'infrastructure/flavors/create.html'
 
     def get_initial(self):
         suggestion_id = self.kwargs.get('suggestion_id')
         if not suggestion_id:
             return super(CreateView, self).get_initial()
         node = tuskar_ui.api.Node.get(self.request, suggestion_id)
-        suggestion = tabs.ProfileSuggestion.from_node(node)
+        suggestion = tabs.FlavorSuggestion.from_node(node)
         return {
             'name': suggestion.name,
             'vcpus': suggestion.vcpus,
@@ -59,25 +59,25 @@ class CreateView(horizon.workflows.WorkflowView):
 
 
 class DetailView(horizon.tables.DataTableView):
-    table_class = tables.NodeProfileRolesTable
-    template_name = 'infrastructure/node_profiles/details.html'
-    error_redirect = reverse_lazy('horizon:infrastructure:node_profiles:index')
+    table_class = tables.FlavorRolesTable
+    template_name = 'infrastructure/flavors/details.html'
+    error_redirect = reverse_lazy('horizon:infrastructure:flavors:index')
 
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)
-        context['node_profile'] = tuskar_ui.api.NodeProfile.get(
+        context['flavor'] = tuskar_ui.api.Flavor.get(
             self.request,
             kwargs.get('flavor_id'),
             _error_redirect=self.error_redirect
         )
         context['kernel_image'] = image_get(
             self.request,
-            context['node_profile'].kernel_image_id,
+            context['flavor'].kernel_image_id,
             error_message=_("Cannot get kernel image details")
         )
         context['ramdisk_image'] = image_get(
             self.request,
-            context['node_profile'].ramdisk_image_id,
+            context['flavor'].ramdisk_image_id,
             error_message=_("Cannot get ramdisk image details")
         )
         return context

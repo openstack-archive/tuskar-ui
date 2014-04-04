@@ -421,8 +421,8 @@ def data(TEST):
          'name': 'Block Storage Image'})
     TEST.glanceclient_images.add(image_1, image_2, image_3, image_4)
 
-    # Nova flavors aka node profiles
-    # Do not include fields irrelevant for node profiles
+    # Nova flavors
+    # Do not include fields irrelevant for our usage
     TEST.novaclient_flavors = test_data_utils.TestDataContainer()
     flavor_1 = flavors.Flavor(
         flavors.FlavorManager(None),

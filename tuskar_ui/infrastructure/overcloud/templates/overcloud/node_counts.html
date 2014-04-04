@@ -5,7 +5,7 @@
 <table class="table">
   <tr>
     <th>{% trans "Name" %}</th>
-    <th>{% trans "Node profiles" %}</th>
+    <th>{% trans "Flavors" %}</th>
     <th>{% trans "Nodes" %}</th>
     {% if show_change %}
     <th>{% trans "Change" %}</th>
@@ -33,9 +33,9 @@
             (<a
               href="{% url 'horizon:infrastructure:overcloud:role_edit' role_id %}"
               class="ajax-modal"
-             >{% trans "Add a node profile" %}</a>)
+             >{% trans "Add a flavor" %}</a>)
           {% else %}
-            ({% trans "No node profile" %})
+            ({% trans "No flavor" %})
           {% endif %}
         </td>
         <td>
