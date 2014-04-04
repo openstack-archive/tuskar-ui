@@ -16,6 +16,7 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base as base_views
 
+import heatclient
 import horizon.forms
 from horizon import tables as horizon_tables
 from horizon import tabs as horizon_tabs
@@ -33,6 +34,29 @@ from tuskar_ui.infrastructure.overcloud.workflows import undeployed
 
 INDEX_URL = 'horizon:infrastructure:overcloud:index'
 
+
+def get_overcloud_redirect_url(request, action=None):
+    # FIXME(lsmola) instead of action stringsm, use ViewClass
+    try:
+        # TODO(lsmola) implement this properly when supported by API
+        overcloud = api.Overcloud.get_the_overcloud(request)
+    except heatclient.exc.HTTPNotFound:
+        overcloud = None
+
+    redirect = None
+    if overcloud is None:
+        if action != 'create':
+            redirect = reverse('horizon:infrastructure:overcloud:create')
+    elif overcloud.is_deleting or overcloud.is_delete_failed:
+        if action != 'undeploy_in_progress':
+            redirect = reverse('horizon:infrastructure:overcloud:undeploy-in-progress',
+                               args=(overcloud.id,))
+    else:
+        if action != 'detail':
+            redirect = reverse('horizon:infrastructure:overcloud:detail',
+                               args=(overcloud.id,))
+
+    return redirect
 
 class OvercloudMixin(object):
     @memoized.memoized
@@ -58,34 +82,23 @@ class IndexView(base_views.RedirectView):
     permanent = False
 
     def get_redirect_url(self):
-        try:
-             # TODO(lsmola) implement this properly when supported by API
-            overcloud = api.Overcloud.get_the_overcloud(self.request)
-        except Exception:
-            overcloud = None
-
-        if overcloud is not None:
-            # TODO(lsmola) there can be a short period when overcloud
-            # is created, but stack not. So we have to make sure we have
-            # missing stack under control as a new STATE
-            # Also when deleting now, it first deletes Overcloud then Stack
-            # because stack takes much longer to delete. But we can probably
-            # ignore it for now and fix the worflow on API side.
-            redirect = reverse('horizon:infrastructure:overcloud:detail',
-                               args=(overcloud.id,))
-        else:
-            redirect = reverse('horizon:infrastructure:overcloud:create')
-        return redirect
+        return get_overcloud_redirect_url(self.request)
 
 
 class CreateView(horizon.workflows.WorkflowView):
     workflow_class = undeployed.Workflow
     template_name = 'infrastructure/_fullscreen_workflow_base.html'
 
+    def get_redirect_url(self):
+        return get_overcloud_redirect_url(self.request, 'create')
+
 
 class DetailView(horizon_tabs.TabView, OvercloudMixin):
     tab_group_class = tabs.DetailTabs
     template_name = 'infrastructure/overcloud/detail.html'
+
+    def get_redirect_url(self):
+        return get_overcloud_redirect_url(self.request, 'detail')
 
     def get_tabs(self, request, **kwargs):
         overcloud = self.get_overcloud()
@@ -114,6 +127,24 @@ class UndeployConfirmationView(horizon.forms.ModalFormView):
         initial = super(UndeployConfirmationView, self).get_initial(**kwargs)
         initial['overcloud_id'] = self.kwargs['overcloud_id']
         return initial
+
+
+class UndeployInProgressView(horizon_tabs.TabView, OvercloudMixin):
+    tab_group_class = tabs.UndeployInProgressTabs
+    template_name = 'infrastructure/overcloud/detail.html'
+
+    def get_redirect_url(self):
+        import pdb; pdb.set_trace()
+        return get_overcloud_redirect_url(self.request, 'undeploy_in_progress')
+
+    def get_tabs(self, request, **kwargs):
+        overcloud = api.Overcloud.get_the_overcloud(request)
+        return self.tab_group_class(request, overcloud=overcloud, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(UndeployInProgressView, self).get_context_data(**kwargs)
+        context['overcloud'] = api.Overcloud.get_the_overcloud(self.request)
+        return context
 
 
 class Scale(horizon.workflows.WorkflowView, OvercloudMixin):

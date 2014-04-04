@@ -363,7 +363,7 @@ class Overcloud(base.APIResourceWrapper):
 
         the_overcloud = cls(object(), request=request)
         # I need to mock attributes of overcloud that is being deleted.
-        the_overcloud.id = "deleting_in_progress"
+        the_overcloud.id = "unknown"
 
         if the_overcloud.stack and the_overcloud.is_deleting:
             return the_overcloud
@@ -442,7 +442,7 @@ class Overcloud(base.APIResourceWrapper):
         :rtype: bool
         """
         return self.stack.stack_status in ('CREATE_FAILED',
-                                           'UPDATE_FAILED')
+                                           'UPDATE_FAILED',)
 
     @cached_property
     def is_deleting(self):
@@ -452,6 +452,15 @@ class Overcloud(base.APIResourceWrapper):
         :rtype: bool
         """
         return self.stack.stack_status in ('DELETE_IN_PROGRESS', )
+
+    @cached_property
+    def is_delete_failed(self):
+        """Check if this Overcloud is deleting.
+
+        :return: True if Overcloud is deleting, False otherwise.
+        :rtype: bool
+        """
+        return self.stack.stack_status in ('DELETE_FAILED', )
 
     @memoized.memoized
     def all_resources(self, with_joins=True):

@@ -79,6 +79,31 @@ class OverviewTab(tabs.Tab):
         }
 
 
+class UndeployInProgressTab(tabs.Tab):
+    name = _("Undeploy in progress")
+    slug = "undeploy_in_progress_tab"
+    template_name = "infrastructure/overcloud/_undeploy_in_progress.html"
+    preload = False
+
+    def get_context_data(self, request, **kwargs):
+        overcloud = self.tab_group.kwargs['overcloud']
+        all_resources_count = len(overcloud.all_resources(with_joins=False))
+        total_num_nodes_count = sum([count['num_nodes']
+                                    for count in overcloud.counts])
+
+        delete_progress = 100 * (total_num_nodes_count - all_resources_count)
+
+        events = overcloud.stack_events
+        last_failed_events = [e for e in events
+                              if e.resource_status == 'DELETE_FAILED'][-3:]
+        return {
+            'overcloud': overcloud,
+            'progress': delete_progress,
+            'last_failed_events': last_failed_events,
+        }
+
+
+
 class ConfigurationTab(tabs.TableTab):
     table_classes = (tables.ConfigurationTable,)
     name = _("Configuration")
@@ -103,6 +128,12 @@ class LogTab(tabs.TableTab):
     def get_log_data(self):
         overcloud = self.tab_group.kwargs['overcloud']
         return overcloud.stack_events
+
+
+class UndeployInProgressTabs(tabs.TabGroup):
+    slug = "undeploy_in_progress"
+    tabs = (UndeployInProgressTab, LogTab)
+    sticky = True
 
 
 class DetailTabs(tabs.TabGroup):
