@@ -14,6 +14,7 @@
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext_lazy
 
+import heatclient
 from horizon import tabs
 
 from tuskar_ui import api
@@ -79,6 +80,45 @@ class OverviewTab(tabs.Tab):
         }
 
 
+class UndeployInProgressTab(tabs.Tab):
+    name = _("Undeploy in progress")
+    slug = "undeploy_in_progress_tab"
+    template_name = "infrastructure/overcloud/_undeploy_in_progress.html"
+    preload = False
+
+    def get_context_data(self, request, **kwargs):
+        overcloud = self.tab_group.kwargs['overcloud']
+
+        # TODO(lsmola) since at this point we don't have total number of nodes
+        # we will hack this around, till API can show this information. So it
+        # will actually show progress like the total number is 10, or it will
+        # show progress of 5%. Ugly, but workable.
+        total_num_nodes_count = 10
+
+        try:
+            all_resources_count = len(
+                overcloud.all_resources(with_joins=False))
+        except heatclient.exc.HTTPNotFound:
+            # Immediately after undeploying has started, heat returns this
+            # exception so we can take it as kind of init of undeploying.
+            all_resources_count = total_num_nodes_count
+
+        # TODO(lsmola) same as hack above
+        total_num_nodes_count = max(all_resources_count, total_num_nodes_count)
+
+        delete_progress = max(
+            5, 100 * (total_num_nodes_count - all_resources_count))
+
+        events = overcloud.stack_events
+        last_failed_events = [e for e in events
+                              if e.resource_status == 'DELETE_FAILED'][-3:]
+        return {
+            'overcloud': overcloud,
+            'progress': delete_progress,
+            'last_failed_events': last_failed_events,
+        }
+
+
 class ConfigurationTab(tabs.TableTab):
     table_classes = (tables.ConfigurationTable,)
     name = _("Configuration")
@@ -103,6 +143,12 @@ class LogTab(tabs.TableTab):
     def get_log_data(self):
         overcloud = self.tab_group.kwargs['overcloud']
         return overcloud.stack_events
+
+
+class UndeployInProgressTabs(tabs.TabGroup):
+    slug = "undeploy_in_progress"
+    tabs = (UndeployInProgressTab, LogTab)
+    sticky = True
 
 
 class DetailTabs(tabs.TabGroup):
