@@ -1,0 +1,50 @@
+{% load i18n %}
+
+  <div class="row-fluid">
+    <div class="span12">
+      <div class="actions pull-right">
+      </div>
+      {% if overcloud.is_deleting %}
+      <div class="alert alert-error">
+        <div class="row-fluid">
+          <div class="span2">
+            <strong>Undeploying...</strong>
+            <div class="progress progress-striped progress-danger">
+              <div class="bar bar-info" style="width:{{ progress }}%"></div>
+            </div>
+          </div>
+      {% else %}
+      <div class="alert alert-error">
+        <div class="row-fluid">
+          <div class="span2">
+            <strong>Undeploying failed</strong>
+            <div class="progress progress-striped progress-danger">
+              <div class="bar bar-info" style="width:{{ progress }}%"></div>
+            </div>
+          </div>
+      {% endif %}
+          <div class="span10">
+            {% if last_failed_events %}
+              <strong>{% trans "Last failed events:" %}</strong>
+              {% for event in last_failed_events %}
+              <div>
+                <dl>
+                  <dt>{% trans "Timestamp" %}</dt>
+                  <dd><time datetime="{{ event.event_time }}">{{ event.event_time }}</time></dd>
+                  <dt>{% trans "Resource Name" %}</dt>
+                  <dd>{{ event.resource_name }}</dd>
+                  <dt>{% trans "Status" %}</dt>
+                  <dd>{{ event.resource_status }}</dd>
+                  <dt>{% trans "Reason" %}</dt>
+                  <dd>{{ event.resource_status_reason }}</dd>
+                </dl>
+              </div>
+              {% endfor %}
+            {% endif %}
+            <a href="?tab=undeploy_in_progress__log" data-toggle="tab" data-target="#undeploy_in_progress__log" class="pull-right">See full log</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
