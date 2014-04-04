@@ -1,0 +1,2 @@
+DASHBOARD = 'project'
+DISABLED = True

@@ -47,6 +47,23 @@ TEMPLATE_DEBUG = DEBUG
 # valid options would be "AUTO", "VNC" or "SPICE"
 # CONSOLE_TYPE = "AUTO"
 
+# Default OpenStack Dashboard configuration.
+HORIZON_CONFIG = {
+    'dashboards': ('project', 'admin', 'settings',),
+    'default_dashboard': 'project',
+    'user_home': 'openstack_dashboard.views.get_user_home',
+    'ajax_queue_limit': 10,
+    'auto_fade_alerts': {
+        'delay': 3000,
+        'fade_duration': 1500,
+        'types': ['alert-success', 'alert-info']
+    },
+    'help_url': "http://docs.openstack.org",
+    'exceptions': {'recoverable': exceptions.RECOVERABLE,
+                   'not_found': exceptions.NOT_FOUND,
+                   'unauthorized': exceptions.UNAUTHORIZED},
+}
+
 # Specify a regular expression to validate user passwords.
 # HORIZON_CONFIG["password_validator"] = {
 #     "regex": '.*',
@@ -347,6 +364,8 @@ SECURITY_GROUP_RULES = {
 }
 
 TUSKAR_ENDPOINT_URL = "http://127.0.0.1:8585"
+
+HORIZON_CONFIG['user_home'] = ''
 
 OVERCLOUD_CREDS = {
     'user': 'admin',
