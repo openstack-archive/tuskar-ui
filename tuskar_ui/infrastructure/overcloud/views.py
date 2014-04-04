@@ -16,7 +16,10 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base as base_views
 
+import heatclient
+from horizon import exceptions as horizon_exceptions
 import horizon.forms
+from horizon import messages
 from horizon import tables as horizon_tables
 from horizon import tabs as horizon_tabs
 from horizon.utils import memoized
@@ -32,6 +35,10 @@ from tuskar_ui.infrastructure.overcloud.workflows import undeployed
 
 
 INDEX_URL = 'horizon:infrastructure:overcloud:index'
+DETAIL_URL = 'horizon:infrastructure:overcloud:detail'
+CREATE_URL = 'horizon:infrastructure:overcloud:create'
+UNDEPLOY_IN_PROGRESS_URL = (
+    'horizon:infrastructure:overcloud:undeploy_in_progress')
 
 
 class OvercloudMixin(object):
@@ -59,22 +66,21 @@ class IndexView(base_views.RedirectView):
 
     def get_redirect_url(self):
         try:
-             # TODO(lsmola) implement this properly when supported by API
+            # TODO(lsmola) implement this properly when supported by API
             overcloud = api.Overcloud.get_the_overcloud(self.request)
-        except Exception:
+        except heatclient.exc.HTTPNotFound:
             overcloud = None
 
-        if overcloud is not None:
-            # TODO(lsmola) there can be a short period when overcloud
-            # is created, but stack not. So we have to make sure we have
-            # missing stack under control as a new STATE
-            # Also when deleting now, it first deletes Overcloud then Stack
-            # because stack takes much longer to delete. But we can probably
-            # ignore it for now and fix the worflow on API side.
-            redirect = reverse('horizon:infrastructure:overcloud:detail',
+        redirect = None
+        if overcloud is None:
+            redirect = reverse(CREATE_URL)
+        elif overcloud.is_deleting or overcloud.is_delete_failed:
+            redirect = reverse(UNDEPLOY_IN_PROGRESS_URL,
                                args=(overcloud.id,))
         else:
-            redirect = reverse('horizon:infrastructure:overcloud:create')
+            redirect = reverse(DETAIL_URL,
+                               args=(overcloud.id,))
+
         return redirect
 
 
@@ -102,7 +108,7 @@ class UndeployConfirmationView(horizon.forms.ModalFormView):
     template_name = 'infrastructure/overcloud/undeploy_confirmation.html'
 
     def get_success_url(self):
-        return reverse('horizon:infrastructure:overcloud:index')
+        return reverse(INDEX_URL)
 
     def get_context_data(self, **kwargs):
         context = super(UndeployConfirmationView,
@@ -114,6 +120,42 @@ class UndeployConfirmationView(horizon.forms.ModalFormView):
         initial = super(UndeployConfirmationView, self).get_initial(**kwargs)
         initial['overcloud_id'] = self.kwargs['overcloud_id']
         return initial
+
+
+class UndeployInProgressView(horizon_tabs.TabView, OvercloudMixin, ):
+    tab_group_class = tabs.UndeployInProgressTabs
+    template_name = 'infrastructure/overcloud/detail.html'
+
+    def get_overcloud_or_redirect(self):
+        try:
+            # TODO(lsmola) implement this properly when supported by API
+            overcloud = api.Overcloud.get_the_overcloud(self.request)
+        except heatclient.exc.HTTPNotFound:
+            overcloud = None
+
+        if overcloud is None:
+            redirect = reverse(CREATE_URL)
+            messages.success(self.request,
+                             _("Undeploying of the Overcloud has finished."))
+            raise horizon_exceptions.Http302(redirect)
+        elif overcloud.is_deleting or overcloud.is_delete_failed:
+            return overcloud
+        else:
+            messages.error(self.request,
+                           _("Overcloud is not being undeployed."))
+            redirect = reverse(DETAIL_URL,
+                               args=(overcloud.id,))
+            raise horizon_exceptions.Http302(redirect)
+
+    def get_tabs(self, request, **kwargs):
+        overcloud = self.get_overcloud_or_redirect()
+        return self.tab_group_class(request, overcloud=overcloud, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(UndeployInProgressView,
+                        self).get_context_data(**kwargs)
+        context['overcloud'] = self.get_overcloud_or_redirect()
+        return context
 
 
 class Scale(horizon.workflows.WorkflowView, OvercloudMixin):
@@ -153,7 +195,7 @@ class OvercloudRoleView(horizon_tables.DataTableView,
 
     def get_data(self):
         overcloud = self.get_overcloud()
-        redirect = reverse('horizon:infrastructure:overcloud:detail',
+        redirect = reverse(DETAIL_URL,
                            args=(overcloud.id,))
         role = self.get_role(redirect)
         return self._get_nodes(overcloud, role)
@@ -162,7 +204,7 @@ class OvercloudRoleView(horizon_tables.DataTableView,
         context = super(OvercloudRoleView, self).get_context_data(**kwargs)
 
         overcloud = self.get_overcloud()
-        redirect = reverse('horizon:infrastructure:overcloud:detail',
+        redirect = reverse(DETAIL_URL,
                            args=(overcloud.id,))
         role = self.get_role(redirect)
         context['role'] = role
@@ -182,7 +224,7 @@ class OvercloudRoleEdit(horizon.forms.ModalFormView, OvercloudRoleMixin):
     template_name = 'infrastructure/overcloud/role_edit.html'
 
     def get_success_url(self):
-        return reverse('horizon:infrastructure:overcloud:create')
+        return reverse(CREATE_URL)
 
     def get_initial(self):
         role = self.get_role()

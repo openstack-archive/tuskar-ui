@@ -367,7 +367,7 @@ class Overcloud(base.APIResourceWrapper):
 
         the_overcloud = cls(object(), request=request)
         # I need to mock attributes of overcloud that is being deleted.
-        the_overcloud.id = "deleting_in_progress"
+        the_overcloud.id = "overcloud"
 
         if the_overcloud.stack and the_overcloud.is_deleting:
             return the_overcloud
@@ -395,12 +395,6 @@ class Overcloud(base.APIResourceWrapper):
                  found
         :rtype:  heatclient.v1.stacks.Stack or None
         """
-        # TODO(lsmola) load it properly, once the API has finished workflow
-        # and for example there can't be a situation when I delete Overcloud
-        # but Stack is still deleting. So the Overcloud will represent the
-        # state of all inner entities and operations correctly.
-        # Then also delete the try/except, it should not be caught on this
-        # level.
         return heat.stack_get(self._request, 'overcloud')
 
     @cached_property
@@ -446,7 +440,7 @@ class Overcloud(base.APIResourceWrapper):
         :rtype: bool
         """
         return self.stack.stack_status in ('CREATE_FAILED',
-                                           'UPDATE_FAILED')
+                                           'UPDATE_FAILED',)
 
     @cached_property
     def is_deleting(self):
@@ -456,6 +450,15 @@ class Overcloud(base.APIResourceWrapper):
         :rtype: bool
         """
         return self.stack.stack_status in ('DELETE_IN_PROGRESS', )
+
+    @cached_property
+    def is_delete_failed(self):
+        """Check if this Overcloud deleting has failed.
+
+        :return: True if Overcloud deleting has failed, False otherwise.
+        :rtype: bool
+        """
+        return self.stack.stack_status in ('DELETE_FAILED', )
 
     @memoized.memoized
     def all_resources(self, with_joins=True):
@@ -469,16 +472,9 @@ class Overcloud(base.APIResourceWrapper):
                  are none
         :rtype:  list of tuskar_ui.api.Resource
         """
-        # FIXME(lsmola) of this is a temporary hack. When I delete the stack
-        # there is a brief moment when list of resources throws an exception
-        # a second later, it does not. So the delete in progress page will
-        # need to be separated, because it is 'special'. Till then, this hack
-        # stays.
         try:
             resources = [r for r in heat.resources_list(self._request,
                                                         self.stack.stack_name)]
-        except heatclient.exc.HTTPNotFound:
-            resources = []
         except heatclient.exc.HTTPInternalServerError:
             # TODO(lsmola) There is a weird bug in heat, that after
             # stack-create it returns 500 for a little while. This can be

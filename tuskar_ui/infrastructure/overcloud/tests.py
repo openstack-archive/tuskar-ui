@@ -29,6 +29,11 @@ CREATE_URL = urlresolvers.reverse(
     'horizon:infrastructure:overcloud:create')
 DETAIL_URL = urlresolvers.reverse(
     'horizon:infrastructure:overcloud:detail', args=(1,))
+UNDEPLOY_IN_PROGRESS_URL = urlresolvers.reverse(
+    'horizon:infrastructure:overcloud:undeploy_in_progress',
+    args=('overcloud',))
+UNDEPLOY_IN_PROGRESS_URL_LOG_TAB = (
+    UNDEPLOY_IN_PROGRESS_URL + "?tab=undeploy_in_progress__log")
 DETAIL_URL_CONFIGURATION_TAB = (DETAIL_URL +
                                 "?tab=detail__configuration")
 DETAIL_URL_LOG_TAB = (DETAIL_URL + "?tab=detail__log")
@@ -70,7 +75,10 @@ def _mock_overcloud(**kwargs):
             'id',
             'is_deployed',
             'is_deploying',
+            'is_deleting',
+            'is_delete_failed',
             'is_failed',
+            'all_resources',
             'resources',
             'stack',
             'stack_events',
@@ -86,7 +94,10 @@ def _mock_overcloud(**kwargs):
         'id': 1,
         'is_deployed': True,
         'is_deploying': False,
+        'is_deleting': False,
+        'is_delete_failed': False,
         'is_failed': False,
+        'all_resources.return_value': [],
         'resources.return_value': [],
         'stack_events': [],
         'stack': stack,
@@ -102,7 +113,8 @@ def _mock_overcloud(**kwargs):
 class OvercloudTests(test.BaseAdminViewTests):
 
     def test_index_overcloud_undeployed_get(self):
-        with patch('tuskar_ui.api.Overcloud.list', return_value=[]):
+        with _mock_overcloud(**{'get_the_overcloud.side_effect': None,
+                                'get_the_overcloud.return_value': None}):
             res = self.client.get(INDEX_URL)
 
         self.assertRedirectsNoFollow(res, CREATE_URL)
@@ -304,6 +316,41 @@ class OvercloudTests(test.BaseAdminViewTests):
         with _mock_overcloud():
             res = self.client.post(DELETE_URL)
         self.assertRedirectsNoFollow(res, INDEX_URL)
+
+    def test_undeploy_in_progress(self):
+        with _mock_overcloud(is_deleting=True, is_deployed=False):
+            res = self.client.get(UNDEPLOY_IN_PROGRESS_URL)
+
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/detail.html')
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/_undeploy_in_progress.html')
+        self.assertTemplateNotUsed(
+            res, 'horizon/common/_detail_table.html')
+
+    def test_undeploy_in_progress_finished(self):
+        with _mock_overcloud(**{'get_the_overcloud.side_effect': None,
+                                'get_the_overcloud.return_value': None}):
+            res = self.client.get(UNDEPLOY_IN_PROGRESS_URL)
+
+        self.assertRedirectsNoFollow(res, CREATE_URL)
+
+    def test_undeploy_in_progress_invalid(self):
+        with _mock_overcloud():
+            res = self.client.get(UNDEPLOY_IN_PROGRESS_URL)
+
+        self.assertRedirectsNoFollow(res, DETAIL_URL)
+
+    def test_undeploy_in_progress_log_tab(self):
+        with _mock_overcloud(is_deleting=True, is_deployed=False):
+            res = self.client.get(UNDEPLOY_IN_PROGRESS_URL_LOG_TAB)
+
+        self.assertTemplateUsed(
+            res, 'infrastructure/overcloud/detail.html')
+        self.assertTemplateNotUsed(
+            res, 'infrastructure/overcloud/_undeploy_in_progress.html')
+        self.assertTemplateUsed(
+            res, 'horizon/common/_detail_table.html')
 
     def test_scale_get(self):
         oc = None
