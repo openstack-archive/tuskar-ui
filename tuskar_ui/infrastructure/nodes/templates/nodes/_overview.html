@@ -16,21 +16,21 @@
               </a>
             </td>
             <td>
-              {% if deployed_nodes_down %}
+              {% if deployed_nodes_error %}
                 <i class="icon-exclamation-sign"></i>
-                {% if deployed_nodes_down|length == 1 %}
+                {% if deployed_nodes_error|length == 1 %}
                   {% comment %}
                     Replace id with uuid when ironicclient is used instead baremetalclient
                   {% endcomment %}
-                  {% url 'horizon:infrastructure:nodes:detail' deployed_nodes_down.0.id as node_detail_url %}
+                  {% url 'horizon:infrastructure:nodes:detail' deployed_nodes_error.0.id as node_detail_url %}
                 {% else %}
                   {% url 'horizon:infrastructure:nodes:index' as nodes_index_url %}
                 {% endif %}
 
-                {% blocktrans count down_count=deployed_nodes_down|length %}
-                  <a href="{{ node_detail_url }}">{{ down_count }} node</a> is down
+                {% blocktrans count error_count=deployed_nodes_error|length %}
+                  <a href="{{ node_detail_url }}">{{ error_count }} node</a> with erros
                 {% plural %}
-                  <a href="{{ nodes_index_url }}?tab=nodes__deployed">{{ down_count }} nodes</a> are down
+              <a href="{{ nodes_index_url }}?tab=nodes__deployed&errors">{{ error_count }} nodes</a> with errors
                 {% endblocktrans %}
               {% else %}
                 <i class="icon-ok"></i>
@@ -46,21 +46,21 @@
               </a>
             </td>
             <td>
-              {% if free_nodes_down %}
+              {% if free_nodes_error %}
                 <i class="icon-exclamation-sign"></i>
-                {% if free_nodes_down|length == 1 %}
+                {% if free_nodes_error|length == 1 %}
                   {% comment %}
                     Replace id with uuid when ironicclient is used instead baremetalclient
                   {% endcomment %}
-                  {% url 'horizon:infrastructure:nodes:detail' free_nodes_down.0.id as node_detail_url %}
+                  {% url 'horizon:infrastructure:nodes:detail' free_nodes_error.0.id as node_detail_url %}
                 {% else %}
                   {% url 'horizon:infrastructure:nodes:index' as nodes_index_url %}
                 {% endif %}
 
-                {% blocktrans count down_count=free_nodes_down|length %}
-                  <a href="{{ node_detail_url }}">{{ down_count }} node</a> is down
+                {% blocktrans count error_count=free_nodes_error|length %}
+                  <a href="{{ node_detail_url }}">{{ error_count }} node</a> with errors
                 {% plural %}
-                  <a href="{{ nodes_index_url }}?tab=nodes__free">{{ down_count }} nodes</a> are down
+                  <a href="{{ nodes_index_url }}?tab=nodes__free&errors">{{ error_count }} nodes</a> with errors
                 {% endblocktrans %}
               {% else %}
                 <i class="icon-ok"></i>
@@ -79,8 +79,8 @@
     </div>
     <div class="clear"></div>
     <div class="widget">
-      <h2>{% trans 'Power Status' %}</h2>
-      <div class="d3_pie_chart_distribution" data-used="Running={{ total_nodes_up|length }}|Stopped={{ total_nodes_down|length }}"></div>
+      <h2>{% trans 'Health Status' %}</h2>
+      <div class="d3_pie_chart_distribution" data-used="Healthy={{ total_nodes_healthy|length }}|Defective={{ total_nodes_error|length }}"></div>
     </div>
   </div>
 </div>
