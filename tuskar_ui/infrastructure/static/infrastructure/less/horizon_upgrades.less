@@ -1,0 +1,223 @@
+// general
+h2 {
+  font-weight: 200;
+  font-size: 24px;
+  color: rgb(80, 80, 80);
+  line-height: 130%;
+}
+
+h3 {
+  font-weight: lighter;
+  font-size: 20px;
+  color: rgb(80,80,80);
+  margin-bottom: 3px;
+  margin: 0 0 3px 0;
+}
+
+h4 {
+  font-weight: lighter;
+  font-size: 18px;
+  color: rgb(120,120,120);
+  margin-bottom: 3px;
+}
+
+h5 {
+  font-weight: lighter;
+  font-size: 16px;
+  color: rgb(120,120,120);
+  margin-bottom: 3px;
+}
+
+// topbar
+.topbar {
+  background: rgb(239, 239, 239);
+  padding: 0.5em 2em;
+  font-size: 90%;
+  height: 24px;
+  border-bottom: 1px solid rgb(220, 220, 220);
+}
+
+h1.brand a {
+  height: 24px;
+  width: 107px;
+  margin: 0 1em 0 0;
+  background-size: auto 24px;
+}
+
+.topbar .switcher_bar h3 {
+  line-height: 18px;
+  font-size: 11px !important;
+}
+
+#tenant_switcher {
+  display: none;
+}
+
+#user_info {
+  margin: 0;
+  padding: 0;
+  line-height: 24px;
+  font-size: 11px !important;
+
+  & > a {
+    font-size: 11px !important;
+  }
+}
+
+// sidebar
+.sidebar {
+  margin: 2.5em 2em;
+  border: 0 none;
+  background: none;
+}
+
+.nav_accordion {
+  background: none;
+
+  // dashboards
+  dt {
+    font-size: 90%;
+    color: rgb(170, 170, 170);
+    background-color: transparent;
+    border: 0 none;
+    border-bottom: 3px solid rgb(230, 230, 230);
+    padding: 0.2em 2em 0.2em 0;
+
+    &:not(:first-child) {
+      margin-top: 1em;
+    }
+
+    &.active {
+      color: rgb(120, 120, 120);
+      border-bottom: 3px solid rgb(130, 130, 130);
+    }
+
+    div {
+      font-size: inherit;
+      color: inherit;
+      font-weight: normal;
+      margin: 0;
+    }
+  }
+
+  // panel groups
+  dd {
+    margin: 0;
+
+    h4 {
+      margin: 0;
+      border: 1px solid rgb(210, 210, 210);
+      background-color: rgb(240, 240, 240);
+      color: rgb(140, 140, 140);
+      max-width: none;
+
+      div {
+        margin: 0 0 0 14px;
+      }
+
+      &.active {
+        border: 1px solid rgb(210, 210, 210);
+        background-color: rgb(230, 230, 230);
+        color: rgb(90, 90, 90);
+      }
+    }
+
+    // items
+    ul {
+      width: auto;
+      margin: 0 0 0 14px;
+
+      li a {
+        width: auto;
+        margin: 0;
+        border-bottom: 1px solid rgb(190, 190, 190);
+        border-left: 5px solid rgb(230, 230, 230);
+        color: rgb(90, 90, 90);
+        opacity: 0.8;
+
+        &:last-child {
+          margin: 0;
+        }
+
+        &.active {
+          color: rgb(215, 65, 50);
+          border-top: 0 none;
+          border-left: 5px solid rgb(215, 65, 50);
+          background-color: rgb(245, 245, 245);
+          margin: 0;
+          border-radius: 0;
+          opacity: 1;
+        }
+
+        &:hover {
+          background-color: rgb(245, 245, 245);
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
+
+// content body
+#content_body {
+  padding-left: 300px;
+  padding-right: 35px;
+  padding-top: 2em;
+  padding-bottom: 3.5em;
+}
+
+.page-header {
+  margin-bottom: 0;
+  padding: 0;
+}
+
+// content nav
+#main_content {
+  .nav-tabs {
+    margin: 0 0 30px;
+    border: 0 none;
+
+    li a {
+      font-weight: 500;
+      position: relative;
+      top: -1px;
+      padding: 10px 15px;
+      border-radius: 0 0 4px 4px;
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+      border-top-width: 0;
+      border-color: transparent;
+      color: #43A1D6;
+    }
+
+    li.active a {
+      border: 1px solid rgb(220, 220, 220);
+      background: #43A1D6;
+      color: white;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+
+      &:after {
+        color: inherit;
+      }
+    }
+
+    li:not(.active) a:hover {
+      border: 1px solid rgb(240, 240, 240);
+      border-top-width: 0;
+      background: rgb(244, 244, 244);
+    }
+  }
+
+  .tab-content {
+    padding: 0;
+    border: 0 none;
+  }
+
+  // content area
+  #content_body > .row-fluid {
+    margin: 0;
+  }
+
+  .widget:not(:last-child) {
+    margin: 0 0 2em 0;
+  }
+}

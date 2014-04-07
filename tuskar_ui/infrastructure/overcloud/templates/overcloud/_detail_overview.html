@@ -165,7 +165,7 @@
   <div class="span4">
     <div class="widget">
       <h2>{% trans "Deployment Role Distribution" %}</h2>
-      <div class="d3_pie_chart_distribution pull-left" data-used="{% for role in roles %}{{ role.name }}={{ role.node_count }}{% if not forloop.last %}|{% endif %}{% endfor %}"></div>
+      <div class="d3_pie_chart_distribution" data-used="{% for role in roles %}{{ role.name }}={{ role.node_count }}{% if not forloop.last %}|{% endif %}{% endfor %}"></div>
     </div>
     <div class="clear"></div>
     <div class="widget">
