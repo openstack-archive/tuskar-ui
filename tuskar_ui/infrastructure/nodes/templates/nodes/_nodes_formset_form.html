@@ -2,22 +2,22 @@
      id="tab-{{ form.prefix }}">
   <div class="form form-inline">
     <div class="row-fluid">
-      <h3 style="margin-bottom:16px">Node Detail</h3>
+      <h4>Node Detail</h4>
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.node_tags %}
     </div>
     <div class="row-fluid">
-      <h4>Power Management</h4>
+      <h5>Power Management</h5>
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_address %}
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_user %}
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_password %}
     </div>
     <div class="row-fluid">
-      <h4>Networking</h4>
+      <h5>Networking</h5>
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.mac_address required=True %}
     </div>
     <div class="row-fluid">
       <div class="span4">
-        <h4>Hardware</h4>
+        <h5>Hardware</h5>
       </div>
       <label class="span6 checkbox checkbox-inline">
         {{ form.introspect_hardware }}<small> {{ form.introspect_hardware.label }}</small>

@@ -10,6 +10,7 @@
 @import "index_pages.less";
 @import "individual_pages.less";
 @import "tables.less";
+@import "horizon_upgrades.less";
 
 // disable text select on element
 .unselectable {
@@ -21,10 +22,9 @@
 }
 
 .actions {
-    margin: 0 0  @baseLineHeight / 3 0;
-}
-.fullscreen-workflow-body {
-    overflow: auto;
+    // not nice, but actions should be placed above the line
+    // will fix the style for now, better solution needed
+    margin: -33px 0 0 0;
 }
 
 // hide the project switcher from the top bar
