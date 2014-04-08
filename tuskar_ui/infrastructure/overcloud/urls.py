@@ -32,4 +32,6 @@ urlpatterns = urls.patterns(
     urls.url(r'^(?P<overcloud_id>[^/]+)/undeploy-confirmation$',
              views.UndeployConfirmationView.as_view(),
              name='undeploy_confirmation'),
+    urls.url(r'^(?P<overcloud_id>[^/]+)/role/(?P<role_id>[^/]+)/capacity$',
+             views.OvercloudRoleCapacity.as_view(), name='role_capacity'),
 )

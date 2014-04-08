@@ -10,14 +10,35 @@
 {% block main %}
 <div class="row-fluid">
   <div class="span12">
-    <p><strong>{% blocktrans count counter=nodes|length %}{{ counter }} instance{% plural %}{{ counter }} instances{% endblocktrans %}</strong></p>
-    <dl>
-    <dt>{% trans 'Flavor' %}</dt>
-    <dd><em>{{ flavor.name }}</em> {{ flavor.get_keys.cpu_arch }} | {{ flavor.vcpus }} {% trans "CPU" %} | {{ flavor.ram }} {% trans "MB RAM" %} | {{ flavor.disk }} {% trans "GB HDD" %}</dd>
-    <dt>{% trans 'Image' %}</dt>
-    <dd>{{ image_name }}</dd>
-    </dl>
-
+    <div class="span3">
+      <p><strong>{% blocktrans count counter=nodes|length %}{{ counter }} instance{% plural %}{{ counter }} instances{% endblocktrans %}</strong></p>
+      <dl>
+        <dt>{% trans 'Flavor' %}</dt>
+        <dd><em>{{ flavor.name }}</em> {{ flavor.get_keys.cpu_arch }} | {{ flavor.vcpus }} {% trans "CPU" %} | {{ flavor.ram }} {% trans "MB RAM" %} | {{ flavor.disk }} {% trans "GB HDD" %}</dd>
+        <dt>{% trans 'Image' %}</dt>
+        <dd>{{ image_name }}</dd>
+      </dl>
+    </div>
+    <div class="span7 pull-right">
+      <h4>{% trans "Capacity" %}</h4>
+      <div class="overview_chart pull-left" style="width: 500px">
+        <div class="chart_container" style="width: 400px">
+          <div class="chart"
+               data-chart-type="line_chart"
+               data-url="{% url 'horizon:infrastructure:overcloud:role_capacity' overcloud.id role.id %}"
+               data-form-selector='#linechart_general_form'
+               data-settings='{ "auto_size": false, "axes_x": false, "axes_y": false }'>
+          </div>
+        </div>
+        <div class="bar_chart_container" style="float: right">
+          <div class="chart"
+               data-chart-type="overview_bar_chart">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
     <h3>{% trans 'Nodes' %}</h3>
     {{ table.render }}
   </div>

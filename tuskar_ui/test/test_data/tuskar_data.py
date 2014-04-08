@@ -9,6 +9,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import datetime
+import random
 
 from openstack_dashboard.test.test_data import utils as test_data_utils
 
@@ -441,3 +443,13 @@ def data(TEST):
          'disk': 60})
     flavor_2.get_keys = lambda: {'cpu_arch': 'i386'}
     TEST.novaclient_flavors.add(flavor_1, flavor_2)
+
+    # Mock data for the Ceilometer Capacity metric
+    num_values = 20
+    dates = [datetime.datetime(2014, 3, day, 3, 14, 15)
+             for day in xrange(1, num_values+1)]
+    values = [random.randint(0, 100) for r in xrange(num_values)]
+    capacity_data = [dict(date=d, value=values[i])
+                     for i, d in enumerate(dates)]
+    TEST.capacity = test_data_utils.TestDataContainer()
+    TEST.capacity.add(capacity_data)
