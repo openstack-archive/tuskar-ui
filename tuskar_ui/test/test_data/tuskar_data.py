@@ -9,6 +9,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import random
 
 from openstack_dashboard.test.test_data import utils as test_data_utils
 
@@ -441,3 +442,65 @@ def data(TEST):
          'disk': 60})
     flavor_2.get_keys = lambda: {'cpu_arch': 'i386'}
     TEST.novaclient_flavors.add(flavor_1, flavor_2)
+
+    # Mock data for the Ceilometer Capacity metric
+    rand = [random.randint(0, 100) for r in xrange(12)]
+    average = reduce(lambda x, y: x + y, rand, 0) / 12
+    used = rand[11]
+    tooltip_average = 'Average %s &percnt;<br> From: %s, to: %s' % (
+        used, '2014-03-08T09:57:53', '2014-03-19T09:57:53')
+
+    capacity_data = {
+        'series': [
+            {
+                'data': [
+                {'y': rand[0], 'x': '2014-03-08T09:57:53'},
+                {'y': rand[1], 'x': '2014-03-09T09:57:53'},
+                {'y': rand[2], 'x': '2014-03-10T09:57:53'},
+                {'y': rand[3], 'x': '2014-03-11T09:57:53'},
+                {'y': rand[4], 'x': '2014-03-12T09:57:53'},
+                {'y': rand[5], 'x': '2014-03-13T09:57:53'},
+                {'y': rand[6], 'x': '2014-03-14T09:57:53'},
+                {'y': rand[7], 'x': '2014-03-15T09:57:53'},
+                {'y': rand[8], 'x': '2014-03-16T09:57:53'},
+                {'y': rand[9], 'x': '2014-03-17T09:57:53'},
+                {'y': rand[10], 'x': '2014-03-18T09:57:53'},
+                {'y': rand[11], 'x': '2014-03-19T09:57:53'}
+                ],
+                'name': 'Controller',
+                'unit': '%'
+            }
+        ],
+        'settings': {
+            'renderer': 'StaticAxes',
+            'yMin': 0,
+            'yMax': 100,
+            'higlight_last_point': True,
+            'auto_size': False,
+            'auto_resize': False,
+            'axes_x': False,
+            'axes_y': False,
+            'bar_chart_settings': {
+                'orientation': 'vertical',
+                'used_label_placement': 'left',
+                'width': 30,
+                'color_scale_domain': [0, 80, 80, 100],
+                'color_scale_range': [
+                    '#0000FF',
+                    '#0000FF',
+                    '#FF0000',
+                    '#FF0000'
+                ],
+                'average_color_scale_domain': [0, 100],
+                'average_color_scale_range': ['#0000FF', '#0000FF']
+            }
+        },
+        'stats': {
+            'average': average,
+            'used': used,
+            'tooltip_average': tooltip_average
+        }
+    }
+
+    TEST.capacity = test_data_utils.TestDataContainer()
+    TEST.capacity.add(capacity_data)

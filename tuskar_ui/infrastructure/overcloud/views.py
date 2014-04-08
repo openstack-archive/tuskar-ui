@@ -11,8 +11,10 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import json
 
 from django.core.urlresolvers import reverse
+from django import http
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base as base_views
 
@@ -22,6 +24,7 @@ from horizon import tabs as horizon_tabs
 from horizon.utils import memoized
 import horizon.workflows
 from openstack_dashboard.api import nova
+from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud import forms
@@ -29,6 +32,7 @@ from tuskar_ui.infrastructure.overcloud import tables
 from tuskar_ui.infrastructure.overcloud import tabs
 from tuskar_ui.infrastructure.overcloud.workflows import scale
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed
+from tuskar_ui.test.test_data import tuskar_data
 
 
 INDEX_URL = 'horizon:infrastructure:overcloud:index'
@@ -168,6 +172,7 @@ class OvercloudRoleView(horizon_tables.DataTableView,
         context['role'] = role
         context['image_name'] = role.image_name
         context['nodes'] = self._get_nodes(overcloud, role)
+        context['overcloud'] = overcloud
 
         try:
             context['flavor'] = nova.flavor_get(self.request, role.flavor_id)
@@ -193,3 +198,14 @@ class OvercloudRoleEdit(horizon.forms.ModalFormView, OvercloudRoleMixin):
             'image_name': role.image_name,
             'flavor_id': role.flavor_id,
         }
+
+
+class OvercloudRoleCapacity(base_views.TemplateView):
+    def get(self, request, *args, **kwargs):
+        #TODO(akrivoka): replace mocked data with real data from Ceilometer
+        TEST_DATA = utils.TestDataContainer()
+        tuskar_data.data(TEST_DATA)
+        capacity_data = TEST_DATA.capacity.first()
+
+        return http.HttpResponse(json.dumps(capacity_data),
+                                 mimetype='application/json')
