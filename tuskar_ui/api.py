@@ -211,7 +211,10 @@ class Flavor(object):
     def list_deployed_ids(cls, request):
         """Get and memoize ID's of deployed flavors."""
         servers = nova.server_list(request)[0]
-        return set(server.flavor['id'] for server in servers)
+        deployed_ids = set(server.flavor['id'] for server in servers)
+        roles = OvercloudRole.list(request)
+        deployed_ids |= set(role.flavor_id for role in roles)
+        return deployed_ids
 
 
 class Overcloud(base.APIResourceWrapper):

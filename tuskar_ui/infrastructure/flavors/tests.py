@@ -63,18 +63,20 @@ def _prepare_create():
 class FlavorsTest(test.BaseAdminViewTests):
 
     def test_index(self):
+        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         with contextlib.nested(
                 patch('openstack_dashboard.api.nova.flavor_list',
                       return_value=TEST_DATA.novaclient_flavors.list()),
                 patch('openstack_dashboard.api.nova.server_list',
                       return_value=([], False)),
-        ) as (flavors_mock, servers_mock):
+                patch('tuskar_ui.api.OvercloudRole.list', return_value=roles),
+        ) as (flavors_mock, servers_mock, role_list_mock):
             res = self.client.get(INDEX_URL)
             self.assertEqual(flavors_mock.call_count, 1)
             self.assertEqual(servers_mock.call_count, 1)
+            self.assertEqual(role_list_mock.call_count, 1)
 
-        self.assertTemplateUsed(res,
-                                'infrastructure/flavors/index.html')
+        self.assertTemplateUsed(res, 'infrastructure/flavors/index.html')
 
     def test_index_recoverable_failure(self):
         with patch('openstack_dashboard.api.nova.flavor_list',
@@ -88,8 +90,7 @@ class FlavorsTest(test.BaseAdminViewTests):
                    return_value=([], False)) as mock:
             res = self.client.get(CREATE_URL)
             self.assertEqual(mock.call_count, 2)
-        self.assertTemplateUsed(res,
-                                'infrastructure/flavors/create.html')
+        self.assertTemplateUsed(res, 'infrastructure/flavors/create.html')
 
     def test_create_get_recoverable_failure(self):
         with patch('openstack_dashboard.api.glance.image_list_detailed',
@@ -125,18 +126,20 @@ class FlavorsTest(test.BaseAdminViewTests):
                 patch('openstack_dashboard.api.nova.flavor_delete'),
                 patch('openstack_dashboard.api.nova.server_list',
                       return_value=([], False)),
+                patch('tuskar_ui.api.OvercloudRole.list', return_value=[]),
                 patch('openstack_dashboard.api.glance.image_list_detailed',
                       return_value=([], False)),
                 patch('openstack_dashboard.api.nova.flavor_list',
                       return_value=TEST_DATA.novaclient_flavors.list())
-        ) as (delete_mock, server_list_mock, glance_mock, flavors_mock):
+        ) as (delete_mock, server_list_mock, _role_list_mock, _glance_mock,
+              _flavors_mock):
             res = self.client.post(INDEX_URL, data)
             self.assertNoFormErrors(res)
             self.assertRedirectsNoFollow(res, INDEX_URL)
             self.assertEqual(delete_mock.call_count, 2)
             self.assertEqual(server_list_mock.call_count, 1)
 
-    def test_delete_deployed(self):
+    def test_delete_deployed_on_servers(self):
         flavors = TEST_DATA.novaclient_flavors.list()
         server = servers.Server(
             servers.ServerManager(None),
@@ -152,11 +155,37 @@ class FlavorsTest(test.BaseAdminViewTests):
                 patch('openstack_dashboard.api.nova.flavor_delete'),
                 patch('openstack_dashboard.api.nova.server_list',
                       return_value=([server], False)),
+                patch('tuskar_ui.api.OvercloudRole.list', return_value=[]),
                 patch('openstack_dashboard.api.glance.image_list_detailed',
                       return_value=([], False)),
                 patch('openstack_dashboard.api.nova.flavor_list',
                       return_value=TEST_DATA.novaclient_flavors.list())
-        ) as (delete_mock, server_list_mock, glance_mock, flavors_mock):
+        ) as (delete_mock, server_list_mock, _role_list_mock, _glance_mock,
+              _flavors_mock):
+            res = self.client.post(INDEX_URL, data)
+            self.assertMessageCount(error=1, warning=0)
+            self.assertNoFormErrors(res)
+            self.assertRedirectsNoFollow(res, INDEX_URL)
+            self.assertEqual(delete_mock.call_count, 1)
+            self.assertEqual(server_list_mock.call_count, 1)
+
+    def test_delete_deployed_on_roles(self):
+        flavors = TEST_DATA.novaclient_flavors.list()
+        roles = TEST_DATA.tuskarclient_roles_with_flavors.list()
+
+        data = {'action': 'flavors__delete',
+                'object_ids': [flavors[0].id, flavors[1].id]}
+        with contextlib.nested(
+                patch('openstack_dashboard.api.nova.flavor_delete'),
+                patch('openstack_dashboard.api.nova.server_list',
+                      return_value=([], False)),
+                patch('tuskar_ui.api.OvercloudRole.list', return_value=roles),
+                patch('openstack_dashboard.api.glance.image_list_detailed',
+                      return_value=([], False)),
+                patch('openstack_dashboard.api.nova.flavor_list',
+                      return_value=TEST_DATA.novaclient_flavors.list())
+        ) as (delete_mock, server_list_mock, _role_list_mock, _glance_mock,
+              _flavors_mock):
             res = self.client.post(INDEX_URL, data)
             self.assertMessageCount(error=1, warning=0)
             self.assertNoFormErrors(res)
