@@ -9,6 +9,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import datetime
+import random
 
 from openstack_dashboard.test.test_data import utils as test_data_utils
 
@@ -452,3 +454,12 @@ def data(TEST):
          'flavor_id': '1',
          'image_name': 'overcloud-block-storage'})
     TEST.tuskarclient_roles_with_flavors.add(role_with_flavor)
+
+    # Mock data for the Ceilometer Capacity metric
+    num_values = 20
+    dates = [datetime.datetime(2014, 3, day, 3, 14, 15)
+             for day in xrange(1, num_values+1)]
+    values = [random.randint(0, 100) for r in xrange(num_values)]
+    data = [dict(date=d, value=values[i]) for i, d in enumerate(dates)]
+    TEST.ceilometer = test_data_utils.TestDataContainer()
+    TEST.ceilometer.add(data)

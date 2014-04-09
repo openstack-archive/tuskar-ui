@@ -9,43 +9,79 @@
 {% block main %}
 <div class="row-fluid">
   <div class="span12">
-      <h4>{% trans "Info" %}</h4>
-      <dl class="clearfix">
-        <dt>{% trans "MAC Addresses" %}</dt>
-        <dd>{{ node.addresses|join:", "|default:"&mdash;" }}</dd>
-        <dt>{% trans "UUID" %}</dt>
-        <dd>{{ node.uuid|default:"&mdash;" }}</dd>
-        <dt>{% trans "Instance UUID" %}</dt>
-        <dd>{{ node.instance_uuid|default:"&mdash;" }}</dd>
-        <dt>{% trans "Driver" %}</dt>
-        <dd>{{ node.driver|default:"&mdash;" }}</dd>
-        <dt>{% trans "Power state" %}</dt>
-        <dd>{{ node.power_state|default:"&mdash;" }}</dd>
-      </dl>
+    <h4>{% trans "Info" %}</h4>
+    <dl class="clearfix">
+      <dt>{% trans "MAC Addresses" %}</dt>
+      <dd>{{ node.addresses|join:", "|default:"&mdash;" }}</dd>
+      <dt>{% trans "UUID" %}</dt>
+      <dd>{{ node.uuid|default:"&mdash;" }}</dd>
+      <dt>{% trans "Instance UUID" %}</dt>
+      <dd>{{ node.instance_uuid|default:"&mdash;" }}</dd>
+      <dt>{% trans "Driver" %}</dt>
+      <dd>{{ node.driver|default:"&mdash;" }}</dd>
+      <dt>{% trans "Power state" %}</dt>
+      <dd>{{ node.power_state|default:"&mdash;" }}</dd>
+    </dl>
   </div>
 </div>
 <div class="row-fluid">
   <div class="span6">
-      <h4>{% trans "Driver Info" %}</h4>
-      <dl class="clearfix">
-        <dt>{% trans "IPMI address" %}</dt>
-        <dd>{{ node.driver_info.ipmi_address|default:"&mdash;" }}</dd>
-        <dt>{% trans "IPMI username" %}</dt>
-        <dd>{{ node.driver_info.ipmi_username|default:"&mdash;" }}</dd>
-        <dt>{% trans "IPMI password" %}</dt>
-        <dd>{{ node.driver_info.ipmi_password|default:"&mdash;" }}</dd>
-      </dl>
+    <h4>{% trans "Driver Info" %}</h4>
+    <dl class="clearfix">
+      <dt>{% trans "IPMI address" %}</dt>
+      <dd>{{ node.driver_info.ipmi_address|default:"&mdash;" }}</dd>
+      <dt>{% trans "IPMI username" %}</dt>
+      <dd>{{ node.driver_info.ipmi_username|default:"&mdash;" }}</dd>
+      <dt>{% trans "IPMI password" %}</dt>
+      <dd>{{ node.driver_info.ipmi_password|default:"&mdash;" }}</dd>
+    </dl>
   </div>
   <div class="span6">
-      <h4>{% trans "Properties" %}</h4>
-      <dl class="clearfix">
-        <dt>{% trans "Local disk" %}</dt>
-        <dd>{{ node.properties.local_disk|filesizeformat|default:"&mdash;" }}</dd>
-        <dt>{% trans "RAM" %}</dt>
-        <dd>{{ node.properties.ram|filesizeformat|default:"&mdash;" }}</dd>
-        <dt>{% trans "CPU" %}</dt>
-        <dd>{{ node.properties.cpu|default:"&mdash;" }}</dd>
-      </dl>
+    <h4>{% trans "Properties" %}</h4>
+    <dl class="clearfix">
+      <dt>{% trans "Local disk" %}</dt>
+      <dd>{{ node.properties.local_disk|filesizeformat|default:"&mdash;" }}</dd>
+      <dt>{% trans "RAM" %}</dt>
+      <dd>{{ node.properties.ram|filesizeformat|default:"&mdash;" }}</dd>
+      <dt>{% trans "CPU" %}</dt>
+      <dd>{{ node.properties.cpu|default:"&mdash;" }}</dd>
+    </dl>
   </div>
 </div>
+
+<h2>{% trans "Performance and Capacity" %}</h2>
+<br />
+{% url 'horizon:infrastructure:nodes:performance' node.id as node_perf_url %}
+
+<table>
+  <tr>
+    <td>
+      {% include "infrastructure/nodes/_performance_chart.html" with label="CPU" url=node_perf_url|add:"?meter=cpu" only %}
+    </td>
+    <td>
+      {% include "infrastructure/nodes/_performance_chart.html" with label="Disk" url=node_perf_url|add:"?meter=disk" only %}
+    </td>
+    <td>
+      {% include "infrastructure/nodes/_performance_chart.html" with label="Network Bandwidth (In)" url=node_perf_url|add:"?meter=network-in" only %}
+    </td>
+    <td>
+      {% include "infrastructure/nodes/_performance_chart.html" with label="Energy" url=node_perf_url|add:"?meter=energy" only %}
+    </td>
+  </tr>
+  <tr>
+    <td>
+      {% include "infrastructure/nodes/_performance_chart.html" with label="Memory" url=node_perf_url|add:"?meter=memory" only %}
+    </td>
+    <td>
+      {% include "infrastructure/nodes/_performance_chart.html" with label="Swap" url=node_perf_url|add:"?meter=swap" only %}
+    </td>
+    <td>
+      {% include "infrastructure/nodes/_performance_chart.html" with label="Network Bandwidth (Out)" url=node_perf_url|add:"?meter=network-out" only %}
+    </td>
+    <td>
+      {% include "infrastructure/nodes/_performance_chart.html" with label="Power" url=node_perf_url|add:"?meter=power" only %}
+    </td>
+  </tr>
+</table>
+
 {% endblock %}

@@ -24,4 +24,6 @@ urlpatterns = urls.patterns(
              name='register'),
     urls.url(r'^(?P<node_uuid>[^/]+)/$', views.DetailView.as_view(),
              name='detail'),
+    urls.url(r'^(?P<node_uuid>[^/]+)/performance/$',
+             views.PerformanceView.as_view(), name='performance'),
 )
