@@ -441,3 +441,14 @@ def data(TEST):
          'disk': 60})
     flavor_2.get_keys = lambda: {'cpu_arch': 'i386'}
     TEST.novaclient_flavors.add(flavor_1, flavor_2)
+
+    # OvercloudRoles with flavors associated
+    TEST.tuskarclient_roles_with_flavors = test_data_utils.TestDataContainer()
+    role_with_flavor = overcloud_roles.OvercloudRole(
+        overcloud_roles.OvercloudRoleManager(None),
+        {'id': 5,
+         'name': 'Block Storage',
+         'description': 'block storage overcloud role',
+         'flavor_id': '1',
+         'image_name': 'overcloud-block-storage'})
+    TEST.tuskarclient_roles_with_flavors.add(role_with_flavor)
