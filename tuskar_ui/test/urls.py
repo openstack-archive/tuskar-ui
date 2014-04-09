@@ -14,8 +14,14 @@
 from django.conf import urls
 from django.views import generic
 
+import openstack_dashboard.urls
 
-urlpatterns = urls.patterns('', urls.url(
-    r'^$',
-    generic.TemplateView.as_view(template_name="infrastructure/qunit.html"),
-    name='qunit_tests'))
+urlpatterns = urls.patterns(
+    '',
+    urls.url(
+        r'^qunit_tuskar',
+        generic.TemplateView.as_view(
+            template_name="infrastructure/qunit.html"),
+        name='qunit_tests'),
+    urls.url(r'', urls.include(openstack_dashboard.urls))
+)
