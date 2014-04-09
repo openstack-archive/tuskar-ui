@@ -15,6 +15,7 @@ import keystoneclient
 import logging
 import urlparse
 
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
 from novaclient.v1_1.contrib import baremetal
@@ -23,7 +24,7 @@ from openstack_dashboard.api import glance
 from openstack_dashboard.api import heat
 from openstack_dashboard.api import keystone
 from openstack_dashboard.api import nova
-from tuskarclient.v1 import client as tuskar_client
+from tuskarclient import client as tuskar_client
 
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
@@ -76,11 +77,22 @@ def baremetalclient(request):
     return baremetal.BareMetalNodeManager(nc)
 
 
-# FIXME: request isn't used right in the tuskar client right now,
-# but looking at other clients, it seems like it will be in the future
-def tuskarclient(request):
-    c = tuskar_client.Client(TUSKAR_ENDPOINT_URL)
-    return c
+def tuskarclient(request, password=None):
+    api_version = "1"
+    insecure = getattr(settings, 'OPENSTACK_SSL_NO_VERIFY', False)
+    cacert = getattr(settings, 'OPENSTACK_SSL_CACERT', None)
+    endpoint = base.url_for(request, 'management')
+    LOG.debug('tuskarclient connection created using token "%s" and url "%s"' %
+              (request.user.token.id, endpoint))
+    kwargs = {
+        'insecure': insecure,
+        'ca_file': cacert,
+        'username': request.user.username,
+        'password': password,
+        'token': request.user.token.id,
+    }
+    client = tuskar_client.Client(api_version, endpoint, **kwargs)
+    return client
 
 
 def list_to_dict(object_list, key_attribute='id'):
