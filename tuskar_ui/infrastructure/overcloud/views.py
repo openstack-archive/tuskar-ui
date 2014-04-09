@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import novaclient
 
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
@@ -171,6 +172,8 @@ class OvercloudRoleView(horizon_tables.DataTableView,
 
         try:
             context['flavor'] = nova.flavor_get(self.request, role.flavor_id)
+        except novaclient.exceptions.NotFound:
+            context['flavor'] = None
         except Exception:
             msg = _('Unable to retrieve flavor.')
             horizon.exceptions.handle(self.request, msg)
