@@ -13,11 +13,13 @@
 #    under the License.
 
 import contextlib
+import json
 
 from django.core import urlresolvers
 
 from mock import patch, call  # noqa
 
+from openstack_dashboard.test import helpers
 from openstack_dashboard.test.test_data import utils
 from tuskar_ui import api as api
 from tuskar_ui.handle_errors import handle_errors  # noqa
@@ -28,11 +30,12 @@ from tuskar_ui.test.test_data import tuskar_data
 INDEX_URL = urlresolvers.reverse('horizon:infrastructure:nodes:index')
 REGISTER_URL = urlresolvers.reverse('horizon:infrastructure:nodes:register')
 DETAIL_VIEW = 'horizon:infrastructure:nodes:detail'
+PERFORMANCE_VIEW = 'horizon:infrastructure:nodes:performance'
 TEST_DATA = utils.TestDataContainer()
 tuskar_data.data(TEST_DATA)
 
 
-class NodesTests(test.BaseAdminViewTests):
+class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
     @handle_errors("Error!", [])
     def _raise_tuskar_exception(self, request, *args, **kwargs):
         raise self.exceptions.tuskar
@@ -240,3 +243,30 @@ class NodesTests(test.BaseAdminViewTests):
             self.assertEqual(mock.get.call_count, 1)
 
         self.assertRedirectsNoFollow(res, INDEX_URL)
+
+    def test_performance(self):
+        node = api.Node(self.ironicclient_nodes.list()[0])
+        meters = self.meters.list()
+        resources = self.resources.list()
+
+        ceilometerclient = self.stub_ceilometerclient()
+        ceilometerclient.resources = self.mox.CreateMockAnything()
+        ceilometerclient.resources.list(q=[]).AndReturn(resources)
+        ceilometerclient.meters = self.mox.CreateMockAnything()
+        ceilometerclient.meters.list(None).AndReturn(meters)
+
+        self.mox.ReplayAll()
+
+        with patch('tuskar_ui.api.Node', **{
+            'spec_set': ['get'],
+            'get.return_value': node,
+        }):
+            url = urlresolvers.reverse(PERFORMANCE_VIEW, args=(node.uuid,))
+            url += '?meter=cpu&date_options=7'
+            res = self.client.get(url)
+
+        json_content = json.loads(res.content)
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('series', json_content)
+        self.assertIn('settings', json_content)
+        self.assertIn('stats', json_content)
