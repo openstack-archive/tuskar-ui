@@ -243,7 +243,7 @@ def data(TEST):
              'ram': '16',
              'local_disk': '10',
          },
-         'power_state': 'on',
+         'power_state': 'error',
 
          # FIXME(lsmola) nova-baremetal test attrs, delete when Ironic is in
          "pm_address": None,

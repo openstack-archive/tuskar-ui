@@ -370,3 +370,16 @@ class TuskarAPITests(test.APITestCase):
             ret_val = api.OvercloudRole.get(self.request, role.id)
 
         self.assertIsInstance(ret_val, api.OvercloudRole)
+
+    def test_filter_nodes(self):
+        nodes = self.ironicclient_nodes.list()
+        num_nodes = len(nodes)
+
+        with patch('novaclient.v1_1.contrib.baremetal.'
+                   'BareMetalNodeManager.list', return_value=nodes):
+            all_nodes = api.filter_nodes(nodes)
+            healthy_nodes = api.filter_nodes(nodes, healthy=True)
+            defective_nodes = api.filter_nodes(nodes, healthy=False)
+        self.assertEqual(len(all_nodes), num_nodes)
+        self.assertEqual(len(healthy_nodes), num_nodes - 1)
+        self.assertEqual(len(defective_nodes), 1)

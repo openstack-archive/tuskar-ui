@@ -1037,3 +1037,27 @@ class OvercloudRole(base.APIResourceWrapper):
             if attr not in self._attrs:
                 raise TypeError('Invalid parameter %r' % attr)
         tuskarclient(request).overcloud_roles.update(self.id, **kwargs)
+
+
+def filter_nodes(nodes, healthy=None):
+    """Filters the list of Nodes and returns the filtered list.
+
+    :param nodes:   list of tuskar_ui.api.Node objects to filter
+    :type  nodes:   list
+    :param healthy: retrieve all Nodes (healthy=None),
+                    only the healthly ones (healthy=True),
+                    or only those in an error state (healthy=False)
+    :type  healthy: None or bool
+    :return:        list of filtered tuskar_ui.api.Node objects
+    :rtype:         list
+    """
+    error_states = ('deploy failed', 'error',)
+
+    if healthy is not None:
+        if healthy:
+            nodes = [node for node in nodes
+                     if node.power_state not in error_states]
+        else:
+            nodes = [node for node in nodes
+                     if node.power_state in error_states]
+    return nodes
