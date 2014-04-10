@@ -11,7 +11,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf import urls
+from django.conf.urls import patterns, include, url
 from django.views import generic
 
 
