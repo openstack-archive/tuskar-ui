@@ -6,7 +6,7 @@ set -o errexit
 # Increment me any time the environment should be rebuilt.
 # This includes dependency changes, directory renames, etc.
 # Simple integer sequence: 1, 2, 3...
-environment_version=41
+environment_version=42
 #--------------------------------------------------------#
 
 function usage {
@@ -31,6 +31,7 @@ function usage {
   echo "                           Implies -V if -N is not set."
   echo "  --only-selenium          Run only the Selenium unit tests"
   echo "  --with-selenium          Run unit tests including Selenium tests"
+  echo "  --selenium-headless      Run Selenium tests headless"
   echo "  --runserver              Run the Django development server for"
   echo "                           openstack_dashboard in the virtual"
   echo "                           environment."
@@ -69,6 +70,7 @@ restore_env=0
 runserver=0
 only_selenium=0
 with_selenium=0
+selenium_headless=0
 testopts=""
 testargs=""
 with_coverage=0
@@ -113,6 +115,7 @@ function process_option {
     --compilemessages) compilemessages=1;;
     --only-selenium) only_selenium=1;;
     --with-selenium) with_selenium=1;;
+    --selenium-headless) selenium_headless=1;;
     --docs) just_docs=1;;
     --runserver) runserver=1;;
     --backup-environment) backup_env=1;;
@@ -290,6 +293,10 @@ function run_tests {
   elif [ $only_selenium -eq 1 ]; then
     export WITH_SELENIUM=1
     export SKIP_UNITTESTS=1
+  fi
+
+  if [ $selenium_headless -eq 1 ]; then
+    export SELENIUM_HEADLESS=1
   fi
 
   if [ -z "$testargs" ]; then
