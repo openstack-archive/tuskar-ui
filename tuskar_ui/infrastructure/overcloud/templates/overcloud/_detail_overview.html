@@ -58,6 +58,7 @@
       <p>You need to run the below commands on the machine where you have tripleo source code and
          direct access through ssh to control node ({{overcloud.keystone_ip}}).
       </p>
+      <h3>If you have installed Undercloud using Devtest</h3>
       <pre>
   export TRIPLEO_ROOT=~/tripleo
   cd $TRIPLEO_ROOT
@@ -94,6 +95,47 @@
       --nova-password $OVERCLOUD_NOVA_PASSWORD \
       --swift-password $OVERCLOUD_SWIFT_PASSWORD \
       --enable-horizon \
+      ${SSLBASE:+--ssl $PUBLIC_API_URL}
+  keystone role-create --name heat_stack_user
+      </pre>
+      <h3>If you have installed Undercloud using Instack</h3>
+      <pre>
+  if [ -d /etc/tripleo ]; then
+      TRIPLEO_ROOT=/etc/tripleo
+  else
+      TRIPLEO_ROOT=/opt/stack/tripleo-incubator
+  fi
+
+  export OVERCLOUD_IP={{overcloud.keystone_ip}}
+
+  export OVERCLOUD_ADMIN_TOKEN={{overcloud.attributes.AdminToken}}
+  export OVERCLOUD_ADMIN_PASSWORD={{overcloud.attributes.AdminPassword}}
+  export OVERCLOUD_CEILOMETER_PASSWORD={{overcloud.attributes.CeilometerPassword}}
+  export OVERCLOUD_CINDER_PASSWORD={{overcloud.attributes.CinderPassword}}
+  export OVERCLOUD_GLANCE_PASSWORD={{overcloud.attributes.GlancePassword}}
+  export OVERCLOUD_HEAT_PASSWORD={{overcloud.attributes.HeatPassword}}
+  export OVERCLOUD_NEUTRON_PASSWORD={{overcloud.attributes.NeutronPassword}}
+  export OVERCLOUD_NOVA_PASSWORD={{overcloud.attributes.NovaPassword}}
+  export OVERCLOUD_SWIFT_PASSWORD={{overcloud.attributes.SwiftPassword}}
+  export OVERCLOUD_SWIFT_HASH={{overcloud.attributes.SwiftHashSuffix}}
+
+  OVERCLOUD_ENDPOINT="http://$OVERCLOUD_IP:5000/v2.0"
+  NEW_JSON=$(jq '.overcloud.password="'${OVERCLOUD_ADMIN_PASSWORD}'" | .overcloud.endpoint="'${OVERCLOUD_ENDPOINT}'" | .overcloud.endpointhost="'${OVERCLOUD_IP}'"' $JSONFILE)
+
+  echo $NEW_JSON > $JSONFILE
+
+  export TE_DATAFILE=$JSONFILE
+  source $TRIPLEO_ROOT/overcloudrc
+
+  tripleo init-keystone -p $OVERCLOUD_ADMIN_PASSWORD $OVERCLOUD_ADMIN_TOKEN \
+      $OVERCLOUD_IP admin@example.com heat-admin@$OVERCLOUD_IP \
+      ${SSLBASE:+--ssl $PUBLIC_API_URL}
+  tripleo setup-endpoints $OVERCLOUD_IP --cinder-password $OVERCLOUD_CINDER_PASSWORD \
+      --glance-password $OVERCLOUD_GLANCE_PASSWORD \
+      --heat-password $OVERCLOUD_HEAT_PASSWORD \
+      --neutron-password $OVERCLOUD_NEUTRON_PASSWORD \
+      --nova-password $OVERCLOUD_NOVA_PASSWORD \
+      --swift-password $OVERCLOUD_SWIFT_PASSWORD \
       ${SSLBASE:+--ssl $PUBLIC_API_URL}
   keystone role-create --name heat_stack_user
       </pre>
