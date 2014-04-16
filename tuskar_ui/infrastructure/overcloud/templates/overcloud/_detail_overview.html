@@ -48,17 +48,19 @@
 {% if not dashboard_urls and not overcloud.is_deploying and not overcloud.is_failed %}
 <div class="row-fluid">
   <div class="span8">
-    <p>Your OpenStack Deployment has been successfully deployed. It needs to be initialized before you will be able to use it.
-    <p/>
+    {% blocktrans %}
+      Your cloud is now deployed; however, it needs to be initialized.
+    {% endblocktrans %}
+    <ul>
+      <li>
+        {% blocktrans %}
+          For <strong>Devtest</strong> users you can <a data-toggle="collapse" data-target="#devtest">see instructions here</a>.
+        {% endblocktrans %}
+        <div id="devtest" class="collapse">
+          <pre>
+  # You need to run the below commands on the machine where you have tripleo source code and
+  # direct access through ssh to control node ({{overcloud.keystone_ip}}).
 
-    <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#demo">
-    Initialize
-    </button>
-    <div id="demo" class="collapse">
-      <p>You need to run the below commands on the machine where you have tripleo source code and
-         direct access through ssh to control node ({{overcloud.keystone_ip}}).
-      </p>
-      <pre>
   export TRIPLEO_ROOT=~/tripleo
   cd $TRIPLEO_ROOT
 
@@ -96,8 +98,55 @@
       --enable-horizon \
       ${SSLBASE:+--ssl $PUBLIC_API_URL}
   keystone role-create --name heat_stack_user
-      </pre>
-    </div>
+          </pre>
+        </div>
+      </li>
+      <li>
+        {% blocktrans %}
+          For <strong>Instack</strong> users you can <a data-toggle="collapse" data-target="#instack">see instructions here</a>.
+        {% endblocktrans %}
+        <div id="instack" class="collapse">
+          <pre>
+  # You need to run the below commands on the Undercloud node
+  # direct access through ssh to Overcloud control node ({{overcloud.keystone_ip}}).
+
+  # Usually stack user has access to Overcloud control node, so switch to stack user
+  su stack
+
+  export OVERCLOUD_IP={{overcloud.keystone_ip}}
+
+  export OVERCLOUD_ADMIN_TOKEN={{overcloud.attributes.AdminToken}}
+  export OVERCLOUD_ADMIN_PASSWORD={{overcloud.attributes.AdminPassword}}
+  export OVERCLOUD_CEILOMETER_PASSWORD={{overcloud.attributes.CeilometerPassword}}
+  export OVERCLOUD_CINDER_PASSWORD={{overcloud.attributes.CinderPassword}}
+  export OVERCLOUD_GLANCE_PASSWORD={{overcloud.attributes.GlancePassword}}
+  export OVERCLOUD_HEAT_PASSWORD={{overcloud.attributes.HeatPassword}}
+  export OVERCLOUD_NEUTRON_PASSWORD={{overcloud.attributes.NeutronPassword}}
+  export OVERCLOUD_NOVA_PASSWORD={{overcloud.attributes.NovaPassword}}
+  export OVERCLOUD_SWIFT_PASSWORD={{overcloud.attributes.SwiftPassword}}
+  export OVERCLOUD_SWIFT_HASH={{overcloud.attributes.SwiftHashSuffix}}
+
+  source /etc/tripleo/overcloudrc
+
+  tripleo init-keystone -p $OVERCLOUD_ADMIN_PASSWORD $OVERCLOUD_ADMIN_TOKEN \
+      $OVERCLOUD_IP admin@example.com heat-admin@$OVERCLOUD_IP
+  tripleo setup-endpoints $OVERCLOUD_IP --cinder-password $OVERCLOUD_CINDER_PASSWORD \
+      --glance-password $OVERCLOUD_GLANCE_PASSWORD \
+      --heat-password $OVERCLOUD_HEAT_PASSWORD \
+      --neutron-password $OVERCLOUD_NEUTRON_PASSWORD \
+      --nova-password $OVERCLOUD_NOVA_PASSWORD \
+      --swift-password $OVERCLOUD_SWIFT_PASSWORD
+  keystone role-create --name heat_stack_user
+          </pre>
+        </div>
+      </li>
+    </ul>
+    <p class="muted">
+      {% blocktrans %}
+        For more information, see our <a href="https://wiki.openstack.org/wiki/Tuskar/UsageGuide#Post-Deployment">documentation</a>
+        . We are working on improving your experience here.
+      {% endblocktrans %}
+    </p>
   </div>
 </div>
 {% endif %}
@@ -179,7 +228,7 @@
           </p>
         {% endfor %}
       {% else %}
-         You need to initialize your OpenStack Deployment first.
+         {% trans "You need to initialize your OpenStack Deployment first." %}
       {% endif %}
     </div>
   </div>
