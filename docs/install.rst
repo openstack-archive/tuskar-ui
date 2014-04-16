@@ -1,26 +1,30 @@
 Setup
 =====
 
-This is a quick guide to setting up tuskar-ui.
+Note
+----
+
+If you want to install and configure the entire TripleO + Tuskar + Tuskar UI
+stack, you can use
+`the devtest installation guide <https://wiki.openstack.org/wiki/Tuskar/Devtest>`_.
+
+Otherwise, you can use the installation instructions for Tuskar UI below.
 
 Prerequisites
 -------------
 
-tuskar-ui is a web UI for talking to Tuskar. It is an extension of the
-existing Horizon web interface.
-
 Installation prerequisites are:
 
-1. A functional OpenStack installation. Horizon and tuskar-ui will
+1. A functional OpenStack installation. Horizon and Tuskar UI will
    connect to the Keystone service here. Keystone does *not* need to be
-   on the same machine as your tuskar-ui interface, but its HTTP API
+   on the same machine as your Tuskar UI interface, but its HTTP API
    must be accessible.
-2. A functional Tuskar installation. tuskar-ui talks to Tuskar via an
+2. A functional Tuskar installation. Tuskar UI talks to Tuskar via an
    HTTP interface. It may, but does not have to, reside on the same
-   machine as tuskar-ui, but it must be network accessible.
+   machine as Tuskar UI, but it must be network accessible.
 
 You may find
-`the Tuskar install guide <https://github.com/openstack/tuskar/blob/master/docs/INSTALL.rst>`_
+`the Tuskar install guide <https://github.com/openstack/tuskar/blob/master/doc/source/INSTALL.rst>`_
 helpful.
 
 For baremetal provisioning, you will want a Nova Baremetal driver
@@ -33,7 +37,7 @@ If you are using Devstack to run OpenStack, you can use
 Installing the packages
 -----------------------
 
-tuskar-ui is a Django app written in Python and has a few installation
+Tuskar UI is a Django app written in Python and has a few installation
 dependencies:
 
 On a RHEL 6 system, you should install the following:
@@ -57,7 +61,7 @@ other tools:
 Install the management UI
 -------------------------
 
-Begin by cloning the horizon and tuskar-ui repositories:
+Begin by cloning the Horizon and Tuskar UI repositories:
 
 ::
 
@@ -93,7 +97,7 @@ editor. You will want to customize several settings:
 -  ``TUSKAR_ENDPOINT_URL`` should point to the Tuskar server you
    configured. It normally runs on port 8585.
 
-Install Tuskar-UI with all dependencies in your virtual environment::
+Install Tuskar UI with all dependencies in your virtual environment::
 
     tools/with_venv.sh pip install -r ../tuskar-ui/requirements.txt
     tools/with_venv.sh pip install -e ../tuskar-ui/
@@ -117,7 +121,7 @@ If everything has gone according to plan, you should be able to run:
 
     tools/with_venv.sh ./manage.py runserver
 
-and have the application start on port 8080. The Tuskar dashboard will
+and have the application start on port 8080. The Tuskar UI dashboard will
 be located at http://localhost:8080/infrastructure
 
 If you wish to access it remotely (i.e., not just from localhost), you

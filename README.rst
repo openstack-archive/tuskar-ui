@@ -1,7 +1,8 @@
-tuskar-ui
+=========
+Tuskar UI
 =========
 
-**tuskar-ui** is a user interface for
+**Tuskar UI** is a user interface for
 `Tuskar <https://github.com/openstack/tuskar>`__, a management API for
 OpenStack deployments. It is a plugin for `OpenStack
 Horizon <https://wiki.openstack.org/wiki/Horizon>`__.
@@ -9,15 +10,18 @@ Horizon <https://wiki.openstack.org/wiki/Horizon>`__.
 High-Level Overview
 -------------------
 
-Tuskar-UI endeavours to be a stateless UI, relying on Tuskar API calls
+Tuskar UI endeavours to be a stateless UI, relying on Tuskar API calls
 as much as possible. We use existing Horizon libraries and components
 where possible. If added libraries and components are needed, we will
 work with the OpenStack community to push those changes back into Horizon.
 
-Code Repository
----------------
+Interested in seeing Tuskar and Tuskar UI in action?
+`Watch a demo! <https://www.youtube.com/watch?v=-6whFIqCqLU>`_
 
-We've moved the code to `OpenStack <https://github.com/openstack>`__.
+Contributing
+------------
+
+The code repository is located at `OpenStack <https://github.com/openstack>`__.
 Please go there if you want to check it out:
 
     git clone https://github.com/openstack/tuskar-ui.git
@@ -32,23 +36,24 @@ We use OpenStack's Gerrit for the code contributions:
 
 and we follow the `OpenStack Gerrit Workflow <https://wiki.openstack.org/wiki/Gerrit_Workflow>`__.
 
+If you're interested in the code, here are some key places to start:
+
+* `tuskar_ui/api.py <https://github.com/openstack/tuskar-ui/blob/master/tuskar_ui/api.py>`_
+  - This file contains all the API calls made to the Tuskar API
+  (through python-tuskarclient).
+* `tuskar_ui/infrastructure <https://github.com/openstack/tuskar-ui/tree/master/tuskar_ui/infrastructure>`_
+  - The Tuskar UI code is contained within this directory.
+
 Installation Guide
 ------------------
 
-Use the `Installation Guide <https://github.com/openstack/tuskar-ui/blob/master/docs/install.rst>`_ to install Tuskar-UI.
+Use the `Installation Guide <https://github.com/openstack/tuskar-ui/blob/master/docs/install.rst>`_ to install Tuskar UI.
 
 License
 -------
 
 This project is licensed under the Apache License, version 2. More
 information can be found in the LICENSE file.
-
-Further Documentation
----------------------
-
-Check out our `docs directory
-<https://github.com/openstack/tuskar-ui/blob/master/docs/index.rst>`_
-for expanded documentation.
 
 Contact Us
 ----------
