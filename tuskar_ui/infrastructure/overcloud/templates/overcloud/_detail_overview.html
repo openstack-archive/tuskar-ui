@@ -51,52 +51,8 @@
     <p>Your OpenStack Deployment has been successfully deployed. It needs to be initialized before you will be able to use it.
     <p/>
 
-    <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#demo">
-    Initialize
-    </button>
-    <div id="demo" class="collapse">
-      <p>You need to run the below commands on the machine where you have tripleo source code and
-         direct access through ssh to control node ({{overcloud.keystone_ip}}).
-      </p>
-      <pre>
-  export TRIPLEO_ROOT=~/tripleo
-  cd $TRIPLEO_ROOT
-
-  # Be careful to source tripleorc here, some variables are rewritten below
-  source $TRIPLEO_ROOT/tripleorc
-
-  export OVERCLOUD_IP={{overcloud.keystone_ip}}
-
-  export OVERCLOUD_ADMIN_TOKEN={{overcloud.attributes.AdminToken}}
-  export OVERCLOUD_ADMIN_PASSWORD={{overcloud.attributes.AdminPassword}}
-  export OVERCLOUD_CEILOMETER_PASSWORD={{overcloud.attributes.CeilometerPassword}}
-  export OVERCLOUD_CINDER_PASSWORD={{overcloud.attributes.CinderPassword}}
-  export OVERCLOUD_GLANCE_PASSWORD={{overcloud.attributes.GlancePassword}}
-  export OVERCLOUD_HEAT_PASSWORD={{overcloud.attributes.HeatPassword}}
-  export OVERCLOUD_NEUTRON_PASSWORD={{overcloud.attributes.NeutronPassword}}
-  export OVERCLOUD_NOVA_PASSWORD={{overcloud.attributes.NovaPassword}}
-  export OVERCLOUD_SWIFT_PASSWORD={{overcloud.attributes.SwiftPassword}}
-  export OVERCLOUD_SWIFT_HASH={{overcloud.attributes.SwiftHashSuffix}}
-
-  OVERCLOUD_ENDPOINT="http://$OVERCLOUD_IP:5000/v2.0"
-  NEW_JSON=$(jq '.overcloud.password="'${OVERCLOUD_ADMIN_PASSWORD}'" | .overcloud.endpoint="'${OVERCLOUD_ENDPOINT}'" | .overcloud.endpointhost="'${OVERCLOUD_IP}'"' $TE_DATAFILE)
-  echo $NEW_JSON > $TE_DATAFILE
-
-  source ./tripleo-incubator/overcloudrc
-
-  init-keystone -p $OVERCLOUD_ADMIN_PASSWORD $OVERCLOUD_ADMIN_TOKEN \
-      $OVERCLOUD_IP admin@example.com heat-admin@$OVERCLOUD_IP \
-      ${SSLBASE:+--ssl $PUBLIC_API_URL}
-  setup-endpoints $OVERCLOUD_IP --cinder-password $OVERCLOUD_CINDER_PASSWORD \
-      --glance-password $OVERCLOUD_GLANCE_PASSWORD \
-      --heat-password $OVERCLOUD_HEAT_PASSWORD \
-      --neutron-password $OVERCLOUD_NEUTRON_PASSWORD \
-      --nova-password $OVERCLOUD_NOVA_PASSWORD \
-      --swift-password $OVERCLOUD_SWIFT_PASSWORD \
-      --enable-horizon \
-      ${SSLBASE:+--ssl $PUBLIC_API_URL}
-  keystone role-create --name heat_stack_user
-      </pre>
+    <div>
+      RTFM http://docs.openstack.org/developer/tripleo-incubator/devtest_overcloud.html
     </div>
   </div>
 </div>
