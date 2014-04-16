@@ -20,7 +20,7 @@ Installation prerequisites are:
    machine as tuskar-ui, but it must be network accessible.
 
 You may find
-`the Tuskar install guide <https://github.com/openstack/tuskar/blob/master/docs/INSTALL.rst>`_
+`the Tuskar install guide <https://github.com/openstack/tuskar/blob/master/doc/source/INSTALL.rst>`_
 helpful.
 
 For baremetal provisioning, you will want a Nova Baremetal driver
