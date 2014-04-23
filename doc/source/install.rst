@@ -1,5 +1,5 @@
-Setup
-=====
+Installation instructions
+=========================
 
 Note
 ----
@@ -32,7 +32,7 @@ installed and registered in the Keystone services catalog. (You can
 `read more about setting up Nova Baremetal here <https://wiki.openstack.org/wiki/Baremetal>`_.)
 
 If you are using Devstack to run OpenStack, you can use
-`Devstack Baremetal configuration <https://github.com/openstack/tuskar-ui/blob/master/docs/devstack_baremetal.rst>`_.
+:doc:`Devstack Baremetal configuration <devstack_baremetal>`.
 
 Installing the packages
 -----------------------
