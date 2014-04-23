@@ -31,10 +31,11 @@ def make_field(name, Type, NoEcho, Default, Description, AllowedValues=None,
         attrs['placeholder'] = _("auto-generate")
     if Type == 'String':
         Field = django.forms.CharField
-    elif Type == 'Integer':
-        Field = django.forms.IntegerField
+    elif Type == 'Number':
+        Field = django.forms.FloatField
     else:
-        raise ValueError("Unsupported parameter type in Heat template.")
+        raise ValueError(
+            "Unsupported parameter type `%s` in Heat template." % Type)
     if NoEcho == 'true':
         Widget = django.forms.PasswordInput
         widget_kwargs['render_value'] = True
