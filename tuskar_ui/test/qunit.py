@@ -15,6 +15,7 @@
 #    under the License.
 
 from horizon.test import helpers as test
+from selenium.common import exceptions as exc
 
 
 class BrowserTests(test.SeleniumTestCase):
@@ -28,5 +29,22 @@ class BrowserTests(test.SeleniumTestCase):
             return "Tests completed" in text
 
         wait.until(qunit_done)
-        failed = self.selenium.find_element_by_class_name("failed")
-        self.assertEqual(int(failed.text), 0)
+
+        failed_elem = self.selenium.find_element_by_class_name("failed")
+        failed = int(failed_elem.text)
+        if failed:
+            self.print_failures()
+
+        self.assertEqual(failed, 0)
+
+    def print_failures(self):
+        fail_elems = self.selenium.find_elements_by_class_name("fail")
+        for elem in fail_elems:
+            try:
+                module = elem.find_element_by_class_name("module-name").text
+                message = elem.find_element_by_class_name("test-message").text
+                source = elem.find_element_by_tag_name("pre").text
+                print("\nError in test: %s\nMessage: %s\nSource: %s" % (
+                    module, message, source))
+            except exc.NoSuchElementException:
+                continue
