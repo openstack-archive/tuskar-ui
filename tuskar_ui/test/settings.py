@@ -121,6 +121,11 @@ LOGGING['loggers']['openstack_dashboard'] = {
     'propagate': False,
 }
 
+LOGGING['loggers']['selenium'] = {
+    'handlers': ['test'],
+    'propagate': False,
+}
+
 SECURITY_GROUP_RULES = {
     'all_tcp': {
         'name': 'ALL TCP',
