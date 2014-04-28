@@ -22,7 +22,7 @@ Interested in seeing Tuskar and Tuskar UI in action?
 Installation Guide
 ------------------
 
-Use the `Installation Guide <https://github.com/openstack/tuskar-ui/blob/master/docs/install.rst>`_ to install Tuskar UI.
+Use the `Installation Guide <http://tuskar-ui.readthedocs.org/en/latest/install.html>`_ to install Tuskar UI.
 
 License
 -------
