@@ -32,10 +32,16 @@ def make_field(name, Type, NoEcho, Default, Description, AllowedValues=None,
     if Type == 'String':
         Field = django.forms.CharField
     elif Type == 'Number':
-        Field = django.forms.FloatField
+        # Heat needs string here
+        Field = django.forms.CharField
+    elif Type == 'Json':
+        Field = django.forms.CharField
     else:
-        raise ValueError(
-            "Unsupported parameter type %r in Heat template." % Type)
+        # TODO(lsmola) we should use Horizon code for generating of the form.
+        # There it should have list of all supported types according to Heat
+        # specification.
+        Field = django.forms.CharField
+
     if NoEcho == 'true':
         Widget = django.forms.PasswordInput
         widget_kwargs['render_value'] = True
