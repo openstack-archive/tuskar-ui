@@ -49,93 +49,126 @@
 <div class="row-fluid">
   <div class="span8">
     {% blocktrans %}
-      Your cloud is now deployed; however, it needs to be initialized.
+      Your cloud is now deployed; however, it needs to be initialized.  To do so, copy the appropriate script into a file, make it executable, and run it.
     {% endblocktrans %}
     <ul>
       <li>
         {% blocktrans %}
-          For <strong>Devtest</strong> users you can <a data-toggle="collapse" data-target="#devtest">see instructions here</a>.
+          <a data-toggle="collapse" data-target="#devtest"><strong>Devtest</strong> cloud initialization script</a>
         {% endblocktrans %}
         <div id="devtest" class="collapse">
           <pre>
-  # You need to run the following commands from a machine where you have a checkout of the tripleo source code
-  # and direct access via SSH to your Overcloud control node ({{overcloud.keystone_ip}}).
+#!/usr/bin/bash
 
-  export TRIPLEO_ROOT=~/tripleo
-  cd $TRIPLEO_ROOT
+# You need to run the following commands from a machine where you have a checkout of the tripleo source code
+# and direct access via SSH to your Overcloud control node ({{overcloud.keystone_ip}}).
 
-  # Be careful to source tripleorc here, some variables are rewritten below
-  source $TRIPLEO_ROOT/tripleorc
+set -eux
 
-  export OVERCLOUD_IP={{overcloud.keystone_ip}}
+export TRIPLEO_ROOT=~/tripleo
+cd $TRIPLEO_ROOT
 
-  export OVERCLOUD_ADMIN_TOKEN={{overcloud.attributes.AdminToken}}
-  export OVERCLOUD_ADMIN_PASSWORD={{overcloud.attributes.AdminPassword}}
-  export OVERCLOUD_CINDER_PASSWORD={{overcloud.attributes.CinderPassword}}
-  export OVERCLOUD_GLANCE_PASSWORD={{overcloud.attributes.GlancePassword}}
-  export OVERCLOUD_HEAT_PASSWORD={{overcloud.attributes.HeatPassword}}
-  export OVERCLOUD_NEUTRON_PASSWORD={{overcloud.attributes.NeutronPassword}}
-  export OVERCLOUD_NOVA_PASSWORD={{overcloud.attributes.NovaPassword}}
-  export OVERCLOUD_SWIFT_PASSWORD={{overcloud.attributes.SwiftPassword}}
-  export OVERCLOUD_SWIFT_HASH={{overcloud.attributes.SwiftHashSuffix}}
+# Be careful to source tripleorc here, some variables are rewritten below
+source $TRIPLEO_ROOT/tripleorc
 
-  OVERCLOUD_ENDPOINT="http://$OVERCLOUD_IP:5000/v2.0"
-  NEW_JSON=$(jq '.overcloud.password="'${OVERCLOUD_ADMIN_PASSWORD}'" | .overcloud.endpoint="'${OVERCLOUD_ENDPOINT}'" | .overcloud.endpointhost="'${OVERCLOUD_IP}'"' $TE_DATAFILE)
-  echo $NEW_JSON > $TE_DATAFILE
+export OVERCLOUD_IP={{overcloud.keystone_ip}}
 
-  source ./tripleo-incubator/overcloudrc
+export OVERCLOUD_ADMIN_TOKEN={{overcloud.attributes.AdminToken}}
+export OVERCLOUD_ADMIN_PASSWORD={{overcloud.attributes.AdminPassword}}
+export OVERCLOUD_CINDER_PASSWORD={{overcloud.attributes.CinderPassword}}
+export OVERCLOUD_GLANCE_PASSWORD={{overcloud.attributes.GlancePassword}}
+export OVERCLOUD_HEAT_PASSWORD={{overcloud.attributes.HeatPassword}}
+export OVERCLOUD_NEUTRON_PASSWORD={{overcloud.attributes.NeutronPassword}}
+export OVERCLOUD_NOVA_PASSWORD={{overcloud.attributes.NovaPassword}}
+export OVERCLOUD_SWIFT_PASSWORD={{overcloud.attributes.SwiftPassword}}
+export OVERCLOUD_SWIFT_HASH={{overcloud.attributes.SwiftHashSuffix}}
 
-  init-keystone -p $OVERCLOUD_ADMIN_PASSWORD $OVERCLOUD_ADMIN_TOKEN \
-      $OVERCLOUD_IP admin@example.com heat-admin@$OVERCLOUD_IP \
-      ${SSLBASE:+--ssl $PUBLIC_API_URL}
-  setup-endpoints $OVERCLOUD_IP --cinder-password $OVERCLOUD_CINDER_PASSWORD \
-      --glance-password $OVERCLOUD_GLANCE_PASSWORD \
-      --heat-password $OVERCLOUD_HEAT_PASSWORD \
-      --neutron-password $OVERCLOUD_NEUTRON_PASSWORD \
-      --nova-password $OVERCLOUD_NOVA_PASSWORD \
-      --swift-password $OVERCLOUD_SWIFT_PASSWORD \
-      --enable-horizon \
-      ${SSLBASE:+--ssl $PUBLIC_API_URL}
-  keystone role-create --name heat_stack_user
+OVERCLOUD_ENDPOINT="http://$OVERCLOUD_IP:5000/v2.0"
+NEW_JSON=$(jq '.overcloud.password="'${OVERCLOUD_ADMIN_PASSWORD}'" | .overcloud.endpoint="'${OVERCLOUD_ENDPOINT}'" | .overcloud.endpointhost="'${OVERCLOUD_IP}'"' $TE_DATAFILE)
+echo $NEW_JSON &gt; $TE_DATAFILE
+
+source ./tripleo-incubator/overcloudrc
+
+init-keystone -p $OVERCLOUD_ADMIN_PASSWORD $OVERCLOUD_ADMIN_TOKEN \
+    $OVERCLOUD_IP admin@example.com heat-admin@$OVERCLOUD_IP \
+    ${SSLBASE:+--ssl $PUBLIC_API_URL}
+setup-endpoints $OVERCLOUD_IP --cinder-password $OVERCLOUD_CINDER_PASSWORD \
+    --glance-password $OVERCLOUD_GLANCE_PASSWORD \
+    --heat-password $OVERCLOUD_HEAT_PASSWORD \
+    --neutron-password $OVERCLOUD_NEUTRON_PASSWORD \
+    --nova-password $OVERCLOUD_NOVA_PASSWORD \
+    --swift-password $OVERCLOUD_SWIFT_PASSWORD \
+    --enable-horizon \
+    ${SSLBASE:+--ssl $PUBLIC_API_URL}
+keystone role-create --name heat_stack_user
           </pre>
         </div>
       </li>
       <li>
         {% blocktrans %}
-          For <strong>Instack</strong> users you can <a data-toggle="collapse" data-target="#instack">see instructions here</a>.
+          <a data-toggle="collapse" data-target="#instack"><strong>Instack</strong> cloud initialization script</a>
         {% endblocktrans %}
         <div id="instack" class="collapse">
           <pre>
-  # You need to run the following commands from a Undercloud node where you have
-  # direct access via SSH to your Overcloud control node ({{overcloud.keystone_ip}}).
+#!/usr/bin/bash
 
-  # Usually stack user has access to Overcloud control node, so switch to stack user
-  su stack
+set -eux
 
-  export OVERCLOUD_IP={{overcloud.keystone_ip}}
+# You need to run the following commands from a Undercloud node where you have
+# direct access via SSH to your Overcloud control node ({{overcloud.keystone_ip}}).
 
-  export OVERCLOUD_ADMIN_TOKEN={{overcloud.attributes.AdminToken}}
-  export OVERCLOUD_ADMIN_PASSWORD={{overcloud.attributes.AdminPassword}}
-  export OVERCLOUD_CINDER_PASSWORD={{overcloud.attributes.CinderPassword}}
-  export OVERCLOUD_GLANCE_PASSWORD={{overcloud.attributes.GlancePassword}}
-  export OVERCLOUD_HEAT_PASSWORD={{overcloud.attributes.HeatPassword}}
-  export OVERCLOUD_NEUTRON_PASSWORD={{overcloud.attributes.NeutronPassword}}
-  export OVERCLOUD_NOVA_PASSWORD={{overcloud.attributes.NovaPassword}}
-  export OVERCLOUD_SWIFT_PASSWORD={{overcloud.attributes.SwiftPassword}}
-  export OVERCLOUD_SWIFT_HASH={{overcloud.attributes.SwiftHashSuffix}}
+# Run these commands as the user you used to install the undercloud, likely the stack
+# user if you followed the recommendations from http://openstack.redhat.com/Deploying_RDO_using_Instack.
+# The commands should also be run from the home directory of that user.
 
-  source /etc/tripleo/overcloudrc
+# Source your deploy-overcloudrc
+# This file was created when you followed http://openstack.redhat.com/Deploying_an_RDO_Overcloud_with_Instack
+source deploy-overcloudrc
 
-  tripleo init-keystone -p $OVERCLOUD_ADMIN_PASSWORD $OVERCLOUD_ADMIN_TOKEN \
-      $OVERCLOUD_IP admin@example.com heat-admin@$OVERCLOUD_IP
-  tripleo setup-endpoints $OVERCLOUD_IP --cinder-password $OVERCLOUD_CINDER_PASSWORD \
-      --glance-password $OVERCLOUD_GLANCE_PASSWORD \
-      --heat-password $OVERCLOUD_HEAT_PASSWORD \
-      --neutron-password $OVERCLOUD_NEUTRON_PASSWORD \
-      --nova-password $OVERCLOUD_NOVA_PASSWORD \
-      --swift-password $OVERCLOUD_SWIFT_PASSWORD \
-      --enable-horizon
-  keystone role-create --name heat_stack_user
+export OVERCLOUD_IP={{overcloud.keystone_ip}}
+
+cat &gt; tripleo-overcloud-passwords &lt;&lt;EOF
+export OVERCLOUD_ADMIN_TOKEN={{overcloud.attributes.AdminToken}}
+export OVERCLOUD_ADMIN_PASSWORD={{overcloud.attributes.AdminPassword}}
+export OVERCLOUD_CINDER_PASSWORD={{overcloud.attributes.CinderPassword}}
+export OVERCLOUD_GLANCE_PASSWORD={{overcloud.attributes.GlancePassword}}
+export OVERCLOUD_HEAT_PASSWORD={{overcloud.attributes.HeatPassword}}
+export OVERCLOUD_NEUTRON_PASSWORD={{overcloud.attributes.NeutronPassword}}
+export OVERCLOUD_NOVA_PASSWORD={{overcloud.attributes.NovaPassword}}
+export OVERCLOUD_SWIFT_PASSWORD={{overcloud.attributes.SwiftPassword}}
+export OVERCLOUD_SWIFT_HASH={{overcloud.attributes.SwiftHashSuffix}}
+EOF
+
+source tripleo-overcloud-passwords
+
+JSONFILE=nodes.json
+if [ ! -f $JSONFILE ]; then
+  echo '{}' &gt; $JSONFILE
+fi
+OVERCLOUD_ENDPOINT="http://{{overcloud.keystone_ip}}:5000/v2.0"
+NEW_JSON=$(jq '.overcloud.password="'{{overcloud.attributes.AdminPassword}}'" | .overcloud.endpoint="'${OVERCLOUD_ENDPOINT}'" | .overcloud.endpointhost="'{{overcloud.keystone_ip}}'"' $JSONFILE)
+echo $NEW_JSON &gt; $JSONFILE
+export TE_DATAFILE=$JSONFILE
+
+source /etc/tripleo/overcloudrc
+
+tripleo init-keystone -p $OVERCLOUD_ADMIN_PASSWORD $OVERCLOUD_ADMIN_TOKEN \
+    $OVERCLOUD_IP admin@example.com heat-admin@$OVERCLOUD_IP
+tripleo setup-endpoints $OVERCLOUD_IP --cinder-password $OVERCLOUD_CINDER_PASSWORD \
+    --glance-password $OVERCLOUD_GLANCE_PASSWORD \
+    --heat-password $OVERCLOUD_HEAT_PASSWORD \
+    --neutron-password $OVERCLOUD_NEUTRON_PASSWORD \
+    --nova-password $OVERCLOUD_NOVA_PASSWORD \
+    --swift-password $OVERCLOUD_SWIFT_PASSWORD \
+    --enable-horizon
+keystone role-create --name heat_stack_user
+
+# Setup the neutron
+tripleo setup-neutron "" "" $NETWORK_CIDR "" "" "" $FLOATING_IP_START $FLOATING_IP_END $FLOATING_IP_CIDR
+
+# Workaround https://bugs.launchpad.net/diskimage-builder/+bug/1211165
+nova flavor-delete m1.tiny
+nova flavor-create m1.tiny 1 512 2 1
           </pre>
         </div>
       </li>
