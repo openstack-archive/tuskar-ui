@@ -136,6 +136,25 @@
       --swift-password $OVERCLOUD_SWIFT_PASSWORD \
       --enable-horizon
   keystone role-create --name heat_stack_user
+
+  # Example neutron variables for deploying the overcloud on a virtual machine setup:
+  NETWORK_CIDR=${NETWORK_CIDR:-"10.0.0.0/8"}
+  FLOATING_IP_START=${FLOATING_IP_START:-"192.0.2.45"}
+  FLOATING_IP_END=${FLOATING_IP_END:-"192.0.2.64"}
+  FLOATING_IP_CIDR=${FLOATING_IP_CIDR:-"192.0.2.0/24"}
+
+  # Example neutron variables for deploying the overcloud on a barmetal machine setup:
+  NETWORK_CIDR=${NETWORK_CIDR:-"10.0.0.0/8"}
+  FLOATING_IP_START=${FLOATING_IP_START:-"172.17.0.45"}
+  FLOATING_IP_END=${FLOATING_IP_END:-"172.17.0.64"}
+  FLOATING_IP_CIDR=${FLOATING_IP_CIDR:-"172.17.0.0/16"}
+
+  # Setup the neutron
+  tripleo setup-neutron "" "" $NETWORK_CIDR "" "" "" $FLOATING_IP_START $FLOATING_IP_END $FLOATING_IP_CIDR
+
+  # Workaround https://bugs.launchpad.net/diskimage-builder/+bug/1211165
+  nova flavor-delete m1.tiny
+  nova flavor-create m1.tiny 1 512 2 1
           </pre>
         </div>
       </li>
