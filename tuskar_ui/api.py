@@ -11,7 +11,7 @@
 #    under the License.
 import django.conf
 import heatclient
-import keystoneclient
+import keystoneclient.apiclient.exceptions
 import logging
 import urlparse
 
