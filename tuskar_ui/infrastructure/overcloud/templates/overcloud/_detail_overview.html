@@ -109,8 +109,9 @@
   # You need to run the following commands from a Undercloud node where you have
   # direct access via SSH to your Overcloud control node ({{overcloud.keystone_ip}}).
 
-  # Usually stack user has access to Overcloud control node, so switch to stack user
-  su stack
+  # Run these commands as the user you used to install the undercloud, likely the stack
+  # user if you followed the recommendations from http://openstack.redhat.com/Deploying_RDO_using_Instack.
+  # The commands should also be run from the home directory of that user.
 
   export OVERCLOUD_IP={{overcloud.keystone_ip}}
 
@@ -124,6 +125,15 @@
   export OVERCLOUD_SWIFT_PASSWORD={{overcloud.attributes.SwiftPassword}}
   export OVERCLOUD_SWIFT_HASH={{overcloud.attributes.SwiftHashSuffix}}
 
+  JSONFILE=nodes.json
+  if [ ! -f $JSONFILE ]; then
+    echo '{}' > $JSONFILE
+  fi
+  OVERCLOUD_ENDPOINT="http://{{overcloud.keystone_ip}}:5000/v2.0"
+  NEW_JSON=$(jq '.overcloud.password="'{{overcloud.attributes.AdminPassword}}'" | .overcloud.endpoint="'${OVERCLOUD_ENDPOINT}'" | .overcloud.endpointhost="'{{overcloud.keystone_ip}}'"' $JSONFILE)
+  echo $NEW_JSON > $JSONFILE
+  export TE_DATAFILE=$JSONFILE
+
   source /etc/tripleo/overcloudrc
 
   tripleo init-keystone -p $OVERCLOUD_ADMIN_PASSWORD $OVERCLOUD_ADMIN_TOKEN \
@@ -136,6 +146,13 @@
       --swift-password $OVERCLOUD_SWIFT_PASSWORD \
       --enable-horizon
   keystone role-create --name heat_stack_user
+
+  # Setup the neutron
+  tripleo setup-neutron "" "" $NETWORK_CIDR "" "" "" $FLOATING_IP_START $FLOATING_IP_END $FLOATING_IP_CIDR
+
+  # Workaround https://bugs.launchpad.net/diskimage-builder/+bug/1211165
+  nova flavor-delete m1.tiny
+  nova flavor-create m1.tiny 1 512 2 1
           </pre>
         </div>
       </li>
