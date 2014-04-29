@@ -11,7 +11,7 @@
 #    under the License.
 import django.conf
 import heatclient
-import keystoneclient
+from keystoneclient.apiclient import exceptions as keystone_exceptions
 import logging
 import urlparse
 
@@ -235,7 +235,7 @@ class Overcloud(base.APIResourceWrapper):
             return overcloud_keystoneclient(self._request,
                                             output['output_value'],
                                             self.attributes['AdminPassword'])
-        except keystoneclient.apiclient.exceptions.Unauthorized:
+        except keystone_exceptions.Unauthorized:
             LOG.debug('Unable to connect overcloud keystone.')
             return None
 
