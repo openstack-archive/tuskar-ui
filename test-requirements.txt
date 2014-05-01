@@ -17,4 +17,4 @@ sphinx>=1.1.2,<1.2
 docutils==0.9.1
 oslosphinx
 
--e git://git.openstack.org/openstack/horizon.git#egg=horizon
+http://tarballs.openstack.org/horizon/horizon-master.tar.gz

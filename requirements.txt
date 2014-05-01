@@ -21,4 +21,4 @@ pytz>=2010h
 lockfile>=0.8
 
 python-ironicclient
--e git+https://github.com/openstack/python-tuskarclient.git#egg=python-tuskarclient
+http://tarballs.openstack.org/python-tuskarclient/python-tuskarclient-master.tar.gz
