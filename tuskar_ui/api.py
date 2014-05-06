@@ -234,7 +234,8 @@ class Overcloud(base.APIResourceWrapper):
         try:
             return overcloud_keystoneclient(self._request,
                                             output['output_value'],
-                                            self.attributes['AdminPassword'])
+                                            self.attributes.get('AdminPassword',
+                                                                None))
         except keystoneclient.apiclient.exceptions.Unauthorized:
             LOG.debug('Unable to connect overcloud keystone.')
             return None
