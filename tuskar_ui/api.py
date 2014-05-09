@@ -665,7 +665,7 @@ class Node(base.APIResourceWrapper):
         #     )
         node = baremetalclient(request).create(**cls.nova_baremetal_format(
             ipmi_address, cpu, ram, local_disk, mac_addresses,
-            ipmi_username=None, ipmi_password=None))
+            ipmi_username=ipmi_username, ipmi_password=ipmi_password))
 
         return cls(node)
 

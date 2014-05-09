@@ -31,7 +31,7 @@ class NodeForm(django.forms.Form):
         required=False,
         widget=django.forms.TextInput(attrs={'class': 'input input-medium'}),
     )
-    ipmi_user = django.forms.CharField(
+    ipmi_username = django.forms.CharField(
         label=_("IPMI User"),
         required=False,
         widget=django.forms.TextInput(attrs={'class': 'input input-medium'}),
