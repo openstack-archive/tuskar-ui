@@ -31,7 +31,7 @@ class NodeForm(django.forms.Form):
         required=False,
         widget=django.forms.TextInput(attrs={'class': 'input input-medium'}),
     )
-    ipmi_user = django.forms.CharField(
+    ipmi_username = django.forms.CharField(
         label=_("IPMI User"),
         required=False,
         widget=django.forms.TextInput(attrs={'class': 'input input-medium'}),
@@ -114,7 +114,10 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
             if not form.cleaned_data:
                 raise django.forms.ValidationError(
                     _("Please provide node data for all nodes."))
-
+            if not form.cleaned_data.get('ipmi_username'):
+                form.cleaned_data['ipmi_username'] = None
+            if not form.cleaned_data.get('ipmi_password'):
+                form.cleaned_data['ipmi_password'] = None
 
 NodeFormset = django.forms.formsets.formset_factory(NodeForm, extra=1,
                                                     formset=BaseNodeFormset)
