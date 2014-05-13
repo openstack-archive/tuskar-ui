@@ -76,17 +76,7 @@ makemessages=0
 compilemessages=0
 manage=0
 
-# There's no /usr/bin/coverage in Debian and Ubuntu,
-# though using "python -m coverage" will fail in a
-# python 2.6 venv. Which is why we do what's below,
-# to make sure it works everywhere.
-COVERAGE_CMD=`which coverage || true`
-if [ -z "${COVERAGE_CMD}" ] ; then
-	COVERAGE_CMD=`which python-coverage || true`
-fi
-if [ -z "${COVERAGE_CMD}" ] ; then
-	COVERAGE_CMD="python -m coverage"
-fi
+COVERAGE_CMD="python -m coverage.__main__"
 
 # Jenkins sets a "JOB_NAME" variable, if it's not set, we'll make it "default"
 [ "$JOB_NAME" ] || JOB_NAME="default"
