@@ -60,6 +60,13 @@ class Action(horizon.workflows.Action):
         for name, data in parameters:
             self.fields[name] = make_field(name, **data)
 
+    def clean(self):
+        # this is a workaround for a single parameter
+        if 'GlanceLogFile' in self.cleaned_data:
+            if not self.cleaned_data['GlanceLogFile']:
+                self.cleaned_data['GlanceLogFile'] = u"''"
+        return self.cleaned_data
+
 
 class Step(horizon.workflows.Step):
     action_class = Action
