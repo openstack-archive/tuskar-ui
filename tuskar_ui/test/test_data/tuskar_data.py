@@ -18,6 +18,7 @@ from heatclient.v1 import resources
 from heatclient.v1 import stacks
 from ironicclient.v1 import node
 from ironicclient.v1 import port
+from novaclient.v1_1.contrib import baremetal
 from novaclient.v1_1 import flavors
 from novaclient.v1_1 import servers
 from tuskarclient.v1 import overcloud_roles
@@ -112,7 +113,83 @@ def data(TEST):
     TEST.heatclient_events.add(event_1, event_2, event_3, event_4,
                                event_5, event_6, event_7, event_8)
 
-    # Node
+    # BareMetalNode
+    TEST.baremetalclient_nodes = test_data_utils.TestDataContainer()
+    bm_node_1 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '1',
+         'uuid': 'aa-11',
+         'instance_uuid': 'aa',
+         "service_host": "undercloud",
+         "cpus": 1,
+         "memory_mb": 4096,
+         "local_gb": 20,
+         'task_state': 'active',
+         "pm_address": None,
+         "pm_user": None,
+         "interfaces": [{"address": "52:54:00:90:38:01"},
+                        {"address": "52:54:00:90:38:01"}],
+         })
+    bm_node_2 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '2',
+         'uuid': 'bb-22',
+         'instance_uuid': 'bb',
+         "service_host": "undercloud",
+         "cpus": 1,
+         "memory_mb": 4096,
+         "local_gb": 20,
+         'task_state': 'active',
+         "pm_address": None,
+         "pm_user": None,
+         "interfaces": [{"address": "52:54:00:90:38:01"}],
+         })
+    bm_node_3 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '3',
+         'uuid': 'cc-33',
+         'instance_uuid': 'cc',
+         "service_host": "undercloud",
+         "cpus": 1,
+         "memory_mb": 4096,
+         "local_gb": 20,
+         'task_state': 'reboot',
+         "pm_address": None,
+         "pm_user": None,
+         "interfaces": [{"address": "52:54:00:90:38:01"}],
+         })
+    bm_node_4 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '4',
+         'uuid': 'cc-44',
+         'instance_uuid': 'cc',
+         "service_host": "undercloud",
+         "cpus": 1,
+         "memory_mb": 4096,
+         "local_gb": 20,
+         'task_state': 'active',
+         "pm_address": None,
+         "pm_user": None,
+         "interfaces": [{"address": "52:54:00:90:38:01"}],
+         })
+    bm_node_5 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '5',
+         'uuid': 'dd-55',
+         'instance_uuid': 'dd',
+         "service_host": "undercloud",
+         "cpus": 1,
+         "memory_mb": 4096,
+         "local_gb": 20,
+         'task_state': 'error',
+         "pm_address": None,
+         "pm_user": None,
+         "interfaces": [{"address": "52:54:00:90:38:01"}],
+         })
+    TEST.baremetalclient_nodes.add(
+        bm_node_1, bm_node_2, bm_node_3, bm_node_4, bm_node_5)
+
+    # IronicNode
     TEST.ironicclient_nodes = test_data_utils.TestDataContainer()
     node_1 = node.Node(
         node.NodeManager(None),
@@ -124,6 +201,7 @@ def data(TEST):
              'ipmi_address': '1.1.1.1',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
+             'ip_address': '1.2.2.2'
          },
          'properties': {
              'cpu': '8',
@@ -131,17 +209,6 @@ def data(TEST):
              'local_disk': '10',
          },
          'power_state': 'on',
-
-         # FIXME(lsmola) nova-baremetal test attrs, delete when Ironic is in
-         "pm_address": None,
-         "pm_user": None,
-         "task_state": "active",
-         "interfaces": [{"address": "52:54:00:90:38:01"},
-                        {"address": "52:54:00:90:38:01"}],
-         "cpus": 1,
-         "memory_mb": 4096,
-         "service_host": "undercloud",
-         "local_gb": 20,
          })
     node_2 = node.Node(
         node.NodeManager(None),
@@ -153,6 +220,7 @@ def data(TEST):
              'ipmi_address': '2.2.2.2',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
+             'ip_address': '1.2.2.3'
          },
          'properties': {
              'cpu': '16',
@@ -160,16 +228,6 @@ def data(TEST):
              'local_disk': '100',
          },
          'power_state': 'on',
-
-         # FIXME(lsmola) nova-baremetal test attrs, delete when Ironic is in
-         "pm_address": None,
-         "pm_user": None,
-         "task_state": "active",
-         "interfaces": [{"address": "52:54:00:90:38:01"}],
-         "cpus": 1,
-         "memory_mb": 4096,
-         "service_host": "undercloud",
-         "local_gb": 20,
          })
     node_3 = node.Node(
         node.NodeManager(None),
@@ -181,6 +239,7 @@ def data(TEST):
              'ipmi_address': '3.3.3.3',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
+             'ip_address': '1.2.2.4'
          },
          'properties': {
              'cpu': '32',
@@ -188,16 +247,6 @@ def data(TEST):
              'local_disk': '1',
          },
          'power_state': 'rebooting',
-
-         # FIXME(lsmola) nova-baremetal test attrs, delete when Ironic is in
-         "pm_address": None,
-         "pm_user": None,
-         "task_state": "active",
-         "interfaces": [{"address": "52:54:00:90:38:01"}],
-         "cpus": 1,
-         "memory_mb": 4096,
-         "service_host": "undercloud",
-         "local_gb": 20,
          })
     node_4 = node.Node(
         node.NodeManager(None),
@@ -209,6 +258,7 @@ def data(TEST):
              'ipmi_address': '4.4.4.4',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
+             'ip_address': '1.2.2.5'
          },
          'properties': {
              'cpu': '8',
@@ -216,16 +266,6 @@ def data(TEST):
              'local_disk': '10',
          },
          'power_state': 'on',
-
-         # FIXME(lsmola) nova-baremetal test attrs, delete when Ironic is in
-         "pm_address": None,
-         "pm_user": None,
-         "task_state": "active",
-         "interfaces": [{"address": "52:54:00:90:38:01"}],
-         "cpus": 1,
-         "memory_mb": 4096,
-         "service_host": "undercloud",
-         "local_gb": 20,
          })
     node_5 = node.Node(
         node.NodeManager(None),
@@ -237,6 +277,7 @@ def data(TEST):
              'ipmi_address': '5.5.5.5',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
+             'ip_address': '1.2.2.6'
          },
          'properties': {
              'cpu': '8',
@@ -244,16 +285,6 @@ def data(TEST):
              'local_disk': '10',
          },
          'power_state': 'error',
-
-         # FIXME(lsmola) nova-baremetal test attrs, delete when Ironic is in
-         "pm_address": None,
-         "pm_user": None,
-         "task_state": "active",
-         "interfaces": [{"address": "52:54:00:90:38:01"}],
-         "cpus": 1,
-         "memory_mb": 4096,
-         "service_host": "undercloud",
-         "local_gb": 20,
          })
     TEST.ironicclient_nodes.add(node_1, node_2, node_3, node_4, node_5)
 

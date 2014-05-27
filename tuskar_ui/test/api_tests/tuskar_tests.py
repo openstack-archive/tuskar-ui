@@ -24,9 +24,6 @@ from novaclient.v1_1 import servers
 from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 
-# TODO(Tzu-Mainn Chen): uncomment mock data and mock
-# api calls once api.py stops using mock data
-
 
 class TuskarAPITests(test.APITestCase):
     def test_overcloud_create(self):
@@ -112,25 +109,27 @@ class TuskarAPITests(test.APITestCase):
         # anybody has idea how to do it?
         stack = self.heatclient_stacks.first()
         resources = self.heatclient_resources.list()
-        nodes = self.ironicclient_nodes.list()
+        nodes = self.baremetalclient_nodes.list()
         instances = []
 
-        with patch('openstack_dashboard.api.heat.resources_list',
-                   return_value=resources):
-            with patch('openstack_dashboard.api.nova.server_list',
-                       return_value=(instances, None)):
-                with patch('novaclient.v1_1.contrib.baremetal.'
-                           'BareMetalNodeManager.list',
-                           return_value=nodes):
-                    with patch('openstack_dashboard.api.heat.stack_get',
-                               return_value=stack):
-                        ret_val = oc.all_resources()
+        with patch('openstack_dashboard.api.base.is_service_enabled',
+                   return_value=False):
+            with patch('openstack_dashboard.api.heat.resources_list',
+                       return_value=resources):
+                with patch('openstack_dashboard.api.nova.server_list',
+                           return_value=(instances, None)):
+                    with patch('novaclient.v1_1.contrib.baremetal.'
+                               'BareMetalNodeManager.list',
+                               return_value=nodes):
+                        with patch('openstack_dashboard.api.heat.stack_get',
+                                   return_value=stack):
+                            ret_val = oc.all_resources()
 
         for i in ret_val:
             self.assertIsInstance(i, api.Resource)
         self.assertEqual(4, len(ret_val))
 
-    def test_overcloud_resources(self):
+    def test_overcloud_resources_no_ironic(self):
         oc = api.Overcloud(self.tuskarclient_overclouds.first(),
                            request=object())
         role = api.OvercloudRole(self.tuskarclient_overcloud_roles.first())
@@ -141,24 +140,27 @@ class TuskarAPITests(test.APITestCase):
         stack = self.heatclient_stacks.first()
         resources = self.heatclient_resources.list()
         instances = self.novaclient_servers.list()
-        nodes = self.ironicclient_nodes.list()
-        with patch('openstack_dashboard.api.heat.resources_list',
-                   return_value=resources) as resource_list:
-            with patch('openstack_dashboard.api.nova.server_list',
-                       return_value=(instances, None)) as server_list:
-                with patch('openstack_dashboard.api.glance.image_get',
-                           return_value=image) as image_get:
-                    with patch('novaclient.v1_1.contrib.baremetal.'
-                               'BareMetalNodeManager.list',
-                               return_value=nodes) as node_list:
-                        with patch('openstack_dashboard.api.heat.stack_get',
-                                   return_value=stack) as stack_get:
-                            ret_val = oc.resources(role)
-                            self.assertEqual(resource_list.call_count, 1)
-                            self.assertEqual(server_list.call_count, 1)
-                            self.assertEqual(image_get.call_count, 2)
-                            self.assertEqual(node_list.call_count, 1)
-                            self.assertEqual(stack_get.call_count, 1)
+        nodes = self.baremetalclient_nodes.list()
+        with patch('openstack_dashboard.api.base.is_service_enabled',
+                   return_value=False):
+            with patch('openstack_dashboard.api.heat.resources_list',
+                       return_value=resources) as resource_list:
+                with patch('openstack_dashboard.api.nova.server_list',
+                           return_value=(instances, None)) as server_list:
+                    with patch('openstack_dashboard.api.glance.image_get',
+                               return_value=image) as image_get:
+                        with patch('novaclient.v1_1.contrib.baremetal.'
+                                   'BareMetalNodeManager.list',
+                                   return_value=nodes) as node_list:
+                            with patch(
+                                    'openstack_dashboard.api.heat.stack_get',
+                                    return_value=stack) as stack_get:
+                                ret_val = oc.resources(role)
+                                self.assertEqual(resource_list.call_count, 1)
+                                self.assertEqual(server_list.call_count, 1)
+                                self.assertEqual(image_get.call_count, 2)
+                                self.assertEqual(node_list.call_count, 1)
+                                self.assertEqual(stack_get.call_count, 1)
 
         for i in ret_val:
             self.assertIsInstance(i, api.Resource)
@@ -209,7 +211,7 @@ class TuskarAPITests(test.APITestCase):
             self.assertEqual(client_get.call_count, 1)
 
     def test_node_create(self):
-        node = api.Node(self.ironicclient_nodes.first())
+        node = api.BareMetalNode(self.baremetalclient_nodes.first())
 
         # FIXME(lsmola) this should be mocking client call no Node
         with patch('novaclient.v1_1.contrib.baremetal.'
@@ -218,9 +220,9 @@ class TuskarAPITests(test.APITestCase):
             ret_val = api.Node.create(
                 self.request,
                 node.driver_info['ipmi_address'],
-                node.properties['cpu'],
-                node.properties['ram'],
-                node.properties['local_disk'],
+                node.cpus,
+                node.memory_mb,
+                node.local_gb,
                 ['aa:aa:aa:aa:aa:aa'],
                 ipmi_username='admin',
                 ipmi_password='password')
@@ -228,7 +230,7 @@ class TuskarAPITests(test.APITestCase):
         self.assertIsInstance(ret_val, api.Node)
 
     def test_node_get(self):
-        node = self.ironicclient_nodes.first()
+        node = self.baremetalclient_nodes.first()
         instance = self.novaclient_servers.first()
 
         with patch('openstack_dashboard.api.nova.server_get',
@@ -243,8 +245,8 @@ class TuskarAPITests(test.APITestCase):
 
     def test_node_get_by_instance_uuid(self):
         instance = self.novaclient_servers.first()
-        node = self.ironicclient_nodes.first()
-        nodes = self.ironicclient_nodes.list()
+        node = self.baremetalclient_nodes.first()
+        nodes = self.baremetalclient_nodes.list()
 
         with patch('openstack_dashboard.api.nova.server_get',
                    return_value=instance):
@@ -259,7 +261,7 @@ class TuskarAPITests(test.APITestCase):
 
     def test_node_list(self):
         instances = self.novaclient_servers.list()
-        nodes = self.ironicclient_nodes.list()
+        nodes = self.baremetalclient_nodes.list()
 
         with patch('openstack_dashboard.api.nova.server_list',
                    return_value=(instances, None)):
@@ -273,14 +275,14 @@ class TuskarAPITests(test.APITestCase):
         self.assertEqual(5, len(ret_val))
 
     def test_node_delete(self):
-        node = self.ironicclient_nodes.first()
+        node = self.baremetalclient_nodes.first()
         with patch('novaclient.v1_1.contrib.baremetal.'
                    'BareMetalNodeManager.delete',
                    return_value=None):
             api.Node.delete(self.request, node.uuid)
 
     def test_node_instance(self):
-        node = self.ironicclient_nodes.first()
+        node = self.baremetalclient_nodes.first()
         instance = self.novaclient_servers.first()
 
         with patch('openstack_dashboard.api.nova.server_get',
@@ -289,7 +291,7 @@ class TuskarAPITests(test.APITestCase):
         self.assertIsInstance(ret_val, servers.Server)
 
     def test_node_image_name(self):
-        node = self.ironicclient_nodes.first()
+        node = self.baremetalclient_nodes.first()
         instance = self.novaclient_servers.first()
         image = self.glanceclient_images.first()
 
@@ -301,7 +303,7 @@ class TuskarAPITests(test.APITestCase):
         self.assertEqual(ret_val, 'overcloud-control')
 
     def test_node_overcloud_role(self):
-        node = self.ironicclient_nodes.first()
+        node = self.baremetalclient_nodes.first()
         instance = self.novaclient_servers.first()
         image = self.glanceclient_images.first()
         roles = self.tuskarclient_overcloud_roles.list()
@@ -317,10 +319,9 @@ class TuskarAPITests(test.APITestCase):
             ret_val = api.Node(node).overcloud_role
         self.assertEqual(ret_val.name, 'Controller')
 
-    def test_node_addresses(self):
-        node = self.ironicclient_nodes.first()
-
-        ret_val = api.Node(node).addresses
+    def test_node_addresses_no_ironic(self):
+        node = self.baremetalclient_nodes.first()
+        ret_val = api.BareMetalNode(node).addresses
         self.assertEqual(2, len(ret_val))
 
     def test_resource_get(self):
@@ -337,17 +338,19 @@ class TuskarAPITests(test.APITestCase):
                                            resource.resource_name)
         self.assertIsInstance(ret_val, api.Resource)
 
-    def test_resource_node(self):
+    def test_resource_node_no_ironic(self):
         resource = self.heatclient_resources.first()
-        nodes = self.ironicclient_nodes.list()
+        nodes = self.baremetalclient_nodes.list()
         instance = self.novaclient_servers.first()
 
-        with patch('openstack_dashboard.api.nova.server_get',
-                   return_value=instance):
-            with patch('novaclient.v1_1.contrib.baremetal.'
-                       'BareMetalNodeManager.list',
-                       return_value=nodes):
-                ret_val = api.Resource(resource, request=object()).node
+        with patch('openstack_dashboard.api.base.is_service_enabled',
+                   return_value=False):
+            with patch('openstack_dashboard.api.nova.server_get',
+                       return_value=instance):
+                with patch('novaclient.v1_1.contrib.baremetal.'
+                           'BareMetalNodeManager.list',
+                           return_value=nodes):
+                    ret_val = api.Resource(resource, request=object()).node
         self.assertIsInstance(ret_val, api.Node)
         self.assertIsInstance(ret_val.instance, servers.Server)
 
@@ -372,7 +375,8 @@ class TuskarAPITests(test.APITestCase):
         self.assertIsInstance(ret_val, api.OvercloudRole)
 
     def test_filter_nodes(self):
-        nodes = self.ironicclient_nodes.list()
+        nodes = self.baremetalclient_nodes.list()
+        nodes = [api.BareMetalNode(node) for node in nodes]
         num_nodes = len(nodes)
 
         with patch('novaclient.v1_1.contrib.baremetal.'
