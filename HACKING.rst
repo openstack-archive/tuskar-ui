@@ -1,5 +1,5 @@
 Contributing
-------------
+============
 
 The code repository is located at `OpenStack <https://github.com/openstack>`__.
 Please go there if you want to check it out:
@@ -23,6 +23,34 @@ If you're interested in the code, here are some key places to start:
   (through python-tuskarclient).
 * `tuskar_ui/infrastructure <https://github.com/openstack/tuskar-ui/tree/master/tuskar_ui/infrastructure>`_
   - The Tuskar UI code is contained within this directory.
+
+Running tests
+=============
+
+There are several ways to run tests for tuskar-ui.
+
+Using ``tox``:
+
+    This is the easiest way to run tests. When run, tox installs dependencies,
+    prepares the virtual python environment, then runs test commands. The gate
+    tests in gerrit usually also use tox to run tests. For avaliable tox
+    environments, see ``tox.ini``.
+
+By running ``run_tests.sh``:
+
+    Tests can also be run using the ``run_tests.sh`` script, to see available
+    options, run it with the ``--help`` option. It handles preparing the
+    virtual environment and executing tests, but in contrast with tox, it does
+    not install all dependencies, e.g. ``jshint`` must be installed before
+    running the jshint testcase.
+
+Manual tests:
+
+    To manually check tuskar-ui, it is possible to run a development server
+    for tuskar-ui by running ``run_tests.sh --runserver``.
+
+    To run the server with the settings used by the test environment:
+    ``run_tests.sh --runserver 0.0.0.0:8000 --settings=tuskar_ui.test.settings``
 
 OpenStack Style Commandments
 ============================
