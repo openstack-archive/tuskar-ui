@@ -24,7 +24,7 @@ horizon.addInitFunction(function () {
         equal(input.attr('checked'), undefined);
         tuskar.formset_table.replace_delete(row);
         var x = input.next('a');
-        tuskar.formset_table.delete_row.call(x)
+        tuskar.formset_table.delete_row.call(x);
         equal(row.css("display"), 'none');
         equal(input.attr('checked'), 'checked');
     });

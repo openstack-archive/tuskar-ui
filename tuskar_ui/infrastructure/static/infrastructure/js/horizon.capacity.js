@@ -131,29 +131,26 @@ horizon.Capacity = {
   // Draw the initial d3 bars
   _initialCreation: function(bars) {
     var scope = this;
+
     $(bars).each(function(index, element) {
       var progress_element = $(element);
 
       var capacity_limit = parseInt(progress_element.attr('data-capacity-limit'), 10);
       var capacity_used = parseInt(progress_element.attr('data-capacity-used'), 10);
       var average_used = parseInt(progress_element.attr('data-average-capacity-used'), 10);
+      var percentage_used = 0;
+      var average_percentage = 0;
+      var _used_px = 0;
 
       if (!isNaN(capacity_limit) && !isNaN(average_used)) {
-        var average_percentage = ((average_used / capacity_limit) * 100);
-      } else {
-        var average_percentage = 0;
+        average_percentage = ((average_used / capacity_limit) * 100);
       }
-
       if (!isNaN(capacity_limit) && !isNaN(capacity_used)) {
-        var percentage_used = Math.round((capacity_used / capacity_limit) * 100);
-        var used_px = progress_element.width() / 100 * percentage_used;
-
-      } else { // If NaN percentage_used is 0
-        var percentage_used = 0;
-        var used_px = 0;
+        percentage_used = Math.round((capacity_used / capacity_limit) * 100);
+        _used_px = progress_element.width() / 100 * percentage_used;
       }
 
-      scope.drawUsed($(element).attr('id'), percentage_used, used_px, average_percentage);
+      scope.drawUsed($(element).attr('id'), percentage_used, _used_px, average_percentage);
     });
   }
 };
