@@ -59,7 +59,7 @@ tuskar.formset_table = (function () {
             button.click(function () {
                 module.add_row(table, prefix, empty_row_html);
             });
-        };
+        }
 
         // if the formset is not empty and has no errors,
         // delete the empty extra rows from the end
@@ -67,17 +67,17 @@ tuskar.formset_table = (function () {
         var total_forms = +$('#id_' + prefix + '-TOTAL_FORMS').val();
 
         if (table.find('tbody tr').length > 1 &&
-            table.find('tbody td.error').length == 0 &&
+            table.find('tbody td.error').length === 0 &&
             total_forms > initial_forms) {
             table.find('tbody tr').each(function (index) {
                 if (index >= initial_forms) {
                     $(this).remove();
-                };
+                }
             });
             module.reenumerate_rows(table, prefix);
             $('#id_' + prefix + '-INITIAL_FORMS').val(
                 $('#id_' + prefix + '-TOTAL_FORMS').val());
-        };
+        }
 
         // enable tooltips
         table.find('td.error[title]').tooltip();

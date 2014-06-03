@@ -97,7 +97,7 @@ horizon.d3_circles_chart = {
     }
 
     this.time = jquery_element.data('time');
-    this.data = []
+    this.data = [];
 
     this.refresh = refresh;
     function refresh(){
@@ -130,7 +130,7 @@ horizon.d3_circles_chart = {
     self.bind_commands();
   },
   refresh: function(html_element){
-    var chart = new this.CirclesChart(this, html_element)
+    var chart = new this.CirclesChart(this, html_element);
     // FIXME save chart objects somewhere so I can use them again when
     // e.g. I am swithing tabs, or if I want to update them
     // via web sockets
@@ -143,7 +143,7 @@ horizon.d3_circles_chart = {
     // library
     var width = size + 4,
         height = size + 4,
-        round = size / 2;
+        round = size / 2,
         center_x = width / 2,
         center_y = height / 2;
 
@@ -171,27 +171,30 @@ horizon.d3_circles_chart = {
         .attr("cx", center_x)
         .attr("cy", center_y)
         .attr("stroke", "#cecece")
-        .attr("stroke-width", function(d) {
+        .attr("stroke-width", function (d) {
           return 1;
         })
-        .style("fill", function(d) {
-          if (d.color){
+        .style("fill", function (d) {
+          if (d.color) {
             return d.color;
-          } else if (settings.scale == "linear_color_scale"){
-            return self.linear_color_scale(d.percentage, settings.domain, settings.range)
-
+          } else if (settings.scale == "linear_color_scale") {
+            return self.linear_color_scale(d.percentage, settings.domain, settings.range);
           }
         })
-        .on("mouseover", function(d){
+        .on("mouseover", function (d) {
           if (d.tooltip) {
             tooltip.html(d.tooltip);
           } else {
             tooltip.html(d.name + "<br/>" + d.status);
           }
-          tooltip.style("visibility", "visible");})
-        .on("mousemove", function(d){tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
-        .on("mouseout", function(d){tooltip.style("visibility", "hidden");});
-        ;
+          tooltip.style("visibility", "visible");
+        })
+        .on("mousemove", function (d) {
+            tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");
+        })
+        .on("mouseout", function (d) {
+            tooltip.style("visibility", "hidden");
+        });
 
     /*
     // or just d3 title element
@@ -210,15 +213,15 @@ horizon.d3_circles_chart = {
     var change_time_command_selector = 'select[data-circles-chart-command="change_time"]';
     var change_url_command_selector = '[data-circles-chart-command="change_url"]';
     var self = this;
-    bind_change_time = function(){
+    bind_change_time = function () {
       $(change_time_command_selector).each(function() {
-        $(this).change(function(){
+        $(this).change(function () {
           var invoker = $(this);
           var command = new self.Command.ChangeTime(self, invoker);
           command.execute();
         });
       });
-    }
+    };
     bind_change_url = function(){
       $(change_url_command_selector + ' a').click(function (e) {
         // Bootstrap tabs functionality
@@ -229,8 +232,8 @@ horizon.d3_circles_chart = {
         var invoker = $(this);
         var command = new self.Command.ChangeUrl(self, invoker);
         command.execute();
-      })
-    }
+      });
+    };
     bind_change_time();
     bind_change_url();
   },
@@ -248,7 +251,7 @@ horizon.d3_circles_chart = {
             // change time of the chart
             $(this).data('time', self.new_time);
             // refresh the chart
-            chart_class.refresh(this)
+            chart_class.refresh(this);
           });
       }
     },
@@ -265,12 +268,12 @@ horizon.d3_circles_chart = {
           // change time of the chart
           $(this).data('url', self.new_url);
           // refresh the chart
-          chart_class.refresh(this)
+          chart_class.refresh(this);
         });
       }
     }
   }
-}
+};
 
 /* init the graphs */
 horizon.addInitFunction(function () {

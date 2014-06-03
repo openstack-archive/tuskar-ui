@@ -429,6 +429,7 @@ horizon.d3_single_bar_chart = {
       .attr("height", base_component.h)
       .style("background-color", "white")
       .append("g");
+    var used_component;
 
     // append Unused resources Bar
     this.append_unused(bar, base_component, tooltip_free);
@@ -444,19 +445,19 @@ horizon.d3_single_bar_chart = {
         tooltip_used = this.append_tooltip(tooltip_used, "");
 
         // append used so it will be shown as multiple values in one chart
-        var used_component = new this.UsedComponent(base_component);
+        used_component = new this.UsedComponent(base_component);
         used_component.append(bar, tooltip_used);
 
         // append Used resources to Bar
         base_component.total_used_perc += base_component.percentage_used_value();
-      };
+      }
 
       // append Text to Bar
       this.append_text(bar, base_component, tooltip_free);
 
     } else {
       // used is show as one value it the chart
-      var used_component = new this.UsedComponent(base_component);
+      used_component = new this.UsedComponent(base_component);
       used_component.append(bar, tooltip_used);
 
       // append average value to Bar
@@ -465,7 +466,7 @@ horizon.d3_single_bar_chart = {
     }
     // append border of whole Bar
     this.append_border(bar);
-  },
+  }
 };
 
 
