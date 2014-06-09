@@ -12,6 +12,7 @@
 #    under the License.
 
 import os
+import warnings
 
 from django.core.handlers import wsgi
 from django.utils import unittest
@@ -22,6 +23,11 @@ from tuskar_ui.test.test_data import utils as test_data_utils
 
 # Makes output of failing mox tests much easier to read.
 wsgi.WSGIRequest.__repr__ = lambda self: "<class 'django.http.HttpRequest'>"
+
+# Silences the warning about with statements.
+warnings.filterwarnings('ignore', 'With-statements now directly support '
+                        'multiple context managers', DeprecationWarning,
+                        r'.*[._]tests$')
 
 
 def create_stubs(stubs_to_create={}):
