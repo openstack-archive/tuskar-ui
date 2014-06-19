@@ -100,7 +100,7 @@ class Action(horizon.workflows.Action):
     @memoized.memoized
     def _get_roles(self):
         """Retrieve the list of all overcloud roles."""
-        return api.OvercloudRole.list(self.request)
+        return api.tuskar.OvercloudRole.list(self.request)
 
     def clean(self):
         for key, value in self.cleaned_data.iteritems():
@@ -121,7 +121,7 @@ class Step(horizon.workflows.Step):
 
     def get_free_nodes(self):
         """Get the count of nodes that are not assigned yet."""
-        return len(api.Node.list(self.workflow.request, False))
+        return len(api.node.Node.list(self.workflow.request, False))
 
     def contribute(self, data, context):
         counts = {}

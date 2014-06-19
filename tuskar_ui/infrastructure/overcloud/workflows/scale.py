@@ -17,7 +17,6 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 import horizon.workflows
 
-# from tuskar_ui import api
 from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud.workflows import scale_node_counts
 from tuskar_ui.infrastructure.overcloud.workflows import undeployed
@@ -37,8 +36,8 @@ class Workflow(undeployed.DeploymentValidationMixin,
         try:
             # TODO(lsmola) when updates are fixed in Heat, figure out whether
             # we need to send also parameters, right now we send {}
-            api.Overcloud.update(request, overcloud_id,
-                                 context['role_counts'], {})
+            api.tuskar.Overcloud.update(request, overcloud_id,
+                                        context['role_counts'], {})
         except Exception:
             exceptions.handle(request, _('Unable to update deployment.'))
             return False

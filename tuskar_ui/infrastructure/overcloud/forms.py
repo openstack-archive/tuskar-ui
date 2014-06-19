@@ -25,7 +25,7 @@ from tuskar_ui import api
 class UndeployOvercloud(horizon.forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
-            api.Overcloud.delete(request, self.initial['overcloud_id'])
+            api.tuskar.Overcloud.delete(request, self.initial['overcloud_id'])
         except Exception:
             horizon.exceptions.handle(request,
                                       _("Unable to undeploy overcloud."))
@@ -71,7 +71,7 @@ class OvercloudRoleForm(horizon.forms.SelfHandlingForm):
 
     def handle(self, request, context):
         try:
-            role = api.OvercloudRole.get(request, context['id'])
+            role = api.tuskar.OvercloudRole.get(request, context['id'])
             role.update(request, flavor_id=context['flavor_id'])
         except Exception:
             horizon.exceptions.handle(request,

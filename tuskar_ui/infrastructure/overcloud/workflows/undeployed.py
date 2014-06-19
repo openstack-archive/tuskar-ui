@@ -33,7 +33,7 @@ class DeploymentValidationMixin(object):
         # TODO(lsmola) change this when we support more overclouds. It
         # will have to obtain actual free nodes and compare them to
         # number of newly created.
-        free = len(api.Node.list(self.request))
+        free = len(api.node.Node.list(self.request))
         if requested > free:
             m1 = translation.ungettext_lazy(
                 'This configuration requires %(requested)d node, ',
@@ -65,8 +65,8 @@ class Workflow(DeploymentValidationMixin, horizon.workflows.Workflow):
 
     def handle(self, request, context):
         try:
-            api.Overcloud.create(self.request, context['role_counts'],
-                                 context['configuration'])
+            api.tuskar.Overcloud.create(self.request, context['role_counts'],
+                                        context['configuration'])
         except Exception as e:
             # Showing error in both workflow tabs, because from the exception
             # type we can't recognize where it should show

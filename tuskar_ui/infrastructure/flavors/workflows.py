@@ -90,7 +90,7 @@ class CreateFlavor(flavor_workflows.CreateFlavor):
 
     def handle(self, request, data):
         try:
-            self.object = api.Flavor.create(
+            self.object = api.flavor.Flavor.create(
                 request,
                 name=data['name'],
                 memory=data['memory_mb'],

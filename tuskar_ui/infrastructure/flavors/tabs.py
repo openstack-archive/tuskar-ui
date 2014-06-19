@@ -22,8 +22,8 @@ from tuskar_ui.infrastructure.flavors import tables
 def _get_unmatched_suggestions(request):
     unmatched_suggestions = []
     flavor_suggestions = [FlavorSuggestion.from_flavor(flavor)
-                          for flavor in api.Flavor.list(request)]
-    for node in api.Node.list(request):
+                          for flavor in api.flavor.Flavor.list(request)]
+    for node in api.node.Node.list(request):
         node_suggestion = FlavorSuggestion.from_node(node)
         for flavor_suggestion in flavor_suggestions:
             if flavor_suggestion == node_suggestion:
@@ -45,7 +45,7 @@ class FlavorsTab(horizon.tabs.TableTab):
     preload = False
 
     def get_flavors_data(self):
-        flavors = api.Flavor.list(self.request)
+        flavors = api.flavor.Flavor.list(self.request)
         flavors.sort(key=lambda np: (np.vcpus, np.ram, np.disk))
         return flavors
 

@@ -27,13 +27,14 @@ class OverviewTab(tabs.Tab):
     template_name = "infrastructure/nodes/_overview.html"
 
     def get_context_data(self, request):
-        deployed_nodes = api.Node.list(request, associated=True)
-        free_nodes = api.Node.list(request, associated=False)
-        deployed_nodes_error = api.filter_nodes(deployed_nodes, healthy=False)
-        free_nodes_error = api.filter_nodes(free_nodes, healthy=False)
+        deployed_nodes = api.node.Node.list(request, associated=True)
+        free_nodes = api.node.Node.list(request, associated=False)
+        deployed_nodes_error = api.node.filter_nodes(
+            deployed_nodes, healthy=False)
+        free_nodes_error = api.node.filter_nodes(free_nodes, healthy=False)
         total_nodes = deployed_nodes + free_nodes
         total_nodes_error = deployed_nodes_error + free_nodes_error
-        total_nodes_healthy = api.filter_nodes(total_nodes, healthy=True)
+        total_nodes_healthy = api.node.filter_nodes(total_nodes, healthy=True)
 
         return {
             'total_nodes_healthy': total_nodes_healthy,
@@ -56,11 +57,11 @@ class DeployedTab(tabs.TableTab):
 
     def get_deployed_nodes_data(self):
         redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
-        deployed_nodes = api.Node.list(self.request, associated=True,
-                                       _error_redirect=redirect)
+        deployed_nodes = api.node.Node.list(self.request, associated=True,
+                                            _error_redirect=redirect)
 
         if 'errors' in self.request.GET:
-            return api.filter_nodes(deployed_nodes, healthy=False)
+            return api.node.filter_nodes(deployed_nodes, healthy=False)
 
         return deployed_nodes
 
@@ -76,11 +77,11 @@ class FreeTab(tabs.TableTab):
 
     def get_free_nodes_data(self):
         redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
-        free_nodes = api.Node.list(self.request, associated=False,
-                                   _error_redirect=redirect)
+        free_nodes = api.node.Node.list(self.request, associated=False,
+                                        _error_redirect=redirect)
 
         if 'errors' in self.request.GET:
-            return api.filter_nodes(free_nodes, healthy=False)
+            return api.node.filter_nodes(free_nodes, healthy=False)
 
         return free_nodes
 

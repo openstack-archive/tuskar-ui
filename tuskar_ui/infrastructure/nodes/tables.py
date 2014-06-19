@@ -32,7 +32,7 @@ class DeleteNode(tables.BatchAction):
         return getattr(obj, 'instance', None) is None
 
     def action(self, request, obj_id):
-        api.Node.delete(request, obj_id)
+        api.node.Node.delete(request, obj_id)
 
 
 class NodeFilterAction(tables.FilterAction):
@@ -111,7 +111,7 @@ class FreeNodesTable(NodesTable):
 class DeployedNodesTable(NodesTable):
 
     deployment_role = tables.Column(
-        lambda node: node.overcloud_role.name,
+        lambda node: api.tuskar.OvercloudRole.get_by_node(node).name,
         verbose_name=_("Deployment Role"))
 
     # TODO(lsmola) waits for Ceilometer baremetal metrics

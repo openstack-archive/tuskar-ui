@@ -20,6 +20,9 @@ from mock import patch, call  # noqa
 from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui.test import helpers as test
+from tuskar_ui.test.test_data import flavor_data
+from tuskar_ui.test.test_data import heat_data
+from tuskar_ui.test.test_data import node_data
 from tuskar_ui.test.test_data import tuskar_data
 
 
@@ -40,6 +43,9 @@ DETAIL_URL_LOG_TAB = (DETAIL_URL + "?tab=detail__log")
 DELETE_URL = urlresolvers.reverse(
     'horizon:infrastructure:overcloud:undeploy_confirmation', args=(1,))
 TEST_DATA = utils.TestDataContainer()
+flavor_data.data(TEST_DATA)
+node_data.data(TEST_DATA)
+heat_data.data(TEST_DATA)
 tuskar_data.data(TEST_DATA)
 
 
@@ -105,7 +111,7 @@ def _mock_overcloud(**kwargs):
         'template_parameters.return_value': template_parameters,
     }
     params.update(kwargs)
-    with patch('tuskar_ui.api.Overcloud', **params) as Overcloud:
+    with patch('tuskar_ui.api.tuskar.Overcloud', **params) as Overcloud:
         oc = Overcloud
         yield Overcloud
 
@@ -139,12 +145,12 @@ class OvercloudTests(test.BaseAdminViewTests):
     def test_create_get(self):
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         with contextlib.nested(
-            patch('tuskar_ui.api.OvercloudRole', **{
+            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
             _mock_overcloud(),
-            patch('tuskar_ui.api.Node', **{
+            patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': [],
             }),
@@ -174,12 +180,12 @@ class OvercloudTests(test.BaseAdminViewTests):
             'count__4__': '0',
         }
         with contextlib.nested(
-            patch('tuskar_ui.api.OvercloudRole', **{
+            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
             _mock_overcloud(),
-            patch('tuskar_ui.api.Node', **{
+            patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': [node],
             }),
@@ -217,12 +223,12 @@ class OvercloudTests(test.BaseAdminViewTests):
             'count__4__': '0',
         }
         with contextlib.nested(
-            patch('tuskar_ui.api.OvercloudRole', **{
+            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
             _mock_overcloud(),
-            patch('tuskar_ui.api.Node', **{
+            patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': [],
             }),
@@ -247,12 +253,12 @@ class OvercloudTests(test.BaseAdminViewTests):
             'count__4__': '0',
         }
         with contextlib.nested(
-            patch('tuskar_ui.api.OvercloudRole', **{
+            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
             _mock_overcloud(),
-            patch('tuskar_ui.api.Node', **{
+            patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': [node],
             }),
@@ -271,7 +277,7 @@ class OvercloudTests(test.BaseAdminViewTests):
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         with contextlib.nested(
             _mock_overcloud(),
-            patch('tuskar_ui.api.OvercloudRole', **{
+            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
@@ -356,7 +362,7 @@ class OvercloudTests(test.BaseAdminViewTests):
         oc = None
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         with contextlib.nested(
-            patch('tuskar_ui.api.OvercloudRole', **{
+            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
@@ -390,7 +396,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             'count__4__': '0',
         }
         with contextlib.nested(
-            patch('tuskar_ui.api.OvercloudRole', **{
+            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
@@ -398,7 +404,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                 "overcloud_role_id": role.id,
                 "num_nodes": 0,
             } for role in roles]),
-            patch('tuskar_ui.api.Node', **{
+            patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': [node],
             }),
@@ -430,7 +436,7 @@ class OvercloudTests(test.BaseAdminViewTests):
         url = urlresolvers.reverse(
             'horizon:infrastructure:overcloud:role_edit', args=(role.id,))
         with contextlib.nested(
-            patch('tuskar_ui.api.OvercloudRole', **{
+            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
                 'spec_set': ['get'],
                 'get.return_value': role,
             }),
@@ -450,7 +456,7 @@ class OvercloudTests(test.BaseAdminViewTests):
         Flavor = collections.namedtuple('Flavor', 'id name')
         flavor = Flavor('xxx', 'Xxx')
         with contextlib.nested(
-            patch('tuskar_ui.api.OvercloudRole', **{
+            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
                 'spec_set': [
                     'get',
                     'update',

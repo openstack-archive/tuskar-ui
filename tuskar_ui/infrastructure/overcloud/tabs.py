@@ -83,7 +83,7 @@ class OverviewTab(tabs.Tab):
 
     def get_context_data(self, request, **kwargs):
         overcloud = self.tab_group.kwargs['overcloud']
-        roles = api.OvercloudRole.list(request)
+        roles = api.tuskar.OvercloudRole.list(request)
         role_data = [_get_role_data(overcloud, role) for role in roles]
         total = sum(d['total_node_count'] for d in role_data)
         progress = 100 * sum(d.get('deployed_node_count', 0)
