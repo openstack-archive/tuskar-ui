@@ -35,12 +35,13 @@ class IndexView(horizon_tabs.TabbedTableView):
     template_name = 'infrastructure/nodes/index.html'
 
     def get_free_nodes_count(self):
-        free_nodes_count = len(api.Node.list(self.request, associated=False))
+        free_nodes_count = len(api.node.Node.list(
+            self.request, associated=False))
         return free_nodes_count
 
     def get_deployed_nodes_count(self):
-        deployed_nodes_count = len(api.Node.list(self.request,
-                                                 associated=True))
+        deployed_nodes_count = len(api.node.Node.list(self.request,
+                                                      associated=True))
         return deployed_nodes_count
 
     def get_context_data(self, **kwargs):
@@ -76,7 +77,7 @@ class DetailView(horizon_views.APIView):
     def get_data(self, request, context, *args, **kwargs):
         node_uuid = kwargs.get('node_uuid')
         redirect = reverse_lazy('horizon:infrastructure:nodes:index')
-        node = api.Node.get(request, node_uuid, _error_redirect=redirect)
+        node = api.node.Node.get(request, node_uuid, _error_redirect=redirect)
         context['node'] = node
 
         if api_base.is_service_enabled(request, 'metering'):

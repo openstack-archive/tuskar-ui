@@ -88,7 +88,7 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
         success = True
         for form in self:
             try:
-                api.Node.create(
+                api.node.Node.create(
                     request,
                     form.cleaned_data['ipmi_address'],
                     form.cleaned_data.get('cpus'),

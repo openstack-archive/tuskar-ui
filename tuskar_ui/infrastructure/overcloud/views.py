@@ -48,8 +48,8 @@ class OvercloudMixin(object):
         if redirect is None:
             redirect = reverse(INDEX_URL)
         overcloud_id = self.kwargs['overcloud_id']
-        overcloud = api.Overcloud.get(self.request, overcloud_id,
-                                      _error_redirect=redirect)
+        overcloud = api.tuskar.Overcloud.get(self.request, overcloud_id,
+                                             _error_redirect=redirect)
         return overcloud
 
 
@@ -57,8 +57,8 @@ class OvercloudRoleMixin(object):
     @memoized.memoized
     def get_role(self, redirect=None):
         role_id = self.kwargs['role_id']
-        role = api.OvercloudRole.get(self.request, role_id,
-                                     _error_redirect=redirect)
+        role = api.tuskar.OvercloudRole.get(self.request, role_id,
+                                            _error_redirect=redirect)
         return role
 
 
@@ -68,7 +68,7 @@ class IndexView(base_views.RedirectView):
     def get_redirect_url(self):
         try:
             # TODO(lsmola) implement this properly when supported by API
-            overcloud = api.Overcloud.get_the_overcloud(self.request)
+            overcloud = api.tuskar.Overcloud.get_the_overcloud(self.request)
         except heatclient.exc.HTTPNotFound:
             overcloud = None
 
@@ -130,7 +130,7 @@ class UndeployInProgressView(horizon_tabs.TabView, OvercloudMixin, ):
     def get_overcloud_or_redirect(self):
         try:
             # TODO(lsmola) implement this properly when supported by API
-            overcloud = api.Overcloud.get_the_overcloud(self.request)
+            overcloud = api.tuskar.Overcloud.get_the_overcloud(self.request)
         except heatclient.exc.HTTPNotFound:
             overcloud = None
 
@@ -171,7 +171,7 @@ class Scale(horizon.workflows.WorkflowView, OvercloudMixin):
         overcloud = self.get_overcloud()
         overcloud_roles = dict((overcloud_role.id, overcloud_role)
                                for overcloud_role in
-                               api.OvercloudRole.list(self.request))
+                               api.tuskar.OvercloudRole.list(self.request))
 
         role_counts = dict((
             (count['overcloud_role_id'],

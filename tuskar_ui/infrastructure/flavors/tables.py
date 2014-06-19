@@ -48,7 +48,7 @@ class DeleteFlavor(flavor_tables.DeleteFlavor):
         :type  datum: tuskar_ui.api.Flavor
         """
         if datum is not None:
-            deployed_flavors = api.Flavor.list_deployed_ids(
+            deployed_flavors = api.flavor.Flavor.list_deployed_ids(
                 request, _error_default=None)
             if deployed_flavors is None or datum.id in deployed_flavors:
                 return False
@@ -87,7 +87,7 @@ class FlavorRolesTable(tables.DataTable):
     def __init__(self, request, *args, **kwargs):
         # TODO(dtantsur): support multiple overclouds
         try:
-            overcloud = api.Overcloud.get_the_overcloud(request)
+            overcloud = api.tuskar.Overcloud.get_the_overcloud(request)
         except Exception:
             count_getter = lambda role: _("Not deployed")
         else:

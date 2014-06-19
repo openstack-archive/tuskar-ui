@@ -20,7 +20,7 @@ import horizon.tables
 import horizon.tabs
 import horizon.workflows
 
-import tuskar_ui.api
+from tuskar_ui import api
 from tuskar_ui.infrastructure.flavors import tables
 from tuskar_ui.infrastructure.flavors import tabs
 from tuskar_ui.infrastructure.flavors import workflows
@@ -29,7 +29,7 @@ from tuskar_ui.infrastructure.flavors import workflows
 def image_get(request, image_id, error_message):
     # TODO(dtantsur): there should be generic way to handle exceptions
     try:
-        return tuskar_ui.api.image_get(request, image_id)
+        return api.node.image_get(request, image_id)
     except Exception:
         horizon.exceptions.handle(request, error_message)
 
@@ -47,7 +47,7 @@ class CreateView(horizon.workflows.WorkflowView):
         suggestion_id = self.kwargs.get('suggestion_id')
         if not suggestion_id:
             return super(CreateView, self).get_initial()
-        node = tuskar_ui.api.Node.get(self.request, suggestion_id)
+        node = api.node.Node.get(self.request, suggestion_id)
         suggestion = tabs.FlavorSuggestion.from_node(node)
         return {
             'name': suggestion.name,
@@ -65,7 +65,7 @@ class DetailView(horizon.tables.DataTableView):
 
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)
-        context['flavor'] = tuskar_ui.api.Flavor.get(
+        context['flavor'] = api.flavor.Flavor.get(
             self.request,
             kwargs.get('flavor_id'),
             _error_redirect=self.error_redirect
@@ -83,5 +83,5 @@ class DetailView(horizon.tables.DataTableView):
         return context
 
     def get_data(self):
-        return [role for role in tuskar_ui.api.OvercloudRole.list(self.request)
+        return [role for role in api.tuskar.OvercloudRole.list(self.request)
                 if role.flavor_id == str(self.kwargs.get('flavor_id'))]

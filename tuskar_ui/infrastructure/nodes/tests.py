@@ -21,9 +21,11 @@ from mock import patch, call  # noqa
 
 from openstack_dashboard.test import helpers
 from openstack_dashboard.test.test_data import utils
-from tuskar_ui import api as api
+from tuskar_ui import api
 from tuskar_ui.handle_errors import handle_errors  # noqa
 from tuskar_ui.test import helpers as test
+from tuskar_ui.test.test_data import heat_data
+from tuskar_ui.test.test_data import node_data
 from tuskar_ui.test.test_data import tuskar_data
 
 
@@ -32,6 +34,8 @@ REGISTER_URL = urlresolvers.reverse('horizon:infrastructure:nodes:register')
 DETAIL_VIEW = 'horizon:infrastructure:nodes:detail'
 PERFORMANCE_VIEW = 'horizon:infrastructure:nodes:performance'
 TEST_DATA = utils.TestDataContainer()
+node_data.data(TEST_DATA)
+heat_data.data(TEST_DATA)
 tuskar_data.data(TEST_DATA)
 
 
@@ -42,7 +46,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
 
     def test_index_get(self):
 
-        with patch('tuskar_ui.api.Node', **{
+        with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['list'],  # Only allow these attributes
             'list.return_value': [],
         }) as mock:
@@ -55,26 +59,26 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         self.assertTemplateUsed(res, 'infrastructure/nodes/_overview.html')
 
     def test_free_nodes(self):
-        free_nodes = [api.Node(node)
+        free_nodes = [api.node.Node(node)
                       for node in self.ironicclient_nodes.list()]
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         instance = TEST_DATA.novaclient_servers.first()
         image = TEST_DATA.glanceclient_images.first()
 
         with contextlib.nested(
-            patch('tuskar_ui.api.OvercloudRole', **{
-                'spec_set': ['list', 'name'],
+            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
+                'spec_set': ['list', 'name', 'get_by_node'],
                 'list.return_value': roles,
             }),
-            patch('tuskar_ui.api.Node', **{
+            patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': free_nodes,
             }),
-            patch('tuskar_ui.api.nova', **{
+            patch('tuskar_ui.api.node.nova', **{
                 'spec_set': ['server_get'],
                 'server_get.return_value': instance,
             }),
-            patch('tuskar_ui.api.glance', **{
+            patch('tuskar_ui.api.node.glance', **{
                 'spec_set': ['image_get'],
                 'image_get.return_value': image,
             }),
@@ -90,7 +94,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                               free_nodes)
 
     def test_free_nodes_list_exception(self):
-        with patch('tuskar_ui.api.Node', **{
+        with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['list'],
             'list.side_effect': self._raise_tuskar_exception,
         }) as mock:
@@ -100,26 +104,26 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
     def test_deployed_nodes(self):
-        deployed_nodes = [api.Node(node)
+        deployed_nodes = [api.node.Node(node)
                           for node in self.ironicclient_nodes.list()]
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         instance = TEST_DATA.novaclient_servers.first()
         image = TEST_DATA.glanceclient_images.first()
 
         with contextlib.nested(
-            patch('tuskar_ui.api.OvercloudRole', **{
-                'spec_set': ['list', 'name'],
+            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
+                'spec_set': ['list', 'name', 'get_by_node'],
                 'list.return_value': roles,
             }),
-            patch('tuskar_ui.api.Node', **{
+            patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': deployed_nodes,
             }),
-            patch('tuskar_ui.api.nova', **{
+            patch('tuskar_ui.api.node.nova', **{
                 'spec_set': ['server_get'],
                 'server_get.return_value': instance,
             }),
-            patch('tuskar_ui.api.glance', **{
+            patch('tuskar_ui.api.node.glance', **{
                 'spec_set': ['image_get'],
                 'image_get.return_value': image,
             }),
@@ -136,7 +140,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
 
     def test_deployed_nodes_list_exception(self):
         instance = TEST_DATA.novaclient_servers.first()
-        with patch('tuskar_ui.api.Node', **{
+        with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['list', 'instance'],
             'instance': instance,
             'list.side_effect': self._raise_tuskar_exception,
@@ -172,7 +176,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-1-memory': '5',
             'register_nodes-1-local_disk': '6',
         }
-        with patch('tuskar_ui.api.Node', **{
+        with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['create'],
             'create.return_value': node,
         }) as Node:
@@ -206,7 +210,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-1-memory': '5',
             'register_nodes-1-local_disk': '6',
         }
-        with patch('tuskar_ui.api.Node', **{
+        with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['create'],
             'create.side_effect': self.exceptions.tuskar,
         }) as Node:
@@ -222,9 +226,9 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             res, 'infrastructure/nodes/register.html')
 
     def test_node_detail(self):
-        node = api.Node(self.ironicclient_nodes.list()[0])
+        node = api.node.Node(self.ironicclient_nodes.list()[0])
 
-        with patch('tuskar_ui.api.Node', **{
+        with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['get'],  # Only allow these attributes
             'get.return_value': node,
         }) as mock:
@@ -237,7 +241,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         self.assertEqual(res.context['node'], node)
 
     def test_node_detail_exception(self):
-        with patch('tuskar_ui.api.Node', **{
+        with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['get'],
             'get.side_effect': self._raise_tuskar_exception,
         }) as mock:
@@ -249,7 +253,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
     def test_performance(self):
-        node = api.Node(self.ironicclient_nodes.list()[0])
+        node = api.node.Node(self.ironicclient_nodes.list()[0])
         meters = self.meters.list()
         resources = self.resources.list()
 
@@ -261,7 +265,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
 
         self.mox.ReplayAll()
 
-        with patch('tuskar_ui.api.Node', **{
+        with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['get'],
             'get.return_value': node,
         }):

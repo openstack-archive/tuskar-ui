@@ -24,10 +24,14 @@ from horizon import exceptions
 from openstack_dashboard.test.test_data import utils
 from tuskar_ui import api
 from tuskar_ui.test import helpers as test
+from tuskar_ui.test.test_data import flavor_data
+from tuskar_ui.test.test_data import heat_data
 from tuskar_ui.test.test_data import tuskar_data
 
 
 TEST_DATA = utils.TestDataContainer()
+flavor_data.data(TEST_DATA)
+heat_data.data(TEST_DATA)
 tuskar_data.data(TEST_DATA)
 INDEX_URL = urlresolvers.reverse(
     'horizon:infrastructure:flavors:index')
@@ -49,7 +53,7 @@ def _prepare_create():
             'kernel_image_id': images[0].id,
             'ramdisk_image_id': images[1].id}
     with contextlib.nested(
-            patch('tuskar_ui.api.Flavor.create',
+            patch('tuskar_ui.api.flavor.Flavor.create',
                   return_value=flavor),
             patch('openstack_dashboard.api.glance.image_list_detailed',
                   return_value=(TEST_DATA.glanceclient_images.list(), False)),
@@ -69,7 +73,8 @@ class FlavorsTest(test.BaseAdminViewTests):
                       return_value=TEST_DATA.novaclient_flavors.list()),
                 patch('openstack_dashboard.api.nova.server_list',
                       return_value=([], False)),
-                patch('tuskar_ui.api.OvercloudRole.list', return_value=roles),
+                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                      return_value=roles),
         ) as (flavors_mock, servers_mock, role_list_mock):
             res = self.client.get(INDEX_URL)
             self.assertEqual(flavors_mock.call_count, 1)
@@ -126,7 +131,8 @@ class FlavorsTest(test.BaseAdminViewTests):
                 patch('openstack_dashboard.api.nova.flavor_delete'),
                 patch('openstack_dashboard.api.nova.server_list',
                       return_value=([], False)),
-                patch('tuskar_ui.api.OvercloudRole.list', return_value=[]),
+                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                      return_value=[]),
                 patch('openstack_dashboard.api.glance.image_list_detailed',
                       return_value=([], False)),
                 patch('openstack_dashboard.api.nova.flavor_list',
@@ -155,7 +161,8 @@ class FlavorsTest(test.BaseAdminViewTests):
                 patch('openstack_dashboard.api.nova.flavor_delete'),
                 patch('openstack_dashboard.api.nova.server_list',
                       return_value=([server], False)),
-                patch('tuskar_ui.api.OvercloudRole.list', return_value=[]),
+                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                      return_value=[]),
                 patch('openstack_dashboard.api.glance.image_list_detailed',
                       return_value=([], False)),
                 patch('openstack_dashboard.api.nova.flavor_list',
@@ -179,7 +186,8 @@ class FlavorsTest(test.BaseAdminViewTests):
                 patch('openstack_dashboard.api.nova.flavor_delete'),
                 patch('openstack_dashboard.api.nova.server_list',
                       return_value=([], False)),
-                patch('tuskar_ui.api.OvercloudRole.list', return_value=roles),
+                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                      return_value=roles),
                 patch('openstack_dashboard.api.glance.image_list_detailed',
                       return_value=([], False)),
                 patch('openstack_dashboard.api.nova.flavor_list',
@@ -194,18 +202,18 @@ class FlavorsTest(test.BaseAdminViewTests):
             self.assertEqual(server_list_mock.call_count, 1)
 
     def test_details_no_overcloud(self):
-        flavor = api.Flavor(TEST_DATA.novaclient_flavors.first())
+        flavor = api.flavor.Flavor(TEST_DATA.novaclient_flavors.first())
         images = TEST_DATA.glanceclient_images.list()[:2]
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         roles[0].flavor_id = flavor.id
         with contextlib.nested(
                 patch('openstack_dashboard.api.glance.image_get',
                       side_effect=images),
-                patch('tuskar_ui.api.Flavor.get',
+                patch('tuskar_ui.api.flavor.Flavor.get',
                       return_value=flavor),
-                patch('tuskar_ui.api.OvercloudRole.list',
+                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
                       return_value=roles),
-                patch('tuskar_ui.api.Overcloud.get_the_overcloud',
+                patch('tuskar_ui.api.tuskar.Overcloud.get_the_overcloud',
                       side_effect=Exception)
         ) as (image_mock, get_mock, roles_mock, overcloud_mock):
             res = self.client.get(urlresolvers.reverse(DETAILS_VIEW,
@@ -218,22 +226,23 @@ class FlavorsTest(test.BaseAdminViewTests):
                                 'infrastructure/flavors/details.html')
 
     def test_details(self):
-        flavor = api.Flavor(TEST_DATA.novaclient_flavors.first())
+        flavor = api.flavor.Flavor(TEST_DATA.novaclient_flavors.first())
         images = TEST_DATA.glanceclient_images.list()[:2]
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         roles[0].flavor_id = flavor.id
-        overcloud = api.Overcloud(TEST_DATA.tuskarclient_overclouds.first())
+        overcloud = api.tuskar.Overcloud(
+            TEST_DATA.tuskarclient_overclouds.first())
         with contextlib.nested(
                 patch('openstack_dashboard.api.glance.image_get',
                       side_effect=images),
-                patch('tuskar_ui.api.Flavor.get',
+                patch('tuskar_ui.api.flavor.Flavor.get',
                       return_value=flavor),
-                patch('tuskar_ui.api.OvercloudRole.list',
+                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
                       return_value=roles),
-                patch('tuskar_ui.api.Overcloud.get_the_overcloud',
+                patch('tuskar_ui.api.tuskar.Overcloud.get_the_overcloud',
                       return_value=overcloud),
                 # __name__ is required for horizon.tables
-                patch('tuskar_ui.api.Overcloud.resources_count',
+                patch('tuskar_ui.api.tuskar.Overcloud.resources_count',
                       return_value=42, __name__='')
         ) as (image_mock, get_mock, roles_mock, overcloud_mock, count_mock):
             res = self.client.get(urlresolvers.reverse(DETAILS_VIEW,

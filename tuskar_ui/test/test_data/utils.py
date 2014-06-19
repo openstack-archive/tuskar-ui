@@ -23,6 +23,9 @@ def load_test_data(load_onto=None):
     from openstack_dashboard.test.test_data import nova_data
     from openstack_dashboard.test.test_data import swift_data
     from tuskar_ui.test.test_data import exceptions
+    from tuskar_ui.test.test_data import flavor_data
+    from tuskar_ui.test.test_data import heat_data as tuskar_heat_data
+    from tuskar_ui.test.test_data import node_data
     from tuskar_ui.test.test_data import tuskar_data
 
     # The order of these loaders matters, some depend on others.
@@ -34,6 +37,9 @@ def load_test_data(load_onto=None):
                neutron_data.data,
                swift_data.data,
                heat_data.data,
+               flavor_data.data,
+               node_data.data,
+               tuskar_heat_data.data,
                tuskar_data.data)
     if load_onto:
         for data_func in loaders:
