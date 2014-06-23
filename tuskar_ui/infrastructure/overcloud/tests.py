@@ -19,6 +19,7 @@ from django.core import urlresolvers
 from mock import patch, call  # noqa
 from openstack_dashboard.test.test_data import utils
 
+from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import flavor_data
 from tuskar_ui.test.test_data import heat_data
@@ -50,9 +51,13 @@ tuskar_data.data(TEST_DATA)
 
 
 @contextlib.contextmanager
-def _mock_overcloud(**kwargs):
-    oc = None
-    stack = TEST_DATA.heatclient_stacks.first()
+def _mock_plan(**kwargs):
+    plan = None
+    stack = api.heat.OvercloudStack(TEST_DATA.heatclient_stacks.first())
+    stack.events = []
+    stack.resources_by_role = lambda *args, **kwargs: []
+    stack.resources = lambda *args, **kwargs: []
+    stack.overcloud_keystone = None
     template_parameters = {
         "NeutronPublicInterfaceRawDevice": {
             "Default": "",
@@ -74,70 +79,59 @@ def _mock_overcloud(**kwargs):
         'spec_set': [
             'counts',
             'create',
-            'dashboard_urls',
             'delete',
             'get',
-            'get_the_overcloud',
+            'get_the_plan',
             'id',
-            'is_deployed',
-            'is_deploying',
-            'is_deleting',
-            'is_delete_failed',
-            'is_failed',
-            'all_resources',
-            'resources',
             'stack',
-            'stack_events',
             'update',
             'template_parameters',
         ],
         'counts': [],
-        'create.side_effect': lambda *args, **kwargs: oc,
-        'dashboard_urls': '',
+        'create.side_effect': lambda *args, **kwargs: plan,
         'delete.return_value': None,
-        'get.side_effect': lambda *args, **kwargs: oc,
-        'get_the_overcloud.side_effect': lambda *args, **kwargs: oc,
+        'get.side_effect': lambda *args, **kwargs: plan,
+        'get_the_plan.side_effect': lambda *args, **kwargs: plan,
         'id': 1,
-        'is_deployed': True,
-        'is_deploying': False,
-        'is_deleting': False,
-        'is_delete_failed': False,
-        'is_failed': False,
-        'all_resources.return_value': [],
-        'resources.return_value': [],
-        'stack_events': [],
         'stack': stack,
-        'update.side_effect': lambda *args, **kwargs: oc,
+        'update.side_effect': lambda *args, **kwargs: plan,
         'template_parameters.return_value': template_parameters,
     }
     params.update(kwargs)
-    with patch('tuskar_ui.api.tuskar.Overcloud', **params) as Overcloud:
-        oc = Overcloud
-        yield Overcloud
+    with patch(
+            'tuskar_ui.api.tuskar.OvercloudPlan', **params) as OvercloudPlan:
+        plan = OvercloudPlan
+        yield OvercloudPlan
 
 
 class OvercloudTests(test.BaseAdminViewTests):
 
     def test_index_overcloud_undeployed_get(self):
-        with _mock_overcloud(**{'get_the_overcloud.side_effect': None,
-                                'get_the_overcloud.return_value': None}):
+        with _mock_plan(**{'get_the_plan.side_effect': None,
+                           'get_the_plan.return_value': None}):
             res = self.client.get(INDEX_URL)
 
         self.assertRedirectsNoFollow(res, CREATE_URL)
 
     def test_index_overcloud_deployed_stack_not_created(self):
-        with _mock_overcloud(is_deployed=False, stack=None) as Overcloud:
+        with contextlib.nested(
+                _mock_plan(),
+                patch('tuskar_ui.api.heat.OvercloudStack.is_deployed',
+                      return_value=False),
+        ):
             res = self.client.get(INDEX_URL)
-            request = Overcloud.get_the_overcloud.call_args_list[0][0][0]
-            self.assertListEqual(Overcloud.get_the_overcloud.call_args_list,
-                                 [call(request)])
+            request = api.tuskar.OvercloudPlan.get_the_plan. \
+                call_args_list[0][0][0]
+            self.assertListEqual(
+                api.tuskar.OvercloudPlan.get_the_plan.call_args_list,
+                [call(request)])
         self.assertRedirectsNoFollow(res, DETAIL_URL)
 
     def test_index_overcloud_deployed(self):
-        with _mock_overcloud() as Overcloud:
+        with _mock_plan() as Overcloud:
             res = self.client.get(INDEX_URL)
-            request = Overcloud.get_the_overcloud.call_args_list[0][0][0]
-            self.assertListEqual(Overcloud.get_the_overcloud.call_args_list,
+            request = Overcloud.get_the_plan.call_args_list[0][0][0]
+            self.assertListEqual(Overcloud.get_the_plan.call_args_list,
                                  [call(request)])
 
         self.assertRedirectsNoFollow(res, DETAIL_URL)
@@ -149,7 +143,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
-            _mock_overcloud(),
+            _mock_plan(),
             patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': [],
@@ -184,7 +178,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
-            _mock_overcloud(),
+            _mock_plan(),
             patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': [node],
@@ -227,7 +221,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
-            _mock_overcloud(),
+            _mock_plan(),
             patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': [],
@@ -257,7 +251,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
-            _mock_overcloud(),
+            _mock_plan(),
             patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list'],
                 'list.return_value': [node],
@@ -275,8 +269,9 @@ class OvercloudTests(test.BaseAdminViewTests):
 
     def test_detail_get(self):
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+
         with contextlib.nested(
-            _mock_overcloud(),
+            _mock_plan(),
             patch('tuskar_ui.api.tuskar.OvercloudRole', **{
                 'spec_set': ['list'],
                 'list.return_value': roles,
@@ -292,7 +287,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'infrastructure/overcloud/_detail_overview.html')
 
     def test_detail_get_configuration_tab(self):
-        with _mock_overcloud():
+        with _mock_plan():
             res = self.client.get(DETAIL_URL_CONFIGURATION_TAB)
 
         self.assertTemplateUsed(
@@ -303,7 +298,7 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'horizon/common/_detail_table.html')
 
     def test_detail_get_log_tab(self):
-        with _mock_overcloud():
+        with _mock_plan():
             res = self.client.get(DETAIL_URL_LOG_TAB)
 
         self.assertTemplateUsed(
@@ -319,12 +314,18 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'infrastructure/overcloud/undeploy_confirmation.html')
 
     def test_delete_post(self):
-        with _mock_overcloud():
+        with _mock_plan():
             res = self.client.post(DELETE_URL)
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
     def test_undeploy_in_progress(self):
-        with _mock_overcloud(is_deleting=True, is_deployed=False):
+        with contextlib.nested(
+                _mock_plan(),
+                patch('tuskar_ui.api.heat.OvercloudStack.is_deleting',
+                      return_value=True),
+                patch('tuskar_ui.api.heat.OvercloudStack.is_deployed',
+                      return_value=False),
+        ):
             res = self.client.get(UNDEPLOY_IN_PROGRESS_URL)
 
         self.assertTemplateUsed(
@@ -335,20 +336,26 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'horizon/common/_detail_table.html')
 
     def test_undeploy_in_progress_finished(self):
-        with _mock_overcloud(**{'get_the_overcloud.side_effect': None,
-                                'get_the_overcloud.return_value': None}):
+        with _mock_plan(**{'get_the_plan.side_effect': None,
+                           'get_the_plan.return_value': None}):
             res = self.client.get(UNDEPLOY_IN_PROGRESS_URL)
 
         self.assertRedirectsNoFollow(res, CREATE_URL)
 
     def test_undeploy_in_progress_invalid(self):
-        with _mock_overcloud():
+        with _mock_plan():
             res = self.client.get(UNDEPLOY_IN_PROGRESS_URL)
 
         self.assertRedirectsNoFollow(res, DETAIL_URL)
 
     def test_undeploy_in_progress_log_tab(self):
-        with _mock_overcloud(is_deleting=True, is_deployed=False):
+        with contextlib.nested(
+                _mock_plan(),
+                patch('tuskar_ui.api.heat.OvercloudStack.is_deleting',
+                      return_value=True),
+                patch('tuskar_ui.api.heat.OvercloudStack.is_deployed',
+                      return_value=False),
+        ):
             res = self.client.get(UNDEPLOY_IN_PROGRESS_URL_LOG_TAB)
 
         self.assertTemplateUsed(
@@ -366,7 +373,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
-            _mock_overcloud(counts=[{
+            _mock_plan(counts=[{
                 "overcloud_role_id": role.id,
                 "num_nodes": 0,
             } for role in roles]),
@@ -389,7 +396,7 @@ class OvercloudTests(test.BaseAdminViewTests):
         old_flavor_id = roles[0].flavor_id
         roles[0].flavor_id = flavor.id
         data = {
-            'overcloud_id': '1',
+            'plan_id': '1',
             'count__1__%s' % flavor.id: '1',
             'count__2__': '0',
             'count__3__': '0',
@@ -400,7 +407,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
-            _mock_overcloud(counts=[{
+            _mock_plan(counts=[{
                 "overcloud_role_id": role.id,
                 "num_nodes": 0,
             } for role in roles]),

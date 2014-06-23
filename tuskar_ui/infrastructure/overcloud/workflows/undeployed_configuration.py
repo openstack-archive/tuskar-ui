@@ -56,10 +56,10 @@ class Action(horizon.workflows.Action):
 
     def __init__(self, request, *args, **kwargs):
         super(Action, self).__init__(request, *args, **kwargs)
-        parameters = api.tuskar.Overcloud.template_parameters(request).items()
-        parameters.sort()
+        params = api.tuskar.OvercloudPlan.template_parameters(request).items()
+        params.sort()
 
-        for name, data in parameters:
+        for name, data in params:
             self.fields[name] = make_field(name, **data)
 
     def clean(self):

@@ -19,3 +19,18 @@ CAMEL_RE = re.compile(r'([a-z]|SSL)([A-Z])')
 def de_camel_case(text):
     """Convert CamelCase names to human-readable format."""
     return CAMEL_RE.sub(lambda m: m.group(1) + ' ' + m.group(2), text)
+
+
+def list_to_dict(object_list, key_attribute='id'):
+    """Converts an object list to a dict
+
+    :param object_list: list of objects to be put into a dict
+    :type  object_list: list
+
+    :param key_attribute: object attribute used as index by dict
+    :type  key_attribute: str
+
+    :return: dict containing the objects in the list
+    :rtype: dict
+    """
+    return dict((getattr(o, key_attribute), o) for o in object_list)

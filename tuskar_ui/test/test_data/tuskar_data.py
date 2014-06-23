@@ -19,19 +19,19 @@ from tuskarclient.v1 import overclouds
 def data(TEST):
 
     # Overcloud
-    TEST.tuskarclient_overclouds = test_data_utils.TestDataContainer()
+    TEST.tuskarclient_overcloud_plans = test_data_utils.TestDataContainer()
     # TODO(Tzu-Mainn Chen): fix these to create Tuskar Overcloud objects
     # once the api supports it
     oc_1 = overclouds.Overcloud(
         overclouds.OvercloudManager(None),
         {'id': 1,
-         'stack_id': 'stack-id-1',
          'name': 'overcloud',
          'description': 'overcloud',
+         'stack_id': 'stack-id-1',
          'attributes': {
              'AdminPassword': "unset"
          }})
-    TEST.tuskarclient_overclouds.add(oc_1)
+    TEST.tuskarclient_overcloud_plans.add(oc_1)
 
     # OvercloudRole
     TEST.tuskarclient_overcloud_roles = test_data_utils.TestDataContainer()

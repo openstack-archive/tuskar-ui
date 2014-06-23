@@ -32,18 +32,18 @@ class Workflow(undeployed.DeploymentValidationMixin,
     finalize_button_name = _("Apply Changes")
 
     def handle(self, request, context):
-        overcloud_id = context['overcloud_id']
+        plan_id = context['plan_id']
         try:
             # TODO(lsmola) when updates are fixed in Heat, figure out whether
             # we need to send also parameters, right now we send {}
-            api.tuskar.Overcloud.update(request, overcloud_id,
-                                        context['role_counts'], {})
+            api.tuskar.OvercloudPlan.update(request, plan_id,
+                                            context['role_counts'], {})
         except Exception:
             exceptions.handle(request, _('Unable to update deployment.'))
             return False
         return True
 
     def get_success_url(self):
-        overcloud_id = self.context.get('overcloud_id', 1)
+        plan_id = self.context.get('plan_id', 1)
         return reverse('horizon:infrastructure:overcloud:detail',
-                       args=(overcloud_id,))
+                       args=(plan_id,))

@@ -20,6 +20,7 @@ from tuskar_ui.api import tuskar
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
 
+
 LOG = logging.getLogger(__name__)
 
 

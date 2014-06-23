@@ -65,8 +65,9 @@ class Workflow(DeploymentValidationMixin, horizon.workflows.Workflow):
 
     def handle(self, request, context):
         try:
-            api.tuskar.Overcloud.create(self.request, context['role_counts'],
-                                        context['configuration'])
+            api.tuskar.OvercloudPlan.create(
+                self.request, context['role_counts'],
+                context['configuration'])
         except Exception as e:
             # Showing error in both workflow tabs, because from the exception
             # type we can't recognize where it should show

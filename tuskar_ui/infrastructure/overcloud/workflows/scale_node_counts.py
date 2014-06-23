@@ -25,7 +25,7 @@ class Action(undeployed_overview.Action):
 
 class Step(undeployed_overview.Step):
     action_class = Action
-    contributes = ('role_counts', 'overcloud_id')
+    contributes = ('role_counts', 'plan_id')
     template_name = 'infrastructure/overcloud/scale_node_counts.html'
 
     def prepare_action_context(self, request, context):

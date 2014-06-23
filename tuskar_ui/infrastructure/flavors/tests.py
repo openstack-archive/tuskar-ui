@@ -215,15 +215,15 @@ class FlavorsTest(test.BaseAdminViewTests):
                       return_value=flavor),
                 patch('tuskar_ui.api.tuskar.OvercloudRole.list',
                       return_value=roles),
-                patch('tuskar_ui.api.tuskar.Overcloud.get_the_overcloud',
+                patch('tuskar_ui.api.tuskar.OvercloudPlan.get_the_plan',
                       side_effect=Exception)
-        ) as (image_mock, get_mock, roles_mock, overcloud_mock):
+        ) as (image_mock, get_mock, roles_mock, plan_mock):
             res = self.client.get(urlresolvers.reverse(DETAILS_VIEW,
                                                        args=(flavor.id,)))
             self.assertEqual(image_mock.call_count, 1)  # memoized
             self.assertEqual(get_mock.call_count, 1)
             self.assertEqual(roles_mock.call_count, 1)
-            self.assertEqual(overcloud_mock.call_count, 1)
+            self.assertEqual(plan_mock.call_count, 1)
         self.assertTemplateUsed(res,
                                 'infrastructure/flavors/details.html')
 
@@ -232,8 +232,10 @@ class FlavorsTest(test.BaseAdminViewTests):
         images = TEST_DATA.glanceclient_images.list()[:2]
         roles = TEST_DATA.tuskarclient_overcloud_roles.list()
         roles[0].flavor_id = flavor.id
-        overcloud = api.tuskar.Overcloud(
-            TEST_DATA.tuskarclient_overclouds.first())
+        plan = api.tuskar.OvercloudPlan(
+            TEST_DATA.tuskarclient_overcloud_plans.first())
+        stack = api.heat.OvercloudStack(
+            TEST_DATA.heatclient_stacks.first())
         with contextlib.nested(
                 patch('openstack_dashboard.api.glance.image_get',
                       side_effect=images),
@@ -241,18 +243,22 @@ class FlavorsTest(test.BaseAdminViewTests):
                       return_value=flavor),
                 patch('tuskar_ui.api.tuskar.OvercloudRole.list',
                       return_value=roles),
-                patch('tuskar_ui.api.tuskar.Overcloud.get_the_overcloud',
-                      return_value=overcloud),
+                patch('tuskar_ui.api.tuskar.OvercloudPlan.get_the_plan',
+                      return_value=plan),
+                patch('tuskar_ui.api.heat.OvercloudStack.get',
+                      return_value=stack),
                 # __name__ is required for horizon.tables
-                patch('tuskar_ui.api.tuskar.Overcloud.resources_count',
+                patch('tuskar_ui.api.heat.OvercloudStack.resources_count',
                       return_value=42, __name__='')
-        ) as (image_mock, get_mock, roles_mock, overcloud_mock, count_mock):
+        ) as (image_mock, get_mock, roles_mock, plan_mock, stack_mock,
+              count_mock):
             res = self.client.get(urlresolvers.reverse(DETAILS_VIEW,
                                                        args=(flavor.id,)))
             self.assertEqual(image_mock.call_count, 1)  # memoized
             self.assertEqual(get_mock.call_count, 1)
             self.assertEqual(roles_mock.call_count, 1)
-            self.assertEqual(overcloud_mock.call_count, 1)
+            self.assertEqual(plan_mock.call_count, 1)
+            self.assertEqual(stack_mock.call_count, 1)
             self.assertEqual(count_mock.call_count, 1)
             self.assertListEqual(count_mock.call_args_list, [call(roles[0])])
         self.assertTemplateUsed(res,

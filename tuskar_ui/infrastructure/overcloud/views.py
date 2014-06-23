@@ -42,15 +42,15 @@ UNDEPLOY_IN_PROGRESS_URL = (
     'horizon:infrastructure:overcloud:undeploy_in_progress')
 
 
-class OvercloudMixin(object):
+class OvercloudPlanMixin(object):
     @memoized.memoized
-    def get_overcloud(self, redirect=None):
+    def get_plan(self, redirect=None):
         if redirect is None:
             redirect = reverse(INDEX_URL)
-        overcloud_id = self.kwargs['overcloud_id']
-        overcloud = api.tuskar.Overcloud.get(self.request, overcloud_id,
-                                             _error_redirect=redirect)
-        return overcloud
+        plan_id = self.kwargs['plan_id']
+        plan = api.tuskar.OvercloudPlan.get(self.request, plan_id,
+                                            _error_redirect=redirect)
+        return plan
 
 
 class OvercloudRoleMixin(object):
@@ -68,19 +68,19 @@ class IndexView(base_views.RedirectView):
     def get_redirect_url(self):
         try:
             # TODO(lsmola) implement this properly when supported by API
-            overcloud = api.tuskar.Overcloud.get_the_overcloud(self.request)
+            plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
         except heatclient.exc.HTTPNotFound:
-            overcloud = None
+            plan = None
 
         redirect = None
-        if overcloud is None:
+        if plan is None:
             redirect = reverse(CREATE_URL)
-        elif overcloud.is_deleting or overcloud.is_delete_failed:
+        elif plan.stack.is_deleting or plan.stack.is_delete_failed:
             redirect = reverse(UNDEPLOY_IN_PROGRESS_URL,
-                               args=(overcloud.id,))
+                               args=(plan.id,))
         else:
             redirect = reverse(DETAIL_URL,
-                               args=(overcloud.id,))
+                               args=(plan.id,))
 
         return redirect
 
@@ -90,17 +90,18 @@ class CreateView(horizon.workflows.WorkflowView):
     template_name = 'infrastructure/_fullscreen_workflow_base.html'
 
 
-class DetailView(horizon_tabs.TabView, OvercloudMixin):
+class DetailView(horizon_tabs.TabView, OvercloudPlanMixin):
     tab_group_class = tabs.DetailTabs
     template_name = 'infrastructure/overcloud/detail.html'
 
     def get_tabs(self, request, **kwargs):
-        overcloud = self.get_overcloud()
-        return self.tab_group_class(request, overcloud=overcloud, **kwargs)
+        plan = self.get_plan()
+        return self.tab_group_class(request, plan=plan, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)
-        context['overcloud'] = self.get_overcloud()
+        context['plan'] = self.get_plan()
+        context['stack'] = self.get_plan().stack
         return context
 
 
@@ -114,61 +115,61 @@ class UndeployConfirmationView(horizon.forms.ModalFormView):
     def get_context_data(self, **kwargs):
         context = super(UndeployConfirmationView,
                         self).get_context_data(**kwargs)
-        context['overcloud_id'] = self.kwargs['overcloud_id']
+        context['plan_id'] = self.kwargs['plan_id']
         return context
 
     def get_initial(self, **kwargs):
         initial = super(UndeployConfirmationView, self).get_initial(**kwargs)
-        initial['overcloud_id'] = self.kwargs['overcloud_id']
+        initial['plan_id'] = self.kwargs['plan_id']
         return initial
 
 
-class UndeployInProgressView(horizon_tabs.TabView, OvercloudMixin, ):
+class UndeployInProgressView(horizon_tabs.TabView, OvercloudPlanMixin, ):
     tab_group_class = tabs.UndeployInProgressTabs
     template_name = 'infrastructure/overcloud/detail.html'
 
-    def get_overcloud_or_redirect(self):
+    def get_overcloud_plan_or_redirect(self):
         try:
             # TODO(lsmola) implement this properly when supported by API
-            overcloud = api.tuskar.Overcloud.get_the_overcloud(self.request)
+            plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
         except heatclient.exc.HTTPNotFound:
-            overcloud = None
+            plan = None
 
-        if overcloud is None:
+        if plan is None:
             redirect = reverse(CREATE_URL)
             messages.success(self.request,
                              _("Undeploying of the Overcloud has finished."))
             raise horizon_exceptions.Http302(redirect)
-        elif overcloud.is_deleting or overcloud.is_delete_failed:
-            return overcloud
+        elif plan.stack.is_deleting or plan.stack.is_delete_failed:
+            return plan
         else:
             messages.error(self.request,
                            _("Overcloud is not being undeployed."))
             redirect = reverse(DETAIL_URL,
-                               args=(overcloud.id,))
+                               args=(plan.id,))
             raise horizon_exceptions.Http302(redirect)
 
     def get_tabs(self, request, **kwargs):
-        overcloud = self.get_overcloud_or_redirect()
-        return self.tab_group_class(request, overcloud=overcloud, **kwargs)
+        plan = self.get_overcloud_plan_or_redirect()
+        return self.tab_group_class(request, plan=plan, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(UndeployInProgressView,
                         self).get_context_data(**kwargs)
-        context['overcloud'] = self.get_overcloud_or_redirect()
+        context['plan'] = self.get_overcloud_plan_or_redirect()
         return context
 
 
-class Scale(horizon.workflows.WorkflowView, OvercloudMixin):
+class Scale(horizon.workflows.WorkflowView, OvercloudPlanMixin):
     workflow_class = scale.Workflow
 
     def get_context_data(self, **kwargs):
         context = super(Scale, self).get_context_data(**kwargs)
-        context['overcloud_id'] = self.kwargs['overcloud_id']
+        context['plan_id'] = self.kwargs['plan_id']
         return context
 
     def get_initial(self):
-        overcloud = self.get_overcloud()
+        plan = self.get_plan()
         overcloud_roles = dict((overcloud_role.id, overcloud_role)
                                for overcloud_role in
                                api.tuskar.OvercloudRole.list(self.request))
@@ -177,40 +178,40 @@ class Scale(horizon.workflows.WorkflowView, OvercloudMixin):
             (count['overcloud_role_id'],
              overcloud_roles[count['overcloud_role_id']].flavor_id),
             count['num_nodes'],
-        ) for count in overcloud.counts)
+        ) for count in plan.counts)
         return {
-            'overcloud_id': overcloud.id,
+            'plan_id': plan.id,
             'role_counts': role_counts,
         }
 
 
 class OvercloudRoleView(horizon_tables.DataTableView,
-                        OvercloudRoleMixin, OvercloudMixin):
+                        OvercloudRoleMixin, OvercloudPlanMixin):
     table_class = tables.OvercloudRoleNodeTable
     template_name = 'infrastructure/overcloud/overcloud_role.html'
 
     @memoized.memoized
-    def _get_nodes(self, overcloud, role):
-        resources = overcloud.resources(role, with_joins=True)
+    def _get_nodes(self, plan, role):
+        resources = plan.stack.resources_by_role(role, with_joins=True)
         return [r.node for r in resources]
 
     def get_data(self):
-        overcloud = self.get_overcloud()
+        plan = self.get_plan()
         redirect = reverse(DETAIL_URL,
-                           args=(overcloud.id,))
+                           args=(plan.id,))
         role = self.get_role(redirect)
-        return self._get_nodes(overcloud, role)
+        return self._get_nodes(plan, role)
 
     def get_context_data(self, **kwargs):
         context = super(OvercloudRoleView, self).get_context_data(**kwargs)
 
-        overcloud = self.get_overcloud()
+        plan = self.get_plan()
         redirect = reverse(DETAIL_URL,
-                           args=(overcloud.id,))
+                           args=(plan.id,))
         role = self.get_role(redirect)
         context['role'] = role
         context['image_name'] = role.image_name
-        context['nodes'] = self._get_nodes(overcloud, role)
+        context['nodes'] = self._get_nodes(plan, role)
 
         try:
             context['flavor'] = nova.flavor_get(self.request, role.flavor_id)

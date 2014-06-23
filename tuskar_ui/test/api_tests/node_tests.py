@@ -22,7 +22,6 @@ from tuskar_ui.test import helpers as test
 
 
 class NodeAPITests(test.APITestCase):
-
     def test_node_create(self):
         node = api.node.BareMetalNode(self.baremetalclient_nodes.first())
 

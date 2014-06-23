@@ -21,7 +21,7 @@ from tuskar_ui.infrastructure.overcloud import tables
 from tuskar_ui import utils
 
 
-def _get_role_data(overcloud, role):
+def _get_role_data(plan, role):
     """Gathers data about a single deployment role from the related Overcloud
     and OvercloudRole objects, and presents it in the form convenient for use
     from the template.
@@ -33,9 +33,9 @@ def _get_role_data(overcloud, role):
     :return: dict with information about the role, to be used by template
     :rtype:  dict
     """
-    resources = overcloud.resources(role, with_joins=True)
+    resources = plan.stack.resources_by_role(role, with_joins=True)
     nodes = [r.node for r in resources]
-    counts = getattr(overcloud, 'counts', [])
+    counts = getattr(plan, 'counts', [])
 
     for c in counts:
         if c['overcloud_role_id'] == role.id:
@@ -82,21 +82,21 @@ class OverviewTab(tabs.Tab):
     preload = False
 
     def get_context_data(self, request, **kwargs):
-        overcloud = self.tab_group.kwargs['overcloud']
+        plan = self.tab_group.kwargs['plan']
         roles = api.tuskar.OvercloudRole.list(request)
-        role_data = [_get_role_data(overcloud, role) for role in roles]
+        role_data = [_get_role_data(plan, role) for role in roles]
         total = sum(d['total_node_count'] for d in role_data)
         progress = 100 * sum(d.get('deployed_node_count', 0)
                              for d in role_data) // (total or 1)
 
-        events = overcloud.stack_events
+        events = plan.stack.events
         last_failed_events = [e for e in events
                               if e.resource_status == 'CREATE_FAILED'][-3:]
         return {
-            'overcloud': overcloud,
+            'plan': plan,
             'roles': role_data,
             'progress': max(5, progress),
-            'dashboard_urls': overcloud.dashboard_urls,
+            'dashboard_urls': plan.stack.dashboard_urls,
             'last_failed_events': last_failed_events,
         }
 
@@ -108,7 +108,7 @@ class UndeployInProgressTab(tabs.Tab):
     preload = False
 
     def get_context_data(self, request, **kwargs):
-        overcloud = self.tab_group.kwargs['overcloud']
+        plan = self.tab_group.kwargs['plan']
 
         # TODO(lsmola) since at this point we don't have total number of nodes
         # we will hack this around, till API can show this information. So it
@@ -117,24 +117,24 @@ class UndeployInProgressTab(tabs.Tab):
         total_num_nodes_count = 10
 
         try:
-            all_resources_count = len(
-                overcloud.all_resources(with_joins=False))
+            resources_count = len(
+                plan.stack.resources(with_joins=False))
         except heatclient.exc.HTTPNotFound:
             # Immediately after undeploying has started, heat returns this
             # exception so we can take it as kind of init of undeploying.
-            all_resources_count = total_num_nodes_count
+            resources_count = total_num_nodes_count
 
         # TODO(lsmola) same as hack above
-        total_num_nodes_count = max(all_resources_count, total_num_nodes_count)
+        total_num_nodes_count = max(resources_count, total_num_nodes_count)
 
         delete_progress = max(
-            5, 100 * (total_num_nodes_count - all_resources_count))
+            5, 100 * (total_num_nodes_count - resources_count))
 
-        events = overcloud.stack_events
+        events = plan.stack.events
         last_failed_events = [e for e in events
                               if e.resource_status == 'DELETE_FAILED'][-3:]
         return {
-            'overcloud': overcloud,
+            'plan': plan,
             'progress': delete_progress,
             'last_failed_events': last_failed_events,
         }
@@ -148,10 +148,10 @@ class ConfigurationTab(tabs.TableTab):
     preload = False
 
     def get_configuration_data(self):
-        overcloud = self.tab_group.kwargs['overcloud']
+        plan = self.tab_group.kwargs['plan']
 
         return [(utils.de_camel_case(key), value) for key, value in
-                overcloud.stack.parameters.items()]
+                plan.stack.parameters.items()]
 
 
 class LogTab(tabs.TableTab):
@@ -162,8 +162,8 @@ class LogTab(tabs.TableTab):
     preload = False
 
     def get_log_data(self):
-        overcloud = self.tab_group.kwargs['overcloud']
-        return overcloud.stack_events
+        plan = self.tab_group.kwargs['plan']
+        return plan.stack.events
 
 
 class UndeployInProgressTabs(tabs.TabGroup):

@@ -23,6 +23,7 @@ from openstack_dashboard.api import nova
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
 
+
 LOG = logging.getLogger(__name__)
 
 

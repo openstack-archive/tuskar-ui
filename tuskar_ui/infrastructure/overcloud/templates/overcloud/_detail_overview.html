@@ -1,8 +1,8 @@
 {% load i18n %}
 {% load url from future%}
 
-{% if overcloud.is_deploying or overcloud.is_failed %}
-  {% if overcloud.is_deploying %}
+{% if stack.is_deploying or stack.is_failed %}
+  {% if stack.is_deploying %}
     <div class="alert alert-info">
       <div class="row-fluid">
         <div class="span2">
@@ -45,7 +45,7 @@
 </div>
 {% endif %}
 
-{% if not dashboard_urls and not overcloud.is_deploying and not overcloud.is_failed %}
+{% if not dashboard_urls and not stack.is_deploying and not stack.is_failed %}
 <div class="row-fluid">
   <div class="span8">
     {% blocktrans %}
@@ -61,7 +61,7 @@
 #!/usr/bin/bash
 
 # You need to run the following commands from a machine where you have a checkout of the tripleo source code
-# and direct access via SSH to your Overcloud control node ({{overcloud.keystone_ip}}).
+# and direct access via SSH to your Overcloud control node ({{stack.keystone_ip}}).
 
 set -eux
 
@@ -71,17 +71,17 @@ cd $TRIPLEO_ROOT
 # Be careful to source tripleorc here, some variables are rewritten below
 source $TRIPLEO_ROOT/tripleorc
 
-export OVERCLOUD_IP={{overcloud.keystone_ip}}
+export OVERCLOUD_IP={{stack.keystone_ip}}
 
-export OVERCLOUD_ADMIN_TOKEN={{overcloud.attributes.AdminToken}}
-export OVERCLOUD_ADMIN_PASSWORD={{overcloud.attributes.AdminPassword}}
-export OVERCLOUD_CINDER_PASSWORD={{overcloud.attributes.CinderPassword}}
-export OVERCLOUD_GLANCE_PASSWORD={{overcloud.attributes.GlancePassword}}
-export OVERCLOUD_HEAT_PASSWORD={{overcloud.attributes.HeatPassword}}
-export OVERCLOUD_NEUTRON_PASSWORD={{overcloud.attributes.NeutronPassword}}
-export OVERCLOUD_NOVA_PASSWORD={{overcloud.attributes.NovaPassword}}
-export OVERCLOUD_SWIFT_PASSWORD={{overcloud.attributes.SwiftPassword}}
-export OVERCLOUD_SWIFT_HASH={{overcloud.attributes.SwiftHashSuffix}}
+export OVERCLOUD_ADMIN_TOKEN={{plan.attributes.AdminToken}}
+export OVERCLOUD_ADMIN_PASSWORD={{plan.attributes.AdminPassword}}
+export OVERCLOUD_CINDER_PASSWORD={{plan.attributes.CinderPassword}}
+export OVERCLOUD_GLANCE_PASSWORD={{plan.attributes.GlancePassword}}
+export OVERCLOUD_HEAT_PASSWORD={{plan.attributes.HeatPassword}}
+export OVERCLOUD_NEUTRON_PASSWORD={{plan.attributes.NeutronPassword}}
+export OVERCLOUD_NOVA_PASSWORD={{plan.attributes.NovaPassword}}
+export OVERCLOUD_SWIFT_PASSWORD={{plan.attributes.SwiftPassword}}
+export OVERCLOUD_SWIFT_HASH={{plan.attributes.SwiftHashSuffix}}
 
 OVERCLOUD_ENDPOINT="http://$OVERCLOUD_IP:5000/v2.0"
 NEW_JSON=$(jq '.overcloud.password="'${OVERCLOUD_ADMIN_PASSWORD}'" | .overcloud.endpoint="'${OVERCLOUD_ENDPOINT}'" | .overcloud.endpointhost="'${OVERCLOUD_IP}'"' $TE_DATAFILE)
@@ -115,7 +115,7 @@ keystone role-create --name heat_stack_user
 set -eux
 
 # You need to run the following commands from a Undercloud node where you have
-# direct access via SSH to your Overcloud control node ({{overcloud.keystone_ip}}).
+# direct access via SSH to your Overcloud control node ({{stack.keystone_ip}}).
 
 # Run these commands as the user you used to install the undercloud, likely the stack
 # user if you followed the recommendations from http://openstack.redhat.com/Deploying_RDO_using_Instack.
@@ -125,18 +125,18 @@ set -eux
 # This file was created when you followed http://openstack.redhat.com/Deploying_an_RDO_Overcloud_with_Instack
 source deploy-overcloudrc
 
-export OVERCLOUD_IP={{overcloud.keystone_ip}}
+export OVERCLOUD_IP={{stack.keystone_ip}}
 
 cat &gt; tripleo-overcloud-passwords &lt;&lt;EOF
-export OVERCLOUD_ADMIN_TOKEN={{overcloud.attributes.AdminToken}}
-export OVERCLOUD_ADMIN_PASSWORD={{overcloud.attributes.AdminPassword}}
-export OVERCLOUD_CINDER_PASSWORD={{overcloud.attributes.CinderPassword}}
-export OVERCLOUD_GLANCE_PASSWORD={{overcloud.attributes.GlancePassword}}
-export OVERCLOUD_HEAT_PASSWORD={{overcloud.attributes.HeatPassword}}
-export OVERCLOUD_NEUTRON_PASSWORD={{overcloud.attributes.NeutronPassword}}
-export OVERCLOUD_NOVA_PASSWORD={{overcloud.attributes.NovaPassword}}
-export OVERCLOUD_SWIFT_PASSWORD={{overcloud.attributes.SwiftPassword}}
-export OVERCLOUD_SWIFT_HASH={{overcloud.attributes.SwiftHashSuffix}}
+export OVERCLOUD_ADMIN_TOKEN={{plan.attributes.AdminToken}}
+export OVERCLOUD_ADMIN_PASSWORD={{plan.attributes.AdminPassword}}
+export OVERCLOUD_CINDER_PASSWORD={{plan.attributes.CinderPassword}}
+export OVERCLOUD_GLANCE_PASSWORD={{plan.attributes.GlancePassword}}
+export OVERCLOUD_HEAT_PASSWORD={{plan.attributes.HeatPassword}}
+export OVERCLOUD_NEUTRON_PASSWORD={{plan.attributes.NeutronPassword}}
+export OVERCLOUD_NOVA_PASSWORD={{plan.attributes.NovaPassword}}
+export OVERCLOUD_SWIFT_PASSWORD={{plan.attributes.SwiftPassword}}
+export OVERCLOUD_SWIFT_HASH={{plan.attributes.SwiftHashSuffix}}
 EOF
 
 source tripleo-overcloud-passwords
@@ -145,8 +145,8 @@ JSONFILE=nodes.json
 if [ ! -f $JSONFILE ]; then
   echo '{}' &gt; $JSONFILE
 fi
-OVERCLOUD_ENDPOINT="http://{{overcloud.keystone_ip}}:5000/v2.0"
-NEW_JSON=$(jq '.overcloud.password="'{{overcloud.attributes.AdminPassword}}'" | .overcloud.endpoint="'${OVERCLOUD_ENDPOINT}'" | .overcloud.endpointhost="'{{overcloud.keystone_ip}}'"' $JSONFILE)
+OVERCLOUD_ENDPOINT="http://{{stack.keystone_ip}}:5000/v2.0"
+NEW_JSON=$(jq '.overcloud.password="'{{plan.attributes.AdminPassword}}'" | .overcloud.endpoint="'${OVERCLOUD_ENDPOINT}'" | .overcloud.endpointhost="'{{stack.keystone_ip}}'"' $JSONFILE)
 echo $NEW_JSON &gt; $JSONFILE
 export TE_DATAFILE=$JSONFILE
 
@@ -191,7 +191,7 @@ nova flavor-create m1.tiny 1 512 2 1
       {% for role in roles %}
         <tr>
           <td><a
-              href="{% url 'horizon:infrastructure:overcloud:role' overcloud.id role.role.id %}"
+              href="{% url 'horizon:infrastructure:overcloud:role' plan.id role.role.id %}"
               >{{ role.name }} <span class="badge">({{ role.total_node_count }})</span></a>
           </td>
           <td>

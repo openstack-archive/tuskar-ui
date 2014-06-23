@@ -87,11 +87,11 @@ class FlavorRolesTable(tables.DataTable):
     def __init__(self, request, *args, **kwargs):
         # TODO(dtantsur): support multiple overclouds
         try:
-            overcloud = api.tuskar.Overcloud.get_the_overcloud(request)
+            stack = api.tuskar.OvercloudPlan.get_the_plan(request).stack
         except Exception:
             count_getter = lambda role: _("Not deployed")
         else:
-            count_getter = overcloud.resources_count
+            count_getter = stack.resources_count
         self._columns['count'] = tables.Column(
             count_getter,
             verbose_name=_("Instances Count")
