@@ -15,6 +15,7 @@ import django.forms
 from django.utils.translation import ugettext_lazy as _
 import horizon.workflows
 
+from openstack_dashboard.api import neutron
 from tuskar_ui import api
 from tuskar_ui import utils
 
@@ -60,6 +61,15 @@ class Action(horizon.workflows.Action):
         params.sort()
 
         for name, data in params:
+            # workaround for this parameter, which needs a preset taken from
+            # neutron
+            if name == 'NeutronControlPlaneID':
+                networks = neutron.network_list(request)
+                for network in networks:
+                    if network.name == 'ctlplane':
+                        data['Default'] = network.id
+                        break
+
             self.fields[name] = make_field(name, **data)
 
     def clean(self):
