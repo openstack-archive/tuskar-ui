@@ -232,15 +232,18 @@ class OvercloudStack(base.APIResourceWrapper):
                                 self.stack_name)
         return []
 
+    def stack_outputs(self):
+        return getattr(self, 'outputs', [])
+
     @cached_property
     def keystone_ip(self):
-        for output in self.outputs:
+        for output in self.stack_outputs:
             if output['output_key'] == 'KeystoneURL':
                 return urlparse.urlparse(output['output_value']).hostname
 
     @cached_property
     def overcloud_keystone(self):
-        for output in self.outputs:
+        for output in self.stack_outputs:
             if output['output_key'] == 'KeystoneURL':
                 break
         else:
