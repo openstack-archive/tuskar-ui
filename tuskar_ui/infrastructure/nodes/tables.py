@@ -110,9 +110,8 @@ class FreeNodesTable(NodesTable):
 
 class DeployedNodesTable(NodesTable):
 
-    deployment_role = tables.Column(
-        lambda node: api.tuskar.OvercloudRole.get_by_node(node).name,
-        verbose_name=_("Deployment Role"))
+    deployment_role = tables.Column("role_name",
+                                    verbose_name=_("Deployment Role"))
 
     # TODO(lsmola) waits for Ceilometer baremetal metrics
     # capacity = tables.Column(
