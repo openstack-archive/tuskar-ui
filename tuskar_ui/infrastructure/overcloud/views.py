@@ -193,7 +193,13 @@ class OvercloudRoleView(horizon_tables.DataTableView,
     @memoized.memoized
     def _get_nodes(self, plan, role):
         resources = plan.stack.resources_by_role(role, with_joins=True)
-        return [r.node for r in resources]
+        nodes = [r.node for r in resources]
+        # TODO(akrivoka) ideally, the role should be a direct attribute
+        # of a node; however, that cannot be done until the tuskar api
+        # update that will prevent a circular dependency in the api
+        for node in nodes:
+            node.role_name = role.name
+        return nodes
 
     def get_data(self):
         plan = self.get_plan()
