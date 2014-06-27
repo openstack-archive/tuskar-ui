@@ -94,6 +94,7 @@ class OverviewTab(tabs.Tab):
                               if e.resource_status == 'CREATE_FAILED'][-3:]
         return {
             'plan': plan,
+            'stack': plan.stack,
             'roles': role_data,
             'progress': max(5, progress),
             'dashboard_urls': plan.stack.dashboard_urls,
