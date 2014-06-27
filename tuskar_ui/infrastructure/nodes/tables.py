@@ -51,7 +51,7 @@ class NodeFilterAction(tables.FilterAction):
 
 
 class NodesTable(tables.DataTable):
-    node = tables.Column(lambda node: node.driver_info['ip_address'],
+    node = tables.Column(lambda node: node.driver_info['ipmi_address'],
                          link="horizon:infrastructure:nodes:detail",
                          verbose_name=_("Node"))
 
