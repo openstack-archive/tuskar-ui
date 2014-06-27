@@ -89,8 +89,8 @@ echo $NEW_JSON &gt; $TE_DATAFILE
 
 source ./tripleo-incubator/overcloudrc
 
-init-keystone -p $OVERCLOUD_ADMIN_PASSWORD $OVERCLOUD_ADMIN_TOKEN \
-    $OVERCLOUD_IP admin@example.com heat-admin@$OVERCLOUD_IP \
+init-keystone -p $OVERCLOUD_ADMIN_PASSWORD -t $OVERCLOUD_ADMIN_TOKEN \
+    -o $OVERCLOUD_IP -e admin@example.com -u heat-admin@$OVERCLOUD_IP \
     ${SSLBASE:+--ssl $PUBLIC_API_URL}
 setup-endpoints $OVERCLOUD_IP --cinder-password $OVERCLOUD_CINDER_PASSWORD \
     --glance-password $OVERCLOUD_GLANCE_PASSWORD \
@@ -152,8 +152,8 @@ export TE_DATAFILE=$JSONFILE
 
 source /etc/tripleo/overcloudrc
 
-tripleo init-keystone -p $OVERCLOUD_ADMIN_PASSWORD $OVERCLOUD_ADMIN_TOKEN \
-    $OVERCLOUD_IP admin@example.com heat-admin@$OVERCLOUD_IP
+tripleo init-keystone -p $OVERCLOUD_ADMIN_PASSWORD -t $OVERCLOUD_ADMIN_TOKEN \
+    -o $OVERCLOUD_IP -e admin@example.com -u heat-admin@$OVERCLOUD_IP
 tripleo setup-endpoints $OVERCLOUD_IP --cinder-password $OVERCLOUD_CINDER_PASSWORD \
     --glance-password $OVERCLOUD_GLANCE_PASSWORD \
     --heat-password $OVERCLOUD_HEAT_PASSWORD \
