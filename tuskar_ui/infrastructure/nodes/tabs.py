@@ -63,12 +63,12 @@ class DeployedTab(tabs.TableTab):
         if 'errors' in self.request.GET:
             return api.node.filter_nodes(deployed_nodes, healthy=False)
 
-        # TODO(tzumainn) ideally, the role should be a direct attribute
-        # of a node; however, that cannot be done until the tuskar api
-        # update that will prevent a circular dependency in the api
         for node in deployed_nodes:
-            node.role_name = api.tuskar.OvercloudRole.get_by_node(
-                self.request, node).name
+            # TODO(tzumainn): this could probably be done more efficiently
+            # by getting the resource for all nodes at once
+            resource = api.heat.Resource.get_by_node(self.request, node)
+            if resource:
+                node.role_name = resource.role.name
 
         return deployed_nodes
 

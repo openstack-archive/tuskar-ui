@@ -16,33 +16,25 @@ from django.utils.translation import ugettext_lazy as _
 import heatclient
 from horizon import tabs
 
-from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud import tables
 from tuskar_ui import utils
 
 
-def _get_role_data(plan, role):
+def _get_role_data(stack, role):
     """Gathers data about a single deployment role from the related Overcloud
     and OvercloudRole objects, and presents it in the form convenient for use
     from the template.
 
-    :param overcloud: Overcloud object
-    :type  overcloud: tuskar_ui.api.Overcloud
+    :param stack: Stack object
+    :type  stack: tuskar_ui.api.heat.Stack
     :param role: Role object
-    :type  role: tuskar_ui.api.OvercloudRole
+    :type  role: tuskar_ui.api.tuskar.OvercloudRole
     :return: dict with information about the role, to be used by template
     :rtype:  dict
     """
-    resources = plan.stack.resources_by_role(role, with_joins=True)
+    resources = stack.resources_by_role(role, with_joins=True)
     nodes = [r.node for r in resources]
-    counts = getattr(plan, 'counts', [])
-
-    for c in counts:
-        if c['overcloud_role_id'] == role.id:
-            node_count = c['num_nodes']
-            break
-    else:
-        node_count = 0
+    node_count = len(nodes)
 
     data = {
         'role': role,
@@ -82,22 +74,23 @@ class OverviewTab(tabs.Tab):
     preload = False
 
     def get_context_data(self, request, **kwargs):
-        plan = self.tab_group.kwargs['plan']
-        roles = api.tuskar.OvercloudRole.list(request)
-        role_data = [_get_role_data(plan, role) for role in roles]
+        stack = self.tab_group.kwargs['stack']
+        roles = stack.plan.role_list
+        role_data = [_get_role_data(stack, role) for role in roles]
         total = sum(d['total_node_count'] for d in role_data)
         progress = 100 * sum(d.get('deployed_node_count', 0)
                              for d in role_data) // (total or 1)
 
-        events = plan.stack.events
+        events = stack.events
         last_failed_events = [e for e in events
                               if e.resource_status == 'CREATE_FAILED'][-3:]
+
         return {
-            'plan': plan,
-            'stack': plan.stack,
+            'stack': stack,
+            'plan': stack.plan,
             'roles': role_data,
             'progress': max(5, progress),
-            'dashboard_urls': plan.stack.dashboard_urls,
+            'dashboard_urls': stack.dashboard_urls,
             'last_failed_events': last_failed_events,
         }
 
@@ -109,7 +102,7 @@ class UndeployInProgressTab(tabs.Tab):
     preload = False
 
     def get_context_data(self, request, **kwargs):
-        plan = self.tab_group.kwargs['plan']
+        stack = self.tab_group.kwargs['stack']
 
         # TODO(lsmola) since at this point we don't have total number of nodes
         # we will hack this around, till API can show this information. So it
@@ -119,7 +112,7 @@ class UndeployInProgressTab(tabs.Tab):
 
         try:
             resources_count = len(
-                plan.stack.resources(with_joins=False))
+                stack.resources(with_joins=False))
         except heatclient.exc.HTTPNotFound:
             # Immediately after undeploying has started, heat returns this
             # exception so we can take it as kind of init of undeploying.
@@ -131,11 +124,12 @@ class UndeployInProgressTab(tabs.Tab):
         delete_progress = max(
             5, 100 * (total_num_nodes_count - resources_count))
 
-        events = plan.stack.events
+        events = stack.events
         last_failed_events = [e for e in events
                               if e.resource_status == 'DELETE_FAILED'][-3:]
         return {
-            'plan': plan,
+            'stack': stack,
+            'plan': stack.plan,
             'progress': delete_progress,
             'last_failed_events': last_failed_events,
         }
@@ -149,10 +143,10 @@ class ConfigurationTab(tabs.TableTab):
     preload = False
 
     def get_configuration_data(self):
-        plan = self.tab_group.kwargs['plan']
+        stack = self.tab_group.kwargs['stack']
 
         return [(utils.de_camel_case(key), value) for key, value in
-                plan.stack.parameters.items()]
+                stack.parameters.items()]
 
 
 class LogTab(tabs.TableTab):
@@ -163,8 +157,8 @@ class LogTab(tabs.TableTab):
     preload = False
 
     def get_log_data(self):
-        plan = self.tab_group.kwargs['plan']
-        return plan.stack.events
+        stack = self.tab_group.kwargs['stack']
+        return stack.events
 
 
 class UndeployInProgressTabs(tabs.TabGroup):
