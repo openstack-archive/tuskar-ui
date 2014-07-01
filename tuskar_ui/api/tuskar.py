@@ -15,12 +15,16 @@ import logging
 
 from django.utils.translation import ugettext_lazy as _
 from openstack_dashboard.api import base
+from openstack_dashboard.test.test_data import utils
 from tuskarclient.v1 import client as tuskar_client
 
-from tuskar_ui.api import heat
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
+from tuskar_ui.test.test_data import tuskar_data
 
+
+TEST_DATA = utils.TestDataContainer()
+tuskar_data.data(TEST_DATA)
 
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
@@ -33,66 +37,36 @@ def tuskarclient(request):
     return c
 
 
-def transform_sizing(overcloud_sizing):
-    """Transform the sizing to simpler format
-
-    We need this till API will accept the more complex format with flavors,
-    then we delete this.
-
-    :param overcloud_sizing: overcloud sizing information with structure
-                             {('overcloud_role_id',
-                               'flavor_name'): count, ...}
-    :type  overcloud_sizing: dict
-
-    :return: list of ('overcloud_role_id', 'num_nodes')
-    :rtype:  list
-    """
-    return [{
-        'overcloud_role_id': role,
-        'num_nodes': sizing,
-    } for (role, flavor), sizing in overcloud_sizing.items()]
-
-
-class OvercloudPlan(base.APIResourceWrapper):
-    _attrs = ('id', 'stack_id', 'name', 'description', 'counts', 'attributes')
+class OvercloudPlan(base.APIDictWrapper):
+    _attrs = ('id', 'name', 'description', 'created_at', 'modified_at',
+              'roles', 'parameters')
 
     def __init__(self, apiresource, request=None):
         super(OvercloudPlan, self).__init__(apiresource)
         self._request = request
 
     @classmethod
-    def create(cls, request, overcloud_sizing, overcloud_configuration):
+    def create(cls, request, name, description):
         """Create an OvercloudPlan in Tuskar
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param overcloud_sizing: overcloud sizing information with structure
-                                 {('overcloud_role_id',
-                                   'flavor_name'): count, ...}
-        :type  overcloud_sizing: dict
+        :param name: plan name
+        :type  name: string
 
-        :param overcloud_configuration: overcloud configuration with structure
-                                        {'key': 'value', ...}
-        :type  overcloud_configuration: dict
+        :param description: plan description
+        :type  description: string
 
         :return: the created OvercloudPlan object
         :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
-        # TODO(lsmola) for now we have to transform the sizing to simpler
-        # format, till API will accept the more complex with flavors,
-        # then we delete this
-        transformed_sizing = transform_sizing(overcloud_sizing)
 
-        overcloud = tuskarclient(request).overclouds.create(
-            name='overcloud', description="Openstack cloud providing VMs",
-            counts=transformed_sizing, attributes=overcloud_configuration)
-
-        return cls(overcloud, request=request)
+        return cls(TEST_DATA.tuskarclient_plans.first(),
+                   request=request)
 
     @classmethod
-    def update(cls, request, overcloud_id, overcloud_sizing,
-               overcloud_configuration):
+    def update(cls, request, overcloud_id, name, description):
         """Update an OvercloudPlan in Tuskar
 
         :param request: request object
@@ -101,28 +75,17 @@ class OvercloudPlan(base.APIResourceWrapper):
         :param overcloud_id: id of the overcloud we want to update
         :type  overcloud_id: string
 
-        :param overcloud_sizing: overcloud sizing information with structure
-                                 {('overcloud_role_id',
-                                   'flavor_name'): count, ...}
-        :type  overcloud_sizing: dict
+        :param name: plan name
+        :type  name: string
 
-        :param overcloud_configuration: overcloud configuration with structure
-                                        {'key': 'value', ...}
-        :type  overcloud_configuration: dict
+        :param description: plan description
+        :type  description: string
 
         :return: the updated OvercloudPlan object
         :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
-        # TODO(lsmola) for now we have to transform the sizing to simpler
-        # format, till API will accept the more complex with flavors,
-        # then we delete this
-        transformed_sizing = transform_sizing(overcloud_sizing)
-
-        overcloud = tuskarclient(request).overclouds.update(
-            overcloud_id, counts=transformed_sizing,
-            attributes=overcloud_configuration)
-
-        return cls(overcloud, request=request)
+        return cls(TEST_DATA.tuskarclient_plans.first(),
+                   request=request)
 
     @classmethod
     def list(cls, request):
@@ -134,20 +97,20 @@ class OvercloudPlan(base.APIResourceWrapper):
         :return: list of OvercloudPlans, or an empty list if there are none
         :rtype:  list of tuskar_ui.api.tuskar.OvercloudPlan
         """
-        ocs = tuskarclient(request).overclouds.list()
+        plans = TEST_DATA.tuskarclient_plans.list()
 
-        return [cls(oc, request=request) for oc in ocs]
+        return [cls(plan, request=request) for plan in plans]
 
     @classmethod
-    @handle_errors(_("Unable to retrieve deployment"))
-    def get(cls, request, overcloud_id):
+    @handle_errors(_("Unable to retrieve plan"))
+    def get(cls, request, plan_id):
         """Return the OvercloudPlan that matches the ID
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param overcloud_id: id of OvercloudPlan to be retrieved
-        :type  overcloud_id: int
+        :param plan_id: id of OvercloudPlan to be retrieved
+        :type  plan_id: int
 
         :return: matching OvercloudPlan, or None if no OvercloudPlan matches
                  the ID
@@ -175,47 +138,34 @@ class OvercloudPlan(base.APIResourceWrapper):
                 return plan
 
     @classmethod
-    def delete(cls, request, overcloud_id):
+    def delete(cls, request, plan_id):
         """Delete an OvercloudPlan
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param overcloud_id: overcloud id
-        :type  overcloud_id: int
+        :param plan_id: plan id
+        :type  plan_id: int
         """
-        tuskarclient(request).overclouds.delete(overcloud_id)
-
-    @classmethod
-    def template_parameters(cls, request):
-        """Return a list of needed template parameters
-
-        :param request: request object
-        :type  request: django.http.HttpRequest
-
-        :return: dict with key/value parameters
-        :rtype:  dict
-        """
-        parameters = tuskarclient(request).overclouds.template_parameters()
-        # FIXME(lsmola) python client is converting the result to
-        # object, we have to return it better from client or API
-        return parameters._info
+        return
 
     @cached_property
-    def stack(self):
-        """Return the Heat Stack associated with this Overcloud
+    def role_list(self):
+        return [OvercloudRole(role) for role in self.roles]
 
-        :return: Heat Stack associated with this Overcloud; or None
-                 if no Stack is associated, or no Stack can be
-                 found
-        :rtype:  heatclient.v1.stacks.Stack or None
-        """
-        return heat.OvercloudStack.get(self._request, self.stack_id,
-                                       plan=self)
+    def parameter(self, param_name):
+        for parameter in self.parameters:
+            if parameter['name'] == param_name:
+                return parameter
+
+    def parameter_value(self, param_name):
+        parameter = self.parameter(param_name)
+        if parameter is not None:
+            return parameter['value']
 
 
-class OvercloudRole(base.APIResourceWrapper):
-    _attrs = ('id', 'name', 'description', 'image_name', 'flavor_id')
+class OvercloudRole(base.APIDictWrapper):
+    _attrs = ('id', 'name', 'version', 'description', 'created_at')
 
     @classmethod
     @handle_errors(_("Unable to retrieve overcloud roles"), [])
@@ -229,7 +179,7 @@ class OvercloudRole(base.APIResourceWrapper):
                  are none
         :rtype:  list of tuskar_ui.api.tuskar.OvercloudRole
         """
-        roles = tuskarclient(request).overcloud_roles.list()
+        roles = TEST_DATA.tuskarclient_roles.list()
         return [cls(role) for role in roles]
 
     @classmethod
@@ -247,47 +197,30 @@ class OvercloudRole(base.APIResourceWrapper):
                  OvercloudRole can be found
         :rtype:  tuskar_ui.api.tuskar.OvercloudRole
         """
-        role = tuskarclient(request).overcloud_roles.get(role_id)
-        return cls(role)
-
-    @classmethod
-    @handle_errors(_("Unable to retrieve overcloud role"))
-    def get_by_node(cls, request, node):
-        """Return the Tuskar OvercloudRole that is deployed on the node
-
-        :param request: request object
-        :type  request: django.http.HttpRequest
-
-        :param node: node to check against
-        :type  node: tuskar_ui.api.node.Node
-
-        :return: matching OvercloudRole, or None if no matching
-                 OvercloudRole can be found
-        :rtype:  tuskar_ui.api.tuskar.OvercloudRole
-        """
-        roles = cls.list(request)
-        for role in roles:
-            if role.is_deployed_on_node(node):
+        for role in OvercloudRole.list(request):
+            if role.id == role_id:
                 return role
 
-    def update(self, request, **kwargs):
-        """Update the selected attributes of Tuskar OvercloudRole.
+    # TODO(tzumainn): fix this once we know how a role corresponds to
+    # its provider resource type
+    @property
+    def provider_resource_type(self):
+        return self.name
 
-        :param request: request object
-        :type  request: django.http.HttpRequest
-        """
-        for attr in kwargs:
-            if attr not in self._attrs:
-                raise TypeError('Invalid parameter %r' % attr)
-        tuskarclient(request).overcloud_roles.update(self.id, **kwargs)
+    # TODO(tzumainn): fix this once we know how this connection can be
+    # made
+    @property
+    def node_count_parameter_name(self):
+        return self.name + 'NodeCount'
 
-    def is_deployed_on_node(self, node):
-        """Determine whether a node matches an overcloud role
+    # TODO(tzumainn): fix this once we know how this connection can be
+    # made
+    @property
+    def image_id_parameter_name(self):
+        return self.name + 'ImageID'
 
-        :param node: node to check against
-        :type  node: tuskar_ui.api.node.Node
-
-        :return: does this node match the overcloud_role?
-        :rtype:  bool
-        """
-        return self.image_name == node.image_name
+    # TODO(tzumainn): fix this once we know how this connection can be
+    # made
+    @property
+    def flavor_id_parameter_name(self):
+        return self.name + 'FlavorID'

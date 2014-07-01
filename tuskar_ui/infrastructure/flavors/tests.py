@@ -67,7 +67,7 @@ def _prepare_create():
 class FlavorsTest(test.BaseAdminViewTests):
 
     def test_index(self):
-        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        roles = TEST_DATA.tuskarclient_roles.list()
         with contextlib.nested(
                 patch('openstack_dashboard.api.nova.flavor_list',
                       return_value=TEST_DATA.novaclient_flavors.list()),
@@ -206,7 +206,7 @@ class FlavorsTest(test.BaseAdminViewTests):
     def test_details_no_overcloud(self):
         flavor = api.flavor.Flavor(TEST_DATA.novaclient_flavors.first())
         images = TEST_DATA.glanceclient_images.list()[:2]
-        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        roles = TEST_DATA.tuskarclient_roles.list()
         roles[0].flavor_id = flavor.id
         with contextlib.nested(
                 patch('openstack_dashboard.api.glance.image_get',
@@ -230,7 +230,7 @@ class FlavorsTest(test.BaseAdminViewTests):
     def test_details(self):
         flavor = api.flavor.Flavor(TEST_DATA.novaclient_flavors.first())
         images = TEST_DATA.glanceclient_images.list()[:2]
-        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        roles = TEST_DATA.tuskarclient_roles.list()
         roles[0].flavor_id = flavor.id
         plan = api.tuskar.OvercloudPlan(
             TEST_DATA.tuskarclient_overcloud_plans.first())

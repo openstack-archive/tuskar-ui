@@ -53,7 +53,7 @@ tuskar_data.data(TEST_DATA)
 @contextlib.contextmanager
 def _mock_plan(**kwargs):
     plan = None
-    stack = api.heat.OvercloudStack(TEST_DATA.heatclient_stacks.first())
+    stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
     stack.events = []
     stack.resources_by_role = lambda *args, **kwargs: []
     stack.resources = lambda *args, **kwargs: []
@@ -116,7 +116,7 @@ class OvercloudTests(test.BaseAdminViewTests):
     def test_index_overcloud_deployed_stack_not_created(self):
         with contextlib.nested(
                 _mock_plan(),
-                patch('tuskar_ui.api.heat.OvercloudStack.is_deployed',
+                patch('tuskar_ui.api.heat.Stack.is_deployed',
                       return_value=False),
         ):
             res = self.client.get(INDEX_URL)
@@ -128,147 +128,17 @@ class OvercloudTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(res, DETAIL_URL)
 
     def test_index_overcloud_deployed(self):
-        with _mock_plan() as Overcloud:
+        with _mock_plan() as OvercloudPlan:
             res = self.client.get(INDEX_URL)
-            request = Overcloud.get_the_plan.call_args_list[0][0][0]
-            self.assertListEqual(Overcloud.get_the_plan.call_args_list,
+            request = OvercloudPlan.get_the_plan.call_args_list[0][0][0]
+            self.assertListEqual(OvercloudPlan.get_the_plan.call_args_list,
                                  [call(request)])
 
         self.assertRedirectsNoFollow(res, DETAIL_URL)
 
-    def test_create_get(self):
-        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
-        with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
-                'spec_set': ['list'],
-                'list.return_value': roles,
-            }),
-            _mock_plan(),
-            patch('tuskar_ui.api.node.Node', **{
-                'spec_set': ['list'],
-                'list.return_value': [],
-            }),
-            patch('openstack_dashboard.api.nova', **{
-                'spec_set': ['flavor_list'],
-                'flavor_list.return_value': [],
-            }),
-        ):
-            res = self.client.get(CREATE_URL)
-        self.assertTemplateUsed(
-            res, 'infrastructure/_fullscreen_workflow_base.html')
-        self.assertTemplateUsed(
-            res, 'infrastructure/overcloud/node_counts.html')
-        self.assertTemplateUsed(
-            res, 'infrastructure/overcloud/undeployed_overview.html')
-
-    def test_create_post(self):
-        node = TEST_DATA.ironicclient_nodes.first
-        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
-        flavor = TEST_DATA.novaclient_flavors.first()
-        old_flavor_id = roles[0].flavor_id
-        roles[0].flavor_id = flavor.id
-        data = {
-            'count__1__%s' % flavor.id: '1',
-            'count__2__': '0',
-            'count__3__': '0',
-            'count__4__': '0',
-        }
-        with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
-                'spec_set': ['list'],
-                'list.return_value': roles,
-            }),
-            _mock_plan(),
-            patch('tuskar_ui.api.node.Node', **{
-                'spec_set': ['list'],
-                'list.return_value': [node],
-            }),
-            patch('openstack_dashboard.api.nova', **{
-                'spec_set': ['flavor_list'],
-                'flavor_list.return_value': [flavor],
-            }),
-        ) as (OvercloudRole, Overcloud, Node, nova):
-            res = self.client.post(CREATE_URL, data)
-            request = Overcloud.create.call_args_list[0][0][0]
-            self.assertListEqual(
-                Overcloud.create.call_args_list,
-                [
-                    call(request, {
-                        ('1', flavor.id): 1,
-                        ('2', ''): 0,
-                        ('3', ''): 0,
-                        ('4', ''): 0,
-                    }, {
-                        'NeutronPublicInterfaceRawDevice': '',
-                        'HeatPassword': '',
-                    }),
-                ])
-        roles[0].flavor_id = old_flavor_id
-        self.assertRedirectsNoFollow(res, INDEX_URL)
-
-    def test_create_post_invalid_flavor(self):
-        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
-        old_flavor_id = roles[0].flavor_id
-        roles[0].flavor_id = 'non-existing'
-        data = {
-            'count__1__%s' % roles[0].flavor_id: '1',
-            'count__2__': '0',
-            'count__3__': '0',
-            'count__4__': '0',
-        }
-        with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
-                'spec_set': ['list'],
-                'list.return_value': roles,
-            }),
-            _mock_plan(),
-            patch('tuskar_ui.api.node.Node', **{
-                'spec_set': ['list'],
-                'list.return_value': [],
-            }),
-            patch('openstack_dashboard.api.nova', **{
-                'spec_set': ['flavor_list'],
-                'flavor_list.return_value': [],
-            }),
-        ) as (OvercloudRole, Overcloud, Node, nova):
-            res = self.client.post(CREATE_URL, data)
-            self.assertFormErrors(res)
-        roles[0].flavor_id = old_flavor_id
-
-    def test_create_post_not_enough_nodes(self):
-        node = TEST_DATA.ironicclient_nodes.first
-        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
-        flavor = TEST_DATA.novaclient_flavors.first()
-        roles[0].flavor_id = flavor.id
-        data = {
-            'count__1__%s' % flavor.id: '2',
-            'count__2__': '0',
-            'count__3__': '0',
-            'count__4__': '0',
-        }
-        with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
-                'spec_set': ['list'],
-                'list.return_value': roles,
-            }),
-            _mock_plan(),
-            patch('tuskar_ui.api.node.Node', **{
-                'spec_set': ['list'],
-                'list.return_value': [node],
-            }),
-            patch('openstack_dashboard.api.nova', **{
-                'spec_set': ['flavor_list'],
-                'flavor_list.return_value': [flavor],
-            }),
-        ):
-            response = self.client.post(CREATE_URL, data)
-        self.assertFormErrors(
-            response,
-            1,
-            'This configuration requires 2 nodes, but only 1 is available.')
-
     def test_detail_get(self):
-        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        roles = [api.tuskar.OvercloudRole(role)
+                 for role in TEST_DATA.tuskarclient_roles.list()]
 
         with contextlib.nested(
             _mock_plan(),
@@ -321,9 +191,9 @@ class OvercloudTests(test.BaseAdminViewTests):
     def test_undeploy_in_progress(self):
         with contextlib.nested(
                 _mock_plan(),
-                patch('tuskar_ui.api.heat.OvercloudStack.is_deleting',
+                patch('tuskar_ui.api.heat.Stack.is_deleting',
                       return_value=True),
-                patch('tuskar_ui.api.heat.OvercloudStack.is_deployed',
+                patch('tuskar_ui.api.heat.Stack.is_deployed',
                       return_value=False),
         ):
             res = self.client.get(UNDEPLOY_IN_PROGRESS_URL)
@@ -351,9 +221,9 @@ class OvercloudTests(test.BaseAdminViewTests):
     def test_undeploy_in_progress_log_tab(self):
         with contextlib.nested(
                 _mock_plan(),
-                patch('tuskar_ui.api.heat.OvercloudStack.is_deleting',
+                patch('tuskar_ui.api.heat.Stack.is_deleting',
                       return_value=True),
-                patch('tuskar_ui.api.heat.OvercloudStack.is_deployed',
+                patch('tuskar_ui.api.heat.Stack.is_deployed',
                       return_value=False),
         ):
             res = self.client.get(UNDEPLOY_IN_PROGRESS_URL_LOG_TAB)
@@ -367,14 +237,15 @@ class OvercloudTests(test.BaseAdminViewTests):
 
     def test_scale_get(self):
         oc = None
-        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        roles = [api.tuskar.OvercloudRole(role)
+                 for role in TEST_DATA.tuskarclient_roles.list()]
         with contextlib.nested(
             patch('tuskar_ui.api.tuskar.OvercloudRole', **{
                 'spec_set': ['list'],
                 'list.return_value': roles,
             }),
             _mock_plan(counts=[{
-                "overcloud_role_id": role.id,
+                "overcloud_role_id": role['id'],
                 "num_nodes": 0,
             } for role in roles]),
             patch('openstack_dashboard.api.nova', **{
@@ -391,7 +262,8 @@ class OvercloudTests(test.BaseAdminViewTests):
 
     def test_scale_post(self):
         node = TEST_DATA.ironicclient_nodes.first
-        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        roles = [api.tuskar.OvercloudRole(role)
+                 for role in TEST_DATA.tuskarclient_roles.list()]
         flavor = TEST_DATA.novaclient_flavors.first()
         old_flavor_id = roles[0].flavor_id
         roles[0].flavor_id = flavor.id
@@ -408,7 +280,7 @@ class OvercloudTests(test.BaseAdminViewTests):
                 'list.return_value': roles,
             }),
             _mock_plan(counts=[{
-                "overcloud_role_id": role.id,
+                "overcloud_role_id": role['id'],
                 "num_nodes": 0,
             } for role in roles]),
             patch('tuskar_ui.api.node.Node', **{
@@ -439,9 +311,9 @@ class OvercloudTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(res, DETAIL_URL)
 
     def test_role_edit_get(self):
-        role = TEST_DATA.tuskarclient_overcloud_roles.first()
+        role = api.tuskar.OvercloudRole(TEST_DATA.tuskarclient_roles.first())
         url = urlresolvers.reverse(
-            'horizon:infrastructure:overcloud:role_edit', args=(role.id,))
+            'horizon:infrastructure:overcloud:role_edit', args=(role['id'],))
         with contextlib.nested(
             patch('tuskar_ui.api.tuskar.OvercloudRole', **{
                 'spec_set': ['get'],

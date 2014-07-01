@@ -57,7 +57,8 @@ class Action(horizon.workflows.Action):
 
     def __init__(self, request, *args, **kwargs):
         super(Action, self).__init__(request, *args, **kwargs)
-        params = api.tuskar.OvercloudPlan.template_parameters(request).items()
+        #params = api.tuskar.OvercloudPlan.template_parameters(request).items()
+        params = []
         params.sort()
 
         for name, data in params:
@@ -83,7 +84,7 @@ class Action(horizon.workflows.Action):
 class Step(horizon.workflows.Step):
     action_class = Action
     contributes = ('configuration',)
-    template_name = 'infrastructure/overcloud/undeployed_configuration.html'
+    template_name = 'infrastructure/plans/create_configuration.html'
 
     def contribute(self, data, context):
         context['configuration'] = data
