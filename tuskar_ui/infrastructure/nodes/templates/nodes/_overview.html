@@ -19,10 +19,7 @@
               {% if deployed_nodes_error %}
                 <i class="icon-exclamation-sign"></i>
                 {% if deployed_nodes_error|length == 1 %}
-                  {% comment %}
-                    Replace id with uuid when ironicclient is used instead baremetalclient
-                  {% endcomment %}
-                  {% url 'horizon:infrastructure:nodes:detail' deployed_nodes_error.0.id as node_detail_url %}
+                  {% url 'horizon:infrastructure:nodes:detail' deployed_nodes_error.0.uuid as node_detail_url %}
                 {% else %}
                   {% url 'horizon:infrastructure:nodes:index' as nodes_index_url %}
                 {% endif %}

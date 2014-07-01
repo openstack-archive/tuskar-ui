@@ -14,22 +14,22 @@
 
 from django.utils.translation import ugettext_lazy as _
 
-from tuskar_ui.infrastructure.overcloud.workflows import undeployed_overview
+from horizon import tables
 
 
-class Action(undeployed_overview.Action):
+class ConfigurationTable(tables.DataTable):
+
+    key = tables.Column(lambda parameter: parameter[0],
+                        verbose_name=_("Attribute Name"))
+    value = tables.Column(lambda parameter: parameter[1],
+                          verbose_name=_("Attribute Value"))
+
     class Meta:
-        slug = 'scale_node_counts'
-        name = _("Node Counts")
+        name = "configuration"
+        verbose_name = _("Configuration")
+        multi_select = False
+        table_actions = ()
+        row_actions = ()
 
-
-class Step(undeployed_overview.Step):
-    action_class = Action
-    contributes = ('role_counts', 'plan_id')
-    template_name = 'infrastructure/overcloud/scale_node_counts.html'
-
-    def prepare_action_context(self, request, context):
-        for (role_id, flavor_id), count in context['role_counts'].items():
-            name = 'count__%s__%s' % (role_id, flavor_id)
-            context[name] = count
-        return context
+    def get_object_id(self, datum):
+        return datum[0]

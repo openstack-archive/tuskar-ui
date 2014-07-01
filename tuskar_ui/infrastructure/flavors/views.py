@@ -83,5 +83,6 @@ class DetailView(horizon.tables.DataTableView):
         return context
 
     def get_data(self):
-        return [role for role in api.tuskar.OvercloudRole.list(self.request)
-                if role.flavor_id == str(self.kwargs.get('flavor_id'))]
+        # TODO(tzumainn): fix role relation, if possible; the plan needs to be
+        # considered as well
+        return []

@@ -15,6 +15,7 @@
 from django.core import urlresolvers
 from django.utils.translation import ugettext_lazy as _
 
+from horizon import exceptions
 from horizon import tabs
 
 from tuskar_ui import api
@@ -63,12 +64,14 @@ class DeployedTab(tabs.TableTab):
         if 'errors' in self.request.GET:
             return api.node.filter_nodes(deployed_nodes, healthy=False)
 
-        # TODO(tzumainn) ideally, the role should be a direct attribute
-        # of a node; however, that cannot be done until the tuskar api
-        # update that will prevent a circular dependency in the api
         for node in deployed_nodes:
-            node.role_name = api.tuskar.OvercloudRole.get_by_node(
-                self.request, node).name
+            # TODO(tzumainn): this could probably be done more efficiently
+            # by getting the resource for all nodes at once
+            try:
+                resource = api.heat.Resource.get_by_node(self.request, node)
+                node.role_name = resource.role.name
+            except exceptions.NotFound:
+                node.role_name = '-'
 
         return deployed_nodes
 

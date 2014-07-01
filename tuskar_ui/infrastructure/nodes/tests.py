@@ -61,13 +61,14 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
     def test_free_nodes(self):
         free_nodes = [api.node.Node(node)
                       for node in self.ironicclient_nodes.list()]
-        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        roles = [api.tuskar.OvercloudRole(r)
+                 for r in TEST_DATA.tuskarclient_roles.list()]
         instance = TEST_DATA.novaclient_servers.first()
         image = TEST_DATA.glanceclient_images.first()
 
         with contextlib.nested(
             patch('tuskar_ui.api.tuskar.OvercloudRole', **{
-                'spec_set': ['list', 'name', 'get_by_node'],
+                'spec_set': ['list', 'name'],
                 'list.return_value': roles,
             }),
             patch('tuskar_ui.api.node.Node', **{
@@ -106,13 +107,14 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
     def test_deployed_nodes(self):
         deployed_nodes = [api.node.Node(node)
                           for node in self.ironicclient_nodes.list()]
-        roles = TEST_DATA.tuskarclient_overcloud_roles.list()
+        roles = [api.tuskar.OvercloudRole(r)
+                 for r in TEST_DATA.tuskarclient_roles.list()]
         instance = TEST_DATA.novaclient_servers.first()
         image = TEST_DATA.glanceclient_images.first()
 
         with contextlib.nested(
             patch('tuskar_ui.api.tuskar.OvercloudRole', **{
-                'spec_set': ['list', 'name', 'get_by_node'],
+                'spec_set': ['list', 'name'],
                 'list.return_value': roles,
             }),
             patch('tuskar_ui.api.node.Node', **{
