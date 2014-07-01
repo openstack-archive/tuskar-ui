@@ -84,7 +84,7 @@ class NodesTable(tables.DataTable):
         row_actions = ()
 
     def get_object_id(self, datum):
-        return datum.id
+        return datum.uuid
 
     def get_object_display(self, datum):
         return datum.uuid

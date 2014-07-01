@@ -14,12 +14,19 @@ import logging
 
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
-from openstack_dashboard.api import nova
+#from openstack_dashboard.api import nova
+from openstack_dashboard.test.test_data import utils as test_utils
 
-from tuskar_ui.api import tuskar
+#from tuskar_ui.api import tuskar
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
+from tuskar_ui.test.test_data import flavor_data
+from tuskar_ui.test.test_data import heat_data
 
+
+TEST_DATA = test_utils.TestDataContainer()
+flavor_data.data(TEST_DATA)
+heat_data.data(TEST_DATA)
 
 LOG = logging.getLogger(__name__)
 
@@ -77,29 +84,38 @@ class Flavor(object):
     @classmethod
     def create(cls, request, name, memory, vcpus, disk, cpu_arch,
                kernel_image_id, ramdisk_image_id):
-        extras_dict = {'cpu_arch': cpu_arch,
-                       'baremetal:deploy_kernel_id': kernel_image_id,
-                       'baremetal:deploy_ramdisk_id': ramdisk_image_id}
-        return cls(nova.flavor_create(request, name, memory, vcpus, disk,
-                                      metadata=extras_dict))
+        #extras_dict = {'cpu_arch': cpu_arch,
+        #               'baremetal:deploy_kernel_id': kernel_image_id,
+        #               'baremetal:deploy_ramdisk_id': ramdisk_image_id}
+        #return cls(nova.flavor_create(request, name, memory, vcpus, disk,
+        #                              metadata=extras_dict))
+        return cls(TEST_DATA.novaclient_flavors.first(),
+                   request=request)
 
     @classmethod
     @handle_errors(_("Unable to load flavor."))
     def get(cls, request, flavor_id):
-        return cls(nova.flavor_get(request, flavor_id))
+        #return cls(nova.flavor_get(request, flavor_id))
+        for flavor in Flavor.list(request):
+            if flavor.id == flavor_id:
+                return flavor
 
     @classmethod
     @handle_errors(_("Unable to retrieve flavor list."), [])
     def list(cls, request):
-        return [cls(item) for item in nova.flavor_list(request)]
+        #return [cls(item) for item in nova.flavor_list(request)]
+        flavors = TEST_DATA.novaclient_flavors.list()
+        return [cls(flavor) for flavor in flavors]
 
     @classmethod
     @memoized.memoized
     @handle_errors(_("Unable to retrieve existing servers list."), [])
     def list_deployed_ids(cls, request):
         """Get and memoize ID's of deployed flavors."""
-        servers = nova.server_list(request)[0]
+        #servers = nova.server_list(request)[0]
+        servers = TEST_DATA.novaclient_servers.list()
         deployed_ids = set(server.flavor['id'] for server in servers)
-        roles = tuskar.OvercloudRole.list(request)
-        deployed_ids |= set(role.flavor_id for role in roles)
+        # TODO(tzumainn): this needs to take plan into account as well
+        #roles = tuskar.OvercloudRole.list(request)
+        #deployed_ids |= set(role.flavor_id for role in roles)
         return deployed_ids

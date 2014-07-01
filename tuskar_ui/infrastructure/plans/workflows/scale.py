@@ -18,11 +18,11 @@ from horizon import exceptions
 import horizon.workflows
 
 from tuskar_ui import api
-from tuskar_ui.infrastructure.overcloud.workflows import scale_node_counts
-from tuskar_ui.infrastructure.overcloud.workflows import undeployed
+from tuskar_ui.infrastructure.plans.workflows import create
+from tuskar_ui.infrastructure.plans.workflows import scale_node_counts
 
 
-class Workflow(undeployed.DeploymentValidationMixin,
+class Workflow(create.DeploymentValidationMixin,
                horizon.workflows.Workflow):
     slug = 'scale_overcloud'
     name = _("Scale Deployment")
