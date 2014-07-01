@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -13,28 +14,22 @@
 
 from django.utils.translation import ugettext_lazy as _
 
-import horizon
+from tuskar_ui.infrastructure.plans.workflows import create_overview
 
 
-class BasePanels(horizon.PanelGroup):
-    slug = "infrastructure"
-    name = _("Infrastructure")
-    panels = (
-        'overcloud',
-        'plans',
-        'nodes',
-        'flavors',
-    )
+class Action(create_overview.Action):
+    class Meta:
+        slug = 'scale_node_counts'
+        name = _("Node Counts")
 
 
-class Infrastructure(horizon.Dashboard):
-    name = _("Infrastructure")
-    slug = "infrastructure"
-    panels = (
-        BasePanels,
-    )
-    default_panel = 'overcloud'
-    permissions = ('openstack.roles.admin',)
+class Step(create_overview.Step):
+    action_class = Action
+    contributes = ('role_counts', 'plan_id')
+    template_name = 'infrastructure/plans/scale_node_counts.html'
 
-
-horizon.register(Infrastructure)
+    def prepare_action_context(self, request, context):
+        for (role_id, flavor_id), count in context['role_counts'].items():
+            name = 'count__%s__%s' % (role_id, flavor_id)
+            context[name] = count
+        return context

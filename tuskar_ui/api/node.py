@@ -14,16 +14,23 @@ import logging
 
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
-from ironicclient.v1 import client as ironicclient
+#from ironicclient.v1 import client as ironicclient
 from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from openstack_dashboard.api import nova
+from openstack_dashboard.test.test_data import utils as test_utils
 
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
+from tuskar_ui.test.test_data import heat_data
+from tuskar_ui.test.test_data import node_data
 from tuskar_ui import utils
 
+
+TEST_DATA = test_utils.TestDataContainer()
+node_data.data(TEST_DATA)
+heat_data.data(TEST_DATA)
 
 LOG = logging.getLogger(__name__)
 
@@ -87,20 +94,20 @@ class IronicNode(base.APIResourceWrapper):
         :return: the created Node object
         :rtype:  tuskar_ui.api.node.IronicNode
         """
-        node = ironicclient(request).node.create(
-            driver='pxe_ipmitool',
-            driver_info={'ipmi_address': ipmi_address,
-                         'ipmi_username': ipmi_username,
-                         'password': ipmi_password},
-            properties={'cpu': cpu,
-                        'ram': ram,
-                        'local_disk': local_disk})
-        for mac_address in mac_addresses:
-            ironicclient(request).port.create(
-                node_uuid=node.uuid,
-                address=mac_address
-            )
-
+        #node = ironicclient(request).node.create(
+        #    driver='pxe_ipmitool',
+        #    driver_info={'ipmi_address': ipmi_address,
+        #                 'ipmi_username': ipmi_username,
+        #                 'password': ipmi_password},
+        #    properties={'cpu': cpu,
+        #                'ram': ram,
+        #                'local_disk': local_disk})
+        #for mac_address in mac_addresses:
+        #    ironicclient(request).port.create(
+        #        node_uuid=node.uuid,
+        #        address=mac_address
+        #    )
+        node = TEST_DATA.ironicclient_nodes.first()
         return cls(node)
 
     @classmethod
@@ -116,8 +123,11 @@ class IronicNode(base.APIResourceWrapper):
         :return: matching IronicNode, or None if no IronicNode matches the ID
         :rtype:  tuskar_ui.api.node.IronicNode
         """
-        node = ironicclient(request).nodes.get(uuid)
-        return cls(node)
+        #node = ironicclient(request).nodes.get(uuid)
+        #return cls(node)
+        for node in IronicNode.list(request):
+            if node.uuid == uuid:
+                return node
 
     @classmethod
     def get_by_instance_uuid(cls, request, instance_uuid):
@@ -136,8 +146,11 @@ class IronicNode(base.APIResourceWrapper):
         :raises: ironicclient.exc.HTTPNotFound if there is no IronicNode with
                  the matching instance UUID
         """
-        node = ironicclient(request).nodes.get_by_instance_uuid(instance_uuid)
-        return cls(node)
+        #node = ironicclient(request).nodes.get_by_instance_uuid(instance_uuid)
+        #return cls(node)
+        for node in IronicNode.list(request):
+            if node.instance_uuid == instance_uuid:
+                return node
 
     @classmethod
     @handle_errors(_("Unable to retrieve nodes"), [])
@@ -155,8 +168,17 @@ class IronicNode(base.APIResourceWrapper):
         :return: list of IronicNodes, or an empty list if there are none
         :rtype:  list of tuskar_ui.api.node.IronicNode
         """
-        nodes = ironicclient(request).nodes.list(
-            associated=associated)
+        #nodes = ironicclient(request).nodes.list(
+        #    associated=associated)
+        nodes = TEST_DATA.ironicclient_nodes.list()
+        if associated is not None:
+            if associated:
+                nodes = [node for node in nodes
+                         if node.instance_uuid is not None]
+            else:
+                nodes = [node for node in nodes
+                         if node.instance_uuid is None]
+
         return [cls(node) for node in nodes]
 
     @classmethod
@@ -170,7 +192,7 @@ class IronicNode(base.APIResourceWrapper):
         :param uuid: ID of IronicNode to be removed
         :type  uuid: str
         """
-        ironicclient(request).nodes.delete(uuid)
+        #ironicclient(request).nodes.delete(uuid)
         return
 
     @cached_property
@@ -222,15 +244,16 @@ class BareMetalNode(base.APIResourceWrapper):
         :return: the created BareMetalNode object
         :rtype:  tuskar_ui.api.node.BareMetalNode
         """
-        node = baremetalclient(request).create(
-            'undercloud',
-            cpu,
-            ram,
-            local_disk,
-            mac_addresses,
-            pm_address=ipmi_address,
-            pm_user=ipmi_username,
-            pm_password=ipmi_password)
+        #node = baremetalclient(request).create(
+        #    'undercloud',
+        #    cpu,
+        #    ram,
+        #    local_disk,
+        #    mac_addresses,
+        #    pm_address=ipmi_address,
+        #    pm_user=ipmi_username,
+        #    pm_password=ipmi_password)
+        node = TEST_DATA.baremetalclient_nodes.first()
         return cls(node)
 
     @classmethod
@@ -247,9 +270,11 @@ class BareMetalNode(base.APIResourceWrapper):
                  the ID
         :rtype:  tuskar_ui.api.node.BareMetalNode
         """
-        node = baremetalclient(request).get(uuid)
-
-        return cls(node)
+        #node = baremetalclient(request).get(uuid)
+        #return cls(node)
+        for node in BareMetalNode.list(request):
+            if node.uuid == uuid:
+                return node
 
     @classmethod
     def get_by_instance_uuid(cls, request, instance_uuid):
@@ -268,10 +293,13 @@ class BareMetalNode(base.APIResourceWrapper):
         :raises: ironicclient.exc.HTTPNotFound if there is no BareMetalNode
                  with the matching instance UUID
         """
-        nodes = baremetalclient(request).list()
-        node = next((n for n in nodes if instance_uuid == n.instance_uuid),
-                    None)
-        return cls(node)
+        #nodes = baremetalclient(request).list()
+        #node = next((n for n in nodes if instance_uuid == n.instance_uuid),
+        #            None)
+        #return cls(node)
+        for node in BareMetalNode.list(request):
+            if node.instance_uuid == instance_uuid:
+                return node
 
     @classmethod
     def list(cls, request, associated=None):
@@ -288,7 +316,8 @@ class BareMetalNode(base.APIResourceWrapper):
         :return: list of BareMetalNodes, or an empty list if there are none
         :rtype:  list of tuskar_ui.api.node.BareMetalNode
         """
-        nodes = baremetalclient(request).list()
+        #nodes = baremetalclient(request).list()
+        nodes = TEST_DATA.baremetalclient_nodes.list()
         if associated is not None:
             if associated:
                 nodes = [node for node in nodes
@@ -308,7 +337,7 @@ class BareMetalNode(base.APIResourceWrapper):
         :param uuid: ID of BareMetalNode to be removed
         :type  uuid: str
         """
-        baremetalclient(request).delete(uuid)
+        #baremetalclient(request).delete(uuid)
         return
 
     @cached_property
@@ -427,9 +456,9 @@ class Node(base.APIResourceWrapper):
     @handle_errors(_("Unable to retrieve node"))
     def get(cls, request, uuid):
         node = NodeClient(request).node_class.get(request, uuid)
-
         if node.instance_uuid is not None:
-            server = nova.server_get(request, node.instance_uuid)
+            #server = nova.server_get(request, node.instance_uuid)
+            server = TEST_DATA.novaclient_servers.first()
             return cls(node, instance=server, request=request)
 
         return cls(node)
@@ -439,7 +468,8 @@ class Node(base.APIResourceWrapper):
     def get_by_instance_uuid(cls, request, instance_uuid):
         node = NodeClient(request).node_class.get_by_instance_uuid(
             request, instance_uuid)
-        server = nova.server_get(request, instance_uuid)
+        #server = nova.server_get(request, instance_uuid)
+        server = TEST_DATA.novaclient_servers.first()
         return cls(node, instance=server, request=request)
 
     @classmethod
@@ -449,8 +479,8 @@ class Node(base.APIResourceWrapper):
             request, associated=associated)
 
         if associated is None or associated:
-            servers, has_more_data = nova.server_list(request)
-
+            #servers = nova.server_list(request)[0]
+            servers = TEST_DATA.novaclient_servers.list()
             servers_dict = utils.list_to_dict(servers)
             nodes_with_instance = []
             for n in nodes:
@@ -478,7 +508,8 @@ class Node(base.APIResourceWrapper):
             return self._instance
 
         if self.instance_uuid:
-            server = nova.server_get(self._request, self.instance_uuid)
+            #server = nova.server_get(self._request, self.instance_uuid)
+            server = TEST_DATA.novaclient_servers.first()
             return server
 
         return None

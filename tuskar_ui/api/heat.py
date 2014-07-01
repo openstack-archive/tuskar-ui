@@ -10,22 +10,29 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import heatclient
-import keystoneclient.exceptions
+#import heatclient
 import logging
 import urlparse
+
+from django.utils.translation import ugettext_lazy as _
 
 from horizon.utils import memoized
 
 from openstack_dashboard.api import base
 from openstack_dashboard.api import heat
 from openstack_dashboard.api import keystone
+from openstack_dashboard.test.test_data import utils as test_utils
 
 from tuskar_ui.api import node
+from tuskar_ui.api import tuskar
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
+from tuskar_ui.test.test_data import heat_data
 from tuskar_ui import utils
 
+
+TEST_DATA = test_utils.TestDataContainer()
+heat_data.data(TEST_DATA)
 
 LOG = logging.getLogger(__name__)
 
@@ -69,25 +76,43 @@ def overcloud_keystoneclient(request, endpoint, password):
     return conn
 
 
-class OvercloudStack(base.APIResourceWrapper):
+class Stack(base.APIResourceWrapper):
     _attrs = ('id', 'stack_name', 'outputs', 'stack_status', 'parameters')
 
-    def __init__(self, apiresource, request=None, plan=None):
-        super(OvercloudStack, self).__init__(apiresource)
+    def __init__(self, apiresource, request=None):
+        super(Stack, self).__init__(apiresource)
         self._request = request
-        self._plan = plan
 
     @classmethod
-    def get(cls, request, stack_id, plan=None):
-        """Return the Heat Stack associated with the stack_id
+    @handle_errors(_("Unable to retrieve heat stacks"), [])
+    def list(cls, request):
+        """Return a list of stacks in Heat
+
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :return: list of Heat stacks, or an empty list if there
+                 are none
+        :rtype:  list of tuskar_ui.api.heat.Stack
+        """
+        stacks = TEST_DATA.heatclient_stacks.list()
+        return [cls(stack, request=request) for stack in stacks]
+
+    @classmethod
+    @handle_errors(_("Unable to retrieve stack"))
+    def get(cls, request, stack_id):
+        """Return the Heat Stack associated with this Overcloud
 
         :return: Heat Stack associated with the stack_id; or None
                  if no Stack is associated, or no Stack can be
                  found
-        :rtype:  heatclient.v1.stacks.Stack or None
+        :rtype:  tuskar_ui.api.heat.Stack or None
         """
-        stack = heat.stack_get(request, stack_id)
-        return cls(stack, request=request, plan=plan)
+        #stack = heat.stack_get(request, stack_id)
+        #return cls(stack, request=request)
+        for stack in Stack.list(request):
+            if stack.id == stack_id:
+                return stack
 
     @memoized.memoized
     def resources(self, with_joins=True):
@@ -100,14 +125,17 @@ class OvercloudStack(base.APIResourceWrapper):
         :return: list of all Resources or an empty list if there are none
         :rtype:  list of tuskar_ui.api.heat.Resource
         """
-        try:
-            resources = [r for r in heat.resources_list(self._request,
-                                                        self.stack_name)]
-        except heatclient.exc.HTTPInternalServerError:
-            # TODO(lsmola) There is a weird bug in heat, that after
-            # stack-create it returns 500 for a little while. This can be
-            # removed once the bug is fixed.
-            resources = []
+        #try:
+        #    resources = [r for r in heat.resources_list(self._request,
+        #                                                self.stack_name)]
+        #except heatclient.exc.HTTPInternalServerError:
+        #    # TODO(lsmola) There is a weird bug in heat, that after
+        #    # stack-create it returns 500 for a little while. This can be
+        #    # removed once the bug is fixed.
+        #    resources = []
+
+        resources = [r for r in TEST_DATA.heatclient_resources.list() if
+                     r.stack_id == self.id]
 
         if not with_joins:
             return [Resource(r, request=self._request)
@@ -144,8 +172,7 @@ class OvercloudStack(base.APIResourceWrapper):
         # nova instance
         resources = self.resources(with_joins)
         filtered_resources = [resource for resource in resources if
-                              (overcloud_role.is_deployed_on_node(
-                                  resource.node))]
+                              (resource.has_role(overcloud_role))]
 
         return filtered_resources
 
@@ -168,6 +195,19 @@ class OvercloudStack(base.APIResourceWrapper):
         else:
             resources = self.resources_by_role(overcloud_role)
         return len(resources)
+
+    @cached_property
+    def plan(self):
+        """return associated OvercloudPlan if a plan_id exists within stack
+        parameters.
+
+        :return: associated OvercloudPlan if plan_id exists and a matching plan
+                 exists as well; None otherwise
+        :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
+        """
+        if 'plan_id' in self.parameters:
+            return tuskar.OvercloudPlan.get(self._request,
+                                            self.parameters['plan_id'])
 
     @cached_property
     def is_deployed(self):
@@ -251,9 +291,9 @@ class OvercloudStack(base.APIResourceWrapper):
             return overcloud_keystoneclient(
                 self._request,
                 output['output_value'],
-                self._plan.attributes.get('AdminPassword', None))
-        except keystoneclient.exceptions.Unauthorized:
-            LOG.debug('Unable to connect overcloud keystone.')
+                self.plan.parameter_value('AdminPassword'))
+        except Exception:
+            LOG.debug('Unable to connect to overcloud keystone.')
             return None
 
     @cached_property
@@ -318,9 +358,58 @@ class Resource(base.APIResourceWrapper):
                  matches the resource name
         :rtype:  tuskar_ui.api.heat.Resource
         """
-        resource = heat.resource_get(stack.id,
-                                     resource_name)
-        return cls(resource, request=request)
+        #resource = heat.resource_get(stack.id,
+        #                             resource_name)
+        #return cls(resource, request=request)
+        for r in TEST_DATA.heatclient_resources.list():
+            if r.stack_id == stack.id and r.resource_name == resource_name:
+                return cls(stack, request=request)
+
+    @classmethod
+    def get_by_node(cls, request, node):
+        """Return the specified Heat Resource given a Node
+
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param node: node to match
+        :type  node: tuskar_ui.api.node.Node
+
+        :return: matching Resource, or None if no Resource matches
+                 the Node
+        :rtype:  tuskar_ui.api.heat.Resource
+        """
+        # TODO(tzumainn): this is terribly inefficient, but I don't see a
+        # better way.  Maybe if Heat set some node metadata. . . ?
+        if node.instance_uuid:
+            for stack in Stack.list(request):
+                for resource in stack.resources(with_joins=False):
+                    if resource.physical_resource_id == node.instance_uuid:
+                        return resource
+
+    @cached_property
+    def role(self):
+        """Return the OvercloudRole associated with this Resource
+
+        :return: OvercloudRole associated with this Resource, or None if no
+                 OvercloudRole is associated
+        :rtype:  tuskar_ui.api.tuskar.OvercloudRole
+        """
+        roles = tuskar.OvercloudRole.list(self._request)
+        for role in roles:
+            if self.has_role(role):
+                return role
+
+    def has_role(self, role):
+        """Determine whether a resources matches an overcloud role
+
+        :param role: role to check against
+        :type  role: tuskar_ui.api.tuskar.OvercloudRole
+
+        :return: does this resource match the overcloud_role?
+        :rtype:  bool
+        """
+        return self.resource_type == role.provider_resource_type
 
     @cached_property
     def node(self):

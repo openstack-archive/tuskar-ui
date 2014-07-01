@@ -3,7 +3,7 @@
 {% load url from future %}
 
 {% block form_id %}provision_form{% endblock %}
-{% block form_action %}{% url 'horizon:infrastructure:overcloud:undeploy_confirmation' plan_id %}{% endblock %}
+{% block form_action %}{% url 'horizon:infrastructure:overcloud:undeploy_confirmation' stack_id %}{% endblock %}
 
 {% block modal_id %}provision_modal{% endblock %}
 {% block modal-header %}{% trans "Provisioning Confirmation" %}{% endblock %}

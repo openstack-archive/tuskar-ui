@@ -12,68 +12,79 @@
 
 from openstack_dashboard.test.test_data import utils as test_data_utils
 
-from tuskarclient.v1 import overcloud_roles
-from tuskarclient.v1 import overclouds
-
 
 def data(TEST):
 
-    # Overcloud
-    TEST.tuskarclient_overcloud_plans = test_data_utils.TestDataContainer()
-    # TODO(Tzu-Mainn Chen): fix these to create Tuskar Overcloud objects
-    # once the api supports it
-    oc_1 = overclouds.Overcloud(
-        overclouds.OvercloudManager(None),
-        {'id': 1,
-         'name': 'overcloud',
-         'description': 'overcloud',
-         'stack_id': 'stack-id-1',
-         'attributes': {
-             'AdminPassword': "unset"
-         }})
-    TEST.tuskarclient_overcloud_plans.add(oc_1)
+    # OvercloudPlan
+    TEST.tuskarclient_plans = test_data_utils.TestDataContainer()
+    plan_1 = {
+        'id': 'plan-1',
+        'name': 'overcloud',
+        'description': 'this is an overcloud deployment plan',
+        'created_at': '2014-05-27T21:11:09Z',
+        'modified_at': '2014-05-30T21:11:09Z',
+        'roles': [{
+            'id': 'role-1',
+            'name': 'Controller',
+            'version': 1,
+        }, {
+            'id': 'role-2',
+            'name': 'Compute',
+            'version': 1,
+        }, {
+            'id': 'role-3',
+            'name': 'Object Storage',
+            'version': 1,
+        }, {
+            'id': 'role-5',
+            'name': 'Block Storage',
+            'version': 2,
+        }],
+        'parameters': [{
+            'name': 'AdminPassword',
+            'label': 'Admin Password',
+            'description': 'Admin password',
+            'hidden': 'false',
+            'value': 'unset',
+        }],
+    }
+    TEST.tuskarclient_plans.add(plan_1)
 
     # OvercloudRole
-    TEST.tuskarclient_overcloud_roles = test_data_utils.TestDataContainer()
-    r_1 = overcloud_roles.OvercloudRole(
-        overcloud_roles.OvercloudRoleManager(None),
-        {
-            'id': 1,
-            'name': 'Controller',
-            'description': 'controller overcloud role',
-            'image_name': 'overcloud-control',
-            'flavor_id': '',
-        })
-    r_2 = overcloud_roles.OvercloudRole(
-        overcloud_roles.OvercloudRoleManager(None),
-        {'id': 2,
-         'name': 'Compute',
-         'description': 'compute overcloud role',
-         'flavor_id': '',
-         'image_name': 'overcloud-compute'})
-    r_3 = overcloud_roles.OvercloudRole(
-        overcloud_roles.OvercloudRoleManager(None),
-        {'id': 3,
-         'name': 'Object Storage',
-         'description': 'object storage overcloud role',
-         'flavor_id': '',
-         'image_name': 'overcloud-object-storage'})
-    r_4 = overcloud_roles.OvercloudRole(
-        overcloud_roles.OvercloudRoleManager(None),
-        {'id': 4,
-         'name': 'Block Storage',
-         'description': 'block storage overcloud role',
-         'flavor_id': '',
-         'image_name': 'overcloud-block-storage'})
-    TEST.tuskarclient_overcloud_roles.add(r_1, r_2, r_3, r_4)
-
-    # OvercloudRoles with flavors associated
-    TEST.tuskarclient_roles_with_flavors = test_data_utils.TestDataContainer()
-    role_with_flavor = overcloud_roles.OvercloudRole(
-        overcloud_roles.OvercloudRoleManager(None),
-        {'id': 5,
-         'name': 'Block Storage',
-         'description': 'block storage overcloud role',
-         'flavor_id': '1',
-         'image_name': 'overcloud-block-storage'})
-    TEST.tuskarclient_roles_with_flavors.add(role_with_flavor)
+    TEST.tuskarclient_roles = test_data_utils.TestDataContainer()
+    r_1 = {
+        'id': 'role-1',
+        'name': 'Controller',
+        'version': 1,
+        'description': 'controller role',
+        'created_at': '2014-05-27T21:11:09Z',
+    }
+    r_2 = {
+        'id': 'role-2',
+        'name': 'Compute',
+        'version': 1,
+        'description': 'compute role',
+        'created_at': '2014-05-27T21:11:09Z',
+    }
+    r_3 = {
+        'id': 'role-3',
+        'name': 'Object Storage',
+        'version': 1,
+        'description': 'object storage role',
+        'created_at': '2014-05-27T21:11:09Z',
+    }
+    r_4 = {
+        'id': 'role-4',
+        'name': 'Block Storage',
+        'version': 1,
+        'description': 'block storage role',
+        'created_at': '2014-05-27T21:11:09Z',
+    }
+    r_5 = {
+        'id': 'role-5',
+        'name': 'Block Storage',
+        'version': 2,
+        'description': 'block storage role',
+        'created_at': '2014-05-28T21:11:09Z',
+    }
+    TEST.tuskarclient_roles.add(r_1, r_2, r_3, r_4, r_5)
