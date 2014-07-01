@@ -19,20 +19,12 @@
 <div class="row-fluid">
   <div class="span12">
     <div class="actions pull-right">
-        <a href="{% url 'horizon:infrastructure:overcloud:undeploy_confirmation' plan.id %}"
+        <a href="{% url 'horizon:infrastructure:overcloud:undeploy_confirmation' stack.id %}"
            class="btn btn-danger ajax-modal
             {% if not stack.is_deployed and not stack.is_failed %}disabled{% endif %}">
             <i class="icon-fire icon-white"></i>
             {% trans "Undeploy" %}
         </a>
-        {% comment %} no scaling for Icehouse, uncomment when ready
-        <a href="{% url 'horizon:infrastructure:overcloud:scale' plan.id %}"
-           class="btn ajax-modal
-            {% if not stack.is_deployed %}disabled{% endif %}">
-            <i class="icon-resize-full"></i>
-            {% trans "Scale deployment" %}
-        </a>
-        {% endcomment %}
     </div>
     {{ tab_group.render }}
   </div>

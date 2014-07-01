@@ -33,6 +33,7 @@ def data(TEST):
              'output_value': 'http://192.0.2.23:5000/v2',
          }],
          'parameters': {
+             'plan_id': 'plan-1',
              'one': 'one',
              'two': 'two',
          }})
@@ -117,7 +118,7 @@ def data(TEST):
          'logical_resource_id': 'Compute0',
          'physical_resource_id': 'aa',
          'resource_status': 'CREATE_COMPLETE',
-         'resource_type': 'AWS::EC2::Instance'})
+         'resource_type': 'Compute'})
     resource_2 = resources.Resource(
         resources.ResourceManager(None),
         {'id': '2-resource-id',
@@ -126,7 +127,7 @@ def data(TEST):
          'logical_resource_id': 'Controller',
          'physical_resource_id': 'bb',
          'resource_status': 'CREATE_COMPLETE',
-         'resource_type': 'AWS::EC2::Instance'})
+         'resource_type': 'Controller'})
     resource_3 = resources.Resource(
         resources.ResourceManager(None),
         {'id': '3-resource-id',
@@ -135,7 +136,7 @@ def data(TEST):
          'logical_resource_id': 'Compute1',
          'physical_resource_id': 'cc',
          'resource_status': 'CREATE_COMPLETE',
-         'resource_type': 'AWS::EC2::Instance'})
+         'resource_type': 'Compute'})
     resource_4 = resources.Resource(
         resources.ResourceManager(None),
         {'id': '4-resource-id',
@@ -144,7 +145,7 @@ def data(TEST):
          'logical_resource_id': 'Compute2',
          'physical_resource_id': 'dd',
          'resource_status': 'CREATE_COMPLETE',
-         'resource_type': 'AWS::EC2::Instance'})
+         'resource_type': 'Compute'})
     TEST.heatclient_resources.add(resource_1,
                                   resource_2,
                                   resource_3,

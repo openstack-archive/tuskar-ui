@@ -19,9 +19,8 @@ from django.utils.translation import ugettext_lazy as _
 import horizon.workflows
 
 from tuskar_ui import api
-from tuskar_ui.infrastructure.overcloud.workflows\
-    import undeployed_configuration
-from tuskar_ui.infrastructure.overcloud.workflows import undeployed_overview
+from tuskar_ui.infrastructure.plans.workflows import create_configuration
+from tuskar_ui.infrastructure.plans.workflows import create_overview
 
 
 LOG = logging.getLogger(__name__)
@@ -46,18 +45,18 @@ class DeploymentValidationMixin(object):
                 free)
             m2 %= {'free': free}
             message = unicode(translation.string_concat(m1, m2))
-            self.add_error_to_step(message, 'undeployed_overview')
+            self.add_error_to_step(message, 'create_overview')
             self.add_error_to_step(message, 'scale_node_counts')
             return False
         return super(DeploymentValidationMixin, self).validate(context)
 
 
 class Workflow(DeploymentValidationMixin, horizon.workflows.Workflow):
-    slug = 'undeployed_overcloud'
-    name = _("My OpenStack Deployment")
+    slug = 'create_plan'
+    name = _("My OpenStack Deployment Plan")
     default_steps = (
-        undeployed_overview.Step,
-        undeployed_configuration.Step,
+        create_overview.Step,
+        create_configuration.Step,
     )
     finalize_button_name = _("Deploy")
     success_message = _("OpenStack deployment launched")
@@ -65,15 +64,15 @@ class Workflow(DeploymentValidationMixin, horizon.workflows.Workflow):
 
     def handle(self, request, context):
         try:
+            #role_ids = context['role_ids']
             api.tuskar.OvercloudPlan.create(
-                self.request, context['role_counts'],
-                context['configuration'])
+                self.request, 'overcloud', 'overcloud')
         except Exception as e:
             # Showing error in both workflow tabs, because from the exception
             # type we can't recognize where it should show
             msg = unicode(e)
-            self.add_error_to_step(msg, 'undeployed_overview')
-            self.add_error_to_step(msg, 'deployed_configuration')
-            LOG.exception('Error creating overcloud')
+            self.add_error_to_step(msg, 'create_overview')
+            self.add_error_to_step(msg, 'create_configuration')
+            LOG.exception('Error creating overcloud plan')
             raise django.forms.ValidationError(msg)
         return True

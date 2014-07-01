@@ -14,20 +14,13 @@
 
 from django.conf import urls
 
-from tuskar_ui.infrastructure.overcloud import views
+from tuskar_ui.infrastructure.plans import views
 
 
 urlpatterns = urls.patterns(
     '',
     urls.url(r'^$', views.IndexView.as_view(), name='index'),
-    urls.url(r'^(?P<stack_id>[^/]+)/undeploy-in-progress$',
-             views.UndeployInProgressView.as_view(),
-             name='undeploy_in_progress'),
-    urls.url(r'^(?P<stack_id>[^/]+)/$', views.DetailView.as_view(),
-             name='detail'),
-    urls.url(r'^(?P<stack_id>[^/]+)/role/(?P<role_id>[^/]+)$',
-             views.OvercloudRoleView.as_view(), name='role'),
-    urls.url(r'^(?P<stack_id>[^/]+)/undeploy-confirmation$',
-             views.UndeployConfirmationView.as_view(),
-             name='undeploy_confirmation'),
+    urls.url(r'^create/$', views.CreateView.as_view(), name='create'),
+    urls.url(r'^(?P<plan_id>[^/]+)/scale$', views.Scale.as_view(),
+             name='scale'),
 )
