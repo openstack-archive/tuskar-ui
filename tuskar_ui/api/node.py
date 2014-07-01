@@ -22,6 +22,7 @@ from openstack_dashboard.api import nova
 
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
+from tuskar_ui import utils
 
 
 LOG = logging.getLogger(__name__)
@@ -30,21 +31,6 @@ LOG = logging.getLogger(__name__)
 def baremetalclient(request):
     nc = nova.novaclient(request)
     return baremetal.BareMetalNodeManager(nc)
-
-
-def list_to_dict(object_list, key_attribute='id'):
-    """Converts an object list to a dict
-
-    :param object_list: list of objects to be put into a dict
-    :type  object_list: list
-
-    :param key_attribute: object attribute used as index by dict
-    :type  key_attribute: str
-
-    :return: dict containing the objects in the list
-    :rtype: dict
-    """
-    return dict((getattr(o, key_attribute), o) for o in object_list)
 
 
 # FIXME(lsmola) This should be done in Horizon, they don't have caching
@@ -465,7 +451,7 @@ class Node(base.APIResourceWrapper):
         if associated is None or associated:
             servers, has_more_data = nova.server_list(request)
 
-            servers_dict = list_to_dict(servers)
+            servers_dict = utils.list_to_dict(servers)
             nodes_with_instance = []
             for n in nodes:
                 server = servers_dict.get(n.instance_uuid, None)
