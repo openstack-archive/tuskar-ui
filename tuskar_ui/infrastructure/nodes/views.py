@@ -15,6 +15,7 @@ import json
 
 from django.core.urlresolvers import reverse_lazy
 from django import http
+from django.utils.http import urlencode
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base
 
@@ -80,18 +81,41 @@ class DetailView(horizon_views.APIView):
         node = api.node.Node.get(request, node_uuid, _error_redirect=redirect)
         context['node'] = node
         if api_base.is_service_enabled(request, 'metering'):
-            context['meters'] = (
-                ('cpu', _('CPU')),
-                ('disk', _('Disk')),
-                ('network', _('Network Bandwidth (In)')),
-                ('energy', _('Energy')),
-                ('memory', _('Memory')),
-                ('swap', _('Swap')),
-                ('network-out', _('Network Bandwidth (Out)')),
-                ('power', _('Power')),
+            # Meter configuration in the following format:
+            # (meter label, url part)
+            context['meter_conf'] = (
+                # CPU load
+                (_('CPU load average (1 min)'),
+                 url_part('hardware.cpu.load.1min', False)),
+                # CPU utilization
+                (_('CPU utilization'),
+                 url_part('hardware.system_stats.cpu.util', True)),
+                # Swap
+                # TODO(akrivoka): Both lines in one chart, with barchart.
+                (_('Swap (total)'),
+                 url_part('hardware.memory.swap.total', False)),
+                (_('Swap (used)'),
+                 url_part('hardware.memory.swap.util', False)),
+                # Disk
+                (_('Disk I/O (out)'),
+                 url_part('hardware.system_stats.io.raw_sent', False)),
+                (_('Disk I/O (in)'),
+                 url_part('hardware.system_stats.io.raw_received', False)),
+                # Network
+                (_('Network bandwidth (out)'),
+                 url_part('hardware.network.ip.out_requests', False)),
+                (_('Network bandwidth (in)'),
+                 url_part('hardware.network.ip.in_receives', False)),
             )
 
         return context
+
+
+def url_part(meter_name, barchart):
+    d = {'meter': meter_name}
+    if barchart:
+        d['barchart'] = True
+    return urlencode(d)
 
 
 class PerformanceView(base.TemplateView):
@@ -102,76 +126,85 @@ class PerformanceView(base.TemplateView):
         date_to = request.GET.get('date_to')
         stats_attr = request.GET.get('stats_attr', 'avg')
         group_by = request.GET.get('group_by')
+        barchart = bool(request.GET.get('barchart'))
 
         meter_name = meter.replace(".", "_")
         resource_name = 'id' if group_by == "project" else 'resource_id'
         node_uuid = kwargs.get('node_uuid')
-
-        additional_query = [{'field': 'resource_id',
-                             'op': 'eq',
-                             'value': node_uuid}]
-
-        resources, unit = metering.query_data(
-            request=request,
-            date_from=date_from,
-            date_to=date_to,
-            date_options=date_options,
-            group_by=group_by,
-            meter=meter,
-            additional_query=additional_query)
-        series = metering.SamplesView._series_for_meter(resources,
-                                                        resource_name,
-                                                        meter_name,
-                                                        stats_attr,
-                                                        unit)
+        node = api.node.Node.get(request, node_uuid)
 
         average = used = 0
         tooltip_average = ''
 
-        if series:
-            values = [point['y'] for point in series[0]['data']]
-            average = sum(values) / len(values)
-            used = values[-1]
-            first_date = series[0]['data'][0]['x']
-            last_date = series[0]['data'][-1]['x']
-            tooltip_average = _(
-                'Average %(average)s %(unit)s<br> From: %(first_date)s, to: '
-                '%(last_date)s'
-            ) % (dict(average=average, unit=unit, first_date=first_date,
-                 last_date=last_date)
-                 )
+        try:
+            ip_addr = (node.instance._apiresource.addresses['ctlplane'][0]
+                       ['addr'])
+        except AttributeError:
+            series = []
+        else:
+
+            additional_query = [{'field': 'resource_id',
+                                 'op': 'eq',
+                                 'value': ip_addr}]
+            resources, unit = metering.query_data(
+                request=request,
+                date_from=date_from,
+                date_to=date_to,
+                date_options=date_options,
+                group_by=group_by,
+                meter=meter,
+                additional_query=additional_query)
+            series = metering.SamplesView._series_for_meter(resources,
+                                                            resource_name,
+                                                            meter_name,
+                                                            stats_attr,
+                                                            unit)
+
+            if barchart:
+                values = [point['y'] for point in series[0]['data']]
+                average = sum(values) / len(values)
+                used = values[-1]
+                first_date = series[0]['data'][0]['x']
+                last_date = series[0]['data'][-1]['x']
+                tooltip_average = _('Average %(average)s %(unit)s<br> From: '
+                                    '%(first_date)s, to: %(last_date)s') % (
+                                        dict(average=average, unit=unit,
+                                             first_date=first_date,
+                                             last_date=last_date)
+                                    )
 
         ret = {
             'series': series,
             'settings': {
                 'renderer': 'StaticAxes',
                 'yMin': 0,
-                'yMax': 100,
                 'higlight_last_point': True,
                 'auto_size': False,
                 'auto_resize': False,
                 'axes_x': False,
-                'axes_y': False,
-                'bar_chart_settings': {
-                    'orientation': 'vertical',
-                    'used_label_placement': 'left',
-                    'width': 30,
-                    'color_scale_domain': [0, 80, 80, 100],
-                    'color_scale_range': [
-                        '#0000FF',
-                        '#0000FF',
-                        '#FF0000',
-                        '#FF0000'
-                    ],
-                    'average_color_scale_domain': [0, 100],
-                    'average_color_scale_range': ['#0000FF', '#0000FF']
-                }
+                'axes_y': True,
             },
-            'stats': {
+        }
+
+        if barchart:
+            ret['settings']['bar_chart_settings'] = {
+                'orientation': 'vertical',
+                'used_label_placement': 'left',
+                'width': 30,
+                'color_scale_domain': [0, 80, 80, 100],
+                'color_scale_range': [
+                    '#0000FF',
+                    '#0000FF',
+                    '#FF0000',
+                    '#FF0000'
+                ],
+                'average_color_scale_domain': [0, 100],
+                'average_color_scale_range': ['#0000FF', '#0000FF']
+            }
+            ret['stats'] = {
                 'average': average,
                 'used': used,
                 'tooltip_average': tooltip_average,
             }
-        }
 
         return http.HttpResponse(json.dumps(ret), mimetype='application/json')
