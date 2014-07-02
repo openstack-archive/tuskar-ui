@@ -61,6 +61,7 @@ class DetailView(horizon_views.APIView):
         redirect = reverse_lazy('horizon:infrastructure:nodes:index')
         node = api.node.Node.get(request, node_uuid, _error_redirect=redirect)
         context['node'] = node
+        context['title'] = _("Node Details: %(uuid)s") % {'uuid': node.uuid}
         try:
             resource = api.heat.Resource.get_by_node(request, node)
             context['role'] = resource.role
