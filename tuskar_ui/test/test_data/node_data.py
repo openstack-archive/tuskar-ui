@@ -25,6 +25,12 @@ def data(TEST):
         baremetal.BareMetalNodeManager(None),
         {'id': '1',
          'uuid': 'aa-11',
+         'driver_info': {
+             'ipmi_address': '1.1.1.1',
+             'ipmi_username': 'admin',
+             'ipmi_password': 'password',
+             'ip_address': '192.0.2.36'
+         },
          'instance_uuid': 'aa',
          "service_host": "undercloud",
          "cpus": 1,

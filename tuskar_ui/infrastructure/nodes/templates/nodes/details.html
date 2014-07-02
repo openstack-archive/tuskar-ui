@@ -49,9 +49,9 @@
 
 <h2>{% trans "Performance and Capacity" %}</h2>
 
-{% if meters %}
+{% if meter_conf %}
 <br />
-{% url 'horizon:infrastructure:nodes:performance' node.id as node_perf_url %}
+{% url 'horizon:infrastructure:nodes:performance' node.uuid as node_perf_url %}
 
 <div id="ceilometer-stats">
   <form class="form-horizontal" id="linechart_general_form">
@@ -125,12 +125,12 @@
 <div class="clear"></div>
 <div>
   <table>
-    {% for meter_name, meter_label in meters %}
+    {% for meter_label, url_part in meter_conf %}
       {% if forloop.counter0|divisibleby:"4" %}
         <tr>
       {% endif %}
       <td>
-        {% include "infrastructure/_performance_chart.html" with label=meter_label url=node_perf_url|add:"?meter="|add:meter_name only %}
+        {% include "infrastructure/_performance_chart.html" with label=meter_label url=node_perf_url|add:"?"|add:url_part only %}
       </td>
       {% if forloop.counter|divisibleby:"4" %}
         </tr>
