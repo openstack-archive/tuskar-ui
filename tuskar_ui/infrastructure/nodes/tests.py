@@ -261,21 +261,26 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
 
     def test_performance(self):
         node = api.node.Node(self.ironicclient_nodes.list()[0])
-        meters = self.meters.list()
         resources = self.resources.list()
+        instance = TEST_DATA.novaclient_servers.first()
 
         ceilometerclient = self.stub_ceilometerclient()
         ceilometerclient.resources = self.mox.CreateMockAnything()
         ceilometerclient.resources.list(q=[]).AndReturn(resources)
         ceilometerclient.meters = self.mox.CreateMockAnything()
-        ceilometerclient.meters.list(None).AndReturn(meters)
 
         self.mox.ReplayAll()
 
-        with patch('tuskar_ui.api.node.Node', **{
-            'spec_set': ['get'],
-            'get.return_value': node,
-        }):
+        with contextlib.nested(
+            patch('tuskar_ui.api.node.Node', **{
+                'spec_set': ['get'],
+                'get.return_value': node,
+            }),
+            patch('tuskar_ui.api.node.nova', **{
+                'spec_set': ['servers', 'server_get'],
+                'servers.return_value': [instance],
+            })
+        ):
             url = urlresolvers.reverse(PERFORMANCE_VIEW, args=(node.uuid,))
             url += '?meter=cpu&date_options=7'
             res = self.client.get(url)
@@ -284,4 +289,3 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn('series', json_content)
         self.assertIn('settings', json_content)
-        self.assertIn('stats', json_content)
