@@ -82,14 +82,11 @@ class DetailView(horizon_views.APIView):
 
         if api_base.is_service_enabled(request, 'metering'):
             context['meters'] = (
-                ('cpu', _('CPU')),
-                ('disk', _('Disk')),
-                ('network', _('Network Bandwidth (In)')),
-                ('energy', _('Energy')),
-                ('memory', _('Memory')),
-                ('swap', _('Swap')),
-                ('network-out', _('Network Bandwidth (Out)')),
-                ('power', _('Power')),
+                ('hardware.cpu.load.15min', _('CPU load (15 min)')),
+                ('hardware.disk.size.total', _('Disk size (total)')),
+                ('hardware.disk.size.used', _('Disk size (used)')),
+                ('hardware.memory.total', _('Memory (total)')),
+                ('hardware.memory.used', _('Memory (used)')),
             )
 
         return context
@@ -107,10 +104,12 @@ class PerformanceView(base.TemplateView):
         meter_name = meter.replace(".", "_")
         resource_name = 'id' if group_by == "project" else 'resource_id'
         node_uuid = kwargs.get('node_uuid')
+        node = api.node.Node.get(request, node_uuid)
+        ip_addr = node.instance._apiresource.addresses['ctlplane'][0]['addr']
 
         additional_query = [{'field': 'resource_id',
                              'op': 'eq',
-                             'value': node_uuid}]
+                             'value': ip_addr}]
 
         resources, unit = metering.query_data(
             request=request,
@@ -126,53 +125,17 @@ class PerformanceView(base.TemplateView):
                                                         stats_attr,
                                                         unit)
 
-        average = used = 0
-        tooltip_average = ''
-
-        if series:
-            values = [point['y'] for point in series[0]['data']]
-            average = sum(values) / len(values)
-            used = values[-1]
-            first_date = series[0]['data'][0]['x']
-            last_date = series[0]['data'][-1]['x']
-            tooltip_average = _(
-                'Average %(average)s %(unit)s<br> From: %(first_date)s, to: '
-                '%(last_date)s'
-            ) % (dict(average=average, unit=unit, first_date=first_date,
-                 last_date=last_date)
-                 )
-
         ret = {
             'series': series,
             'settings': {
                 'renderer': 'StaticAxes',
                 'yMin': 0,
-                'yMax': 100,
                 'higlight_last_point': True,
                 'auto_size': False,
                 'auto_resize': False,
                 'axes_x': False,
-                'axes_y': False,
-                'bar_chart_settings': {
-                    'orientation': 'vertical',
-                    'used_label_placement': 'left',
-                    'width': 30,
-                    'color_scale_domain': [0, 80, 80, 100],
-                    'color_scale_range': [
-                        '#0000FF',
-                        '#0000FF',
-                        '#FF0000',
-                        '#FF0000'
-                    ],
-                    'average_color_scale_domain': [0, 100],
-                    'average_color_scale_range': ['#0000FF', '#0000FF']
-                }
+                'axes_y': True,
             },
-            'stats': {
-                'average': average,
-                'used': used,
-                'tooltip_average': tooltip_average,
-            }
         }
 
         return http.HttpResponse(json.dumps(ret), mimetype='application/json')
