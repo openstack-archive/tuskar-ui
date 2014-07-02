@@ -312,6 +312,15 @@ class BareMetalNode(base.APIResourceWrapper):
         :return: return pm_address property of this BareMetalNode
         :rtype:  dict of str
         """
+        # TODO(akrivoka): mocking driver info, remove later
+        node = TEST_DATA.baremetalclient_nodes.first()
+        return {
+            'ipmi_address': node.ipmi_address,
+            'ipmi_username': node.ipmi_username,
+            'ipmi_password': node.ipmi_password,
+            'ip_address': node.ip_address,
+        }
+
         try:
             ip_address = (self.instance._apiresource.addresses['ctlplane'][0]
                           ['addr'])
