@@ -79,9 +79,9 @@ class OvercloudStack(base.APIResourceWrapper):
 
     @classmethod
     def get(cls, request, stack_id, plan=None):
-        """Return the Heat Stack associated with this Overcloud
+        """Return the Heat Stack associated with the stack_id
 
-        :return: Heat Stack associated with this Overcloud; or None
+        :return: Heat Stack associated with the stack_id; or None
                  if no Stack is associated, or no Stack can be
                  found
         :rtype:  heatclient.v1.stacks.Stack or None
@@ -91,15 +91,14 @@ class OvercloudStack(base.APIResourceWrapper):
 
     @memoized.memoized
     def resources(self, with_joins=True):
-        """Return a list of all Overcloud Resources
+        """Return a list of all Resources associated with the Stack
 
         :param with_joins: should we also retrieve objects associated with each
                            retrieved Resource?
         :type  with_joins: bool
 
-        :return: list of all Overcloud Resources or an empty list if there
-                 are none
-        :rtype:  list of tuskar_ui.api.Resource
+        :return: list of all Resources or an empty list if there are none
+        :rtype:  list of tuskar_ui.api.heat.Resource
         """
         try:
             resources = [r for r in heat.resources_list(self._request,
@@ -128,18 +127,18 @@ class OvercloudStack(base.APIResourceWrapper):
 
     @memoized.memoized
     def resources_by_role(self, overcloud_role, with_joins=True):
-        """Return a list of Overcloud Resources that match an Overcloud Role
+        """Return a list of Resources that match an OvercloudRole
 
         :param overcloud_role: role of resources to be returned
-        :type  overcloud_role: tuskar_ui.api.OvercloudRole
+        :type  overcloud_role: tuskar_ui.api.tuskar.OvercloudRole
 
         :param with_joins: should we also retrieve objects associated with each
                            retrieved Resource?
         :type  with_joins: bool
 
-        :return: list of Overcloud Resources that match the Overcloud Role,
-                 or an empty list if there are none
-        :rtype:  list of tuskar_ui.api.Resource
+        :return: list of Resources that match the OvercloudRole, or an empty
+                 list if there are none
+        :rtype:  list of tuskar_ui.api.heat.Resource
         """
         # FIXME(lsmola) with_joins is not necessary here, I need at least
         # nova instance
@@ -152,12 +151,12 @@ class OvercloudStack(base.APIResourceWrapper):
 
     @memoized.memoized
     def resources_count(self, overcloud_role=None):
-        """Return count of Overcloud Resources
+        """Return count of associated Resources
 
-        :param overcloud_role: role of resources to be counted, None means all
-        :type  overcloud_role: tuskar_ui.api.OvercloudRole
+        :param overcloud_role: role of resources to be counted; None means all
+        :type  overcloud_role: tuskar_ui.api.tuskar.OvercloudRole
 
-        :return: Number of matches resources
+        :return: Number of matching resources
         :rtype:  int
         """
         # TODO(dtantsur): there should be better way to do it, rather than
@@ -172,10 +171,9 @@ class OvercloudStack(base.APIResourceWrapper):
 
     @cached_property
     def is_deployed(self):
-        """Check if this Overcloud is successfully deployed.
+        """Check if this Stack is successfully deployed.
 
-        :return: True if this Overcloud is successfully deployed;
-                 False otherwise
+        :return: True if this Stack is successfully deployed, False otherwise
         :rtype:  bool
         """
         return self.stack_status in ('CREATE_COMPLETE',
@@ -183,7 +181,7 @@ class OvercloudStack(base.APIResourceWrapper):
 
     @cached_property
     def is_deploying(self):
-        """Check if this Overcloud is currently deploying or updating.
+        """Check if this Stack is currently deploying or updating.
 
         :return: True if deployment is in progress, False otherwise.
         :rtype: bool
@@ -193,7 +191,7 @@ class OvercloudStack(base.APIResourceWrapper):
 
     @cached_property
     def is_failed(self):
-        """Check if this Overcloud failed to update or deploy.
+        """Check if this Stack failed to update or deploy.
 
         :return: True if deployment there was an error, False otherwise.
         :rtype: bool
@@ -203,29 +201,29 @@ class OvercloudStack(base.APIResourceWrapper):
 
     @cached_property
     def is_deleting(self):
-        """Check if this Overcloud is deleting.
+        """Check if this Stack is deleting.
 
-        :return: True if Overcloud is deleting, False otherwise.
+        :return: True if Stack is deleting, False otherwise.
         :rtype: bool
         """
         return self.stack_status in ('DELETE_IN_PROGRESS', )
 
     @cached_property
     def is_delete_failed(self):
-        """Check if this Overcloud deleting has failed.
+        """Check if Stack deleting has failed.
 
-        :return: True if Overcloud deleting has failed, False otherwise.
+        :return: True if Stack deleting has failed, False otherwise.
         :rtype: bool
         """
         return self.stack_status in ('DELETE_FAILED', )
 
     @cached_property
     def events(self):
-        """Return the Heat Events associated with this Overcloud
+        """Return the Heat Events associated with this Stack
 
-        :return: list of Heat Events associated with this Overcloud;
+        :return: list of Heat Events associated with this Stack;
                  or an empty list if there is no Stack associated with
-                 this Overcloud, or there are no Events
+                 this Stack, or there are no Events
         :rtype:  list of heatclient.v1.events.Event
         """
         return heat.events_list(self._request,
@@ -293,7 +291,7 @@ class Resource(base.APIResourceWrapper):
         :type  request: django.core.handlers.wsgi.WSGIRequest
 
         :param node: node relation we want to cache
-        :type  node: tuskar_ui.api.Node
+        :type  node: tuskar_ui.api.node.Node
 
         :return: Resource object
         :rtype:  Resource
@@ -305,20 +303,20 @@ class Resource(base.APIResourceWrapper):
 
     @classmethod
     def get(cls, request, stack, resource_name):
-        """Return the specified Heat Resource within an Overcloud
+        """Return the specified Heat Resource within a Stack
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param overcloud: the Overcloud from which to retrieve the resource
-        :type  overcloud: tuskar_ui.api.Overcloud
+        :param overcloud: the Stack from which to retrieve the resource
+        :type  overcloud: tuskar_ui.api.heat.OvercloudStack
 
         :param resource_name: name of the Resource to retrieve
         :type  resource_name: str
 
-        :return: matching Resource, or None if no Resource in the Overcloud
-                 stack matches the resource name
-        :rtype:  tuskar_ui.api.Resource
+        :return: matching Resource, or None if no Resource in the Stack
+                 matches the resource name
+        :rtype:  tuskar_ui.api.heat.Resource
         """
         resource = heat.resource_get(stack.id,
                                      resource_name)
@@ -330,7 +328,7 @@ class Resource(base.APIResourceWrapper):
 
         :return: Ironic Node associated with this Resource, or None if no
                  Node is associated
-        :rtype:  tuskar_ui.api.Node
+        :rtype:  tuskar_ui.api.node.Node
 
         :raises: ironicclient.exc.HTTPNotFound if there is no Node with the
                  matching instance UUID

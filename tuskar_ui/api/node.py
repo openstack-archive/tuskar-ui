@@ -85,7 +85,7 @@ class IronicNode(base.APIResourceWrapper):
         :type  ipmi_password: str
 
         :return: the created Node object
-        :rtype:  tuskar_ui.api.Node
+        :rtype:  tuskar_ui.api.node.IronicNode
         """
         node = ironicclient(request).node.create(
             driver='pxe_ipmitool',
@@ -105,36 +105,36 @@ class IronicNode(base.APIResourceWrapper):
 
     @classmethod
     def get(cls, request, uuid):
-        """Return the Node in Ironic that matches the ID
+        """Return the IronicNode that matches the ID
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param uuid: ID of Node to be retrieved
+        :param uuid: ID of IronicNode to be retrieved
         :type  uuid: str
 
-        :return: matching Node, or None if no Node matches the ID
-        :rtype:  tuskar_ui.api.Node
+        :return: matching IronicNode, or None if no IronicNode matches the ID
+        :rtype:  tuskar_ui.api.node.IronicNode
         """
         node = ironicclient(request).nodes.get(uuid)
         return cls(node)
 
     @classmethod
     def get_by_instance_uuid(cls, request, instance_uuid):
-        """Return the Node in Ironic associated with the instance ID
+        """Return the IronicNode associated with the instance ID
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param instance_uuid: ID of Instance that is deployed on the Node
+        :param instance_uuid: ID of Instance that is deployed on the IronicNode
                               to be retrieved
         :type  instance_uuid: str
 
-        :return: matching Node
-        :rtype:  tuskar_ui.api.Node
+        :return: matching IronicNode
+        :rtype:  tuskar_ui.api.node.IronicNode
 
-        :raises: ironicclient.exc.HTTPNotFound if there is no Node with the
-                 matching instance UUID
+        :raises: ironicclient.exc.HTTPNotFound if there is no IronicNode with
+                 the matching instance UUID
         """
         node = ironicclient(request).nodes.get_by_instance_uuid(instance_uuid)
         return cls(node)
@@ -142,18 +142,18 @@ class IronicNode(base.APIResourceWrapper):
     @classmethod
     @handle_errors(_("Unable to retrieve nodes"), [])
     def list(cls, request, associated=None):
-        """Return a list of Nodes in Ironic
+        """Return a list of IronicNodes
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param associated: should we also retrieve all Nodes, only those
+        :param associated: should we also retrieve all IronicNodes, only those
                            associated with an Instance, or only those not
                            associated with an Instance?
         :type  associated: bool
 
-        :return: list of Nodes, or an empty list if there are none
-        :rtype:  list of tuskar_ui.api.Node
+        :return: list of IronicNodes, or an empty list if there are none
+        :rtype:  list of tuskar_ui.api.node.IronicNode
         """
         nodes = ironicclient(request).nodes.list(
             associated=associated)
@@ -161,13 +161,13 @@ class IronicNode(base.APIResourceWrapper):
 
     @classmethod
     def delete(cls, request, uuid):
-        """Remove the Node matching the ID from Ironic if it
+        """Remove the IronicNode matching the ID if it
         exists; otherwise, does nothing.
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param uuid: ID of Node to be removed
+        :param uuid: ID of IronicNode to be removed
         :type  uuid: str
         """
         ironicclient(request).nodes.delete(uuid)
@@ -175,11 +175,11 @@ class IronicNode(base.APIResourceWrapper):
 
     @cached_property
     def addresses(self):
-        """Return a list of port addresses associated with this Node
+        """Return a list of port addresses associated with this IronicNode
 
-        :return: list of port addresses associated with this Node, or
+        :return: list of port addresses associated with this IronicNode, or
                  an empty list if no addresses are associated with
-                 this Node
+                 this IronicNode
         :rtype:  list of str
         """
         ports = self.list_ports()
@@ -193,7 +193,7 @@ class BareMetalNode(base.APIResourceWrapper):
     @classmethod
     def create(cls, request, ipmi_address, cpu, ram, local_disk,
                mac_addresses, ipmi_username=None, ipmi_password=None):
-        """Create a Node in Nova BareMetal
+        """Create a Nova BareMetalNode
 
         :param request: request object
         :type  request: django.http.HttpRequest
@@ -219,8 +219,8 @@ class BareMetalNode(base.APIResourceWrapper):
         :param ipmi_password: IPMI password
         :type  ipmi_password: str
 
-        :return: the created Node object
-        :rtype:  tuskar_ui.api.Node
+        :return: the created BareMetalNode object
+        :rtype:  tuskar_ui.api.node.BareMetalNode
         """
         node = baremetalclient(request).create(
             'undercloud',
@@ -235,16 +235,17 @@ class BareMetalNode(base.APIResourceWrapper):
 
     @classmethod
     def get(cls, request, uuid):
-        """Return the Node in Nova BareMetal that matches the ID
+        """Return the BareMetalNode that matches the ID
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param uuid: ID of Node to be retrieved
+        :param uuid: ID of BareMetalNode to be retrieved
         :type  uuid: str
 
-        :return: matching Node, or None if no Node matches the ID
-        :rtype:  tuskar_ui.api.Node
+        :return: matching BareMetalNode, or None if no BareMetalNode matches
+                 the ID
+        :rtype:  tuskar_ui.api.node.BareMetalNode
         """
         node = baremetalclient(request).get(uuid)
 
@@ -252,20 +253,20 @@ class BareMetalNode(base.APIResourceWrapper):
 
     @classmethod
     def get_by_instance_uuid(cls, request, instance_uuid):
-        """Return the Node in Nova BareMetal associated with the instance ID
+        """Return the BareMetalNode associated with the instance ID
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param instance_uuid: ID of Instance that is deployed on the Node
-                              to be retrieved
+        :param instance_uuid: ID of Instance that is deployed on the
+                              BareMetalNode to be retrieved
         :type  instance_uuid: str
 
-        :return: matching Node
-        :rtype:  tuskar_ui.api.Node
+        :return: matching BareMetalNode
+        :rtype:  tuskar_ui.api.node.BareMetalNode
 
-        :raises: ironicclient.exc.HTTPNotFound if there is no Node with the
-                 matching instance UUID
+        :raises: ironicclient.exc.HTTPNotFound if there is no BareMetalNode
+                 with the matching instance UUID
         """
         nodes = baremetalclient(request).list()
         node = next((n for n in nodes if instance_uuid == n.instance_uuid),
@@ -274,18 +275,18 @@ class BareMetalNode(base.APIResourceWrapper):
 
     @classmethod
     def list(cls, request, associated=None):
-        """Return a list of Nodes in Nova BareMetal
+        """Return a list of BareMetalNodes
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param associated: should we also retrieve all Nodes, only those
-                           associated with an Instance, or only those not
+        :param associated: should we also retrieve all BareMetalNodes, only
+                           those associated with an Instance, or only those not
                            associated with an Instance?
         :type  associated: bool
 
-        :return: list of Nodes, or an empty list if there are none
-        :rtype:  list of tuskar_ui.api.Node
+        :return: list of BareMetalNodes, or an empty list if there are none
+        :rtype:  list of tuskar_ui.api.node.BareMetalNode
         """
         nodes = baremetalclient(request).list()
         if associated is not None:
@@ -299,13 +300,12 @@ class BareMetalNode(base.APIResourceWrapper):
 
     @classmethod
     def delete(cls, request, uuid):
-        """Remove the Node matching the ID from Nova BareMetal if it
-        exists; otherwise, does nothing.
+        """Remove the BareMetalNode if it exists; otherwise, do nothing.
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param uuid: ID of Node to be removed
+        :param uuid: ID of BareMetalNode to be removed
         :type  uuid: str
         """
         baremetalclient(request).delete(uuid)
@@ -335,10 +335,10 @@ class BareMetalNode(base.APIResourceWrapper):
 
     @cached_property
     def properties(self):
-        """Return properties of this Node
+        """Return properties of this BareMetalNode
 
         :return: return memory, cpus and local_disk properties
-                 of this Node, ram and local_disk properties
+                 of this BareMetalNode, ram and local_disk properties
                  are in bytes
         :rtype:  dict of str
         """
@@ -350,9 +350,9 @@ class BareMetalNode(base.APIResourceWrapper):
 
     @cached_property
     def driver_info(self):
-        """Return driver_info for this Node
+        """Return driver_info for this BareMetalNode
 
-        :return: return pm_address property of this Node
+        :return: return pm_address property of this BareMetalNode
         :rtype:  dict of str
         """
         try:
@@ -370,11 +370,11 @@ class BareMetalNode(base.APIResourceWrapper):
 
     @cached_property
     def addresses(self):
-        """Return a list of port addresses associated with this Node
+        """Return a list of port addresses associated with this BareMetalNode
 
-        :return: list of port addresses associated with this Node, or
+        :return: list of port addresses associated with this BareMetalNode, or
                  an empty list if no addresses are associated with
-                 this Node
+                 this BareMetalNode
         :rtype:  list of str
         """
         return [interface["address"] for interface in
@@ -396,7 +396,7 @@ class Node(base.APIResourceWrapper):
               'properties', 'power_state', 'addresses')
 
     def __init__(self, apiresource, request=None, **kwargs):
-        """Initialize a node
+        """Initialize a Node
 
         :param apiresource: apiresource we want to wrap
         :type  apiresource: novaclient.v1_1.contrib.baremetal.BareMetalNode
@@ -408,7 +408,7 @@ class Node(base.APIResourceWrapper):
         :type  instance: openstack_dashboard.api.nova.Server
 
         :return: Node object
-        :rtype:  Node
+        :rtype:  tusar_ui.api.node.Node
         """
         super(Node, self).__init__(apiresource)
         self._request = request
@@ -472,7 +472,7 @@ class Node(base.APIResourceWrapper):
         :return: Nova Instance associated with this Node; or
                  None if there is no Instance associated with this
                  Node, or no matching Instance is found
-        :rtype:  tuskar_ui.api.Instance
+        :rtype:  Instance
         """
         if hasattr(self, '_instance'):
             return self._instance
@@ -505,13 +505,13 @@ class Node(base.APIResourceWrapper):
 def filter_nodes(nodes, healthy=None):
     """Filters the list of Nodes and returns the filtered list.
 
-    :param nodes:   list of tuskar_ui.api.Node objects to filter
+    :param nodes:   list of tuskar_ui.api.node.Node objects to filter
     :type  nodes:   list
     :param healthy: retrieve all Nodes (healthy=None),
                     only the healthly ones (healthy=True),
                     or only those in an error state (healthy=False)
     :type  healthy: None or bool
-    :return:        list of filtered tuskar_ui.api.Node objects
+    :return:        list of filtered tuskar_ui.api.node.Node objects
     :rtype:         list
     """
     error_states = ('deploy failed', 'error',)

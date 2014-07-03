@@ -62,7 +62,7 @@ class OvercloudPlan(base.APIResourceWrapper):
 
     @classmethod
     def create(cls, request, overcloud_sizing, overcloud_configuration):
-        """Create an Overcloud in Tuskar
+        """Create an OvercloudPlan in Tuskar
 
         :param request: request object
         :type  request: django.http.HttpRequest
@@ -76,8 +76,8 @@ class OvercloudPlan(base.APIResourceWrapper):
                                         {'key': 'value', ...}
         :type  overcloud_configuration: dict
 
-        :return: the created Overcloud object
-        :rtype:  tuskar_ui.api.Overcloud
+        :return: the created OvercloudPlan object
+        :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
         # TODO(lsmola) for now we have to transform the sizing to simpler
         # format, till API will accept the more complex with flavors,
@@ -93,7 +93,7 @@ class OvercloudPlan(base.APIResourceWrapper):
     @classmethod
     def update(cls, request, overcloud_id, overcloud_sizing,
                overcloud_configuration):
-        """Update an Overcloud in Tuskar
+        """Update an OvercloudPlan in Tuskar
 
         :param request: request object
         :type  request: django.http.HttpRequest
@@ -110,8 +110,8 @@ class OvercloudPlan(base.APIResourceWrapper):
                                         {'key': 'value', ...}
         :type  overcloud_configuration: dict
 
-        :return: the updated Overcloud object
-        :rtype:  tuskar_ui.api.Overcloud
+        :return: the updated OvercloudPlan object
+        :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
         # TODO(lsmola) for now we have to transform the sizing to simpler
         # format, till API will accept the more complex with flavors,
@@ -126,13 +126,13 @@ class OvercloudPlan(base.APIResourceWrapper):
 
     @classmethod
     def list(cls, request):
-        """Return a list of Overclouds in Tuskar
+        """Return a list of OvercloudPlans in Tuskar
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :return: list of Overclouds, or an empty list if there are none
-        :rtype:  list of tuskar_ui.api.Overcloud
+        :return: list of OvercloudPlans, or an empty list if there are none
+        :rtype:  list of tuskar_ui.api.tuskar.OvercloudPlan
         """
         ocs = tuskarclient(request).overclouds.list()
 
@@ -141,17 +141,17 @@ class OvercloudPlan(base.APIResourceWrapper):
     @classmethod
     @handle_errors(_("Unable to retrieve deployment"))
     def get(cls, request, overcloud_id):
-        """Return the Tuskar Overcloud that matches the ID
+        """Return the OvercloudPlan that matches the ID
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param overcloud_id: ID of Overcloud to be retrieved
+        :param overcloud_id: id of OvercloudPlan to be retrieved
         :type  overcloud_id: int
 
-        :return: matching Overcloud, or None if no Overcloud matches
+        :return: matching OvercloudPlan, or None if no OvercloudPlan matches
                  the ID
-        :rtype:  tuskar_ui.api.Overcloud
+        :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
         # FIXME(lsmola) hack for Icehouse, only one Overcloud is allowed
         # TODO(lsmola) uncomment when possible
@@ -176,7 +176,7 @@ class OvercloudPlan(base.APIResourceWrapper):
 
     @classmethod
     def delete(cls, request, overcloud_id):
-        """Create an Overcloud in Tuskar
+        """Delete an OvercloudPlan
 
         :param request: request object
         :type  request: django.http.HttpRequest
@@ -227,7 +227,7 @@ class OvercloudRole(base.APIResourceWrapper):
 
         :return: list of Overcloud Roles, or an empty list if there
                  are none
-        :rtype:  list of tuskar_ui.api.OvercloudRole
+        :rtype:  list of tuskar_ui.api.tuskar.OvercloudRole
         """
         roles = tuskarclient(request).overcloud_roles.list()
         return [cls(role) for role in roles]
@@ -245,7 +245,7 @@ class OvercloudRole(base.APIResourceWrapper):
 
         :return: matching OvercloudRole, or None if no matching
                  OvercloudRole can be found
-        :rtype:  tuskar_ui.api.OvercloudRole
+        :rtype:  tuskar_ui.api.tuskar.OvercloudRole
         """
         role = tuskarclient(request).overcloud_roles.get(role_id)
         return cls(role)
@@ -263,7 +263,7 @@ class OvercloudRole(base.APIResourceWrapper):
 
         :return: matching OvercloudRole, or None if no matching
                  OvercloudRole can be found
-        :rtype:  tuskar_ui.api.OvercloudRole
+        :rtype:  tuskar_ui.api.tuskar.OvercloudRole
         """
         roles = cls.list(request)
         for role in roles:
