@@ -419,7 +419,11 @@ class Node(base.APIResourceWrapper):
     def get(cls, request, uuid):
         node = NodeClient(request).node_class.get(request, uuid)
         if node.instance_uuid is not None:
-            server = TEST_DATA.novaclient_servers.first()
+            for server in TEST_DATA.novaclient_servers.list():
+                if server.id == node.instance_uuid:
+                    break
+            else:
+                server = None
             return cls(node, instance=server, request=request)
 
         return cls(node)
@@ -429,7 +433,11 @@ class Node(base.APIResourceWrapper):
     def get_by_instance_uuid(cls, request, instance_uuid):
         node = NodeClient(request).node_class.get_by_instance_uuid(
             request, instance_uuid)
-        server = TEST_DATA.novaclient_servers.first()
+        for server in TEST_DATA.novaclient_servers.list():
+            if server.id == node.instance_uuid:
+                break
+        else:
+            server = None
         return cls(node, instance=server, request=request)
 
     @classmethod
@@ -467,10 +475,9 @@ class Node(base.APIResourceWrapper):
             return self._instance
 
         if self.instance_uuid:
-            server = TEST_DATA.novaclient_servers.first()
-            return server
-
-        return None
+            for server in TEST_DATA.novaclient_servers.list():
+                if server.id == self.instance_uuid:
+                    return server
 
     @cached_property
     def image_name(self):
@@ -483,7 +490,9 @@ class Node(base.APIResourceWrapper):
         """
         if self.instance is None:
             return
-        return image_get(self._request, self.instance.image['id']).name
+        for image in TEST_DATA.glanceclient_images.list():
+            if image.id == self.instance.image['id']:
+                return image.name
 
     @cached_property
     def instance_status(self):

@@ -78,7 +78,9 @@ class DetailView(horizon_views.APIView):
         node_uuid = kwargs.get('node_uuid')
         redirect = reverse_lazy('horizon:infrastructure:nodes:index')
         node = api.node.Node.get(request, node_uuid, _error_redirect=redirect)
+        role = api.heat.Resource.get_by_node(request, node).role
         context['node'] = node
+        context['role'] = role
         if api_base.is_service_enabled(request, 'metering'):
             context['meters'] = (
                 ('cpu', _('CPU')),
