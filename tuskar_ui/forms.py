@@ -26,11 +26,28 @@ def fieldset(self, *args, **kwargs):
             yield forms.forms.BoundField(self, self.fields[name], name)
 
 
+class MACDialect(netaddr.mac_eui48):
+    """For validating MAC addresses. Same validation as Nova uses."""
+    word_fmt = '%.02x'
+    word_sep = ':'
+
+
+def normalize_MAC(value):
+    try:
+        return str(netaddr.EUI(
+            value.strip(), version=48, dialect=MACDialect)).upper()
+    except (netaddr.AddrFormatError, TypeError):
+        raise ValueError('Invalid MAC address')
+
+
 class NumberInput(forms.widgets.TextInput):
+    """A form input for numbers."""
     input_type = 'number'
 
 
 class NumberPickerInput(NumberInput):
+    """A form input that is rendered as a big number picker."""
+
     def __init__(self, attrs=None):
         default_attrs = {'hr-number-picker': '', 'ng-cloak': '', }
         if attrs:
@@ -39,20 +56,39 @@ class NumberPickerInput(NumberInput):
 
 
 class MACField(forms.fields.Field):
+    """A form field for entering a single MAC address."""
+
     def clean(self, value):
-        class mac_dialect(netaddr.mac_eui48):
-            """Same validation as Nova uses."""
-            word_fmt = '%.02x'
-            word_sep = ':'
+        value = super(MACField, self).clean(value)
         try:
-            return str(netaddr.EUI(
-                value.strip(), version=48, dialect=mac_dialect)).upper()
-        except (netaddr.AddrFormatError, TypeError):
+            return normalize_MAC(value)
+        except ValueError:
             raise forms.ValidationError(_(u'Enter a valid MAC address.'))
 
 
-class NetworkField(forms.fields.Field):
+class MultiMACField(forms.fields.Field):
+    """A form field for entering multiple MAC addresses.
+
+       The individual MAC addresses can be separated by any whitespace,
+       commas, semicolons or pipe characters.
+
+       Gives a string of normalized MAC addresses separated by spaces.
+    """
+
     def clean(self, value):
+        value = super(MultiMACField, self).clean(value)
+        try:
+            return ' '.join(normalize_MAC(mac)
+                            for mac in value.split(' \t\r\n\v,;|') if mac)
+        except ValueError:
+            raise forms.ValidationError(_(u'Enter valid MAC addresses.'))
+
+
+class NetworkField(forms.fields.Field):
+    """A form field for entering a network specification with a mask."""
+
+    def clean(self, value):
+        value = super(NetworkField, self).clean(value)
         try:
             return str(netaddr.IPNetwork(value, version=4))
         except netaddr.AddrFormatError:
