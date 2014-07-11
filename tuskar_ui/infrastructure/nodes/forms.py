@@ -42,10 +42,11 @@ class NodeForm(django.forms.Form):
         widget=django.forms.PasswordInput(
             render_value=False, attrs={'class': 'input input-medium'}),
     )
-    mac_address = tuskar_ui.forms.MACField(
-        label=_("NIC MAC Address"),
-        widget=django.forms.TextInput(attrs={
-            'class': 'input input-medium'
+    mac_addresses = tuskar_ui.forms.MultiMACField(
+        label=_("NIC MAC Addresses"),
+        widget=django.forms.Textarea(attrs={
+            'class': 'input input-medium',
+            'rows': '2',
         }),
     )
     cpus = django.forms.IntegerField(
@@ -94,7 +95,7 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
                     form.cleaned_data.get('cpus'),
                     form.cleaned_data.get('memory'),
                     form.cleaned_data.get('local_disk'),
-                    form.cleaned_data['mac_address'],
+                    form.cleaned_data['mac_addresses'].split(),
                     form.cleaned_data.get('ipmi_username'),
                     form.cleaned_data.get('ipmi_password'),
                 )
