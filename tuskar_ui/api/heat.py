@@ -127,7 +127,7 @@ class Stack(base.APIResourceWrapper):
                      r.stack_id == self.id]
 
         if not with_joins:
-            return [Resource(r, request=self._request)
+            return [Resource(r, request=self._request, stack=self)
                     for r in resources]
 
         nodes_dict = utils.list_to_dict(node.Node.list(self._request,
@@ -137,7 +137,7 @@ class Stack(base.APIResourceWrapper):
         for r in resources:
             joined_resources.append(
                 Resource(r, node=nodes_dict.get(r.physical_resource_id, None),
-                         request=self._request))
+                         request=self._request, stack=self))
         # TODO(lsmola) I want just resources with nova instance
         # this could be probably filtered a better way, investigate
         return [r for r in joined_resources if r.node is not None]
@@ -329,6 +329,8 @@ class Resource(base.APIResourceWrapper):
         self._request = request
         if 'node' in kwargs:
             self._node = kwargs['node']
+        if 'stack' in kwargs:
+            self._stack = kwargs['stack']
 
     @classmethod
     def get(cls, request, stack, resource_name):
@@ -349,7 +351,7 @@ class Resource(base.APIResourceWrapper):
         """
         for r in TEST_DATA.heatclient_resources.list():
             if r.stack_id == stack.id and r.resource_name == resource_name:
-                return cls(stack, request=request)
+                return cls(r, request=request, stack=stack)
 
     @classmethod
     def get_by_node(cls, request, node):
@@ -416,3 +418,14 @@ class Resource(base.APIResourceWrapper):
             return node.Node.get_by_instance_uuid(self._request,
                                                   self.physical_resource_id)
         return None
+
+    @cached_property
+    def stack(self):
+        """Return the Stack associated with this Resource
+
+        :return: Stack associated with this Resource, or None if no
+                 Stack is associated
+        :rtype:  tuskar_ui.api.heat.Stack
+        """
+        if hasattr(self, '_stack'):
+            return self._stack

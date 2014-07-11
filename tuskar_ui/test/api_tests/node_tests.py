@@ -113,7 +113,7 @@ class NodeAPITests(test.APITestCase):
             with patch('openstack_dashboard.api.glance.image_get',
                        return_value=image):
                 ret_val = api.node.Node(node).image_name
-        self.assertEqual(ret_val, 'overcloud-control')
+        self.assertEqual(ret_val, 'overcloud-compute')
 
     def test_node_addresses_no_ironic(self):
         node = self.baremetalclient_nodes.first()

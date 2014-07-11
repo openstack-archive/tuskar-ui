@@ -18,6 +18,7 @@ from django import http
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base
 
+from horizon import exceptions
 from horizon import forms as horizon_forms
 from horizon import tabs as horizon_tabs
 from horizon import views as horizon_views
@@ -79,6 +80,12 @@ class DetailView(horizon_views.APIView):
         redirect = reverse_lazy('horizon:infrastructure:nodes:index')
         node = api.node.Node.get(request, node_uuid, _error_redirect=redirect)
         context['node'] = node
+        try:
+            resource = api.heat.Resource.get_by_node(request, node)
+            context['role'] = resource.role
+            context['stack'] = resource.stack
+        except exceptions.NotFound:
+            pass
         if api_base.is_service_enabled(request, 'metering'):
             context['meters'] = (
                 ('cpu', _('CPU')),

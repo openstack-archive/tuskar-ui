@@ -157,7 +157,8 @@ def data(TEST):
         servers.ServerManager(None),
         {'id': 'aa',
          'name': 'Compute',
-         'image': {'id': 1},
+         'created': '2014-06-26T20:38:06Z',
+         'image': {'id': '1'},
          'flavor': {
              'id': '1',
          },
@@ -166,7 +167,8 @@ def data(TEST):
         servers.ServerManager(None),
         {'id': 'bb',
          'name': 'Controller',
-         'image': {'id': 2},
+         'created': '2014-06-27T20:38:06Z',
+         'image': {'id': '2'},
          'flavor': {
              'id': '2',
          },
@@ -175,7 +177,8 @@ def data(TEST):
         servers.ServerManager(None),
         {'id': 'cc',
          'name': 'Compute',
-         'image': {'id': 1},
+         'created': '2014-06-28T20:38:06Z',
+         'image': {'id': '1'},
          'flavor': {
              'id': '1',
          },
@@ -184,7 +187,8 @@ def data(TEST):
         servers.ServerManager(None),
         {'id': 'dd',
          'name': 'Compute',
-         'image': {'id': 1},
+         'created': '2014-06-29T20:38:06Z',
+         'image': {'id': '1'},
          'flavor': {
              'id': '1',
          },
