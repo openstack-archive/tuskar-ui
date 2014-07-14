@@ -171,6 +171,8 @@ class OvercloudRoleView(horizon_tables.DataTableView,
             try:
                 resource = api.heat.Resource.get_by_node(self.request, node)
                 node.role_name = resource.role.name
+                node.role_id = resource.role.id
+                node.stack_id = resource.stack.id
             except horizon_exceptions.NotFound:
                 node.role_name = '-'
 

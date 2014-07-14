@@ -35,26 +35,6 @@ class IndexView(horizon_tabs.TabbedTableView):
     tab_group_class = tabs.NodeTabs
     template_name = 'infrastructure/nodes/index.html'
 
-    def get_free_nodes_count(self):
-        free_nodes_count = len(api.node.Node.list(
-            self.request, associated=False))
-        return free_nodes_count
-
-    def get_deployed_nodes_count(self):
-        deployed_nodes_count = len(api.node.Node.list(self.request,
-                                                      associated=True))
-        return deployed_nodes_count
-
-    def get_context_data(self, **kwargs):
-        context = super(IndexView, self).get_context_data(**kwargs)
-
-        context['free_nodes_count'] = self.get_free_nodes_count()
-        context['deployed_nodes_count'] = self.get_deployed_nodes_count()
-        context['nodes_count'] = (context['free_nodes_count'] +
-                                  context['deployed_nodes_count'])
-
-        return context
-
 
 class RegisterView(horizon_forms.ModalFormView):
     form_class = forms.NodeFormset
