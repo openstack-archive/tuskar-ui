@@ -32,18 +32,27 @@ class OverviewTab(tabs.Tab):
         free_nodes = api.node.Node.list(request, associated=False)
         deployed_nodes_error = api.node.filter_nodes(
             deployed_nodes, healthy=False)
+        deployed_nodes_down = api.node.filter_nodes(
+            deployed_nodes, power_state=False)
         free_nodes_error = api.node.filter_nodes(free_nodes, healthy=False)
+        free_nodes_down = api.node.filter_nodes(free_nodes, power_state=False)
         total_nodes = deployed_nodes + free_nodes
         total_nodes_error = deployed_nodes_error + free_nodes_error
+        total_nodes_down = deployed_nodes_down + free_nodes_down
         total_nodes_healthy = api.node.filter_nodes(total_nodes, healthy=True)
+        total_nodes_up = api.node.filter_nodes(total_nodes, power_state=True)
 
         return {
             'total_nodes_healthy': total_nodes_healthy,
+            'total_nodes_up': total_nodes_up,
             'total_nodes_error': total_nodes_error,
+            'total_nodes_down': total_nodes_down,
             'deployed_nodes': deployed_nodes,
             'deployed_nodes_error': deployed_nodes_error,
+            'deployed_nodes_down': deployed_nodes_down,
             'free_nodes': free_nodes,
             'free_nodes_error': free_nodes_error,
+            'free_nodes_down': free_nodes_down,
         }
 
 
