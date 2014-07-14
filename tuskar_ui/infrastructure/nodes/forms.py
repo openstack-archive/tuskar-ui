@@ -49,6 +49,14 @@ class NodeForm(django.forms.Form):
             'rows': '2',
         }),
     )
+    architecture = django.forms.ChoiceField(
+        label=_("Architecture"),
+        required=True,
+        choices=[
+            ('i386', _("i386")),
+            ('amd64', _("AMD64")),
+        ],
+    )
     cpus = django.forms.IntegerField(
         label=_("CPUs"),
         required=True,
@@ -96,6 +104,7 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
                     form.cleaned_data.get('memory'),
                     form.cleaned_data.get('local_disk'),
                     form.cleaned_data['mac_addresses'].split(),
+                    form.cleaned_data.get('architecture'),
                     form.cleaned_data.get('ipmi_username'),
                     form.cleaned_data.get('ipmi_password'),
                 )

@@ -63,7 +63,8 @@ class IronicNode(base.APIResourceWrapper):
 
     @classmethod
     def create(cls, request, ipmi_address, cpu, ram, local_disk,
-               mac_addresses, ipmi_username=None, ipmi_password=None):
+               mac_addresses, architecture,
+               ipmi_username=None, ipmi_password=None):
         """Create a Node in Ironic
 
         :param request: request object
@@ -83,6 +84,9 @@ class IronicNode(base.APIResourceWrapper):
 
         :param mac_addresses: list of mac addresses
         :type  mac_addresses: list of str
+
+        :param architecture: name of the architecture
+        :type  architecture: str
 
         :param ipmi_username: IPMI username
         :type  ipmi_username: str
@@ -193,7 +197,8 @@ class BareMetalNode(base.APIResourceWrapper):
 
     @classmethod
     def create(cls, request, ipmi_address, cpu, ram, local_disk,
-               mac_addresses, ipmi_username=None, ipmi_password=None):
+               mac_addresses, architecture,
+               ipmi_username=None, ipmi_password=None):
         """Create a Nova BareMetalNode
 
         :param request: request object
@@ -213,6 +218,9 @@ class BareMetalNode(base.APIResourceWrapper):
 
         :param mac_addresses: list of mac addresses
         :type  mac_addresses: list of str
+
+        :param architecture: name of the architecture
+        :type  architecture: str
 
         :param ipmi_username: IPMI username
         :type  ipmi_username: str
