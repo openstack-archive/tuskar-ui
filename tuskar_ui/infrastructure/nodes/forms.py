@@ -20,27 +20,55 @@ from tuskar_ui import api
 import tuskar_ui.forms
 
 
+DRIVER_CHOICES = [
+    ('ipmi', _("IPMI Driver")),
+    ('dummy', _("Dummy Driver")),
+]
+
+
 class NodeForm(django.forms.Form):
     id = django.forms.IntegerField(
         label="",
         required=False,
         widget=django.forms.HiddenInput(),
     )
+
+    driver = django.forms.ChoiceField(
+        label=_("Driver"),
+        choices=DRIVER_CHOICES,
+        required=True,
+        widget=django.forms.Select(attrs={
+            'class': 'input input-medium switchable',
+            'data-slug': 'driver',
+        }),
+    )
+
     ipmi_address = django.forms.IPAddressField(
         label=_("IPMI Address"),
         required=False,
-        widget=django.forms.TextInput(attrs={'class': 'input input-medium'}),
+        widget=django.forms.TextInput(attrs={
+            'class': 'switched',
+            'data-switch-on': 'driver',
+            'data-driver-ipmi': 'ipmi',
+        }),
     )
     ipmi_username = django.forms.CharField(
         label=_("IPMI User"),
         required=False,
-        widget=django.forms.TextInput(attrs={'class': 'input input-medium'}),
+        widget=django.forms.TextInput(attrs={
+            'class': 'input input-medium switched',
+            'data-switch-on': 'driver',
+            'data-driver-ipmi': 'ipmi',
+        }),
     )
     ipmi_password = django.forms.CharField(
         label=_("IPMI Password"),
         required=False,
-        widget=django.forms.PasswordInput(
-            render_value=False, attrs={'class': 'input input-medium'}),
+        widget=django.forms.PasswordInput(render_value=False, attrs={
+            'class': 'input input-medium switched',
+            'data-switch-on': 'driver',
+            'data-driver-ipmi': 'ipmi',
+        }),
     )
     mac_addresses = tuskar_ui.forms.MultiMACField(
         label=_("NIC MAC Addresses"),
@@ -88,16 +116,20 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
     def handle(self, request, data):
         success = True
         for form in self:
+            data = form.cleaned_data
             try:
                 api.node.Node.create(
                     request,
-                    form.cleaned_data['ipmi_address'],
-                    form.cleaned_data.get('cpus'),
-                    form.cleaned_data.get('memory'),
-                    form.cleaned_data.get('local_disk'),
-                    form.cleaned_data['mac_addresses'].split(),
-                    form.cleaned_data.get('ipmi_username'),
-                    form.cleaned_data.get('ipmi_password'),
+                    # TODO(rdopieralski) If ipmi_address is no longer required,
+                    # then we will need to use something else here?
+                    ipmi_address=data['ipmi_address'],
+                    cpus=data.get('cpus'),
+                    memory=data.get('memory'),
+                    local_disk=data.get('local_disk'),
+                    mac_addresses=data['mac_addresses'].split(),
+                    ipmi_username=data.get('ipmi_username'),
+                    ipmi_password=data.get('ipmi_password'),
+                    driver=form.cleaned_data.get('driver'),
                 )
             except Exception:
                 success = False
@@ -119,6 +151,7 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
                 form.cleaned_data['ipmi_username'] = None
             if not form.cleaned_data.get('ipmi_password'):
                 form.cleaned_data['ipmi_password'] = None
+
 
 NodeFormset = django.forms.formsets.formset_factory(NodeForm, extra=1,
                                                     formset=BaseNodeFormset)
