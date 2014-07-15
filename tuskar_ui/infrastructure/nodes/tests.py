@@ -167,13 +167,13 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-0-ipmi_address': '127.0.0.1',
             'register_nodes-0-ipmi_username': 'username',
             'register_nodes-0-ipmi_password': 'password',
-            'register_nodes-0-mac_address': 'de:ad:be:ef:ca:fe',
+            'register_nodes-0-mac_addresses': 'de:ad:be:ef:ca:fe',
             'register_nodes-0-cpus': '1',
             'register_nodes-0-memory': '2',
             'register_nodes-0-local_disk': '3',
 
             'register_nodes-1-ipmi_address': '127.0.0.2',
-            'register_nodes-1-mac_address': 'de:ad:be:ef:ca:ff',
+            'register_nodes-1-mac_addresses': 'de:ad:be:ef:ca:ff',
             'register_nodes-1-cpus': '4',
             'register_nodes-1-memory': '5',
             'register_nodes-1-local_disk': '6',
@@ -186,9 +186,9 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             request = Node.create.call_args_list[0][0][0]  # This is a hack.
             self.assertListEqual(Node.create.call_args_list, [
                 call(request, u'127.0.0.1', 1, 2, 3,
-                     'DE:AD:BE:EF:CA:FE', u'username', u'password'),
+                     ['DE:AD:BE:EF:CA:FE'], u'username', u'password'),
                 call(request, u'127.0.0.2', 4, 5, 6,
-                     'DE:AD:BE:EF:CA:FF', None, None),
+                     ['DE:AD:BE:EF:CA:FF'], None, None),
             ])
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
@@ -201,13 +201,13 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-0-ipmi_address': '127.0.0.1',
             'register_nodes-0-ipmi_username': 'username',
             'register_nodes-0-ipmi_password': 'password',
-            'register_nodes-0-mac_address': 'de:ad:be:ef:ca:fe',
+            'register_nodes-0-mac_addresses': 'de:ad:be:ef:ca:fe',
             'register_nodes-0-cpus': '1',
             'register_nodes-0-memory': '2',
             'register_nodes-0-local_disk': '3',
 
             'register_nodes-1-ipmi_address': '127.0.0.2',
-            'register_nodes-1-mac_address': 'de:ad:be:ef:ca:ff',
+            'register_nodes-1-mac_addresses': 'de:ad:be:ef:ca:ff',
             'register_nodes-1-cpus': '4',
             'register_nodes-1-memory': '5',
             'register_nodes-1-local_disk': '6',
@@ -220,9 +220,9 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             request = Node.create.call_args_list[0][0][0]  # This is a hack.
             self.assertListEqual(Node.create.call_args_list, [
                 call(request, u'127.0.0.1', 1, 2, 3,
-                     'DE:AD:BE:EF:CA:FE', u'username', u'password'),
+                     ['DE:AD:BE:EF:CA:FE'], u'username', u'password'),
                 call(request, u'127.0.0.2', 4, 5, 6,
-                     'DE:AD:BE:EF:CA:FF', None, None),
+                     ['DE:AD:BE:EF:CA:FF'], None, None),
             ])
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/register.html')
