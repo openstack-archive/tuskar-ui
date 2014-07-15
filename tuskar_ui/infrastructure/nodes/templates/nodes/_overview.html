@@ -71,13 +71,13 @@
   </div>
   <div class="span4">
     <div class="widget">
-      <h2>{% trans 'Provisioning Status' %}</h2>
+      <h2>{% trans 'Free Nodes' %}</h2>
       <div class="d3_pie_chart_distribution" data-used="Deployed={{ deployed_nodes|length }}|Free={{ free_nodes|length }}"></div>
     </div>
     <div class="clear"></div>
     <div class="widget">
-      <h2>{% trans 'Health Status' %}</h2>
-      <div class="d3_pie_chart_distribution" data-used="Healthy={{ total_nodes_healthy|length }}|Defective={{ total_nodes_error|length }}"></div>
+      <h2>{% trans 'Power Status' %}</h2>
+      <div class="d3_pie_chart_distribution" data-used="Running={{ total_nodes_up|length }}|Stopped={{ total_nodes_down|length }}"></div>
     </div>
   </div>
 </div>
