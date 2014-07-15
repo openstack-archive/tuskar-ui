@@ -62,7 +62,7 @@ class IronicNode(base.APIResourceWrapper):
               'properties', 'power_state')
 
     @classmethod
-    def create(cls, request, ipmi_address, cpu, ram, local_disk,
+    def create(cls, request, ipmi_address, architecture, cpu, ram, local_disk,
                mac_addresses, ipmi_username=None, ipmi_password=None):
         """Create a Node in Ironic
 
@@ -192,7 +192,7 @@ class BareMetalNode(base.APIResourceWrapper):
               'task_state', 'pm_user', 'pm_address', 'interfaces')
 
     @classmethod
-    def create(cls, request, ipmi_address, cpu, ram, local_disk,
+    def create(cls, request, ipmi_address, architecture, cpu, ram, local_disk,
                mac_addresses, ipmi_username=None, ipmi_password=None):
         """Create a Nova BareMetalNode
 
@@ -407,10 +407,10 @@ class Node(base.APIResourceWrapper):
             self._instance = kwargs['instance']
 
     @classmethod
-    def create(cls, request, ipmi_address, cpu, ram, local_disk,
+    def create(cls, request, ipmi_address, architecture, cpu, ram, local_disk,
                mac_addresses, ipmi_username=None, ipmi_password=None):
         return cls(NodeClient(request).node_class.create(
-            request, ipmi_address, cpu, ram, local_disk,
+            request, ipmi_address, architecture, cpu, ram, local_disk,
             mac_addresses, ipmi_username=ipmi_username,
             ipmi_password=ipmi_password))
 
