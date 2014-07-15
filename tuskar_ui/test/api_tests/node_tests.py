@@ -32,6 +32,7 @@ class NodeAPITests(test.APITestCase):
             ret_val = api.node.Node.create(
                 self.request,
                 node.driver_info['ipmi_address'],
+                'i386',
                 node.cpus,
                 node.memory_mb,
                 node.local_gb,

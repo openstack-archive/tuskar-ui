@@ -20,6 +20,12 @@ from tuskar_ui import api
 import tuskar_ui.forms
 
 
+ARCHITECTURE_CHOICES = [
+    ('x86', _("x86")),
+    ('x86_64', _("x86_64")),
+]
+
+
 class NodeForm(django.forms.Form):
     id = django.forms.IntegerField(
         label="",
@@ -48,6 +54,14 @@ class NodeForm(django.forms.Form):
             'class': 'input input-medium',
             'rows': '2',
         }),
+    )
+
+    architecture = django.forms.ChoiceField(
+        label=_("Architecture"),
+        required=True,
+        choices=ARCHITECTURE_CHOICES,
+        widget=django.forms.Select(
+            attrs={'class': 'input input-medium'}),
     )
     cpus = django.forms.IntegerField(
         label=_("CPUs"),
@@ -92,6 +106,7 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
                 api.node.Node.create(
                     request,
                     form.cleaned_data['ipmi_address'],
+                    form.cleaned_data.get('architecture'),
                     form.cleaned_data.get('cpus'),
                     form.cleaned_data.get('memory'),
                     form.cleaned_data.get('local_disk'),
