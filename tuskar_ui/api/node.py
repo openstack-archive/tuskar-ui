@@ -63,14 +63,9 @@ class IronicNode(base.APIResourceWrapper):
 
     @classmethod
     def create(cls, request, ipmi_address, architecture, cpu, ram, local_disk,
-               mac_addresses, ipmi_username=None, ipmi_password=None):
+               mac_addresses, ipmi_username=None, ipmi_password=None,
+               driver=None):
         """Create a Node in Ironic
-
-        :param request: request object
-        :type  request: django.http.HttpRequest
-
-        :param ipmi_address: IPMI address
-        :type  ipmi_address: str
 
         :param cpu: number of cores
         :type  cpu: int
@@ -83,12 +78,6 @@ class IronicNode(base.APIResourceWrapper):
 
         :param mac_addresses: list of mac addresses
         :type  mac_addresses: list of str
-
-        :param ipmi_username: IPMI username
-        :type  ipmi_username: str
-
-        :param ipmi_password: IPMI password
-        :type  ipmi_password: str
 
         :return: the created Node object
         :rtype:  tuskar_ui.api.node.IronicNode
@@ -193,14 +182,9 @@ class BareMetalNode(base.APIResourceWrapper):
 
     @classmethod
     def create(cls, request, ipmi_address, architecture, cpu, ram, local_disk,
-               mac_addresses, ipmi_username=None, ipmi_password=None):
+               mac_addresses, ipmi_username=None, ipmi_password=None,
+               driver=None):
         """Create a Nova BareMetalNode
-
-        :param request: request object
-        :type  request: django.http.HttpRequest
-
-        :param ipmi_address: IPMI address
-        :type  ipmi_address: str
 
         :param cpu: number of cores
         :type  cpu: int
@@ -213,12 +197,6 @@ class BareMetalNode(base.APIResourceWrapper):
 
         :param mac_addresses: list of mac addresses
         :type  mac_addresses: list of str
-
-        :param ipmi_username: IPMI username
-        :type  ipmi_username: str
-
-        :param ipmi_password: IPMI password
-        :type  ipmi_password: str
 
         :return: the created BareMetalNode object
         :rtype:  tuskar_ui.api.node.BareMetalNode
@@ -414,7 +392,8 @@ class Node(base.APIResourceWrapper):
 
     @classmethod
     def create(cls, request, ipmi_address, architecture, cpu, ram, local_disk,
-               mac_addresses, ipmi_username=None, ipmi_password=None):
+               mac_addresses, ipmi_username=None, ipmi_password=None,
+               driver=None):
         return cls(NodeClient(request).node_class.create(
             request, ipmi_address, architecture, cpu, ram, local_disk,
             mac_addresses, ipmi_username=ipmi_username,
