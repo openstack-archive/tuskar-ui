@@ -5,16 +5,16 @@ coverage>=3.6
 django-nose
 mock>=1.0
 mox>=0.5.3
-nodeenv
+nodeenv>=0.9.4 # BSD License
 nose
 nose-exclude
 nosexcover
 openstack.nose_plugin>=0.7
 nosehtmloutput>=0.0.3
 selenium
-xvfbwrapper
+xvfbwrapper>=0.1.3 #license: MIT
 # Docs Requirements
-sphinx>=1.1.2,<1.2
+sphinx>=1.1.2,!=1.2.0,<1.3
 # for bug 1091333, remove after sphinx >1.1.3 is released.
 docutils==0.9.1
 oslosphinx
