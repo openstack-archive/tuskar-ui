@@ -24,7 +24,7 @@ def data(TEST):
     bm_node_1 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'id': '1',
-         'uuid': 'aa-11',
+         'uuid': 'd0ace338-a702-426a-b344-394ce861e070',
          'instance_uuid': 'aa',
          "service_host": "undercloud",
          "cpus": 1,
@@ -39,7 +39,7 @@ def data(TEST):
     bm_node_2 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'id': '2',
-         'uuid': 'bb-22',
+         'uuid': 'bd70e5e7-52e6-40d6-b862-c7f7ea1f262e',
          'instance_uuid': 'bb',
          "service_host": "undercloud",
          "cpus": 1,
@@ -53,7 +53,7 @@ def data(TEST):
     bm_node_3 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'id': '3',
-         'uuid': 'cc-33',
+         'uuid': '74981-2cfa-4e15-be96-3f0ec5635115',
          'instance_uuid': 'cc',
          "service_host": "undercloud",
          "cpus": 1,
@@ -67,7 +67,7 @@ def data(TEST):
     bm_node_4 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'id': '4',
-         'uuid': 'cc-44',
+         'uuid': 'f5c1df48-dcbe-4eb5-bd44-9eef2cb9139a',
          'instance_uuid': 'cc',
          "service_host": "undercloud",
          "cpus": 1,
@@ -81,7 +81,7 @@ def data(TEST):
     bm_node_5 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'id': '5',
-         'uuid': 'dd-55',
+         'uuid': 'c8998d40-2ff6-4233-8535-b44a825b20c3',
          'instance_uuid': 'dd',
          "service_host": "undercloud",
          "cpus": 1,
@@ -95,7 +95,7 @@ def data(TEST):
     bm_node_6 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),
         {'id': '6',
-         'uuid': 'ff-66',
+         'uuid': 'cfd5a2cf-f21c-4044-a604-acb855478e44',
          'instance_uuid': None,
          "service_host": "undercloud",
          "cpus": 1,
