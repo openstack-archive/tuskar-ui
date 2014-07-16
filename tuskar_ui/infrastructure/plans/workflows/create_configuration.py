@@ -51,8 +51,8 @@ def make_field(name, Type, NoEcho, Default, Description, AllowedValues=None,
 
 class Action(horizon.workflows.Action):
     class Meta:
-        slug = 'deployed_configuration'
-        name = _("Configuration")
+        slug = 'create_configuration'
+        name = _("Deployment Configuration")
 
     def __init__(self, request, *args, **kwargs):
         super(Action, self).__init__(request, *args, **kwargs)

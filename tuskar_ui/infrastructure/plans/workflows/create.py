@@ -20,7 +20,7 @@ import horizon.workflows
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.plans.workflows import create_configuration
-from tuskar_ui.infrastructure.plans.workflows import create_overview
+from tuskar_ui.infrastructure.plans.workflows import create_settings
 
 
 LOG = logging.getLogger(__name__)
@@ -55,12 +55,13 @@ class Workflow(DeploymentValidationMixin, horizon.workflows.Workflow):
     slug = 'create_plan'
     name = _("My OpenStack Deployment Plan")
     default_steps = (
-        create_overview.Step,
+        create_settings.Step,
         create_configuration.Step,
     )
     finalize_button_name = _("Deploy")
     success_message = _("OpenStack deployment launched")
     success_url = 'horizon:infrastructure:overcloud:index'
+    wizard = True
 
     def handle(self, request, context):
         try:

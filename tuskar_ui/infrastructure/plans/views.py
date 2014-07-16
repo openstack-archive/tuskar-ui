@@ -12,12 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 from django.core.urlresolvers import reverse
-from django.views.generic import base as base_views
 
 from horizon.utils import memoized
 import horizon.workflows
+import horizon.tabs
 
 from tuskar_ui import api
+from tuskar_ui.infrastructure.plans import tabs
 from tuskar_ui.infrastructure.plans.workflows import create
 from tuskar_ui.infrastructure.plans.workflows import scale
 
@@ -47,18 +48,13 @@ class OvercloudRoleMixin(object):
         return role
 
 
-class IndexView(base_views.RedirectView):
-    permanent = False
+class IndexView(horizon.tabs.TabView, OvercloudPlanMixin):
+    tab_group_class = tabs.PlansTabs
+    template_name = 'infrastructure/plans/index.html'
 
-    def get_redirect_url(self):
-        plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
-
-        if plan is None:
-            redirect = reverse(CREATE_URL)
-        else:
-            redirect = reverse(OVERCLOUD_INDEX_URL)
-
-        return redirect
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        return context
 
 
 class CreateView(horizon.workflows.WorkflowView):
