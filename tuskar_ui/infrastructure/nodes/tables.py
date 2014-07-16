@@ -82,7 +82,53 @@ class RegisteredNodesTable(tables.DataTable):
 
     class Meta:
         name = "nodes_table"
-        verbose_name = _("Nodes")
+        verbose_name = _("Registered Nodes")
+        table_actions = (NodeFilterAction,)
+        row_actions = (DeleteNode,)
+
+    def get_object_id(self, datum):
+        return datum.uuid
+
+    def get_object_display(self, datum):
+        return datum.uuid
+
+
+class IronicRegisteredNodesTable(RegisteredNodesTable):
+
+    maintenance = tables.Column("maintenance",
+                                verbose_name=_("Maintenance"),
+                                status=True,
+                                status_choices=(
+                                    (True, True),
+                                    (False, False),
+                                    (None, False)
+                                ))
+
+    class Meta:
+        name = "nodes_table"
+        verbose_name = _("Registered Nodes")
+        table_actions = (NodeFilterAction,)
+        row_actions = (DeleteNode,)
+
+
+class IronicDiscoveredNodesTable(tables.DataTable):
+    node = tables.Column('uuid',
+                         link="horizon:infrastructure:nodes:detail",
+                         verbose_name=_("Node Name"))
+    cpu = tables.Column(lambda n: n.properties['cpu'],
+                        verbose_name=_("CPU (cores)"))
+    ram = tables.Column(lambda n: n.properties['ram'],
+                        verbose_name=_("Memory (MB)"))
+    local_disk = tables.Column(lambda n: n.properties['local_disk'],
+                               verbose_name=_("Disk (GB)"))
+    driver = tables.Column('driver',
+                           verbose_name=_("Driver"))
+    nics = tables.Column(lambda n: len(n.addresses),
+                         verbose_name=_("NICs"))
+
+    class Meta:
+        name = "discovered_nodes_table"
+        verbose_name = _("Discovered Nodes")
         table_actions = (NodeFilterAction,)
         row_actions = (DeleteNode,)
 
