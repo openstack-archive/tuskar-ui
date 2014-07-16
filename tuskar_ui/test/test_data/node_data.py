@@ -31,10 +31,10 @@ def data(TEST):
          "memory_mb": 4096,
          "local_gb": 20,
          'task_state': 'active',
-         "pm_address": None,
-         "pm_user": None,
+         "pm_address": '1.1.1.1',
+         "pm_user": 'test1',
          "interfaces": [{"address": "52:54:00:90:38:01"},
-                        {"address": "52:54:00:90:38:01"}],
+                        {"address": "52:54:00:90:38:02"}],
          })
     bm_node_2 = baremetal.BareMetalNode(
         baremetal.BareMetalNodeManager(None),

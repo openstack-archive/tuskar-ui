@@ -22,9 +22,18 @@
       <dt>{% trans "Node UUID" %}</dt>
       <dd>{{ node.uuid|default:"&mdash;" }}</dd>
       <dt>{% trans "Driver" %}</dt>
-      <dd>{{ node.driver|default:"&mdash;" }}</dd>
+      <dd>
+	{{ node.driver|default:"&mdash;" }}<br />
+	<b>IP Address:</b> {{ node.driver_info.ipmi_address|default:"&mdash;" }}<br />
+	<b>IPMI User:</b> {{ node.driver_info.ipmi_username|default:"&mdash;" }}
+      </dd>
       <dt>{% trans "Network Cards" %}</dt>
-      <dd>{{ node.addresses|length }}</dd>
+      <dd>
+	{{ node.addresses|length }}<br />
+	{% for address in node.addresses %}
+	  {{ address }}<br />
+	{% endfor %}
+      </dd>
       <dt>{% trans "Registered HW" %}</dt>
       <dd>
         {{ node.properties.cpu|default:"&mdash;" }} {% trans "CPU" %}<br />
