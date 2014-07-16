@@ -129,6 +129,8 @@ def data(TEST):
              'local_disk': '10',
          },
          'power_state': 'on',
+         'maintenance': None,
+         'newly_discovered': None,
          })
     node_2 = node.Node(
         node.NodeManager(None),
@@ -148,6 +150,8 @@ def data(TEST):
              'local_disk': '100',
          },
          'power_state': 'on',
+         'maintenance': None,
+         'newly_discovered': None,
          })
     node_3 = node.Node(
         node.NodeManager(None),
@@ -167,6 +171,8 @@ def data(TEST):
              'local_disk': '1',
          },
          'power_state': 'rebooting',
+         'maintenance': None,
+         'newly_discovered': None,
          })
     node_4 = node.Node(
         node.NodeManager(None),
@@ -186,6 +192,8 @@ def data(TEST):
              'local_disk': '10',
          },
          'power_state': 'on',
+         'maintenance': None,
+         'newly_discovered': None,
          })
     node_5 = node.Node(
         node.NodeManager(None),
@@ -205,6 +213,8 @@ def data(TEST):
              'local_disk': '10',
          },
          'power_state': 'error',
+         'maintenance': None,
+         'newly_discovered': None,
          })
     node_6 = node.Node(
         node.NodeManager(None),
@@ -224,8 +234,74 @@ def data(TEST):
              'local_disk': '10',
          },
          'power_state': 'on',
+         'maintenance': None,
+         'newly_discovered': None,
          })
-    TEST.ironicclient_nodes.add(node_1, node_2, node_3, node_4, node_5, node_6)
+    node_7 = node.Node(
+        node.NodeManager(None),
+        {'id': '7',
+         'uuid': 'gg-77',
+         'instance_uuid': None,
+         'driver': 'pxe_ipmitool',
+         'driver_info': {
+             'ipmi_address': '7.7.7.7',
+             'ipmi_username': 'admin',
+             'ipmi_password': 'password',
+             'ip_address': '1.2.2.7'
+         },
+         'properties': {
+             'cpu': '8',
+             'ram': '16',
+             'local_disk': '10',
+         },
+         'power_state': 'on',
+         'maintenance': True,
+         'newly_discovered': None,
+         })
+    node_8 = node.Node(
+        node.NodeManager(None),
+        {'id': '8',
+         'uuid': 'hh-88',
+         'instance_uuid': None,
+         'driver': 'pxe_ipmitool',
+         'driver_info': {
+             'ipmi_address': '8.8.8.8',
+             'ipmi_username': 'admin',
+             'ipmi_password': 'password',
+             'ip_address': '1.2.2.8'
+         },
+         'properties': {
+             'cpu': '8',
+             'ram': '16',
+             'local_disk': '10',
+         },
+         'power_state': 'on',
+         'maintenance': True,
+         'newly_discovered': True,
+         })
+    node_9 = node.Node(
+        node.NodeManager(None),
+        {'id': '9',
+         'uuid': 'ii-99',
+         'instance_uuid': None,
+         'driver': 'pxe_ipmitool',
+         'driver_info': {
+             'ipmi_address': '9.9.9.9',
+             'ipmi_username': 'admin',
+             'ipmi_password': 'password',
+             'ip_address': '1.2.2.9'
+         },
+         'properties': {
+             'cpu': '16',
+             'ram': '32',
+             'local_disk': '1000',
+         },
+         'power_state': 'on',
+         'maintenance': True,
+         'newly_discovered': True,
+         })
+    TEST.ironicclient_nodes.add(node_1, node_2, node_3, node_4, node_5, node_6,
+                                node_7, node_8, node_9)
 
     # Ports
     TEST.ironicclient_ports = test_data_utils.TestDataContainer()

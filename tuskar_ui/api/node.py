@@ -59,7 +59,7 @@ def image_get(request, image_id):
 
 class IronicNode(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'driver', 'driver_info',
-              'properties', 'power_state')
+              'properties', 'power_state', 'maintenance')
 
     @classmethod
     def create(cls, request, ipmi_address, architecture, cpu, ram, local_disk,
@@ -109,7 +109,8 @@ class IronicNode(base.APIResourceWrapper):
         :return: matching IronicNode, or None if no IronicNode matches the ID
         :rtype:  tuskar_ui.api.node.IronicNode
         """
-        for node in IronicNode.list(request):
+        nodes = IronicNode.list(request) + IronicNode.list_discovered(request)
+        for node in nodes:
             if node.uuid == uuid:
                 return node
 
@@ -150,7 +151,8 @@ class IronicNode(base.APIResourceWrapper):
         :return: list of IronicNodes, or an empty list if there are none
         :rtype:  list of tuskar_ui.api.node.IronicNode
         """
-        nodes = TEST_DATA.ironicclient_nodes.list()
+        nodes = [node for node in TEST_DATA.ironicclient_nodes.list()
+                 if not node.newly_discovered]
         if associated is not None:
             if associated:
                 nodes = [node for node in nodes
@@ -159,6 +161,15 @@ class IronicNode(base.APIResourceWrapper):
                 nodes = [node for node in nodes
                          if node.instance_uuid is None]
 
+        return [cls(node) for node in nodes]
+
+    @classmethod
+    @handle_errors(_("Unable to retrieve newly discovered nodes"), [])
+    def list_discovered(cls, request):
+        """Return a list of IronicNodes which have been newly discovered
+        """
+        nodes = [node for node in TEST_DATA.ironicclient_nodes.list()
+                 if node.newly_discovered]
         return [cls(node) for node in nodes]
 
     @classmethod
@@ -183,7 +194,11 @@ class IronicNode(base.APIResourceWrapper):
                  this IronicNode
         :rtype:  list of str
         """
-        ports = self.list_ports()
+        # we don't use an association in the node test data, because that
+        # association is unclear (to me); the REST API uses item links that
+        # are difficult to simulate.  for mock purposes, no harm in just
+        # returning all ports
+        ports = TEST_DATA.ironicclient_ports.list()
         return [port.address for port in ports]
 
 
@@ -379,18 +394,21 @@ class BareMetalNode(base.APIResourceWrapper):
 
 
 class NodeClient(object):
-    def __init__(self, request):
-        ironic_enabled = base.is_service_enabled(request, 'baremetal')
 
-        if ironic_enabled:
+    def __init__(self, request):
+        if self.ironic_enabled(request):
             self.node_class = IronicNode
         else:
             self.node_class = BareMetalNode
 
+    @classmethod
+    def ironic_enabled(cls, request):
+        return base.is_service_enabled(request, 'baremetal')
+
 
 class Node(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'driver', 'driver_info',
-              'properties', 'power_state', 'addresses')
+              'properties', 'power_state', 'addresses', 'maintenance')
 
     def __init__(self, apiresource, request=None, **kwargs):
         """Initialize a Node
@@ -463,6 +481,12 @@ class Node(base.APIResourceWrapper):
             return nodes_with_instance
         else:
             return [cls(node, request=request) for node in nodes]
+
+    @classmethod
+    @handle_errors(_("Unable to retrieve discovered nodes"), [])
+    def list_discovered(cls, request):
+        nodes = NodeClient(request).node_class.list_discovered(request)
+        return [cls(node, request=request) for node in nodes]
 
     @classmethod
     def delete(cls, request, uuid):
