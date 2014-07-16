@@ -162,7 +162,8 @@ def data(TEST):
          'flavor': {
              'id': '1',
          },
-         'status': 'ACTIVE'})
+         'status': 'ACTIVE',
+         'public_ip': '192.168.1.1'})
     s_2 = servers.Server(
         servers.ServerManager(None),
         {'id': 'bb',
@@ -172,7 +173,8 @@ def data(TEST):
          'flavor': {
              'id': '2',
          },
-         'status': 'ACTIVE'})
+         'status': 'ACTIVE',
+         'public_ip': '192.168.1.2'})
     s_3 = servers.Server(
         servers.ServerManager(None),
         {'id': 'cc',
@@ -182,7 +184,8 @@ def data(TEST):
          'flavor': {
              'id': '1',
          },
-         'status': 'BUILD'})
+         'status': 'BUILD',
+         'public_ip': '192.168.1.3'})
     s_4 = servers.Server(
         servers.ServerManager(None),
         {'id': 'dd',
@@ -192,7 +195,8 @@ def data(TEST):
          'flavor': {
              'id': '1',
          },
-         'status': 'ERROR'})
+         'status': 'ERROR',
+         'public_ip': '192.168.1.4'})
     TEST.novaclient_servers.add(s_1, s_2, s_3, s_4)
 
     # Image

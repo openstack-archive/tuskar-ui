@@ -52,15 +52,15 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         }) as mock:
             res = self.client.get(INDEX_URL)
             # FIXME(lsmola) optimize, this should call 1 time, what the hell
-            self.assertEqual(mock.list.call_count, 8)
+            self.assertEqual(mock.list.call_count, 5)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
         self.assertTemplateUsed(res, 'infrastructure/nodes/_overview.html')
 
-    def test_free_nodes(self):
-        free_nodes = [api.node.Node(node)
-                      for node in self.ironicclient_nodes.list()]
+    def test_registered_nodes(self):
+        registered_nodes = [api.node.Node(node)
+                            for node in self.ironicclient_nodes.list()]
         roles = [api.tuskar.OvercloudRole(r)
                  for r in TEST_DATA.tuskarclient_roles.list()]
         instance = TEST_DATA.novaclient_servers.first()
@@ -73,7 +73,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             }),
             patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list'],
-                'list.return_value': free_nodes,
+                'list.return_value': registered_nodes,
             }),
             patch('tuskar_ui.api.node.nova', **{
                 'spec_set': ['server_get'],
@@ -84,71 +84,25 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                 'image_get.return_value': image,
             }),
         ) as (_OvercloudRole, Node, _nova, _glance):
-            res = self.client.get(INDEX_URL + '?tab=nodes__free')
+            res = self.client.get(INDEX_URL + '?tab=nodes__registered')
             # FIXME(lsmola) horrible count, optimize
-            self.assertEqual(Node.list.call_count, 10)
-
-        self.assertTemplateUsed(res,
-                                'infrastructure/nodes/index.html')
-        self.assertTemplateUsed(res, 'horizon/common/_detail_table.html')
-        self.assertItemsEqual(res.context['free_nodes_table'].data,
-                              free_nodes)
-
-    def test_free_nodes_list_exception(self):
-        with patch('tuskar_ui.api.node.Node', **{
-            'spec_set': ['list'],
-            'list.side_effect': self._raise_tuskar_exception,
-        }) as mock:
-            res = self.client.get(INDEX_URL + '?tab=nodes__free')
-            self.assertEqual(mock.list.call_count, 3)
-
-        self.assertRedirectsNoFollow(res, INDEX_URL)
-
-    def test_deployed_nodes(self):
-        deployed_nodes = [api.node.Node(node)
-                          for node in self.ironicclient_nodes.list()]
-        roles = [api.tuskar.OvercloudRole(r)
-                 for r in TEST_DATA.tuskarclient_roles.list()]
-        instance = TEST_DATA.novaclient_servers.first()
-        image = TEST_DATA.glanceclient_images.first()
-
-        with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
-                'spec_set': ['list', 'name'],
-                'list.return_value': roles,
-            }),
-            patch('tuskar_ui.api.node.Node', **{
-                'spec_set': ['list'],
-                'list.return_value': deployed_nodes,
-            }),
-            patch('tuskar_ui.api.node.nova', **{
-                'spec_set': ['server_get'],
-                'server_get.return_value': instance,
-            }),
-            patch('tuskar_ui.api.node.glance', **{
-                'spec_set': ['image_get'],
-                'image_get.return_value': image,
-            }),
-        ) as (_OvercloudRole, Node, _nova, _glance):
-            res = self.client.get(INDEX_URL + '?tab=nodes__deployed')
-            # FIXME(lsmola) horrible count, optimize
-            self.assertEqual(Node.list.call_count, 10)
+            self.assertEqual(Node.list.call_count, 6)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
         self.assertTemplateUsed(res, 'horizon/common/_detail_table.html')
-        self.assertItemsEqual(res.context['deployed_nodes_table'].data,
-                              deployed_nodes)
+        self.assertItemsEqual(res.context['nodes_table_table'].data,
+                              registered_nodes)
 
-    def test_deployed_nodes_list_exception(self):
+    def test_registered_nodes_list_exception(self):
         instance = TEST_DATA.novaclient_servers.first()
         with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['list', 'instance'],
             'instance': instance,
             'list.side_effect': self._raise_tuskar_exception,
         }) as mock:
-            res = self.client.get(INDEX_URL + '?tab=nodes__deployed')
-            self.assertEqual(mock.list.call_count, 3)
+            res = self.client.get(INDEX_URL + '?tab=nodes__registered')
+            self.assertEqual(mock.list.call_count, 4)
 
         self.assertRedirectsNoFollow(res, INDEX_URL)
 

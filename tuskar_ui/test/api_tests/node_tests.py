@@ -86,7 +86,7 @@ class NodeAPITests(test.APITestCase):
 
         for node in ret_val:
             self.assertIsInstance(node, api.node.Node)
-        self.assertEqual(5, len(ret_val))
+        self.assertEqual(6, len(ret_val))
 
     def test_node_delete(self):
         node = self.baremetalclient_nodes.first()

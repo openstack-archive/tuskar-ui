@@ -19,7 +19,7 @@ from horizon import tables
 from tuskar_ui.infrastructure.nodes import tables as nodes_tables
 
 
-class OvercloudRoleNodeTable(nodes_tables.DeployedNodesTable):
+class OvercloudRoleNodeTable(nodes_tables.RegisteredNodesTable):
 
     class Meta:
         name = "overcloud_role__nodetable"

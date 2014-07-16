@@ -28,6 +28,10 @@ class OverviewTab(tabs.Tab):
     template_name = "infrastructure/nodes/_overview.html"
 
     def get_context_data(self, request):
+        nodes = api.node.Node.list(request)
+        cpus = sum(int(node.properties['cpu']) for node in nodes)
+        ram = sum(int(node.properties['ram']) for node in nodes)
+        local_disk = sum(int(node.properties['local_disk']) for node in nodes)
         deployed_nodes = api.node.Node.list(request, associated=True)
         free_nodes = api.node.Node.list(request, associated=False)
         deployed_nodes_error = api.node.filter_nodes(
@@ -43,6 +47,9 @@ class OverviewTab(tabs.Tab):
         total_nodes_up = api.node.filter_nodes(total_nodes, power_state=True)
 
         return {
+            'cpus': cpus,
+            'ram_gb': ram / 1024.0 ** 3,
+            'local_disk_gb': local_disk / 1024.0 ** 3,
             'total_nodes_healthy': total_nodes_healthy,
             'total_nodes_up': total_nodes_up,
             'total_nodes_error': total_nodes_error,
@@ -56,57 +63,38 @@ class OverviewTab(tabs.Tab):
         }
 
 
-class DeployedTab(tabs.TableTab):
-    table_classes = (tables.DeployedNodesTable,)
-    name = _("Deployed")
-    slug = "deployed"
+class RegisteredTab(tabs.TableTab):
+    table_classes = (tables.RegisteredNodesTable,)
+    name = _("Registered")
+    slug = "registered"
     template_name = "horizon/common/_detail_table.html"
 
     def get_items_count(self):
-        return len(self.get_deployed_nodes_data())
+        return len(self.get_nodes_table_data())
 
-    def get_deployed_nodes_data(self):
+    def get_nodes_table_data(self):
         redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
-        deployed_nodes = api.node.Node.list(self.request, associated=True,
-                                            _error_redirect=redirect)
+        nodes = api.node.Node.list(self.request, _error_redirect=redirect)
 
         if 'errors' in self.request.GET:
-            return api.node.filter_nodes(deployed_nodes, healthy=False)
+            return api.node.filter_nodes(nodes, healthy=False)
 
-        for node in deployed_nodes:
+        for node in nodes:
             # TODO(tzumainn): this could probably be done more efficiently
             # by getting the resource for all nodes at once
             try:
                 resource = api.heat.Resource.get_by_node(self.request, node)
                 node.role_name = resource.role.name
+                node.role_id = resource.role.id
+                node.stack_id = resource.stack.id
             except exceptions.NotFound:
                 node.role_name = '-'
 
-        return deployed_nodes
-
-
-class FreeTab(tabs.TableTab):
-    table_classes = (tables.FreeNodesTable,)
-    name = _("Free")
-    slug = "free"
-    template_name = "horizon/common/_detail_table.html"
-
-    def get_items_count(self):
-        return len(self.get_free_nodes_data())
-
-    def get_free_nodes_data(self):
-        redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
-        free_nodes = api.node.Node.list(self.request, associated=False,
-                                        _error_redirect=redirect)
-
-        if 'errors' in self.request.GET:
-            return api.node.filter_nodes(free_nodes, healthy=False)
-
-        return free_nodes
+        return nodes
 
 
 class NodeTabs(tabs.TabGroup):
     slug = "nodes"
-    tabs = (OverviewTab, DeployedTab, FreeTab)
+    tabs = (OverviewTab, RegisteredTab)
     sticky = True
     template_name = "horizon/common/_items_count_tab_group.html"

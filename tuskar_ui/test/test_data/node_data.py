@@ -92,8 +92,22 @@ def data(TEST):
          "pm_user": None,
          "interfaces": [{"address": "52:54:00:90:38:01"}],
          })
+    bm_node_6 = baremetal.BareMetalNode(
+        baremetal.BareMetalNodeManager(None),
+        {'id': '6',
+         'uuid': 'ff-66',
+         'instance_uuid': None,
+         "service_host": "undercloud",
+         "cpus": 1,
+         "memory_mb": 4096,
+         "local_gb": 20,
+         'task_state': None,
+         "pm_address": None,
+         "pm_user": None,
+         "interfaces": [{"address": "52:54:00:90:38:01"}],
+         })
     TEST.baremetalclient_nodes.add(
-        bm_node_1, bm_node_2, bm_node_3, bm_node_4, bm_node_5)
+        bm_node_1, bm_node_2, bm_node_3, bm_node_4, bm_node_5, bm_node_6)
 
     # IronicNode
     TEST.ironicclient_nodes = test_data_utils.TestDataContainer()
@@ -192,7 +206,26 @@ def data(TEST):
          },
          'power_state': 'error',
          })
-    TEST.ironicclient_nodes.add(node_1, node_2, node_3, node_4, node_5)
+    node_6 = node.Node(
+        node.NodeManager(None),
+        {'id': '6',
+         'uuid': 'ff-66',
+         'instance_uuid': None,
+         'driver': 'pxe_ipmitool',
+         'driver_info': {
+             'ipmi_address': '5.5.5.5',
+             'ipmi_username': 'admin',
+             'ipmi_password': 'password',
+             'ip_address': '1.2.2.6'
+         },
+         'properties': {
+             'cpu': '8',
+             'ram': '16',
+             'local_disk': '10',
+         },
+         'power_state': 'on',
+         })
+    TEST.ironicclient_nodes.add(node_1, node_2, node_3, node_4, node_5, node_6)
 
     # Ports
     TEST.ironicclient_ports = test_data_utils.TestDataContainer()

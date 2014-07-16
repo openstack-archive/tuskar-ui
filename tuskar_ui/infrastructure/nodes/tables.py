@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.template import defaultfilters
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
@@ -50,24 +50,27 @@ class NodeFilterAction(tables.FilterAction):
         return filter(comp, nodes)
 
 
-class NodesTable(tables.DataTable):
-    node = tables.Column(lambda node: node.driver_info['ipmi_address'],
+def get_role_link(datum):
+    # TODO(tzumainn): this could probably be done more efficiently
+    # by getting the resource for all nodes at once
+    if datum.role_id:
+        return reverse('horizon:infrastructure:overcloud:role',
+                       kwargs={'stack_id': datum.stack_id,
+                               'role_id': datum.role_id})
+
+
+class RegisteredNodesTable(tables.DataTable):
+    node = tables.Column('uuid',
                          link="horizon:infrastructure:nodes:detail",
-                         verbose_name=_("Node"))
-
-    # TODO(lsmola) waits for Ironic
-    # architecture = tables.Column(
-    #     lambda node: "",
-    #     verbose_name=_("Architecture"))
-
-    cpu = tables.Column(lambda node: node.properties['cpu'],
-                        verbose_name=_("CPU (cores)"))
-    ram = tables.Column(lambda node: defaultfilters.filesizeformat(
-                        node.properties['ram']),
-                        verbose_name=_("RAM"))
-    local_disk = tables.Column(lambda node: defaultfilters.filesizeformat(
-                               node.properties['local_disk']),
-                               verbose_name=_("Local Disk"))
+                         verbose_name=_("Node Name"))
+    instance_ip = tables.Column(lambda n:
+                                n.instance.public_ip if n.instance else '-',
+                                verbose_name=_("Instance IP"))
+    provisioning_status = tables.Column('provisioning_status',
+                                        verbose_name=_("Provisioned"))
+    role_name = tables.Column('role_name',
+                              link=get_role_link,
+                              verbose_name=_("Deployment Role"))
     power_state = tables.Column("power_state",
                                 verbose_name=_("Power"),
                                 status=True,
@@ -80,51 +83,11 @@ class NodesTable(tables.DataTable):
     class Meta:
         name = "nodes_table"
         verbose_name = _("Nodes")
-        table_actions = ()
-        row_actions = ()
+        table_actions = (NodeFilterAction,)
+        row_actions = (DeleteNode,)
 
     def get_object_id(self, datum):
         return datum.uuid
 
     def get_object_display(self, datum):
         return datum.uuid
-
-
-class FreeNodesTable(NodesTable):
-
-    # TODO(jtomasek): waits for Ironic to expose IP
-    # node = tables.Column(lambda node: node.driver_info['ipmi_address'],
-    #                      link="horizon:infrastructure:nodes:detail",
-    #                      verbose_name=_("Node"))
-    node = tables.Column("uuid",
-                         link="horizon:infrastructure:nodes:detail",
-                         verbose_name=_("Node"))
-
-    class Meta:
-        name = "free_nodes"
-        verbose_name = _("Free Nodes")
-        table_actions = (DeleteNode,
-                         NodeFilterAction,)
-        row_actions = (DeleteNode,)
-
-
-class DeployedNodesTable(NodesTable):
-
-    deployment_role = tables.Column("role_name",
-                                    verbose_name=_("Deployment Role"))
-
-    # TODO(lsmola) waits for Ceilometer baremetal metrics
-    # capacity = tables.Column(
-    #     lambda node: "",
-    #     verbose_name=_("Capacity"))
-
-    health = tables.Column('instance_status',
-                           verbose_name=_("Health"))
-
-    class Meta:
-        name = "deployed_nodes"
-        verbose_name = _("Deployed Nodes")
-        table_actions = (NodeFilterAction,)
-        row_actions = ()
-        columns = ('node', 'deployment_role', 'capacity', 'architecture',
-                   'cpu', 'ram', 'local_disk', 'health', 'power_state')
