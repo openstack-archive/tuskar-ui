@@ -1,0 +1,24 @@
+{% extends 'infrastructure/base.html' %}
+{% load i18n %}
+{% load url from future %}
+
+{% block title %}{% trans 'Deployment Plans' %}{% endblock %}
+
+{% block page_header %}
+  {% include 'horizon/common/_domain_page_header.html' with title=_('Deployment Plans') %}
+{% endblock page_header %}
+
+{% block main %}
+<div class="row-fluid">
+  <div class="span12">
+    <div class="actions pull-right">
+        <a href="{% url 'horizon:infrastructure:plans:create' %}"
+           class="btn ajax-modal
+            <i class="icon-file icon-white"></i>
+            {% trans "Create" %}
+        </a>
+    </div>
+    {{ tab_group.render }}
+  </div>
+</div>
+{% endblock %}

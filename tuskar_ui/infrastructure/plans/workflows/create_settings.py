@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import django.forms
 from django.utils.translation import ugettext_lazy as _
-from horizon import forms
+import horizon.forms
 import horizon.workflows
 
 from tuskar_ui import api
@@ -21,15 +22,22 @@ from tuskar_ui import api
 
 class Action(horizon.workflows.Action):
 
-    role_ids = forms.MultipleChoiceField(
+
+    name = django.forms.CharField(label=_("Name"))
+    description = django.forms.CharField(
+        label=_("Description"),
+        widget=django.forms.Textarea,
+        required=False,
+    )
+    role_ids = horizon.forms.MultipleChoiceField(
         label=_("Roles"),
         required=True,
-        widget=forms.CheckboxSelectMultiple(),
+        widget=horizon.forms.CheckboxSelectMultiple(),
         help_text=_("Select roles for this plan."))
 
     class Meta:
-        slug = 'create_overview'
-        name = _("Overview")
+        slug = 'create_settings'
+        name = _("Deployment Settings")
 
     def __init__(self, *args, **kwargs):
         super(Action, self).__init__(*args, **kwargs)
@@ -44,9 +52,12 @@ class Action(horizon.workflows.Action):
 
 class Step(horizon.workflows.Step):
     action_class = Action
-    contributes = ('role_ids',)
-    template_name = 'infrastructure/plans/create_overview.html'
-    help_text = _("Nothing deployed yet. Design your first deployment.")
+    contributes = (
+        'name',
+        'description',
+        'role_ids',
+    )
+    template_name = 'infrastructure/plans/create_settings.html'
 
     def contribute(self, data, context):
         context = super(Step, self).contribute(data, context)

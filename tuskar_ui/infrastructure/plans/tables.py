@@ -14,14 +14,17 @@
 
 from django.utils.translation import ugettext_lazy as _
 
-from horizon import tables
+import horizon.tables
+from horizon.tables import formset
+
+from tuskar_ui.infrastructure.plans import forms
 
 
-class ConfigurationTable(tables.DataTable):
+class ConfigurationTable(horizon.tables.DataTable):
 
-    key = tables.Column(lambda parameter: parameter[0],
+    key = horizon.tables.Column(lambda parameter: parameter[0],
                         verbose_name=_("Attribute Name"))
-    value = tables.Column(lambda parameter: parameter[1],
+    value = horizon.tables.Column(lambda parameter: parameter[1],
                           verbose_name=_("Attribute Value"))
 
     class Meta:
@@ -33,3 +36,13 @@ class ConfigurationTable(tables.DataTable):
 
     def get_object_id(self, datum):
         return datum[0]
+
+
+class PlanRolesTable(formset.FormsetDataTable):
+    formset_class = forms.PlanRoleFormset
+
+    class Meta:
+        name = "setup_roles"
+        verbose_name = _("Setup Roles")
+        table_actions = ()
+        row_actions = ()
