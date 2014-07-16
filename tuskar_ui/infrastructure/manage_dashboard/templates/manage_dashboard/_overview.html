@@ -1,0 +1,83 @@
+{% load i18n %}
+{% load url from future%}
+
+
+<div class="row-fluid">
+  <div class="span8">
+    <div class="widget">
+      <h2>{% trans 'Health Status' %}</h2>
+      <table class="table">
+        <tbody>
+          <tr>
+            <td>
+              <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__deployed">
+                {% trans 'Deployed Nodes' %}
+                ({{ deployed_nodes|length|default:0 }})
+              </a>
+            </td>
+            <td>
+              {% if deployed_nodes_error %}
+                <i class="icon-exclamation-sign"></i>
+                {% if deployed_nodes_error|length == 1 %}
+                  {% url 'horizon:infrastructure:nodes:detail' deployed_nodes_error.0.uuid as node_detail_url %}
+                {% else %}
+                  {% url 'horizon:infrastructure:nodes:index' as nodes_index_url %}
+                {% endif %}
+
+                {% blocktrans count error_count=deployed_nodes_error|length %}
+                  <a href="{{ node_detail_url }}">{{ error_count }} node</a> with erros
+                {% plural %}
+              <a href="{{ nodes_index_url }}?tab=nodes__deployed&errors">{{ error_count }} nodes</a> with errors
+                {% endblocktrans %}
+              {% else %}
+                <i class="icon-ok"></i>
+                {% trans 'All nodes are performing correctly' %}
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__free">
+                {% trans 'Free Nodes' %}
+                ({{ free_nodes|length|default:0 }})
+              </a>
+            </td>
+            <td>
+              {% if free_nodes_error %}
+                <i class="icon-exclamation-sign"></i>
+                {% if free_nodes_error|length == 1 %}
+                  {% comment %}
+                    Replace id with uuid when ironicclient is used instead baremetalclient
+                  {% endcomment %}
+                  {% url 'horizon:infrastructure:nodes:detail' free_nodes_error.0.id as node_detail_url %}
+                {% else %}
+                  {% url 'horizon:infrastructure:nodes:index' as nodes_index_url %}
+                {% endif %}
+
+                {% blocktrans count error_count=free_nodes_error|length %}
+                  <a href="{{ node_detail_url }}">{{ error_count }} node</a> with errors
+                {% plural %}
+                  <a href="{{ nodes_index_url }}?tab=nodes__free&errors">{{ error_count }} nodes</a> with errors
+                {% endblocktrans %}
+              {% else %}
+                <i class="icon-ok"></i>
+                {% trans 'All nodes are performing correctly' %}
+              {% endif %}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="widget">
+      <h2>{% trans 'Provisioning Status' %}</h2>
+      <div class="d3_pie_chart_distribution" data-used="Deployed={{ deployed_nodes|length }}|Free={{ free_nodes|length }}"></div>
+    </div>
+    <div class="clear"></div>
+    <div class="widget">
+      <h2>{% trans 'Health Status' %}</h2>
+      <div class="d3_pie_chart_distribution" data-used="Healthy={{ total_nodes_healthy|length }}|Defective={{ total_nodes_error|length }}"></div>
+    </div>
+  </div>
+</div>
