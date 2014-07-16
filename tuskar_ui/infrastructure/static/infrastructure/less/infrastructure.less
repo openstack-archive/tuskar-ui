@@ -77,20 +77,59 @@
             display: none;
         }
     }
+
+    .widget-info {
+        span {
+            font-size: 200%;
+        }
+    }
+
+    .d3_pie_chart_distribution {
+        .legend {
+            position: fixed;
+        }
+    }
 }
 
-// Node overview
+.dashboard-item {
+    height: 180px;
+    margin-top: 20px;
+    padding: 20px;
+    text-align: center;
 
-.nodes {
-  .widget-info {
-    span {
-      font-size: 200%;
-    }
-  }
+    &.done {
+        border: 1px solid #bbbbbb;
+        background: #eeeeee;
 
-  .d3_pie_chart_distribution {
-    .legend {
-      position: fixed;
+        div.mark{
+           background-image: url(/static/infrastructure/images/done.png);
+        }
     }
-  }
+
+    &.todo {
+        border: 1px solid #dddddd;
+        background: #f8f8f8;
+
+        div.mark{
+           background-image: url(/static/infrastructure/images/todo.png);
+        }
+    }
+
+    p {
+        margin: 20px;
+        line-height: 115%;
+        font-size: 16pt;
+        font-family: anivers;
+    }
+
+    .mark {
+        height: 64px;
+        width: 64px;
+        margin: auto;
+        margin-top: 20px;
+    }
+
+    .mark:after {
+        content: nbsp;
+    }
 }
