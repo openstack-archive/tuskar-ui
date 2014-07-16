@@ -69,6 +69,11 @@ class RegisteredTab(tabs.TableTab):
     slug = "registered"
     template_name = "horizon/common/_detail_table.html"
 
+    def __init__(self, tab_group, request):
+        if api.node.NodeClient.ironic_enabled(request):
+            self.table_classes = (tables.IronicRegisteredNodesTable,)
+        super(RegisteredTab, self).__init__(tab_group, request)
+
     def get_items_count(self):
         return len(self.get_nodes_table_data())
 
@@ -93,8 +98,29 @@ class RegisteredTab(tabs.TableTab):
         return nodes
 
 
+class IronicDiscoveredTab(tabs.TableTab):
+    table_classes = (tables.IronicDiscoveredNodesTable,)
+    name = _("Discovered")
+    slug = "discovered"
+    template_name = "horizon/common/_detail_table.html"
+
+    def get_items_count(self):
+        return len(self.get_discovered_nodes_table_data())
+
+    def get_discovered_nodes_table_data(self):
+        redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
+        nodes = api.node.Node.list_discovered(
+            self.request, _error_redirect=redirect)
+        return nodes
+
+
 class NodeTabs(tabs.TabGroup):
     slug = "nodes"
     tabs = (OverviewTab, RegisteredTab)
     sticky = True
     template_name = "horizon/common/_items_count_tab_group.html"
+
+    def __init__(self, request, **kwargs):
+        if api.node.NodeClient.ironic_enabled(request):
+            self.tabs = self.tabs + (IronicDiscoveredTab,)
+        super(NodeTabs, self).__init__(request, **kwargs)
