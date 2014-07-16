@@ -14,22 +14,20 @@
 
 from django.utils.translation import ugettext_lazy as _
 
-from horizon import tables
+import horizon.tabs
 
 
-class ConfigurationTable(tables.DataTable):
+class OverviewTab(horizon.tabs.Tab):
+    name = _("Overview")
+    slug = 'overview'
+    template_name = 'infrastructure/plans/overview.html'
 
-    key = tables.Column(lambda parameter: parameter[0],
-                        verbose_name=_("Attribute Name"))
-    value = tables.Column(lambda parameter: parameter[1],
-                          verbose_name=_("Attribute Value"))
+    def get_context_data(self, *args, **kwargs):
+        return {}
 
-    class Meta:
-        name = "configuration"
-        verbose_name = _("Configuration")
-        multi_select = False
-        table_actions = ()
-        row_actions = ()
 
-    def get_object_id(self, datum):
-        return datum[0]
+class PlansTabs(horizon.tabs.TabGroup):
+    slug = 'plans'
+    tabs = (
+        OverviewTab,
+    )

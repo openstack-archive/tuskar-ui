@@ -20,7 +20,8 @@ import horizon.workflows
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.plans.workflows import create_configuration
-from tuskar_ui.infrastructure.plans.workflows import create_overview
+from tuskar_ui.infrastructure.plans.workflows import create_roles
+from tuskar_ui.infrastructure.plans.workflows import create_settings
 
 
 LOG = logging.getLogger(__name__)
@@ -28,7 +29,7 @@ LOG = logging.getLogger(__name__)
 
 class DeploymentValidationMixin(object):
     def validate(self, context):
-        requested = sum(context['role_counts'].values())
+        requested = sum(role['size'] for role in context['role_setup'])
         # TODO(lsmola) change this when we support more overclouds. It
         # will have to obtain actual free nodes and compare them to
         # number of newly created.
@@ -53,24 +54,27 @@ class DeploymentValidationMixin(object):
 
 class Workflow(DeploymentValidationMixin, horizon.workflows.Workflow):
     slug = 'create_plan'
-    name = _("My OpenStack Deployment Plan")
+    name = _("Create OpenStack Deployment Plan")
     default_steps = (
-        create_overview.Step,
+        create_settings.Step,
+        create_roles.Step,
         create_configuration.Step,
     )
-    finalize_button_name = _("Deploy")
-    success_message = _("OpenStack deployment launched")
+    finalize_button_name = _("Create")
+    success_message = _("Deployment plan created")
     success_url = 'horizon:infrastructure:overcloud:index'
+    wizard = True
 
     def handle(self, request, context):
         try:
             api.tuskar.OvercloudPlan.create(
                 self.request, 'overcloud', 'overcloud')
         except Exception as e:
-            # Showing error in both workflow tabs, because from the exception
+            # Showing error in all workflow tabs, because from the exception
             # type we can't recognize where it should show
             msg = unicode(e)
             self.add_error_to_step(msg, 'create_overview')
+            self.add_error_to_step(msg, 'create_roles')
             self.add_error_to_step(msg, 'create_configuration')
             LOG.exception('Error creating overcloud plan')
             raise django.forms.ValidationError(msg)

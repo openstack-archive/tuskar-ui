@@ -3,12 +3,14 @@
 {% for error in formset.non_form_errors %}
   <div class="alert alert-error error">{{ error }}</div>
 {% endfor %}
-<div class="row-fluid register-nodes-formset" id="formset-{{ formset.prefix }}">
+<div class="row-fluid menu-formset" id="formset-{{ formset.prefix }}">
   <div class="span5">
     <div class="clearfix register-nav-head">
+      {% if add_link_label %}
       <a class="pull-right add-node-link"
-         href="#"><i class="icon-plus"></i> {% trans "Add Node" %}</a>
-      <h4>Nodes to register</h4>
+        href="#"><i class="icon-plus"></i>&nbsp;{{ add_link_label }}</a>
+      {% endif %}
+      <h4>{{ title }}</h4>
     </div>
     <ul class="nav nav-tabs nav-stacked">
       {% for form in formset %}

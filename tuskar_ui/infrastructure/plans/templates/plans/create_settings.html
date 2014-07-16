@@ -1,0 +1,15 @@
+{% load i18n %}
+{% load url from future%}
+
+<noscript><h3>{{ step }}</h3></noscript>
+<div class="widget muted">{{ step.get_help_text }}</div>
+
+<div class="row-fluid">
+  <div class="span8">
+    <h2>{% trans "General Settings" %}</h2>
+    {% include "horizon/common/_form_field.html" with field=form.name %}
+    {% include "horizon/common/_form_field.html" with field=form.description %}
+    <h2>{% trans "Deployment Roles" %}</h2>
+    {% include "horizon/common/_form_field.html" with field=form.role_ids %}
+  </div>
+</div>

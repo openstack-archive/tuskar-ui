@@ -35,12 +35,12 @@
 
 <script type="text/javascript">
 (window.$ || window.addHorizonLoadEvent)(function () {
+  // Update the name in tab on the left when it's changed in the form.
   var form_prefix = '{{ form.prefix|escapejs }}';
   var $form = $('#tab-' + form_prefix);
   var $nav_link = $('a[href="#' + $form.attr('id') + '"]');
   var undefined_name = '{{ form.get_name|escapejs }}';
 
-  // FIXME(lsmola) what is this good for exactly?
   $form.find('input[name$="-ipmi_address"]').change(function () {
     $nav_link.html($(this).val() || undefined_name);
   });

@@ -1,0 +1,10 @@
+{% load i18n %}
+<noscript><h3>{{ step }}</h3></noscript>
+<p>{{ step.get_help_text }}</p>
+
+<div class="row-fluid">
+  <div class="span12">
+    {% include 'horizon/common/_form_errors.html' with form=form %}
+    {% include "formset_table/menu_formset.html" with formset=form.formset  form_template="infrastructure/plans/_role_formset_form.html" title=_("Deployment Roles") add_link_label="" %}
+  </div>
+</div>
