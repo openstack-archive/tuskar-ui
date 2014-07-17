@@ -118,6 +118,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-INITIAL_FORMS': 1,
             'register_nodes-MAX_NUM_FORMS': 1000,
 
+            'register_nodes-0-driver': 'ipmi',
             'register_nodes-0-ipmi_address': '127.0.0.1',
             'register_nodes-0-ipmi_username': 'username',
             'register_nodes-0-ipmi_password': 'password',
@@ -127,6 +128,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-0-memory': '2',
             'register_nodes-0-local_disk': '3',
 
+            'register_nodes-1-driver': 'ipmi',
             'register_nodes-1-ipmi_address': '127.0.0.2',
             'register_nodes-1-mac_addresses': 'de:ad:be:ef:ca:ff',
             'register_nodes-1-architecture': 'x86',
@@ -142,10 +144,30 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             self.assertRedirectsNoFollow(res, INDEX_URL)
             request = Node.create.call_args_list[0][0][0]  # This is a hack.
             self.assertListEqual(Node.create.call_args_list, [
-                call(request, u'127.0.0.1', 'x86', 1, 2, 3,
-                     ['DE:AD:BE:EF:CA:FE'], u'username', u'password'),
-                call(request, u'127.0.0.2', 'x86', 4, 5, 6,
-                     ['DE:AD:BE:EF:CA:FF'], None, None),
+                call(
+                    request,
+                    ipmi_address=u'127.0.0.1',
+                    architecture='x86',
+                    cpu=1,
+                    ram=2,
+                    local_disk=3,
+                    mac_addresses=['DE:AD:BE:EF:CA:FE'],
+                    ipmi_username=u'username',
+                    ipmi_password=u'password',
+                    driver='ipmi',
+                ),
+                call(
+                    request,
+                    ipmi_address=u'127.0.0.2',
+                    architecture='x86',
+                    cpu=4,
+                    ram=5,
+                    local_disk=6,
+                    mac_addresses=['DE:AD:BE:EF:CA:FF'],
+                    ipmi_username=None,
+                    ipmi_password=None,
+                    driver='ipmi',
+                ),
             ])
 
     def test_register_post_exception(self):
@@ -154,6 +176,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-INITIAL_FORMS': 1,
             'register_nodes-MAX_NUM_FORMS': 1000,
 
+            'register_nodes-0-driver': 'ipmi',
             'register_nodes-0-ipmi_address': '127.0.0.1',
             'register_nodes-0-ipmi_username': 'username',
             'register_nodes-0-ipmi_password': 'password',
@@ -163,6 +186,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-0-memory': '2',
             'register_nodes-0-local_disk': '3',
 
+            'register_nodes-1-driver': 'ipmi',
             'register_nodes-1-ipmi_address': '127.0.0.2',
             'register_nodes-1-mac_addresses': 'de:ad:be:ef:ca:ff',
             'register_nodes-1-architecture': 'x86',
@@ -178,10 +202,30 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             self.assertEqual(res.status_code, 200)
             request = Node.create.call_args_list[0][0][0]  # This is a hack.
             self.assertListEqual(Node.create.call_args_list, [
-                call(request, u'127.0.0.1', 'x86', 1, 2, 3,
-                     ['DE:AD:BE:EF:CA:FE'], u'username', u'password'),
-                call(request, u'127.0.0.2', 'x86', 4, 5, 6,
-                     ['DE:AD:BE:EF:CA:FF'], None, None),
+                call(
+                    request,
+                    ipmi_address=u'127.0.0.1',
+                    architecture='x86',
+                    cpu=1,
+                    ram=2,
+                    local_disk=3,
+                    mac_addresses=['DE:AD:BE:EF:CA:FE'],
+                    ipmi_username=u'username',
+                    ipmi_password=u'password',
+                    driver='ipmi',
+                ),
+                call(
+                    request,
+                    ipmi_address=u'127.0.0.2',
+                    architecture='x86',
+                    cpu=4,
+                    ram=5,
+                    local_disk=6,
+                    mac_addresses=['DE:AD:BE:EF:CA:FF'],
+                    ipmi_username=None,
+                    ipmi_password=None,
+                    driver='ipmi',
+                ),
             ])
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/register.html')
