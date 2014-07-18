@@ -1,48 +1,20 @@
 {% extends 'infrastructure/base.html' %}
 {% load i18n %}
-{% block title %}{% trans 'Node Details' %}{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block page_header %}
-  {% include 'horizon/common/_page_header.html' with title=_('Node Details') %}
+  {% include 'horizon/common/_page_header.html' with title=title %}
 {% endblock page_header %}
 
 {% block main %}
-<div class="row-fluid">
-  <div class="span12">
-    <dl class="clearfix">
-      <dt>{% trans "Power state" %}</dt>
-      <dd>{{ node.power_state|default:"&mdash;" }}</dd>
+<div class="node node-details">
+  <div class="node-title">
+    <dl>
+      <span class="powerstate">{% trans "Powered" %} {{ node.power_state|default:"&mdash;" }}</span>
     </dl>
   </div>
-</div>
-<div class="row-fluid">
-  <div class="span6">
-    <h4>{% trans "Inventory" %}</h4>
-    <dl class="clearfix">
-      <dt>{% trans "Node UUID" %}</dt>
-      <dd>{{ node.uuid|default:"&mdash;" }}</dd>
-      <dt>{% trans "Driver" %}</dt>
-      <dd>
-	{{ node.driver|default:"&mdash;" }}<br />
-	<b>IP Address:</b> {{ node.driver_info.ipmi_address|default:"&mdash;" }}<br />
-	<b>IPMI User:</b> {{ node.driver_info.ipmi_username|default:"&mdash;" }}
-      </dd>
-      <dt>{% trans "Network Cards" %}</dt>
-      <dd>
-	{{ node.addresses|length }}<br />
-	{% for address in node.addresses %}
-	  {{ address }}<br />
-	{% endfor %}
-      </dd>
-      <dt>{% trans "Registered HW" %}</dt>
-      <dd>
-        {{ node.cpus|default:"&mdash;" }} {% trans "CPU" %}<br />
-        {{ node.memory_mb|default:"&mdash;" }} {% trans "RAM (MB)" %}<br />
-        {{ node.local_gb|default:"&mdash;" }} {% trans "HDD (GB)" %}
-      </dd>
-    </dl>
-  </div>
-  <div class="span6">
+
+  <div class="node node-deployment">
     <h4>{% trans "Deployment" %}</h4>
     <dl class="clearfix">
       <dt>{% trans "Deployment Role" %}</dt>
@@ -53,10 +25,10 @@
       {% endif %}
       <dt>{% trans "Provisioning" %}</dt>
       <dd>
-	{{ node.provisioning_status|default:"&mdash;" }}
-	{% if node.instance_uuid %}
-	  <br />{{ node.instance.created }}
-	{% endif %}
+        {{ node.provisioning_status|default:"&mdash;" }}
+        {% if node.instance_uuid %}
+          <br />{{ node.instance.created }}
+        {% endif %}
       </dd>
       <dt>{% trans "Image" %}</dt>
       <dd>{{ node.image_name|default:"&mdash;" }}</dd>
@@ -64,23 +36,60 @@
       <dd>{{ node.instance_uuid|default:"&mdash;" }}</dd>
     </dl>
   </div>
-</div>
 
-<h2>{% trans "Performance and Capacity" %}</h2>
+  <div class="node node-detail">
+    <h4>{% trans "Inventory" %}</h4>
+    <dl>
+      <dt>{% trans "Node UUID" %}</dt>
+      <dd>{{ node.uuid|default:"&mdash;" }}</dd>
+      <dt>{% trans "Driver" %}</dt>
+      <dd class="dropdown">
+        <span class="dropdown-toggle" type="button" data-toggle="dropdown">
+          {{ node.driver|default:"&mdash;" }}
+          <span class="caret"></span>
+        </span>
+        <ul class="dropdown-menu">
+          <li><dt>IP Address</dt> <dd>{{ node.driver_info.ipmi_address|default:"&mdash;" }}</dd></li>
+          <li><dt>IPMI User</dt> <dd>{{ node.driver_info.ipmi_username|default:"&mdash;" }}</dd></li>
+        </ul>
+      </dd>
+      <dt>{% trans "Network Cards" %}</dt>
+      <dd class="dropdown">
+        <span class="dropdown-toggle" type="button" data-toggle="dropdown">
+          {{ node.addresses|length }}
+          <span class="caret"></span>
+        </span>
+        <ul class="dropdown-menu">
+          {% for address in node.addresses %}
+            <li>{{ address }}</li>
+          {% endfor %}
+        </ul>
+      </dd>
+      <dt>{% trans "Registered HW" %}</dt>
+      <dd>
+        {{ node.cpus|default:"&mdash;" }} {% trans "CPU" %}<br />
+        {{ node.memory_mb|default:"&mdash;" }} {% trans "RAM (MB)" %}<br />
+        {{ node.local_gb|default:"&mdash;" }} {% trans "HDD (GB)" %}
+      </dd>
+    </dl>
+  </div>
 
-{% if meters %}
-<br />
-{% url 'horizon:infrastructure:nodes:performance' node.id as node_perf_url %}
+  <div id="node-performance" class="node">
+    <h4>{% trans "Performance and Capacity" %}</h4>
 
-<div id="ceilometer-stats">
-  <form class="form-horizontal" id="linechart_general_form">
-    <div class="control-group">
-      <label for="date_options" class="control-label">{% trans "Period" %}:&nbsp;</label>
-      <div class="controls">
-        <select data-line-chart-command="select_box_change"
-                id="date_options"
-                name="date_options"
-                class="span2">
+  {% if meters %}
+  <br />
+  {% url 'horizon:infrastructure:nodes:performance' node.id as node_perf_url %}
+
+  <div id="ceilometer-stats" class="clearfix">
+    <form class="form-horizontal" id="linechart_general_form">
+      <div class="control-group">
+        <label for="date_options" class="control-label">{% trans "Period" %}:&nbsp;</label>
+        <div class="controls">
+          <select data-line-chart-command="select_box_change"
+            id="date_options"
+            name="date_options"
+            class="span2">
           <option value="1">{% trans "Last day" %}</option>
           <option value="7" selected="selected">{% trans "Last week" %}</option>
           <option value="{% now 'j' %}">{% trans "Month to date" %}</option>
@@ -88,43 +97,43 @@
           <option value="30">{% trans "Last 30 days" %}</option>
           <option value="365">{% trans "Last year" %}</option>
           <option value="other">{% trans "Other" %}</option>
-        </select>
+          </select>
+        </div>
       </div>
-    </div>
-    <div class="control-group" id="date_from">
-      <label for="date_from" class="control-label">{% trans "From" %}:&nbsp;</label>
-      <div class="controls">
-        <input data-line-chart-command="date_picker_change"
-               type="text"
-               id="date_from"
-               name="date_from"
-               class="span2 example"/>
+      <div class="control-group" id="date_from">
+        <label for="date_from" class="control-label">{% trans "From" %}:&nbsp;</label>
+        <div class="controls">
+          <input data-line-chart-command="date_picker_change"
+            type="text"
+            id="date_from"
+            name="date_from"
+            class="span2 example"/>
+        </div>
       </div>
-    </div>
-    <div class="control-group" id="date_to">
-      <label for="date_to" class="control-label">{% trans "To" %}:&nbsp;</label>
-      <div class="controls">
-        <input data-line-chart-command="date_picker_change"
-               type="text"
-               name="date_to"
-               class="span2 example"/>
+      <div class="control-group" id="date_to">
+        <label for="date_to" class="control-label">{% trans "To" %}:&nbsp;</label>
+        <div class="controls">
+          <input data-line-chart-command="date_picker_change"
+            type="text"
+            name="date_to"
+            class="span2 example"/>
+        </div>
       </div>
-    </div>
-  </form>
-</div>
+    </form>
+  </div>
 
-<script type="text/javascript">
-  if (typeof $ !== 'undefined') {
-    show_hide_datepickers();
-  } else {
-    addHorizonLoadEvent(function() {
+  <script type="text/javascript">
+    if (typeof $ !== 'undefined') {
       show_hide_datepickers();
-    });
-  }
+    } else {
+      addHorizonLoadEvent(function() {
+        show_hide_datepickers();
+      });
+    }
 
-  function show_hide_datepickers() {
-    var date_options = $("#date_options");
-    date_options.change(function(evt) {
+    function show_hide_datepickers() {
+      var date_options = $("#date_options");
+      date_options.change(function(evt) {
         if ($(this).find("option:selected").val() == "other"){
           evt.stopPropagation();
           $("#date_from .controls input, #date_to .controls input").val('');
@@ -132,32 +141,30 @@
         } else {
           $("#date_from, #date_to").hide();
         }
-    });
-    if (date_options.find("option:selected").val() == "other"){
-      $("#date_from, #date_to").show();
-    } else {
-      $("#date_from, #date_to").hide();
+      });
+      if (date_options.find("option:selected").val() == "other"){
+        $("#date_from, #date_to").show();
+      } else {
+        $("#date_from, #date_to").hide();
+      }
     }
-  }
-</script>
+  </script>
 
-<div class="clear"></div>
-<div>
-  <table>
+  <div id="node-charts" class="clearfix">
     {% for meter_name, meter_label in meters %}
       {% if forloop.counter0|divisibleby:"4" %}
-        <tr>
       {% endif %}
-      <td>
-        {% include "infrastructure/_performance_chart.html" with label=meter_label url=node_perf_url|add:"?meter="|add:meter_name only %}
-      </td>
-      {% if forloop.counter|divisibleby:"4" %}
-        </tr>
+        <div class="span3">
+          {% include "infrastructure/_performance_chart.html" with label=meter_label url=node_perf_url|add:"?meter="|add:meter_name only %}
+        </div>
+      {% if forloop.counter0|divisibleby:"4" %}
       {% endif %}
     {% endfor %}
-  </table>
+
+  {% else %}
+    {% trans 'Metering service is not enabled.' %}
+  {% endif %}
+  </div>
 </div>
-{% else %}
-  Metering service is not enabled.
-{% endif %}
+
 {% endblock %}
