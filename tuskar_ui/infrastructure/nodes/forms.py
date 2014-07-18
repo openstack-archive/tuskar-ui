@@ -97,7 +97,7 @@ class NodeForm(django.forms.Form):
         widget=tuskar_ui.forms.NumberInput(
             attrs={'class': 'input input-medium'}),
     )
-    memory = django.forms.IntegerField(
+    memory_mb = django.forms.IntegerField(
         label=_("Memory"),
         required=True,
         min_value=1,
@@ -105,7 +105,7 @@ class NodeForm(django.forms.Form):
         widget=tuskar_ui.forms.NumberInput(
             attrs={'class': 'input input-medium'}),
     )
-    local_disk = django.forms.IntegerField(
+    local_gb = django.forms.IntegerField(
         label=_("Local Disk"),
         required=True,
         min_value=1,
@@ -136,9 +136,9 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
                     # then we will need to use something else here?
                     ipmi_address=data['ipmi_address'],
                     architecture=data.get('architecture'),
-                    cpu=data.get('cpus'),
-                    ram=data.get('memory'),
-                    local_disk=data.get('local_disk'),
+                    cpus=data.get('cpus'),
+                    memory_mb=data.get('memory_mb'),
+                    local_gb=data.get('local_gb'),
                     mac_addresses=data['mac_addresses'].split(),
                     ipmi_username=data.get('ipmi_username'),
                     ipmi_password=data.get('ipmi_password'),

@@ -36,9 +36,9 @@
       </dd>
       <dt>{% trans "Registered HW" %}</dt>
       <dd>
-        {{ node.properties.cpu|default:"&mdash;" }} {% trans "CPU" %}<br />
-        {{ node.properties.ram|filesizeformat|default:"&mdash;" }} {% trans "RAM" %}<br />
-        {{ node.properties.local_disk|filesizeformat|default:"&mdash;" }} {% trans "HDD" %}
+        {{ node.cpus|default:"&mdash;" }} {% trans "CPU" %}<br />
+        {{ node.memory_mb|default:"&mdash;" }} {% trans "RAM (MB)" %}<br />
+        {{ node.local_gb|default:"&mdash;" }} {% trans "HDD (GB)" %}
       </dd>
     </dl>
   </div>

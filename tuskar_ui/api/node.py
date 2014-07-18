@@ -62,25 +62,10 @@ class IronicNode(base.APIResourceWrapper):
               'properties', 'power_state', 'maintenance')
 
     @classmethod
-    def create(cls, request, ipmi_address, architecture, cpu, ram, local_disk,
-               mac_addresses, ipmi_username=None, ipmi_password=None,
+    def create(cls, request, ipmi_address, architecture, cpus, memory_mb,
+               local_gb, mac_addresses, ipmi_username=None, ipmi_password=None,
                driver=None):
         """Create a Node in Ironic
-
-        :param cpu: number of cores
-        :type  cpu: int
-
-        :param ram: RAM in GB
-        :type  ram: int
-
-        :param local_disk: local disk in TB
-        :type  local_disk: int
-
-        :param mac_addresses: list of mac addresses
-        :type  mac_addresses: list of str
-
-        :return: the created Node object
-        :rtype:  tuskar_ui.api.node.IronicNode
         """
         node = TEST_DATA.ironicclient_nodes.first()
         return cls(node)
@@ -190,31 +175,28 @@ class IronicNode(base.APIResourceWrapper):
         ports = TEST_DATA.ironicclient_ports.list()
         return [port.address for port in ports]
 
+    @cached_property
+    def cpus(self):
+        return self.properties['cpus']
+
+    @cached_property
+    def memory_mb(self):
+        return self.properties['memory_mb']
+
+    @cached_property
+    def local_gb(self):
+        return self.properties['local_gb']
+
 
 class BareMetalNode(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'memory_mb', 'cpus', 'local_gb',
               'task_state', 'pm_user', 'pm_address', 'interfaces')
 
     @classmethod
-    def create(cls, request, ipmi_address, architecture, cpu, ram, local_disk,
-               mac_addresses, ipmi_username=None, ipmi_password=None,
+    def create(cls, request, ipmi_address, architecture, cpus, memory_mb,
+               local_gb, mac_addresses, ipmi_username=None, ipmi_password=None,
                driver=None):
         """Create a Nova BareMetalNode
-
-        :param cpu: number of cores
-        :type  cpu: int
-
-        :param ram: RAM in GB
-        :type  ram: int
-
-        :param local_disk: local disk in TB
-        :type  local_disk: int
-
-        :param mac_addresses: list of mac addresses
-        :type  mac_addresses: list of str
-
-        :return: the created BareMetalNode object
-        :rtype:  tuskar_ui.api.node.BareMetalNode
         """
         node = TEST_DATA.baremetalclient_nodes.first()
         return cls(node)
@@ -318,21 +300,6 @@ class BareMetalNode(base.APIResourceWrapper):
         return task_state_dict.get(self.task_state, 'off')
 
     @cached_property
-    def properties(self):
-        """Return properties of this BareMetalNode
-
-        :return: return memory, cpus and local_disk properties
-                 of this BareMetalNode, ram and local_disk properties
-                 are in bytes
-        :rtype:  dict of str
-        """
-        return {
-            'ram': self.memory_mb * 1024.0 * 1024.0,
-            'cpu': self.cpus,
-            'local_disk': self.local_gb * 1024.0 * 1024.0 * 1024.0
-        }
-
-    @cached_property
     def driver(self):
         """Return driver for this BareMetalNode
         """
@@ -386,7 +353,8 @@ class NodeClient(object):
 
 class Node(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'driver', 'driver_info',
-              'properties', 'power_state', 'addresses', 'maintenance')
+              'power_state', 'addresses', 'maintenance', 'cpus',
+              'memory_mb', 'local_gb')
 
     def __init__(self, apiresource, request=None, **kwargs):
         """Initialize a Node
@@ -409,11 +377,11 @@ class Node(base.APIResourceWrapper):
             self._instance = kwargs['instance']
 
     @classmethod
-    def create(cls, request, ipmi_address, architecture, cpu, ram, local_disk,
-               mac_addresses, ipmi_username=None, ipmi_password=None,
+    def create(cls, request, ipmi_address, architecture, cpus, memory_mb,
+               local_gb, mac_addresses, ipmi_username=None, ipmi_password=None,
                driver=None):
         return cls(NodeClient(request).node_class.create(
-            request, ipmi_address, architecture, cpu, ram, local_disk,
+            request, ipmi_address, architecture, cpus, memory_mb, local_gb,
             mac_addresses, ipmi_username=ipmi_username,
             ipmi_password=ipmi_password, driver=driver))
 
@@ -448,7 +416,6 @@ class Node(base.APIResourceWrapper):
     def list(cls, request, associated=None):
         nodes = NodeClient(request).node_class.list(
             request, associated=associated)
-
         if associated is None or associated:
             servers = TEST_DATA.novaclient_servers.list()
             servers_dict = utils.list_to_dict(servers)
