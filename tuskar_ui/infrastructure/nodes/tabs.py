@@ -29,9 +29,9 @@ class OverviewTab(tabs.Tab):
 
     def get_context_data(self, request):
         nodes = api.node.Node.list(request)
-        cpus = sum(int(node.properties['cpu']) for node in nodes)
-        ram = sum(int(node.properties['ram']) for node in nodes)
-        local_disk = sum(int(node.properties['local_disk']) for node in nodes)
+        cpus = sum(int(node.cpus) for node in nodes)
+        memory_mb = sum(int(node.memory_mb) for node in nodes)
+        local_gb = sum(int(node.local_gb) for node in nodes)
         deployed_nodes = api.node.Node.list(request, associated=True)
         free_nodes = api.node.Node.list(request, associated=False)
         deployed_nodes_error = api.node.filter_nodes(
@@ -48,8 +48,8 @@ class OverviewTab(tabs.Tab):
 
         return {
             'cpus': cpus,
-            'ram_gb': ram / 1024.0 ** 3,
-            'local_disk_gb': local_disk / 1024.0 ** 3,
+            'memory_gb': memory_mb / 1024.0,
+            'local_gb': local_gb,
             'total_nodes_healthy': total_nodes_healthy,
             'total_nodes_up': total_nodes_up,
             'total_nodes_error': total_nodes_error,

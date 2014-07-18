@@ -124,9 +124,9 @@ def data(TEST):
              'ip_address': '1.2.2.2'
          },
          'properties': {
-             'cpu': '8',
-             'ram': '16',
-             'local_disk': '10',
+             'cpus': '8',
+             'memory_mb': '4096',
+             'local_gb': '10',
          },
          'power_state': 'on',
          'maintenance': None,
@@ -145,9 +145,9 @@ def data(TEST):
              'ip_address': '1.2.2.3'
          },
          'properties': {
-             'cpu': '16',
-             'ram': '32',
-             'local_disk': '100',
+             'cpus': '16',
+             'memory_mb': '4096',
+             'local_gb': '100',
          },
          'power_state': 'on',
          'maintenance': None,
@@ -166,9 +166,9 @@ def data(TEST):
              'ip_address': '1.2.2.4'
          },
          'properties': {
-             'cpu': '32',
-             'ram': '64',
-             'local_disk': '1',
+             'cpus': '32',
+             'memory_mb': '8192',
+             'local_gb': '1',
          },
          'power_state': 'rebooting',
          'maintenance': None,
@@ -187,9 +187,9 @@ def data(TEST):
              'ip_address': '1.2.2.5'
          },
          'properties': {
-             'cpu': '8',
-             'ram': '16',
-             'local_disk': '10',
+             'cpus': '8',
+             'memory_mb': '4096',
+             'local_gb': '10',
          },
          'power_state': 'on',
          'maintenance': None,
@@ -208,9 +208,9 @@ def data(TEST):
              'ip_address': '1.2.2.6'
          },
          'properties': {
-             'cpu': '8',
-             'ram': '16',
-             'local_disk': '10',
+             'cpus': '8',
+             'memory_mb': '4096',
+             'local_gb': '10',
          },
          'power_state': 'error',
          'maintenance': None,
@@ -229,9 +229,9 @@ def data(TEST):
              'ip_address': '1.2.2.6'
          },
          'properties': {
-             'cpu': '8',
-             'ram': '16',
-             'local_disk': '10',
+             'cpus': '8',
+             'memory_mb': '4096',
+             'local_gb': '10',
          },
          'power_state': 'on',
          'maintenance': None,
@@ -250,9 +250,9 @@ def data(TEST):
              'ip_address': '1.2.2.7'
          },
          'properties': {
-             'cpu': '8',
-             'ram': '16',
-             'local_disk': '10',
+             'cpus': '8',
+             'memory_mb': '4096',
+             'local_gb': '10',
          },
          'power_state': 'on',
          'maintenance': True,
@@ -271,9 +271,9 @@ def data(TEST):
              'ip_address': '1.2.2.8'
          },
          'properties': {
-             'cpu': '8',
-             'ram': '16',
-             'local_disk': '10',
+             'cpus': '8',
+             'memory_mb': '4096',
+             'local_gb': '10',
          },
          'power_state': 'on',
          'maintenance': True,
@@ -292,9 +292,9 @@ def data(TEST):
              'ip_address': '1.2.2.9'
          },
          'properties': {
-             'cpu': '16',
-             'ram': '32',
-             'local_disk': '1000',
+             'cpus': '16',
+             'memory_mb': '8192',
+             'local_gb': '1000',
          },
          'power_state': 'on',
          'maintenance': True,

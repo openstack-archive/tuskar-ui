@@ -43,9 +43,9 @@ class NodeFilterAction(tables.FilterAction):
         def comp(node):
             return any(q in attr for attr in
                        (node.ip_address,
-                        node.properties['cpu'],
-                        node.properties['ram'],
-                        node.properties['local_disk'],))
+                        node.cpus,
+                        node.memory_mb,
+                        node.local_gb,))
 
         return filter(comp, nodes)
 
@@ -115,12 +115,12 @@ class IronicDiscoveredNodesTable(tables.DataTable):
     node = tables.Column('uuid',
                          link="horizon:infrastructure:nodes:detail",
                          verbose_name=_("Node Name"))
-    cpu = tables.Column(lambda n: n.properties['cpu'],
-                        verbose_name=_("CPU (cores)"))
-    ram = tables.Column(lambda n: n.properties['ram'],
-                        verbose_name=_("Memory (MB)"))
-    local_disk = tables.Column(lambda n: n.properties['local_disk'],
-                               verbose_name=_("Disk (GB)"))
+    cpus = tables.Column('cpus',
+                         verbose_name=_("CPU (cores)"))
+    memory_mb = tables.Column('memory_mb',
+                              verbose_name=_("Memory (MB)"))
+    local_gb = tables.Column('local_gb',
+                             verbose_name=_("Disk (GB)"))
     driver = tables.Column('driver',
                            verbose_name=_("Driver"))
     nics = tables.Column(lambda n: len(n.addresses),

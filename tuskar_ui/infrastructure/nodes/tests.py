@@ -59,7 +59,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         self.assertTemplateUsed(res, 'infrastructure/nodes/_overview.html')
 
     def test_registered_nodes(self):
-        registered_nodes = [api.node.Node(node)
+        registered_nodes = [api.node.Node(api.node.IronicNode(node))
                             for node in self.ironicclient_nodes.list()]
         roles = [api.tuskar.OvercloudRole(r)
                  for r in TEST_DATA.tuskarclient_roles.list()]
@@ -125,16 +125,16 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-0-mac_addresses': 'de:ad:be:ef:ca:fe',
             'register_nodes-0-architecture': 'x86',
             'register_nodes-0-cpus': '1',
-            'register_nodes-0-memory': '2',
-            'register_nodes-0-local_disk': '3',
+            'register_nodes-0-memory_mb': '2',
+            'register_nodes-0-local_gb': '3',
 
             'register_nodes-1-driver': 'ipmi',
             'register_nodes-1-ipmi_address': '127.0.0.2',
             'register_nodes-1-mac_addresses': 'de:ad:be:ef:ca:ff',
             'register_nodes-1-architecture': 'x86',
             'register_nodes-1-cpus': '4',
-            'register_nodes-1-memory': '5',
-            'register_nodes-1-local_disk': '6',
+            'register_nodes-1-memory_mb': '5',
+            'register_nodes-1-local_gb': '6',
         }
         with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['create'],
@@ -148,9 +148,9 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                     request,
                     ipmi_address=u'127.0.0.1',
                     architecture='x86',
-                    cpu=1,
-                    ram=2,
-                    local_disk=3,
+                    cpus=1,
+                    memory_mb=2,
+                    local_gb=3,
                     mac_addresses=['DE:AD:BE:EF:CA:FE'],
                     ipmi_username=u'username',
                     ipmi_password=u'password',
@@ -160,9 +160,9 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                     request,
                     ipmi_address=u'127.0.0.2',
                     architecture='x86',
-                    cpu=4,
-                    ram=5,
-                    local_disk=6,
+                    cpus=4,
+                    memory_mb=5,
+                    local_gb=6,
                     mac_addresses=['DE:AD:BE:EF:CA:FF'],
                     ipmi_username=None,
                     ipmi_password=None,
@@ -183,16 +183,16 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-0-mac_addresses': 'de:ad:be:ef:ca:fe',
             'register_nodes-0-architecture': 'x86',
             'register_nodes-0-cpus': '1',
-            'register_nodes-0-memory': '2',
-            'register_nodes-0-local_disk': '3',
+            'register_nodes-0-memory_mb': '2',
+            'register_nodes-0-local_gb': '3',
 
             'register_nodes-1-driver': 'ipmi',
             'register_nodes-1-ipmi_address': '127.0.0.2',
             'register_nodes-1-mac_addresses': 'de:ad:be:ef:ca:ff',
             'register_nodes-1-architecture': 'x86',
             'register_nodes-1-cpus': '4',
-            'register_nodes-1-memory': '5',
-            'register_nodes-1-local_disk': '6',
+            'register_nodes-1-memory_mb': '5',
+            'register_nodes-1-local_gb': '6',
         }
         with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['create'],
@@ -206,9 +206,9 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                     request,
                     ipmi_address=u'127.0.0.1',
                     architecture='x86',
-                    cpu=1,
-                    ram=2,
-                    local_disk=3,
+                    cpus=1,
+                    memory_mb=2,
+                    local_gb=3,
                     mac_addresses=['DE:AD:BE:EF:CA:FE'],
                     ipmi_username=u'username',
                     ipmi_password=u'password',
@@ -218,9 +218,9 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                     request,
                     ipmi_address=u'127.0.0.2',
                     architecture='x86',
-                    cpu=4,
-                    ram=5,
-                    local_disk=6,
+                    cpus=4,
+                    memory_mb=5,
+                    local_gb=6,
                     mac_addresses=['DE:AD:BE:EF:CA:FF'],
                     ipmi_username=None,
                     ipmi_password=None,

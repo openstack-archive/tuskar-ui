@@ -27,8 +27,8 @@
     <div class="row-fluid" id="register-hardware-fields">
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.architecture required=True %}
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.cpus extra_text=_('units') required=True %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.memory extra_text=_('MB') required=True %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.local_disk extra_text=_('GB') required=True %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.memory_mb extra_text=_('MB') required=True %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.local_gb extra_text=_('GB') required=True %}
     </div>
   </fieldset></div>
 </div>
