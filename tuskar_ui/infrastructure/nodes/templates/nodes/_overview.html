@@ -2,10 +2,10 @@
 {% load url from future%}
 
 
-<div class="row-fluid">
-  <div class="span8">
+<div class="nodes">
+  <div class="span4">
     <div class="widget">
-      <h2>{% trans 'Hardware Inventory' %}</h2>
+      <h3>{% trans 'Hardware Inventory' %}</h3>
       <table class="table">
         <tbody>
           <tr>
@@ -17,35 +17,32 @@
           <tr>
             <td>{{ local_gb }} {% trans 'GB of storage' %}</td>
           </tr>
-          <tr>
-            <td>
-              <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
-                {% trans 'Free Nodes' %}
-                ({{ free_nodes|length|default:0 }})
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
-                {% trans 'Provisioned Nodes' %}
-                ({{ deployed_nodes|length|default:0 }})
-              </a>
-            </td>
-          </tr>
         </tbody>
       </table>
     </div>
   </div>
   <div class="span4">
     <div class="widget">
-      <h2>{% trans 'Free Nodes' %}</h2>
+      <h3>{% trans 'Free Nodes' %}</h3>
       <div class="d3_pie_chart_distribution" data-used="Deployed={{ deployed_nodes|length }}|Free={{ free_nodes|length }}"></div>
+      <div class="widget-info">
+        <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+          <span class="info">{{ free_nodes|length|default:0 }}</span>
+          {% trans 'Free Nodes' %}
+        </a>
+      </div>
     </div>
-    <div class="clear"></div>
+  </div>
+  <div class="span4">
     <div class="widget">
       <h2>{% trans 'Power Status' %}</h2>
       <div class="d3_pie_chart_distribution" data-used="Running={{ total_nodes_up|length }}|Stopped={{ total_nodes_down|length }}"></div>
+      <div class="widget-info">
+        <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+          <span class="info">{{ deployed_nodes|length|default:0 }}</span>
+          {% trans 'Provisioned Nodes' %}
+        </a>
+      </div>
     </div>
   </div>
 </div>
