@@ -144,7 +144,9 @@ class PerformanceView(base.TemplateView):
                     meter_name,
                     stats_attr,
                     unit))
-
+            
+            if not series:
+                barchart = False
             if barchart:
                 average, used, tooltip_average = get_barchart_stats(series,
                                                                     unit)
