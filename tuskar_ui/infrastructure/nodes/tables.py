@@ -115,6 +115,8 @@ class IronicDiscoveredNodesTable(tables.DataTable):
     node = tables.Column('uuid',
                          link="horizon:infrastructure:nodes:detail",
                          verbose_name=_("Node Name"))
+    arch = tables.Column('arch',
+                         verbose_name=_("Arch."))
     cpus = tables.Column('cpus',
                          verbose_name=_("CPU (cores)"))
     memory_mb = tables.Column('memory_mb',
