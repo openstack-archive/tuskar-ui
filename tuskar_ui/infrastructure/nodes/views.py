@@ -68,22 +68,23 @@ class DetailView(horizon_views.APIView):
             context['stack'] = resource.stack
         except exceptions.NotFound:
             pass
-        if api_base.is_service_enabled(request, 'metering'):
-            # Meter configuration in the following format:
-            # (meter label, url part, barchart (True/False))
-            context['meter_conf'] = (
-                (_('System Load'),
-                 url_part('hardware.cpu.load.1min', False)),
-                (_('CPU Utilization'),
-                 url_part('hardware.system_stats.cpu.util', True)),
-                #TODO(akrivoka) need this metric expressed in percentages
-                (_('Swap Utilization'),
-                 url_part('hardware.memory.swap.util', True)),
-                (_('Disk I/O '),
-                 url_part('disk-io', False)),
-                (_('Network I/O '),
-                 url_part('network-io', False)),
-            )
+        if node.instance_uuid:
+            if api_base.is_service_enabled(request, 'metering'):
+                # Meter configuration in the following format:
+                # (meter label, url part, barchart (True/False))
+                context['meter_conf'] = (
+                    (_('System Load'),
+                     url_part('hardware.cpu.load.1min', False)),
+                    (_('CPU Utilization'),
+                     url_part('hardware.system_stats.cpu.util', True)),
+                    #TODO(akrivoka) need this metric expressed in percentages
+                    (_('Swap Utilization'),
+                     url_part('hardware.memory.swap.util', True)),
+                    (_('Disk I/O '),
+                     url_part('disk-io', False)),
+                    (_('Network I/O '),
+                     url_part('network-io', False)),
+                )
         return context
 
 
