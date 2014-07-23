@@ -5,7 +5,7 @@
          data-chart-type="line_chart"
          data-url="{{ url }}"
          data-form-selector='#linechart_general_form'
-         data-settings='{ "auto_size": false, "axes_x" : false, "axes_y" : false }'>
+         data-settings='{ "auto_size": false, "axes_x" : false, "axes_y" : false {% if y_max %}, "yMax": {{ y_max }} {% endif %} }'>
     </div>
   </div>
   <div class="bar_chart_container">
