@@ -151,9 +151,9 @@
   </script>
 
   <div id="node-charts" class="clearfix">
-    {% for meter_label, url_part in meter_conf %}
+    {% for meter_label, url_part, y_max in meter_conf %}
         <div class="span3">
-          {% include "infrastructure/_performance_chart.html" with label=meter_label url=node_perf_url|add:"?"|add:url_part only %}
+          {% include "infrastructure/_performance_chart.html" with label=meter_label y_max=y_max url=node_perf_url|add:"?"|add:url_part only %}
         </div>
     {% endfor %}
 
