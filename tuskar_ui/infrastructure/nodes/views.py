@@ -74,16 +74,20 @@ class DetailView(horizon_views.APIView):
                 # (meter label, url part, barchart (True/False))
                 context['meter_conf'] = (
                     (_('System Load'),
-                     url_part('hardware.cpu.load.1min', False)),
+                     url_part('hardware.cpu.load.1min', False),
+                     None),
                     (_('CPU Utilization'),
-                     url_part('hardware.system_stats.cpu.util', True)),
-                    #TODO(akrivoka) need this metric expressed in percentages
+                     url_part('hardware.system_stats.cpu.util', True),
+                     '100'),
                     (_('Swap Utilization'),
-                     url_part('hardware.memory.swap.util', True)),
+                     url_part('swap-util', True),
+                     '100'),
                     (_('Disk I/O '),
-                     url_part('disk-io', False)),
+                     url_part('disk-io', False),
+                     None),
                     (_('Network I/O '),
-                     url_part('network-io', False)),
+                     url_part('network-io', False),
+                     None),
                 )
         return context
 
@@ -126,17 +130,22 @@ class PerformanceView(base.TemplateView):
                     'hardware.network.ip.out_requests',
                     'hardware.network.ip.in_receives'
                 ])
+            elif meter == 'swap-util':
+                meters = get_meters([
+                    'hardware.memory.swap.util',
+                    'hardware.memory.swap.total'
+                ])
             else:
                 meters = get_meters([meter])
 
-            for meter, meter_name in meters:
+            for meter_id, meter_name in meters:
                 resources, unit = metering.query_data(
                     request=request,
                     date_from=date_from,
                     date_to=date_to,
                     date_options=date_options,
                     group_by=group_by,
-                    meter=meter,
+                    meter=meter_id,
                     additional_query=additional_query)
                 series.extend(metering.SamplesView._series_for_meter(
                     resources,
@@ -144,6 +153,20 @@ class PerformanceView(base.TemplateView):
                     meter_name,
                     stats_attr,
                     unit))
+            if meter == 'swap-util':
+                data = []
+                # Divide available swap with used swap, multiply by 100.
+                # Integers are good enough here.
+                result = series[0].copy()
+
+                for i, d in enumerate(result['data']):
+                    try:
+                        result['data'][i]['y'] = int((100*series[0]['data'][i]['y'])//series[2]['data'][i]['y'])
+                    except IndexError:
+                        # Could happen if one series is shorter.
+                        del result['data'][i]
+                result['unit'] = '%'
+                series = [result]
 
             if barchart:
                 average, used, tooltip_average = get_barchart_stats(series,
