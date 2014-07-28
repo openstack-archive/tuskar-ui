@@ -22,6 +22,7 @@ from tuskar_ui.infrastructure import dashboard
 class Plans(horizon.Panel):
     name = _("Plans")
     slug = "plans"
+    nav = False
 
 
 dashboard.Infrastructure.register(Plans)
