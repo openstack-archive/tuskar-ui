@@ -264,7 +264,9 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
 
         ceilometerclient = self.stub_ceilometerclient()
         ceilometerclient.resources = self.mox.CreateMockAnything()
-        ceilometerclient.resources.list(q=[]).AndReturn(resources)
+        ceilometerclient.resources.list(q=[{'field': 'resource_id',
+                                            'value': '1.2.2.2',
+                                            'op': 'eq'}]).AndReturn(resources)
         ceilometerclient.meters = self.mox.CreateMockAnything()
 
         self.mox.ReplayAll()
