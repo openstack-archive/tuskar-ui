@@ -187,6 +187,10 @@ class IronicNode(base.APIResourceWrapper):
     def local_gb(self):
         return self.properties['local_gb']
 
+    @cached_property
+    def arch(self):
+        return self.properties['arch']
+
 
 class BareMetalNode(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'memory_mb', 'cpus', 'local_gb',
@@ -363,7 +367,7 @@ class NodeClient(object):
 class Node(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'driver', 'driver_info',
               'power_state', 'addresses', 'maintenance', 'cpus',
-              'memory_mb', 'local_gb')
+              'memory_mb', 'local_gb', 'arch')
 
     def __init__(self, apiresource, request=None, **kwargs):
         """Initialize a Node
