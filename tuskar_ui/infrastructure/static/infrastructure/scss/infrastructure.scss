@@ -1,0 +1,16 @@
+/* Additional CSS for infrastructure. */
+@import "/horizon/scss/_variables";
+
+@import "_numberpicker";
+@import "_breadcrumbs";
+@import "_buttons";
+@import "_capacities";
+@import "_flavor_usages";
+@import "_formsets";
+@import "_index_pages";
+@import "_individual_pages";
+
+// hide the project switcher from the top bar
+#tenant_switcher {
+    visibility: hidden;
+}
