@@ -230,10 +230,23 @@ def query_data(request,
         unit = meter_list[0].unit
     except Exception:
         unit = ""
-    if group_by == "resources":
-        # TODO(lsmola) need to implement group_by groups of resources
-        resources = []
-        unit = ""
+    if group_by == "roles":
+        # TODO(lsmola) this will not work now, we need to first propagate
+        # role related metadata through heat to nova. Ceilometer will then
+        # store it into resource metadata and then we can make aggregated
+        # queries.
+        queries = {}
+        role_id = ""
+        role_query = [{"field": "metadata.role_id",
+                       "op": "eq",
+                       "value": role_id}]
+
+        queries[role_id] = role_query
+
+        ceilometer_usage = ceilometer.CeilometerUsage(request)
+        resources = ceilometer_usage.resource_aggregates_with_statistics(
+            queries, [meter], period=period, stats_attr=None,
+            additional_query=additional_query)
     else:
         ceilometer_usage = ceilometer.CeilometerUsage(request)
         try:
