@@ -89,7 +89,7 @@
           <select data-line-chart-command="select_box_change"
             id="date_options"
             name="date_options"
-            class="span2">
+            class="col-xs-2">
           <option value="1" selected="selected">{% trans "Last day" %}</option>
           <option value="7">{% trans "Last week" %}</option>
           <option value="{% now 'j' %}">{% trans "Month to date" %}</option>
@@ -107,7 +107,7 @@
             type="text"
             id="date_from"
             name="date_from"
-            class="span2 example"/>
+            class="col-xs-2 example"/>
         </div>
       </div>
       <div class="control-group" id="date_to">
@@ -116,7 +116,7 @@
           <input data-line-chart-command="date_picker_change"
             type="text"
             name="date_to"
-            class="span2 example"/>
+            class="col-xs-2 example"/>
         </div>
       </div>
     </form>
@@ -152,7 +152,7 @@
 
   <div id="node-charts" class="clearfix">
     {% for meter_label, url_part, y_max in meter_conf %}
-        <div class="span3">
+        <div class="col-xs-3">
           {% include "infrastructure/_performance_chart.html" with label=meter_label y_max=y_max url=node_perf_url|add:"?"|add:url_part only %}
         </div>
     {% endfor %}
