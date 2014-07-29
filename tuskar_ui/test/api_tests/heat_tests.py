@@ -37,7 +37,11 @@ class HeatAPITests(test.APITestCase):
 
     def test_stack_plan(self):
         stack = api.heat.Stack(self.heatclient_stacks.first())
-        ret_val = stack.plan
+        plan = self.tuskarclient_plans.first()
+
+        with patch('tuskar_ui.test.test_driver.tuskar_driver.Plan.get',
+                   return_value=plan):
+            ret_val = stack.plan
         self.assertIsInstance(ret_val, api.tuskar.OvercloudPlan)
 
     def test_stack_events(self):
@@ -100,6 +104,7 @@ class HeatAPITests(test.APITestCase):
 
     def test_stack_dashboard_url(self):
         stack = api.heat.Stack(self.heatclient_stacks.first())
+        stack.plan = api.tuskar.OvercloudPlan(self.tuskarclient_plans.first())
 
         mocked_service = mock.Mock(id='horizon_id')
         mocked_service.name = 'horizon'
