@@ -1,5 +1,3 @@
-# -*- coding: utf8 -*-
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -12,32 +10,38 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import contextlib
-
-from django.core import urlresolvers
-from mock import patch, call  # noqa
 from openstack_dashboard.test.test_data import utils
 
-from tuskar_ui import api
-from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import tuskar_data
-
-
-INDEX_URL = urlresolvers.reverse(
-    'horizon:infrastructure:parameters:index')
 
 TEST_DATA = utils.TestDataContainer()
 tuskar_data.data(TEST_DATA)
 
 
-class ParametersTest(test.BaseAdminViewTests):
+class Plan:
 
-    def test_index(self):
-        plan = api.tuskar.OvercloudPlan(TEST_DATA.tuskarclient_plans.first())
-        with contextlib.nested(
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.get_the_plan',
-                      return_value=plan),
-        ):
-            res = self.client.get(INDEX_URL)
+    _plans = {}
 
-        self.assertTemplateUsed(res, 'infrastructure/parameters/index.html')
+    @classmethod
+    def create(cls, name, description):
+        plan = TEST_DATA.tuskarclient_plans.first()
+        cls._plans[plan['id']] = plan
+        return plan
+
+    @classmethod
+    def update(cls, plan_id, name, description):
+        plan = cls.get(plan_id)
+        # no updates for now
+        return plan
+
+    @classmethod
+    def list(cls):
+        return cls._plans.values()
+
+    @classmethod
+    def get(cls, plan_id):
+        return cls._plans.get(plan_id, None)
+
+    @classmethod
+    def delete(cls, plan_id):
+        cls._plans.pop(plan_id, None)
