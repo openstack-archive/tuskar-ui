@@ -2,8 +2,8 @@
 {% load url from future%}
 
 
-<div class="nodes">
-  <div class="span4">
+<div class="nodes row">
+  <div class="col-xs-4">
     <div class="widget">
       <h3>{% trans 'Hardware Inventory' %}</h3>
       <table class="table">
@@ -21,7 +21,7 @@
       </table>
     </div>
   </div>
-  <div class="span4">
+  <div class="col-xs-4">
     <div class="widget">
       <h3>{% trans 'Free Nodes' %}</h3>
       <div class="d3_pie_chart_distribution" data-used="Deployed={{ deployed_nodes|length }}|Free={{ free_nodes|length }}"></div>
@@ -39,7 +39,7 @@
       </div>
     </div>
   </div>
-  <div class="span4">
+  <div class="col-xs-4">
     <div class="widget">
       <h2>{% trans 'Power Status' %}</h2>
       <div class="d3_pie_chart_distribution" data-used="Running={{ total_nodes_up|length }}|Stopped={{ total_nodes_down|length }}"></div>

@@ -3,14 +3,15 @@
 {% for error in formset.non_form_errors %}
   <div class="alert alert-error error">{{ error }}</div>
 {% endfor %}
-<div class="row-fluid register-nodes-formset" id="formset-{{ formset.prefix }}">
-  <div class="span5">
+<div class="row register-nodes-formset" id="formset-{{ formset.prefix }}">
+  <div class="col-xs-5">
     <div class="clearfix register-nav-head">
-      <a class="pull-right add-node-link"
-         href="#"><i class="icon-plus"></i> {% trans "Add Node" %}</a>
+      <a class="add-node-link" href="#">
+        <i class="glyphicon glyphicon-plus"></i> {% trans "Add Node" %}
+      </a>
       <h4>Nodes to register</h4>
     </div>
-    <ul class="nav nav-tabs nav-stacked">
+    <ul class="nav nav-pills nav-stacked">
       {% for form in formset %}
       <li {% if forloop.first %}class="active"{% endif %}>
         <a href="#tab-{{ form.prefix }}" data-toggle="tab">
@@ -20,7 +21,7 @@
       {% endfor %}
     </ul>
   </div>
-  <div class="span7">
+  <div class="col-xs-7">
     <div class="tab-content">
       {% for form in formset %}
         {% include form_template with form=form active=forloop.first %}
