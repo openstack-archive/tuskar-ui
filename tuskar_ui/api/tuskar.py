@@ -21,6 +21,7 @@ from tuskarclient.v1 import client as tuskar_client
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
 from tuskar_ui.test.test_data import tuskar_data
+from tuskar_ui.test.test_driver import tuskar_driver as mock_tuskar
 
 
 TEST_DATA = utils.TestDataContainer()
@@ -61,19 +62,18 @@ class OvercloudPlan(base.APIDictWrapper):
         :return: the created OvercloudPlan object
         :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
-
-        return cls(TEST_DATA.tuskarclient_plans.first(),
-                   request=request)
+        plan = mock_tuskar.Plan.create(name, description)
+        return cls(plan, request=request)
 
     @classmethod
-    def update(cls, request, overcloud_id, name, description):
+    def update(cls, request, plan_id, name, description):
         """Update an OvercloudPlan in Tuskar
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param overcloud_id: id of the overcloud we want to update
-        :type  overcloud_id: string
+        :param plan_id: id of the plan we want to update
+        :type  plan_id: string
 
         :param name: plan name
         :type  name: string
@@ -84,8 +84,8 @@ class OvercloudPlan(base.APIDictWrapper):
         :return: the updated OvercloudPlan object
         :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
-        return cls(TEST_DATA.tuskarclient_plans.first(),
-                   request=request)
+        plan = mock_tuskar.Plan.update(plan_id, name, description)
+        return cls(plan, request=request)
 
     @classmethod
     def list(cls, request):
@@ -97,7 +97,7 @@ class OvercloudPlan(base.APIDictWrapper):
         :return: list of OvercloudPlans, or an empty list if there are none
         :rtype:  list of tuskar_ui.api.tuskar.OvercloudPlan
         """
-        plans = TEST_DATA.tuskarclient_plans.list()
+        plans = mock_tuskar.Plan.list()
 
         return [cls(plan, request=request) for plan in plans]
 
@@ -116,8 +116,7 @@ class OvercloudPlan(base.APIDictWrapper):
                  the ID
         :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
-        # FIXME(lsmola) hack for Icehouse, only one Overcloud is allowed
-        return cls.get_the_plan(request)
+        return cls(mock_tuskar.Plan.get(plan_id))
 
     # TODO(lsmola) before will will support multiple overclouds, we
     # can work only with overcloud that is named overcloud. Delete
@@ -131,8 +130,7 @@ class OvercloudPlan(base.APIDictWrapper):
     def get_the_plan(cls, request):
         plan_list = cls.list(request)
         for plan in plan_list:
-            if plan.name == 'overcloud':
-                return plan
+            return plan
 
     @classmethod
     def delete(cls, request, plan_id):
@@ -144,7 +142,7 @@ class OvercloudPlan(base.APIDictWrapper):
         :param plan_id: plan id
         :type  plan_id: int
         """
-        return
+        mock_tuskar.Plan.delete(plan_id)
 
     @cached_property
     def role_list(self):
