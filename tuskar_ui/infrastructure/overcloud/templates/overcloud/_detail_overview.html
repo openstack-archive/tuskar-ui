@@ -4,8 +4,8 @@
 {% if stack.is_deploying or stack.is_failed %}
   {% if stack.is_deploying %}
     <div class="alert alert-info">
-      <div class="row-fluid">
-        <div class="span2">
+      <div class="row">
+        <div class="col-xs-2">
           <strong>Deploying...</strong>
           <div class="progress progress-striped active progress-info">
             <div class="bar bar-info" style="width:{{ progress }}%"></div>
@@ -13,15 +13,15 @@
         </div>
   {% else %}
     <div class="alert alert-error">
-      <div class="row-fluid">
-        <div class="span2">
+      <div class="row">
+        <div class="col-xs-2">
           <strong>Deployment failed</strong>
           <div class="progress progress-striped progress-danger">
             <div class="bar bar-info" style="width:{{ progress }}%"></div>
           </div>
         </div>
   {% endif %}
-    <div class="span10">
+    <div class="col-xs-10">
       {% if last_failed_events %}
         <strong>{% trans "Last failed events:" %}</strong>
         {% for event in last_failed_events %}
@@ -46,8 +46,8 @@
 {% endif %}
 
 {% if not dashboard_urls and not stack.is_deploying and not stack.is_failed %}
-<div class="row-fluid">
-  <div class="span8">
+<div class="row">
+  <div class="col-xs-8">
     {% blocktrans %}
       Your cloud is now deployed; however, it needs to be initialized.  To do so, copy the appropriate script into a file, make it executable, and run it.
     {% endblocktrans %}
@@ -183,8 +183,8 @@ nova flavor-create m1.tiny 1 512 2 1
 </div>
 {% endif %}
 
-<div class="row-fluid">
-  <div class="span8">
+<div class="row">
+  <div class="col-xs-8">
     <h2>{% trans "Deployment Roles" %}</h2>
     <div class="widget">
       <table class="table">
@@ -228,9 +228,9 @@ nova flavor-create m1.tiny 1 512 2 1
           </td>
           <td>
             {% if role.capacity %}
-            <div class="row-fluid">
-              <div class="span6"><p>{{ role.capacity }}%</p></div>
-              <div class="span6">
+            <div class="row">
+              <div class="col-xs-6"><p>{{ role.capacity }}%</p></div>
+              <div class="col-xs-6">
                 <div class="progress active progress-info">
                   <div class="bar bar-info" style="width:{{ role.capacity }}%"></div>
                 </div>
@@ -243,7 +243,7 @@ nova flavor-create m1.tiny 1 512 2 1
       </table>
     </div>
   </div>
-  <div class="span4">
+  <div class="col-xs-4">
     <div class="widget">
       <h2>{% trans "Deployment Role Distribution" %}</h2>
       <div class="d3_pie_chart_distribution" data-used='{% for role in roles %}{{ role.name }}={{ role.deployed_node_count|default:"0" }}{% if not forloop.last %}|{% endif %}{% endfor %}'></div>
