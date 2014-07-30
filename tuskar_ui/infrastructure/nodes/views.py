@@ -247,7 +247,7 @@ def query_data(request,
                additional_query=None):
 
     if not period:
-        period = _calc_period(date_from, date_to, 20)
+        period = _calc_period(date_from, date_to, 50)
     if additional_query is None:
         additional_query = []
     if date_from:
@@ -386,7 +386,8 @@ def create_json_output(series, start_datetime, end_datetime):
             'auto_size': False,
             'auto_resize': False,
             'axes_x': False,
-            'axes_y': False,
+            'axes_y': True,
+            'axes_y_label': False,
         },
     }
 
