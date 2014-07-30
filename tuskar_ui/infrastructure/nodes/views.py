@@ -11,6 +11,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+from datetime import datetime  # noqa
+from datetime import timedelta  # noqa
+from django.utils import timezone
+
 import json
 
 from django.core.urlresolvers import reverse_lazy
@@ -196,7 +201,7 @@ class PerformanceView(base.TemplateView):
                                  mimetype='application/json')
 
 
-#TODO(lsmola) this should probably live in Horizon
+#TODO(lsmola) this should probably live in Horizon common
 def query_data(request,
                date_from,
                date_to,
@@ -206,7 +211,7 @@ def query_data(request,
                period=None,
                query=None,
                additional_query=None):
-    date_from, date_to = metering._calc_date_args(date_from,
+    date_from, date_to = _calc_date_args(date_from,
                                                   date_to,
                                                   date_options)
     if not period:
@@ -247,7 +252,7 @@ def query_data(request,
     return resources, unit
 
 
-#TODO(lsmola) push this function to Horizon then delete this
+#TODO(lsmola) push this function to Horizon common then delete this
 def _calc_period(date_from, date_to, number_of_samples=400):
     if date_from and date_to:
         if date_to < date_from:
@@ -268,6 +273,43 @@ def _calc_period(date_from, date_to, number_of_samples=400):
         # If some date is missing, just set static window to one day.
         period = 3600 * 24
     return period
+
+
+#TODO(lsmola) push this function to Horizon common then delete this
+def _calc_date_args(date_from, date_to, date_options):
+    # TODO(lsmola) all timestamps should probably work with
+    # current timezone. And also show the current timezone in chart.
+    if (date_options == "other"):
+        try:
+            if date_from:
+                date_from = datetime.strptime(date_from,
+                                              "%Y-%m-%d")
+            else:
+                # TODO(lsmola) there should be probably the date
+                # of the first sample as default, so it correctly
+                # counts the time window. Though I need ordering
+                # and limit of samples to obtain that.
+                pass
+            if date_to:
+                date_to = datetime.strptime(date_to,
+                                            "%Y-%m-%d")
+                # It return beginning of the day, I want the and of
+                # the day, so i will add one day without a second.
+                date_to = (date_to + timedelta(days=1) -
+                           timedelta(seconds=1))
+            else:
+                date_to = timezone.now()
+        except Exception:
+            raise ValueError("The dates haven't been "
+                             "recognized")
+    else:
+        try:
+            date_from = timezone.now() - timedelta(days=float(date_options))
+            date_to = timezone.now()
+        except Exception:
+            raise ValueError("The time delta must be an "
+                             "integer representing days.")
+    return date_from, date_to
 
 
 def url_part(meter_name, barchart):
