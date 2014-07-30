@@ -178,13 +178,16 @@ class PerformanceView(base.TemplateView):
             else:
                 meters = get_meters([meter])
 
+            date_from, date_to = _calc_date_args(date_from,
+                                                 date_to,
+                                                 date_options)
+
             series = []
             for meter_id, meter_name in meters:
                 resources, unit = query_data(
                     request=request,
                     date_from=date_from,
                     date_to=date_to,
-                    date_options=date_options,
                     group_by=group_by,
                     meter=meter_id,
                     query=query)
@@ -221,8 +224,9 @@ class PerformanceView(base.TemplateView):
             if barchart:
                 average, used, tooltip_average = get_barchart_stats(series,
                                                                     unit)
-
-        json_output = create_json_output(series)
+        start_datetime = date_from.strftime("%Y-%m-%dT%H:%M:%S")
+        end_datetime = date_to.strftime("%Y-%m-%dT%H:%M:%S")
+        json_output = create_json_output(series, start_datetime, end_datetime)
 
         if barchart:
             json_output = add_barchart_settings(json_output, average, used,
@@ -236,15 +240,12 @@ class PerformanceView(base.TemplateView):
 def query_data(request,
                date_from,
                date_to,
-               date_options,
                group_by,
                meter,
                period=None,
                query=None,
                additional_query=None):
-    date_from, date_to = _calc_date_args(date_from,
-                                         date_to,
-                                         date_options)
+
     if not period:
         period = _calc_period(date_from, date_to, 20)
     if additional_query is None:
@@ -373,17 +374,19 @@ def get_barchart_stats(series, unit):
     return average, used, tooltip_average
 
 
-def create_json_output(series):
+def create_json_output(series, start_datetime, end_datetime):
     return {
         'series': series,
         'settings': {
             'renderer': 'StaticAxes',
             'yMin': 0,
+            'xMin': start_datetime,
+            'xMax': end_datetime,
             'higlight_last_point': True,
             'auto_size': False,
             'auto_resize': False,
             'axes_x': False,
-            'axes_y': True,
+            'axes_y': False,
         },
     }
 
