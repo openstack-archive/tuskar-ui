@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -11,31 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.utils.translation import ugettext_lazy as _
+from django.conf import urls
 
-import horizon
-
-
-class BasePanels(horizon.PanelGroup):
-    slug = "infrastructure"
-    name = _("Infrastructure")
-    panels = (
-        'overcloud',
-        'plans',
-        'nodes',
-        'flavors',
-        'history',
-    )
+from tuskar_ui.infrastructure.history import views
 
 
-class Infrastructure(horizon.Dashboard):
-    name = _("Infrastructure")
-    slug = "infrastructure"
-    panels = (
-        BasePanels,
-    )
-    default_panel = 'overcloud'
-    permissions = ('openstack.roles.admin',)
-
-
-horizon.register(Infrastructure)
+urlpatterns = urls.patterns(
+    '',
+    urls.url(r'^$', views.IndexView.as_view(), name='index'),
+)

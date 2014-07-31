@@ -112,6 +112,20 @@ class Stack(base.APIResourceWrapper):
             if stack.id == stack_id:
                 return stack
 
+    @classmethod
+    @handle_errors(_("Unable to retrieve stack"))
+    def get_by_plan(cls, request, plan):
+        """Return the Heat Stack associated with an OvercloudPlan
+
+        :return: Heat Stack associated with the plan; or None
+                 if no Stack is associated, or no Stack can be
+                 found
+        :rtype:  tuskar_ui.api.heat.Stack or None
+        """
+        for stack in Stack.list(request):
+            if stack.plan and (stack.plan.id == plan.id):
+                return stack
+
     @memoized.memoized
     def resources(self, with_joins=True):
         """Return a list of all Resources associated with the Stack

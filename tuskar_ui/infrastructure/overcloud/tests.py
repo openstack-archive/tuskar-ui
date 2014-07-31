@@ -33,11 +33,8 @@ DETAIL_URL = urlresolvers.reverse(
 UNDEPLOY_IN_PROGRESS_URL = urlresolvers.reverse(
     'horizon:infrastructure:overcloud:undeploy_in_progress',
     args=('overcloud',))
-UNDEPLOY_IN_PROGRESS_URL_LOG_TAB = (
-    UNDEPLOY_IN_PROGRESS_URL + "?tab=undeploy_in_progress__log")
 DETAIL_URL_CONFIGURATION_TAB = (DETAIL_URL +
                                 "?tab=detail__configuration")
-DETAIL_URL_LOG_TAB = (DETAIL_URL + "?tab=detail__log")
 DELETE_URL = urlresolvers.reverse(
     'horizon:infrastructure:overcloud:undeploy_confirmation',
     args=('stack-id-1',))
@@ -145,21 +142,6 @@ class OvercloudTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(
             res, 'horizon/common/_detail_table.html')
 
-    def test_detail_get_log_tab(self):
-        with contextlib.nested(
-                _mock_plan(),
-                patch('tuskar_ui.api.heat.Stack.events',
-                      return_value=[]),
-        ):
-            res = self.client.get(DETAIL_URL_LOG_TAB)
-
-        self.assertTemplateUsed(
-            res, 'infrastructure/overcloud/detail.html')
-        self.assertTemplateNotUsed(
-            res, 'infrastructure/overcloud/_detail_overview.html')
-        self.assertTemplateUsed(
-            res, 'horizon/common/_detail_table.html')
-
     def test_delete_get(self):
         res = self.client.get(DELETE_URL)
         self.assertTemplateUsed(
@@ -201,22 +183,3 @@ class OvercloudTests(test.BaseAdminViewTests):
             res = self.client.get(UNDEPLOY_IN_PROGRESS_URL)
 
         self.assertRedirectsNoFollow(res, DETAIL_URL)
-
-    def test_undeploy_in_progress_log_tab(self):
-        with contextlib.nested(
-                _mock_plan(),
-                patch('tuskar_ui.api.heat.Stack.is_deleting',
-                      return_value=True),
-                patch('tuskar_ui.api.heat.Stack.is_deployed',
-                      return_value=False),
-                patch('tuskar_ui.api.heat.Stack.events',
-                      return_value=[]),
-        ):
-            res = self.client.get(UNDEPLOY_IN_PROGRESS_URL_LOG_TAB)
-
-        self.assertTemplateUsed(
-            res, 'infrastructure/overcloud/detail.html')
-        self.assertTemplateNotUsed(
-            res, 'infrastructure/overcloud/_undeploy_in_progress.html')
-        self.assertTemplateUsed(
-            res, 'horizon/common/_detail_table.html')

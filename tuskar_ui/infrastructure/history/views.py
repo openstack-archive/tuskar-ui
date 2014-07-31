@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -11,31 +12,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.utils.translation import ugettext_lazy as _
+from horizon import tables as horizon_tables
 
-import horizon
-
-
-class BasePanels(horizon.PanelGroup):
-    slug = "infrastructure"
-    name = _("Infrastructure")
-    panels = (
-        'overcloud',
-        'plans',
-        'nodes',
-        'flavors',
-        'history',
-    )
+from tuskar_ui import api
+from tuskar_ui.infrastructure.history import tables
 
 
-class Infrastructure(horizon.Dashboard):
-    name = _("Infrastructure")
-    slug = "infrastructure"
-    panels = (
-        BasePanels,
-    )
-    default_panel = 'overcloud'
-    permissions = ('openstack.roles.admin',)
+class IndexView(horizon_tables.DataTableView):
+    table_class = tables.HistoryTable
+    template_name = "infrastructure/history/index.html"
 
-
-horizon.register(Infrastructure)
+    def get_data(self):
+        plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+        if plan:
+            stack = api.heat.Stack.get_by_plan(self.request, plan)
+            if stack:
+                return stack.events

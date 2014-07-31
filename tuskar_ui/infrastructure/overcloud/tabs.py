@@ -149,25 +149,13 @@ class ConfigurationTab(tabs.TableTab):
                 stack.parameters.items()]
 
 
-class LogTab(tabs.TableTab):
-    table_classes = (tables.LogTable,)
-    name = _("Log")
-    slug = "log"
-    template_name = "horizon/common/_detail_table.html"
-    preload = False
-
-    def get_log_data(self):
-        stack = self.tab_group.kwargs['stack']
-        return stack.events
-
-
 class UndeployInProgressTabs(tabs.TabGroup):
     slug = "undeploy_in_progress"
-    tabs = (UndeployInProgressTab, LogTab)
+    tabs = (UndeployInProgressTab,)
     sticky = True
 
 
 class DetailTabs(tabs.TabGroup):
     slug = "detail"
-    tabs = (OverviewTab, ConfigurationTab, LogTab)
+    tabs = (OverviewTab, ConfigurationTab,)
     sticky = True
