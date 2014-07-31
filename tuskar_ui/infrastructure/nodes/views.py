@@ -146,7 +146,9 @@ class PerformanceView(base.TemplateView):
 
         average = used = 0
         tooltip_average = ''
+        unit = ''
         series = []
+        start_datetime = end_datetime = ''
 
         try:
             ip_addr = node.driver_info['ip_address']
@@ -180,7 +182,6 @@ class PerformanceView(base.TemplateView):
                                                  date_to,
                                                  date_options)
 
-            series = []
             for meter_id, meter_name in meters:
                 resources, unit = query_data(
                     request=request,
@@ -197,16 +198,17 @@ class PerformanceView(base.TemplateView):
                     unit)
                 series += serie
 
-            if meter == 'swap-util':
+            if series and meter == 'swap-util':
                 # Divide available swap with used swap, multiply by 100.
                 # Integers are good enough here.
+                util = total = {}
                 for serie in series:
                     if serie['meter'] == 'hardware.memory.swap.util':
                         util = serie.copy()
-                    if serie['meter'] == 'hardware.memory.swap.total':
+                    else:
                         total = serie.copy()
 
-                for i, d in enumerate(util['data']):
+                for i, d in enumerate(util.get('data', [])):
                     try:
                         util['data'][i]['y'] =\
                             int((100*d['y'])//total['data'][i]['y'])
@@ -216,16 +218,17 @@ class PerformanceView(base.TemplateView):
                 util['unit'] = '%'
                 series = [util]
 
-            if not series:
-                barchart = False
-            if barchart:
+            if series and barchart:
                 average, used, tooltip_average = get_barchart_stats(series,
                                                                     unit)
-        start_datetime = date_from.strftime("%Y-%m-%dT%H:%M:%S")
-        end_datetime = date_to.strftime("%Y-%m-%dT%H:%M:%S")
+        if date_from:
+            start_datetime = date_from.strftime("%Y-%m-%dT%H:%M:%S")
+        if date_to:
+            end_datetime = date_to.strftime("%Y-%m-%dT%H:%M:%S")
+
         json_output = create_json_output(series, start_datetime, end_datetime)
 
-        if barchart:
+        if series and barchart:
             json_output = add_barchart_settings(json_output, average, used,
                                                 tooltip_average)
 
