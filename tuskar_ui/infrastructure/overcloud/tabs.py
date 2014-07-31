@@ -17,7 +17,7 @@ import heatclient
 from horizon import tabs
 
 from tuskar_ui.infrastructure.overcloud import tables
-from tuskar_ui import utils
+from tuskar_ui.utils import utils
 
 
 def _get_role_data(stack, role):
