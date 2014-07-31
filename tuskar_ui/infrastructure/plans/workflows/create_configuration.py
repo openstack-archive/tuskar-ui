@@ -16,7 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 import horizon.workflows
 
 from openstack_dashboard.api import neutron
-from tuskar_ui import utils
+from tuskar_ui.utils import utils
 
 
 def make_field(name, Type, NoEcho, Default, Description, AllowedValues=None,

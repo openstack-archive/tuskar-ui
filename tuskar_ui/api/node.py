@@ -24,7 +24,7 @@ from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
 from tuskar_ui.test.test_data import heat_data
 from tuskar_ui.test.test_data import node_data
-from tuskar_ui import utils
+from tuskar_ui.utils import utils
 
 
 TEST_DATA = test_utils.TestDataContainer()
