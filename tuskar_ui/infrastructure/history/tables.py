@@ -16,31 +16,22 @@ from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
 
-from tuskar_ui.infrastructure.nodes import tables as nodes_tables
 
+class HistoryTable(tables.DataTable):
 
-class OvercloudRoleNodeTable(nodes_tables.RegisteredNodesTable):
-
-    class Meta:
-        name = "overcloud_role__nodetable"
-        verbose_name = _("Nodes")
-        table_actions = ()
-        row_actions = ()
-
-
-class ConfigurationTable(tables.DataTable):
-
-    key = tables.Column(lambda parameter: parameter[0],
-                        verbose_name=_("Attribute Name"))
-    value = tables.Column(lambda parameter: parameter[1],
-                          verbose_name=_("Attribute Value"))
+    timestamp = tables.Column('event_time',
+                              verbose_name=_("Timestamp"),
+                              attrs={'data-type': 'timestamp'})
+    resource_name = tables.Column('resource_name',
+                                  verbose_name=_("Resource Name"))
+    resource_status = tables.Column('resource_status',
+                                    verbose_name=_("Status"))
+    resource_status_reason = tables.Column('resource_status_reason',
+                                           verbose_name=_("Reason"))
 
     class Meta:
-        name = "configuration"
-        verbose_name = _("Configuration")
+        name = "log"
+        verbose_name = _("Log")
         multi_select = False
         table_actions = ()
         row_actions = ()
-
-    def get_object_id(self, datum):
-        return datum[0]
