@@ -36,9 +36,9 @@ def data(TEST):
             'name': 'Object Storage',
             'version': 1,
         }, {
-            'id': 'role-5',
+            'id': 'role-4',
             'name': 'Block Storage',
-            'version': 2,
+            'version': 1,
         }],
         'parameters': [{
             'name': 'AdminPassword',
@@ -58,6 +58,21 @@ def data(TEST):
         'version': 1,
         'description': 'controller role',
         'created_at': '2014-05-27T21:11:09Z',
+        'parameters': [{
+            'name': 'controller_NovaInterfaces',
+            'parameter_group': 'Nova',
+            'type': 'String',
+            'description': '',
+            'no_echo': 'false',
+            'default': 'eth0',
+        }, {
+            'name': 'controller_NeutronInterfaces',
+            'parameter_group': 'Neutron',
+            'type': 'String',
+            'description': '',
+            'no_echo': 'false',
+            'default': 'eth0',
+        }]
     }
     r_2 = {
         'id': 'role-2',
@@ -65,6 +80,14 @@ def data(TEST):
         'version': 1,
         'description': 'compute role',
         'created_at': '2014-05-27T21:11:09Z',
+        'parameters': [{
+            'name': 'compute_KeystoneHost',
+            'parameter_group': 'Keystone',
+            'type': 'String',
+            'description': '',
+            'no_echo': 'false',
+            'default': '',
+        }]
     }
     r_3 = {
         'id': 'role-3',
@@ -72,6 +95,14 @@ def data(TEST):
         'version': 1,
         'description': 'object storage role',
         'created_at': '2014-05-27T21:11:09Z',
+        'parameters': [{
+            'name': 'object_storage_SwiftHashSuffix',
+            'parameter_group': 'Swift',
+            'type': 'String',
+            'description': '',
+            'no_echo': 'true',
+            'default': '',
+        }]
     }
     r_4 = {
         'id': 'role-4',
@@ -79,12 +110,13 @@ def data(TEST):
         'version': 1,
         'description': 'block storage role',
         'created_at': '2014-05-27T21:11:09Z',
+        'parameters': [{
+            'name': 'block_storage_NeutronNetworkType',
+            'parameter_group': 'Neutron',
+            'type': 'String',
+            'description': '',
+            'no_echo': 'false',
+            'default': 'gre',
+        }]
     }
-    r_5 = {
-        'id': 'role-5',
-        'name': 'Block Storage',
-        'version': 2,
-        'description': 'block storage role',
-        'created_at': '2014-05-28T21:11:09Z',
-    }
-    TEST.tuskarclient_roles.add(r_1, r_2, r_3, r_4, r_5)
+    TEST.tuskarclient_roles.add(r_1, r_2, r_3, r_4)

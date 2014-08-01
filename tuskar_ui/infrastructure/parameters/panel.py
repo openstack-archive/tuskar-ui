@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -15,28 +16,12 @@ from django.utils.translation import ugettext_lazy as _
 
 import horizon
 
-
-class BasePanels(horizon.PanelGroup):
-    slug = "infrastructure"
-    name = _("Infrastructure")
-    panels = (
-        'overcloud',
-        'plans',
-        'parameters',
-        'nodes',
-        'flavors',
-        'history',
-    )
+from tuskar_ui.infrastructure import dashboard
 
 
-class Infrastructure(horizon.Dashboard):
-    name = _("Infrastructure")
-    slug = "infrastructure"
-    panels = (
-        BasePanels,
-    )
-    default_panel = 'overcloud'
-    permissions = ('openstack.roles.admin',)
+class Parameters(horizon.Panel):
+    name = _("Service Configuration")
+    slug = "parameters"
 
 
-horizon.register(Infrastructure)
+dashboard.Infrastructure.register(Parameters)
