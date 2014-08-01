@@ -137,11 +137,8 @@ class PerformanceView(base.TemplateView):
         node_uuid = kwargs.get('node_uuid')
         node = api.node.Node.get(request, node_uuid)
 
-        average = used = 0
-        tooltip_average = ''
         unit = ''
         series = []
-        start_datetime = end_datetime = ''
 
         try:
             ip_addr = node.driver_info['ip_address']
@@ -184,54 +181,20 @@ class PerformanceView(base.TemplateView):
                     group_by=group_by,
                     meter=meter_id,
                     query=query)
-                serie = self._series_for_meter(
+                s = self._series_for_meter(
                     resources,
                     meter_id,
                     meter_name,
                     stats_attr,
                     unit)
-                series += serie
-
-            if series and meter == 'swap-util':
-                # Divide available swap with used swap, multiply by 100.
-                # Integers are good enough here.
-                util = total = {}
-                for serie in series:
-                    if serie['meter'] == 'hardware.memory.swap.util':
-                        util = serie.copy()
-                    else:
-                        total = serie.copy()
-
-                for i, d in enumerate(util.get('data', [])):
-                    try:
-                        util['data'][i]['y'] =\
-                            int((100*d['y'])//total['data'][i]['y'])
-                    except IndexError:
-                        # Could happen if one series is shorter.
-                        del util['data'][i]
-                util['unit'] = '%'
-                series = [util]
-
-            if series and barchart:
-                average, used, tooltip_average = (
-                    metering_utils.get_barchart_stats(series, unit))
-
-        if date_from:
-            start_datetime = date_from.strftime("%Y-%m-%dT%H:%M:%S")
-        if date_to:
-            end_datetime = date_to.strftime("%Y-%m-%dT%H:%M:%S")
+                series += s
 
         json_output = metering_utils.create_json_output(
             series,
-            start_datetime,
-            end_datetime)
-
-        if series and barchart:
-            json_output = metering_utils.add_barchart_settings(
-                json_output,
-                average,
-                used,
-                tooltip_average)
+            barchart,
+            unit,
+            date_from,
+            date_to)
 
         return http.HttpResponse(json.dumps(json_output),
                                  mimetype='application/json')
