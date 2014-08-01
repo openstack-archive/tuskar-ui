@@ -1,0 +1,23 @@
+{% extends 'infrastructure/base.html' %}
+{% load i18n %}
+{% load url from future %}
+{% block title %}{% trans 'Service Configuration' %}{% endblock %}
+
+{% block page_header %}
+  {% include 'horizon/common/_page_header.html' with title=title %}
+{% endblock page_header %}
+
+{% block main %}
+<div class="row-fluid">
+  <div class="span12">
+    {% for role in roles %}
+     {{ role.name }}
+     <ul>
+       {% for p in role.parameters %}
+         <li>{{ p.name }}</li>
+       {% endfor %}    
+     </ul>
+    {% endfor %}    
+  </div>
+</div>
+{% endblock %}

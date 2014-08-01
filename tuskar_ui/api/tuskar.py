@@ -148,7 +148,8 @@ class OvercloudPlan(base.APIDictWrapper):
 
     @cached_property
     def role_list(self):
-        return [OvercloudRole(role) for role in self.roles]
+        return [OvercloudRole.get(self._request, role['id'])
+                for role in self.roles]
 
     def parameter(self, param_name):
         for parameter in self.parameters:
@@ -162,7 +163,8 @@ class OvercloudPlan(base.APIDictWrapper):
 
 
 class OvercloudRole(base.APIDictWrapper):
-    _attrs = ('id', 'name', 'version', 'description', 'created_at')
+    _attrs = ('id', 'name', 'version', 'description', 'created_at',
+              'parameters')
 
     @classmethod
     @handle_errors(_("Unable to retrieve overcloud roles"), [])
