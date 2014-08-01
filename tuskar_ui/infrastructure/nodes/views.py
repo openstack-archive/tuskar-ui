@@ -25,6 +25,8 @@ from horizon import tabs as horizon_tabs
 from horizon import views as horizon_views
 
 from openstack_dashboard.api import base as api_base
+from openstack_dashboard.api import ceilometer
+
 from openstack_dashboard.dashboards.admin.metering import views as metering
 
 from tuskar_ui import api
@@ -115,9 +117,9 @@ class PerformanceView(base.TemplateView):
         except AttributeError:
             pass
         else:
-            additional_query = [{'field': 'resource_id',
-                                 'op': 'eq',
-                                 'value': ip_addr}]
+            query = [{'field': 'resource_id',
+                      'op': 'eq',
+                      'value': ip_addr}]
 
             # Disk and Network I/O: data from 2 meters in one chart
             if meter == 'disk-io':
@@ -139,14 +141,14 @@ class PerformanceView(base.TemplateView):
                 meters = get_meters([meter])
 
             for meter_id, meter_name in meters:
-                resources, unit = metering.query_data(
+                resources, unit = query_data(
                     request=request,
                     date_from=date_from,
                     date_to=date_to,
                     date_options=date_options,
                     group_by=group_by,
                     meter=meter_id,
-                    additional_query=additional_query)
+                    query=query)
                 next_series = metering.SamplesView._series_for_meter(
                     resources,
                     resource_name,
@@ -192,6 +194,80 @@ class PerformanceView(base.TemplateView):
 
         return http.HttpResponse(json.dumps(json_output),
                                  mimetype='application/json')
+
+
+#TODO(lsmola) this should probably live in Horizon
+def query_data(request,
+               date_from,
+               date_to,
+               date_options,
+               group_by,
+               meter,
+               period=None,
+               query=None,
+               additional_query=None):
+    date_from, date_to = metering._calc_date_args(date_from,
+                                                  date_to,
+                                                  date_options)
+    if not period:
+        period = _calc_period(date_from, date_to, 20)
+    if additional_query is None:
+        additional_query = []
+    if date_from:
+        additional_query += [{'field': 'timestamp',
+                              'op': 'ge',
+                              'value': date_from}]
+    if date_to:
+        additional_query += [{'field': 'timestamp',
+                              'op': 'le',
+                              'value': date_to}]
+
+    # TODO(lsmola) replace this by logic implemented in I1 in bugs
+    # 1226479 and 1226482, this is just a quick fix for RC1
+    try:
+        meter_list = [m for m in metering.meter_list(request)
+                      if m.name == meter]
+        unit = meter_list[0].unit
+    except Exception:
+        unit = ""
+    if group_by == "resources":
+        # TODO(lsmola) need to implement group_by groups of resources
+        resources = []
+        unit = ""
+    else:
+        ceilometer_usage = ceilometer.CeilometerUsage(request)
+        try:
+            resources = ceilometer_usage.resources_with_statistics(
+                query, [meter], period=period, stats_attr=None,
+                additional_query=additional_query)
+        except Exception:
+            resources = []
+            exceptions.handle(request,
+                              _('Unable to retrieve statistics.'))
+    return resources, unit
+
+
+#TODO(lsmola) push this function to Horizon then delete this
+def _calc_period(date_from, date_to, number_of_samples=400):
+    if date_from and date_to:
+        if date_to < date_from:
+            # TODO(lsmola) propagate the Value error through Horizon
+            # handler to the client with verbose message.
+            raise ValueError("Date to must be bigger than date "
+                             "from.")
+            # get the time delta in seconds
+        delta = date_to - date_from
+        if delta.days <= 0:
+            # it's one day
+            delta_in_seconds = 3600 * 24
+        else:
+            delta_in_seconds = delta.days * 24 * 3600 + delta.seconds
+
+        period = delta_in_seconds / number_of_samples
+    else:
+        # If some date is missing, just set static window to one day.
+        period = 3600 * 24
+    return period
 
 
 def url_part(meter_name, barchart):
