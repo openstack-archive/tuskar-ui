@@ -100,6 +100,38 @@ class DetailView(horizon_views.APIView):
 
 
 class PerformanceView(base.TemplateView):
+    LABELS = {
+        'hardware.cpu.load.1min': _("CPU load 1 min average"),
+        'hardware.system_stats.cpu.util': _("CPU utilization"),
+        'hardware.system_stats.io.raw_sent': _("IO raw sent"),
+        'hardware.system_stats.io.raw_received': _("IO raw received"),
+        'hardware.network.ip.out_requests': _("IP out requests"),
+        'hardware.network.ip.in_receives': _("IP in requests"),
+        'hardware.memory.swap.util': _("Swap utilization"),
+    }
+
+    @staticmethod
+    def _series_for_meter(aggregates,
+                          meter_id,
+                          meter_name,
+                          stats_name,
+                          unit):
+        """Construct datapoint series for a meter from resource aggregates."""
+        series = []
+        for resource in aggregates:
+            if resource.get_meter(meter_name):
+                name = PerformanceView.LABELS.get(meter_id, meter_name)
+                point = {'unit': unit,
+                         'name': unicode(name),
+                         'meter': meter_id,
+                         'data': []}
+                for statistic in resource.get_meter(meter_name):
+                    date = statistic.duration_end[:19]
+                    value = float(getattr(statistic, stats_name))
+                    point['data'].append({'x': date, 'y': value})
+                series.append(point)
+        return series
+
     def get(self, request, *args, **kwargs):
         meter = request.GET.get('meter')
         date_options = request.GET.get('date_options')
@@ -109,7 +141,6 @@ class PerformanceView(base.TemplateView):
         group_by = request.GET.get('group_by')
         barchart = bool(request.GET.get('barchart'))
 
-        resource_name = 'id' if group_by == "project" else 'resource_id'
         node_uuid = kwargs.get('node_uuid')
         node = api.node.Node.get(request, node_uuid)
 
@@ -145,6 +176,7 @@ class PerformanceView(base.TemplateView):
             else:
                 meters = get_meters([meter])
 
+            series = []
             for meter_id, meter_name in meters:
                 resources, unit = query_data(
                     request=request,
@@ -154,17 +186,13 @@ class PerformanceView(base.TemplateView):
                     group_by=group_by,
                     meter=meter_id,
                     query=query)
-                next_series = metering.SamplesView._series_for_meter(
+                serie = self._series_for_meter(
                     resources,
-                    resource_name,
+                    meter_id,
                     meter_name,
                     stats_attr,
                     unit)
-                # You would think the meter name would be a part of the
-                # returned data...
-                for serie in next_series:
-                    serie['meter'] = meter_id
-                series.extend(next_series)
+                series += serie
 
             if meter == 'swap-util':
                 # Divide available swap with used swap, multiply by 100.
