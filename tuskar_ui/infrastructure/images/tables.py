@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -13,30 +14,19 @@
 
 from django.utils.translation import ugettext_lazy as _
 
-import horizon
+from horizon import tables
 
 
-class BasePanels(horizon.PanelGroup):
-    slug = "infrastructure"
-    name = _("Infrastructure")
-    panels = (
-        'overcloud',
-        'plans',
-        'nodes',
-        'flavors',
-        'images',
-        'history',
-    )
+class ImagesTable(tables.DataTable):
 
+    name = tables.Column('name',
+                         verbose_name=_("Image Name"))
+    disk_format = tables.Column('disk_format',
+                                verbose_name=_("Format"))
 
-class Infrastructure(horizon.Dashboard):
-    name = _("Infrastructure")
-    slug = "infrastructure"
-    panels = (
-        BasePanels,
-    )
-    default_panel = 'overcloud'
-    permissions = ('openstack.roles.admin',)
-
-
-horizon.register(Infrastructure)
+    class Meta:
+        name = "images"
+        verbose_name = _("Provisioning Images")
+        multi_select = False
+        table_actions = ()
+        row_actions = ()
