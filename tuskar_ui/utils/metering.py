@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 from datetime import datetime  # noqa
 from datetime import timedelta  # noqa
 
@@ -23,6 +25,41 @@ from horizon import exceptions
 
 from openstack_dashboard.api import ceilometer
 from openstack_dashboard.dashboards.admin.metering import views as metering
+
+
+SETTINGS = {
+    'settings': {
+        'renderer': 'StaticAxes',
+        'yMin': 0,
+        'xMin': None,
+        'xMax': None,
+        'higlight_last_point': True,
+        'auto_size': False,
+        'auto_resize': False,
+        'axes_x': False,
+        'axes_y': True,
+        'axes_y_label': False,
+        'bar_chart_settings': {
+            'orientation': 'vertical',
+            'used_label_placement': 'left',
+            'width': 30,
+            'color_scale_domain': [0, 80, 80, 100],
+            'color_scale_range': [
+                '#0000FF',
+                '#0000FF',
+                '#FF0000',
+                '#FF0000'
+            ],
+        'average_color_scale_domain': [0, 100],
+        'average_color_scale_range': ['#0000FF', '#0000FF']
+        }
+    },
+    'stats': {
+        'average': None,
+        'used': None,
+        'tooltip_average': None,
+    }
+}
 
 
 #TODO(lsmola) this should probably live in Horizon common
@@ -159,42 +196,47 @@ def get_barchart_stats(series, unit):
     return average, used, tooltip_average
 
 
-def create_json_output(series, start_datetime, end_datetime):
-    return {
-        'series': series,
-        'settings': {
-            'renderer': 'StaticAxes',
-            'yMin': 0,
-            'xMin': start_datetime,
-            'xMax': end_datetime,
-            'higlight_last_point': True,
-            'auto_size': False,
-            'auto_resize': False,
-            'axes_x': False,
-            'axes_y': True,
-            'axes_y_label': False,
-        },
-    }
+def create_json_output(series, barchart, unit, date_from, date_to):
+    start_datetime = end_datetime = ''
+    if date_from:
+        start_datetime = date_from.strftime("%Y-%m-%dT%H:%M:%S")
+    if date_to:
+        end_datetime = date_to.strftime("%Y-%m-%dT%H:%M:%S")
+
+    settings = copy.deepcopy(SETTINGS)
+    settings['settings']['xMin'] = start_datetime
+    settings['settings']['xMax'] = end_datetime
+
+    if series and barchart:
+        average, used, tooltip_average = get_barchart_stats(series, unit)
+        settings['stats']['average'] = average
+        settings['stats']['used'] = used
+        settings['stats']['tooltip_average'] = tooltip_average
+    else:
+        del settings['settings']['bar_chart_settings']
+        del settings['stats']
+
+    json_output = {'series': series}
+    json_output = dict(json_output.items() + settings.items())
+    return json_output
 
 
-def add_barchart_settings(ret, average, used, tooltip_average):
-    ret['settings']['bar_chart_settings'] = {
-        'orientation': 'vertical',
-        'used_label_placement': 'left',
-        'width': 30,
-        'color_scale_domain': [0, 80, 80, 100],
-        'color_scale_range': [
-            '#0000FF',
-            '#0000FF',
-            '#FF0000',
-            '#FF0000'
-        ],
-        'average_color_scale_domain': [0, 100],
-        'average_color_scale_range': ['#0000FF', '#0000FF']
-    }
-    ret['stats'] = {
-        'average': average,
-        'used': used,
-        'tooltip_average': tooltip_average,
-    }
-    return ret
+def handle_swap_util(series):
+    # Divide available swap with used swap, multiply by 100.
+    # Integers are good enough here.
+    util = total = {}
+    for serie in series:
+        if serie['meter'] == 'hardware.memory.swap.util':
+            util = serie.copy()
+        else:
+            total = serie.copy()
+
+    for i, d in enumerate(util.get('data', [])):
+        try:
+            util['data'][i]['y'] =\
+                int((100*d['y'])//total['data'][i]['y'])
+        except IndexError:
+            # Could happen if one series is shorter.
+            del util['data'][i]
+    util['unit'] = '%'
+    return [util]
