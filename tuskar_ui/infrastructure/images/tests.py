@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -11,33 +12,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.utils.translation import ugettext_lazy as _
+from django.core import urlresolvers
 
-import horizon
+from mock import patch, call  # noqa
 
-
-class BasePanels(horizon.PanelGroup):
-    slug = "infrastructure"
-    name = _("Infrastructure")
-    panels = (
-        'overcloud',
-        'plans',
-        'parameters',
-        'nodes',
-        'flavors',
-        'images',
-        'history',
-    )
+from tuskar_ui.test import helpers as test
 
 
-class Infrastructure(horizon.Dashboard):
-    name = _("Infrastructure")
-    slug = "infrastructure"
-    panels = (
-        BasePanels,
-    )
-    default_panel = 'overcloud'
-    permissions = ('openstack.roles.admin',)
+INDEX_URL = urlresolvers.reverse(
+    'horizon:infrastructure:images:index')
 
 
-horizon.register(Infrastructure)
+class ImagesTest(test.BaseAdminViewTests):
+
+    def test_index(self):
+        with patch('openstack_dashboard.api.glance.image_list_detailed',
+                   return_value=[self.images.list(), False, False]):
+            res = self.client.get(INDEX_URL)
+
+        self.assertTemplateUsed(res, 'infrastructure/images/index.html')
