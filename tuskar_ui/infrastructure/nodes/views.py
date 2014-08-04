@@ -165,7 +165,7 @@ class PerformanceView(base.TemplateView):
                 ])
             elif meter == 'swap-util':
                 meters = metering_utils.get_meters([
-                    'hardware.memory.swap.util',
+                    'hardware.memory.swap.avail',
                     'hardware.memory.swap.total'
                 ])
             else:
@@ -197,16 +197,18 @@ class PerformanceView(base.TemplateView):
                 # Integers are good enough here.
                 util = total = {}
                 for serie in series:
-                    if serie['meter'] == 'hardware.memory.swap.util':
+                    if serie['meter'] == 'hardware.memory.swap.avail':
                         util = serie.copy()
                     else:
                         total = serie.copy()
 
                 for i, d in enumerate(util.get('data', [])):
                     try:
-                        util['data'][i]['y'] =\
-                            int((100*d['y'])//total['data'][i]['y'])
-                    except IndexError:
+                        util['data'] = [
+                            int(100 * (100 - data['y'])) // total_data['y']
+                            for data, total_data in
+                            zip(util.get('data', []), total['data'])]
+                    except (ZeroDivisionError, IndexError):
                         # Could happen if one series is shorter.
                         del util['data'][i]
                 util['unit'] = '%'
