@@ -42,7 +42,7 @@ class NodeForm(django.forms.Form):
         choices=DRIVER_CHOICES,
         required=True,
         widget=django.forms.Select(attrs={
-            'class': 'input input-medium switchable',
+            'class': 'form-control switchable',
             'data-slug': 'driver',
         }),
     )
@@ -51,7 +51,7 @@ class NodeForm(django.forms.Form):
         label=_("IPMI Address"),
         required=False,
         widget=django.forms.TextInput(attrs={
-            'class': 'switched',
+            'class': 'form-control switched',
             'data-switch-on': 'driver',
             'data-driver-ipmi': 'ipmi',
         }),
@@ -60,7 +60,7 @@ class NodeForm(django.forms.Form):
         label=_("IPMI User"),
         required=False,
         widget=django.forms.TextInput(attrs={
-            'class': 'input input-medium switched',
+            'class': 'form-control switched',
             'data-switch-on': 'driver',
             'data-driver-ipmi': 'ipmi',
         }),
@@ -69,7 +69,7 @@ class NodeForm(django.forms.Form):
         label=_("IPMI Password"),
         required=False,
         widget=django.forms.PasswordInput(render_value=False, attrs={
-            'class': 'input input-medium switched',
+            'class': 'form-control switched',
             'data-switch-on': 'driver',
             'data-driver-ipmi': 'ipmi',
         }),
@@ -77,7 +77,7 @@ class NodeForm(django.forms.Form):
     mac_addresses = tuskar_ui.forms.MultiMACField(
         label=_("NIC MAC Addresses"),
         widget=django.forms.Textarea(attrs={
-            'class': 'input input-medium',
+            'class': 'form-control',
             'rows': '2',
         }),
     )
@@ -87,7 +87,7 @@ class NodeForm(django.forms.Form):
         required=True,
         choices=ARCHITECTURE_CHOICES,
         widget=django.forms.Select(
-            attrs={'class': 'input input-medium'}),
+            attrs={'class': 'form-control'}),
     )
     cpus = django.forms.IntegerField(
         label=_("CPUs"),
@@ -95,7 +95,7 @@ class NodeForm(django.forms.Form):
         min_value=1,
         initial=1,
         widget=tuskar_ui.forms.NumberInput(
-            attrs={'class': 'input input-medium'}),
+            attrs={'class': 'form-control'}),
     )
     memory_mb = django.forms.IntegerField(
         label=_("Memory"),
@@ -103,7 +103,7 @@ class NodeForm(django.forms.Form):
         min_value=1,
         initial=1,
         widget=tuskar_ui.forms.NumberInput(
-            attrs={'class': 'input input-medium'}),
+            attrs={'class': 'form-control'}),
     )
     local_gb = django.forms.IntegerField(
         label=_("Local Disk"),
@@ -111,7 +111,7 @@ class NodeForm(django.forms.Form):
         min_value=1,
         initial=1,
         widget=tuskar_ui.forms.NumberInput(
-            attrs={'class': 'input input-medium'}),
+            attrs={'class': 'form-control'}),
     )
 
     def get_name(self):
