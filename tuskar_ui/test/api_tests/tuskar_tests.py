@@ -44,7 +44,6 @@ class TuskarAPITests(test.APITestCase):
         plan = api.tuskar.OvercloudPlan(self.tuskarclient_plans.first())
 
         ret_val = plan.role_list
-
         self.assertEqual(4, len(ret_val))
         for r in ret_val:
             self.assertIsInstance(r, api.tuskar.OvercloudRole)
@@ -54,7 +53,7 @@ class TuskarAPITests(test.APITestCase):
 
         for r in ret_val:
             self.assertIsInstance(r, api.tuskar.OvercloudRole)
-        self.assertEqual(5, len(ret_val))
+        self.assertEqual(4, len(ret_val))
 
     def test_role_get(self):
         role = self.tuskarclient_roles.first()
