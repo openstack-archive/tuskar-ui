@@ -21,18 +21,29 @@ from tuskar_ui.test import helpers as test
 
 class TuskarAPITests(test.APITestCase):
     def test_plan_create(self):
-        ret_val = api.tuskar.OvercloudPlan.create(self.request, {}, {})
+        plan = self.tuskarclient_plans.first()
+
+        with patch('tuskar_ui.test.test_driver.tuskar_driver.Plan.create',
+                   return_value=plan):
+            ret_val = api.tuskar.OvercloudPlan.create(self.request, {}, {})
         self.assertIsInstance(ret_val, api.tuskar.OvercloudPlan)
 
     def test_plan_list(self):
-        ret_val = api.tuskar.OvercloudPlan.list(self.request)
+        plans = self.tuskarclient_plans.list()
+
+        with patch('tuskar_ui.test.test_driver.tuskar_driver.Plan.list',
+                   return_value=plans):
+            ret_val = api.tuskar.OvercloudPlan.list(self.request)
         for plan in ret_val:
             self.assertIsInstance(plan, api.tuskar.OvercloudPlan)
         self.assertEqual(1, len(ret_val))
 
     def test_plan_get(self):
         plan = self.tuskarclient_plans.first()
-        ret_val = api.tuskar.OvercloudPlan.get(self.request, plan['id'])
+
+        with patch('tuskar_ui.test.test_driver.tuskar_driver.Plan.get',
+                   return_value=plan):
+            ret_val = api.tuskar.OvercloudPlan.get(self.request, plan['id'])
 
         self.assertIsInstance(ret_val, api.tuskar.OvercloudPlan)
 
