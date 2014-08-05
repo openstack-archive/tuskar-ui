@@ -20,8 +20,7 @@ class BasePanels(horizon.PanelGroup):
     slug = "infrastructure"
     name = _("Infrastructure")
     panels = (
-        'overcloud',
-        'plans',
+        'overview',
         'parameters',
         'roles',
         'nodes',
@@ -37,7 +36,7 @@ class Infrastructure(horizon.Dashboard):
     panels = (
         BasePanels,
     )
-    default_panel = 'overcloud'
+    default_panel = 'overview'
     permissions = ('openstack.roles.admin',)
 
 
