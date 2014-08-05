@@ -47,6 +47,17 @@ class TuskarAPITests(test.APITestCase):
 
         self.assertIsInstance(ret_val, api.tuskar.OvercloudPlan)
 
+    def test_plan_get_the_plan(self):
+        plan = self.tuskarclient_plans.first()
+
+        with patch('tuskar_ui.test.test_driver.tuskar_driver.Plan.list',
+                   return_value=[]):
+            with patch('tuskar_ui.test.test_driver.tuskar_driver.Plan.create',
+                       return_value=plan):
+                ret_val = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+
+        self.assertIsInstance(ret_val, api.tuskar.OvercloudPlan)
+
     def test_plan_delete(self):
         plan = self.tuskarclient_plans.first()
         api.tuskar.OvercloudPlan.delete(self.request, plan['id'])

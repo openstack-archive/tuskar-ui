@@ -131,6 +131,9 @@ class OvercloudPlan(base.APIDictWrapper):
         plan_list = cls.list(request)
         for plan in plan_list:
             return plan
+        # if plan doesn't exist, create it
+        plan = cls.create(request, 'overcloud', 'overcloud')
+        return plan
 
     @classmethod
     def delete(cls, request, plan_id):
