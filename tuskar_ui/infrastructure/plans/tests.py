@@ -31,7 +31,7 @@ INDEX_URL = urlresolvers.reverse(
 CREATE_URL = urlresolvers.reverse(
     'horizon:infrastructure:plans:create')
 OVERCLOUD_INDEX_URL = urlresolvers.reverse(
-    'horizon:infrastructure:overcloud:index')
+    'horizon:infrastructure:overview:index')
 
 TEST_DATA = utils.TestDataContainer()
 flavor_data.data(TEST_DATA)

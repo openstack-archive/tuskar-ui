@@ -23,16 +23,16 @@ from horizon import tabs as horizon_tabs
 from horizon.utils import memoized
 
 from tuskar_ui import api
-from tuskar_ui.infrastructure.overcloud import forms
-from tuskar_ui.infrastructure.overcloud import tables
-from tuskar_ui.infrastructure.overcloud import tabs
+from tuskar_ui.infrastructure.overview import forms
+from tuskar_ui.infrastructure.overview import tables
+from tuskar_ui.infrastructure.overview import tabs
 
 
-INDEX_URL = 'horizon:infrastructure:overcloud:index'
-DETAIL_URL = 'horizon:infrastructure:overcloud:detail'
+INDEX_URL = 'horizon:infrastructure:overview:index'
+DETAIL_URL = 'horizon:infrastructure:overview:detail'
 PLAN_CREATE_URL = 'horizon:infrastructure:plans:create'
 UNDEPLOY_IN_PROGRESS_URL = (
-    'horizon:infrastructure:overcloud:undeploy_in_progress')
+    'horizon:infrastructure:overview:undeploy_in_progress')
 
 
 class StackMixin(object):
@@ -82,7 +82,7 @@ class IndexView(base_views.RedirectView):
 
 class DetailView(horizon_tabs.TabView, StackMixin):
     tab_group_class = tabs.DetailTabs
-    template_name = 'infrastructure/overcloud/detail.html'
+    template_name = 'infrastructure/overview/detail.html'
 
     def get_tabs(self, request, **kwargs):
         stack = self.get_stack()
@@ -97,7 +97,7 @@ class DetailView(horizon_tabs.TabView, StackMixin):
 
 class UndeployConfirmationView(horizon.forms.ModalFormView):
     form_class = forms.UndeployOvercloud
-    template_name = 'infrastructure/overcloud/undeploy_confirmation.html'
+    template_name = 'infrastructure/overview/undeploy_confirmation.html'
 
     def get_success_url(self):
         return reverse(INDEX_URL)
@@ -116,7 +116,7 @@ class UndeployConfirmationView(horizon.forms.ModalFormView):
 
 class UndeployInProgressView(horizon_tabs.TabView, StackMixin, ):
     tab_group_class = tabs.UndeployInProgressTabs
-    template_name = 'infrastructure/overcloud/detail.html'
+    template_name = 'infrastructure/overview/detail.html'
 
     def get_stack_or_redirect(self):
         plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
@@ -158,7 +158,7 @@ class UndeployInProgressView(horizon_tabs.TabView, StackMixin, ):
 class OvercloudRoleView(horizon_tables.DataTableView,
                         OvercloudRoleMixin, StackMixin):
     table_class = tables.OvercloudRoleNodeTable
-    template_name = 'infrastructure/overcloud/overcloud_role.html'
+    template_name = 'infrastructure/overview/overcloud_role.html'
 
     @memoized.memoized
     def _get_nodes(self, stack, role):

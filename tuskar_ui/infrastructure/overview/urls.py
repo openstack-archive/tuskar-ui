@@ -14,7 +14,7 @@
 
 from django.conf import urls
 
-from tuskar_ui.infrastructure.overcloud import views
+from tuskar_ui.infrastructure.overview import views
 
 
 urlpatterns = urls.patterns(

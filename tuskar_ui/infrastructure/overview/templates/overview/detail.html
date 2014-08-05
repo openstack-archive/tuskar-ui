@@ -19,7 +19,7 @@
 <div class="row">
   <div class="col-xs-12">
     <div class="actions page-actions pull-right">
-        <a href="{% url 'horizon:infrastructure:overcloud:undeploy_confirmation' stack.id %}"
+        <a href="{% url 'horizon:infrastructure:overview:undeploy_confirmation' stack.id %}"
            class="btn btn-danger ajax-modal
             {% if not stack.is_deployed and not stack.is_failed %}disabled{% endif %}">
             <i class="icon-fire icon-white"></i>

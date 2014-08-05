@@ -19,9 +19,9 @@ import horizon
 from tuskar_ui.infrastructure import dashboard
 
 
-class Overcloud(horizon.Panel):
-    name = _("OpenStack Deployment")
-    slug = "overcloud"
+class Overview(horizon.Panel):
+    name = _("Overview")
+    slug = "overview"
 
 
-dashboard.Infrastructure.register(Overcloud)
+dashboard.Infrastructure.register(Overview)

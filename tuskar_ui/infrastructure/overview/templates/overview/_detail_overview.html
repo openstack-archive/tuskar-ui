@@ -191,7 +191,7 @@ nova flavor-create m1.tiny 1 512 2 1
       {% for role in roles %}
         <tr>
           <td><a
-              href="{% url 'horizon:infrastructure:overcloud:role' stack.id role.role.id %}"
+              href="{% url 'horizon:infrastructure:overview:role' stack.id role.role.id %}"
               >{{ role.name }} <span class="badge">({{ role.total_node_count }})</span></a>
           </td>
           <td>

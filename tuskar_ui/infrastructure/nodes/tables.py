@@ -54,7 +54,7 @@ def get_role_link(datum):
     # TODO(tzumainn): this could probably be done more efficiently
     # by getting the resource for all nodes at once
     if datum.role_id:
-        return reverse('horizon:infrastructure:overcloud:role',
+        return reverse('horizon:infrastructure:overview:role',
                        kwargs={'stack_id': datum.stack_id,
                                'role_id': datum.role_id})
 

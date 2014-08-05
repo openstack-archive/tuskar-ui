@@ -16,7 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 import heatclient
 from horizon import tabs
 
-from tuskar_ui.infrastructure.overcloud import tables
+from tuskar_ui.infrastructure.overview import tables
 from tuskar_ui import utils
 
 
@@ -70,7 +70,7 @@ def _get_role_data(stack, role):
 class OverviewTab(tabs.Tab):
     name = _("Overview")
     slug = "overview"
-    template_name = "infrastructure/overcloud/_detail_overview.html"
+    template_name = "infrastructure/overview/_detail_overview.html"
     preload = False
 
     def get_context_data(self, request, **kwargs):
@@ -98,7 +98,7 @@ class OverviewTab(tabs.Tab):
 class UndeployInProgressTab(tabs.Tab):
     name = _("Overview")
     slug = "undeploy_in_progress_tab"
-    template_name = "infrastructure/overcloud/_undeploy_in_progress.html"
+    template_name = "infrastructure/overview/_undeploy_in_progress.html"
     preload = False
 
     def get_context_data(self, request, **kwargs):

@@ -27,16 +27,16 @@ from tuskar_ui.test.test_data import tuskar_data
 
 
 INDEX_URL = urlresolvers.reverse(
-    'horizon:infrastructure:overcloud:index')
+    'horizon:infrastructure:overview:index')
 DETAIL_URL = urlresolvers.reverse(
-    'horizon:infrastructure:overcloud:detail', args=('stack-id-1',))
+    'horizon:infrastructure:overview:detail', args=('stack-id-1',))
 UNDEPLOY_IN_PROGRESS_URL = urlresolvers.reverse(
-    'horizon:infrastructure:overcloud:undeploy_in_progress',
+    'horizon:infrastructure:overview:undeploy_in_progress',
     args=('overcloud',))
 DETAIL_URL_CONFIGURATION_TAB = (DETAIL_URL +
                                 "?tab=detail__configuration")
 DELETE_URL = urlresolvers.reverse(
-    'horizon:infrastructure:overcloud:undeploy_confirmation',
+    'horizon:infrastructure:overview:undeploy_confirmation',
     args=('stack-id-1',))
 PLAN_CREATE_URL = urlresolvers.reverse(
     'horizon:infrastructure:plans:create')
@@ -125,27 +125,27 @@ class OvercloudTests(test.BaseAdminViewTests):
             res = self.client.get(DETAIL_URL)
 
         self.assertTemplateUsed(
-            res, 'infrastructure/overcloud/detail.html')
+            res, 'infrastructure/overview/detail.html')
         self.assertTemplateNotUsed(
             res, 'horizon/common/_detail_table.html')
         self.assertTemplateUsed(
-            res, 'infrastructure/overcloud/_detail_overview.html')
+            res, 'infrastructure/overview/_detail_overview.html')
 
     def test_detail_get_configuration_tab(self):
         with _mock_plan():
             res = self.client.get(DETAIL_URL_CONFIGURATION_TAB)
 
         self.assertTemplateUsed(
-            res, 'infrastructure/overcloud/detail.html')
+            res, 'infrastructure/overview/detail.html')
         self.assertTemplateNotUsed(
-            res, 'infrastructure/overcloud/_detail_overview.html')
+            res, 'infrastructure/overview/_detail_overview.html')
         self.assertTemplateUsed(
             res, 'horizon/common/_detail_table.html')
 
     def test_delete_get(self):
         res = self.client.get(DELETE_URL)
         self.assertTemplateUsed(
-            res, 'infrastructure/overcloud/undeploy_confirmation.html')
+            res, 'infrastructure/overview/undeploy_confirmation.html')
 
     def test_delete_post(self):
         with _mock_plan():
@@ -165,9 +165,9 @@ class OvercloudTests(test.BaseAdminViewTests):
             res = self.client.get(UNDEPLOY_IN_PROGRESS_URL)
 
         self.assertTemplateUsed(
-            res, 'infrastructure/overcloud/detail.html')
+            res, 'infrastructure/overview/detail.html')
         self.assertTemplateUsed(
-            res, 'infrastructure/overcloud/_undeploy_in_progress.html')
+            res, 'infrastructure/overview/_undeploy_in_progress.html')
         self.assertTemplateNotUsed(
             res, 'horizon/common/_detail_table.html')
 

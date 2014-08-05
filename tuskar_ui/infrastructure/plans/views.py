@@ -24,7 +24,7 @@ from tuskar_ui.infrastructure.plans.workflows import scale
 
 INDEX_URL = 'horizon:infrastructure:plans:index'
 CREATE_URL = 'horizon:infrastructure:plans:create'
-OVERCLOUD_INDEX_URL = 'horizon:infrastructure:overcloud:index'
+OVERCLOUD_INDEX_URL = 'horizon:infrastructure:overview:index'
 
 
 class OvercloudPlanMixin(object):

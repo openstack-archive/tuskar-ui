@@ -19,7 +19,7 @@
     <dl class="clearfix">
       <dt>{% trans "Deployment Role" %}</dt>
       {% if stack and role %}
-        <dd><a href="{% url 'horizon:infrastructure:overcloud:role' stack.id role.id %}">{{ role.name }}</a></dd>
+        <dd><a href="{% url 'horizon:infrastructure:overview:role' stack.id role.id %}">{{ role.name }}</a></dd>
       {% else %}
         <dd>&mdash;</dd>
       {% endif %}
