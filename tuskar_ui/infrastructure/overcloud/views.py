@@ -18,13 +18,11 @@ from django.views.generic import base as base_views
 from horizon import exceptions as horizon_exceptions
 import horizon.forms
 from horizon import messages
-from horizon import tables as horizon_tables
 from horizon import tabs as horizon_tabs
 from horizon.utils import memoized
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.overcloud import forms
-from tuskar_ui.infrastructure.overcloud import tables
 from tuskar_ui.infrastructure.overcloud import tabs
 
 
@@ -44,15 +42,6 @@ class StackMixin(object):
         stack = api.heat.Stack.get(self.request, stack_id,
                                    _error_redirect=redirect)
         return stack
-
-
-class OvercloudRoleMixin(object):
-    @memoized.memoized
-    def get_role(self, redirect=None):
-        role_id = self.kwargs['role_id']
-        role = api.tuskar.OvercloudRole.get(self.request, role_id,
-                                            _error_redirect=redirect)
-        return role
 
 
 class IndexView(base_views.RedirectView):
@@ -152,50 +141,4 @@ class UndeployInProgressView(horizon_tabs.TabView, StackMixin, ):
         context = super(UndeployInProgressView,
                         self).get_context_data(**kwargs)
         context['stack'] = self.get_stack_or_redirect()
-        return context
-
-
-class OvercloudRoleView(horizon_tables.DataTableView,
-                        OvercloudRoleMixin, StackMixin):
-    table_class = tables.OvercloudRoleNodeTable
-    template_name = 'infrastructure/overcloud/overcloud_role.html'
-
-    @memoized.memoized
-    def _get_nodes(self, stack, role):
-        resources = stack.resources_by_role(role, with_joins=True)
-        nodes = [r.node for r in resources]
-
-        for node in nodes:
-            # TODO(tzumainn): this could probably be done more efficiently
-            # by getting the resource for all nodes at once
-            try:
-                resource = api.heat.Resource.get_by_node(self.request, node)
-                node.role_name = resource.role.name
-                node.role_id = resource.role.id
-                node.stack_id = resource.stack.id
-            except horizon_exceptions.NotFound:
-                node.role_name = '-'
-
-        return nodes
-
-    def get_data(self):
-        stack = self.get_stack()
-        redirect = reverse(DETAIL_URL,
-                           args=(stack.id,))
-        role = self.get_role(redirect)
-        return self._get_nodes(stack, role)
-
-    def get_context_data(self, **kwargs):
-        context = super(OvercloudRoleView, self).get_context_data(**kwargs)
-
-        stack = self.get_stack()
-        redirect = reverse(DETAIL_URL,
-                           args=(stack.id,))
-        role = self.get_role(redirect)
-        context['role'] = role
-        # TODO(tzumainn) we need to do this from plan parameters
-        context['image_name'] = 'FIXME'
-        context['nodes'] = self._get_nodes(stack, role)
-        context['flavor'] = None
-
         return context

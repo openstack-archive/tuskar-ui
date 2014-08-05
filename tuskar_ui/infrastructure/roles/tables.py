@@ -16,20 +16,26 @@ from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
 
+from tuskar_ui.infrastructure.nodes import tables as nodes_tables
 
-class ConfigurationTable(tables.DataTable):
 
-    key = tables.Column(lambda parameter: parameter[0],
-                        verbose_name=_("Attribute Name"))
-    value = tables.Column(lambda parameter: parameter[1],
-                          verbose_name=_("Attribute Value"))
+class RolesTable(tables.DataTable):
+
+    name = tables.Column('name',
+                         link="horizon:infrastructure:roles:detail",
+                         verbose_name=_("Image Name"))
 
     class Meta:
-        name = "configuration"
-        verbose_name = _("Configuration")
-        multi_select = False
+        name = "roles"
+        verbose_name = _("Deployment Roles")
         table_actions = ()
         row_actions = ()
 
-    def get_object_id(self, datum):
-        return datum[0]
+
+class NodeTable(nodes_tables.RegisteredNodesTable):
+
+    class Meta:
+        name = "nodetable"
+        verbose_name = _("Nodes")
+        table_actions = ()
+        row_actions = ()

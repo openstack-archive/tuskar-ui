@@ -25,8 +25,6 @@ urlpatterns = urls.patterns(
              name='undeploy_in_progress'),
     urls.url(r'^(?P<stack_id>[^/]+)/$', views.DetailView.as_view(),
              name='detail'),
-    urls.url(r'^(?P<stack_id>[^/]+)/role/(?P<role_id>[^/]+)$',
-             views.OvercloudRoleView.as_view(), name='role'),
     urls.url(r'^(?P<stack_id>[^/]+)/undeploy-confirmation$',
              views.UndeployConfirmationView.as_view(),
              name='undeploy_confirmation'),

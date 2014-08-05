@@ -23,6 +23,7 @@ class BasePanels(horizon.PanelGroup):
         'overcloud',
         'plans',
         'parameters',
+        'roles',
         'nodes',
         'flavors',
         'images',
