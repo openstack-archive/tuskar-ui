@@ -41,7 +41,7 @@
             </div>
             {% endfor %}
           {% endif %}
-          <a href="?tab=undeploy_in_progress__log" data-toggle="tab" data-target="#undeploy_in_progress__log" class="pull-right">See full log</a>
+          <a href="{% url 'horizon:infrastructure:history:index' %}" class="pull-right">See full log</a>
         </div>
       </div>
     </div>
