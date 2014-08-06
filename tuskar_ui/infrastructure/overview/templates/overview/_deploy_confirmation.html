@@ -1,0 +1,22 @@
+{% extends "horizon/common/_modal_form.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block form_id %}provision_form{% endblock %}
+{% block form_action %}{% url 'horizon:infrastructure:overview:deploy_confirmation' %}{% endblock %}
+
+{% block modal_id %}provision_modal{% endblock %}
+{% block modal-header %}{% trans "Deployment Confirmation" %}{% endblock %}
+
+{% block modal-body %}
+<div>
+    <p>{% trans "You are about deploy your overcloud" %}
+    </p>
+    <p>{% trans "This operation cannot be undone. Are you sure you want to do that?" %}</p>
+</div>
+{% endblock %}
+
+{% block modal-footer %}
+  <input class="btn btn-primary" type="submit" value="{% trans "Deploy" %}" />
+  <a href="{% url 'horizon:infrastructure:overview:index' %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
+{% endblock %}

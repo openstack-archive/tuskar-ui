@@ -1,0 +1,34 @@
+{% load i18n %}
+{% load url from future%}
+
+{% if stack %}
+  {% if stack.is_deleting or stack.is_delete_failed %}
+    {% include "infrastructure/overview/_undeploy_in_progress.html" %}
+  {% else %}
+    {% include "infrastructure/overview/_plan_overview.html" %}
+  {% endif %}
+  <div class="actions page-actions pull-left">
+    <a href="{% url 'horizon:infrastructure:overview:undeploy_confirmation' %}"
+       class="btn btn-danger ajax-modal
+              {% if not stack.is_deployed and not stack.is_failed %}disabled{% endif %}">
+      <i class="icon-fire icon-white"></i>
+      {% trans "Undeploy" %}
+    </a>
+  </div>
+{% else %}
+  Ready to get deployed
+  <ul>
+    {% for role in roles %}
+      {% if role.planned_node_count > 0 %}
+        <li>{{ role.planned_node_count }} x {{ role.name }} </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+  <div class="actions page-actions pull-left">
+    <a href="{% url 'horizon:infrastructure:overview:deploy_confirmation' %}"
+       class="btn btn-danger ajax-modal">
+      <i class="icon-fire icon-white"></i>
+      {% trans "Deploy" %}
+    </a>
+  </div>
+{% endif %}

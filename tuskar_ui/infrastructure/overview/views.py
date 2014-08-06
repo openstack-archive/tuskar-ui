@@ -26,48 +26,46 @@ from tuskar_ui.infrastructure.overview import forms
 INDEX_URL = 'horizon:infrastructure:overview:index'
 
 
-def _get_role_data(stack, role):
+def _get_role_data(plan, stack, role):
     """Gathers data about a single deployment role from the related Overcloud
     and OvercloudRole objects, and presents it in the form convenient for use
     from the template.
 
-    :param stack: Stack object
-    :type  stack: tuskar_ui.api.heat.Stack
-    :param role: Role object
-    :type  role: tuskar_ui.api.tuskar.OvercloudRole
-    :return: dict with information about the role, to be used by template
-    :rtype:  dict
     """
-    resources = stack.resources_by_role(role, with_joins=True)
-    nodes = [r.node for r in resources]
-    node_count = len(nodes)
-
     data = {
         'role': role,
         'name': role.name,
-        'total_node_count': node_count,
+        'planned_node_count': plan.parameter_value(
+            role.node_count_parameter_name, 0)
     }
-    deployed_node_count = 0
-    deploying_node_count = 0
-    error_node_count = 0
-    waiting_node_count = node_count
 
-    if nodes:
-        deployed_node_count = sum(1 for node in nodes
-                                  if node.instance.status == 'ACTIVE')
-        deploying_node_count = sum(1 for node in nodes
-                                   if node.instance.status == 'BUILD')
-        error_node_count = sum(1 for node in nodes
-                               if node.instance.status == 'ERROR')
-        waiting_node_count = (node_count - deployed_node_count -
-                              deploying_node_count - error_node_count)
+    if stack:
+        resources = stack.resources_by_role(role, with_joins=True)
+        nodes = [r.node for r in resources]
+        node_count = len(nodes)
 
-    data.update({
-        'deployed_node_count': deployed_node_count,
-        'deploying_node_count': deploying_node_count,
-        'waiting_node_count': waiting_node_count,
-        'error_node_count': error_node_count,
-    })
+        deployed_node_count = 0
+        deploying_node_count = 0
+        error_node_count = 0
+        waiting_node_count = node_count
+
+        if nodes:
+            deployed_node_count = sum(1 for node in nodes
+                                      if node.instance.status == 'ACTIVE')
+            deploying_node_count = sum(1 for node in nodes
+                                       if node.instance.status == 'BUILD')
+            error_node_count = sum(1 for node in nodes
+                                   if node.instance.status == 'ERROR')
+            waiting_node_count = (node_count - deployed_node_count -
+                                  deploying_node_count - error_node_count)
+        data.update({
+            'total_node_count': node_count,
+            'deployed_node_count': deployed_node_count,
+            'deploying_node_count': deploying_node_count,
+            'waiting_node_count': waiting_node_count,
+            'error_node_count': error_node_count,
+        })
+
     # TODO(rdopieralski) get this from ceilometer
     # data['capacity'] = 20
     return data
@@ -91,8 +89,17 @@ class IndexView(horizon_views.APIView, StackMixin):
         plan = api.tuskar.OvercloudPlan.get_the_plan(request)
         stack = self.get_stack()
 
+        api.heat.Stack.create(request,
+                              plan.name,
+                              plan.template,
+                              plan.parameters)
+
         context['plan'] = plan
         context['stack'] = stack
+
+        roles = [_get_role_data(plan, stack, role)
+                 for role in plan.role_list]
+        context['roles'] = roles
 
         if stack:
             context['last_failed_events'] = [
@@ -126,16 +133,20 @@ class IndexView(horizon_views.APIView, StackMixin):
                     5, 100 * (total_num_nodes_count - resources_count))
             else:
                 # stack is active
-                roles = [_get_role_data(stack, role)
-                         for role in stack.plan.role_list]
                 total = sum(d['total_node_count'] for d in roles)
-
-                context['roles'] = roles
                 context['progress'] = 100 * sum(d.get('deployed_node_count', 0)
                                                 for d in roles) // (total or 1)
                 context['dashboard_urls'] = stack.dashboard_urls
 
         return context
+
+
+class DeployConfirmationView(horizon.forms.ModalFormView, StackMixin):
+    form_class = forms.DeployOvercloud
+    template_name = 'infrastructure/overview/deploy_confirmation.html'
+
+    def get_success_url(self):
+        return reverse(INDEX_URL)
 
 
 class UndeployConfirmationView(horizon.forms.ModalFormView, StackMixin):

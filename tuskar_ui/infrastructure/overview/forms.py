@@ -20,6 +20,26 @@ import horizon.messages
 from tuskar_ui import api
 
 
+class DeployOvercloud(horizon.forms.SelfHandlingForm):
+    def handle(self, request, data):
+        try:
+            plan = api.tuskar.OvercloudPlan.get_the_plan(request)
+            stack = api.heat.Stack.get_by_plan(self.request, plan)
+            if not stack:
+                api.heat.Stack.create(request,
+                                      plan.name,
+                                      plan.template,
+                                      plan.parameters)
+        except Exception:
+            horizon.exceptions.handle(request,
+                                      _("Unable to deploy overcloud."))
+            return False
+        else:
+            msg = _('Deployment in progress.')
+            horizon.messages.success(request, msg)
+            return True
+
+
 class UndeployOvercloud(horizon.forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
