@@ -28,6 +28,7 @@ from tuskar_ui.api import tuskar
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
 from tuskar_ui.test.test_data import heat_data
+from tuskar_ui.test.test_driver import heat_driver as mock_heat
 from tuskar_ui.utils import utils
 
 
@@ -84,6 +85,15 @@ class Stack(base.APIResourceWrapper):
         self._request = request
 
     @classmethod
+    @handle_errors(_("Unable to create Heat stack"), [])
+    def create(cls, request, stack_name, template, parameters):
+        stack = mock_heat.Stack.create(
+            stack_name=stack_name,
+            template=template,
+            parameters=parameters)
+        return cls(stack, request=request)
+
+    @classmethod
     @handle_errors(_("Unable to retrieve heat stacks"), [])
     def list(cls, request):
         """Return a list of stacks in Heat
@@ -95,7 +105,7 @@ class Stack(base.APIResourceWrapper):
                  are none
         :rtype:  list of tuskar_ui.api.heat.Stack
         """
-        stacks = TEST_DATA.heatclient_stacks.list()
+        stacks = mock_heat.Stack.list()
         return [cls(stack, request=request) for stack in stacks]
 
     @classmethod
@@ -108,9 +118,7 @@ class Stack(base.APIResourceWrapper):
                  found
         :rtype:  tuskar_ui.api.heat.Stack or None
         """
-        for stack in Stack.list(request):
-            if stack.id == stack_id:
-                return stack
+        return cls(mock_heat.Stack.get(stack_id))
 
     @classmethod
     @handle_errors(_("Unable to retrieve stack"))
@@ -125,6 +133,11 @@ class Stack(base.APIResourceWrapper):
         for stack in Stack.list(request):
             if stack.plan and (stack.plan.id == plan.id):
                 return stack
+
+    @classmethod
+    @handle_errors(_("Unable to delete Heat stack"), [])
+    def delete(cls, request, stack_id):
+        mock_heat.Stack.delete(stack_id)
 
     @memoized.memoized
     def resources(self, with_joins=True):

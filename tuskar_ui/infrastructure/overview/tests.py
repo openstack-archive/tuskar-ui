@@ -18,6 +18,7 @@ from django.core import urlresolvers
 from mock import patch, call  # noqa
 from openstack_dashboard.test.test_data import utils
 
+from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import heat_data
 from tuskar_ui.test.test_data import tuskar_data
@@ -62,7 +63,7 @@ def _mock_plan(**kwargs):
         yield OvercloudPlan
 
 
-class OvercloudTests(test.BaseAdminViewTests):
+class OverviewTests(test.BaseAdminViewTests):
 
     def test_index_stack_not_created(self):
         with contextlib.nested(
@@ -83,10 +84,12 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'infrastructure/overview/_role_nodes.html')
 
     def test_index_stack_deployed(self):
+        stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
+
         with contextlib.nested(
                 _mock_plan(),
-                patch('tuskar_ui.api.heat.Stack.get',
-                      return_value=None),
+                patch('tuskar_ui.api.heat.Stack.get_by_plan',
+                      return_value=stack),
                 patch('tuskar_ui.api.heat.Stack.events',
                       return_value=[]),
         ) as (OvercloudPlan, stack_get_mock, stack_events_mock):
@@ -102,8 +105,12 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'infrastructure/overview/_plan_overview.html')
 
     def test_index_stack_undeploy_in_progress(self):
+        stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
+
         with contextlib.nested(
                 _mock_plan(),
+                patch('tuskar_ui.api.heat.Stack.get_by_plan',
+                      return_value=stack),
                 patch('tuskar_ui.api.heat.Stack.is_deleting',
                       return_value=True),
                 patch('tuskar_ui.api.heat.Stack.is_deployed',
@@ -119,11 +126,24 @@ class OvercloudTests(test.BaseAdminViewTests):
             res, 'infrastructure/overview/_undeploy_in_progress.html')
 
     def test_delete_get(self):
-        res = self.client.get(DELETE_URL)
+        stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
+
+        with contextlib.nested(
+                _mock_plan(),
+                patch('tuskar_ui.api.heat.Stack.get_by_plan',
+                      return_value=stack),
+        ):
+            res = self.client.get(DELETE_URL)
         self.assertTemplateUsed(
             res, 'infrastructure/overview/undeploy_confirmation.html')
 
     def test_delete_post(self):
-        with _mock_plan():
+        stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
+
+        with contextlib.nested(
+                _mock_plan(),
+                patch('tuskar_ui.api.heat.Stack.get_by_plan',
+                      return_value=stack),
+        ):
             res = self.client.post(DELETE_URL)
         self.assertRedirectsNoFollow(res, INDEX_URL)
