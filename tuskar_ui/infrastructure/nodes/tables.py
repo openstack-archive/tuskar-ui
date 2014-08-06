@@ -29,7 +29,7 @@ class DeleteNode(tables.BatchAction):
     classes = ('btn-danger',)
 
     def allowed(self, request, obj=None):
-        return getattr(obj, 'instance', None) is None
+        return getattr(obj, 'instance_uuid', None) is None
 
     def action(self, request, obj_id):
         api.node.Node.delete(request, obj_id)
