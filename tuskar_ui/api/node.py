@@ -14,6 +14,7 @@ import logging
 
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
+from ironicclient import client as ironic_client
 from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
@@ -37,6 +38,13 @@ LOG = logging.getLogger(__name__)
 def baremetalclient(request):
     nc = nova.novaclient(request)
     return baremetal.BareMetalNodeManager(nc)
+
+
+def ironicclient(request):
+    api_version = 1
+    kwargs = {'os_auth_token': request.user.token.id,
+              'ironic_url': base.url_for(request, 'baremetal')}
+    return ironic_client.get_client(api_version, **kwargs)
 
 
 # FIXME(lsmola) This should be done in Horizon, they don't have caching
@@ -67,7 +75,25 @@ class IronicNode(base.APIResourceWrapper):
                driver=None):
         """Create a Node in Ironic
         """
-        node = TEST_DATA.ironicclient_nodes.first()
+        node = ironicclient(request).node.create(
+            driver=driver,
+            driver_info={
+                'ipmi_address': ipmi_address,
+                'ipmi_username': ipmi_username,
+                'password': ipmi_password
+            },
+            properties={
+                'cpus': cpus,
+                'memory_mb': memory_mb,
+                'local_gb': local_gb,
+            }
+        )
+        for mac_address in mac_addresses:
+            ironicclient(request).port.create(
+                node_uuid=node.uuid,
+                address=mac_address
+            )
+
         return cls(node)
 
     @classmethod
@@ -83,10 +109,8 @@ class IronicNode(base.APIResourceWrapper):
         :return: matching IronicNode, or None if no IronicNode matches the ID
         :rtype:  tuskar_ui.api.node.IronicNode
         """
-        nodes = IronicNode.list(request) + IronicNode.list_discovered(request)
-        for node in nodes:
-            if node.uuid == uuid:
-                return node
+        node = ironicclient(request).node.get(uuid)
+        return cls(node)
 
     @classmethod
     def get_by_instance_uuid(cls, request, instance_uuid):
@@ -105,9 +129,8 @@ class IronicNode(base.APIResourceWrapper):
         :raises: ironicclient.exc.HTTPNotFound if there is no IronicNode with
                  the matching instance UUID
         """
-        for node in IronicNode.list(request):
-            if node.instance_uuid == instance_uuid:
-                return node
+        node = ironicclient(request).node.get_by_instance_uuid(instance_uuid)
+        return cls(node)
 
     @classmethod
     @handle_errors(_("Unable to retrieve nodes"), [])
@@ -125,26 +148,17 @@ class IronicNode(base.APIResourceWrapper):
         :return: list of IronicNodes, or an empty list if there are none
         :rtype:  list of tuskar_ui.api.node.IronicNode
         """
-        nodes = [node for node in TEST_DATA.ironicclient_nodes.list()
-                 if not node.newly_discovered]
-        if associated is not None:
-            if associated:
-                nodes = [node for node in nodes
-                         if node.instance_uuid is not None]
-            else:
-                nodes = [node for node in nodes
-                         if node.instance_uuid is None]
-
-        return [cls(node) for node in nodes]
+        nodes = ironicclient(request).node.list(associated=associated)
+        return [cls(cls.get(request, node.uuid)) for node in nodes]
 
     @classmethod
     @handle_errors(_("Unable to retrieve newly discovered nodes"), [])
     def list_discovered(cls, request):
         """Return a list of IronicNodes which have been newly discovered
         """
-        nodes = [node for node in TEST_DATA.ironicclient_nodes.list()
-                 if node.newly_discovered]
-        return [cls(node) for node in nodes]
+        #TODO(akrivoka) How to get discovered nodes?
+        nodes = ironicclient(request).node.list()
+        return [cls(cls.get(request, node.uuid)) for node in nodes]
 
     @classmethod
     def delete(cls, request, uuid):
@@ -157,7 +171,19 @@ class IronicNode(base.APIResourceWrapper):
         :param uuid: ID of IronicNode to be removed
         :type  uuid: str
         """
-        return
+        return ironicclient(request).node.delete(uuid)
+
+    @classmethod
+    def list_ports(cls, request, uuid):
+        """Return a list of ports associated with this IronicNode
+
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param uuid: ID of IronicNode
+        :type  uuid: str
+        """
+        return ironicclient(request).node.list_ports(uuid)
 
     @cached_property
     def addresses(self):
@@ -168,11 +194,9 @@ class IronicNode(base.APIResourceWrapper):
                  this IronicNode
         :rtype:  list of str
         """
-        # we don't use an association in the node test data, because that
-        # association is unclear (to me); the REST API uses item links that
-        # are difficult to simulate.  for mock purposes, no harm in just
-        # returning all ports
-        ports = TEST_DATA.ironicclient_ports.list()
+        #TODO(akrivoka) addresses?
+        return []
+        ports = self.list_ports(self._request, self.uuid)
         return [port.address for port in ports]
 
     @cached_property
@@ -187,9 +211,10 @@ class IronicNode(base.APIResourceWrapper):
     def local_gb(self):
         return self.properties['local_gb']
 
-    @cached_property
-    def arch(self):
-        return self.properties['arch']
+    #TODO(akrivoka): arch?
+    #@cached_property
+    #def arch(self):
+    #    return self.properties['arch']
 
 
 class BareMetalNode(base.APIResourceWrapper):
