@@ -40,7 +40,7 @@ def tuskarclient(request):
 
 class OvercloudPlan(base.APIDictWrapper):
     _attrs = ('id', 'name', 'description', 'created_at', 'modified_at',
-              'roles', 'parameters')
+              'roles', 'parameters', 'template')
 
     def __init__(self, apiresource, request=None):
         super(OvercloudPlan, self).__init__(apiresource)
@@ -157,10 +157,11 @@ class OvercloudPlan(base.APIDictWrapper):
             if parameter['name'] == param_name:
                 return parameter
 
-    def parameter_value(self, param_name):
+    def parameter_value(self, param_name, default=None):
         parameter = self.parameter(param_name)
         if parameter is not None:
             return parameter['value']
+        return default
 
 
 class OvercloudRole(base.APIDictWrapper):

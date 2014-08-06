@@ -20,6 +20,9 @@ from tuskar_ui.infrastructure.overview import views
 urlpatterns = urls.patterns(
     '',
     urls.url(r'^$', views.IndexView.as_view(), name='index'),
+    urls.url(r'^deploy-confirmation$',
+             views.DeployConfirmationView.as_view(),
+             name='deploy_confirmation'),
     urls.url(r'^undeploy-confirmation$',
              views.UndeployConfirmationView.as_view(),
              name='undeploy_confirmation'),

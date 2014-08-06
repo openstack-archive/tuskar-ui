@@ -26,6 +26,8 @@ from tuskar_ui.test.test_data import tuskar_data
 
 INDEX_URL = urlresolvers.reverse(
     'horizon:infrastructure:overview:index')
+DEPLOY_URL = urlresolvers.reverse(
+    'horizon:infrastructure:overview:deploy_confirmation')
 DELETE_URL = urlresolvers.reverse(
     'horizon:infrastructure:overview:undeploy_confirmation')
 TEST_DATA = utils.TestDataContainer()
@@ -100,7 +102,7 @@ class OverviewTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(
             res, 'infrastructure/overview/index.html')
         self.assertTemplateUsed(
-            res, 'infrastructure/overview/_plan_overview.html')
+            res, 'infrastructure/overview/_deployment_status.html')
 
     def test_index_stack_undeploy_in_progress(self):
         stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
@@ -121,7 +123,13 @@ class OverviewTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(
             res, 'infrastructure/overview/index.html')
         self.assertTemplateUsed(
-            res, 'infrastructure/overview/_undeploy_in_progress.html')
+            res, 'infrastructure/overview/_deployment_status.html')
+
+    def test_deploy_get(self):
+        with _mock_plan():
+            res = self.client.get(DEPLOY_URL)
+        self.assertTemplateUsed(
+            res, 'infrastructure/overview/deploy_confirmation.html')
 
     def test_delete_get(self):
         stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())

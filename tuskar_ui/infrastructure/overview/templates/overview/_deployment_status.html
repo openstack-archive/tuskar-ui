@@ -1,0 +1,91 @@
+{% load i18n %}
+{% load url from future%}
+
+{% if stack %}
+  {% if stack.is_deleting or stack.is_delete_failed or stack.is_deploying or stack.is_failed %}
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="alert alert-info">
+          <div class="row">
+            <div class="col-xs-2">
+	      <strong>
+                {% if stack.is_deleting %}
+                  Undeploying...
+		{% elif stack.is_delete_failed %}
+                  Undeploying failed
+		{% elif stack.is_deploying %}
+                  Deploying...
+                {% elif stack.is_failed %}
+                  Deployment failed
+                {% endif %}
+	      </strong
+              <div class="progress progress-striped progress-danger">
+                <div class="bar bar-info" style="width:{{ progress }}%"></div>
+              </div>
+    	    </div>
+            <div class="col-xs-10">
+              {% if last_failed_events %}
+                <strong>{% trans "Last failed events:" %}</strong>
+                {% for event in last_failed_events %}
+                <div>
+                  <dl>
+                    <dt>{% trans "Timestamp" %}</dt>
+                    <dd><time datetime="{{ event.event_time }}">{{ event.event_time }}</time></dd>
+                    <dt>{% trans "Resource Name" %}</dt>
+                    <dd>{{ event.resource_name }}</dd>
+                    <dt>{% trans "Status" %}</dt>
+                    <dd>{{ event.resource_status }}</dd>
+                    <dt>{% trans "Reason" %}</dt>
+                    <dd>{{ event.resource_status_reason }}</dd>
+                  </dl>
+                </div>
+                {% endfor %}
+              {% endif %}
+              <a href="{% url 'horizon:infrastructure:history:index' %}" class="pull-right">See full log</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if not dashboard_urls and not stack.is_deploying and not stack.is_failed %}
+    Your OpenStack cloud is deployed, but it needs to be initialized.
+  {% else %}
+    Deployment is live
+    <div class="widget">
+      <h2>{% trans "Access Information" %}</h2>
+      {% for dashboard_url in dashboard_urls %}
+        <p>
+          <a href="{{ dashboard_url }}">
+            {% trans "Horizon URL" %} ({{ dashboard_url }})
+          </a>
+        </p>
+      {% endfor %}
+    </div>
+  {% endif %}
+  <br />
+  <div class="actions page-actions pull-left">
+    <a href="{% url 'horizon:infrastructure:overview:undeploy_confirmation' %}"
+       class="btn btn-danger ajax-modal">
+      <i class="icon-fire icon-white"></i>
+      {% trans "Undeploy" %}
+    </a>
+  </div>
+{% else %}
+  Ready to get deployed
+  <ul>
+    {% for role in roles %}
+      {% if role.planned_node_count > 0 %}
+        <li>{{ role.planned_node_count }} x {{ role.name }} </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+  <div class="actions page-actions pull-left">
+    <a href="{% url 'horizon:infrastructure:overview:deploy_confirmation' %}"
+       class="btn btn-danger ajax-modal">
+      <i class="icon-fire icon-white"></i>
+      {% trans "Deploy" %}
+    </a>
+  </div>
+{% endif %}
