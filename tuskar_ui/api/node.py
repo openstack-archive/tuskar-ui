@@ -14,6 +14,7 @@ import logging
 
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
+from ironicclient import client as ironic_client
 from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
@@ -37,6 +38,13 @@ LOG = logging.getLogger(__name__)
 def baremetalclient(request):
     nc = nova.novaclient(request)
     return baremetal.BareMetalNodeManager(nc)
+
+
+def ironicclient(request):
+    api_version = 1
+    kwargs = {'os_auth_token': request.user.token.id,
+              'ironic_url': base.url_for(request, 'baremetal')}
+    return ironic_client.get_client(api_version, **kwargs)
 
 
 # FIXME(lsmola) This should be done in Horizon, they don't have caching
@@ -83,10 +91,8 @@ class IronicNode(base.APIResourceWrapper):
         :return: matching IronicNode, or None if no IronicNode matches the ID
         :rtype:  tuskar_ui.api.node.IronicNode
         """
-        nodes = IronicNode.list(request) + IronicNode.list_discovered(request)
-        for node in nodes:
-            if node.uuid == uuid:
-                return node
+        node = ironicclient(request).node.get(uuid)
+        return cls(node)
 
     @classmethod
     def get_by_instance_uuid(cls, request, instance_uuid):
@@ -125,16 +131,7 @@ class IronicNode(base.APIResourceWrapper):
         :return: list of IronicNodes, or an empty list if there are none
         :rtype:  list of tuskar_ui.api.node.IronicNode
         """
-        nodes = [node for node in TEST_DATA.ironicclient_nodes.list()
-                 if not node.newly_discovered]
-        if associated is not None:
-            if associated:
-                nodes = [node for node in nodes
-                         if node.instance_uuid is not None]
-            else:
-                nodes = [node for node in nodes
-                         if node.instance_uuid is None]
-
+        nodes = ironicclient(request).node.list(associated=associated)
         return [cls(node) for node in nodes]
 
     @classmethod
