@@ -25,7 +25,7 @@
       </label>
     </div>
     <div class="row" id="register-hardware-fields">
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.architecture required=True %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.cpu_arch required=True %}
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.cpus extra_text=_('units') required=True %}
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.memory_mb extra_text=_('MB') required=True %}
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.local_gb extra_text=_('GB') required=True %}

@@ -20,7 +20,7 @@ from tuskar_ui import api
 import tuskar_ui.forms
 
 
-ARCHITECTURE_CHOICES = [
+CPU_ARCH_CHOICES = [
     ('x86', _("x86")),
     ('x86_64', _("x86_64")),
 ]
@@ -82,10 +82,10 @@ class NodeForm(django.forms.Form):
         }),
     )
 
-    architecture = django.forms.ChoiceField(
+    cpu_arch = django.forms.ChoiceField(
         label=_("Architecture"),
         required=True,
-        choices=ARCHITECTURE_CHOICES,
+        choices=CPU_ARCH_CHOICES,
         widget=django.forms.Select(
             attrs={'class': 'form-control'}),
     )
@@ -135,7 +135,7 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
                     # TODO(rdopieralski) If ipmi_address is no longer required,
                     # then we will need to use something else here?
                     ipmi_address=data['ipmi_address'],
-                    architecture=data.get('architecture'),
+                    cpu_arch=data.get('cpu_arch'),
                     cpus=data.get('cpus'),
                     memory_mb=data.get('memory_mb'),
                     local_gb=data.get('local_gb'),
