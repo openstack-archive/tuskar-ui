@@ -23,8 +23,10 @@ from tuskar_ui import api
 class UndeployOvercloud(horizon.forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
-            stack = api.heat.Stack.get(request, self.initial['stack_id'])
-            api.tuskar.OvercloudPlan.delete(request, stack.plan.id)
+            plan = api.tuskar.OvercloudPlan.get_the_plan(request)
+            stack = api.heat.Stack.get_by_plan(self.request, plan)
+            if stack:
+                api.heat.Stack.delete(request, stack.id)
         except Exception:
             horizon.exceptions.handle(request,
                                       _("Unable to undeploy overcloud."))

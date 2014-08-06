@@ -25,7 +25,11 @@ from tuskar_ui.test import helpers as test
 
 class HeatAPITests(test.APITestCase):
     def test_stack_list(self):
-        ret_val = api.heat.Stack.list(self.request)
+        stacks = self.heatclient_stacks.list()
+
+        with patch('tuskar_ui.test.test_driver.heat_driver.Stack.list',
+                   return_value=stacks):
+            ret_val = api.heat.Stack.list(self.request)
         for stack in ret_val:
             self.assertIsInstance(stack, api.heat.Stack)
         self.assertEqual(1, len(ret_val))
