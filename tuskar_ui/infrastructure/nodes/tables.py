@@ -29,7 +29,7 @@ class DeleteNode(tables.BatchAction):
     classes = ('btn-danger',)
 
     def allowed(self, request, obj=None):
-        return getattr(obj, 'instance', None) is None
+        return getattr(obj, 'instance_uuid', None) is None
 
     def action(self, request, obj_id):
         api.node.Node.delete(request, obj_id)
@@ -114,8 +114,8 @@ class IronicDiscoveredNodesTable(tables.DataTable):
     node = tables.Column('uuid',
                          link="horizon:infrastructure:nodes:detail",
                          verbose_name=_("Node Name"))
-    arch = tables.Column('arch',
-                         verbose_name=_("Arch."))
+    cpu_arch = tables.Column('cpu_arch',
+                             verbose_name=_("Arch."))
     cpus = tables.Column('cpus',
                          verbose_name=_("CPU (cores)"))
     memory_mb = tables.Column('memory_mb',
