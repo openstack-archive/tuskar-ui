@@ -137,11 +137,8 @@ class PerformanceView(base.TemplateView):
         node_uuid = kwargs.get('node_uuid')
         node = api.node.Node.get(request, node_uuid)
 
-        average = used = 0
-        tooltip_average = ''
         unit = ''
         series = []
-        start_datetime = end_datetime = ''
 
         try:
             ip_addr = node.driver_info['ip_address']
@@ -212,26 +209,12 @@ class PerformanceView(base.TemplateView):
                 util['unit'] = '%'
                 series = [util]
 
-            if series and barchart:
-                average, used, tooltip_average = (
-                    metering_utils.get_barchart_stats(series, unit))
-
-        if date_from:
-            start_datetime = date_from.strftime("%Y-%m-%dT%H:%M:%S")
-        if date_to:
-            end_datetime = date_to.strftime("%Y-%m-%dT%H:%M:%S")
-
         json_output = metering_utils.create_json_output(
             series,
-            start_datetime,
-            end_datetime)
-
-        if series and barchart:
-            json_output = metering_utils.add_barchart_settings(
-                json_output,
-                average,
-                used,
-                tooltip_average)
+            barchart,
+            unit,
+            date_from,
+            date_to)
 
         return http.HttpResponse(json.dumps(json_output),
                                  mimetype='application/json')
