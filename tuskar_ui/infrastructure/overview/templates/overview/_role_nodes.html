@@ -2,42 +2,24 @@
 {% load url from future %}
 
 {% include 'horizon/common/_form_errors.html' with form=form %}
+Deployment Roles
 <table class="table">
-  <tr>
-    <th>{% trans "Name" %}</th>
-    <th>{% trans "Flavors" %}</th>
-    <th>{% trans "Nodes" %}</th>
-    {% if show_change %}
-    <th>{% trans "Change" %}</th>
-    {% endif %}
-  </tr>
-  {% for role_id, label, fields in form.roles_fieldset %}
+  {% for role in roles %}
     <tbody>
-    {% for field in fields %}
       <tr>
-        {% if forloop.first %}
-          <td rowspan="{{ fields|length }}">
-            {{ label }}
-          </td>
-        {% endif %}
-        <td>
-          {% if field.field.label %}
-            {{ field.label }}
-          {% else %}
-            ({% trans "No flavor" %})
-          {% endif %}
-        </td>
-        <td>
-          {{ field }}
-          {% for error in field.errors %}
-            <span class="help-inline">{{ error }}</span>
-          {% endfor %}
-        </td>
-        {% if show_change %}
-          <td class="changed"><span class="muted">no change</span></td>
-        {% endif %}
+	<td>
+	  {% if stack %}
+  	    {% if role.total_node_count != role.deployed_node_count %}
+               {{ role.deployed_node_count }} / {{ role.total_node_count }}
+    	    {% else %}
+              {{ role.total_node_count }}
+	    {% endif %}
+	  {% else %}
+	    {{ role.planned_node_count }}
+	  {% endif %}
+	</td>
+        <td>{{ role.name }}</td>
       </tr>
-    {% endfor %}
-    </tbody>
+     </tbody>
   {% endfor %}
 </table>
