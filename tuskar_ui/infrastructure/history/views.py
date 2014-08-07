@@ -28,3 +28,4 @@ class IndexView(horizon_tables.DataTableView):
             stack = api.heat.Stack.get_by_plan(self.request, plan)
             if stack:
                 return stack.events
+        return []
