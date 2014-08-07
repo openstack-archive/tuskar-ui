@@ -19,7 +19,11 @@
       <dd>{% trans 'No flavor associated' %}</dd>
     {% endif %}
     <dt>{% trans 'Image' %}</dt>
-    <dd>{{ image_name }}</dd>
+    {% if image %}
+      <dd>{{ image.name }}</dd>
+    {% else %}
+      <dd>{% trans 'No image associated' %}</dd>
+    {% endif %}
     </dl>
 
     <h3>{% trans 'Nodes' %}</h3>

@@ -60,6 +60,42 @@ def data(TEST):
             'hidden': 'false',
             'value': 5,
         }, {
+            'name': 'ControllerFlavorID',
+            'label': 'Controller Flavor ID',
+            'description': 'Controller flavor ID',
+            'hidden': 'false',
+            'value': '1',
+        }, {
+            'name': 'ComputeFlavorID',
+            'label': 'Compute Flavor ID',
+            'description': 'Compute flavor ID',
+            'hidden': 'false',
+            'value': '1',
+        }, {
+            'name': 'Block StorageFlavorID',
+            'label': 'Block Storage Flavor ID',
+            'description': 'Block storage flavor ID',
+            'hidden': 'false',
+            'value': '2',
+        }, {
+            'name': 'ControllerImageID',
+            'label': 'Controller Image ID',
+            'description': 'Controller image ID',
+            'hidden': 'false',
+            'value': '2',
+        }, {
+            'name': 'ComputeImageID',
+            'label': 'Compute Image ID',
+            'description': 'Compute image ID',
+            'hidden': 'false',
+            'value': '1',
+        }, {
+            'name': 'Block StorageImageID',
+            'label': 'Block Storage Image ID',
+            'description': 'Block storage image ID',
+            'hidden': 'false',
+            'value': '4',
+        }, {
             'name': 'AdminPassword',
             'label': 'Admin Password',
             'description': 'Admin password',

@@ -13,6 +13,7 @@
 #    under the License.
 
 from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions as horizon_exceptions
 from horizon import tables as horizon_tables
@@ -50,7 +51,23 @@ class IndexView(horizon_tables.DataTableView):
     template_name = "infrastructure/roles/index.html"
 
     def get_data(self):
-        return api.tuskar.OvercloudRole.list(self.request)
+        roles = api.tuskar.OvercloudRole.list(self.request)
+        plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+        for role in roles:
+            role_flavor = role.flavor(plan)
+            # TODO(tzumainn): we don't mock images, so calling role.image(plan)
+            # won't work right now
+            role_image = None
+            if role_flavor:
+                role.flavor = role_flavor.name
+            else:
+                role.flavor = _('Unknown')
+            if role_image:
+                role.image = role_image.name
+            else:
+                role.image = _('Unknown')
+
+        return roles
 
 
 class DetailView(horizon_tables.DataTableView, OvercloudRoleMixin, StackMixin):
@@ -87,16 +104,18 @@ class DetailView(horizon_tables.DataTableView, OvercloudRoleMixin, StackMixin):
         context = super(DetailView, self).get_context_data(**kwargs)
         redirect = reverse(INDEX_URL)
 
+        plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
         stack = self.get_stack(redirect)
         role = self.get_role(redirect)
 
         context['role'] = role
-        # TODO(tzumainn) we need to do this from plan parameters
-        context['image_name'] = 'FIXME'
         if stack:
             context['nodes'] = self._get_nodes(stack, role)
         else:
             context['nodes'] = []
-        context['flavor'] = None
+        context['flavor'] = role.flavor(plan)
+        # TODO(tzumainn): we don't mock images, so calling role.image(plan)
+        # won't work right now
+        context['image'] = None
 
         return context
