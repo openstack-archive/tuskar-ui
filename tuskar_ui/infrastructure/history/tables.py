@@ -31,7 +31,7 @@ class HistoryTable(tables.DataTable):
 
     class Meta:
         name = "log"
-        verbose_name = _("Log")
+        verbose_name = _("Deployment Log")
         multi_select = False
         table_actions = ()
         row_actions = ()
