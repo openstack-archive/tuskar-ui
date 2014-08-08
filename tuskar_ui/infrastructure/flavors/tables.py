@@ -66,11 +66,6 @@ class FlavorsTable(tables.DataTable):
     disk = tables.Column(flavor_tables.get_disk_size,
                          verbose_name=_('Disk'),
                          attrs={'data-type': 'size'})
-    # FIXME(dtantsur): would be much better to have names here
-    kernel_image_id = tables.Column('kernel_image_id',
-                                    verbose_name=_('Deploy Kernel Image ID'))
-    ramdisk_image_id = tables.Column('ramdisk_image_id',
-                                     verbose_name=_('Deploy Ramdisk Image ID'))
 
     class Meta:
         name = "flavors"
