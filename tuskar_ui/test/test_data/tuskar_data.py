@@ -21,6 +21,7 @@ def data(TEST):
         'id': 'plan-1',
         'name': 'overcloud',
         'description': 'this is an overcloud deployment plan',
+        'template': '',
         'created_at': '2014-05-27T21:11:09Z',
         'modified_at': '2014-05-30T21:11:09Z',
         'roles': [{
@@ -41,6 +42,24 @@ def data(TEST):
             'version': 1,
         }],
         'parameters': [{
+            'name': 'ControllerNodeCount',
+            'label': 'Controller Node Count',
+            'description': 'Controller node count',
+            'hidden': 'false',
+            'value': 1,
+        }, {
+            'name': 'ComputeNodeCount',
+            'label': 'Compute Node Count',
+            'description': 'Compute node count',
+            'hidden': 'false',
+            'value': 42,
+        }, {
+            'name': 'Block StorageNodeCount',
+            'label': 'Block Sorage Node Count',
+            'description': 'Block storage node count',
+            'hidden': 'false',
+            'value': 5,
+        }, {
             'name': 'AdminPassword',
             'label': 'Admin Password',
             'description': 'Admin password',
