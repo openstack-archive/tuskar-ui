@@ -23,6 +23,9 @@ class ImagesTable(tables.DataTable):
                          verbose_name=_("Image Name"))
     disk_format = tables.Column('disk_format',
                                 verbose_name=_("Format"))
+    role = tables.Column(lambda i:
+                         i.role.name if i.role else '-',
+                         verbose_name=_("Deployment Role"))
 
     class Meta:
         name = "images"

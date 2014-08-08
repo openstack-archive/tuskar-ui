@@ -82,3 +82,16 @@ class TuskarAPITests(test.APITestCase):
         ret_val = api.tuskar.OvercloudRole.get(self.request, role['id'])
 
         self.assertIsInstance(ret_val, api.tuskar.OvercloudRole)
+
+    def test_role_get_by_image(self):
+        plan = api.tuskar.OvercloudPlan(self.tuskarclient_plans.first())
+        image = self.glanceclient_images.first()
+        roles = [api.tuskar.OvercloudRole(role) for role in
+                 self.tuskarclient_roles.list()]
+
+        with patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                   return_value=roles):
+            ret_val = api.tuskar.OvercloudRole.get_by_image(
+                self.request, plan, image)
+        self.assertIsInstance(ret_val, api.tuskar.OvercloudRole)
+        self.assertEqual(ret_val.name, 'Controller')
