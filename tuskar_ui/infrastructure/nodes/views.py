@@ -80,7 +80,8 @@ class DetailView(horizon_views.APIView):
                                              True),
                      '100'),
                     (_('Swap Utilization'),
-                     metering_utils.url_part('swap-util', True),
+                     metering_utils.url_part('hardware.memory.swap.util',
+                                             True),
                      '100'),
                     (_('Disk I/O '),
                      metering_utils.url_part('disk-io', False),
@@ -160,11 +161,6 @@ class PerformanceView(base.TemplateView):
                     'hardware.network.ip.out_requests',
                     'hardware.network.ip.in_receives'
                 ])
-            elif meter == 'swap-util':
-                meters = metering_utils.get_meters([
-                    'hardware.memory.swap.util',
-                    'hardware.memory.swap.total'
-                ])
             else:
                 meters = metering_utils.get_meters([meter])
 
@@ -188,26 +184,6 @@ class PerformanceView(base.TemplateView):
                     stats_attr,
                     unit)
                 series += serie
-
-            if series and meter == 'swap-util':
-                # Divide available swap with used swap, multiply by 100.
-                # Integers are good enough here.
-                util = total = {}
-                for serie in series:
-                    if serie['meter'] == 'hardware.memory.swap.util':
-                        util = serie.copy()
-                    else:
-                        total = serie.copy()
-
-                for i, d in enumerate(util.get('data', [])):
-                    try:
-                        util['data'][i]['y'] =\
-                            int((100*d['y'])//total['data'][i]['y'])
-                    except IndexError:
-                        # Could happen if one series is shorter.
-                        del util['data'][i]
-                util['unit'] = '%'
-                series = [util]
 
         json_output = metering_utils.create_json_output(
             series,
