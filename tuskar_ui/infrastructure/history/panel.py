@@ -20,7 +20,7 @@ from tuskar_ui.infrastructure import dashboard
 
 
 class History(horizon.Panel):
-    name = _("History")
+    name = _("Deployment Log")
     slug = "history"
 
 
