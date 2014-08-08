@@ -154,6 +154,17 @@ class OvercloudPlan(base.APIDictWrapper):
         return [OvercloudRole.get(self._request, role['id'])
                 for role in self.roles]
 
+    def parameter_list(self, include_key_parameters=True):
+        params = self.parameters
+        if not include_key_parameters:
+            key_params = []
+            for role in self.role_list:
+                key_params.extend([role.node_count_parameter_name,
+                                   role.image_id_parameter_name,
+                                   role.flavor_id_parameter_name])
+            params = [p for p in params if p['name'] not in key_params]
+        return params
+
     def parameter(self, param_name):
         for parameter in self.parameters:
             if parameter['name'] == param_name:
@@ -167,8 +178,7 @@ class OvercloudPlan(base.APIDictWrapper):
 
 
 class OvercloudRole(base.APIDictWrapper):
-    _attrs = ('id', 'name', 'version', 'description', 'created_at',
-              'parameters')
+    _attrs = ('id', 'name', 'version', 'description', 'created')
 
     def __init__(self, apiresource, request=None):
         super(OvercloudRole, self).__init__(apiresource)

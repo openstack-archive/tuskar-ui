@@ -23,5 +23,6 @@ class IndexView(horizon_views.APIView):
     def get_data(self, request, context, *args, **kwargs):
         plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
         context['plan'] = plan
-        context['roles'] = plan.role_list
+        context['plan_parameters'] = plan.parameter_list(
+            include_key_parameters=False)
         return context

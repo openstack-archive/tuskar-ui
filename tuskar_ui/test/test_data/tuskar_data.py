@@ -96,6 +96,41 @@ def data(TEST):
             'hidden': 'false',
             'value': '4',
         }, {
+            'name': 'controller_NovaInterfaces',
+            'parameter_group': 'Nova',
+            'type': 'String',
+            'description': '',
+            'no_echo': 'false',
+            'default': 'eth0',
+        }, {
+            'name': 'controller_NeutronInterfaces',
+            'parameter_group': 'Neutron',
+            'type': 'String',
+            'description': '',
+            'no_echo': 'false',
+            'default': 'eth0',
+        }, {
+            'name': 'compute_KeystoneHost',
+            'parameter_group': 'Keystone',
+            'type': 'String',
+            'description': '',
+            'no_echo': 'false',
+            'default': '',
+        }, {
+            'name': 'object_storage_SwiftHashSuffix',
+            'parameter_group': 'Swift',
+            'type': 'String',
+            'description': '',
+            'no_echo': 'true',
+            'default': '',
+        }, {
+            'name': 'block_storage_NeutronNetworkType',
+            'parameter_group': 'Neutron',
+            'type': 'String',
+            'description': '',
+            'no_echo': 'false',
+            'default': 'gre',
+        }, {
             'name': 'AdminPassword',
             'label': 'Admin Password',
             'description': 'Admin password',
@@ -112,66 +147,27 @@ def data(TEST):
         'name': 'Controller',
         'version': 1,
         'description': 'controller role',
-        'created_at': '2014-05-27T21:11:09Z',
-        'parameters': [{
-            'name': 'controller_NovaInterfaces',
-            'parameter_group': 'Nova',
-            'type': 'String',
-            'description': '',
-            'no_echo': 'false',
-            'default': 'eth0',
-        }, {
-            'name': 'controller_NeutronInterfaces',
-            'parameter_group': 'Neutron',
-            'type': 'String',
-            'description': '',
-            'no_echo': 'false',
-            'default': 'eth0',
-        }]
+        'created_at': '2014-05-27T21:11:09Z'
     }
     r_2 = {
         'id': 'role-2',
         'name': 'Compute',
         'version': 1,
         'description': 'compute role',
-        'created_at': '2014-05-27T21:11:09Z',
-        'parameters': [{
-            'name': 'compute_KeystoneHost',
-            'parameter_group': 'Keystone',
-            'type': 'String',
-            'description': '',
-            'no_echo': 'false',
-            'default': '',
-        }]
+        'created_at': '2014-05-27T21:11:09Z'
     }
     r_3 = {
         'id': 'role-3',
         'name': 'Object Storage',
         'version': 1,
         'description': 'object storage role',
-        'created_at': '2014-05-27T21:11:09Z',
-        'parameters': [{
-            'name': 'object_storage_SwiftHashSuffix',
-            'parameter_group': 'Swift',
-            'type': 'String',
-            'description': '',
-            'no_echo': 'true',
-            'default': '',
-        }]
+        'created_at': '2014-05-27T21:11:09Z'
     }
     r_4 = {
         'id': 'role-4',
         'name': 'Block Storage',
         'version': 1,
         'description': 'block storage role',
-        'created_at': '2014-05-27T21:11:09Z',
-        'parameters': [{
-            'name': 'block_storage_NeutronNetworkType',
-            'parameter_group': 'Neutron',
-            'type': 'String',
-            'description': '',
-            'no_echo': 'false',
-            'default': 'gre',
-        }]
+        'created_at': '2014-05-27T21:11:09Z'
     }
     TEST.tuskarclient_roles.add(r_1, r_2, r_3, r_4)
