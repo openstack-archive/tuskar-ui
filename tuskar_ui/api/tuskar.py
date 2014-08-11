@@ -15,9 +15,11 @@ import logging
 
 from django.utils.translation import ugettext_lazy as _
 from openstack_dashboard.api import base
+from openstack_dashboard.api import glance
 from openstack_dashboard.test.test_data import utils
 from tuskarclient.v1 import client as tuskar_client
 
+from tuskar_ui.api import flavor
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
 from tuskar_ui.test.test_data import tuskar_data
@@ -116,7 +118,7 @@ class OvercloudPlan(base.APIDictWrapper):
                  the ID
         :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
-        return cls(mock_tuskar.Plan.get(plan_id))
+        return cls(mock_tuskar.Plan.get(plan_id), request=request)
 
     # TODO(lsmola) before will will support multiple overclouds, we
     # can work only with overcloud that is named overcloud. Delete
@@ -168,6 +170,10 @@ class OvercloudRole(base.APIDictWrapper):
     _attrs = ('id', 'name', 'version', 'description', 'created_at',
               'parameters')
 
+    def __init__(self, apiresource, request=None):
+        super(OvercloudRole, self).__init__(apiresource)
+        self._request = request
+
     @classmethod
     @handle_errors(_("Unable to retrieve overcloud roles"), [])
     def list(cls, request):
@@ -181,7 +187,7 @@ class OvercloudRole(base.APIDictWrapper):
         :rtype:  list of tuskar_ui.api.tuskar.OvercloudRole
         """
         roles = TEST_DATA.tuskarclient_roles.list()
-        return [cls(role) for role in roles]
+        return [cls(role, request=request) for role in roles]
 
     @classmethod
     @handle_errors(_("Unable to retrieve overcloud role"))
@@ -225,3 +231,13 @@ class OvercloudRole(base.APIDictWrapper):
     @property
     def flavor_id_parameter_name(self):
         return self.name + 'FlavorID'
+
+    def image(self, plan):
+        image_id = plan.parameter_value(self.image_id_parameter_name)
+        if image_id:
+            return glance.image_get(self._request, image_id)
+
+    def flavor(self, plan):
+        flavor_id = plan.parameter_value(self.flavor_id_parameter_name)
+        if flavor_id:
+            return flavor.Flavor.get(self._request, flavor_id)

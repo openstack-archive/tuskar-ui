@@ -24,6 +24,10 @@ class RolesTable(tables.DataTable):
     name = tables.Column('name',
                          link="horizon:infrastructure:roles:detail",
                          verbose_name=_("Image Name"))
+    flavor = tables.Column('flavor',
+                           verbose_name=_("Flavor"))
+    image = tables.Column('image',
+                          verbose_name=_("Image"))
 
     class Meta:
         name = "roles"
