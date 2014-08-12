@@ -94,42 +94,22 @@ $link-color: #428bca;
   }
 }
 
+// Power state icons
+.glyphicon.powerstate {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 18px;
+  background: $gray-lighter;
+  border: 1px solid $gray-light;
+  padding: .2em;
+  &.glyphicon-play {
+    color: $brand-success;
+  }
+}
+
 // Node detail view
-
 .node-details {
-    .powerstate {
-        background-image: url(../images/power.png);
-        background-repeat: no-repeat;
-        height: 20px;
-        padding: 4px 30px;
-    }
-
-    .node-detail {
-        width: 50%;
-    }
-
-    .node-deployment {
-        float: right;
-        width: 50%;
-    }
-
-    .dropdown-menu li {
-        margin: 5px 10px;
-    }
-
-    .node h4 {
-        margin-top: 8px;
-        margin-bottom: 5px;
-    }
-
-    #node-charts {
-        margin-left: -20px;
-    }
-
    .chart svg {
-        height: 120px;
-        width: 144px;
-
         path.undefined {
             stroke-width: 1px;
             stroke: #ff7f0e;
