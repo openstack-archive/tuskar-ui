@@ -487,13 +487,16 @@ class Node(base.APIResourceWrapper):
                  Node, or no matching Instance is found
         :rtype:  Instance
         """
-        if hasattr(self, '_instance'):
-            return self._instance
-
         if self.instance_uuid:
-            for server in TEST_DATA.novaclient_servers.list():
+            servers, _has_more_data = nova.server_list(self._request)
+            for server in servers:
                 if server.id == self.instance_uuid:
                     return server
+
+    @cached_property
+    def ip_address(self):
+        return (self.instance._apiresource.addresses['ctlplane'][0]
+                ['addr'])
 
     @cached_property
     def image_name(self):

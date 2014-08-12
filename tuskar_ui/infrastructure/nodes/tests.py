@@ -66,6 +66,9 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         instance = TEST_DATA.novaclient_servers.first()
         image = TEST_DATA.glanceclient_images.first()
 
+        for node in registered_nodes:
+            node.ip_address = '1.1.1.1'
+
         with contextlib.nested(
             patch('tuskar_ui.api.tuskar.OvercloudRole', **{
                 'spec_set': ['list', 'name'],
@@ -76,8 +79,9 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                 'list.return_value': registered_nodes,
             }),
             patch('tuskar_ui.api.node.nova', **{
-                'spec_set': ['server_get'],
+                'spec_set': ['server_get', 'server_list'],
                 'server_get.return_value': instance,
+                'server_list.return_value': ([instance], False),
             }),
             patch('tuskar_ui.api.node.glance', **{
                 'spec_set': ['image_get'],
@@ -259,14 +263,10 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
 
     def test_performance(self):
         node = api.node.Node(self.ironicclient_nodes.list()[0])
-        resources = self.resources.list()
         instance = TEST_DATA.novaclient_servers.first()
 
         ceilometerclient = self.stub_ceilometerclient()
         ceilometerclient.resources = self.mox.CreateMockAnything()
-        ceilometerclient.resources.list(q=[{'field': 'resource_id',
-                                            'value': '1.2.2.2',
-                                            'op': 'eq'}]).AndReturn(resources)
         ceilometerclient.meters = self.mox.CreateMockAnything()
 
         self.mox.ReplayAll()
@@ -277,8 +277,9 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                 'get.return_value': node,
             }),
             patch('tuskar_ui.api.node.nova', **{
-                'spec_set': ['servers', 'server_get'],
+                'spec_set': ['servers', 'server_get', 'server_list'],
                 'servers.return_value': [instance],
+                'server_list.return_value': ([instance], None),
             })
         ):
             url = urlresolvers.reverse(PERFORMANCE_VIEW, args=(node.uuid,))

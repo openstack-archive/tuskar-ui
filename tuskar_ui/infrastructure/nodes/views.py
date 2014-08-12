@@ -142,7 +142,7 @@ class PerformanceView(base.TemplateView):
         series = []
 
         try:
-            ip_addr = node.driver_info['ip_address']
+            ip_addr = node.ip_address
         except AttributeError:
             pass
         else:

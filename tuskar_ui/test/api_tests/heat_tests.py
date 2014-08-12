@@ -159,7 +159,10 @@ class HeatAPITests(test.APITestCase):
                 with patch('novaclient.v1_1.contrib.baremetal.'
                            'BareMetalNodeManager.list',
                            return_value=nodes):
-                    ret_val = api.heat.Resource(
-                        resource, request=object()).node
+                    with patch('openstack_dashboard.api.nova.server_list',
+                               return_value=([instance], False)):
+                        ret_val = api.heat.Resource(
+                            resource, request=object()).node
+                        ret_instance = ret_val.instance
         self.assertIsInstance(ret_val, api.node.Node)
-        self.assertIsInstance(ret_val.instance, servers.Server)
+        self.assertIsInstance(ret_instance, servers.Server)

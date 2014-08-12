@@ -63,7 +63,7 @@ class RegisteredNodesTable(tables.DataTable):
                          link="horizon:infrastructure:nodes:detail",
                          verbose_name=_("Node Name"))
     instance_ip = tables.Column(lambda n:
-                                n.instance.public_ip if n.instance else '-',
+                                n.ip_address if n.instance else '-',
                                 verbose_name=_("Instance IP"))
     provisioning_status = tables.Column('provisioning_status',
                                         verbose_name=_("Provisioned"))

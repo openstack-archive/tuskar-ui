@@ -51,10 +51,13 @@ class NodeAPITests(test.APITestCase):
             with patch('novaclient.v1_1.contrib.baremetal.'
                        'BareMetalNodeManager.get',
                        return_value=node):
-                ret_val = api.node.Node.get(self.request, node.uuid)
+                with patch('openstack_dashboard.api.nova.server_list',
+                           return_value=([instance], False)):
+                    ret_val = api.node.Node.get(self.request, node.uuid)
+                    ret_instance = ret_val.instance
 
         self.assertIsInstance(ret_val, api.node.Node)
-        self.assertIsInstance(ret_val.instance, servers.Server)
+        self.assertIsInstance(ret_instance, servers.Server)
 
     def test_node_get_by_instance_uuid(self):
         instance = self.novaclient_servers.first()
@@ -66,12 +69,15 @@ class NodeAPITests(test.APITestCase):
             with patch('novaclient.v1_1.contrib.baremetal.'
                        'BareMetalNodeManager.list',
                        return_value=nodes):
-                ret_val = api.node.Node.get_by_instance_uuid(
-                    self.request,
-                    node.instance_uuid)
+                with patch('openstack_dashboard.api.nova.server_list',
+                           return_value=([instance], False)):
+                    ret_val = api.node.Node.get_by_instance_uuid(
+                        self.request,
+                        node.instance_uuid)
+                    ret_instance = ret_val.instance
 
         self.assertIsInstance(ret_val, api.node.Node)
-        self.assertIsInstance(ret_val.instance, servers.Server)
+        self.assertIsInstance(ret_instance, servers.Server)
 
     def test_node_list(self):
         instances = self.novaclient_servers.list()
@@ -101,7 +107,10 @@ class NodeAPITests(test.APITestCase):
 
         with patch('openstack_dashboard.api.nova.server_get',
                    return_value=instance):
-            ret_val = api.node.Node(node).instance
+            with patch('openstack_dashboard.api.nova.server_list',
+                       return_value=([instance], False)):
+                ret_val = api.node.Node(node).instance
+
         self.assertIsInstance(ret_val, servers.Server)
 
     def test_node_image_name(self):
@@ -113,7 +122,9 @@ class NodeAPITests(test.APITestCase):
                    return_value=instance):
             with patch('openstack_dashboard.api.glance.image_get',
                        return_value=image):
-                ret_val = api.node.Node(node).image_name
+                with patch('openstack_dashboard.api.nova.server_list',
+                           return_value=([instance], False)):
+                    ret_val = api.node.Node(node).image_name
         self.assertEqual(ret_val, 'overcloud-compute')
 
     def test_node_addresses_no_ironic(self):
