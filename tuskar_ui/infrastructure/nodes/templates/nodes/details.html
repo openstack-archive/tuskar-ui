@@ -3,7 +3,7 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block page_header %}
-  {% include 'horizon/common/_page_header.html' with title=title %}
+{% include 'horizon/common/_page_header.html' with title=title %}
 {% endblock page_header %}
 
 {% block main %}
@@ -13,157 +13,158 @@
       <span class="powerstate">{% trans "Powered" %} {{ node.power_state|default:"&mdash;" }}</span>
     </dl>
   </div>
+  <div class="row">
+    <div class="col-lg-6 col-xs-12">
+      <div class="node node-deployment">
+        <h4>{% trans "Deployment" %}</h4>
+        <dl class="clearfix">
+          <dt>{% trans "Deployment Role" %}</dt>
+          {% if stack and role %}
+          <dd><a href="{% url 'horizon:infrastructure:roles:detail' role.id %}">{{ role.name }}</a></dd>
+          {% else %}
+          <dd>&mdash;</dd>
+          {% endif %}
+          <dt>{% trans "Provisioning" %}</dt>
+          <dd>
+            {{ node.provisioning_status|default:"&mdash;" }}
+            {% if node.instance_uuid %}
+            <br />{{ node.instance.created }}
+            {% endif %}
+          </dd>
+          <dt>{% trans "Image" %}</dt>
+          <dd>{{ node.image_name|default:"&mdash;" }}</dd>
+          <dt>{% trans "Instance UUID" %}</dt>
+          <dd>{{ node.instance_uuid|default:"&mdash;" }}</dd>
+        </dl>
+      </div>
+      <div class="node node-detail">
+        <h4>{% trans "Inventory" %}</h4>
+        <dl>
+          <dt>{% trans "Node UUID" %}</dt>
+          <dd>{{ node.uuid|default:"&mdash;" }}</dd>
+          <dt>{% trans "Driver" %}</dt>
+          <dd class="dropdown">
+            <span class="dropdown-toggle" type="button" data-toggle="dropdown">
+              {{ node.driver|default:"&mdash;" }}
+              <span class="caret"></span>
+            </span>
+            <ul class="dropdown-menu">
+              <li><dt>IP Address</dt> <dd>{{ node.driver_info.ipmi_address|default:"&mdash;" }}</dd></li>
+              <li><dt>IPMI User</dt> <dd>{{ node.driver_info.ipmi_username|default:"&mdash;" }}</dd></li>
+            </ul>
+          </dd>
+          <dt>{% trans "Network Cards" %}</dt>
+          <dd class="dropdown">
+            <span class="dropdown-toggle" type="button" data-toggle="dropdown">
+              {{ node.addresses|length }}
+              <span class="caret"></span>
+            </span>
+            <ul class="dropdown-menu">
+              {% for address in node.addresses %}
+              <li>{{ address }}</li>
+              {% endfor %}
+            </ul>
+          </dd>
+          <dt>{% trans "Registered HW" %}</dt>
+          <dd>
+            {{ node.cpus|default:"&mdash;" }} {% trans "CPU" %}<br />
+            {{ node.memory_mb|default:"&mdash;" }} {% trans "RAM (MB)" %}<br />
+            {{ node.local_gb|default:"&mdash;" }} {% trans "HDD (GB)" %}
+          </dd>
+        </dl>
+      </div>
+    </div>
+    <div class="col-lg-6 col-xs-12">
+      <div id="node-performance" class="node">
+        <h4>{% trans "Performance and Capacity" %}</h4>
+        {% if meter_conf %}
+        <br />
+        {% url 'horizon:infrastructure:nodes:performance' node.uuid as node_perf_url %}
+        <div id="ceilometer-stats" class="clearfix">
+          <form class="form-horizontal" id="linechart_general_form">
+            <div class="control-group">
+              <label for="date_options" class="control-label">{% trans "Period" %}:&nbsp;</label>
+              <div class="controls">
+                <select data-line-chart-command="select_box_change"
+                        id="date_options"
+                        name="date_options"
+                        class="col-xs-2">
+                  <option value="0.041666">{% trans "Last hour" %}</option>
+                  <option value="0.25">{% trans "Last 6 hours" %}</option>
+                  <option value="0.5">{% trans "Last 12 hours" %}</option>
+                  <option value="1" selected="selected">{% trans "Last day" %}</option>
+                  <option value="7">{% trans "Last week" %}</option>
+                  <option value="{% now 'j' %}">{% trans "Month to date" %}</option>
+                  <option value="15">{% trans "Last 15 days" %}</option>
+                  <option value="30">{% trans "Last 30 days" %}</option>
+                  <option value="365">{% trans "Last year" %}</option>
+                  <option value="other">{% trans "Other" %}</option>
+                </select>
+              </div>
+            </div>
+            <div class="control-group" id="date_from">
+              <label for="date_from" class="control-label">{% trans "From" %}:&nbsp;</label>
+              <div class="controls">
+                <input data-line-chart-command="date_picker_change"
+                       type="text"
+                       id="date_from"
+                       name="date_from"
+                       class="col-xs-2 example"/>
+              </div>
+            </div>
+            <div class="control-group" id="date_to">
+              <label for="date_to" class="control-label">{% trans "To" %}:&nbsp;</label>
+              <div class="controls">
+                <input data-line-chart-command="date_picker_change"
+                       type="text"
+                       name="date_to"
+                       class="col-xs-2 example"/>
+              </div>
+            </div>
+          </form>
+        </div>
 
-  <div class="node node-deployment">
-    <h4>{% trans "Deployment" %}</h4>
-    <dl class="clearfix">
-      <dt>{% trans "Deployment Role" %}</dt>
-      {% if stack and role %}
-        <dd><a href="{% url 'horizon:infrastructure:roles:detail' role.id %}">{{ role.name }}</a></dd>
-      {% else %}
-        <dd>&mdash;</dd>
-      {% endif %}
-      <dt>{% trans "Provisioning" %}</dt>
-      <dd>
-        {{ node.provisioning_status|default:"&mdash;" }}
-        {% if node.instance_uuid %}
-          <br />{{ node.instance.created }}
-        {% endif %}
-      </dd>
-      <dt>{% trans "Image" %}</dt>
-      <dd>{{ node.image_name|default:"&mdash;" }}</dd>
-      <dt>{% trans "Instance UUID" %}</dt>
-      <dd>{{ node.instance_uuid|default:"&mdash;" }}</dd>
-    </dl>
-  </div>
+        <script type="text/javascript">
+          if (typeof $ !== 'undefined') {
+            show_hide_datepickers();
+          } else {
+            addHorizonLoadEvent(function() {
+              show_hide_datepickers();
+            });
+          }
 
-  <div class="node node-detail">
-    <h4>{% trans "Inventory" %}</h4>
-    <dl>
-      <dt>{% trans "Node UUID" %}</dt>
-      <dd>{{ node.uuid|default:"&mdash;" }}</dd>
-      <dt>{% trans "Driver" %}</dt>
-      <dd class="dropdown">
-        <span class="dropdown-toggle" type="button" data-toggle="dropdown">
-          {{ node.driver|default:"&mdash;" }}
-          <span class="caret"></span>
-        </span>
-        <ul class="dropdown-menu">
-          <li><dt>IP Address</dt> <dd>{{ node.driver_info.ipmi_address|default:"&mdash;" }}</dd></li>
-          <li><dt>IPMI User</dt> <dd>{{ node.driver_info.ipmi_username|default:"&mdash;" }}</dd></li>
-        </ul>
-      </dd>
-      <dt>{% trans "Network Cards" %}</dt>
-      <dd class="dropdown">
-        <span class="dropdown-toggle" type="button" data-toggle="dropdown">
-          {{ node.addresses|length }}
-          <span class="caret"></span>
-        </span>
-        <ul class="dropdown-menu">
-          {% for address in node.addresses %}
-            <li>{{ address }}</li>
+          function show_hide_datepickers() {
+            var date_options = $("#date_options");
+            date_options.change(function(evt) {
+              if ($(this).find("option:selected").val() == "other"){
+                evt.stopPropagation();
+                $("#date_from .controls input, #date_to .controls input").val('');
+                $("#date_from, #date_to").show();
+              } else {
+                $("#date_from, #date_to").hide();
+              }
+            });
+            if (date_options.find("option:selected").val() == "other"){
+              $("#date_from, #date_to").show();
+            } else {
+              $("#date_from, #date_to").hide();
+            }
+          }
+        </script>
+
+        <div id="node-charts" class="clearfix">
+          {% for meter_label, url_part, y_max in meter_conf %}
+          <div class="col-md-6">
+            {% include "infrastructure/_performance_chart.html" with label=meter_label y_max=y_max url=node_perf_url|add:"?"|add:url_part only %}
+          </div>
           {% endfor %}
-        </ul>
-      </dd>
-      <dt>{% trans "Registered HW" %}</dt>
-      <dd>
-        {{ node.cpus|default:"&mdash;" }} {% trans "CPU" %}<br />
-        {{ node.memory_mb|default:"&mdash;" }} {% trans "RAM (MB)" %}<br />
-        {{ node.local_gb|default:"&mdash;" }} {% trans "HDD (GB)" %}
-      </dd>
-    </dl>
-  </div>
 
-  <div id="node-performance" class="node">
-    <h4>{% trans "Performance and Capacity" %}</h4>
-
-{% if meter_conf %}
-<br />
-{% url 'horizon:infrastructure:nodes:performance' node.uuid as node_perf_url %}
-
-  <div id="ceilometer-stats" class="clearfix">
-    <form class="form-horizontal" id="linechart_general_form">
-      <div class="control-group">
-        <label for="date_options" class="control-label">{% trans "Period" %}:&nbsp;</label>
-        <div class="controls">
-          <select data-line-chart-command="select_box_change"
-            id="date_options"
-            name="date_options"
-            class="col-xs-2">
-          <option value="0.041666">{% trans "Last hour" %}</option>
-          <option value="0.25">{% trans "Last 6 hours" %}</option>
-          <option value="0.5">{% trans "Last 12 hours" %}</option>
-          <option value="1" selected="selected">{% trans "Last day" %}</option>
-          <option value="7">{% trans "Last week" %}</option>
-          <option value="{% now 'j' %}">{% trans "Month to date" %}</option>
-          <option value="15">{% trans "Last 15 days" %}</option>
-          <option value="30">{% trans "Last 30 days" %}</option>
-          <option value="365">{% trans "Last year" %}</option>
-          <option value="other">{% trans "Other" %}</option>
-          </select>
+          {% else %}
+          {% trans 'Metering service is not enabled.' %}
+          {% endif %}
         </div>
       </div>
-      <div class="control-group" id="date_from">
-        <label for="date_from" class="control-label">{% trans "From" %}:&nbsp;</label>
-        <div class="controls">
-          <input data-line-chart-command="date_picker_change"
-            type="text"
-            id="date_from"
-            name="date_from"
-            class="col-xs-2 example"/>
-        </div>
-      </div>
-      <div class="control-group" id="date_to">
-        <label for="date_to" class="control-label">{% trans "To" %}:&nbsp;</label>
-        <div class="controls">
-          <input data-line-chart-command="date_picker_change"
-            type="text"
-            name="date_to"
-            class="col-xs-2 example"/>
-        </div>
-      </div>
-    </form>
+    </div>
   </div>
-
-  <script type="text/javascript">
-    if (typeof $ !== 'undefined') {
-      show_hide_datepickers();
-    } else {
-      addHorizonLoadEvent(function() {
-        show_hide_datepickers();
-      });
-    }
-
-    function show_hide_datepickers() {
-      var date_options = $("#date_options");
-      date_options.change(function(evt) {
-        if ($(this).find("option:selected").val() == "other"){
-          evt.stopPropagation();
-          $("#date_from .controls input, #date_to .controls input").val('');
-          $("#date_from, #date_to").show();
-        } else {
-          $("#date_from, #date_to").hide();
-        }
-      });
-      if (date_options.find("option:selected").val() == "other"){
-        $("#date_from, #date_to").show();
-      } else {
-        $("#date_from, #date_to").hide();
-      }
-    }
-  </script>
-
-  <div id="node-charts" class="clearfix">
-    {% for meter_label, url_part, y_max in meter_conf %}
-        <div class="col-xs-3">
-          {% include "infrastructure/_performance_chart.html" with label=meter_label y_max=y_max url=node_perf_url|add:"?"|add:url_part only %}
-        </div>
-    {% endfor %}
-
-  {% else %}
-    {% trans 'Metering service is not enabled.' %}
-  {% endif %}
-  </div>
+  {% endblock %}
 </div>
-
-{% endblock %}
