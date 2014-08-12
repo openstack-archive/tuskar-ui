@@ -19,10 +19,12 @@ from openstack_dashboard.test.test_data import utils as test_utils
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
 from tuskar_ui.test.test_data import flavor_data
+from tuskar_ui.test.test_data import heat_data
 
 
 TEST_DATA = test_utils.TestDataContainer()
 flavor_data.data(TEST_DATA)
+heat_data.data(TEST_DATA)
 
 LOG = logging.getLogger(__name__)
 
