@@ -1,5 +1,6 @@
 /* Additional CSS for infrastructure. */
-@import "/horizon/scss/_variables";
+@import "/bootstrap/scss/bootstrap/variables";
+@import "/dashboard/scss/variables";
 
 @import "_numberpicker";
 @import "_breadcrumbs";
