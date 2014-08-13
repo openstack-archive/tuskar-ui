@@ -78,7 +78,11 @@ class OverviewTests(test.BaseAdminViewTests):
                 call_args_list[0][0][0]
             self.assertListEqual(
                 api.tuskar.OvercloudPlan.get_the_plan.call_args_list,
-                [call(request), call(request)])
+                [
+                    call(request),
+                    call(request),
+                    call(request),
+                ])
         self.assertTemplateUsed(
             res, 'infrastructure/overview/index.html')
         self.assertTemplateUsed(
@@ -96,8 +100,13 @@ class OverviewTests(test.BaseAdminViewTests):
         ) as (OvercloudPlan, stack_get_mock, stack_events_mock):
             res = self.client.get(INDEX_URL)
             request = OvercloudPlan.get_the_plan.call_args_list[0][0][0]
-            self.assertListEqual(OvercloudPlan.get_the_plan.call_args_list,
-                                 [call(request), call(request)])
+            self.assertListEqual(
+                OvercloudPlan.get_the_plan.call_args_list,
+                [
+                    call(request),
+                    call(request),
+                    call(request),
+                ])
 
         self.assertTemplateUsed(
             res, 'infrastructure/overview/index.html')
