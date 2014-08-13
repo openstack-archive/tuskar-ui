@@ -12,12 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 from django.core.urlresolvers import reverse
-
+from django.core.urlresolvers import reverse_lazy
+import django.views.generic
 import heatclient
-
 import horizon.forms
 from horizon.utils import memoized
-from horizon import views as horizon_views
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.overview import forms
@@ -82,8 +81,18 @@ class StackMixin(object):
         return stack
 
 
-class IndexView(horizon_views.APIView, StackMixin):
+class IndexView(django.views.generic.FormView, StackMixin):
     template_name = 'infrastructure/overview/index.html'
+    form_class = forms.EditPlan
+    success_url = reverse_lazy(INDEX_URL)
+
+    def get_form(self, form_class):
+        return form_class(self.request, **self.get_form_kwargs())
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(IndexView, self).get_context_data(*args, **kwargs)
+        context.update(self.get_data(self.request, context))
+        return context
 
     def get_data(self, request, context, *args, **kwargs):
         plan = api.tuskar.OvercloudPlan.get_the_plan(request)
