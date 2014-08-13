@@ -4,17 +4,13 @@
 {% block title %}{% trans 'Service Configuration' %}{% endblock %}
 
 {% block page_header %}
-  {% include 'horizon/common/_page_header.html' with title=title %}
+  {% include 'horizon/common/_page_header.html' with title=_('Service Configuration') %}
 {% endblock page_header %}
 
 {% block main %}
 <div class="row-fluid">
   <div class="span12">
-    <ul>
-      {% for p in plan_parameters %}
-        <li>{{ p.parameter_group|default:"General" }}: {{ p.name }}</li>
-      {% endfor %}
-    </ul>
+    <h3>Not Implemented</h3>
   </div>
 </div>
 {% endblock %}

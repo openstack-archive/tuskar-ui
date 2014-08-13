@@ -93,6 +93,12 @@ class FlavorRolesTable(tables.DataTable):
         )
         super(FlavorRolesTable, self).__init__(request, *args, **kwargs)
 
+    class Meta:
+        name = "flavor_roles"
+        verbose_name = _("Overcloud Roles")
+        table_actions = ()
+        row_actions = ()
+
 
 class FlavorSuggestionsTable(tables.DataTable):
     arch = tables.Column('cpu_arch', verbose_name=_('Architecture'))

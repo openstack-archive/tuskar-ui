@@ -28,7 +28,7 @@ def data(TEST):
          'ipmi_address': '1.1.1.1',
          'ipmi_username': 'admin',
          'ipmi_password': 'password',
-         'ip_address': '192.0.2.36',
+         'ip_address': '192.0.2.32',
          'instance_uuid': 'aa',
          "service_host": "undercloud",
          "cpus": 1,
