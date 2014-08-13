@@ -1,5 +1,17 @@
 <div class="number_picker unselectable">
-  <a ng-click="decrementValue()" class="btn btn-link" ng-class="{disabled: disabledInput || disableArrow()}"><i ng-hide="disabledInput" class="icon-chevron-left"></i></a>
+  <a
+    ng-click="decrementValue()"
+    class="arrow-left"
+    ng-class="{disabled: disabledInput || disableArrow()}"
+  >
+    <i ng-hide="disabledInput" class="glyphicon glyphicon-chevron-left"></i>
+  </a>
   <input type="text" value="{$value$}" ng-model="value">
-  <a ng-click="incrementValue()" class="btn btn-link" ng-class="{disabled: disabledInput}"><i ng-hide="disabledInput" class="icon-chevron-right"></i></a>
+  <a
+    ng-click="incrementValue()"
+    class="arrow-right"
+    ng-class="{disabled: disabledInput}"
+  >
+    <i ng-hide="disabledInput" class="glyphicon glyphicon-chevron-right"></i>
+  </a>
 </div>

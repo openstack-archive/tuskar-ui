@@ -1,25 +1,9 @@
 {% load i18n %}
 {% load url from future %}
 
-{% include 'horizon/common/_form_errors.html' with form=form %}
-Deployment Roles
-<table class="table">
-  {% for role in roles %}
-    <tbody>
-      <tr>
-	<td>
-	  {% if stack %}
-  	    {% if role.total_node_count != role.deployed_node_count %}
-               {{ role.deployed_node_count }} / {{ role.total_node_count }}
-    	    {% else %}
-              {{ role.total_node_count }}
-	    {% endif %}
-	  {% else %}
-	    {{ role.planned_node_count }}
-	  {% endif %}
-	</td>
-        <td>{{ role.name }}</td>
-      </tr>
-     </tbody>
-  {% endfor %}
-</table>
+<h4>{% trans "Deployment Roles" %}</h4>
+<form method="POST" action=".">
+{% csrf_token %}
+{% include 'horizon/common/_form_fields.html' with form=form %}
+<button type="submit" class="btn">{% trans "Update" %}</button>
+</form>
