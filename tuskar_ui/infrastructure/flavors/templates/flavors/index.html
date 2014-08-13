@@ -10,7 +10,9 @@
 {% block main %}
 <div class="row">
   <div class="col-xs-12">
-    {{ tab_group.render }}
+    <div class="no-table-title"> {% comment %}This will likely move to the tables Meta in the future{% endcomment %}
+      {{ tab_group.render }}
+    </div>
   </div>
 </div>
 {% endblock %}

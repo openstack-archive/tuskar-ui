@@ -69,7 +69,7 @@ class FlavorsTable(tables.DataTable):
 
     class Meta:
         name = "flavors"
-        verbose_name = _("Flavors")
+        verbose_name = _("Available")
         table_actions = (CreateFlavor,
                          DeleteFlavor,
                          flavor_tables.FlavorFilterAction)
@@ -92,6 +92,12 @@ class FlavorRolesTable(tables.DataTable):
             verbose_name=_("Instances Count")
         )
         super(FlavorRolesTable, self).__init__(request, *args, **kwargs)
+
+    class Meta:
+        name = "flavor_roles"
+        verbose_name = _("Overcloud Roles")
+        table_actions = ()
+        row_actions = ()
 
 
 class FlavorSuggestionsTable(tables.DataTable):

@@ -38,7 +38,7 @@ def get_flavor_suggestions(request):
 
 
 class FlavorsTab(horizon.tabs.TableTab):
-    name = _("Flavors")
+    name = _("Available")
     slug = 'flavors'
     table_classes = (tables.FlavorsTable,)
     template_name = ("horizon/common/_detail_table.html")
@@ -121,7 +121,7 @@ class FlavorSuggestion(object):
 
 
 class FlavorSuggestionsTab(horizon.tabs.TableTab):
-    name = _("Flavor Suggestions")
+    name = _("Suggested")
     slug = 'flavor_suggestions'
     table_classes = (tables.FlavorSuggestionsTable,)
     template_name = ("horizon/common/_detail_table.html")
