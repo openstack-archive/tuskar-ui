@@ -90,12 +90,16 @@ class HeatAPITests(test.APITestCase):
         stack = api.heat.Stack(self.heatclient_stacks.first())
         role = api.tuskar.OvercloudRole(
             self.tuskarclient_roles.first())
+        nodes = self.baremetalclient_nodes.list()
 
         # FIXME(lsmola) only resources and image_name should be tested
         # here, anybody has idea how to do that?
         with patch('openstack_dashboard.api.base.is_service_enabled',
                    return_value=False):
-            ret_val = stack.resources_by_role(role)
+            with patch('novaclient.v1_1.contrib.baremetal.'
+                       'BareMetalNodeManager.list',
+                       return_value=nodes):
+                ret_val = stack.resources_by_role(role)
 
         for i in ret_val:
             self.assertIsInstance(i, api.heat.Resource)
