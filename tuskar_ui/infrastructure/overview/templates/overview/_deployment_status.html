@@ -64,28 +64,25 @@
       {% endfor %}
     </div>
   {% endif %}
-  <br />
-  <div class="actions page-actions pull-left">
+  <hr>
     <a href="{% url 'horizon:infrastructure:overview:undeploy_confirmation' %}"
        class="btn btn-danger ajax-modal">
       <i class="icon-fire icon-white"></i>
       {% trans "Undeploy" %}
     </a>
-  </div>
 {% else %}
-  Ready to get deployed
+  <h4>{% trans "Ready to get deployed" %}</h4>
   <ul>
     {% for role in roles %}
       {% if role.planned_node_count > 0 %}
-        <li>{{ role.planned_node_count }} x {{ role.name }} </li>
+        <li>{{ role.planned_node_count }} × {{ role.name }}</li>
       {% endif %}
     {% endfor %}
   </ul>
-  <div class="actions page-actions pull-left">
+  <hr>
     <a href="{% url 'horizon:infrastructure:overview:deploy_confirmation' %}"
        class="btn btn-danger ajax-modal">
       <i class="icon-fire icon-white"></i>
       {% trans "Deploy" %}
     </a>
-  </div>
 {% endif %}

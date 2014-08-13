@@ -12,12 +12,42 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import django.forms
 from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
 import horizon.forms
 import horizon.messages
 
 from tuskar_ui import api
+import tuskar_ui.forms
+
+
+def _get_role_count(plan, role):
+    return plan.parameter_value(role.node_count_parameter_name, 0)
+
+
+class EditPlan(horizon.forms.SelfHandlingForm):
+    def __init__(self, *args, **kwargs):
+        super(EditPlan, self).__init__(*args, **kwargs)
+        self.plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+        self.fields.update(self._role_count_fields(self.plan))
+
+    def _role_count_fields(self, plan):
+        fields = {}
+        for role in plan.role_list:
+            field = django.forms.IntegerField(
+                label=role.name,
+                widget=tuskar_ui.forms.NumberPickerInput,
+                initial=_get_role_count(plan, role),
+                # XXX Dirty hack for requiring a controller node.
+                required=(role.name == 'Controller'),
+            )
+            fields['%s-count' % role.id] = field
+        return fields
+
+    def handle(self, request, data):
+        # XXX Update the plan.
+        return True
 
 
 class DeployOvercloud(horizon.forms.SelfHandlingForm):

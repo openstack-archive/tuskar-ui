@@ -1,16 +1,34 @@
 // Number picker widget
 div.number_picker {
-  margin: 5px 0;
+  margin: 5px 14px;
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
   input {
-    width: 35px;
-    height: 30px;
-    margin-bottom: 0;
-    text-align: center;
+      border: 0;
+      width: 20px;
+      display: block;
+      margin: 8px auto;
+      padding: 0;
+      text-align: center;
   }
   a {
+    display: block;
     width: 14px;
+    position: absolute;
+    top: 8px;
+    cursor: default;
     &.disabled {
       cursor: default;
+    }
+    &.arrow-left {
+      left: -14px;
+    }
+    &.arrow-right {
+      right: -14px;
     }
   }
 }
