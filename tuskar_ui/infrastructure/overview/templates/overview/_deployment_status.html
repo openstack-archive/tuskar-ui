@@ -73,14 +73,6 @@
     </a>
   </div>
 {% else %}
-  Ready to get deployed
-  <ul>
-    {% for role in roles %}
-      {% if role.planned_node_count > 0 %}
-        <li>{{ role.planned_node_count }} x {{ role.name }} </li>
-      {% endif %}
-    {% endfor %}
-  </ul>
   <div class="actions page-actions pull-left">
     <a href="{% url 'horizon:infrastructure:overview:deploy_confirmation' %}"
        class="btn btn-danger ajax-modal">
