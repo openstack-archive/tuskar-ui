@@ -64,28 +64,22 @@
       {% endfor %}
     </div>
   {% endif %}
-  <br />
-  <div class="actions page-actions pull-left">
+  <hr>
     <a href="{% url 'horizon:infrastructure:overview:undeploy_confirmation' %}"
        class="btn btn-danger ajax-modal">
-      <i class="icon-fire icon-white"></i>
+      <i class="glyphicon glyphicon-fire"></i>
       {% trans "Undeploy" %}
     </a>
-  </div>
 {% else %}
-  Ready to get deployed
-  <ul>
-    {% for role in roles %}
-      {% if role.planned_node_count > 0 %}
-        <li>{{ role.planned_node_count }} x {{ role.name }} </li>
-      {% endif %}
-    {% endfor %}
-  </ul>
-  <div class="actions page-actions pull-left">
-    <a href="{% url 'horizon:infrastructure:overview:deploy_confirmation' %}"
-       class="btn btn-danger ajax-modal">
-      <i class="icon-fire icon-white"></i>
-      {% trans "Deploy" %}
-    </a>
-  </div>
+  <h4>
+      <span class="text-success" style="font-size: x-large; vertical-align:middle">
+          <i class="glyphicon glyphicon-ok-circle"></i>
+      </span>
+      {% trans "Ready to get deployed" %}
+  </h4>
+  <a href="{% url 'horizon:infrastructure:overview:deploy_confirmation' %}"
+   class="btn btn-danger ajax-modal">
+    <i class="glyphicon glyphicon-cloud-upload"></i>
+    {% trans "Deploy" %}
+  </a>
 {% endif %}
