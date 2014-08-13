@@ -1,8 +1,10 @@
 {% load form_helpers %}
 
-<div class="control-group{% if field.errors %} error{% endif %} {{ field.css_classes }}">
-  <label class="control-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-  <div class="controls">
+<div class="form-group{% if field.errors %} error{% endif %} {{ field.css_classes }}">
+  <label class="control-label col-sm-3" for="{{ field.id_for_label }}">
+    {{ field.label }}
+  </label>
+  <div class="col-sm-9">
     {{ field|add_bootstrap_class }}
     {% for error in field.errors %}
       <span class="help-inline text-error">{{ error }}</span>
