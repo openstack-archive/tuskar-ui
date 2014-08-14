@@ -542,6 +542,7 @@ def filter_nodes(nodes, healthy=None, power_state=None):
     :rtype:         list
     """
     error_states = ('deploy failed', 'error',)
+    power_on_states = ('on', 'power on')
 
     if healthy is not None:
         if healthy:
@@ -553,8 +554,10 @@ def filter_nodes(nodes, healthy=None, power_state=None):
 
     if power_state is not None:
         if power_state:
-            nodes = [node for node in nodes if node.power_state == 'on']
+            nodes = [node for node in nodes
+                     if node.power_state in power_on_states]
         else:
-            nodes = [node for node in nodes if node.power_state != 'on']
+            nodes = [node for node in nodes
+                     if node.power_state not in power_on_states]
 
     return nodes
