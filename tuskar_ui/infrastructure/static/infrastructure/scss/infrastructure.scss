@@ -15,3 +15,8 @@
 #tenant_switcher {
     visibility: hidden;
 }
+
+// Some tables should not have a title because it just repeats the page title.
+.no-table-title h3.table_title {
+    display: none;
+}
