@@ -32,6 +32,9 @@ TEST_DATA = test_utils.TestDataContainer()
 node_data.data(TEST_DATA)
 heat_data.data(TEST_DATA)
 
+ERROR_STATES = set(['deploy failed', 'error'])
+POWER_ON_STATES = set(['on', 'power on'])
+
 LOG = logging.getLogger(__name__)
 
 
@@ -541,20 +544,20 @@ def filter_nodes(nodes, healthy=None, power_state=None):
     :return:        list of filtered tuskar_ui.api.node.Node objects
     :rtype:         list
     """
-    error_states = ('deploy failed', 'error',)
-
     if healthy is not None:
         if healthy:
             nodes = [node for node in nodes
-                     if node.power_state not in error_states]
+                     if node.power_state not in ERROR_STATES]
         else:
             nodes = [node for node in nodes
-                     if node.power_state in error_states]
+                     if node.power_state in ERROR_STATES]
 
     if power_state is not None:
         if power_state:
-            nodes = [node for node in nodes if node.power_state == 'on']
+            nodes = [node for node in nodes
+                     if node.power_state in POWER_ON_STATES]
         else:
-            nodes = [node for node in nodes if node.power_state != 'on']
+            nodes = [node for node in nodes
+                     if node.power_state not in POWER_ON_STATES]
 
     return nodes
