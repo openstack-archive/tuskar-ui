@@ -93,6 +93,11 @@ class FlavorRolesTable(tables.DataTable):
         )
         super(FlavorRolesTable, self).__init__(request, *args, **kwargs)
 
+    class Meta:
+        name = "flavor_roles"
+        verbose_name = _("Flavor Roles")
+        template = 'horizon/common/_captionless_data_table.html'
+
 
 class FlavorSuggestionsTable(tables.DataTable):
     arch = tables.Column('cpu_arch', verbose_name=_('Architecture'))
