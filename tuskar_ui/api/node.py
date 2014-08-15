@@ -232,7 +232,15 @@ class BareMetalNode(base.APIResourceWrapper):
                driver=None):
         """Create a Nova BareMetalNode
         """
-        node = TEST_DATA.baremetalclient_nodes.first()
+        node = baremetalclient(request).create(
+            service_host='undercloud',
+            cpus=cpus,
+            memory_mb=memory_mb,
+            local_gb=local_gb,
+            prov_mac_address=mac_addresses,
+            pm_address=ipmi_address,
+            pm_user=ipmi_username,
+            pm_password=ipmi_password)
         return cls(node)
 
     @classmethod
@@ -249,9 +257,8 @@ class BareMetalNode(base.APIResourceWrapper):
                  the ID
         :rtype:  tuskar_ui.api.node.BareMetalNode
         """
-        for node in BareMetalNode.list(request):
-            if node.uuid == uuid:
-                return node
+        node = baremetalclient(request).find(uuid=uuid)
+        return cls(node)
 
     @classmethod
     def get_by_instance_uuid(cls, request, instance_uuid):
@@ -270,9 +277,10 @@ class BareMetalNode(base.APIResourceWrapper):
         :raises: ironicclient.exc.HTTPNotFound if there is no BareMetalNode
                  with the matching instance UUID
         """
-        for node in BareMetalNode.list(request):
-            if node.instance_uuid == instance_uuid:
-                return node
+        nodes = baremetalclient(request).list()
+        node = next((n for n in nodes if instance_uuid == n.instance_uuid),
+                    None)
+        return cls(node)
 
     @classmethod
     def list(cls, request, associated=None):
@@ -289,7 +297,7 @@ class BareMetalNode(base.APIResourceWrapper):
         :return: list of BareMetalNodes, or an empty list if there are none
         :rtype:  list of tuskar_ui.api.node.BareMetalNode
         """
-        nodes = TEST_DATA.baremetalclient_nodes.list()
+        nodes = baremetalclient(request).list()
         if associated is not None:
             if associated:
                 nodes = [node for node in nodes
@@ -309,7 +317,7 @@ class BareMetalNode(base.APIResourceWrapper):
         :param uuid: ID of BareMetalNode to be removed
         :type  uuid: str
         """
-        return
+        return baremetalclient(request).delete(uuid)
 
     @cached_property
     def power_state(self):
@@ -346,15 +354,6 @@ class BareMetalNode(base.APIResourceWrapper):
         :return: return pm_address property of this BareMetalNode
         :rtype:  dict of str
         """
-        # TODO(akrivoka): mocking driver info, remove later
-        node = TEST_DATA.baremetalclient_nodes.first()
-        return {
-            'ipmi_address': node.ipmi_address,
-            'ipmi_username': node.ipmi_username,
-            'ipmi_password': node.ipmi_password,
-            'ip_address': node.ip_address,
-        }
-
         try:
             ip_address = (self.instance._apiresource.addresses['ctlplane'][0]
                           ['addr'])

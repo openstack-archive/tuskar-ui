@@ -66,6 +66,9 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         instance = TEST_DATA.novaclient_servers.first()
         image = TEST_DATA.glanceclient_images.first()
 
+        # TODO(akrivoka): this should be placed in the test data, but currently
+        # that's not possible due to the drawbacks in the Node architecture.
+        # We should rework the entire api/node.py and fix this problem.
         for node in registered_nodes:
             node.ip_address = '1.1.1.1'
 

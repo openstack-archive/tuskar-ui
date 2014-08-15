@@ -49,7 +49,7 @@ class NodeAPITests(test.APITestCase):
         with patch('openstack_dashboard.api.nova.server_get',
                    return_value=instance):
             with patch('novaclient.v1_1.contrib.baremetal.'
-                       'BareMetalNodeManager.get',
+                       'BareMetalNodeManager.find',
                        return_value=node):
                 with patch('openstack_dashboard.api.nova.server_list',
                            return_value=([instance], False)):
