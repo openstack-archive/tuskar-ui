@@ -58,7 +58,7 @@
     <dl class="dl-horizontal">
       <dt>{% trans "Deployment Role" %}</dt>
       {% if stack and role %}
-        <dd><a href="{% url 'horizon:infrastructure:roles:detail' role.id %}">{{ role.name }}</a></dd>
+        <dd><a href="{% url 'horizon:infrastructure:roles:detail' role.uuid %}">{{ role.name }}</a></dd>
       {% else %}
         <dd>&mdash;</dd>
       {% endif %}

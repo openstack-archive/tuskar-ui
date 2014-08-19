@@ -21,7 +21,7 @@ class IndexView(horizon_views.APIView):
     template_name = 'infrastructure/parameters/index.html'
 
     def get_data(self, request, context, *args, **kwargs):
-        plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+        plan = api.tuskar.Plan.get_the_plan(self.request)
         context['plan'] = plan
         context['plan_parameters'] = plan.parameter_list(
             include_key_parameters=False)
