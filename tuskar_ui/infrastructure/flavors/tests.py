@@ -173,7 +173,8 @@ class FlavorsTest(test.BaseAdminViewTests):
     def test_details_no_overcloud(self):
         flavor = api.flavor.Flavor(TEST_DATA.novaclient_flavors.first())
         images = TEST_DATA.glanceclient_images.list()[:2]
-        roles = TEST_DATA.tuskarclient_roles.list()
+        roles = [api.tuskar.OvercloudRole(role) for role in
+                 self.tuskarclient_roles.list()]
         with contextlib.nested(
                 patch('openstack_dashboard.api.glance.image_get',
                       side_effect=images),
@@ -181,8 +182,8 @@ class FlavorsTest(test.BaseAdminViewTests):
                       return_value=flavor),
                 patch('tuskar_ui.api.tuskar.OvercloudRole.list',
                       return_value=roles),
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.get_the_plan',
-                      side_effect=Exception)
+                patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+                      return_value=[])
         ) as (image_mock, get_mock, roles_mock, plan_mock):
             res = self.client.get(urlresolvers.reverse(DETAILS_VIEW,
                                                        args=(flavor.id,)))
@@ -195,9 +196,9 @@ class FlavorsTest(test.BaseAdminViewTests):
     def test_details(self):
         flavor = api.flavor.Flavor(TEST_DATA.novaclient_flavors.first())
         images = TEST_DATA.glanceclient_images.list()[:2]
-        roles = TEST_DATA.tuskarclient_roles.list()
-        plan = api.tuskar.OvercloudPlan(
-            TEST_DATA.tuskarclient_plans.first())
+        roles = [api.tuskar.OvercloudRole(role) for role in
+                 self.tuskarclient_roles.list()]
+        plans = TEST_DATA.tuskarclient_plans.list()
         stack = api.heat.Stack(
             TEST_DATA.heatclient_stacks.first())
         with contextlib.nested(
@@ -207,8 +208,8 @@ class FlavorsTest(test.BaseAdminViewTests):
                       return_value=flavor),
                 patch('tuskar_ui.api.tuskar.OvercloudRole.list',
                       return_value=roles),
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.get_the_plan',
-                      return_value=plan),
+                patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+                      return_value=plans),
                 patch('tuskar_ui.api.heat.Stack.get',
                       return_value=stack),
                 # __name__ is required for horizon.tables

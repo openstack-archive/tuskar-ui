@@ -26,7 +26,7 @@ from tuskar_ui.infrastructure.roles import tables
 INDEX_URL = 'horizon:infrastructure:roles:index'
 
 
-class OvercloudRoleMixin(object):
+class RoleMixin(object):
     @memoized.memoized
     def get_role(self, redirect=None):
         role_id = self.kwargs['role_id']
@@ -55,9 +55,7 @@ class IndexView(horizon_tables.DataTableView):
         plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
         for role in roles:
             role_flavor = role.flavor(plan)
-            # TODO(tzumainn): we don't mock images, so calling role.image(plan)
-            # won't work right now
-            role_image = None
+            role_image = role.image(plan)
             if role_flavor:
                 role.flavor = role_flavor.name
             else:
@@ -70,7 +68,7 @@ class IndexView(horizon_tables.DataTableView):
         return roles
 
 
-class DetailView(horizon_tables.DataTableView, OvercloudRoleMixin, StackMixin):
+class DetailView(horizon_tables.DataTableView, RoleMixin, StackMixin):
     table_class = tables.NodeTable
     template_name = 'infrastructure/roles/detail.html'
 
@@ -85,7 +83,7 @@ class DetailView(horizon_tables.DataTableView, OvercloudRoleMixin, StackMixin):
             try:
                 resource = api.heat.Resource.get_by_node(self.request, node)
                 node.role_name = resource.role.name
-                node.role_id = resource.role.id
+                node.role_id = resource.role.uuid
                 node.stack_id = resource.stack.id
             except horizon_exceptions.NotFound:
                 node.role_name = '-'

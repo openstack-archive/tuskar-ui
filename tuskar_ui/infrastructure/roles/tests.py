@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import contextlib
-
 from django.core import urlresolvers
 
 from mock import patch, call  # noqa
@@ -43,37 +41,34 @@ tuskar_data.data(TEST_DATA)
 class RolesTest(test.BaseAdminViewTests):
 
     def test_index_get(self):
-        roles = [api.tuskar.OvercloudRole(role)
-                 for role in TEST_DATA.tuskarclient_roles.list()]
-        flavor = TEST_DATA.novaclient_flavors.first()
+        roles = [api.tuskar.OvercloudRole(role) for role in
+                 self.tuskarclient_roles.list()]
+        plans = [api.tuskar.OvercloudPlan(plan) for plan in
+                 self.tuskarclient_plans.list()]
 
-        with contextlib.nested(
-                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
-                      return_value=roles),
-                patch('openstack_dashboard.api.nova.flavor_get',
-                      return_value=flavor),
-        ):
-            res = self.client.get(INDEX_URL)
+        with patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+                   return_value=plans):
+            with patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                       return_value=roles):
+                with patch('openstack_dashboard.api.glance.image_get',
+                           return_value=None):
+                    res = self.client.get(INDEX_URL)
 
         self.assertTemplateUsed(res, 'infrastructure/roles/index.html')
 
     def test_detail_get(self):
-        roles = [api.tuskar.OvercloudRole(role)
-                 for role in TEST_DATA.tuskarclient_roles.list()]
-        flavor = TEST_DATA.novaclient_flavors.first()
+        roles = [api.tuskar.OvercloudRole(role) for role in
+                 self.tuskarclient_roles.list()]
+        plans = [api.tuskar.OvercloudPlan(plan) for plan in
+                 self.tuskarclient_plans.list()]
 
-        with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
-                'spec_set': ['list', 'get'],
-                'list.return_value': roles,
-                'get.return_value': roles[0],
-            }),
-            patch('tuskar_ui.api.heat.Stack.events',
-                  return_value=[]),
-            patch('openstack_dashboard.api.nova.flavor_get',
-                  return_value=flavor),
-        ):
-            res = self.client.get(DETAIL_URL)
+        with patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                   return_value=roles):
+            with patch('tuskar_ui.api.heat.Stack.events',
+                       return_value=[]):
+                with patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+                           return_value=plans):
+                    res = self.client.get(DETAIL_URL)
 
         self.assertTemplateUsed(
             res, 'infrastructure/roles/detail.html')

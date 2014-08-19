@@ -35,15 +35,15 @@ INDEX_URL = urlresolvers.reverse(
 class HistoryTest(test.BaseAdminViewTests):
 
     def test_index(self):
-        plan = api.tuskar.OvercloudPlan(
-            TEST_DATA.tuskarclient_plans.first())
+        plans = [api.tuskar.OvercloudPlan(plan) for plan in
+                 self.tuskarclient_plans.list()]
         stack = api.heat.Stack(
             TEST_DATA.heatclient_stacks.first())
         events = TEST_DATA.heatclient_events.list()
 
         with contextlib.nested(
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.get_the_plan',
-                      return_value=plan),
+                patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+                      return_value=plans),
                 patch('tuskar_ui.api.heat.Stack.get_by_plan',
                       return_value=stack),
                 patch('tuskar_ui.api.heat.Stack.events',

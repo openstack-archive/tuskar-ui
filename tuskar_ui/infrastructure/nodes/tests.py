@@ -61,8 +61,8 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
     def test_registered_nodes(self):
         registered_nodes = [api.node.Node(api.node.IronicNode(node))
                             for node in self.ironicclient_nodes.list()]
-        roles = [api.tuskar.OvercloudRole(r)
-                 for r in TEST_DATA.tuskarclient_roles.list()]
+        roles = [api.tuskar.OvercloudRole(role) for role in
+                 self.tuskarclient_roles.list()]
         instance = TEST_DATA.novaclient_servers.first()
         image = TEST_DATA.glanceclient_images.first()
 
@@ -73,7 +73,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             node.ip_address = '1.1.1.1'
 
         with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
+            patch('tuskar_ui.api.tuskar.OvercloudRole.list', **{
                 'spec_set': ['list', 'name'],
                 'list.return_value': roles,
             }),
@@ -90,7 +90,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                 'spec_set': ['image_get'],
                 'image_get.return_value': image,
             }),
-        ) as (_OvercloudRole, Node, _nova, _glance):
+        ) as (_Role, Node, _nova, _glance):
             res = self.client.get(INDEX_URL + '?tab=nodes__registered')
             # FIXME(lsmola) horrible count, optimize
             self.assertEqual(Node.list.call_count, 6)

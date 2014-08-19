@@ -44,7 +44,7 @@ class EditPlan(horizon.forms.SelfHandlingForm):
                 # XXX Dirty hack for requiring a controller node.
                 required=(role.name == 'Controller'),
             )
-            fields['%s-count' % role.id] = field
+            fields['%s-count' % role.uuid] = field
         return fields
 
     def handle(self, request, data):
