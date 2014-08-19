@@ -16,18 +16,11 @@ import logging
 from django.utils.translation import ugettext_lazy as _
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
-from openstack_dashboard.test.test_data import utils
-from tuskarclient.v1 import client as tuskar_client
+from tuskarclient.v2 import client as tuskar_client
 
 from tuskar_ui.api import flavor
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
-from tuskar_ui.test.test_data import tuskar_data
-from tuskar_ui.test.test_driver import tuskar_driver as mock_tuskar
-
-
-TEST_DATA = utils.TestDataContainer()
-tuskar_data.data(TEST_DATA)
 
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
@@ -40,17 +33,17 @@ def tuskarclient(request):
     return c
 
 
-class OvercloudPlan(base.APIDictWrapper):
+class Plan(base.APIResourceWrapper):
     _attrs = ('id', 'name', 'description', 'created_at', 'modified_at',
               'roles', 'parameters', 'template')
 
     def __init__(self, apiresource, request=None):
-        super(OvercloudPlan, self).__init__(apiresource)
+        super(Plan, self).__init__(apiresource)
         self._request = request
 
     @classmethod
     def create(cls, request, name, description):
-        """Create an OvercloudPlan in Tuskar
+        """Create an Plan in Tuskar
 
         :param request: request object
         :type  request: django.http.HttpRequest
@@ -61,15 +54,16 @@ class OvercloudPlan(base.APIDictWrapper):
         :param description: plan description
         :type  description: string
 
-        :return: the created OvercloudPlan object
-        :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
+        :return: the created Plan object
+        :rtype:  tuskar_ui.api.tuskar.Plan
         """
-        plan = mock_tuskar.Plan.create(name, description)
+        plan = tuskarclient(request).plans.create(name=name,
+                                                  description=description)
         return cls(plan, request=request)
 
     @classmethod
-    def update(cls, request, plan_id, name, description):
-        """Update an OvercloudPlan in Tuskar
+    def patch(cls, request, plan_id, name, description):
+        """Update an Plan in Tuskar
 
         :param request: request object
         :type  request: django.http.HttpRequest
@@ -83,42 +77,44 @@ class OvercloudPlan(base.APIDictWrapper):
         :param description: plan description
         :type  description: string
 
-        :return: the updated OvercloudPlan object
-        :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
+        :return: the updated Plan object
+        :rtype:  tuskar_ui.api.tuskar.Plan
         """
-        plan = mock_tuskar.Plan.update(plan_id, name, description)
+        plan = tuskarclient(request).plans.patch(plan_uuid=plan_id,
+                                                 name=name,
+                                                 description=description)
         return cls(plan, request=request)
 
     @classmethod
     def list(cls, request):
-        """Return a list of OvercloudPlans in Tuskar
+        """Return a list of Plans in Tuskar
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :return: list of OvercloudPlans, or an empty list if there are none
-        :rtype:  list of tuskar_ui.api.tuskar.OvercloudPlan
+        :return: list of Plans, or an empty list if there are none
+        :rtype:  list of tuskar_ui.api.tuskar.Plan
         """
-        plans = mock_tuskar.Plan.list()
-
+        plans = tuskarclient(request).plans.list()
         return [cls(plan, request=request) for plan in plans]
 
     @classmethod
     @handle_errors(_("Unable to retrieve plan"))
     def get(cls, request, plan_id):
-        """Return the OvercloudPlan that matches the ID
+        """Return the Plan that matches the ID
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param plan_id: id of OvercloudPlan to be retrieved
+        :param plan_id: id of Plan to be retrieved
         :type  plan_id: int
 
-        :return: matching OvercloudPlan, or None if no OvercloudPlan matches
+        :return: matching Plan, or None if no Plan matches
                  the ID
-        :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
+        :rtype:  tuskar_ui.api.tuskar.Plan
         """
-        return cls(mock_tuskar.Plan.get(plan_id), request=request)
+        plan = tuskarclient(request).plans.get(plan_uuid=plan_id)
+        return cls(plan, request=request)
 
     # TODO(lsmola) before will will support multiple overclouds, we
     # can work only with overcloud that is named overcloud. Delete
@@ -139,7 +135,7 @@ class OvercloudPlan(base.APIDictWrapper):
 
     @classmethod
     def delete(cls, request, plan_id):
-        """Delete an OvercloudPlan
+        """Delete an Plan
 
         :param request: request object
         :type  request: django.http.HttpRequest
@@ -147,11 +143,11 @@ class OvercloudPlan(base.APIDictWrapper):
         :param plan_id: plan id
         :type  plan_id: int
         """
-        mock_tuskar.Plan.delete(plan_id)
+        tuskarclient(request).plans.delete(plan_uuid=plan_id)
 
     @cached_property
     def role_list(self):
-        return [OvercloudRole.get(self._request, role['id'])
+        return [Role.get(self._request, role['uuid'])
                 for role in self.roles]
 
     def parameter_list(self, include_key_parameters=True):
@@ -177,11 +173,11 @@ class OvercloudPlan(base.APIDictWrapper):
         return default
 
 
-class OvercloudRole(base.APIDictWrapper):
-    _attrs = ('id', 'name', 'version', 'description', 'created')
+class Role(base.APIResourceWrapper):
+    _attrs = ('uuid', 'name', 'version', 'description', 'created')
 
     def __init__(self, apiresource, request=None):
-        super(OvercloudRole, self).__init__(apiresource)
+        super(Role, self).__init__(apiresource)
         self._request = request
 
     @classmethod
@@ -194,50 +190,50 @@ class OvercloudRole(base.APIDictWrapper):
 
         :return: list of Overcloud Roles, or an empty list if there
                  are none
-        :rtype:  list of tuskar_ui.api.tuskar.OvercloudRole
+        :rtype:  list of tuskar_ui.api.tuskar.Role
         """
-        roles = TEST_DATA.tuskarclient_roles.list()
+        roles = tuskarclient(request).roles.list()
         return [cls(role, request=request) for role in roles]
 
     @classmethod
     @handle_errors(_("Unable to retrieve overcloud role"))
     def get(cls, request, role_id):
-        """Return the Tuskar OvercloudRole that matches the ID
+        """Return the Tuskar Role that matches the ID
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param role_id: ID of OvercloudRole to be retrieved
+        :param role_id: ID of Role to be retrieved
         :type  role_id: int
 
-        :return: matching OvercloudRole, or None if no matching
-                 OvercloudRole can be found
-        :rtype:  tuskar_ui.api.tuskar.OvercloudRole
+        :return: matching Role, or None if no matching
+                 Role can be found
+        :rtype:  tuskar_ui.api.tuskar.Role
         """
-        for role in OvercloudRole.list(request):
-            if role.id == role_id:
+        for role in Role.list(request):
+            if role.uuid == role_id:
                 return role
 
     @classmethod
     @handle_errors(_("Unable to retrieve overcloud role"))
     def get_by_image(cls, request, plan, image):
-        """Return the Tuskar OvercloudRole whose ImageID
+        """Return the Tuskar Role whose ImageID
         parameter matches the passed in image
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
         :param plan: associated plan to check against
-        :type  plan: OvercloudPlan
+        :type  plan: Plan
 
         :param image: image to be matched
         :type  image: Image
 
-        :return: matching OvercloudRole, or None if no matching
-                 OvercloudRole can be found
-        :rtype:  tuskar_ui.api.tuskar.OvercloudRole
+        :return: matching Role, or None if no matching
+                 Role can be found
+        :rtype:  tuskar_ui.api.tuskar.Role
         """
-        for role in OvercloudRole.list(request):
+        for role in Role.list(request):
             image_id_from_plan = plan.parameter_value(
                 role.image_id_parameter_name)
             if image_id_from_plan == image.id:

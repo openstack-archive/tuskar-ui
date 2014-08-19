@@ -23,7 +23,7 @@ class IndexView(horizon_tables.DataTableView):
     template_name = "infrastructure/history/index.html"
 
     def get_data(self):
-        plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+        plan = api.tuskar.Plan.get_the_plan(self.request)
         if plan:
             stack = api.heat.Stack.get_by_plan(self.request, plan)
             if stack:

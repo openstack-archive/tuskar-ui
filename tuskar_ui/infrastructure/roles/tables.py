@@ -29,6 +29,9 @@ class RolesTable(tables.DataTable):
     image = tables.Column('image',
                           verbose_name=_("Image"))
 
+    def get_object_id(self, datum):
+        return datum.uuid
+
     class Meta:
         name = "roles"
         verbose_name = _("Deployment Roles")

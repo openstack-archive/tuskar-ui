@@ -121,7 +121,7 @@ class FlavorsTest(test.BaseAdminViewTests):
                 patch('openstack_dashboard.api.nova.flavor_delete'),
                 patch('openstack_dashboard.api.nova.server_list',
                       return_value=([], False)),
-                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                patch('tuskarclient.v2.roles.RoleManager.list',
                       return_value=[]),
                 patch('openstack_dashboard.api.glance.image_list_detailed',
                       return_value=([], False)),
@@ -149,7 +149,7 @@ class FlavorsTest(test.BaseAdminViewTests):
                 patch('openstack_dashboard.api.nova.flavor_delete'),
                 patch('openstack_dashboard.api.nova.server_list',
                       return_value=([server], False)),
-                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                patch('tuskarclient.v2.roles.RoleManager.list',
                       return_value=[]),
                 patch('openstack_dashboard.api.glance.image_list_detailed',
                       return_value=([], False)),
@@ -171,10 +171,10 @@ class FlavorsTest(test.BaseAdminViewTests):
                       side_effect=images),
                 patch('tuskar_ui.api.flavor.Flavor.get',
                       return_value=flavor),
-                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                patch('tuskarclient.v2.roles.RoleManager.list',
                       return_value=roles),
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.get_the_plan',
-                      side_effect=Exception)
+                patch('tuskarclient.v2.plans.PlanManager.list',
+                      return_value=[])
         ) as (image_mock, get_mock, roles_mock, plan_mock):
             res = self.client.get(urlresolvers.reverse(DETAILS_VIEW,
                                                        args=(flavor.id,)))
@@ -188,8 +188,7 @@ class FlavorsTest(test.BaseAdminViewTests):
         flavor = api.flavor.Flavor(TEST_DATA.novaclient_flavors.first())
         images = TEST_DATA.glanceclient_images.list()[:2]
         roles = TEST_DATA.tuskarclient_roles.list()
-        plan = api.tuskar.OvercloudPlan(
-            TEST_DATA.tuskarclient_plans.first())
+        plans = TEST_DATA.tuskarclient_plans.list()
         stack = api.heat.Stack(
             TEST_DATA.heatclient_stacks.first())
         with contextlib.nested(
@@ -197,10 +196,10 @@ class FlavorsTest(test.BaseAdminViewTests):
                       side_effect=images),
                 patch('tuskar_ui.api.flavor.Flavor.get',
                       return_value=flavor),
-                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                patch('tuskarclient.v2.roles.RoleManager.list',
                       return_value=roles),
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.get_the_plan',
-                      return_value=plan),
+                patch('tuskarclient.v2.plans.PlanManager.list',
+                      return_value=plans),
                 patch('tuskar_ui.api.heat.Stack.get',
                       return_value=stack),
                 # __name__ is required for horizon.tables
