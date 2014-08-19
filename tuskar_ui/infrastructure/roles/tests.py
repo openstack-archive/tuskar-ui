@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import contextlib
-
 from django.core import urlresolvers
 
 from mock import patch, call  # noqa
@@ -43,27 +41,48 @@ class RolesTest(test.BaseAdminViewTests):
     def test_index_get(self):
         roles = [api.tuskar.OvercloudRole(role)
                  for role in TEST_DATA.tuskarclient_roles.list()]
+        # The plan does not exist, so it must be created, so we must mock
+        # this call as well:
+        plan = self.tuskarclient_plans.first()
+        # Also, currently we works only with one plan, and that plan must be
+        # called overcloud. Therefore getting the plan means listing all
+        # plans and looking at its name, so we must also mock the plan
+        # listing.
+        plans = self.tuskarclient_plans.list()
 
-        with patch('tuskar_ui.api.tuskar.OvercloudRole.list',
-                   return_value=roles):
-            res = self.client.get(INDEX_URL)
+        with patch('tuskarclient.v2.plans.PlanManager.create',
+                   return_value=plan):
+            with patch('tuskarclient.v2.plans.PlanManager.list',
+                       return_value=plans):
+                with patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                           return_value=roles):
+                    res = self.client.get(INDEX_URL)
 
         self.assertTemplateUsed(res, 'infrastructure/roles/index.html')
 
     def test_detail_get(self):
         roles = [api.tuskar.OvercloudRole(role)
                  for role in TEST_DATA.tuskarclient_roles.list()]
+        # The plan does not exist, so it must be created, so we must mock
+        # this call as well:
+        plan = self.tuskarclient_plans.first()
+        # Also, currently we works only with one plan, and that plan must be
+        # called overcloud. Therefore getting the plan means listing all
+        # plans and looking at its name, so we must also mock the plan
+        # listing.
+        plans = self.tuskarclient_plans.list()
 
-        with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
-                'spec_set': ['list', 'get'],
-                'list.return_value': roles,
-                'get.return_value': roles[0],
-            }),
-            patch('tuskar_ui.api.heat.Stack.events',
-                  return_value=[]),
-        ):
-            res = self.client.get(DETAIL_URL)
+        with patch('tuskar_ui.api.tuskar.OvercloudRole', **{
+                   'spec_set': ['list', 'get'],
+                   'list.return_value': roles,
+                   'get.return_value': roles[0]}):
+            with patch('tuskar_ui.api.heat.Stack.events',
+                       return_value=[]):
+                with patch('tuskarclient.v2.plans.PlanManager.create',
+                           return_value=plan):
+                    with patch('tuskarclient.v2.plans.PlanManager.list',
+                               return_value=plans):
+                        res = self.client.get(DETAIL_URL)
 
         self.assertTemplateUsed(
             res, 'infrastructure/roles/detail.html')

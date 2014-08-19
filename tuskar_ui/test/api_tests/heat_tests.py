@@ -43,7 +43,7 @@ class HeatAPITests(test.APITestCase):
         stack = api.heat.Stack(self.heatclient_stacks.first())
         plan = self.tuskarclient_plans.first()
 
-        with patch('tuskar_ui.test.test_driver.tuskar_driver.Plan.get',
+        with patch('tuskarclient.v2.plans.PlanManager.get',
                    return_value=plan):
             ret_val = stack.plan
         self.assertIsInstance(ret_val, api.tuskar.OvercloudPlan)
@@ -146,8 +146,13 @@ class HeatAPITests(test.APITestCase):
         self.assertIsInstance(ret_val, api.heat.Resource)
 
     def test_resource_role(self):
-        resource = api.heat.Resource(self.heatclient_resources.first())
-        ret_val = resource.role
+        # The api needs to get the role, and getting the role means listing
+        # all roles, so we mock that.
+        roles = self.tuskarclient_roles.list()
+        with patch('tuskarclient.v2.roles.RoleManager.list',
+                   return_value=roles):
+            resource = api.heat.Resource(self.heatclient_resources.first())
+            ret_val = resource.role
         self.assertIsInstance(ret_val, api.tuskar.OvercloudRole)
         self.assertEqual('Compute', ret_val.name)
 

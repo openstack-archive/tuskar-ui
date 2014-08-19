@@ -16,18 +16,11 @@ import logging
 from django.utils.translation import ugettext_lazy as _
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
-from openstack_dashboard.test.test_data import utils
-from tuskarclient.v1 import client as tuskar_client
+from tuskarclient.v2 import client as tuskar_client
 
 from tuskar_ui.api import flavor
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
-from tuskar_ui.test.test_data import tuskar_data
-from tuskar_ui.test.test_driver import tuskar_driver as mock_tuskar
-
-
-TEST_DATA = utils.TestDataContainer()
-tuskar_data.data(TEST_DATA)
 
 LOG = logging.getLogger(__name__)
 TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
@@ -64,11 +57,12 @@ class OvercloudPlan(base.APIDictWrapper):
         :return: the created OvercloudPlan object
         :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
-        plan = mock_tuskar.Plan.create(name, description)
+        plan = tuskarclient(request).plans.create(name=name,
+                                                  description=description)
         return cls(plan, request=request)
 
     @classmethod
-    def update(cls, request, plan_id, name, description):
+    def patch(cls, request, plan_id, name, description):
         """Update an OvercloudPlan in Tuskar
 
         :param request: request object
@@ -86,7 +80,9 @@ class OvercloudPlan(base.APIDictWrapper):
         :return: the updated OvercloudPlan object
         :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
-        plan = mock_tuskar.Plan.update(plan_id, name, description)
+        plan = tuskarclient(request).plans.patch(plan_uuid=plan_id,
+                                                 name=name,
+                                                 description=description)
         return cls(plan, request=request)
 
     @classmethod
@@ -99,8 +95,7 @@ class OvercloudPlan(base.APIDictWrapper):
         :return: list of OvercloudPlans, or an empty list if there are none
         :rtype:  list of tuskar_ui.api.tuskar.OvercloudPlan
         """
-        plans = mock_tuskar.Plan.list()
-
+        plans = tuskarclient(request).plans.list()
         return [cls(plan, request=request) for plan in plans]
 
     @classmethod
@@ -118,7 +113,8 @@ class OvercloudPlan(base.APIDictWrapper):
                  the ID
         :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
-        return cls(mock_tuskar.Plan.get(plan_id), request=request)
+        plan = tuskarclient(request).plans.get(plan_uuid=plan_id)
+        return cls(plan, request=request)
 
     # TODO(lsmola) before will will support multiple overclouds, we
     # can work only with overcloud that is named overcloud. Delete
@@ -147,7 +143,7 @@ class OvercloudPlan(base.APIDictWrapper):
         :param plan_id: plan id
         :type  plan_id: int
         """
-        mock_tuskar.Plan.delete(plan_id)
+        tuskarclient(request).plans.delete(plan_uuid=plan_id)
 
     @cached_property
     def role_list(self):
@@ -196,7 +192,7 @@ class OvercloudRole(base.APIDictWrapper):
                  are none
         :rtype:  list of tuskar_ui.api.tuskar.OvercloudRole
         """
-        roles = TEST_DATA.tuskarclient_roles.list()
+        roles = tuskarclient(request).roles.list()
         return [cls(role, request=request) for role in roles]
 
     @classmethod
