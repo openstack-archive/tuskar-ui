@@ -110,6 +110,7 @@ Then disable the other dashboards::
 
     cp ../tuskar-ui/_10_admin.py.example openstack_dashboard/local/enabled/_10_admin.py
     cp ../tuskar-ui/_20_project.py.example openstack_dashboard/local/enabled/_20_project.py
+    cp ../tuskar-ui/_30_identity.py.example openstack_dashboard/local/enabled/_30_identity.py
 
 
 Starting the app
