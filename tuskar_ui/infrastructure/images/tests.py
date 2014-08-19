@@ -12,12 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import contextlib
+
 from django.core import urlresolvers
 
 from mock import patch, call  # noqa
 
 from tuskar_ui.test import helpers as test
-
 
 INDEX_URL = urlresolvers.reverse(
     'horizon:infrastructure:images:index')
@@ -26,8 +27,16 @@ INDEX_URL = urlresolvers.reverse(
 class ImagesTest(test.BaseAdminViewTests):
 
     def test_index(self):
-        with patch('openstack_dashboard.api.glance.image_list_detailed',
-                   return_value=[self.images.list(), False, False]):
+        roles = self.tuskarclient_roles.list()
+        plans = self.tuskarclient_plans.list()
+
+        with contextlib.nested(
+            patch('tuskarclient.v2.roles.RoleManager.list',
+                  return_value=roles),
+            patch('tuskarclient.v2.plans.PlanManager.list',
+                  return_value=plans),
+            patch('openstack_dashboard.api.glance.image_list_detailed',
+                  return_value=[self.images.list(), False, False]),):
             res = self.client.get(INDEX_URL)
 
         self.assertTemplateUsed(res, 'infrastructure/images/index.html')

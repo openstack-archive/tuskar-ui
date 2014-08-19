@@ -11,36 +11,42 @@
 #    under the License.
 
 from openstack_dashboard.test.test_data import utils as test_data_utils
+from tuskarclient.v2 import plans
+from tuskarclient.v2 import roles
+
+planmanager = plans.PlanManager(None)
+rolemanager = roles.RoleManager(None)
 
 
 def data(TEST):
 
-    # OvercloudPlan
+    # Plan
     TEST.tuskarclient_plans = test_data_utils.TestDataContainer()
-    plan_1 = {
+    plan_1 = plans.Plan(planmanager, {
         'id': 'plan-1',
         'name': 'overcloud',
         'description': 'this is an overcloud deployment plan',
         'template': '',
         'created_at': '2014-05-27T21:11:09Z',
         'modified_at': '2014-05-30T21:11:09Z',
-        'roles': [{
-            'id': 'role-1',
-            'name': 'Controller',
-            'version': 1,
-        }, {
-            'id': 'role-2',
-            'name': 'Compute',
-            'version': 1,
-        }, {
-            'id': 'role-3',
-            'name': 'Object Storage',
-            'version': 1,
-        }, {
-            'id': 'role-4',
-            'name': 'Block Storage',
-            'version': 1,
-        }],
+        'roles': [
+            {
+                'uuid': 'role-1',
+                'name': 'Controller',
+                'version': 1,
+            }, {
+                'uuid': 'role-2',
+                'name': 'Compute',
+                'version': 1,
+            }, {
+                'uuid': 'role-3',
+                'name': 'Object Storage',
+                'version': 1,
+            }, {
+                'uuid': 'role-4',
+                'name': 'Block Storage',
+                'version': 1,
+            }],
         'parameters': [{
             'name': 'ControllerNodeCount',
             'label': 'Controller Node Count',
@@ -137,37 +143,37 @@ def data(TEST):
             'hidden': 'false',
             'value': 'unset',
         }],
-    }
+    })
     TEST.tuskarclient_plans.add(plan_1)
 
-    # OvercloudRole
+    # Role
     TEST.tuskarclient_roles = test_data_utils.TestDataContainer()
-    r_1 = {
-        'id': 'role-1',
+    r_1 = roles.Role(rolemanager, {
+        'uuid': 'role-1',
         'name': 'Controller',
         'version': 1,
         'description': 'controller role',
         'created_at': '2014-05-27T21:11:09Z'
-    }
-    r_2 = {
-        'id': 'role-2',
+    })
+    r_2 = roles.Role(rolemanager, {
+        'uuid': 'role-2',
         'name': 'Compute',
         'version': 1,
         'description': 'compute role',
         'created_at': '2014-05-27T21:11:09Z'
-    }
-    r_3 = {
-        'id': 'role-3',
+    })
+    r_3 = roles.Role(rolemanager, {
+        'uuid': 'role-3',
         'name': 'Object Storage',
         'version': 1,
         'description': 'object storage role',
         'created_at': '2014-05-27T21:11:09Z'
-    }
-    r_4 = {
-        'id': 'role-4',
+    })
+    r_4 = roles.Role(rolemanager, {
+        'uuid': 'role-4',
         'name': 'Block Storage',
         'version': 1,
         'description': 'block storage role',
         'created_at': '2014-05-27T21:11:09Z'
-    }
+    })
     TEST.tuskarclient_roles.add(r_1, r_2, r_3, r_4)

@@ -12,13 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import contextlib
-
 from django.core import urlresolvers
 from mock import patch, call  # noqa
 from openstack_dashboard.test.test_data import utils
 
-from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import tuskar_data
 
@@ -33,11 +30,13 @@ tuskar_data.data(TEST_DATA)
 class ParametersTest(test.BaseAdminViewTests):
 
     def test_index(self):
-        plan = api.tuskar.OvercloudPlan(TEST_DATA.tuskarclient_plans.first())
-        with contextlib.nested(
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.get_the_plan',
-                      return_value=plan),
-        ):
-            res = self.client.get(INDEX_URL)
+        plans = self.tuskarclient_plans.list()
+        roles = self.tuskarclient_roles.list()
+
+        with patch('tuskarclient.v2.roles.RoleManager.list',
+                   return_value=roles):
+            with patch('tuskarclient.v2.plans.PlanManager.list',
+                       return_value=plans):
+                res = self.client.get(INDEX_URL)
 
         self.assertTemplateUsed(res, 'infrastructure/parameters/index.html')
