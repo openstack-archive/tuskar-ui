@@ -43,10 +43,10 @@ class HeatAPITests(test.APITestCase):
         stack = api.heat.Stack(self.heatclient_stacks.first())
         plan = self.tuskarclient_plans.first()
 
-        with patch('tuskar_ui.test.test_driver.tuskar_driver.Plan.get',
+        with patch('tuskarclient.v2.plans.PlanManager.get',
                    return_value=plan):
             ret_val = stack.plan
-        self.assertIsInstance(ret_val, api.tuskar.OvercloudPlan)
+        self.assertIsInstance(ret_val, api.tuskar.Plan)
 
     def test_stack_events(self):
         event_list = self.heatclient_events.list()
@@ -88,7 +88,7 @@ class HeatAPITests(test.APITestCase):
 
     def test_stack_resources_no_ironic(self):
         stack = api.heat.Stack(self.heatclient_stacks.first())
-        role = api.tuskar.OvercloudRole(
+        role = api.tuskar.Role(
             self.tuskarclient_roles.first())
         nodes = self.baremetalclient_nodes.list()
 
@@ -112,7 +112,7 @@ class HeatAPITests(test.APITestCase):
 
     def test_stack_dashboard_url(self):
         stack = api.heat.Stack(self.heatclient_stacks.first())
-        stack.plan = api.tuskar.OvercloudPlan(self.tuskarclient_plans.first())
+        stack.plan = api.tuskar.Plan(self.tuskarclient_plans.first())
 
         mocked_service = mock.Mock(id='horizon_id')
         mocked_service.name = 'horizon'
@@ -146,9 +146,14 @@ class HeatAPITests(test.APITestCase):
         self.assertIsInstance(ret_val, api.heat.Resource)
 
     def test_resource_role(self):
-        resource = api.heat.Resource(self.heatclient_resources.first())
-        ret_val = resource.role
-        self.assertIsInstance(ret_val, api.tuskar.OvercloudRole)
+        # The api needs to get the role, and getting the role means listing
+        # all roles, so we mock that.
+        roles = self.tuskarclient_roles.list()
+        with patch('tuskarclient.v2.roles.RoleManager.list',
+                   return_value=roles):
+            resource = api.heat.Resource(self.heatclient_resources.first())
+            ret_val = resource.role
+        self.assertIsInstance(ret_val, api.tuskar.Role)
         self.assertEqual('Compute', ret_val.name)
 
     def test_resource_node_no_ironic(self):
