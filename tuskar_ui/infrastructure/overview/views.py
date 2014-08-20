@@ -170,3 +170,23 @@ class UndeployConfirmationView(horizon.forms.ModalFormView, StackMixin):
         initial = super(UndeployConfirmationView, self).get_initial(**kwargs)
         initial['stack_id'] = self.get_stack().id
         return initial
+
+
+class PostDeployInitView(horizon.forms.ModalFormView, StackMixin):
+    form_class = forms.PostDeployInit
+    template_name = 'infrastructure/overview/post_deploy_init.html'
+
+    def get_success_url(self):
+        return reverse(INDEX_URL)
+
+    def get_context_data(self, **kwargs):
+        context = super(PostDeployInitView,
+                        self).get_context_data(**kwargs)
+        context['stack_id'] = self.get_stack().id
+        return context
+
+    def get_initial(self, **kwargs):
+        initial = super(PostDeployInitView, self).get_initial(**kwargs)
+        initial['stack_id'] = self.get_stack().id
+        return initial
+

@@ -17,6 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
 import horizon.forms
 import horizon.messages
+from os_cloud_config import keystone as keystone_setup
 
 from tuskar_ui import api
 import tuskar_ui.forms
@@ -83,3 +84,50 @@ class UndeployOvercloud(horizon.forms.SelfHandlingForm):
             msg = _('Undeployment in progress.')
             horizon.messages.success(request, msg)
             return True
+
+
+class PostDeployInit(horizon.forms.SelfHandlingForm):
+    def build_endpoints(self, plan):
+        # TODO(lsmola) add passwords from the plan
+        return {
+            "ceilometer": {"password": ''},
+            "cinder": {"password": ''},
+            "ec2": {"password": ''},
+            "glance": {"password": '16b4aaa3e056d07f796a93afb6010487b7b617e7'},
+            "heat": {"password": ''},
+            "neutron": {"password": ''},
+            "nova": {"password": ''},
+            "novav3": {"password": ''},
+            "swift": {"password": ''},
+            "horizon": {}}
+
+    def handle(self, request, data):
+        try:
+            plan = api.tuskar.OvercloudPlan.get_the_plan(request)
+            stack = api.heat.Stack.get_by_plan(self.request, plan)
+
+            # TODO(lsmola) replace by data from TuskarAPI once available
+            admin_token = 'aa61677c0a270880e99293c148cefee4000b2259'
+            admin_password = '5ba3a69c95c668daf84c2f103ebec82d273a4897'
+            admin_email = 'example@example.org'
+            auth_ip = stack.keystone_ip
+            auth_url = stack.keystone_auth_url
+            auth_tenant = 'admin'
+            auth_user = 'admin'
+
+            # do the keystone init
+            keystone_setup.initialize(auth_ip, admin_token, admin_email, admin_password, region='regionOne', ssl=None, public=None, user='heat-admin')
+
+            # do the setup endpoints
+            keystone_setup.setup_endpoints(self.build_endpoints(plan), public_host=None, region=None, os_username=auth_user, os_password=admin_password, os_tenant_name=auth_tenant, os_auth_url=auth_url)
+
+            # do the neutron init
+        except Exception:
+            horizon.exceptions.handle(request,
+                                      _("Unable to initialize Overcloud."))
+            return False
+        else:
+            msg = _('Overcloud has been initialized.')
+            horizon.messages.success(request, msg)
+            return True
+

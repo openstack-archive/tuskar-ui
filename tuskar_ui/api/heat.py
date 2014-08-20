@@ -105,7 +105,7 @@ class Stack(base.APIResourceWrapper):
                  are none
         :rtype:  list of tuskar_ui.api.heat.Stack
         """
-        stacks = mock_heat.Stack.list()
+        stacks, has_more_data, has_prev_data = heat.stacks_list(request)
         return [cls(stack, request=request) for stack in stacks]
 
     @classmethod
@@ -118,7 +118,7 @@ class Stack(base.APIResourceWrapper):
                  found
         :rtype:  tuskar_ui.api.heat.Stack or None
         """
-        return cls(mock_heat.Stack.get(stack_id))
+        return cls(heat.stack_get(request, stack_id), request=request)
 
     @classmethod
     @handle_errors(_("Unable to retrieve stack"))
@@ -130,9 +130,15 @@ class Stack(base.APIResourceWrapper):
                  found
         :rtype:  tuskar_ui.api.heat.Stack or None
         """
-        for stack in Stack.list(request):
-            if stack.plan and (stack.plan.id == plan.id):
-                return stack
+        # TODO(lsmola) until we have working deployment through Tuskar-API,
+        # this will not work
+        #for stack in Stack.list(request):
+        #    if stack.plan and (stack.plan.id == plan.id):
+        #        return stack
+        stack = Stack.list(request)[0]
+        # TODO(lsmola) stack list actually does not contain all the detail
+        # info, there should be call for that, investigate
+        return Stack.get(request, stack.id)
 
     @classmethod
     @handle_errors(_("Unable to delete Heat stack"), [])
@@ -221,9 +227,23 @@ class Stack(base.APIResourceWrapper):
                  exists as well; None otherwise
         :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
-        if 'plan_id' in self.parameters:
-            return tuskar.OvercloudPlan.get(self._request,
-                                            self.parameters['plan_id'])
+        # TODO(lsmola) replace this by actual reference, I am pretty sure
+        # the relation won't be stored in parameters, that would mean putting
+        # that into template, which doesn't make sense
+        #if 'plan_id' in self.parameters:
+        #    return tuskar.OvercloudPlan.get(self._request,
+        #                                    self.parameters['plan_id'])
+        return tuskar.OvercloudPlan.get(self._request, 'mock')
+
+    @cached_property
+    def is_initialized(self):
+        """Check if this Stack is successfully initialized.
+
+        :return: True if this Stack is successfully initialized, False
+                 otherwise
+        :rtype:  bool
+        """
+        return len(self.dashboard_urls) > 0
 
     @cached_property
     def is_deployed(self):
@@ -291,22 +311,22 @@ class Stack(base.APIResourceWrapper):
         return getattr(self, 'outputs', [])
 
     @cached_property
-    def keystone_ip(self):
+    def keystone_auth_url(self):
         for output in self.stack_outputs:
             if output['output_key'] == 'KeystoneURL':
-                return urlparse.urlparse(output['output_value']).hostname
+                return output['output_value']
+
+    @cached_property
+    def keystone_ip(self):
+        if self.keystone_auth_url:
+            return urlparse.urlparse(self.keystone_auth_url).hostname
 
     @cached_property
     def overcloud_keystone(self):
-        for output in self.stack_outputs:
-            if output['output_key'] == 'KeystoneURL':
-                break
-        else:
-            return None
         try:
             return overcloud_keystoneclient(
                 self._request,
-                output['output_value'],
+                self.keystone_auth_url,
                 self.plan.parameter_value('AdminPassword'))
         except Exception:
             LOG.debug('Unable to connect to overcloud keystone.')

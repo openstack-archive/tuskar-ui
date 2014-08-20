@@ -135,7 +135,7 @@ def data(TEST):
             'label': 'Admin Password',
             'description': 'Admin password',
             'hidden': 'false',
-            'value': 'unset',
+            'value': '5ba3a69c95c668daf84c2f103ebec82d273a4897',
         }],
     }
     TEST.tuskarclient_plans.add(plan_1)
