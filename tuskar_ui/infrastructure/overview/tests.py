@@ -30,6 +30,8 @@ DEPLOY_URL = urlresolvers.reverse(
     'horizon:infrastructure:overview:deploy_confirmation')
 DELETE_URL = urlresolvers.reverse(
     'horizon:infrastructure:overview:undeploy_confirmation')
+POST_DEPLOY_INIT_URL = urlresolvers.reverse(
+    'horizon:infrastructure:overview:post_deploy_init')
 TEST_DATA = utils.TestDataContainer()
 heat_data.data(TEST_DATA)
 tuskar_data.data(TEST_DATA)
@@ -162,3 +164,20 @@ class OverviewTests(test.BaseAdminViewTests):
         ):
             res = self.client.post(DELETE_URL)
         self.assertRedirectsNoFollow(res, INDEX_URL)
+
+    def test_post_deploy_init_get(self):
+        stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
+
+        with contextlib.nested(
+            _mock_plan(),
+            patch('tuskar_ui.api.heat.Stack.get_by_plan',
+                  return_value=stack),
+        ):
+            res = self.client.get(POST_DEPLOY_INIT_URL)
+        self.assertTemplateUsed(
+            res, 'infrastructure/overview/post_deploy_init.html')
+
+    def test_post_deploy_init_post(self):
+        # TODO(lsmola) add this test once os-cloud-config changes are
+        # released, otherwise it will throw error in the Gate
+        pass

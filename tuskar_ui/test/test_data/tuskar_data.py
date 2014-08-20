@@ -135,7 +135,25 @@ def data(TEST):
             'label': 'Admin Password',
             'description': 'Admin password',
             'hidden': 'false',
-            'value': 'unset',
+            'value': '5ba3a69c95c668daf84c2f103ebec82d273a4897',
+        }, {
+            'name': 'AdminToken',
+            'label': 'Admin Token',
+            'description': 'Admin Token',
+            'hidden': 'false',
+            'value': 'aa61677c0a270880e99293c148cefee4000b2259',
+        }, {
+            'name': 'GlancePassword',
+            'label': 'Glance Password',
+            'description': 'Glance Password',
+            'hidden': 'false',
+            'value': '16b4aaa3e056d07f796a93afb6010487b7b617e7',
+        }, {
+            'name': 'NovaPassword',
+            'label': 'Nova Password',
+            'description': 'Nova Password',
+            'hidden': 'false',
+            'value': '67d8090ff40c0c400b08ff558233091402afc9c5',
         }],
     }
     TEST.tuskarclient_plans.add(plan_1)
