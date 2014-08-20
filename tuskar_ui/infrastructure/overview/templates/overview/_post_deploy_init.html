@@ -1,0 +1,24 @@
+{% extends "horizon/common/_modal_form.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block form_id %}post_deploy_init_form{% endblock %}
+{% block form_action %}{% url 'horizon:infrastructure:overview:post_deploy_init' %}{% endblock %}
+
+{% block modal_id %}provision_modal{% endblock %}
+{% block modal-header %}{% trans "Initialize Overcloud" %}{% endblock %}
+
+{% block modal-body %}
+<div>
+    <p>{% trans "Your OpenStack cloud is deployed but it needs to get initialized in order to get live" %}
+    </p>
+  <fieldset>
+  {% include "horizon/common/_form_fields.html" %}
+  </fieldset>
+</div>
+{% endblock %}
+
+{% block modal-footer %}
+  <input class="btn btn-primary" type="submit" value="{% trans "Initialize" %}" />
+  <a href="{% url 'horizon:infrastructure:overview:index' %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
+{% endblock %}
