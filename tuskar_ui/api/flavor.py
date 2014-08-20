@@ -14,17 +14,12 @@ import logging
 
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
-from openstack_dashboard.test.test_data import utils as test_utils
+from openstack_dashboard.api import nova
 
+import tuskar_ui
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
-from tuskar_ui.test.test_data import flavor_data
-from tuskar_ui.test.test_data import heat_data
 
-
-TEST_DATA = test_utils.TestDataContainer()
-flavor_data.data(TEST_DATA)
-heat_data.data(TEST_DATA)
 
 LOG = logging.getLogger(__name__)
 
@@ -82,27 +77,31 @@ class Flavor(object):
     @classmethod
     def create(cls, request, name, memory, vcpus, disk, cpu_arch,
                kernel_image_id, ramdisk_image_id):
-        return cls(TEST_DATA.novaclient_flavors.first(),
-                   request=request)
+        extras_dict = {'cpu_arch': cpu_arch,
+                       'baremetal:deploy_kernel_id': kernel_image_id,
+                       'baremetal:deploy_ramdisk_id': ramdisk_image_id}
+        return cls(nova.flavor_create(request, name, memory, vcpus, disk,
+                                      metadata=extras_dict))
 
     @classmethod
     @handle_errors(_("Unable to load flavor."))
     def get(cls, request, flavor_id):
-        for flavor in Flavor.list(request):
-            if flavor.id == flavor_id:
-                return flavor
+        return cls(nova.flavor_get(request, flavor_id))
 
     @classmethod
     @handle_errors(_("Unable to retrieve flavor list."), [])
     def list(cls, request):
-        flavors = TEST_DATA.novaclient_flavors.list()
-        return [cls(flavor) for flavor in flavors]
+        return [cls(item) for item in nova.flavor_list(request)]
 
     @classmethod
     @memoized.memoized
     @handle_errors(_("Unable to retrieve existing servers list."), [])
     def list_deployed_ids(cls, request):
         """Get and memoize ID's of deployed flavors."""
-        servers = TEST_DATA.novaclient_servers.list()
+        servers = nova.server_list(request)[0]
         deployed_ids = set(server.flavor['id'] for server in servers)
+        for plan in tuskar_ui.api.tuskar.OvercloudPlan.list(request):
+            deployed_ids |= set(
+                plan.parameter_value(role.flavor_id_parameter_name)
+                for role in plan.role_list)
         return deployed_ids

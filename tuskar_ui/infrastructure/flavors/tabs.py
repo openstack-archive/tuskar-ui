@@ -64,10 +64,10 @@ class FlavorSuggestion(object):
     @classmethod
     def from_node(cls, node):
         return cls(
-            node_id=node.id,
+            node_id=node.uuid,
             vcpus=int(node.cpus),
-            ram_bytes=int(node.memory_mb * (1024 ** 2)),
-            disk_bytes=int(node.local_gb * (1024 ** 3)),
+            ram=int(node.memory_mb),
+            disk=int(node.local_gb),
             # TODO(rdopieralski) Add architecture when available.
         )
 
