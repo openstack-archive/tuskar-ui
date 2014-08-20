@@ -22,6 +22,7 @@ from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui import api
 from tuskar_ui.test import helpers as test
+from tuskar_ui.test.test_data import flavor_data
 from tuskar_ui.test.test_data import heat_data
 from tuskar_ui.test.test_data import node_data
 from tuskar_ui.test.test_data import tuskar_data
@@ -33,6 +34,7 @@ DETAIL_URL = urlresolvers.reverse(
     'horizon:infrastructure:roles:detail', args=('role-1',))
 
 TEST_DATA = utils.TestDataContainer()
+flavor_data.data(TEST_DATA)
 node_data.data(TEST_DATA)
 heat_data.data(TEST_DATA)
 tuskar_data.data(TEST_DATA)
@@ -43,9 +45,14 @@ class RolesTest(test.BaseAdminViewTests):
     def test_index_get(self):
         roles = [api.tuskar.OvercloudRole(role)
                  for role in TEST_DATA.tuskarclient_roles.list()]
+        flavor = TEST_DATA.novaclient_flavors.first()
 
-        with patch('tuskar_ui.api.tuskar.OvercloudRole.list',
-                   return_value=roles):
+        with contextlib.nested(
+                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                      return_value=roles),
+                patch('openstack_dashboard.api.nova.flavor_get',
+                      return_value=flavor),
+        ):
             res = self.client.get(INDEX_URL)
 
         self.assertTemplateUsed(res, 'infrastructure/roles/index.html')
@@ -53,6 +60,7 @@ class RolesTest(test.BaseAdminViewTests):
     def test_detail_get(self):
         roles = [api.tuskar.OvercloudRole(role)
                  for role in TEST_DATA.tuskarclient_roles.list()]
+        flavor = TEST_DATA.novaclient_flavors.first()
 
         with contextlib.nested(
             patch('tuskar_ui.api.tuskar.OvercloudRole', **{
@@ -62,6 +70,8 @@ class RolesTest(test.BaseAdminViewTests):
             }),
             patch('tuskar_ui.api.heat.Stack.events',
                   return_value=[]),
+            patch('openstack_dashboard.api.nova.flavor_get',
+                  return_value=flavor),
         ):
             res = self.client.get(DETAIL_URL)
 
