@@ -26,4 +26,7 @@ urlpatterns = urls.patterns(
     urls.url(r'^undeploy-confirmation$',
              views.UndeployConfirmationView.as_view(),
              name='undeploy_confirmation'),
+    urls.url(r'^post-deploy-init$',
+             views.PostDeployInitView.as_view(),
+             name='post_deploy_init'),
 )
