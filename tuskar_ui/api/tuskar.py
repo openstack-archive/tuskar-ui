@@ -118,7 +118,10 @@ class OvercloudPlan(base.APIDictWrapper):
                  the ID
         :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
-        return cls(mock_tuskar.Plan.get(plan_id), request=request)
+
+        # TODO(lsmola) just putting there first plan, we don't have
+        # to associations yet
+        return cls(mock_tuskar.Plan.list()[0], request=request)
 
     # TODO(lsmola) before will will support multiple overclouds, we
     # can work only with overcloud that is named overcloud. Delete

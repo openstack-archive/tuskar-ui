@@ -19,6 +19,7 @@ from django.core import urlresolvers
 
 from mock import patch, call  # noqa
 
+from horizon import exceptions as horizon_exceptions
 from openstack_dashboard.test import helpers
 from openstack_dashboard.test.test_data import utils
 from tuskar_ui import api
@@ -43,6 +44,10 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
     @handle_errors("Error!", [])
     def _raise_tuskar_exception(self, request, *args, **kwargs):
         raise self.exceptions.tuskar
+
+    @handle_errors("Error!", [])
+    def _raise_horizon_exception_not_found(self, request, *args, **kwargs):
+        raise horizon_exceptions.NotFound
 
     def test_index_get(self):
 
@@ -90,7 +95,12 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                 'spec_set': ['image_get'],
                 'image_get.return_value': image,
             }),
-        ) as (_OvercloudRole, Node, _nova, _glance):
+            patch('tuskar_ui.api.heat.Resource', **{
+                'spec_set': ['get_by_node'],  # Only allow these attributes
+                'get_by_node.side_effect': (
+                    self._raise_horizon_exception_not_found),
+            }),
+        ) as (_OvercloudRole, Node, _nova, _glance, _resource):
             res = self.client.get(INDEX_URL + '?tab=nodes__registered')
             # FIXME(lsmola) horrible count, optimize
             self.assertEqual(Node.list.call_count, 6)
@@ -240,14 +250,21 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
     def test_node_detail(self):
         node = api.node.Node(self.ironicclient_nodes.list()[0])
 
-        with patch('tuskar_ui.api.node.Node', **{
-            'spec_set': ['get'],  # Only allow these attributes
-            'get.return_value': node,
-        }) as mock:
+        with contextlib.nested(
+            patch('tuskar_ui.api.node.Node', **{
+                'spec_set': ['get'],  # Only allow these attributes
+                'get.return_value': node,
+            }),
+            patch('tuskar_ui.api.heat.Resource', **{
+                'spec_set': ['get_by_node'],  # Only allow these attributes
+                'get_by_node.side_effect': (
+                    self._raise_horizon_exception_not_found),
+            }),
+        ) as (mock_node, mock_heat):
             res = self.client.get(
                 urlresolvers.reverse(DETAIL_VIEW, args=(node.uuid,))
             )
-            self.assertEqual(mock.get.call_count, 1)
+            self.assertEqual(mock_node.get.call_count, 1)
 
         self.assertTemplateUsed(res, 'infrastructure/nodes/details.html')
         self.assertEqual(res.context['node'], node)
