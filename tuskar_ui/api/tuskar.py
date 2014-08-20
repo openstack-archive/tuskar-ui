@@ -218,6 +218,31 @@ class OvercloudRole(base.APIDictWrapper):
             if role.id == role_id:
                 return role
 
+    @classmethod
+    @handle_errors(_("Unable to retrieve overcloud role"))
+    def get_by_image(cls, request, plan, image):
+        """Return the Tuskar OvercloudRole whose ImageID
+        parameter matches the passed in image
+
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param plan: associated plan to check against
+        :type  plan: OvercloudPlan
+
+        :param image: image to be matched
+        :type  image: Image
+
+        :return: matching OvercloudRole, or None if no matching
+                 OvercloudRole can be found
+        :rtype:  tuskar_ui.api.tuskar.OvercloudRole
+        """
+        for role in OvercloudRole.list(request):
+            image_id_from_plan = plan.parameter_value(
+                role.image_id_parameter_name)
+            if image_id_from_plan == image.id:
+                return role
+
     # TODO(tzumainn): fix this once we know how a role corresponds to
     # its provider resource type
     @property

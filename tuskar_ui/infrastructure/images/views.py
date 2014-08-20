@@ -15,6 +15,8 @@
 from horizon import tables as horizon_tables
 
 from openstack_dashboard.api import glance
+
+from tuskar_ui import api
 from tuskar_ui.infrastructure.images import tables
 
 
@@ -23,4 +25,10 @@ class IndexView(horizon_tables.DataTableView):
     template_name = "infrastructure/images/index.html"
 
     def get_data(self):
-        return glance.image_list_detailed(self.request)[0]
+        plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+        images = glance.image_list_detailed(self.request)[0]
+        # TODO(tzumainn): re-architect a bit to avoid inefficiency
+        for image in images:
+            image.role = api.tuskar.OvercloudRole.get_by_image(
+                self.request, plan, image)
+        return images
