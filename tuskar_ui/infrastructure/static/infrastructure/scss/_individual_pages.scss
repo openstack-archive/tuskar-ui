@@ -136,3 +136,24 @@ $link-color: #428bca;
     }
   }
 }
+
+// Plan overview
+
+.deployment-icon {
+    font-size: 32px;
+    vertical-align: top;
+    float: left;
+    margin: 0 4px 0 0;
+    background: #fff;
+}
+
+.deployment-box {
+    border-left: 4px solid #eee;
+    margin-left: 12px;
+}
+
+.deployment-roles-label {
+    font-weight: bold;
+    display: block;
+    margin: 14px 0 0 0;
+}

@@ -6,23 +6,20 @@
 <form method="POST" action="." class="deployment-roles-form">
 {% csrf_token %}
 {% include 'horizon/common/_form_errors.html' with form=form %}
-{% for field in form.visible_fields %}
+{% for role in roles %}
     <div class="form-group well well-sm clearfix{% if field.errors %} error{% endif %} {{ field.css_classes }}">
       <div class="col-sm-2">
-        {{ field|add_bootstrap_class }}
+        {{ role.field|add_bootstrap_class }}
       </div>
       <div class="col-sm-10">
-        <label class="control-label" for="{{ field.id_for_label }}">
-          {{ field.label }}
-        </label>
-        {% for error in field.errors %}
+        <a
+          href="{% url "horizon:infrastructure:roles:detail" role_id=role.id %}"
+          class="deployment-roles-label"
+        >{{ role.name }}</a>
+        {% for error in role.field.errors %}
         <span class="help-block"><span class="text-danger">
           {{ error }}
         </span></span>
-        {% empty %}
-          {% if field.help_text %}
-            <span class="help-block">{{ field.help_text }}</span>
-          {% endif %}
         {% endfor %}
       </div>
     </div>

@@ -71,15 +71,15 @@
       {% trans "Undeploy" %}
     </a>
 {% else %}
-  <h4>
-      <span class="text-success" style="font-size: x-large; vertical-align:middle">
-          <i class="glyphicon glyphicon-ok-circle"></i>
-      </span>
-      {% trans "Ready to get deployed" %}
-  </h4>
-  <a href="{% url 'horizon:infrastructure:overview:deploy_confirmation' %}"
-   class="btn btn-danger ajax-modal">
-    <i class="glyphicon glyphicon-cloud-upload"></i>
-    {% trans "Deploy" %}
-  </a>
+  <div class="text-success deployment-icon">
+      <i class="glyphicon glyphicon-ok-circle"></i>
+  </div>
+  <div class="deployment-box">
+    <h4>{% trans "Ready to get deployed" %}</h4>
+    <a href="{% url 'horizon:infrastructure:overview:deploy_confirmation' %}"
+     class="btn btn-danger ajax-modal btn-default">
+      <i class="glyphicon glyphicon-cloud-upload"></i>
+      {% trans "Deploy" %}
+    </a>
+  </div>
 {% endif %}
