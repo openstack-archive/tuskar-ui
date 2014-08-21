@@ -46,7 +46,8 @@ def _mock_plan(**kwargs):
             'get',
             'get_the_plan',
             'id',
-            'update',
+            'uuid',
+            'patch',
             'parameters',
             'role_list',
         ],
@@ -54,8 +55,9 @@ def _mock_plan(**kwargs):
         'delete.return_value': None,
         'get.side_effect': lambda *args, **kwargs: plan,
         'get_the_plan.side_effect': lambda *args, **kwargs: plan,
-        'id': 1,
-        'update.side_effect': lambda *args, **kwargs: plan,
+        'id': 'plan-1',
+        'uuid': 'plan-1',
+        'patch.side_effect': lambda *args, **kwargs: plan,
         'role_list': [],
     }
     params.update(kwargs)
@@ -74,19 +76,42 @@ class OverviewTests(test.BaseAdminViewTests):
                       return_value=[]),
         ):
             res = self.client.get(INDEX_URL)
-            request = api.tuskar.OvercloudPlan.get_the_plan. \
-                call_args_list[0][0][0]
-            self.assertListEqual(
-                api.tuskar.OvercloudPlan.get_the_plan.call_args_list,
-                [
-                    call(request),
-                    call(request),
-                    call(request),
-                ])
+            get_the_plan = api.tuskar.OvercloudPlan.get_the_plan
+            request = get_the_plan.call_args_list[0][0][0]
+            self.assertListEqual(get_the_plan.call_args_list, [
+                call(request),
+                call(request),
+                call(request),
+            ])
         self.assertTemplateUsed(
             res, 'infrastructure/overview/index.html')
         self.assertTemplateUsed(
             res, 'infrastructure/overview/_role_nodes.html')
+
+    def test_index_stack_not_created_post(self):
+        with contextlib.nested(
+                _mock_plan(),
+                patch('tuskar_ui.api.heat.Stack.list',
+                      return_value=[]),
+        ) as (plan, _stack_list):
+            data = {
+                'role-1-count': 1,
+                'role-2-count': 0,
+                'role-3-count': 0,
+                'role-4-count': 0,
+            }
+            res = self.client.post(INDEX_URL, data)
+            self.assertNoFormErrors(res)
+            self.assertRedirectsNoFollow(res, INDEX_URL)
+            get_the_plan = api.tuskar.OvercloudPlan.get_the_plan
+            request = get_the_plan.call_args_list[0][0][0]
+            self.assertListEqual(get_the_plan.call_args_list, [
+                call(request),
+            ])
+            self.assertListEqual(
+                api.tuskar.OvercloudPlan.patch.call_args_list,
+                [call(request, plan.id, {})],
+            )
 
     def test_index_stack_deployed(self):
         stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
