@@ -51,6 +51,7 @@ def _mock_plan(**kwargs):
             'update',
             'parameters',
             'role_list',
+            'parameter_value',
         ],
         'create.side_effect': lambda *args, **kwargs: plan,
         'delete.return_value': None,
@@ -59,6 +60,7 @@ def _mock_plan(**kwargs):
         'id': 1,
         'update.side_effect': lambda *args, **kwargs: plan,
         'role_list': [],
+        'parameter_value.return_value': None,
     }
     params.update(kwargs)
     with patch(
@@ -178,6 +180,21 @@ class OverviewTests(test.BaseAdminViewTests):
             res, 'infrastructure/overview/post_deploy_init.html')
 
     def test_post_deploy_init_post(self):
-        # TODO(lsmola) add this test once os-cloud-config changes are
-        # released, otherwise it will throw error in the Gate
-        pass
+        stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
+
+        with contextlib.nested(
+            _mock_plan(),
+            patch('tuskar_ui.api.heat.Stack.get_by_plan',
+                  return_value=stack),
+            patch('os_cloud_config.keystone.initialize',
+                  return_value=None),
+            patch('os_cloud_config.keystone.setup_endpoints',
+                  return_value=None),
+        ) as (mock_plan, mock_get_by_plan, mock_initialize,
+              mock_setup_endpoints):
+            res = self.client.post(POST_DEPLOY_INIT_URL)
+
+        self.assertRedirectsNoFollow(res, INDEX_URL)
+
+        self.assertEqual(mock_initialize.call_count, 1)
+        self.assertEqual(mock_setup_endpoints.call_count, 1)
