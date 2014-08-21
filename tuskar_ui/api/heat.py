@@ -284,7 +284,6 @@ class Stack(base.APIResourceWrapper):
         """
         return heat.events_list(self._request,
                                 self.stack_name)
-        return []
 
     @property
     def stack_outputs(self):
