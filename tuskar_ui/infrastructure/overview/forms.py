@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import logging
+
 import django.forms
 from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
@@ -20,6 +22,9 @@ import horizon.messages
 
 from tuskar_ui import api
 import tuskar_ui.forms
+
+
+LOG = logging.getLogger(__name__)
 
 
 def _get_role_count(plan, role):
@@ -42,12 +47,24 @@ class EditPlan(horizon.forms.SelfHandlingForm):
                 # XXX Dirty hack for requiring a controller node.
                 required=(role.name == 'Controller'),
             )
+            field.role = role
             fields['%s-count' % role.id] = field
         return fields
 
     def handle(self, request, data):
-        # XXX Update the plan.
-        return True
+        parameters = dict(
+            (field.role.node_count_parameter_name, data[field.name])
+            for field in self.fields if field.name.endswith('-count')
+        )
+        try:
+            self.plan.update(request, parameters)
+        except Exception:
+            horizon.exceptions.handle(request, _("Unable to update the plan."))
+            LOG.exception()
+            return False
+        else:
+            horizon.messages.success(request, _('Plan updated.'))
+            return True
 
 
 class DeployOvercloud(horizon.forms.SelfHandlingForm):
@@ -61,6 +78,9 @@ class DeployOvercloud(horizon.forms.SelfHandlingForm):
                                       plan.template,
                                       plan.parameters)
         except Exception:
+            horizon.exceptions.handle(request,
+                                      _("Unable to deploy overcloud."))
+            LOG.exception()
             return False
         else:
             msg = _('Deployment in progress.')
@@ -78,6 +98,7 @@ class UndeployOvercloud(horizon.forms.SelfHandlingForm):
         except Exception:
             horizon.exceptions.handle(request,
                                       _("Unable to undeploy overcloud."))
+            LOG.exception()
             return False
         else:
             msg = _('Undeployment in progress.')

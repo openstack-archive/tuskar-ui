@@ -68,7 +68,7 @@ class OvercloudPlan(base.APIDictWrapper):
         return cls(plan, request=request)
 
     @classmethod
-    def update(cls, request, plan_id, name, description):
+    def update(cls, request, plan_id, properties):
         """Update an OvercloudPlan in Tuskar
 
         :param request: request object
@@ -77,16 +77,13 @@ class OvercloudPlan(base.APIDictWrapper):
         :param plan_id: id of the plan we want to update
         :type  plan_id: string
 
-        :param name: plan name
-        :type  name: string
-
-        :param description: plan description
-        :type  description: string
+        :param properties: new values for the plan's properties
+        :type  properties: dict
 
         :return: the updated OvercloudPlan object
         :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
-        plan = mock_tuskar.Plan.update(plan_id, name, description)
+        plan = mock_tuskar.Plan.update(plan_id, properties)
         return cls(plan, request=request)
 
     @classmethod
