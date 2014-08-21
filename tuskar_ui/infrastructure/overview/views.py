@@ -13,7 +13,6 @@
 #    under the License.
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
-import django.views.generic
 import heatclient
 import horizon.forms
 from horizon.utils import memoized
@@ -83,7 +82,7 @@ class StackMixin(object):
         return stack
 
 
-class IndexView(django.views.generic.FormView, StackMixin):
+class IndexView(horizon.forms.ModalFormView, StackMixin):
     template_name = 'infrastructure/overview/index.html'
     form_class = forms.EditPlan
     success_url = reverse_lazy(INDEX_URL)

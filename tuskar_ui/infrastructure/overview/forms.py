@@ -49,12 +49,24 @@ class EditPlan(horizon.forms.SelfHandlingForm):
                 # XXX Dirty hack for requiring a controller node.
                 required=(role.name == 'Controller'),
             )
+            field.role = role
             fields['%s-count' % role.id] = field
         return fields
 
     def handle(self, request, data):
-        # XXX Update the plan.
-        return True
+        parameters = dict(
+            (field.role.node_count_parameter_name, data[name])
+            for (name, field) in self.fields.items() if name.endswith('-count')
+        )
+        try:
+            self.plan.patch(request, self.plan.uuid, parameters)
+        except Exception as e:
+            horizon.exceptions.handle(request, _("Unable to update the plan."))
+            LOG.exception(e)
+            return False
+        else:
+            horizon.messages.success(request, _("Plan updated."))
+            return True
 
 
 class DeployOvercloud(horizon.forms.SelfHandlingForm):
@@ -67,8 +79,10 @@ class DeployOvercloud(horizon.forms.SelfHandlingForm):
                                       plan.name,
                                       plan.template,
                                       plan.parameters)
-        except Exception:
-            LOG.exception()
+        except Exception as e:
+            LOG.exception(e)
+            horizon.exceptions.handle(request,
+                                      _("Unable to deploy overcloud."))
             return False
         else:
             msg = _('Deployment in progress.')
@@ -83,8 +97,8 @@ class UndeployOvercloud(horizon.forms.SelfHandlingForm):
             stack = api.heat.Stack.get_by_plan(self.request, plan)
             if stack:
                 api.heat.Stack.delete(request, stack.id)
-        except Exception:
-            LOG.exception()
+        except Exception as e:
+            LOG.exception(e)
             horizon.exceptions.handle(request,
                                       _("Unable to undeploy overcloud."))
             return False
