@@ -23,7 +23,7 @@ def data(TEST):
     # Plan
     TEST.tuskarclient_plans = test_data_utils.TestDataContainer()
     plan_1 = plans.Plan(planmanager, {
-        'id': 'plan-1',
+        'uuid': 'plan-1',
         'name': 'overcloud',
         'description': 'this is an overcloud deployment plan',
         'template': '',
