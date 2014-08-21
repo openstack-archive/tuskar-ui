@@ -43,7 +43,7 @@ class TuskarAPITests(test.APITestCase):
 
         with patch('tuskarclient.v2.plans.PlanManager.get',
                    return_value=plan):
-            ret_val = api.tuskar.OvercloudPlan.get(self.request, plan.id)
+            ret_val = api.tuskar.OvercloudPlan.get(self.request, plan.uuid)
 
         self.assertIsInstance(ret_val, api.tuskar.OvercloudPlan)
 
@@ -63,7 +63,7 @@ class TuskarAPITests(test.APITestCase):
 
         with patch('tuskarclient.v2.plans.PlanManager.delete',
                    return_value=None):
-            api.tuskar.OvercloudPlan.delete(self.request, plan.id)
+            api.tuskar.OvercloudPlan.delete(self.request, plan.uuid)
 
     def test_plan_role_list(self):
         with patch('tuskarclient.v2.plans.PlanManager.get',
