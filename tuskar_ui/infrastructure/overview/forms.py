@@ -19,6 +19,8 @@ import horizon.forms
 import horizon.messages
 
 from tuskar_ui import api
+import tuskar_ui.api.heat
+import tuskar_ui.api.tuskar
 import tuskar_ui.forms
 
 
