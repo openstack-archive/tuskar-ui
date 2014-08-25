@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import logging
+
 import django.forms
 from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
@@ -22,6 +24,9 @@ from tuskar_ui import api
 import tuskar_ui.api.heat
 import tuskar_ui.api.tuskar
 import tuskar_ui.forms
+
+
+LOG = logging.getLogger(__name__)
 
 
 def _get_role_count(plan, role):
@@ -63,6 +68,7 @@ class DeployOvercloud(horizon.forms.SelfHandlingForm):
                                       plan.template,
                                       plan.parameters)
         except Exception:
+            LOG.exception()
             return False
         else:
             msg = _('Deployment in progress.')
@@ -78,6 +84,7 @@ class UndeployOvercloud(horizon.forms.SelfHandlingForm):
             if stack:
                 api.heat.Stack.delete(request, stack.id)
         except Exception:
+            LOG.exception()
             horizon.exceptions.handle(request,
                                       _("Unable to undeploy overcloud."))
             return False
