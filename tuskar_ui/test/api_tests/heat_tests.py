@@ -47,7 +47,7 @@ class HeatAPITests(test.APITestCase):
         with patch('tuskarclient.v2.plans.PlanManager.get',
                    return_value=plan):
             ret_val = stack.plan
-        self.assertIsInstance(ret_val, api.tuskar.OvercloudPlan)
+        self.assertIsInstance(ret_val, api.tuskar.Plan)
 
     def test_stack_events(self):
         event_list = self.heatclient_events.list()
@@ -89,7 +89,7 @@ class HeatAPITests(test.APITestCase):
 
     def test_stack_resources_no_ironic(self):
         stack = api.heat.Stack(self.heatclient_stacks.first())
-        role = api.tuskar.OvercloudRole(
+        role = api.tuskar.Role(
             self.tuskarclient_roles.first())
         nodes = self.baremetalclient_nodes.list()
 
@@ -113,7 +113,7 @@ class HeatAPITests(test.APITestCase):
 
     def test_stack_dashboard_url(self):
         stack = api.heat.Stack(self.heatclient_stacks.first())
-        stack.plan = api.tuskar.OvercloudPlan(self.tuskarclient_plans.first())
+        stack.plan = api.tuskar.Plan(self.tuskarclient_plans.first())
 
         mocked_service = mock.Mock(id='horizon_id')
         mocked_service.name = 'horizon'
@@ -155,7 +155,7 @@ class HeatAPITests(test.APITestCase):
             resource = api.heat.Resource(self.heatclient_resources.first(),
                                          self.request)
             ret_val = resource.role
-        self.assertIsInstance(ret_val, api.tuskar.OvercloudRole)
+        self.assertIsInstance(ret_val, api.tuskar.Role)
         self.assertEqual('Compute', ret_val.name)
 
     def test_resource_node_no_ironic(self):

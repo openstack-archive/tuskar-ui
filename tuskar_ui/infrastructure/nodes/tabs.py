@@ -90,7 +90,7 @@ class RegisteredTab(tabs.TableTab):
             try:
                 resource = api.heat.Resource.get_by_node(self.request, node)
                 node.role_name = resource.role.name
-                node.role_id = resource.role.id
+                node.role_id = resource.role.uuid
                 node.stack_id = resource.stack.id
             except exceptions.NotFound:
                 node.role_name = '-'

@@ -123,7 +123,7 @@ class Stack(base.APIResourceWrapper):
     @classmethod
     @handle_errors(_("Unable to retrieve stack"))
     def get_by_plan(cls, request, plan):
-        """Return the Heat Stack associated with an OvercloudPlan
+        """Return the Heat Stack associated with a Plan
 
         :return: Heat Stack associated with the plan; or None
                  if no Stack is associated, or no Stack can be
@@ -171,16 +171,16 @@ class Stack(base.APIResourceWrapper):
 
     @memoized.memoized
     def resources_by_role(self, overcloud_role, with_joins=True):
-        """Return a list of Resources that match an OvercloudRole
+        """Return a list of Resources that match a Role
 
         :param overcloud_role: role of resources to be returned
-        :type  overcloud_role: tuskar_ui.api.tuskar.OvercloudRole
+        :type  overcloud_role: tuskar_ui.api.tuskar.Role
 
         :param with_joins: should we also retrieve objects associated with each
                            retrieved Resource?
         :type  with_joins: bool
 
-        :return: list of Resources that match the OvercloudRole, or an empty
+        :return: list of Resources that match the Role, or an empty
                  list if there are none
         :rtype:  list of tuskar_ui.api.heat.Resource
         """
@@ -197,7 +197,7 @@ class Stack(base.APIResourceWrapper):
         """Return count of associated Resources
 
         :param overcloud_role: role of resources to be counted; None means all
-        :type  overcloud_role: tuskar_ui.api.tuskar.OvercloudRole
+        :type  overcloud_role: tuskar_ui.api.tuskar.Role
 
         :return: Number of matching resources
         :rtype:  int
@@ -214,16 +214,16 @@ class Stack(base.APIResourceWrapper):
 
     @cached_property
     def plan(self):
-        """return associated OvercloudPlan if a plan_id exists within stack
+        """return associated Plan if a plan_id exists within stack
         parameters.
 
-        :return: associated OvercloudPlan if plan_id exists and a matching plan
+        :return: associated Plan if plan_id exists and a matching plan
                  exists as well; None otherwise
-        :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
+        :rtype:  tuskar_ui.api.tuskar.Plan
         """
         if 'plan_id' in self.parameters:
-            return tuskar.OvercloudPlan.get(self._request,
-                                            self.parameters['plan_id'])
+            return tuskar.Plan.get(self._request,
+                                   self.parameters['plan_id'])
 
     @cached_property
     def is_deployed(self):
@@ -405,13 +405,13 @@ class Resource(base.APIResourceWrapper):
 
     @cached_property
     def role(self):
-        """Return the OvercloudRole associated with this Resource
+        """Return the Role associated with this Resource
 
-        :return: OvercloudRole associated with this Resource, or None if no
-                 OvercloudRole is associated
-        :rtype:  tuskar_ui.api.tuskar.OvercloudRole
+        :return: Role associated with this Resource, or None if no
+                 Role is associated
+        :rtype:  tuskar_ui.api.tuskar.Role
         """
-        roles = tuskar.OvercloudRole.list(self._request)
+        roles = tuskar.Role.list(self._request)
         for role in roles:
             if self.has_role(role):
                 return role
@@ -420,7 +420,7 @@ class Resource(base.APIResourceWrapper):
         """Determine whether a resources matches an overcloud role
 
         :param role: role to check against
-        :type  role: tuskar_ui.api.tuskar.OvercloudRole
+        :type  role: tuskar_ui.api.tuskar.Role
 
         :return: does this resource match the overcloud_role?
         :rtype:  bool

@@ -42,16 +42,16 @@ tuskar_data.data(TEST_DATA)
 class RolesTest(test.BaseAdminViewTests):
 
     def test_index_get(self):
-        roles = [api.tuskar.OvercloudRole(role)
+        roles = [api.tuskar.Role(role)
                  for role in self.tuskarclient_roles.list()]
-        plans = [api.tuskar.OvercloudPlan(plan)
+        plans = [api.tuskar.Plan(plan)
                  for plan in self.tuskarclient_plans.list()]
         flavor = self.novaclient_flavors.first()
 
         with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+            patch('tuskar_ui.api.tuskar.Plan.list',
                   return_value=plans),
-            patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+            patch('tuskar_ui.api.tuskar.Role.list',
                   return_value=roles),
             patch('openstack_dashboard.api.glance.image_get',
                   return_value=None),
@@ -62,18 +62,18 @@ class RolesTest(test.BaseAdminViewTests):
         self.assertTemplateUsed(res, 'infrastructure/roles/index.html')
 
     def test_detail_get(self):
-        roles = [api.tuskar.OvercloudRole(role)
+        roles = [api.tuskar.Role(role)
                  for role in self.tuskarclient_roles.list()]
-        plans = [api.tuskar.OvercloudPlan(plan)
+        plans = [api.tuskar.Plan(plan)
                  for plan in self.tuskarclient_plans.list()]
         flavor = self.novaclient_flavors.first()
 
         with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+            patch('tuskar_ui.api.tuskar.Role.list',
                   return_value=roles),
             patch('tuskar_ui.api.heat.Stack.events',
                   return_value=[]),
-            patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+            patch('tuskar_ui.api.tuskar.Plan.list',
                   return_value=plans),
             patch('tuskar_ui.api.flavor.Flavor.get',
                   return_value=flavor)):

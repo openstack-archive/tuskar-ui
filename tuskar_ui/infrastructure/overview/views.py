@@ -27,12 +27,12 @@ INDEX_URL = 'horizon:infrastructure:overview:index'
 
 def _get_role_data(plan, stack, role, field):
     """Gathers data about a single deployment role from the related Overcloud
-    and OvercloudRole objects, and presents it in the form convenient for use
+    and Role objects, and presents it in the form convenient for use
     from the template.
 
     """
     data = {
-        'id': role.id,
+        'id': role.uuid,
         'role': role,
         'name': role.name,
         'planned_node_count': plan.parameter_value(
@@ -77,7 +77,7 @@ class StackMixin(object):
     def get_stack(self, redirect=None):
         if redirect is None:
             redirect = reverse(INDEX_URL)
-        plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+        plan = api.tuskar.Plan.get_the_plan(self.request)
         stack = api.heat.Stack.get_by_plan(self.request, plan)
 
         return stack
@@ -97,7 +97,7 @@ class IndexView(django.views.generic.FormView, StackMixin):
         return context
 
     def get_data(self, request, context, *args, **kwargs):
-        plan = api.tuskar.OvercloudPlan.get_the_plan(request)
+        plan = api.tuskar.Plan.get_the_plan(request)
         stack = self.get_stack()
 
         context['plan'] = plan
