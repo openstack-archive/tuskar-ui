@@ -55,9 +55,7 @@ class IndexView(horizon_tables.DataTableView):
         plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
         for role in roles:
             role_flavor = role.flavor(plan)
-            # TODO(tzumainn): we don't mock images, so calling role.image(plan)
-            # won't work right now
-            role_image = None
+            role_image = role.image(plan)
             if role_flavor:
                 role.flavor = role_flavor.name
             else:
