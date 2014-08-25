@@ -33,10 +33,16 @@ tuskar_data.data(TEST_DATA)
 class ParametersTest(test.BaseAdminViewTests):
 
     def test_index(self):
-        plan = api.tuskar.OvercloudPlan(TEST_DATA.tuskarclient_plans.first())
+        plans = [api.tuskar.OvercloudPlan(plan)
+                 for plan in self.tuskarclient_plans.list()]
+        roles = [api.tuskar.OvercloudRole(role)
+                 for role in self.tuskarclient_roles.list()]
+
         with contextlib.nested(
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.get_the_plan',
-                      return_value=plan),
+                patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+                      return_value=plans),
+                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                      return_value=roles),
         ):
             res = self.client.get(INDEX_URL)
 

@@ -67,13 +67,24 @@ def _prepare_create():
 class FlavorsTest(test.BaseAdminViewTests):
 
     def test_index(self):
+        plans = [api.tuskar.OvercloudPlan(plan, self.request)
+                 for plan in TEST_DATA.tuskarclient_plans.list()]
+        roles = [api.tuskar.OvercloudRole(role)
+                 for role in self.tuskarclient_roles.list()]
+
         with contextlib.nested(
+                patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+                      return_value=plans),
+                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                      return_value=roles),
                 patch('openstack_dashboard.api.nova.flavor_list',
                       return_value=TEST_DATA.novaclient_flavors.list()),
                 patch('openstack_dashboard.api.nova.server_list',
                       return_value=([], False)),
-        ) as (flavors_mock, servers_mock):
+        ) as (plans_mock, roles_mock, flavors_mock, servers_mock):
             res = self.client.get(INDEX_URL)
+            self.assertEqual(plans_mock.call_count, 1)
+            self.assertEqual(roles_mock.call_count, 4)
             self.assertEqual(flavors_mock.call_count, 1)
             self.assertEqual(servers_mock.call_count, 1)
 
@@ -131,12 +142,14 @@ class FlavorsTest(test.BaseAdminViewTests):
                       return_value=([], False)),
                 patch('tuskar_ui.api.tuskar.OvercloudRole.list',
                       return_value=[]),
+                patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+                      return_value=[]),
                 patch('openstack_dashboard.api.glance.image_list_detailed',
                       return_value=([], False)),
                 patch('openstack_dashboard.api.nova.flavor_list',
                       return_value=TEST_DATA.novaclient_flavors.list())
-        ) as (delete_mock, server_list_mock, _role_list_mock, _glance_mock,
-              _flavors_mock):
+        ) as (delete_mock, server_list_mock, _role_list_mock, _plan_list_mock,
+              _glance_mock, _flavors_mock):
             res = self.client.post(INDEX_URL, data)
             self.assertNoFormErrors(res)
             self.assertRedirectsNoFollow(res, INDEX_URL)
@@ -159,12 +172,14 @@ class FlavorsTest(test.BaseAdminViewTests):
                       return_value=([server], False)),
                 patch('tuskar_ui.api.tuskar.OvercloudRole.list',
                       return_value=[]),
+                patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+                      return_value=[]),
                 patch('openstack_dashboard.api.glance.image_list_detailed',
                       return_value=([], False)),
                 patch('openstack_dashboard.api.nova.flavor_list',
                       return_value=TEST_DATA.novaclient_flavors.list())
-        ) as (delete_mock, server_list_mock, _role_list_mock, _glance_mock,
-              _flavors_mock):
+        ) as (delete_mock, server_list_mock, _role_list_mock, _plan_list_mock,
+              _glance_mock, _flavors_mock):
             res = self.client.post(INDEX_URL, data)
             self.assertMessageCount(error=1, warning=0)
             self.assertNoFormErrors(res)
