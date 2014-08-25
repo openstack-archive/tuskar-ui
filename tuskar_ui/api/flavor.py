@@ -100,7 +100,7 @@ class Flavor(object):
         """Get and memoize ID's of deployed flavors."""
         servers = nova.server_list(request)[0]
         deployed_ids = set(server.flavor['id'] for server in servers)
-        for plan in tuskar_ui.api.tuskar.OvercloudPlan.list(request):
+        for plan in tuskar_ui.api.tuskar.Plan.list(request):
             deployed_ids |= set(
                 plan.parameter_value(role.flavor_id_parameter_name)
                 for role in plan.role_list)
