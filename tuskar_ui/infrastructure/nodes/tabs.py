@@ -70,8 +70,6 @@ class RegisteredTab(tabs.TableTab):
     template_name = "horizon/common/_detail_table.html"
 
     def __init__(self, tab_group, request):
-        if api.node.NodeClient.ironic_enabled(request):
-            self.table_classes = (tables.IronicRegisteredNodesTable,)
         super(RegisteredTab, self).__init__(tab_group, request)
 
     def get_items_count(self):
@@ -79,7 +77,8 @@ class RegisteredTab(tabs.TableTab):
 
     def get_nodes_table_data(self):
         redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
-        nodes = api.node.Node.list(self.request, _error_redirect=redirect)
+        nodes = api.node.Node.list(self.request, maintenance=False,
+                                   _error_redirect=redirect)
 
         if 'errors' in self.request.GET:
             return api.node.filter_nodes(nodes, healthy=False)
@@ -98,19 +97,19 @@ class RegisteredTab(tabs.TableTab):
         return nodes
 
 
-class IronicDiscoveredTab(tabs.TableTab):
-    table_classes = (tables.IronicDiscoveredNodesTable,)
-    name = _("Discovered")
-    slug = "discovered"
+class MaintenanceTab(tabs.TableTab):
+    table_classes = (tables.MaintenanceNodesTable,)
+    name = _("Maintenance")
+    slug = "maintenance"
     template_name = "horizon/common/_detail_table.html"
 
     def get_items_count(self):
-        return len(self.get_discovered_nodes_table_data())
+        return len(self.get_maintenance_nodes_table_data())
 
-    def get_discovered_nodes_table_data(self):
+    def get_maintenance_nodes_table_data(self):
         redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
-        nodes = api.node.Node.list_discovered(
-            self.request, _error_redirect=redirect)
+        nodes = api.node.Node.list(self.request, maintenance=True,
+                                   _error_redirect=redirect)
         return nodes
 
 
@@ -122,5 +121,5 @@ class NodeTabs(tabs.TabGroup):
 
     def __init__(self, request, **kwargs):
         if api.node.NodeClient.ironic_enabled(request):
-            self.tabs = self.tabs + (IronicDiscoveredTab,)
+            self.tabs = self.tabs + (MaintenanceTab,)
         super(NodeTabs, self).__init__(request, **kwargs)
