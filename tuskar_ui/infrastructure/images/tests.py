@@ -28,15 +28,15 @@ INDEX_URL = urlresolvers.reverse(
 class ImagesTest(test.BaseAdminViewTests):
 
     def test_index(self):
-        roles = [api.tuskar.OvercloudRole(role) for role in
+        roles = [api.tuskar.Role(role) for role in
                  self.tuskarclient_roles.list()]
-        plans = [api.tuskar.OvercloudPlan(plan) for plan in
+        plans = [api.tuskar.Plan(plan) for plan in
                  self.tuskarclient_plans.list()]
 
         with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+            patch('tuskar_ui.api.tuskar.Role.list',
                   return_value=roles),
-            patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+            patch('tuskar_ui.api.tuskar.Plan.list',
                   return_value=plans),
             patch('openstack_dashboard.api.glance.image_list_detailed',
                   return_value=[self.images.list(), False, False]),):

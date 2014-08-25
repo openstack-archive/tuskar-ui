@@ -25,17 +25,17 @@ class TuskarAPITests(test.APITestCase):
 
         with patch('tuskarclient.v2.plans.PlanManager.create',
                    return_value=plan):
-            ret_val = api.tuskar.OvercloudPlan.create(self.request, {}, {})
-        self.assertIsInstance(ret_val, api.tuskar.OvercloudPlan)
+            ret_val = api.tuskar.Plan.create(self.request, {}, {})
+        self.assertIsInstance(ret_val, api.tuskar.Plan)
 
     def test_plan_list(self):
         plans = self.tuskarclient_plans.list()
 
         with patch('tuskarclient.v2.plans.PlanManager.list',
                    return_value=plans):
-            ret_val = api.tuskar.OvercloudPlan.list(self.request)
+            ret_val = api.tuskar.Plan.list(self.request)
         for plan in ret_val:
-            self.assertIsInstance(plan, api.tuskar.OvercloudPlan)
+            self.assertIsInstance(plan, api.tuskar.Plan)
         self.assertEqual(1, len(ret_val))
 
     def test_plan_get(self):
@@ -43,9 +43,9 @@ class TuskarAPITests(test.APITestCase):
 
         with patch('tuskarclient.v2.plans.PlanManager.get',
                    return_value=plan):
-            ret_val = api.tuskar.OvercloudPlan.get(self.request, plan.id)
+            ret_val = api.tuskar.Plan.get(self.request, plan.id)
 
-        self.assertIsInstance(ret_val, api.tuskar.OvercloudPlan)
+        self.assertIsInstance(ret_val, api.tuskar.Plan)
 
     def test_plan_get_the_plan(self):
         plan = self.tuskarclient_plans.first()
@@ -54,21 +54,21 @@ class TuskarAPITests(test.APITestCase):
                    return_value=[plan]):
             with patch('tuskarclient.v2.plans.PlanManager.create',
                        return_value=plan):
-                ret_val = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+                ret_val = api.tuskar.Plan.get_the_plan(self.request)
 
-        self.assertIsInstance(ret_val, api.tuskar.OvercloudPlan)
+        self.assertIsInstance(ret_val, api.tuskar.Plan)
 
     def test_plan_delete(self):
         plan = self.tuskarclient_plans.first()
 
         with patch('tuskarclient.v2.plans.PlanManager.delete',
                    return_value=None):
-            api.tuskar.OvercloudPlan.delete(self.request, plan.id)
+            api.tuskar.Plan.delete(self.request, plan.id)
 
     def test_plan_role_list(self):
         with patch('tuskarclient.v2.plans.PlanManager.get',
                    return_value=[]):
-            plan = api.tuskar.OvercloudPlan(self.tuskarclient_plans.first(),
+            plan = api.tuskar.Plan(self.tuskarclient_plans.first(),
                                             self.request)
 
         with patch('tuskarclient.v2.roles.RoleManager.list',
@@ -76,17 +76,17 @@ class TuskarAPITests(test.APITestCase):
             ret_val = plan.role_list
         self.assertEqual(4, len(ret_val))
         for r in ret_val:
-            self.assertIsInstance(r, api.tuskar.OvercloudRole)
+            self.assertIsInstance(r, api.tuskar.Role)
 
     def test_role_list(self):
         roles = self.tuskarclient_roles.list()
 
         with patch('tuskarclient.v2.roles.RoleManager.list',
                    return_value=roles):
-            ret_val = api.tuskar.OvercloudRole.list(self.request)
+            ret_val = api.tuskar.Role.list(self.request)
 
         for r in ret_val:
-            self.assertIsInstance(r, api.tuskar.OvercloudRole)
+            self.assertIsInstance(r, api.tuskar.Role)
         self.assertEqual(4, len(ret_val))
 
     def test_role_get(self):
@@ -94,18 +94,18 @@ class TuskarAPITests(test.APITestCase):
 
         with patch('tuskarclient.v2.roles.RoleManager.list',
                    return_value=roles):
-            ret_val = api.tuskar.OvercloudRole.get(self.request,
-                                                   roles[0].uuid)
-        self.assertIsInstance(ret_val, api.tuskar.OvercloudRole)
+            ret_val = api.tuskar.Role.get(self.request,
+                                          roles[0].uuid)
+        self.assertIsInstance(ret_val, api.tuskar.Role)
 
     def test_role_get_by_image(self):
-        plan = api.tuskar.OvercloudPlan(self.tuskarclient_plans.first())
+        plan = api.tuskar.Plan(self.tuskarclient_plans.first())
         image = self.glanceclient_images.first()
         roles = self.tuskarclient_roles.list()
 
         with patch('tuskarclient.v2.roles.RoleManager.list',
                    return_value=roles):
-            ret_val = api.tuskar.OvercloudRole.get_by_image(
+            ret_val = api.tuskar.Role.get_by_image(
                 self.request, plan, image)
-        self.assertIsInstance(ret_val, api.tuskar.OvercloudRole)
+        self.assertIsInstance(ret_val, api.tuskar.Role)
         self.assertEqual(ret_val.name, 'Controller')
