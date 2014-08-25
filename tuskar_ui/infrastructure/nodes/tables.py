@@ -35,6 +35,17 @@ class DeleteNode(tables.BatchAction):
         api.node.Node.delete(request, obj_id)
 
 
+class ActivateNode(tables.BatchAction):
+    name = "activate"
+    action_present = _("Activate")
+    action_past = _("Activated")
+    data_type_singular = _("Node")
+    data_type_plural = _("Nodes")
+
+    def action(self, request, obj_id):
+        api.node.Node.set_maintenance(request, obj_id, False)
+
+
 class NodeFilterAction(tables.FilterAction):
     def filter(self, table, nodes, filter_string):
         """Really naive case-insensitive search."""
@@ -92,25 +103,7 @@ class RegisteredNodesTable(tables.DataTable):
         return datum.uuid
 
 
-class IronicRegisteredNodesTable(RegisteredNodesTable):
-
-    maintenance = tables.Column("maintenance",
-                                verbose_name=_("Maintenance"),
-                                status=True,
-                                status_choices=(
-                                    (True, True),
-                                    (False, False),
-                                    (None, False)
-                                ))
-
-    class Meta:
-        name = "nodes_table"
-        verbose_name = _("Registered Nodes")
-        table_actions = (NodeFilterAction,)
-        row_actions = (DeleteNode,)
-
-
-class IronicDiscoveredNodesTable(tables.DataTable):
+class MaintenanceNodesTable(tables.DataTable):
     node = tables.Column('uuid',
                          link="horizon:infrastructure:nodes:detail",
                          verbose_name=_("Node Name"))
@@ -128,10 +121,10 @@ class IronicDiscoveredNodesTable(tables.DataTable):
                          verbose_name=_("NICs"))
 
     class Meta:
-        name = "discovered_nodes_table"
-        verbose_name = _("Discovered Nodes")
+        name = "maintenance_nodes_table"
+        verbose_name = _("Nodes (Maintenance)")
         table_actions = (NodeFilterAction,)
-        row_actions = (DeleteNode,)
+        row_actions = (ActivateNode, DeleteNode,)
 
     def get_object_id(self, datum):
         return datum.uuid
