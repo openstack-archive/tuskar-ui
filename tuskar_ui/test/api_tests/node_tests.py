@@ -101,6 +101,11 @@ class NodeAPITests(test.APITestCase):
                    return_value=None):
             api.node.Node.delete(self.request, node.uuid)
 
+    def test_node_set_maintenance(self):
+        node = self.baremetalclient_nodes.first()
+        with self.assertRaises(NotImplementedError):
+            api.node.Node.set_maintenance(self.request, node.uuid, False)
+
     def test_node_instance(self):
         node = self.baremetalclient_nodes.first()
         instance = self.novaclient_servers.first()
