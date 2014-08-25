@@ -13,7 +13,7 @@
       </div>
       <div class="col-sm-10">
         <a
-          href="{% url "horizon:infrastructure:roles:detail" role_id=role.id %}"
+          href="{% url "horizon:infrastructure:roles:detail" role_id=role.uuid %}"
           class="deployment-roles-label"
         >{{ role.name }}</a>
         {% for error in role.field.errors %}
