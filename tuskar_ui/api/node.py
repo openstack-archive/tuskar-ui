@@ -145,7 +145,7 @@ class IronicNode(base.APIResourceWrapper):
 
     @classmethod
     @handle_errors(_("Unable to retrieve nodes"), [])
-    def list(cls, request, associated=None):
+    def list(cls, request, associated=None, maintenance=None):
         """Return a list of IronicNodes
 
         :param request: request object
@@ -156,19 +156,16 @@ class IronicNode(base.APIResourceWrapper):
                            associated with an Instance?
         :type  associated: bool
 
+        :param maintenance: should we also retrieve all IronicNodes, only those
+                            in maintenance mode, or those which are not in
+                            maintenance mode?
+        :type  maintenance: bool
+
         :return: list of IronicNodes, or an empty list if there are none
         :rtype:  list of tuskar_ui.api.node.IronicNode
         """
-        nodes = ironicclient(request).node.list(associated=associated)
-        return [cls(cls.get(request, node.uuid), request) for node in nodes]
-
-    @classmethod
-    @handle_errors(_("Unable to retrieve newly discovered nodes"), [])
-    def list_discovered(cls, request):
-        """Return a list of IronicNodes which have been newly discovered
-        """
-        nodes = [node for node in ironicclient(request).node.list()
-                 if getattr(node, 'newly_discovered', False)]
+        nodes = ironicclient(request).node.list(associated=associated,
+                                                maintenance=maintenance)
         return [cls(cls.get(request, node.uuid), request) for node in nodes]
 
     @classmethod
@@ -183,6 +180,27 @@ class IronicNode(base.APIResourceWrapper):
         :type  uuid: str
         """
         return ironicclient(request).node.delete(uuid)
+
+    @classmethod
+    def set_maintenance(cls, request, uuid, maintenance):
+        """Set the maintenance status of node
+
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param uuid: ID of IronicNode to be removed
+        :type  uuid: str
+
+        :param maintenance: desired maintenance state
+        :type  maintenance: bool
+        """
+        patch = {
+            'op': 'replace',
+            'value': 'True' if maintenance else 'False',
+            'path': '/maintenance'
+        }
+        node = ironicclient(request).node.update(uuid, [patch])
+        return cls(node, request)
 
     @classmethod
     def list_ports(cls, request, uuid):
@@ -322,6 +340,11 @@ class BareMetalNode(base.APIResourceWrapper):
         """
         return baremetalclient(request).delete(uuid)
 
+    @classmethod
+    def set_maintenance(cls, request, uuid, maintenance):
+        raise NotImplementedError(
+            "set_maintenance is not defined for Nova BareMetal nodes")
+
     @cached_property
     def power_state(self):
         """Return a power state of this BareMetalNode
@@ -450,9 +473,15 @@ class Node(base.APIResourceWrapper):
 
     @classmethod
     @handle_errors(_("Unable to retrieve nodes"), [])
-    def list(cls, request, associated=None):
-        nodes = NodeClient(request).node_class.list(
-            request, associated=associated)
+    def list(cls, request, associated=None, maintenance=None):
+        if NodeClient.ironic_enabled(request):
+            nodes = NodeClient(request).node_class.list(
+                request, associated=associated,
+                maintenance=maintenance)
+        else:
+            nodes = NodeClient(request).node_class.list(
+                request, associated=associated)
+
         if associated is None or associated:
             servers = nova.server_list(request)[0]
             servers_dict = utils.list_to_dict(servers)
@@ -466,14 +495,14 @@ class Node(base.APIResourceWrapper):
             return [cls(node, request=request) for node in nodes]
 
     @classmethod
-    @handle_errors(_("Unable to retrieve discovered nodes"), [])
-    def list_discovered(cls, request):
-        nodes = NodeClient(request).node_class.list_discovered(request)
-        return [cls(node, request=request) for node in nodes]
-
-    @classmethod
     def delete(cls, request, uuid):
         NodeClient(request).node_class.delete(request, uuid)
+
+    @classmethod
+    def set_maintenance(cls, request, uuid, maintenance):
+        node = NodeClient(request).node_class.set_maintenance(
+            request, uuid, maintenance)
+        return cls(node)
 
     @cached_property
     def instance(self):
