@@ -15,6 +15,12 @@
         <span class="glyphicon glyphicon-plus"></span>
         {% trans 'Register Nodes' %}
       </a>
+      {% if ironic_enabled %}
+        <a href="{% url 'horizon:infrastructure:nodes:auto-discover' %}" class="btn btn-primary ajax-modal">
+          <span class="glyphicon glyphicon-plus"></span>
+          {% trans 'Auto-Discover Nodes' %}
+        </a>
+      {% endif %}
     </div>
     {{ tab_group.render }}
   </div>

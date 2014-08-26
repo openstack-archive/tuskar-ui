@@ -35,6 +35,12 @@ class IndexView(horizon_tabs.TabbedTableView):
     tab_group_class = tabs.NodeTabs
     template_name = 'infrastructure/nodes/index.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        context['ironic_enabled'] = api.node.NodeClient.ironic_enabled(
+            self.request)
+        return context
+
 
 class RegisterView(horizon_forms.ModalFormView):
     form_class = forms.NodeFormset
@@ -49,6 +55,19 @@ class RegisterView(horizon_forms.ModalFormView):
     def get_form(self, form_class):
         return form_class(self.request.POST or None,
                           initial=self.get_data(),
+                          prefix=self.form_prefix)
+
+
+class AutoDiscoverView(horizon_forms.ModalFormView):
+    form_class = forms.AutoDiscoverNodeFormset
+    form_prefix = 'auto_discover_nodes'
+    template_name = 'infrastructure/nodes/auto_discover.html'
+    success_url = reverse_lazy(
+        'horizon:infrastructure:nodes:index')
+
+    def get_form(self, form_class):
+        return form_class(self.request.POST or None,
+                          initial=[],
                           prefix=self.form_prefix)
 
 
