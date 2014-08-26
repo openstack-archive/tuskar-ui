@@ -145,8 +145,8 @@ class NodeForm(django.forms.Form):
 
     def get_name(self):
         try:
-            # FIXME(lsmola) show somethign meaningful here
-            name = self.fields['ipmi_address'].value()
+            name = (self.fields['ipmi_address'].value() or
+                    self.fields['ssh_address'].value())
         except AttributeError:
             # when the field is not bound
             name = _("Undefined node")
@@ -208,3 +208,47 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
 
 NodeFormset = django.forms.formsets.formset_factory(NodeForm, extra=1,
                                                     formset=BaseNodeFormset)
+
+
+class AutoDiscoverNodeForm(django.forms.Form):
+    id = django.forms.IntegerField(
+        label="",
+        required=False,
+        widget=django.forms.HiddenInput(),
+    )
+    ssh_address = django.forms.IPAddressField(
+        label=_("SSH Address"),
+        required=False,
+        widget=django.forms.TextInput,
+    )
+    ssh_username = django.forms.CharField(
+        label=_("SSH User"),
+        required=False,
+        widget=django.forms.TextInput,
+    )
+    ssh_key_contents = django.forms.CharField(
+        label=_("SSH Key Contents"),
+        required=False,
+        widget=django.forms.Textarea(attrs={
+            'rows': 2,
+        }),
+    )
+
+    def get_name(self):
+        try:
+            name = self.fields['ssh_address'].value()
+        except AttributeError:
+            # when the field is not bound
+            name = _("Undefined node")
+        return name
+
+
+class BaseAutoDiscoverNodeFormset(BaseNodeFormset):
+    def handle(self, request, data):
+        data['driver'] = 'pxe_ssh'
+        return super(BaseAutoDiscoverNodeFormset, self).handle(request, data)
+
+
+AutoDiscoverNodeFormset = django.forms.formsets.formset_factory(
+    AutoDiscoverNodeForm, extra=1,
+    formset=BaseAutoDiscoverNodeFormset)
