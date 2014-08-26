@@ -12,17 +12,29 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from horizon import views as horizon_views
+from horizon import tables as horizon_tables
 
 from tuskar_ui import api
+from tuskar_ui.infrastructure.parameters import tables
 
 
-class IndexView(horizon_views.APIView):
-    template_name = 'infrastructure/parameters/index.html'
+class ServiceParameter:
+    def __init__(self, params_dict, id):
+        self.id = id
+        self.label = params_dict.get('name')
+        self.value = params_dict.get('default')
+        self.category = params_dict.get('parameter_group')
+        self.description = params_dict.get('description')
 
-    def get_data(self, request, context, *args, **kwargs):
+
+class IndexView(horizon_tables.DataTableView):
+    table_class = tables.ParametersTable
+    template_name = "infrastructure/parameters/index.html"
+
+    def get_data(self):
         plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
-        context['plan'] = plan
-        context['plan_parameters'] = plan.parameter_list(
+        base_parameters = plan.parameter_list(
             include_key_parameters=False)
-        return context
+        params = [ServiceParameter(param, ind)
+                  for ind, param in enumerate(base_parameters)]
+        return params

@@ -29,6 +29,7 @@ def data(TEST):
         'template': '',
         'created_at': '2014-05-27T21:11:09Z',
         'modified_at': '2014-05-30T21:11:09Z',
+        'uuid': '1234567890',
         'roles': [
             {
                 'uuid': 'role-1',
@@ -122,13 +123,17 @@ def data(TEST):
             'description': '',
             'no_echo': 'false',
             'default': '',
+            'label': 'Keystone Host',
+            'value': ''
         }, {
             'name': 'object_storage_SwiftHashSuffix',
             'parameter_group': 'Swift',
+            'label': 'Swift Object Storage Hash Suffix',
             'type': 'String',
             'description': '',
             'no_echo': 'true',
             'default': '',
+            'value': ''
         }, {
             'name': 'block_storage_NeutronNetworkType',
             'parameter_group': 'Neutron',
