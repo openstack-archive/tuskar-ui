@@ -1,0 +1,30 @@
+<div class="well tab-pane{% if active %} active{% endif %}"
+     id="tab-{{ form.prefix }}">
+  <div class="form form-inline"><fieldset>
+    <div class="row">
+      <h4>Node Detail</h4>
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.node_tags %}
+    </div>
+    <div class="row">
+      <h5>Power Management</h5>
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.driver required=True %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_address %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_username %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_password %}
+    </div>
+  </fieldset></div>
+</div>
+
+<script type="text/javascript">
+(window.$ || window.addHorizonLoadEvent)(function () {
+  var form_prefix = '{{ form.prefix|escapejs }}';
+  var $form = $('#tab-' + form_prefix);
+  var $nav_link = $('a[href="#' + $form.attr('id') + '"]');
+  var undefined_name = '{{ form.get_name|escapejs }}';
+
+  // FIXME(lsmola) what is this good for exactly?
+  $form.find('input[name$="-ipmi_address"]').change(function () {
+    $nav_link.html($(this).val() || undefined_name);
+  });
+});
+</script>
