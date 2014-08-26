@@ -246,23 +246,25 @@ class OvercloudRole(base.APIResourceWrapper):
     def provider_resource_type(self):
         return self.name
 
-    # TODO(tzumainn): fix this once we know how this connection can be
-    # made
+    @property
+    def parameter_prefix(self):
+        return self.name + '-' + str(self.version) + '::'
+
     @property
     def node_count_parameter_name(self):
-        return self.name + 'NodeCount'
+        return self.parameter_prefix + 'count'
 
     # TODO(tzumainn): fix this once we know how this connection can be
     # made
     @property
     def image_id_parameter_name(self):
-        return self.name + 'ImageID'
+        return self.parameter_prefix + 'ImageID'
 
     # TODO(tzumainn): fix this once we know how this connection can be
     # made
     @property
     def flavor_id_parameter_name(self):
-        return self.name + 'FlavorID'
+        return self.parameter_prefix + 'FlavorID'
 
     def image(self, plan):
         image_id = plan.parameter_value(self.image_id_parameter_name)
