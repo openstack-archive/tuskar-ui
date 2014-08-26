@@ -9,6 +9,12 @@
 {% block main %}
 <div class="row">
   <div class="col-xs-12">
+    <div class="actions pull-right">
+      <a href="{% url 'horizon:infrastructure:parameters:service_configuration' %}" class="btn btn-primary ajax-modal">
+        <span class="fa fa-pencil"></span>
+        {% trans 'Edit Configuration' %}
+      </a>
+    </div>
     <div class="no-table-title">
       {{ table.render }}
     </div>
