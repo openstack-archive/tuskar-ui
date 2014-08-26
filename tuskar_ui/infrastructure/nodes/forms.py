@@ -208,3 +208,77 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
 
 NodeFormset = django.forms.formsets.formset_factory(NodeForm, extra=1,
                                                     formset=BaseNodeFormset)
+
+
+class AutoDiscoverNodeForm(django.forms.Form):
+    id = django.forms.IntegerField(
+        label="",
+        required=False,
+        widget=django.forms.HiddenInput(),
+    )
+    ssh_address = django.forms.IPAddressField(
+        label=_("SSH Address"),
+        required=False,
+        widget=django.forms.TextInput,
+    )
+    ssh_username = django.forms.CharField(
+        label=_("SSH User"),
+        required=False,
+        widget=django.forms.TextInput,
+    )
+    ssh_key_contents = django.forms.CharField(
+        label=_("SSH Key Contents"),
+        required=False,
+        widget=django.forms.Textarea(attrs={
+            'rows': 2,
+        }),
+    )
+
+    def get_name(self):
+        try:
+            # FIXME(lsmola) show somethign meaningful here
+            name = self.fields['ssh_address'].value()
+        except AttributeError:
+            # when the field is not bound
+            name = _("Undefined node")
+        return name
+
+
+class BaseAutoDiscoverNodeFormset(django.forms.formsets.BaseFormSet):
+    def handle(self, request, data):
+        success = True
+        for form in self:
+            data = form.cleaned_data
+            try:
+                node = api.node.Node.create(
+                    request,
+                    ssh_address=data['ssh_address'],
+                    ssh_username=data.get('ssh_username'),
+                    ssh_key_contents=data.get('ssh_key_contents'),
+                    driver='pxe_ssh'
+                )
+                api.node.Node.set_maintenance(request,
+                                              node.uuid,
+                                              True)
+                #TODO(tzumainn): now we need to boot the node
+            except Exception:
+                success = False
+                exceptions.handle(request, _('Unable to register node.'))
+                # TODO(rdopieralski) Somehow find out if any port creation
+                # failed and remove the mac addresses that succeeded from
+                # the form.
+            else:
+                # TODO(rdopieralski) Remove successful nodes from formset.
+                pass
+        return success
+
+    def clean(self):
+        for form in self:
+            if not form.cleaned_data:
+                raise django.forms.ValidationError(
+                    _("Please provide node data for all nodes."))
+
+
+AutoDiscoverNodeFormset = django.forms.formsets.formset_factory(
+    AutoDiscoverNodeForm, extra=1,
+    formset=BaseAutoDiscoverNodeFormset)
