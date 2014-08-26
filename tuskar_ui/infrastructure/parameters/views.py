@@ -13,8 +13,10 @@
 #    under the License.
 
 from horizon import tables as horizon_tables
+import horizon.forms
 
 from tuskar_ui import api
+from tuskar_ui.infrastructure.parameters import forms
 from tuskar_ui.infrastructure.parameters import tables
 
 
@@ -27,10 +29,33 @@ class ServiceParameter:
         self.description = params_dict.get('description')
 
 
+class ServiceConfigView(horizon.forms.ModalFormView):
+    template_name = "infrastructure/parameters/service_config.html"
+    form_class = forms.EditServiceConfig
+    
+    def get_form(self, form_class):
+        return form_class(self.request, **self.get_form_kwargs())
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(ServiceConfigView, self).get_context_data(*args, **kwargs)
+        context.update(self.get_data(self.request, context))
+        return context
+    
+    def get_data(self, request, context, *args, **kwargs):
+        plan = api.tuskar.Plan.get_the_plan(self.request)
+
+	context['plan'] = plan
+        base_parameters = plan.parameter_list(
+            include_key_parameters=False)
+        context['parameters'] = [ServiceParameter(param, ind)
+                  for ind, param in enumerate(base_parameters)]
+        return context 
+
+
 class IndexView(horizon_tables.DataTableView):
     table_class = tables.ParametersTable
     template_name = "infrastructure/parameters/index.html"
-
+    
     def get_data(self):
         plan = api.tuskar.Plan.get_the_plan(self.request)
         base_parameters = plan.parameter_list(
