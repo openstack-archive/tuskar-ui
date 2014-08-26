@@ -29,6 +29,8 @@ INDEX_URL = urlresolvers.reverse(
 TEST_DATA = utils.TestDataContainer()
 tuskar_data.data(TEST_DATA)
 
+from tuskar_ui.infrastructure.parameters import views
+
 
 class ParametersTest(test.BaseAdminViewTests):
 
@@ -47,3 +49,13 @@ class ParametersTest(test.BaseAdminViewTests):
             res = self.client.get(INDEX_URL)
 
         self.assertTemplateUsed(res, 'infrastructure/parameters/index.html')
+
+    def test_param_object(self):
+        param_dict = {'parameter_group': 'Neutron',
+                      'default': '1.2.3.4',
+                      'name': 'Ip Address',
+                      'description': 'This is an IP Address'}
+
+        p = views.ServiceParameter(param_dict, 5)
+        self.assertEqual(p.id, 5)
+        self.assertEqual(p.value, '1.2.3.4')

@@ -1,6 +1,5 @@
 {% extends 'infrastructure/base.html' %}
 {% load i18n %}
-{% load url from future %}
 {% block title %}{% trans 'Service Configuration' %}{% endblock %}
 
 {% block page_header %}
@@ -8,9 +7,12 @@
 {% endblock page_header %}
 
 {% block main %}
-<div class="row-fluid">
-  <div class="span12">
-    <h4>To Be Done</h4>
+<div class="row">
+  <div class="col-xs-12">
+    <div class="no-table-title">
+      {{ table.render }}
+    </div>
   </div>
 </div>
+
 {% endblock %}

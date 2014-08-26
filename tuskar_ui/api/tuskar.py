@@ -63,7 +63,7 @@ class OvercloudPlan(base.APIResourceWrapper):
         return cls(plan, request=request)
 
     @classmethod
-    def patch(cls, request, plan_id, name, description):
+    def patch(cls, request, plan_id, name, description, parameters):
         """Update an OvercloudPlan in Tuskar
 
         :param request: request object
@@ -83,7 +83,8 @@ class OvercloudPlan(base.APIResourceWrapper):
         """
         plan = tuskarclient(request).plans.patch(plan_uuid=plan_id,
                                                  name=name,
-                                                 description=description)
+                                                 description=description,
+                                                 parameters=parameters)
         return cls(plan, request=request)
 
     @classmethod

@@ -1,0 +1,49 @@
+{% load i18n %}
+{% load url from future %}
+{% load form_helpers %}
+<h4>{% trans "Service Configuration" %}</h4>
+
+<form method="POST" action="." class="service-configuration-form">
+    <div class="row-fluid">
+        <div class="col-sm-3">
+            <ul class="nav nav-pills" role="tablist">
+              <li>
+                  <a href="#network" role="tab" data-toggle="tab">{% trans 'Network Parameters' %}</a>
+              </li>
+              <li>
+                  <a href="#basic" role="tab" data-toggle="tab">{% trans 'Default Parameters' %}</a>
+              </li>
+            </ul>
+        </div>
+        <div class="col-sm-9 tab-content">
+            <div class="tab-pane" id="network">
+                {% include "horizon/common/_form_fields.html" %}
+                    {% csrf_token %}
+                    {% include 'horizon/common/_form_errors.html' with form=form %}
+                    {% for field in form.network_fields %}
+                        <div class="form-group well well-sm clearfix{% if field.errors %} error{% endif %} {{ field.css_classes }}">
+                          <div class="col-sm-2">
+                            {{ field|add_bootstrap_class }}
+                          </div>
+                          <div class="col-sm-10">
+                            {{ field.label }}
+                            {% for error in field.errors %}
+                            <span class="help-block"><span class="text-danger">
+                              {{ error }}
+                            </span></span>
+                            {% endfor %}
+                          </div>
+                        </div>
+                    {% endfor %}
+                    <hr>
+            </div>
+            <div class="tab-pane active" id="basic">
+                {% for field in form.basic_parameters %}
+                  <div><strong>{{ field.label }}</strong> : {{ field.value }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <input class="btn btn-primary pull-right" type="submit" value="{% trans "Save Configuration" %}" />
+    <a href="{% url 'horizon:infrastructure:overview:index' %}" class="btn btn-default secondary cancel close">{% trans "Cancel" %}</a>
+</form>
