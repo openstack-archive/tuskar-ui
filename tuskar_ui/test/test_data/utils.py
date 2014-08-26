@@ -25,6 +25,7 @@ def load_test_data(load_onto=None):
     from tuskar_ui.test.test_data import exceptions
     from tuskar_ui.test.test_data import flavor_data
     from tuskar_ui.test.test_data import heat_data as tuskar_heat_data
+    from tuskar_ui.test.test_data import keystone_data as tuskar_keystone_data
     from tuskar_ui.test.test_data import node_data
     from tuskar_ui.test.test_data import tuskar_data
 
@@ -40,6 +41,7 @@ def load_test_data(load_onto=None):
                flavor_data.data,
                node_data.data,
                tuskar_heat_data.data,
+               tuskar_keystone_data.data,
                tuskar_data.data)
     if load_onto:
         for data_func in loaders:
