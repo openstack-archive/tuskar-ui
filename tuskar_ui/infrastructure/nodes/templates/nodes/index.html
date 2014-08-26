@@ -16,6 +16,14 @@
         {% trans 'Register Nodes' %}
       </a>
     </div>
+    {% if ironic_enabled %}
+    <div class="actions pull-right">
+      <a href="{% url 'horizon:infrastructure:nodes:auto-discover' %}" class="btn btn-primary ajax-modal">
+        <span class="glyphicon glyphicon-plus"></span>
+        {% trans 'Auto-Discover Nodes' %}
+      </a>
+    </div>
+    {% endif %}
     {{ tab_group.render }}
   </div>
 </div>
