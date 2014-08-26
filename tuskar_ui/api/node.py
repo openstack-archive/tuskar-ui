@@ -70,10 +70,10 @@ class IronicNode(base.APIResourceWrapper):
         self._request = request
 
     @classmethod
-    def create(cls, request, ipmi_address, cpu_arch, cpus, memory_mb,
-               local_gb, mac_addresses, ipmi_username=None, ipmi_password=None,
-               ssh_address=None, ssh_username=None, ssh_key_contents=None,
-               driver=None):
+    def create(cls, request, ipmi_address=None, cpu_arch=None, cpus=None,
+               memory_mb=None, local_gb=None, mac_addresses=[],
+               ipmi_username=None, ipmi_password=None, ssh_address=None,
+               ssh_username=None, ssh_key_contents=None, driver=None):
         """Create a Node in Ironic
         """
         if driver == 'pxe_ssh':
@@ -251,6 +251,7 @@ class BareMetalNode(base.APIResourceWrapper):
     @classmethod
     def create(cls, request, ipmi_address, cpu_arch, cpus, memory_mb,
                local_gb, mac_addresses, ipmi_username=None, ipmi_password=None,
+               ssh_address=None, ssh_username=None, ssh_key_contents=None,
                driver=None):
         """Create a Nova BareMetalNode
         """
@@ -446,9 +447,10 @@ class Node(base.APIResourceWrapper):
             self._instance = kwargs['instance']
 
     @classmethod
-    def create(cls, request, ipmi_address, cpu_arch, cpus, memory_mb,
-               local_gb, mac_addresses, ipmi_username=None, ipmi_password=None,
-               driver=None):
+    def create(cls, request, ipmi_address=None, cpu_arch=None, cpus=None,
+               memory_mb=None, local_gb=None, mac_addresses=[],
+               ipmi_username=None, ipmi_password=None, ssh_address=None,
+               ssh_username=None, ssh_key_contents=None, driver=None):
         return cls(NodeClient(request).node_class.create(
             request, ipmi_address, cpu_arch, cpus, memory_mb, local_gb,
             mac_addresses, ipmi_username=ipmi_username,
