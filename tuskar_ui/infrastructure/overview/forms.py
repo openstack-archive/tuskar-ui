@@ -19,7 +19,10 @@ from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
 import horizon.forms
 import horizon.messages
-from os_cloud_config import keystone as keystone_setup
+from neutronclient.common import exceptions as neutron_exceptions
+from os_cloud_config import keystone as keystone_config
+from os_cloud_config import neutron as neutron_config
+from os_cloud_config.utils import clients
 
 from tuskar_ui import api
 import tuskar_ui.api.heat
@@ -98,6 +101,29 @@ class UndeployOvercloud(horizon.forms.SelfHandlingForm):
 
 class PostDeployInit(horizon.forms.SelfHandlingForm):
     def build_endpoints(self, plan):
+        # TODO(lsmola) switch to Tuskar parameters once we are actually
+        # deploying through Tuskar
+        # return {
+        #     "ceilometer": {
+        #         "password": plan.parameter_value('CeilometerPassword')},
+        #     "cinder": {
+        #         "password": plan.parameter_value('CinderPassword')},
+        #     "ec2": {
+        #         "password": plan.parameter_value('GlancePassword')},
+        #     "glance": {
+        #         "password": plan.parameter_value('GlancePassword')},
+        #     "heat": {
+        #         "password": plan.parameter_value('HeatPassword')},
+        #     "neutron": {
+        #         "password": plan.parameter_value('NeutronPassword')},
+        #     "nova": {
+        #         "password": plan.parameter_value('NovaPassword')},
+        #     "novav3": {
+        #         "password": plan.parameter_value('NovaPassword')},
+        #     "swift": {
+        #         "password": plan.parameter_value('SwiftPassword')},
+        #     "horizon": {}}
+
         return {
             "ceilometer": {
                 "password": plan.parameter_value('CeilometerPassword')},
@@ -106,26 +132,45 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
             "ec2": {
                 "password": plan.parameter_value('GlancePassword')},
             "glance": {
-                "password": plan.parameter_value('GlancePassword')},
+                "password": '16b4aaa3e056d07f796a93afb6010487b7b617e7'},
             "heat": {
                 "password": plan.parameter_value('HeatPassword')},
             "neutron": {
-                "password": plan.parameter_value('NeutronPassword')},
+                "password": 'db051bd3a407eb8deda3c8107ed321c98ddd2450'},
             "nova": {
-                "password": plan.parameter_value('NovaPassword')},
+                "password": '67d8090ff40c0c400b08ff558233091402afc9c5'},
             "novav3": {
                 "password": plan.parameter_value('NovaPassword')},
             "swift": {
                 "password": plan.parameter_value('SwiftPassword')},
             "horizon": {}}
 
+    def build_neutron_setup(self):
+        # TODO(lsmola) this is default devtest params, this should probably
+        # go from Tuskar parameters in the future.
+        return {
+            "float": {
+                "name": "default-net",
+                "cidr": "10.0.0.0/8"
+            },
+            "external": {
+                "name": "ext-net",
+                "allocation_start": "192.0.2.45",
+                "allocation_end": "192.0.2.64",
+                "cidr": "192.0.2.0/24"
+            }}
+
     def handle(self, request, data):
         try:
             plan = api.tuskar.OvercloudPlan.get_the_plan(request)
             stack = api.heat.Stack.get_by_plan(self.request, plan)
 
-            admin_token = plan.parameter_value('AdminToken')
-            admin_password = plan.parameter_value('AdminPassword')
+            # TODO(lsmola) switch to Tuskar parameters once we are actually
+            # deploying through Tuskar
+            #admin_token = plan.parameter_value('AdminToken')
+            #admin_password = plan.parameter_value('AdminPassword')
+            admin_token = 'aa61677c0a270880e99293c148cefee4000b2259'
+            admin_password = '5ba3a69c95c668daf84c2f103ebec82d273a4897'
             admin_email = 'example@example.org'
             auth_ip = stack.keystone_ip
             auth_url = stack.keystone_auth_url
@@ -133,18 +178,30 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
             auth_user = 'admin'
 
             # do the keystone init
-            keystone_setup.initialize(
+            keystone_config.initialize(
                 auth_ip, admin_token, admin_email, admin_password,
                 region='regionOne', ssl=None, public=None, user='heat-admin')
 
+            # retrieve needed Overcloud clients
+            keystone_client = clients.get_keystone_client(
+                auth_user, admin_password, auth_tenant, auth_url)
+            neutron_client = clients.get_neutron_client(
+                auth_user, admin_password, auth_tenant, auth_url)
+
             # do the setup endpoints
-            keystone_setup.setup_endpoints(
+            keystone_config.setup_endpoints(
                 self.build_endpoints(plan), public_host=None, region=None,
-                os_username=auth_user, os_password=admin_password,
-                os_tenant_name=auth_tenant, os_auth_url=auth_url)
+                os_auth_url=auth_url, client=keystone_client)
 
             # do the neutron init
-            # TODO(lsmola) neutron needs to be prepared in os-cloud-config
+            try:
+                neutron_config.initialize_neutron(
+                    self.build_neutron_setup(),
+                    neutron_client=neutron_client,
+                    keystone_client=keystone_client)
+            except neutron_exceptions.BadRequest as e:
+                LOG.info('Neutron has been already initialized.')
+                LOG.info(e.message)
 
         except Exception as e:
             LOG.exception(e)
