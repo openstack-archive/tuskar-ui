@@ -21,19 +21,13 @@ from horizon.utils import memoized
 from openstack_dashboard.api import base
 from openstack_dashboard.api import heat
 from openstack_dashboard.api import keystone
-from openstack_dashboard.test.test_data import utils as test_utils
 
 from tuskar_ui.api import node
 from tuskar_ui.api import tuskar
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
-from tuskar_ui.test.test_data import heat_data
-from tuskar_ui.test.test_driver import heat_driver as mock_heat
 from tuskar_ui.utils import utils
 
-
-TEST_DATA = test_utils.TestDataContainer()
-heat_data.data(TEST_DATA)
 
 LOG = logging.getLogger(__name__)
 
@@ -86,11 +80,16 @@ class Stack(base.APIResourceWrapper):
 
     @classmethod
     @handle_errors(_("Unable to create Heat stack"), [])
-    def create(cls, request, stack_name, template, parameters):
-        stack = mock_heat.Stack.create(
-            stack_name=stack_name,
-            template=template,
-            parameters=parameters)
+    def create(cls, request, stack_name, template, environment,
+               provider_resource_templates):
+        fields = {
+            'stack_name': stack_name,
+            'template': template,
+            'environment': environment,
+            'files': provider_resource_templates,
+            'password': 'password',
+        }
+        stack = heat.stack_create(request, **fields)
         return cls(stack, request=request)
 
     @classmethod
@@ -105,7 +104,7 @@ class Stack(base.APIResourceWrapper):
                  are none
         :rtype:  list of tuskar_ui.api.heat.Stack
         """
-        stacks = mock_heat.Stack.list()
+        stacks = heat.stacks_list(request)[0]
         return [cls(stack, request=request) for stack in stacks]
 
     @classmethod
@@ -118,7 +117,7 @@ class Stack(base.APIResourceWrapper):
                  found
         :rtype:  tuskar_ui.api.heat.Stack or None
         """
-        return cls(mock_heat.Stack.get(stack_id))
+        return cls(heat.stack_get(request, stack_id))
 
     @classmethod
     @handle_errors(_("Unable to retrieve stack"))
@@ -130,18 +129,18 @@ class Stack(base.APIResourceWrapper):
                  found
         :rtype:  tuskar_ui.api.heat.Stack or None
         """
-        for stack in Stack.list(request):
-            if stack.plan and (stack.plan.id == plan.id):
-                return stack
+        #TODO(tzumainn): establish how to link plan with stack
+        for stack in cls.list(request):
+            return stack
 
     @classmethod
     @handle_errors(_("Unable to delete Heat stack"), [])
     def delete(cls, request, stack_id):
-        mock_heat.Stack.delete(stack_id)
+        heat.stack_delete(request, stack_id)
 
     @memoized.memoized
-    def resources(self, with_joins=True):
-        """Return a list of all Resources associated with the Stack
+    def resources(self, with_joins=True, role=None):
+        """Return list of OS::Nova::Server Resources associated with the Stack
 
         :param with_joins: should we also retrieve objects associated with each
                            retrieved Resource?
@@ -150,47 +149,48 @@ class Stack(base.APIResourceWrapper):
         :return: list of all Resources or an empty list if there are none
         :rtype:  list of tuskar_ui.api.heat.Resource
         """
-        resources = [r for r in TEST_DATA.heatclient_resources.list() if
-                     r.stack_id == self.id]
+        top_level_resources = heat.resources_list(self._request,
+                                                  self.stack_name)
+        resource_dicts = []
+        for resource in top_level_resources:
+            if resource.resource_type == 'OS::Nova::Server':
+                if role is None:
+                    resource_dicts.append({"resource": resource, "role": None})
+            elif resource.resource_type == 'OS::Heat::ResourceGroup':
+                # we need to dig through the resource group to reach the nova
+                # resources
+                group_resources = heat.resources_list(
+                    self._request, resource.physical_resource_id)
+                for group_resource in group_resources:
+                    tuskar_role = tuskar.OvercloudRole.get_by_resource_type(
+                        self._request, group_resource.resource_type)
+                    nova_resources = heat.resources_list(
+                        self._request,
+                        group_resource.physical_resource_id)
+                    if role is None or role.uuid == tuskar_role.uuid:
+                        resource_dicts.extend([{"resource": resource,
+                                                "role": tuskar_role}
+                                               for resource in nova_resources])
 
         if not with_joins:
-            return [Resource(r, request=self._request, stack=self)
-                    for r in resources]
+            return [Resource(rd['resource'], request=self._request,
+                             stack=self, role=rd['role'])
+                    for rd in resource_dicts]
 
         nodes_dict = utils.list_to_dict(node.Node.list(self._request,
                                                        associated=True),
                                         key_attribute='instance_uuid')
         joined_resources = []
-        for r in resources:
+        for rd in resource_dicts:
+            resource = rd['resource']
             joined_resources.append(
-                Resource(r, node=nodes_dict.get(r.physical_resource_id, None),
-                         request=self._request, stack=self))
+                Resource(resource,
+                         node=nodes_dict.get(resource.physical_resource_id,
+                                             None),
+                         request=self._request, stack=self, role=rd['role']))
         # TODO(lsmola) I want just resources with nova instance
         # this could be probably filtered a better way, investigate
         return [r for r in joined_resources if r.node is not None]
-
-    @memoized.memoized
-    def resources_by_role(self, overcloud_role, with_joins=True):
-        """Return a list of Resources that match an OvercloudRole
-
-        :param overcloud_role: role of resources to be returned
-        :type  overcloud_role: tuskar_ui.api.tuskar.OvercloudRole
-
-        :param with_joins: should we also retrieve objects associated with each
-                           retrieved Resource?
-        :type  with_joins: bool
-
-        :return: list of Resources that match the OvercloudRole, or an empty
-                 list if there are none
-        :rtype:  list of tuskar_ui.api.heat.Resource
-        """
-        # FIXME(lsmola) with_joins is not necessary here, I need at least
-        # nova instance
-        resources = self.resources(with_joins)
-        filtered_resources = [resource for resource in resources if
-                              (resource.has_role(overcloud_role))]
-
-        return filtered_resources
 
     @memoized.memoized
     def resources_count(self, overcloud_role=None):
@@ -209,7 +209,7 @@ class Stack(base.APIResourceWrapper):
         if overcloud_role is None:
             resources = self.resources()
         else:
-            resources = self.resources_by_role(overcloud_role)
+            resources = self.resources(role=overcloud_role)
         return len(resources)
 
     @cached_property
@@ -357,27 +357,8 @@ class Resource(base.APIResourceWrapper):
             self._node = kwargs['node']
         if 'stack' in kwargs:
             self._stack = kwargs['stack']
-
-    @classmethod
-    def get(cls, request, stack, resource_name):
-        """Return the specified Heat Resource within a Stack
-
-        :param request: request object
-        :type  request: django.http.HttpRequest
-
-        :param overcloud: the Stack from which to retrieve the resource
-        :type  overcloud: tuskar_ui.api.heat.OvercloudStack
-
-        :param resource_name: name of the Resource to retrieve
-        :type  resource_name: str
-
-        :return: matching Resource, or None if no Resource in the Stack
-                 matches the resource name
-        :rtype:  tuskar_ui.api.heat.Resource
-        """
-        for r in TEST_DATA.heatclient_resources.list():
-            if r.stack_id == stack.id and r.resource_name == resource_name:
-                return cls(r, request=request, stack=stack)
+        if 'role' in kwargs:
+            self._role = kwargs['role']
 
     @classmethod
     def get_by_node(cls, request, node):
@@ -411,21 +392,8 @@ class Resource(base.APIResourceWrapper):
                  OvercloudRole is associated
         :rtype:  tuskar_ui.api.tuskar.OvercloudRole
         """
-        roles = tuskar.OvercloudRole.list(self._request)
-        for role in roles:
-            if self.has_role(role):
-                return role
-
-    def has_role(self, role):
-        """Determine whether a resources matches an overcloud role
-
-        :param role: role to check against
-        :type  role: tuskar_ui.api.tuskar.OvercloudRole
-
-        :return: does this resource match the overcloud_role?
-        :rtype:  bool
-        """
-        return self.resource_type == role.provider_resource_type
+        if hasattr(self, '_role'):
+            return self._role
 
     @cached_property
     def node(self):

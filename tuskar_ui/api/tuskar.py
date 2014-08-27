@@ -36,7 +36,7 @@ def tuskarclient(request):
 
 class OvercloudPlan(base.APIResourceWrapper):
     _attrs = ('id', 'name', 'description', 'created_at', 'modified_at',
-              'roles', 'parameters', 'template')
+              'roles', 'parameters')
 
     def __init__(self, apiresource, request=None):
         super(OvercloudPlan, self).__init__(apiresource)
@@ -151,6 +151,24 @@ class OvercloudPlan(base.APIResourceWrapper):
         return [OvercloudRole.get(self._request, role['uuid'])
                 for role in self.roles]
 
+    @cached_property
+    def template(self):
+        #TODO(tzumainn): replace with actual call to tuskar api
+        #once tuskar pythonclient is updated
+        return ""
+
+    @cached_property
+    def environment(self):
+        #TODO(tzumainn): replace with actual call to tuskar api
+        #once tuskar pythonclient is updated
+        return ""
+
+    @cached_property
+    def provider_resource_templates(self):
+        #TODO(tzumainn): replace with actual call to tuskar api
+        #once tuskar pythonclient is updated
+        return {}
+
     def parameter_list(self, include_key_parameters=True):
         params = self.parameters
         if not include_key_parameters:
@@ -240,11 +258,18 @@ class OvercloudRole(base.APIResourceWrapper):
             if image_id_from_plan == image.id:
                 return role
 
+    @classmethod
+    @handle_errors(_("Unable to retrieve overcloud role"))
+    def get_by_resource_type(cls, request, resource_type):
+        for role in OvercloudRole.list(request):
+            if role.provider_resource_type == resource_type:
+                return role
+
     # TODO(tzumainn): fix this once we know how a role corresponds to
     # its provider resource type
     @property
     def provider_resource_type(self):
-        return self.name
+        return 'Tuskar::' + self.name + '-' + str(self.version)
 
     @property
     def parameter_prefix(self):

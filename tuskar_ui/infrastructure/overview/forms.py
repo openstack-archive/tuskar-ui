@@ -66,7 +66,8 @@ class DeployOvercloud(horizon.forms.SelfHandlingForm):
                 api.heat.Stack.create(request,
                                       plan.name,
                                       plan.template,
-                                      plan.parameters)
+                                      plan.environment,
+                                      plan.provider_resource_templates)
         except Exception:
             LOG.exception()
             return False

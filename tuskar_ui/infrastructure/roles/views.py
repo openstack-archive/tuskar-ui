@@ -74,9 +74,8 @@ class DetailView(horizon_tables.DataTableView, OvercloudRoleMixin, StackMixin):
 
     @memoized.memoized
     def _get_nodes(self, stack, role):
-        resources = stack.resources_by_role(role, with_joins=True)
+        resources = stack.resources(role=role, with_joins=True)
         nodes = [r.node for r in resources]
-
         for node in nodes:
             # TODO(tzumainn): this could probably be done more efficiently
             # by getting the resource for all nodes at once
