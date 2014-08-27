@@ -27,8 +27,8 @@ class HeatAPITests(test.APITestCase):
     def test_stack_list(self):
         stacks = self.heatclient_stacks.list()
 
-        with patch('tuskar_ui.test.test_driver.heat_driver.Stack.list',
-                   return_value=stacks):
+        with patch('openstack_dashboard.api.heat.stacks_list',
+                   return_value=[stacks, None, None]):
             ret_val = api.heat.Stack.list(self.request)
         for stack in ret_val:
             self.assertIsInstance(stack, api.heat.Stack)
@@ -36,7 +36,9 @@ class HeatAPITests(test.APITestCase):
 
     def test_stack_get(self):
         stack = self.heatclient_stacks.first()
-        ret_val = api.heat.Stack.get(self.request, stack.id)
+        with patch('openstack_dashboard.api.heat.stack_get',
+                   return_value=stack):
+            ret_val = api.heat.Stack.get(self.request, stack.id)
         self.assertIsInstance(ret_val, api.heat.Stack)
 
     def test_stack_plan(self):

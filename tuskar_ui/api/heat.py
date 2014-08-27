@@ -28,7 +28,6 @@ from tuskar_ui.api import tuskar
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
 from tuskar_ui.test.test_data import heat_data
-from tuskar_ui.test.test_driver import heat_driver as mock_heat
 from tuskar_ui.utils import utils
 
 
@@ -87,7 +86,8 @@ class Stack(base.APIResourceWrapper):
     @classmethod
     @handle_errors(_("Unable to create Heat stack"), [])
     def create(cls, request, stack_name, template, parameters):
-        stack = mock_heat.Stack.create(
+        stack = heat.stack_create(
+            request,
             stack_name=stack_name,
             template=template,
             parameters=parameters)
@@ -105,7 +105,7 @@ class Stack(base.APIResourceWrapper):
                  are none
         :rtype:  list of tuskar_ui.api.heat.Stack
         """
-        stacks = mock_heat.Stack.list()
+        stacks = heat.stacks_list(request)[0]
         return [cls(stack, request=request) for stack in stacks]
 
     @classmethod
@@ -118,7 +118,7 @@ class Stack(base.APIResourceWrapper):
                  found
         :rtype:  tuskar_ui.api.heat.Stack or None
         """
-        return cls(mock_heat.Stack.get(stack_id))
+        return cls(heat.stack_get(request, stack_id))
 
     @classmethod
     @handle_errors(_("Unable to retrieve stack"))
@@ -130,14 +130,14 @@ class Stack(base.APIResourceWrapper):
                  found
         :rtype:  tuskar_ui.api.heat.Stack or None
         """
-        for stack in Stack.list(request):
-            if stack.plan and (stack.plan.id == plan.id):
-                return stack
+        #TODO(tzumainn): establish how to link plan with stack
+        for stack in cls.list(request):
+            return stack
 
     @classmethod
     @handle_errors(_("Unable to delete Heat stack"), [])
     def delete(cls, request, stack_id):
-        mock_heat.Stack.delete(stack_id)
+        heat.stack_delete(request, stack_id)
 
     @memoized.memoized
     def resources(self, with_joins=True):
