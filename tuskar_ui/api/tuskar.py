@@ -158,7 +158,7 @@ class OvercloudPlan(base.APIResourceWrapper):
             for role in self.role_list:
                 key_params.extend([role.node_count_parameter_name,
                                    role.image_id_parameter_name,
-                                   role.flavor_id_parameter_name])
+                                   role.instance_type_parameter_name])
             params = [p for p in params if p['name'] not in key_params]
         return params
 
@@ -254,17 +254,13 @@ class OvercloudRole(base.APIResourceWrapper):
     def node_count_parameter_name(self):
         return self.parameter_prefix + 'count'
 
-    # TODO(tzumainn): fix this once we know how this connection can be
-    # made
     @property
     def image_id_parameter_name(self):
-        return self.parameter_prefix + 'ImageID'
+        return self.parameter_prefix + 'image_id'
 
-    # TODO(tzumainn): fix this once we know how this connection can be
-    # made
     @property
-    def flavor_id_parameter_name(self):
-        return self.parameter_prefix + 'FlavorID'
+    def instance_type_parameter_name(self):
+        return self.parameter_prefix + 'instance_type'
 
     def image(self, plan):
         image_id = plan.parameter_value(self.image_id_parameter_name)
@@ -272,9 +268,10 @@ class OvercloudRole(base.APIResourceWrapper):
             return glance.image_get(self._request, image_id)
 
     def flavor(self, plan):
-        flavor_id = plan.parameter_value(self.flavor_id_parameter_name)
-        if flavor_id:
-            return flavor.Flavor.get(self._request, flavor_id)
+        instance_type = plan.parameter_value(
+            self.instance_type_parameter_name)
+        if instance_type:
+            return flavor.Flavor.get_by_name(self._request, instance_type)
 
     @property
     def id(self):

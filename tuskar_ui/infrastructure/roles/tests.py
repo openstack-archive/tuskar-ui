@@ -47,6 +47,7 @@ class RolesTest(test.BaseAdminViewTests):
         plans = [api.tuskar.OvercloudPlan(plan)
                  for plan in self.tuskarclient_plans.list()]
         flavor = self.novaclient_flavors.first()
+        image = self.glanceclient_images.first()
 
         with contextlib.nested(
             patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
@@ -54,8 +55,8 @@ class RolesTest(test.BaseAdminViewTests):
             patch('tuskar_ui.api.tuskar.OvercloudRole.list',
                   return_value=roles),
             patch('openstack_dashboard.api.glance.image_get',
-                  return_value=None),
-            patch('tuskar_ui.api.flavor.Flavor.get',
+                  return_value=image),
+            patch('tuskar_ui.api.flavor.Flavor.get_by_name',
                   return_value=flavor)):
             res = self.client.get(INDEX_URL)
 
@@ -67,6 +68,7 @@ class RolesTest(test.BaseAdminViewTests):
         plans = [api.tuskar.OvercloudPlan(plan)
                  for plan in self.tuskarclient_plans.list()]
         flavor = self.novaclient_flavors.first()
+        image = self.glanceclient_images.first()
 
         with contextlib.nested(
             patch('tuskar_ui.api.tuskar.OvercloudRole.list',
@@ -75,7 +77,9 @@ class RolesTest(test.BaseAdminViewTests):
                   return_value=[]),
             patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
                   return_value=plans),
-            patch('tuskar_ui.api.flavor.Flavor.get',
+            patch('openstack_dashboard.api.glance.image_get',
+                  return_value=image),
+            patch('tuskar_ui.api.flavor.Flavor.get_by_name',
                   return_value=flavor)):
             res = self.client.get(DETAIL_URL)
 

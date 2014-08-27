@@ -89,6 +89,13 @@ class Flavor(object):
         return cls(nova.flavor_get(request, flavor_id))
 
     @classmethod
+    @handle_errors(_("Unable to load flavor."))
+    def get_by_name(cls, request, name):
+        for flavor in cls.list(request):
+            if flavor.name == name:
+                return flavor
+
+    @classmethod
     @handle_errors(_("Unable to retrieve flavor list."), [])
     def list(cls, request):
         return [cls(item) for item in nova.flavor_list(request)]
@@ -100,8 +107,11 @@ class Flavor(object):
         """Get and memoize ID's of deployed flavors."""
         servers = nova.server_list(request)[0]
         deployed_ids = set(server.flavor['id'] for server in servers)
+        deployed_names = []
         for plan in tuskar_ui.api.tuskar.OvercloudPlan.list(request):
-            deployed_ids |= set(
-                plan.parameter_value(role.flavor_id_parameter_name)
-                for role in plan.role_list)
-        return deployed_ids
+            deployed_names.extend(
+                [plan.parameter_value(role.instance_type_parameter_name)
+                 for role in plan.role_list])
+        return [flavor.id for flavor in cls.list(request)
+                if flavor.id not in deployed_ids
+                and flavor.name not in deployed_names]

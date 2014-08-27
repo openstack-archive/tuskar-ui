@@ -23,7 +23,7 @@ class RolesTable(tables.DataTable):
 
     name = tables.Column('name',
                          link="horizon:infrastructure:roles:detail",
-                         verbose_name=_("Image Name"))
+                         verbose_name=_("Role"))
     flavor = tables.Column('flavor',
                            verbose_name=_("Flavor"))
     image = tables.Column('image',
