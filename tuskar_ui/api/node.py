@@ -19,18 +19,11 @@ from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from openstack_dashboard.api import nova
-from openstack_dashboard.test.test_data import utils as test_utils
 
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
-from tuskar_ui.test.test_data import heat_data
-from tuskar_ui.test.test_data import node_data
 from tuskar_ui.utils import utils
 
-
-TEST_DATA = test_utils.TestDataContainer()
-node_data.data(TEST_DATA)
-heat_data.data(TEST_DATA)
 
 ERROR_STATES = set(['deploy failed', 'error'])
 POWER_ON_STATES = set(['on', 'power on'])
@@ -432,25 +425,17 @@ class Node(base.APIResourceWrapper):
     def get(cls, request, uuid):
         node = NodeClient(request).node_class.get(request, uuid)
         if node.instance_uuid is not None:
-            for server in TEST_DATA.novaclient_servers.list():
-                if server.id == node.instance_uuid:
-                    break
-            else:
-                server = None
-            return cls(node, instance=server, request=request)
-
-        return cls(node)
+            server = nova.server_get(request, node.instance_uuid)
+        else:
+            server = None
+        return cls(node, instance=server, request=request)
 
     @classmethod
     @handle_errors(_("Unable to retrieve node"))
     def get_by_instance_uuid(cls, request, instance_uuid):
         node = NodeClient(request).node_class.get_by_instance_uuid(
             request, instance_uuid)
-        for server in TEST_DATA.novaclient_servers.list():
-            if server.id == node.instance_uuid:
-                break
-        else:
-            server = None
+        server = nova.server_get(request, instance_uuid)
         return cls(node, instance=server, request=request)
 
     @classmethod
@@ -459,7 +444,7 @@ class Node(base.APIResourceWrapper):
         nodes = NodeClient(request).node_class.list(
             request, associated=associated)
         if associated is None or associated:
-            servers = TEST_DATA.novaclient_servers.list()
+            servers = nova.server_list(request)[0]
             servers_dict = utils.list_to_dict(servers)
             nodes_with_instance = []
             for n in nodes:
@@ -511,9 +496,8 @@ class Node(base.APIResourceWrapper):
         """
         if self.instance is None:
             return
-        for image in TEST_DATA.glanceclient_images.list():
-            if image.id == self.instance.image['id']:
-                return image.name
+        image = image_get(self._request, self.instance.image['id'])
+        return image.name
 
     @cached_property
     def instance_status(self):

@@ -125,7 +125,7 @@ class NodeAPITests(test.APITestCase):
                 with patch('openstack_dashboard.api.nova.server_list',
                            return_value=([instance], False)):
                     ret_val = api.node.Node(node).image_name
-        self.assertEqual(ret_val, 'overcloud-compute')
+        self.assertEqual(ret_val, 'overcloud-control')
 
     def test_node_addresses_no_ironic(self):
         node = self.baremetalclient_nodes.first()

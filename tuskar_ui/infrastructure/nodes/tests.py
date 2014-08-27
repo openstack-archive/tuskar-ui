@@ -50,7 +50,6 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         raise horizon_exceptions.NotFound
 
     def test_index_get(self):
-
         with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['list'],  # Only allow these attributes
             'list.return_value': [],

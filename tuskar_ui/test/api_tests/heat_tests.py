@@ -40,7 +40,6 @@ class HeatAPITests(test.APITestCase):
         with patch('openstack_dashboard.api.heat.stack_get',
                    return_value=stack):
             ret_val = api.heat.Stack.get(self.request, stack.id)
-
         self.assertIsInstance(ret_val, api.heat.Stack)
 
     def test_stack_plan(self):
@@ -70,8 +69,8 @@ class HeatAPITests(test.APITestCase):
         self.assertFalse(ret_val)
 
     def test_stack_resources(self):
-        stack = api.heat.Stack(self.heatclient_stacks.first())
-
+        stack = api.heat.Stack(self.heatclient_stacks.first(),
+                               request=self.request)
         resources = self.heatclient_resources.list()
         nodes = self.baremetalclient_nodes.list()
         instances = []
@@ -89,26 +88,7 @@ class HeatAPITests(test.APITestCase):
 
         for i in ret_val:
             self.assertIsInstance(i, api.heat.Resource)
-        self.assertEqual(3, len(ret_val))
-
-    def test_stack_resources_no_ironic(self):
-        stack = api.heat.Stack(self.heatclient_stacks.first())
-        role = api.tuskar.OvercloudRole(
-            self.tuskarclient_roles.first())
-        nodes = self.baremetalclient_nodes.list()
-
-        # FIXME(lsmola) only resources and image_name should be tested
-        # here, anybody has idea how to do that?
-        with patch('openstack_dashboard.api.base.is_service_enabled',
-                   return_value=False):
-            with patch('novaclient.v1_1.contrib.baremetal.'
-                       'BareMetalNodeManager.list',
-                       return_value=nodes):
-                ret_val = stack.resources_by_role(role)
-
-        for i in ret_val:
-            self.assertIsInstance(i, api.heat.Resource)
-        self.assertEqual(1, len(ret_val))
+        self.assertEqual(4, len(ret_val))
 
     def test_stack_keystone_ip(self):
         stack = api.heat.Stack(self.heatclient_stacks.first())
@@ -141,26 +121,6 @@ class HeatAPITests(test.APITestCase):
             self.assertEqual(['http://192.0.2.23:/admin'],
                              stack.dashboard_urls)
             self.assertEqual(client_get.call_count, 1)
-
-    def test_resource_get(self):
-        stack = self.heatclient_stacks.first()
-        resource = self.heatclient_resources.first()
-
-        ret_val = api.heat.Resource.get(None, stack,
-                                        resource.resource_name)
-        self.assertIsInstance(ret_val, api.heat.Resource)
-
-    def test_resource_role(self):
-        # The api needs to get the role, and getting the role means listing
-        # all roles, so we mock that.
-        roles = self.tuskarclient_roles.list()
-        with patch('tuskarclient.v2.roles.RoleManager.list',
-                   return_value=roles):
-            resource = api.heat.Resource(self.heatclient_resources.first(),
-                                         self.request)
-            ret_val = resource.role
-        self.assertIsInstance(ret_val, api.tuskar.OvercloudRole)
-        self.assertEqual('Compute', ret_val.name)
 
     def test_resource_node_no_ironic(self):
         resource = self.heatclient_resources.first()

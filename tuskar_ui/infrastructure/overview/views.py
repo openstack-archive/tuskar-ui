@@ -41,7 +41,7 @@ def _get_role_data(plan, stack, role, field):
     }
 
     if stack:
-        resources = stack.resources_by_role(role, with_joins=True)
+        resources = stack.resources(role=role, with_joins=True)
         nodes = [r.node for r in resources]
         node_count = len(nodes)
 
