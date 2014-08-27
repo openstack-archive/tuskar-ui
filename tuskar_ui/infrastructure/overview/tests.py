@@ -124,6 +124,8 @@ class OverviewTests(test.BaseAdminViewTests):
                       return_value=True),
                 patch('tuskar_ui.api.heat.Stack.is_deployed',
                       return_value=False),
+                patch('tuskar_ui.api.heat.Stack.resources',
+                      return_value=[]),
                 patch('tuskar_ui.api.heat.Stack.events',
                       return_value=[]),
         ):

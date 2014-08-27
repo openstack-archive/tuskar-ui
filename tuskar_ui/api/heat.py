@@ -21,19 +21,13 @@ from horizon.utils import memoized
 from openstack_dashboard.api import base
 from openstack_dashboard.api import heat
 from openstack_dashboard.api import keystone
-from openstack_dashboard.test.test_data import utils as test_utils
 
 from tuskar_ui.api import node
 from tuskar_ui.api import tuskar
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
-from tuskar_ui.test.test_data import heat_data
-from tuskar_ui.test.test_driver import heat_driver as mock_heat
 from tuskar_ui.utils import utils
 
-
-TEST_DATA = test_utils.TestDataContainer()
-heat_data.data(TEST_DATA)
 
 LOG = logging.getLogger(__name__)
 
@@ -87,7 +81,8 @@ class Stack(base.APIResourceWrapper):
     @classmethod
     @handle_errors(_("Unable to create Heat stack"), [])
     def create(cls, request, stack_name, template, parameters):
-        stack = mock_heat.Stack.create(
+        stack = heat.stack_create(
+            request,
             stack_name=stack_name,
             template=template,
             parameters=parameters)
@@ -105,7 +100,7 @@ class Stack(base.APIResourceWrapper):
                  are none
         :rtype:  list of tuskar_ui.api.heat.Stack
         """
-        stacks = mock_heat.Stack.list()
+        stacks = heat.stacks_list(request)[0]
         return [cls(stack, request=request) for stack in stacks]
 
     @classmethod
@@ -118,7 +113,7 @@ class Stack(base.APIResourceWrapper):
                  found
         :rtype:  tuskar_ui.api.heat.Stack or None
         """
-        return cls(mock_heat.Stack.get(stack_id))
+        return cls(heat.stack_get(request, stack_id))
 
     @classmethod
     @handle_errors(_("Unable to retrieve stack"))
@@ -130,14 +125,14 @@ class Stack(base.APIResourceWrapper):
                  found
         :rtype:  tuskar_ui.api.heat.Stack or None
         """
-        for stack in Stack.list(request):
-            if stack.plan and (stack.plan.id == plan.id):
-                return stack
+        #TODO(tzumainn): establish how to link plan with stack
+        for stack in cls.list(request):
+            return stack
 
     @classmethod
     @handle_errors(_("Unable to delete Heat stack"), [])
     def delete(cls, request, stack_id):
-        mock_heat.Stack.delete(stack_id)
+        heat.stack_delete(request, stack_id)
 
     @memoized.memoized
     def resources(self, with_joins=True):
@@ -150,9 +145,7 @@ class Stack(base.APIResourceWrapper):
         :return: list of all Resources or an empty list if there are none
         :rtype:  list of tuskar_ui.api.heat.Resource
         """
-        resources = [r for r in TEST_DATA.heatclient_resources.list() if
-                     r.stack_id == self.id]
-
+        resources = heat.resources_list(self._request, self.stack_name)
         if not with_joins:
             return [Resource(r, request=self._request, stack=self)
                     for r in resources]
@@ -375,9 +368,8 @@ class Resource(base.APIResourceWrapper):
                  matches the resource name
         :rtype:  tuskar_ui.api.heat.Resource
         """
-        for r in TEST_DATA.heatclient_resources.list():
-            if r.stack_id == stack.id and r.resource_name == resource_name:
-                return cls(r, request=request, stack=stack)
+        return cls(heat.resource_get(request, stack.id, resource_name),
+                   request=request, stack=stack)
 
     @classmethod
     def get_by_node(cls, request, node):

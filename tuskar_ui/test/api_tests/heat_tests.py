@@ -27,8 +27,8 @@ class HeatAPITests(test.APITestCase):
     def test_stack_list(self):
         stacks = self.heatclient_stacks.list()
 
-        with patch('tuskar_ui.test.test_driver.heat_driver.Stack.list',
-                   return_value=stacks):
+        with patch('openstack_dashboard.api.heat.stacks_list',
+                   return_value=[stacks, None, None]):
             ret_val = api.heat.Stack.list(self.request)
         for stack in ret_val:
             self.assertIsInstance(stack, api.heat.Stack)
@@ -36,7 +36,9 @@ class HeatAPITests(test.APITestCase):
 
     def test_stack_get(self):
         stack = self.heatclient_stacks.first()
-        ret_val = api.heat.Stack.get(self.request, stack.id)
+        with patch('openstack_dashboard.api.heat.stack_get',
+                   return_value=stack):
+            ret_val = api.heat.Stack.get(self.request, stack.id)
         self.assertIsInstance(ret_val, api.heat.Stack)
 
     def test_stack_plan(self):
@@ -66,8 +68,8 @@ class HeatAPITests(test.APITestCase):
         self.assertFalse(ret_val)
 
     def test_stack_resources(self):
-        stack = api.heat.Stack(self.heatclient_stacks.first())
-
+        stack = api.heat.Stack(self.heatclient_stacks.first(),
+                               request=self.request)
         resources = self.heatclient_resources.list()
         nodes = self.baremetalclient_nodes.list()
         instances = []
@@ -85,22 +87,26 @@ class HeatAPITests(test.APITestCase):
 
         for i in ret_val:
             self.assertIsInstance(i, api.heat.Resource)
-        self.assertEqual(3, len(ret_val))
+        self.assertEqual(4, len(ret_val))
 
-    def test_stack_resources_no_ironic(self):
-        stack = api.heat.Stack(self.heatclient_stacks.first())
+    def test_stack_resources_by_role(self):
+        stack = api.heat.Stack(self.heatclient_stacks.first(),
+                               request=self.request)
         role = api.tuskar.OvercloudRole(
             self.tuskarclient_roles.first())
+        resources = self.heatclient_resources.list()
         nodes = self.baremetalclient_nodes.list()
 
         # FIXME(lsmola) only resources and image_name should be tested
         # here, anybody has idea how to do that?
         with patch('openstack_dashboard.api.base.is_service_enabled',
                    return_value=False):
-            with patch('novaclient.v1_1.contrib.baremetal.'
-                       'BareMetalNodeManager.list',
-                       return_value=nodes):
-                ret_val = stack.resources_by_role(role)
+            with patch('openstack_dashboard.api.heat.resources_list',
+                       return_value=resources):
+                with patch('novaclient.v1_1.contrib.baremetal.'
+                           'BareMetalNodeManager.list',
+                           return_value=nodes):
+                    ret_val = stack.resources_by_role(role)
 
         for i in ret_val:
             self.assertIsInstance(i, api.heat.Resource)
@@ -142,8 +148,10 @@ class HeatAPITests(test.APITestCase):
         stack = self.heatclient_stacks.first()
         resource = self.heatclient_resources.first()
 
-        ret_val = api.heat.Resource.get(None, stack,
-                                        resource.resource_name)
+        with patch('openstack_dashboard.api.heat.resource_get',
+                   return_value=stack):
+            ret_val = api.heat.Resource.get(self.request, stack,
+                                            resource.resource_name)
         self.assertIsInstance(ret_val, api.heat.Resource)
 
     def test_resource_role(self):
