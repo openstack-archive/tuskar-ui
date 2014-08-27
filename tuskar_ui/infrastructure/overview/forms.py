@@ -20,7 +20,10 @@ from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
 import horizon.forms
 import horizon.messages
-from os_cloud_config import keystone as keystone_setup
+from neutronclient.common import exceptions as neutron_exceptions
+from os_cloud_config import keystone as keystone_config
+from os_cloud_config import neutron as neutron_config
+from os_cloud_config.utils import clients
 
 from tuskar_ui import api
 import tuskar_ui.api.heat
@@ -79,7 +82,7 @@ def validate_plan(request, plan):
             })
         requested_nodes += plan.get_role_node_count(role)
         snmp_password = plan.parameter_value(
-            role.paremeter_prefix + 'SnmpdReadonlyUserPassword')
+            role.parameter_prefix + 'SnmpdReadonlyUserPassword')
         if (not snmp_password or
                 previous_snmp_password and
                 previous_snmp_password != snmp_password):
@@ -207,35 +210,62 @@ class UndeployOvercloud(horizon.forms.SelfHandlingForm):
 
 
 class PostDeployInit(horizon.forms.SelfHandlingForm):
-    def build_endpoints(self, plan):
+    def build_endpoints(self, plan, controller_role):
         return {
             "ceilometer": {
-                "password": plan.parameter_value('CeilometerPassword')},
+                "password": plan.parameter_value(
+                    controller_role.parameter_prefix + 'CeilometerPassword')},
             "cinder": {
-                "password": plan.parameter_value('CinderPassword')},
+                "password": plan.parameter_value(
+                    controller_role.parameter_prefix + 'CinderPassword')},
             "ec2": {
-                "password": plan.parameter_value('GlancePassword')},
+                "password": plan.parameter_value(
+                    controller_role.parameter_prefix + 'GlancePassword')},
             "glance": {
-                "password": plan.parameter_value('GlancePassword')},
+                "password": plan.parameter_value(
+                    controller_role.parameter_prefix + 'GlancePassword')},
             "heat": {
-                "password": plan.parameter_value('HeatPassword')},
+                "password": plan.parameter_value(
+                    controller_role.parameter_prefix + 'HeatPassword')},
             "neutron": {
-                "password": plan.parameter_value('NeutronPassword')},
+                "password": plan.parameter_value(
+                    controller_role.parameter_prefix + 'NeutronPassword')},
             "nova": {
-                "password": plan.parameter_value('NovaPassword')},
+                "password": plan.parameter_value(
+                    controller_role.parameter_prefix + 'NovaPassword')},
             "novav3": {
-                "password": plan.parameter_value('NovaPassword')},
+                "password": plan.parameter_value(
+                    controller_role.parameter_prefix + 'NovaPassword')},
             "swift": {
-                "password": plan.parameter_value('SwiftPassword')},
+                "password": plan.parameter_value(
+                    controller_role.parameter_prefix + 'SwiftPassword')},
             "horizon": {'port': ''}}
+
+    def build_neutron_setup(self):
+        # TODO(lsmola) this is default devtest params, this should probably
+        # go from Tuskar parameters in the future.
+        return {
+            "float": {
+                "name": "default-net",
+                "cidr": "10.0.0.0/8"
+            },
+            "external": {
+                "name": "ext-net",
+                "allocation_start": "192.0.2.45",
+                "allocation_end": "192.0.2.64",
+                "cidr": "192.0.2.0/24"
+            }}
 
     def handle(self, request, data):
         try:
             plan = api.tuskar.Plan.get_the_plan(request)
+            controller_role = plan.get_role_by_name("controller")
             stack = api.heat.Stack.get_by_plan(self.request, plan)
 
-            admin_token = plan.parameter_value('AdminToken')
-            admin_password = plan.parameter_value('AdminPassword')
+            admin_token = plan.parameter_value(
+                controller_role.parameter_prefix + 'AdminToken')
+            admin_password = plan.parameter_value(
+                controller_role.parameter_prefix + 'AdminPassword')
             admin_email = 'example@example.org'
             auth_ip = stack.keystone_ip
             auth_url = stack.keystone_auth_url
@@ -243,18 +273,30 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
             auth_user = 'admin'
 
             # do the keystone init
-            keystone_setup.initialize(
+            keystone_config.initialize(
                 auth_ip, admin_token, admin_email, admin_password,
                 region='regionOne', ssl=None, public=None, user='heat-admin')
 
+            # retrieve needed Overcloud clients
+            keystone_client = clients.get_keystone_client(
+                auth_user, admin_password, auth_tenant, auth_url)
+            neutron_client = clients.get_neutron_client(
+                auth_user, admin_password, auth_tenant, auth_url)
+
             # do the setup endpoints
-            keystone_setup.setup_endpoints(
-                self.build_endpoints(plan), public_host=None, region=None,
-                os_username=auth_user, os_password=admin_password,
-                os_tenant_name=auth_tenant, os_auth_url=auth_url)
+            keystone_config.setup_endpoints(
+                self.build_endpoints(plan, controller_role), public_host=None,
+                region=None, os_auth_url=auth_url, client=keystone_client)
 
             # do the neutron init
-            # TODO(lsmola) neutron needs to be prepared in os-cloud-config
+            try:
+                neutron_config.initialize_neutron(
+                    self.build_neutron_setup(),
+                    neutron_client=neutron_client,
+                    keystone_client=keystone_client)
+            except neutron_exceptions.BadRequest as e:
+                LOG.info('Neutron has been already initialized.')
+                LOG.info(e.message)
 
         except Exception as e:
             LOG.exception(e)
