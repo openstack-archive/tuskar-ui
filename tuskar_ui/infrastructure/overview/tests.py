@@ -190,11 +190,21 @@ class OverviewTests(test.BaseAdminViewTests):
                   return_value=None),
             patch('os_cloud_config.keystone.setup_endpoints',
                   return_value=None),
+            patch('os_cloud_config.neutron.initialize_neutron',
+                  return_value=None),
+            patch('os_cloud_config.utils.clients.get_keystone_client',
+                  return_value=None),
+            patch('os_cloud_config.utils.clients.get_neutron_client',
+                  return_value=None),
         ) as (mock_plan, mock_get_by_plan, mock_initialize,
-              mock_setup_endpoints):
+              mock_setup_endpoints, mock_initialize_neutron,
+              mock_get_keystone_client, mock_get_neutron_client):
             res = self.client.post(POST_DEPLOY_INIT_URL)
 
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
         self.assertEqual(mock_initialize.call_count, 1)
         self.assertEqual(mock_setup_endpoints.call_count, 1)
+        self.assertEqual(mock_initialize_neutron.call_count, 1)
+        self.assertEqual(mock_get_keystone_client.call_count, 1)
+        self.assertEqual(mock_get_neutron_client.call_count, 1)
