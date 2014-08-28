@@ -27,16 +27,20 @@ class HeatAPITests(test.APITestCase):
     def test_stack_list(self):
         stacks = self.heatclient_stacks.list()
 
-        with patch('tuskar_ui.test.test_driver.heat_driver.Stack.list',
-                   return_value=stacks):
-            ret_val = api.heat.Stack.list(self.request)
-        for stack in ret_val:
+        with patch('openstack_dashboard.api.heat.stacks_list',
+                   return_value=(stacks, None, None)):
+            stacks = api.heat.Stack.list(self.request)
+        for stack in stacks:
             self.assertIsInstance(stack, api.heat.Stack)
-        self.assertEqual(1, len(ret_val))
+        self.assertEqual(1, len(stacks))
 
     def test_stack_get(self):
         stack = self.heatclient_stacks.first()
-        ret_val = api.heat.Stack.get(self.request, stack.id)
+
+        with patch('openstack_dashboard.api.heat.stack_get',
+                   return_value=stack):
+            ret_val = api.heat.Stack.get(self.request, stack.id)
+
         self.assertIsInstance(ret_val, api.heat.Stack)
 
     def test_stack_plan(self):
@@ -44,8 +48,8 @@ class HeatAPITests(test.APITestCase):
                                self.request)
         plan = self.tuskarclient_plans.first()
 
-        with patch('tuskarclient.v2.plans.PlanManager.get',
-                   return_value=plan):
+        with patch('tuskarclient.v2.plans.PlanManager.list',
+                   return_value=[plan]):
             ret_val = stack.plan
         self.assertIsInstance(ret_val, api.tuskar.OvercloudPlan)
 
