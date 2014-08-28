@@ -21,12 +21,13 @@ import tuskar_ui.forms
 
 
 CPU_ARCH_CHOICES = [
+    ('amd64', _("amd64")),
     ('x86', _("x86")),
     ('x86_64', _("x86_64")),
 ]
 DRIVER_CHOICES = [
     ('ipmi', _("IPMI Driver")),
-    ('dummy', _("Dummy Driver")),
+    ('pxe_ssh', _("PXE + SSH")),
 ]
 
 
@@ -54,6 +55,7 @@ class NodeForm(django.forms.Form):
             'class': 'form-control switched',
             'data-switch-on': 'driver',
             'data-driver-ipmi': 'ipmi',
+            'data-driver-pxe_ssh': 'pxe_ssh',
         }),
     )
     ipmi_username = django.forms.CharField(
@@ -63,6 +65,7 @@ class NodeForm(django.forms.Form):
             'class': 'form-control switched',
             'data-switch-on': 'driver',
             'data-driver-ipmi': 'ipmi',
+            'data-driver-pxe_ssh': 'pxe_ssh',
         }),
     )
     ipmi_password = django.forms.CharField(
@@ -72,6 +75,7 @@ class NodeForm(django.forms.Form):
             'class': 'form-control switched',
             'data-switch-on': 'driver',
             'data-driver-ipmi': 'ipmi',
+            'data-driver-pxe_ssh': 'pxe_ssh',
         }),
     )
     mac_addresses = tuskar_ui.forms.MultiMACField(
