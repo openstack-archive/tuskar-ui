@@ -82,13 +82,23 @@ class IronicNode(base.APIResourceWrapper):
                driver=None):
         """Create a Node in Ironic
         """
-        node = ironicclient(request).node.create(
-            driver=driver,
-            driver_info={
+        if driver == 'pxe_ssh':
+            driver_info = {
+                'ssh_address': ipmi_address,
+                'ssh_username': ipmi_username,
+                'ssh_key_contents': ipmi_password,
+                'ssh_virt_type': 'virsh',
+            }
+        else:
+            driver_info = {
                 'ipmi_address': ipmi_address,
                 'ipmi_username': ipmi_username,
                 'password': ipmi_password
-            },
+            }
+
+        node = ironicclient(request).node.create(
+            driver=driver,
+            driver_info=driver_info,
             properties={
                 'cpus': cpus,
                 'memory_mb': memory_mb,
