@@ -35,7 +35,7 @@ def tuskarclient(request):
 
 
 class OvercloudPlan(base.APIResourceWrapper):
-    _attrs = ('id', 'name', 'description', 'created_at', 'modified_at',
+    _attrs = ('id', 'uuid', 'name', 'description', 'created_at', 'modified_at',
               'roles', 'parameters')
 
     def __init__(self, apiresource, request=None):
@@ -152,22 +152,23 @@ class OvercloudPlan(base.APIResourceWrapper):
                 for role in self.roles]
 
     @cached_property
-    def template(self):
-        #TODO(tzumainn): replace with actual call to tuskar api
-        #once tuskar pythonclient is updated
-        return ""
+    def templates(self):
+        return tuskarclient(self._request).plans.templates(self.uuid)
+
+    @cached_property
+    def master_template(self):
+        return self.templates.get('plan.yaml', '')
 
     @cached_property
     def environment(self):
-        #TODO(tzumainn): replace with actual call to tuskar api
-        #once tuskar pythonclient is updated
-        return ""
+        return self.templates.get('environment.yaml', '')
 
     @cached_property
     def provider_resource_templates(self):
-        #TODO(tzumainn): replace with actual call to tuskar api
-        #once tuskar pythonclient is updated
-        return {}
+        template_dict = self.templates
+        del template_dict['plan.yaml']
+        del template_dict['environment.yaml']
+        return template_dict
 
     def parameter_list(self, include_key_parameters=True):
         params = self.parameters
