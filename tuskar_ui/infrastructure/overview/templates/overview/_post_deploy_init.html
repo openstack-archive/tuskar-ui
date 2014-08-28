@@ -15,7 +15,9 @@
     <p>{% trans "This operation can't be undone, are you sure?" %}
     </p>
   <fieldset>
-  {% include "horizon/common/_form_fields.html" %}
+    <div class="left">
+      {% include "horizon/common/_form_fields.html" %}
+    </div>
   </fieldset>
 </div>
 {% endblock %}
