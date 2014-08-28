@@ -11,6 +11,9 @@
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_address %}
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_username %}
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_password %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_address %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_username %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_key_contents %}
     </div>
     <div class="row">
       <h5>Networking</h5>
