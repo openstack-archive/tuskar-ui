@@ -21,12 +21,13 @@ import tuskar_ui.forms
 
 
 CPU_ARCH_CHOICES = [
+    ('amd64', _("amd64")),
     ('x86', _("x86")),
     ('x86_64', _("x86_64")),
 ]
 DRIVER_CHOICES = [
     ('ipmi', _("IPMI Driver")),
-    ('dummy', _("Dummy Driver")),
+    ('pxe_ssh', _("PXE + SSH")),
 ]
 
 
@@ -53,7 +54,7 @@ class NodeForm(django.forms.Form):
         widget=django.forms.TextInput(attrs={
             'class': 'form-control switched',
             'data-switch-on': 'driver',
-            'data-driver-ipmi': 'ipmi',
+            'data-driver-ipmi': _("IPMI Driver"),
         }),
     )
     ipmi_username = django.forms.CharField(
@@ -62,7 +63,7 @@ class NodeForm(django.forms.Form):
         widget=django.forms.TextInput(attrs={
             'class': 'form-control switched',
             'data-switch-on': 'driver',
-            'data-driver-ipmi': 'ipmi',
+            'data-driver-ipmi': _("IPMI Driver"),
         }),
     )
     ipmi_password = django.forms.CharField(
@@ -71,7 +72,35 @@ class NodeForm(django.forms.Form):
         widget=django.forms.PasswordInput(render_value=False, attrs={
             'class': 'form-control switched',
             'data-switch-on': 'driver',
-            'data-driver-ipmi': 'ipmi',
+            'data-driver-ipmi': _("IPMI Driver"),
+        }),
+    )
+    ssh_address = django.forms.IPAddressField(
+        label=_("SSH Address"),
+        required=False,
+        widget=django.forms.TextInput(attrs={
+            'class': 'form-control switched',
+            'data-switch-on': 'driver',
+            'data-driver-pxe_ssh': _("PXE + SSH"),
+        }),
+    )
+    ssh_username = django.forms.CharField(
+        label=_("SSH User"),
+        required=False,
+        widget=django.forms.TextInput(attrs={
+            'class': 'form-control switched',
+            'data-switch-on': 'driver',
+            'data-driver-pxe_ssh': _("PXE + SSH"),
+        }),
+    )
+    ssh_key_contents = django.forms.CharField(
+        label=_("SSH Key Contents"),
+        required=False,
+        widget=django.forms.Textarea(attrs={
+            'class': 'form-control switched',
+            'data-switch-on': 'driver',
+            'data-driver-pxe_ssh': _("PXE + SSH"),
+            'rows': 2,
         }),
     )
     mac_addresses = tuskar_ui.forms.MultiMACField(
@@ -129,21 +158,32 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
         success = True
         for form in self:
             data = form.cleaned_data
-            try:
-                api.node.Node.create(
-                    request,
+            driver = data['driver']
+            kwargs = {}
+            if driver == 'ipmi':
+                kwargs.update(
                     # TODO(rdopieralski) If ipmi_address is no longer required,
                     # then we will need to use something else here?
                     ipmi_address=data['ipmi_address'],
-                    cpu_arch=data.get('cpu_arch'),
-                    cpus=data.get('cpus'),
-                    memory_mb=data.get('memory_mb'),
-                    local_gb=data.get('local_gb'),
-                    mac_addresses=data['mac_addresses'].split(),
                     ipmi_username=data.get('ipmi_username'),
                     ipmi_password=data.get('ipmi_password'),
-                    driver=form.cleaned_data.get('driver'),
                 )
+            elif driver == 'pxe_ssh':
+                kwargs.update(
+                    ssh_address=data['ssh_address'],
+                    ssh_username=data['ssh_username'],
+                    ssh_key_contents=data['ssh_key_contents'],
+                )
+            kwargs.update(
+                cpu_arch=data.get('cpu_arch'),
+                cpus=data.get('cpus'),
+                memory_mb=data.get('memory_mb'),
+                local_gb=data.get('local_gb'),
+                mac_addresses=data['mac_addresses'].split(),
+                driver=driver,
+            )
+            try:
+                api.node.Node.create(request, **kwargs)
             except Exception:
                 success = False
                 exceptions.handle(request, _('Unable to register node.'))
