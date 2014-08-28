@@ -114,6 +114,6 @@ class DetailView(horizon_tables.DataTableView, OvercloudRoleMixin, StackMixin):
         context['flavor'] = role.flavor(plan)
         # TODO(tzumainn): we don't mock images, so calling role.image(plan)
         # won't work right now
-        context['image'] = None
+        context['image'] = role.image(plan)
 
         return context
