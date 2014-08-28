@@ -211,6 +211,18 @@ class OverviewTests(test.BaseAdminViewTests):
     def test_post_deploy_init_post(self):
         stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
 
+        data = {
+            'admin_email': "example@example.org",
+            'public_host': '',
+            'region': 'regionOne',
+            'float_allocation_start': '10.0.0.2',
+            'float_allocation_end': '10.255.255.254',
+            'float_cidr': '10.0.0.0/8',
+            'external_allocation_start': '192.0.2.45',
+            'external_allocation_end': '192.0.2.64',
+            'external_cidr': '192.0.2.0/24'
+        }
+
         with contextlib.nested(
             _mock_plan(),
             patch('tuskar_ui.api.heat.Stack.get_by_plan',
@@ -222,18 +234,50 @@ class OverviewTests(test.BaseAdminViewTests):
             patch('os_cloud_config.neutron.initialize_neutron',
                   return_value=None),
             patch('os_cloud_config.utils.clients.get_keystone_client',
-                  return_value=None),
+                  return_value='keystone_client'),
             patch('os_cloud_config.utils.clients.get_neutron_client',
-                  return_value=None),
+                  return_value='neutron_client'),
         ) as (mock_plan, mock_get_by_plan, mock_initialize,
               mock_setup_endpoints, mock_initialize_neutron,
               mock_get_keystone_client, mock_get_neutron_client):
-            res = self.client.post(POST_DEPLOY_INIT_URL)
+            res = self.client.post(POST_DEPLOY_INIT_URL, data)
 
+        self.assertNoFormErrors(res)
+        self.assertEqual(res.status_code, 302)
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
-        self.assertEqual(mock_initialize.call_count, 1)
-        self.assertEqual(mock_setup_endpoints.call_count, 1)
-        self.assertEqual(mock_initialize_neutron.call_count, 1)
-        self.assertEqual(mock_get_keystone_client.call_count, 1)
-        self.assertEqual(mock_get_neutron_client.call_count, 1)
+        mock_initialize.assert_called_once_with(
+            '192.0.2.23', None, 'example@example.org', None, ssl=None,
+            region='regionOne', user='heat-admin', public=None)
+        mock_setup_endpoints.assert_called_once_with(
+            {'nova': {'password': None},
+             'heat': {'password': None},
+             'ceilometer': {'password': None},
+             'ec2': {'password': None},
+             'horizon': {'port': ''},
+             'cinder': {'password': None},
+             'glance': {'password': None},
+             'swift': {'password': None},
+             'novav3': {'password': None},
+             'neutron': {'password': None}},
+            os_auth_url=stack.keystone_auth_url,
+            client='keystone_client',
+            region='regionOne',
+            public_host='')
+        mock_initialize_neutron.assert_called_once_with(
+            {'float':
+                {'cidr': '10.0.0.0/8',
+                 'allocation_start': '10.0.0.2',
+                 'name': 'default-net',
+                 'allocation_end': '10.255.255.254'},
+             'external':
+                {'cidr': '192.0.2.0/24',
+                 'allocation_start': '192.0.2.45',
+                 'name': 'ext-net',
+                 'allocation_end': '192.0.2.64'}},
+            keystone_client='keystone_client',
+            neutron_client='neutron_client')
+        mock_get_keystone_client.assert_called_once_with(
+            'admin', None, 'admin', stack.keystone_auth_url)
+        mock_get_neutron_client.assert_called_once_with(
+            'admin', None, 'admin', stack.keystone_auth_url)
