@@ -99,30 +99,28 @@ class UndeployOvercloud(horizon.forms.SelfHandlingForm):
 
 
 class PostDeployInit(horizon.forms.SelfHandlingForm):
-    def build_endpoints(self, plan):
-        # TODO(lsmola) switch to Tuskar parameters once we are actually
-        # deploying through Tuskar
-        # return {
-        #     "ceilometer": {
-        #         "password": plan.parameter_value('CeilometerPassword')},
-        #     "cinder": {
-        #         "password": plan.parameter_value('CinderPassword')},
-        #     "ec2": {
-        #         "password": plan.parameter_value('GlancePassword')},
-        #     "glance": {
-        #         "password": plan.parameter_value('GlancePassword')},
-        #     "heat": {
-        #         "password": plan.parameter_value('HeatPassword')},
-        #     "neutron": {
-        #         "password": plan.parameter_value('NeutronPassword')},
-        #     "nova": {
-        #         "password": plan.parameter_value('NovaPassword')},
-        #     "novav3": {
-        #         "password": plan.parameter_value('NovaPassword')},
-        #     "swift": {
-        #         "password": plan.parameter_value('SwiftPassword')},
-        #     "horizon": {}}
+    # TODO(lsmola) put here signed user email, has to be done dynamically
+    # in init
+    admin_email = horizon.forms.CharField(
+        label=_("Admin Email"), initial="example@example.org")
+    public_host = horizon.forms.CharField(
+        label=_("Public Host"), initial="", required=False)
+    region = horizon.forms.CharField(
+        label=_("Region"), initial="regionOne")
+    float_allocation_start = horizon.forms.CharField(
+        label=_("Float Allocation Start"), initial="10.0.0.2")
+    float_allocation_end = horizon.forms.CharField(
+        label=_("Float Allocation Start"), initial="10.255.255.254")
+    float_cidr = horizon.forms.CharField(
+        label=_("Float CIDR"), initial="10.0.0.0/8")
+    external_allocation_start = horizon.forms.CharField(
+        label=_("External Allocation Start"), initial="192.0.2.45")
+    external_allocation_end = horizon.forms.CharField(
+        label=_("External Allocation Start"), initial="192.0.2.64")
+    external_cidr = horizon.forms.CharField(
+        label=_("External CIDR"), initial="192.0.2.0/24")
 
+    def build_endpoints(self, plan):
         return {
             "ceilometer": {
                 "password": plan.parameter_value('CeilometerPassword')},
@@ -131,32 +129,34 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
             "ec2": {
                 "password": plan.parameter_value('GlancePassword')},
             "glance": {
-                "password": '16b4aaa3e056d07f796a93afb6010487b7b617e7'},
+                "password": plan.parameter_value('GlancePassword')},
             "heat": {
                 "password": plan.parameter_value('HeatPassword')},
             "neutron": {
-                "password": 'db051bd3a407eb8deda3c8107ed321c98ddd2450'},
+                "password": plan.parameter_value('NeutronPassword')},
             "nova": {
-                "password": '67d8090ff40c0c400b08ff558233091402afc9c5'},
+                "password": plan.parameter_value('NovaPassword')},
             "novav3": {
                 "password": plan.parameter_value('NovaPassword')},
             "swift": {
                 "password": plan.parameter_value('SwiftPassword')},
             "horizon": {}}
 
-    def build_neutron_setup(self):
+    def build_neutron_setup(self, data):
         # TODO(lsmola) this is default devtest params, this should probably
         # go from Tuskar parameters in the future.
         return {
             "float": {
                 "name": "default-net",
-                "cidr": "10.0.0.0/8"
+                "allocation_start": data['float_allocation_start'],
+                "allocation_end": data['float_allocation_end'],
+                "cidr": data['float_cidr']
             },
             "external": {
                 "name": "ext-net",
-                "allocation_start": "192.0.2.45",
-                "allocation_end": "192.0.2.64",
-                "cidr": "192.0.2.0/24"
+                "allocation_start": data['external_allocation_start'],
+                "allocation_end": data['external_allocation_end'],
+                "cidr": data['external_cidr']
             }}
 
     def handle(self, request, data):
@@ -164,13 +164,9 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
             plan = api.tuskar.OvercloudPlan.get_the_plan(request)
             stack = api.heat.Stack.get_by_plan(self.request, plan)
 
-            # TODO(lsmola) switch to Tuskar parameters once we are actually
-            # deploying through Tuskar
-            #admin_token = plan.parameter_value('AdminToken')
-            #admin_password = plan.parameter_value('AdminPassword')
-            admin_token = 'aa61677c0a270880e99293c148cefee4000b2259'
-            admin_password = '5ba3a69c95c668daf84c2f103ebec82d273a4897'
-            admin_email = 'example@example.org'
+            admin_token = plan.parameter_value('AdminToken')
+            admin_password = plan.parameter_value('AdminPassword')
+            admin_email = data['admin_email']
             auth_ip = stack.keystone_ip
             auth_url = stack.keystone_auth_url
             auth_tenant = 'admin'
@@ -189,13 +185,16 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
 
             # do the setup endpoints
             keystone_config.setup_endpoints(
-                self.build_endpoints(plan), public_host=None, region=None,
-                os_auth_url=auth_url, client=keystone_client)
+                self.build_endpoints(plan),
+                public_host=data['public_host'],
+                region=data['region'],
+                os_auth_url=auth_url,
+                client=keystone_client)
 
             # do the neutron init
             try:
                 neutron_config.initialize_neutron(
-                    self.build_neutron_setup(),
+                    self.build_neutron_setup(data),
                     neutron_client=neutron_client,
                     keystone_client=keystone_client)
             except neutron_exceptions.BadRequest as e:

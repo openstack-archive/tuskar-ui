@@ -10,12 +10,13 @@
 
 {% block modal-body %}
 <div>
-    <p>{% trans "Your OpenStack cloud is deployed but it needs to get initialized in order to get live." %}
-    </p>
-    <p>{% trans "This operation can't be undone, are you sure?" %}
-    </p>
   <fieldset>
-  {% include "horizon/common/_form_fields.html" %}
+    <div class="left">
+      {% include "horizon/common/_form_fields.html" %}
+    </div>
+    <div class="right">
+      {% trans "Your OpenStack cloud nodes are deployed. They need to be initialized before your cloud will be live."%}
+    </div>
   </fieldset>
 </div>
 {% endblock %}
