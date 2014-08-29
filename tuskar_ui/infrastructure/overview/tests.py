@@ -165,6 +165,8 @@ class OverviewTests(test.BaseAdminViewTests):
                 _mock_plan(),
                 patch('tuskar_ui.api.heat.Stack.get_by_plan',
                       return_value=stack),
+                patch('tuskar_ui.api.heat.Stack.delete',
+                      return_value=None),
         ):
             res = self.client.post(DELETE_URL)
         self.assertRedirectsNoFollow(res, INDEX_URL)

@@ -69,8 +69,8 @@ class DeployOvercloud(horizon.forms.SelfHandlingForm):
                                       plan.master_template,
                                       plan.environment,
                                       plan.provider_resource_templates)
-        except Exception:
-            LOG.exception()
+        except Exception as e:
+            LOG.exception(e)
             return False
         else:
             msg = _('Deployment in progress.')
@@ -85,8 +85,8 @@ class UndeployOvercloud(horizon.forms.SelfHandlingForm):
             stack = api.heat.Stack.get_by_plan(self.request, plan)
             if stack:
                 api.heat.Stack.delete(request, stack.id)
-        except Exception:
-            LOG.exception()
+        except Exception as e:
+            LOG.exception(e)
             horizon.exceptions.handle(request,
                                       _("Unable to undeploy overcloud."))
             return False

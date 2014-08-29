@@ -69,11 +69,16 @@ class RolesTest(test.BaseAdminViewTests):
                  for plan in self.tuskarclient_plans.list()]
         flavor = self.novaclient_flavors.first()
         image = self.glanceclient_images.first()
+        stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
 
         with contextlib.nested(
             patch('tuskar_ui.api.tuskar.OvercloudRole.list',
                   return_value=roles),
+            patch('tuskar_ui.api.heat.Stack.get_by_plan',
+                  return_value=stack),
             patch('tuskar_ui.api.heat.Stack.events',
+                  return_value=[]),
+            patch('tuskar_ui.api.heat.Stack.resources',
                   return_value=[]),
             patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
                   return_value=plans),
