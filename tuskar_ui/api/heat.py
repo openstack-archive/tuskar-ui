@@ -150,6 +150,7 @@ class Stack(base.APIResourceWrapper):
     @memoized.memoized
     def resources(self, with_joins=True, role=None):
         """Return list of OS::Nova::Server Resources associated with the Stack
+           and which are associated with a Role
 
         :param with_joins: should we also retrieve objects associated with each
                            retrieved Resource?
@@ -158,28 +159,29 @@ class Stack(base.APIResourceWrapper):
         :return: list of all Resources or an empty list if there are none
         :rtype:  list of tuskar_ui.api.heat.Resource
         """
-        top_level_resources = heat.resources_list(self._request,
-                                                  self.stack_name)
+
+        if role:
+            roles = [role]
+        else:
+            roles = self.plan.role_list
         resource_dicts = []
-        for resource in top_level_resources:
-            if resource.resource_type == 'OS::Nova::Server':
-                if role is None:
-                    resource_dicts.append({"resource": resource, "role": None})
-            elif resource.resource_type == 'OS::Heat::ResourceGroup':
-                # we need to dig through the resource group to reach the nova
-                # resources
-                group_resources = heat.resources_list(
-                    self._request, resource.physical_resource_id)
-                for group_resource in group_resources:
-                    tuskar_role = tuskar.OvercloudRole.get_by_resource_type(
-                        self._request, group_resource.resource_type)
-                    nova_resources = heat.resources_list(
-                        self._request,
-                        group_resource.physical_resource_id)
-                    if role is None or role.uuid == tuskar_role.uuid:
-                        resource_dicts.extend([{"resource": resource,
-                                                "role": tuskar_role}
-                                               for resource in nova_resources])
+
+        # A provider resource is deployed as a nested stack, so we have to
+        # drill down and retrieve those that match a tuskar role
+        for role in roles:
+            resource_group_name = role.provider_resource_group_name
+            resource_group = heat.resource_get(self._request,
+                                               self.id,
+                                               resource_group_name)
+            group_resources = heat.resources_list(
+                self._request, resource_group.physical_resource_id)
+            for group_resource in group_resources:
+                nova_resources = heat.resources_list(
+                    self._request,
+                    group_resource.physical_resource_id)
+                resource_dicts.extend([{"resource": resource,
+                                        "role": role}
+                                       for resource in nova_resources])
 
         if not with_joins:
             return [Resource(rd['resource'], request=self._request,
