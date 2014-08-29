@@ -66,7 +66,7 @@ class DeployOvercloud(horizon.forms.SelfHandlingForm):
             if not stack:
                 api.heat.Stack.create(request,
                                       plan.name,
-                                      plan.template,
+                                      plan.master_template,
                                       plan.environment,
                                       plan.provider_resource_templates)
         except Exception:
