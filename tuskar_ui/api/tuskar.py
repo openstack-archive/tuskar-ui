@@ -268,15 +268,17 @@ class OvercloudRole(base.APIResourceWrapper):
             if role.provider_resource_type == resource_type:
                 return role
 
-    # TODO(tzumainn): fix this once we know how a role corresponds to
-    # its provider resource type
     @property
     def provider_resource_type(self):
-        return 'Tuskar::' + self.name + '-' + str(self.version)
+        return "Tuskar::{0}-{1}".format(self.name, self.version)
+
+    @property
+    def provider_resource_group_name(self):
+        return "{0}-{1}-resource-servers".format(self.name, self.version)
 
     @property
     def parameter_prefix(self):
-        return self.name + '-' + str(self.version) + '::'
+        return "{0}-{1}::".format(self.name, self.version)
 
     @property
     def node_count_parameter_name(self):
