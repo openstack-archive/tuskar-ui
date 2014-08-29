@@ -78,11 +78,20 @@ $link-color: #428bca;
     font-weight: normal;
   }
 
-  fieldset .form-field {
+  fieldset .form-group {
+    width: 100%;
     input, textarea, select {
       width: 150px;
       margin-left: 5px;
     }
+  }
+
+  .required label:after {
+    content: "*";
+    font-weight: bold;
+    line-height: 0;
+    padding-left: 4px;
+    color: #428bca;
   }
 }
 
