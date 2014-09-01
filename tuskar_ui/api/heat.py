@@ -173,13 +173,14 @@ class Stack(base.APIResourceWrapper):
                 for group_resource in group_resources:
                     tuskar_role = tuskar.OvercloudRole.get_by_resource_type(
                         self._request, group_resource.resource_type)
-                    nova_resources = heat.resources_list(
-                        self._request,
-                        group_resource.physical_resource_id)
-                    if role is None or role.uuid == tuskar_role.uuid:
-                        resource_dicts.extend([{"resource": resource,
-                                                "role": tuskar_role}
-                                               for resource in nova_resources])
+                    if group_resource.physical_resource_id:
+                        nova_resources = heat.resources_list(
+                            self._request,
+                            group_resource.physical_resource_id)
+                        if role is None or role.uuid == tuskar_role.uuid:
+                            resource_dicts.extend([{"resource": resource,
+                                                    "role": tuskar_role}
+                                                   for resource in nova_resources])
 
         if not with_joins:
             return [Resource(rd['resource'], request=self._request,
