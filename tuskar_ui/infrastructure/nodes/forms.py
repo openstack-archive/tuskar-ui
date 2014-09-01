@@ -259,7 +259,9 @@ class BaseAutoDiscoverNodeFormset(BaseNodeFormset):
                 api.node.Node.set_maintenance(request,
                                               node.uuid,
                                               True)
-                #TODO(tzumainn): now we need to boot the node
+                api.node.Node.set_power_state(request,
+                                              node.uuid,
+                                              'reboot')
             except Exception:
                 success = False
                 exceptions.handle(request, _('Unable to register node.'))
