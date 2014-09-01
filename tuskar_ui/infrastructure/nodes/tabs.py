@@ -29,9 +29,9 @@ class OverviewTab(tabs.Tab):
 
     def get_context_data(self, request):
         nodes = api.node.Node.list(request)
-        cpus = sum(int(node.cpus) for node in nodes)
-        memory_mb = sum(int(node.memory_mb) for node in nodes)
-        local_gb = sum(int(node.local_gb) for node in nodes)
+        cpus = sum(int(node.cpus) for node in nodes if node.cpus)
+        memory_mb = sum(int(node.memory_mb) for node in nodes if node.memory_mb)
+        local_gb = sum(int(node.local_gb) for node in nodes  if node.local_gb)
         deployed_nodes = api.node.Node.list(request, associated=True)
         free_nodes = api.node.Node.list(request, associated=False)
         deployed_nodes_error = api.node.filter_nodes(
