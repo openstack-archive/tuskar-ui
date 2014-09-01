@@ -106,6 +106,11 @@ class NodeAPITests(test.APITestCase):
         with self.assertRaises(NotImplementedError):
             api.node.Node.set_maintenance(self.request, node.uuid, False)
 
+    def test_node_set_power_state(self):
+        node = self.baremetalclient_nodes.first()
+        with self.assertRaises(NotImplementedError):
+            api.node.Node.set_power_state(self.request, node.uuid, 'on')
+
     def test_node_instance(self):
         node = self.baremetalclient_nodes.first()
         instance = self.novaclient_servers.first()
