@@ -204,6 +204,22 @@ class IronicNode(base.APIResourceWrapper):
         return cls(node, request)
 
     @classmethod
+    def set_power_state(cls, request, uuid, power_state):
+        """Set the power_state of node
+
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param uuid: ID of IronicNode
+        :type  uuid: str
+
+        :param power_state: desired power_state
+        :type  power_state: str
+        """
+        node = ironicclient(request).node.set_power_state(uuid, power_state)
+        return cls(node, request)
+
+    @classmethod
     def list_ports(cls, request, uuid):
         """Return a list of ports associated with this IronicNode
 
@@ -346,6 +362,11 @@ class BareMetalNode(base.APIResourceWrapper):
     def set_maintenance(cls, request, uuid, maintenance):
         raise NotImplementedError(
             "set_maintenance is not defined for Nova BareMetal nodes")
+
+    @classmethod
+    def set_power_state(cls, request, uuid, power_state):
+        raise NotImplementedError(
+            "set_power_state is not defined for Nova BareMetal nodes")
 
     @cached_property
     def power_state(self):
@@ -507,6 +528,12 @@ class Node(base.APIResourceWrapper):
     def set_maintenance(cls, request, uuid, maintenance):
         node = NodeClient(request).node_class.set_maintenance(
             request, uuid, maintenance)
+        return cls(node)
+
+    @classmethod
+    def set_power_state(cls, request, uuid, power_state):
+        node = NodeClient(request).node_class.set_power_state(
+            request, uuid, power_state)
         return cls(node)
 
     @cached_property
