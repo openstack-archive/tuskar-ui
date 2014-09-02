@@ -1,0 +1,22 @@
+{% load i18n %}
+{% load url from future%}
+
+<div class="deployment-icon">
+  {% block deployment-icon %}
+    <i class="glyphicon glyphicon-cloud text-info"></i>
+  {% endblock %}
+</div>
+<div class="deployment-box clearfix">
+  <h4>{% block deployment-title %}{% endblock %}</h4>
+  {% block deployment-info %}{% endblock %}
+  <div class="deployment-buttons clearfix">
+    {% block deployment-buttons %}
+      <a
+    href="{% url 'horizon:infrastructure:overview:undeploy_confirmation' %}"
+    class="btn btn-danger ajax-modal">
+        <i class="glyphicon glyphicon-fire"></i>
+        {% trans "Undeploy" %}
+      </a>
+    {% endblock %}
+  </div>
+</div>

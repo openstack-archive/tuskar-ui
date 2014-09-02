@@ -1,0 +1,19 @@
+{% extends "infrastructure/overview/deployment_base.html" %}
+
+{% load i18n %}
+{% load url from future%}
+
+{% block deployment-title %}{% trans "Deployment is live" %}{% endblock %}
+{% block deployment-info %}
+<strong>{% trans "Access information" %}</strong>
+<dl>
+  {% for dashboard_url in dashboard_urls %}
+  <dt>{% trans "Horizon URL" %}</dt>
+  <dd><a href="{{ dashboard_url }}">{{ dashboard_url }}</a></dd>
+  {% endfor %}
+  <dt>{% trans "User name" %}</dt>
+  <dd>TO BE ADDED</dd>
+  <dt>{% trans "Password" %}</dt>
+  <dd>TO BE ADDED</dd>
+</dl>
+{% endblock %}
