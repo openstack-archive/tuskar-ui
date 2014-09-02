@@ -1,0 +1,14 @@
+{% load i18n %}
+{% load url from future%}
+
+Deployment is live
+<div class="widget">
+  <h2>{% trans "Access Information" %}</h2>
+  {% for dashboard_url in dashboard_urls %}
+    <p>
+      <a href="{{ dashboard_url }}">
+        {% trans "Horizon URL" %} ({{ dashboard_url }})
+      </a>
+    </p>
+  {% endfor %}
+</div>

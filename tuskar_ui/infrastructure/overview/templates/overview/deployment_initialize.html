@@ -1,0 +1,23 @@
+{% load i18n %}
+{% load url from future%}
+
+<div class="row">
+  <div class="col-xs-12">
+    <div class="alert alert-info">
+      <div class="row">
+        <div class="col-xs-2">
+          <span class="text-success" style="font-size: x-large; vertical-align:middle">
+            <i class="glyphicon glyphicon-warning-sign"></i>
+          </span>
+        </div>
+        <div class="col-xs-10">
+          <p>{% trans "Your OpenStack cloud is deployed but it needs to get initialized in order to get live." %}</p>
+          <a href="{% url 'horizon:infrastructure:overview:post_deploy_init' %}"
+             class="btn btn-primary ajax-modal">
+             {% trans "Initialize" %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

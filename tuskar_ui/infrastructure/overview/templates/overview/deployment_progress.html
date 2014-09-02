@@ -1,0 +1,50 @@
+{% extends "infrastructure/overview/deployment_base.html" %}
+
+{% load i18n %}
+{% load url from future%}
+
+{% block deployment-icon %}
+  {% if stack.is_failed or stack.is_delete_failed %}
+    <i class="glyphicon glyphicon-remove-circle text-danger"></i>
+  {% else %}
+    <i class="glyphicon glyphicon-time text-info"></i>
+  {% endif %}
+{% endblock %}
+
+{% block deployment-title %}
+            {% if stack.is_deleting %}
+              Undeploying...
+            {% elif stack.is_delete_failed %}
+              Undeploying failed
+            {% elif stack.is_deploying %}
+              Deploying...
+            {% elif stack.is_failed %}
+              Deployment failed
+            {% endif %}
+{% endblock %}
+
+{% block deployment-info %}
+{% if progress %}
+    <div class="progress progress-striped progress-danger">
+      <div class="bar bar-info" style="width:{{ progress }}%"></div>
+    </div>
+{% endif %}
+{% if last_failed_events %}
+<strong>{% trans "Last failed events:" %}</strong>
+{% for event in last_failed_events %}
+<div>
+  <dl>
+    <dt>{% trans "Timestamp" %}</dt>
+    <dd><time datetime="{{ event.event_time }}">{{ event.event_time }}</time></dd>
+    <dt>{% trans "Resource Name" %}</dt>
+    <dd>{{ event.resource_name }}</dd>
+    <dt>{% trans "Status" %}</dt>
+    <dd>{{ event.resource_status }}</dd>
+    <dt>{% trans "Reason" %}</dt>
+    <dd>{{ event.resource_status_reason }}</dd>
+  </dl>
+</div>
+{% endfor %}
+{% endif %}
+<a href="{% url 'horizon:infrastructure:history:index' %}" class="pull-right">See full log</a>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% load i18n %}
+{% load url from future %}
+
+<h4>{% trans "Deployment Roles" %}</h4>
+{% for role in roles %}
+    <div class="well well-sm clearfix">
+      <div class="col-sm-2">
+        {% if role.deployed_node_count < role.total_node_count %}
+          <strong>{{ role.deployed_node_count }}</strong><small class="text-muted">/{{ role.total_node_count }}</small>
+        {% else %}
+          <strong>{{ role.total_node_count }}</strong>
+        {% endif %}
+      </div>
+      <div class="col-sm-10">
+        <a
+          href="{% url "horizon:infrastructure:roles:detail" role_id=role.id %}"
+        >{{ role.name }}</a>
+      </div>
+    </div>
+{% endfor %}
