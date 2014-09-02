@@ -1,0 +1,22 @@
+{% extends "infrastructure/overview/deployment_base.html" %}
+
+{% load i18n %}
+{% load url from future%}
+
+{% block deployment-icon %}
+  <i class="glyphicon glyphicon-warning-sign text-warning"></i>
+{% endblock %}
+
+{% block deployment-title %}{% trans "Initialization" %}{% endblock %}
+
+{% block deployment-info %}
+<p>{% trans "Your OpenStack cloud is deployed but it needs to get initialized in order to get live." %}</p>
+{% endblock %}
+
+{% block deployment-buttons %}
+  <a href="{% url 'horizon:infrastructure:overview:post_deploy_init' %}"
+     class="btn btn-primary ajax-modal">
+     <i class="glyphicon glyphicon-flag"></i>
+     {% trans "Initialize" %}
+  </a>
+{% endblock %}
