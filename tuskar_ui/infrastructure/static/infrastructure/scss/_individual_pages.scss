@@ -158,7 +158,13 @@ $link-color: #428bca;
 
 .deployment-box {
     border-left: 4px solid #eee;
-    margin-left: 12px;
+    margin-left: 16px;
+    margin-bottom: 12px;
+    padding-left: 20px;
+}
+
+.deployment-buttons {
+    margin-top: 12px;
 }
 
 .deployment-roles-label {
