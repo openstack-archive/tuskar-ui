@@ -66,8 +66,8 @@ AUTHENTICATION_BACKENDS = ('openstack_auth.backend.KeystoneBackend',)
 SITE_BRANDING = 'OpenStack'
 
 HORIZON_CONFIG = {
-    'dashboards': ('project', 'admin', 'infrastructure', 'settings'),
-    'default_dashboard': 'project',
+    'dashboards': ('infrastructure', 'settings'),
+    'default_dashboard': 'infrastructure',
     "password_validator": {
         "regex": '^.{8,18}$',
         "help_text": _("Password must be between 8 and 18 characters.")
