@@ -1,0 +1,20 @@
+{% extends "infrastructure/overview/deployment_base.html" %}
+
+{% load i18n %}
+{% load url from future%}
+
+{% block deployment-icon %}
+  <i class="glyphicon glyphicon-ok-circle text-success"></i>
+{% endblock %}
+
+{% block deployment-title %}
+  {% trans "Ready to get deployed" %}
+{% endblock %}
+
+{% block deployment-buttons %}
+  <a href="{% url 'horizon:infrastructure:overview:deploy_confirmation' %}"
+   class="btn btn-danger ajax-modal btn-default">
+    <i class="glyphicon glyphicon-cloud-upload"></i>
+    {% trans "Deploy" %}
+  </a>
+{% endblock %}
