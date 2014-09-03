@@ -52,6 +52,42 @@ class ActivateNode(tables.BatchAction):
                                       'off')
 
 
+class SetPowerStateOn(tables.BatchAction):
+    name = "set_power_state_on"
+    action_present = _("Power On")
+    action_past = _("Powering On")
+    data_type_singular = _("Node")
+    data_type_plural = _("Nodes")
+
+    def allowed(self, request, obj=None):
+        if api.node.NodeClient.ironic_enabled(request):
+            return obj.power_state != 'power on'
+        return False
+
+    def action(self, request, obj_id):
+        api.node.Node.set_power_state(request,
+                                      obj_id,
+                                      'on')
+
+
+class SetPowerStateOff(tables.BatchAction):
+    name = "set_power_state_off"
+    action_present = _("Power Off")
+    action_past = _("Powering Off")
+    data_type_singular = _("Node")
+    data_type_plural = _("Nodes")
+
+    def allowed(self, request, obj=None):
+        return (api.node.NodeClient.ironic_enabled(request)
+                and obj.power_state != 'power off'
+                and getattr(obj, 'instance_uuid', None) is None)
+
+    def action(self, request, obj_id):
+        api.node.Node.set_power_state(request,
+                                      obj_id,
+                                      'off')
+
+
 class NodeFilterAction(tables.FilterAction):
     def filter(self, table, nodes, filter_string):
         """Really naive case-insensitive search."""
@@ -100,7 +136,7 @@ class RegisteredNodesTable(tables.DataTable):
         name = "nodes_table"
         verbose_name = _("Registered Nodes")
         table_actions = (NodeFilterAction,)
-        row_actions = (DeleteNode,)
+        row_actions = (DeleteNode, SetPowerStateOn, SetPowerStateOff)
 
     def get_object_id(self, datum):
         return datum.uuid
