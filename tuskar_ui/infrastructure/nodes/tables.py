@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
+
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
@@ -44,6 +46,10 @@ class ActivateNode(tables.BatchAction):
 
     def action(self, request, obj_id):
         api.node.Node.set_maintenance(request, obj_id, False)
+        time.sleep(60)
+        api.node.Node.set_power_state(request,
+                                      obj_id,
+                                      'off')
 
 
 class NodeFilterAction(tables.FilterAction):
