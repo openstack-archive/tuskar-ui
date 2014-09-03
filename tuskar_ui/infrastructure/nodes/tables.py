@@ -42,6 +42,10 @@ class ActivateNode(tables.BatchAction):
     data_type_singular = _("Node")
     data_type_plural = _("Nodes")
 
+    def allowed(self, request, obj=None):
+        return (obj.cpus and obj.memory_mb and
+                obj.local_gb and obj.cpu_arch)
+
     def action(self, request, obj_id):
         api.node.Node.set_maintenance(request, obj_id, False)
         api.node.Node.set_power_state(request, obj_id, 'off')
