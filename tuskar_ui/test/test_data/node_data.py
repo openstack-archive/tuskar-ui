@@ -134,6 +134,7 @@ def data(TEST):
              'cpu_arch': 'x86_64',
          },
          'power_state': 'on',
+         'target_power_state': 'on',
          'maintenance': None,
          'newly_discovered': None,
          })
@@ -156,6 +157,7 @@ def data(TEST):
              'cpu_arch': 'x86_64',
          },
          'power_state': 'on',
+         'target_power_state': 'on',
          'maintenance': None,
          'newly_discovered': None,
          })
@@ -178,6 +180,7 @@ def data(TEST):
              'cpu_arch': 'x86_64',
          },
          'power_state': 'rebooting',
+         'target_power_state': 'on',
          'maintenance': None,
          'newly_discovered': None,
          })
@@ -200,6 +203,7 @@ def data(TEST):
              'cpu_arch': 'x86_64',
          },
          'power_state': 'on',
+         'target_power_state': 'on',
          'maintenance': None,
          'newly_discovered': None,
          })
@@ -222,6 +226,7 @@ def data(TEST):
              'cpu_arch': 'x86_64',
          },
          'power_state': 'error',
+         'target_power_state': 'on',
          'maintenance': None,
          'newly_discovered': None,
          })
@@ -244,6 +249,7 @@ def data(TEST):
              'cpu_arch': 'x86_64',
          },
          'power_state': 'on',
+         'target_power_state': 'on',
          'maintenance': None,
          'newly_discovered': None,
          })
@@ -266,6 +272,7 @@ def data(TEST):
              'cpu_arch': 'x86_64',
          },
          'power_state': 'on',
+         'target_power_state': 'on',
          'maintenance': True,
          'newly_discovered': None,
          })
@@ -288,6 +295,7 @@ def data(TEST):
              'cpu_arch': 'x86_64',
          },
          'power_state': 'on',
+         'target_power_state': 'on',
          'maintenance': True,
          'newly_discovered': True,
          })
@@ -310,6 +318,7 @@ def data(TEST):
              'cpu_arch': 'x86_64',
          },
          'power_state': 'on',
+         'target_power_state': 'on',
          'maintenance': True,
          'newly_discovered': True,
          })
