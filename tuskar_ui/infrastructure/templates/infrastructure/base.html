@@ -6,6 +6,8 @@
   {% load compress %}
   {% compress css %}
   <link href='{{ STATIC_URL }}infrastructure/scss/infrastructure.scss' type='text/scss' media='screen' rel='stylesheet' />
+  <link href="{{ STATIC_URL }}horizon/lib/font-awesome/css/font-awesome.css" type="text/css" media="screen" rel="stylesheet" />
+
   {% endcompress %}
 {% endblock %}
 
