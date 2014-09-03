@@ -127,14 +127,8 @@ class RegisteredNodesTable(tables.DataTable):
     role_name = tables.Column('role_name',
                               link=get_role_link,
                               verbose_name=_("Deployment Role"))
-    power_state = tables.Column("power_state",
-                                verbose_name=_("Power"),
-                                status=True,
-                                status_choices=(
-                                    ('on', True),
-                                    ('off', False),
-                                    ('rebooting', None)
-                                ))
+    power_state = tables.Column('power_state_with_transition',
+                                verbose_name=_("Power"))
 
     class Meta:
         name = "nodes_table"

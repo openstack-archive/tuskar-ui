@@ -63,7 +63,8 @@ def image_get(request, image_id):
 
 class IronicNode(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'driver', 'driver_info',
-              'properties', 'power_state', 'maintenance')
+              'properties', 'power_state', 'target_power_state',
+              'maintenance')
 
     def __init__(self, apiresource, request=None):
         super(IronicNode, self).__init__(apiresource)
@@ -396,6 +397,10 @@ class BareMetalNode(base.APIResourceWrapper):
         return task_state_dict.get(self.task_state, 'off')
 
     @cached_property
+    def target_power_state(self):
+        return None
+
+    @cached_property
     def driver(self):
         """Return driver for this BareMetalNode
         """
@@ -449,8 +454,8 @@ class NodeClient(object):
 
 class Node(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'driver', 'driver_info',
-              'power_state', 'addresses', 'maintenance', 'cpus',
-              'memory_mb', 'local_gb', 'cpu_arch')
+              'power_state', 'target_power_state', 'addresses', 'maintenance',
+              'cpus', 'memory_mb', 'local_gb', 'cpu_arch')
 
     def __init__(self, apiresource, request=None, **kwargs):
         """Initialize a Node
@@ -585,6 +590,14 @@ class Node(base.APIResourceWrapper):
         if self.instance_uuid:
             return _("Provisioned")
         return _("Free")
+
+    @cached_property
+    def power_state_with_transition(self):
+        if self.target_power_state and (
+                self.power_state != self.target_power_state):
+            return "{0} -> {1}".format(
+                self.power_state, self.target_power_state)
+        return self.power_state
 
 
 def filter_nodes(nodes, healthy=None, power_state=None):
