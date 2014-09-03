@@ -25,7 +25,8 @@ from tuskar_ui import api
 
 
 class CreateFlavorAction(flavor_workflows.CreateFlavorInfoAction):
-    arch = fields.ChoiceField(choices=(('i386', 'i386'), ('amd64', 'amd64')),
+    arch = fields.ChoiceField(choices=(('i386', 'i386'), ('amd64', 'amd64'),
+                                       ('x86_64', 'x86_64')),
                               label=_("Architecture"))
     kernel_image_id = fields.ChoiceField(choices=(),
                                          label=_("Deploy Kernel Image"))
