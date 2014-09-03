@@ -280,6 +280,88 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
 
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
+    def test_node_set_power_on(self):
+        registered_nodes = [api.node.Node(api.node.IronicNode(node))
+                            for node in self.ironicclient_nodes.list()]
+        node = registered_nodes[0]
+        roles = [api.tuskar.OvercloudRole(r)
+                 for r in TEST_DATA.tuskarclient_roles.list()]
+        instance = TEST_DATA.novaclient_servers.first()
+        image = TEST_DATA.glanceclient_images.first()
+        data = {'action': "nodes_table__set_power_state_on__{0}".format(
+            node.uuid)}
+
+        with contextlib.nested(
+            patch('tuskar_ui.api.node.Node', **{
+                'spec_set': ['list', 'set_power_state'],
+                'list.return_value': registered_nodes,
+                'set_power_state.return_value': node,
+            }),
+            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
+                'spec_set': ['list', 'name'],
+                'list.return_value': roles,
+            }),
+            patch('tuskar_ui.api.node.nova', **{
+                'spec_set': ['server_get', 'server_list'],
+                'server_get.return_value': instance,
+                'server_list.return_value': ([instance], False),
+            }),
+            patch('tuskar_ui.api.node.glance', **{
+                'spec_set': ['image_get'],
+                'image_get.return_value': image,
+            }),
+            patch('tuskar_ui.api.heat.Resource', **{
+                'spec_set': ['get_by_node'],  # Only allow these attributes
+                'get_by_node.side_effect': (
+                    self._raise_horizon_exception_not_found),
+            }),
+        ):
+            res = self.client.post(INDEX_URL + '?tab=nodes__registered', data)
+            self.assertNoFormErrors(res)
+            self.assertRedirectsNoFollow(res,
+                                         INDEX_URL + '?tab=nodes__registered')
+
+    def test_node_set_power_off(self):
+        registered_nodes = [api.node.Node(api.node.IronicNode(node))
+                            for node in self.ironicclient_nodes.list()]
+        node = registered_nodes[0]
+        roles = [api.tuskar.OvercloudRole(r)
+                 for r in TEST_DATA.tuskarclient_roles.list()]
+        instance = TEST_DATA.novaclient_servers.first()
+        image = TEST_DATA.glanceclient_images.first()
+        data = {'action': "nodes_table__set_power_state_off__{0}".format(
+            node.uuid)}
+
+        with contextlib.nested(
+            patch('tuskar_ui.api.node.Node', **{
+                'spec_set': ['list', 'set_power_state'],
+                'list.return_value': registered_nodes,
+                'set_power_state.return_value': node,
+            }),
+            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
+                'spec_set': ['list', 'name'],
+                'list.return_value': roles,
+            }),
+            patch('tuskar_ui.api.node.nova', **{
+                'spec_set': ['server_get', 'server_list'],
+                'server_get.return_value': instance,
+                'server_list.return_value': ([instance], False),
+            }),
+            patch('tuskar_ui.api.node.glance', **{
+                'spec_set': ['image_get'],
+                'image_get.return_value': image,
+            }),
+            patch('tuskar_ui.api.heat.Resource', **{
+                'spec_set': ['get_by_node'],  # Only allow these attributes
+                'get_by_node.side_effect': (
+                    self._raise_horizon_exception_not_found),
+            }),
+        ):
+            res = self.client.post(INDEX_URL + '?tab=nodes__registered', data)
+            self.assertNoFormErrors(res)
+            self.assertRedirectsNoFollow(res,
+                                         INDEX_URL + '?tab=nodes__registered')
+
     def test_performance(self):
         node = api.node.Node(self.ironicclient_nodes.list()[0])
         instance = TEST_DATA.novaclient_servers.first()
