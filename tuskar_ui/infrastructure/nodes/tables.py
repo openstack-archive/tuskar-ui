@@ -110,6 +110,14 @@ def get_role_link(datum):
                        kwargs={'role_id': datum.role_id})
 
 
+def get_power_state_with_transition(node):
+    if node.target_power_state and (
+            node.power_state != node.target_power_state):
+        return "{0} -> {1}".format(
+            node.power_state, node.target_power_state)
+    return node.power_state
+
+
 class RegisteredNodesTable(tables.DataTable):
     node = tables.Column('uuid',
                          link="horizon:infrastructure:nodes:detail",
@@ -122,14 +130,8 @@ class RegisteredNodesTable(tables.DataTable):
     role_name = tables.Column('role_name',
                               link=get_role_link,
                               verbose_name=_("Deployment Role"))
-    power_state = tables.Column("power_state",
-                                verbose_name=_("Power"),
-                                status=True,
-                                status_choices=(
-                                    ('on', True),
-                                    ('off', False),
-                                    ('rebooting', None)
-                                ))
+    power_state = tables.Column(get_power_state_with_transition,
+                                verbose_name=_("Power"))
 
     class Meta:
         name = "nodes_table"
