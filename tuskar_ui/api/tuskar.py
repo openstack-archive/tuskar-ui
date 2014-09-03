@@ -10,9 +10,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import django.conf
 import logging
 
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
@@ -23,17 +23,30 @@ from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
 
 LOG = logging.getLogger(__name__)
-TUSKAR_ENDPOINT_URL = getattr(django.conf.settings, 'TUSKAR_ENDPOINT_URL')
 MASTER_TEMPLATE_NAME = 'plan.yaml'
 ENVIRONMENT_NAME = 'environment.yaml'
+TUSKAR_SERVICE = 'management'
 
 
 # FIXME: request isn't used right in the tuskar client right now,
 # but looking at other clients, it seems like it will be in the future
-def tuskarclient(request):
-    c = tuskar_client.get_client('2', tuskar_url=TUSKAR_ENDPOINT_URL,
-                                 os_auth_token=request.user.token.id)
-    return c
+def tuskarclient(request, password=None):
+    api_version = "2"
+    insecure = getattr(settings, 'OPENSTACK_SSL_NO_VERIFY', False)
+    ca_file = getattr(settings, 'OPENSTACK_SSL_CACERT', None)
+    endpoint = base.url_for(request, TUSKAR_SERVICE)
+
+    LOG.debug('tuskarclient connection created using token "%s" and url "%s"' %
+              (request.user.token.id, endpoint))
+
+    client = tuskar_client.get_client(api_version,
+                                      tuskar_url=endpoint,
+                                      insecure=insecure,
+                                      ca_file=ca_file,
+                                      username=request.user.username,
+                                      password=password,
+                                      os_auth_token=request.user.token.id)
+    return client
 
 
 class OvercloudPlan(base.APIResourceWrapper):

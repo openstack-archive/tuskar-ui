@@ -58,6 +58,15 @@ class TestCase(openstack_dashboard_helpers.TestCase):
         # load tuskar-specific test data
         test_data_utils.load_test_data(self)
 
+        # Reload the service catalog
+        tenants = self.context['authorized_tenants']
+        self.setActiveUser(id=self.user.id,
+                           token=self.token,
+                           username=self.user.name,
+                           tenant_id=self.tenant.id,
+                           service_catalog=self.service_catalog,
+                           authorized_tenants=tenants)
+
 
 class BaseAdminViewTests(openstack_dashboard_helpers.BaseAdminViewTests):
     """A ``TestCase`` subclass which sets an active user with the "admin" role
@@ -80,3 +89,12 @@ class APITestCase(openstack_dashboard_helpers.APITestCase):
 
         # load tuskar-specfic test data
         test_data_utils.load_test_data(self)
+
+        # Reload the service catalog
+        tenants = self.context['authorized_tenants']
+        self.setActiveUser(id=self.user.id,
+                           token=self.token,
+                           username=self.user.name,
+                           tenant_id=self.tenant.id,
+                           service_catalog=self.service_catalog,
+                           authorized_tenants=tenants)
