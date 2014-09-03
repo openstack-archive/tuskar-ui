@@ -59,7 +59,7 @@ class RegisterView(horizon_forms.ModalFormView):
 
 
 class AutoDiscoverView(horizon_forms.ModalFormView):
-    form_class = forms.AutoDiscoverNodeFormset
+    form_class = forms.AutoDiscoverNodeForm
     form_prefix = 'auto_discover_nodes'
     template_name = 'infrastructure/nodes/auto_discover.html'
     success_url = reverse_lazy(

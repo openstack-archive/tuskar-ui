@@ -4,11 +4,19 @@
 
 {% block form_id %}auto_discover_nodes_form{% endblock %}
 {% block form_action %}{% url 'horizon:infrastructure:nodes:auto-discover' %}{% endblock %}
-{% block modal_id %}register_nodes_modal{% endblock %}
+
+{% block modal_id %}auto_discover_nodes_modal{% endblock %}
 {% block modal-header %}{% trans "Auto-Discover Nodes" %}{% endblock %}
 
 {% block modal-body %}
-{% include "formset_table/menu_formset.html" with formset=form  form_template="infrastructure/nodes/_auto_discover_nodes_formset_form.html" %}
+<div class="left">
+    <p>{% trans "Autodiscover nodes." %}</p>
+</div>
+<div class="right">
+  <fieldset>
+  {% include "horizon/common/_form_fields.html" %}
+  </fieldset>
+</div>
 {% endblock %}
 
 {% block modal-footer %}
