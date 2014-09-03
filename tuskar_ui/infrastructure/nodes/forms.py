@@ -16,6 +16,7 @@ import django.forms
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
+import horizon.forms
 from tuskar_ui import api
 import tuskar_ui.forms
 
@@ -210,7 +211,7 @@ NodeFormset = django.forms.formsets.formset_factory(NodeForm, extra=1,
                                                     formset=BaseNodeFormset)
 
 
-class AutoDiscoverNodeForm(django.forms.Form):
+class AutoDiscoverNodeForm(horizon.forms.SelfHandlingForm):
     id = django.forms.IntegerField(
         label="",
         required=False,
@@ -233,27 +234,24 @@ class AutoDiscoverNodeForm(django.forms.Form):
             'rows': 2,
         }),
     )
+    mac_addresses = tuskar_ui.forms.MultiMACField(
+        label=_("NIC MAC Addresses"),
+        widget=django.forms.Textarea(attrs={
+            'rows': '2',
+        }),
+    )
 
-    def get_name(self):
-        try:
-            name = self.fields['ssh_address'].value()
-        except AttributeError:
-            # when the field is not bound
-            name = _("Undefined node")
-        return name
-
-
-class BaseAutoDiscoverNodeFormset(BaseNodeFormset):
     def handle(self, request, data):
         success = True
-        for form in self:
-            data = form.cleaned_data
-            try:
+        try:
+            mac_addresses = data['mac_addresses'].split()
+            for mac_address in mac_addresses:
                 node = api.node.Node.create(
                     request,
                     ssh_address=data['ssh_address'],
                     ssh_username=data.get('ssh_username'),
                     ssh_key_contents=data.get('ssh_key_contents'),
+                    mac_addresses=[mac_address],
                     driver='pxe_ssh'
                 )
                 api.node.Node.set_maintenance(request,
@@ -262,18 +260,10 @@ class BaseAutoDiscoverNodeFormset(BaseNodeFormset):
                 api.node.Node.set_power_state(request,
                                               node.uuid,
                                               'reboot')
-            except Exception:
-                success = False
-                exceptions.handle(request, _('Unable to register node.'))
-                # TODO(rdopieralski) Somehow find out if any port creation
-                # failed and remove the mac addresses that succeeded from
-                # the form.
-            else:
-                # TODO(rdopieralski) Remove successful nodes from formset.
-                pass
+        except Exception:
+            success = False
+            exceptions.handle(request, _('Unable to register node.'))
+            # TODO(rdopieralski) Somehow find out if any port creation
+            # failed and remove the mac addresses that succeeded from
+            # the form.
         return success
-
-
-AutoDiscoverNodeFormset = django.forms.formsets.formset_factory(
-    AutoDiscoverNodeForm, extra=1,
-    formset=BaseAutoDiscoverNodeFormset)
