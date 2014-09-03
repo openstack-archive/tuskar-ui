@@ -265,7 +265,7 @@ def data(TEST):
              'local_gb': '10',
              'cpu_arch': 'x86_64',
          },
-         'power_state': 'on',
+         'power_state': 'off',
          'maintenance': True,
          'newly_discovered': None,
          })
