@@ -44,6 +44,9 @@ class ActivateNode(tables.BatchAction):
 
     def action(self, request, obj_id):
         api.node.Node.set_maintenance(request, obj_id, False)
+        api.node.Node.set_power_state(request,
+                                      obj_id,
+                                      'off')
 
 
 class NodeFilterAction(tables.FilterAction):

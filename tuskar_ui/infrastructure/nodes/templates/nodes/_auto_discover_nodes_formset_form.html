@@ -9,6 +9,10 @@
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_username %}
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_key_contents %}
     </div>
+    <div class="row">
+      <h5>Networking</h5>
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.mac_addresses required=True %}
+    </div>
   </fieldset></div>
 </div>
 

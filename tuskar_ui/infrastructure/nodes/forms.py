@@ -233,6 +233,13 @@ class AutoDiscoverNodeForm(django.forms.Form):
             'rows': 2,
         }),
     )
+    mac_addresses = tuskar_ui.forms.MultiMACField(
+        label=_("NIC MAC Addresses"),
+        widget=django.forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': '2',
+        }),
+    )
 
     def get_name(self):
         try:
@@ -249,19 +256,22 @@ class BaseAutoDiscoverNodeFormset(BaseNodeFormset):
         for form in self:
             data = form.cleaned_data
             try:
-                node = api.node.Node.create(
-                    request,
-                    ssh_address=data['ssh_address'],
-                    ssh_username=data.get('ssh_username'),
-                    ssh_key_contents=data.get('ssh_key_contents'),
-                    driver='pxe_ssh'
-                )
-                api.node.Node.set_maintenance(request,
-                                              node.uuid,
-                                              True)
-                api.node.Node.set_power_state(request,
-                                              node.uuid,
-                                              'reboot')
+                mac_addresses = data['mac_addresses'].split()
+                for mac_address in mac_addresses:
+                    node = api.node.Node.create(
+                        request,
+                        ssh_address=data['ssh_address'],
+                        ssh_username=data.get('ssh_username'),
+                        ssh_key_contents=data.get('ssh_key_contents'),
+                        mac_addresses=[mac_address],
+                        driver='pxe_ssh'
+                    )
+                    api.node.Node.set_maintenance(request,
+                                                  node.uuid,
+                                                  True)
+                    api.node.Node.set_power_state(request,
+                                                  node.uuid,
+                                                  'reboot')
             except Exception:
                 success = False
                 exceptions.handle(request, _('Unable to register node.'))
