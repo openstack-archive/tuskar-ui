@@ -11,6 +11,7 @@
 #    under the License.
 
 import logging
+import time
 
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
@@ -223,6 +224,7 @@ class IronicNode(base.APIResourceWrapper):
         :type  power_state: str
         """
         node = ironicclient(request).node.set_power_state(uuid, power_state)
+        time.sleep(5)
         return cls(node, request)
 
     @classmethod
