@@ -163,7 +163,7 @@ class OvercloudPlan(base.APIResourceWrapper):
 
     @cached_property
     def role_list(self):
-        return [OvercloudRole.get(self._request, role['uuid'])
+        return [OvercloudRole.get(self._request, role.uuid)
                 for role in self.roles]
 
     @cached_property
