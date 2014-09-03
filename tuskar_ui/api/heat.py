@@ -393,7 +393,7 @@ class Resource(base.APIResourceWrapper):
             self._role = kwargs['role']
 
     @classmethod
-    def get_by_node(cls, request, node):
+    def get_by_node(cls, request, node, all_resources=None):
         """Return the specified Heat Resource given a Node
 
         :param request: request object
@@ -409,12 +409,30 @@ class Resource(base.APIResourceWrapper):
         # TODO(tzumainn): this is terribly inefficient, but I don't see a
         # better way.  Maybe if Heat set some node metadata. . . ?
         if node.instance_uuid:
-            for stack in Stack.list(request):
-                for resource in stack.resources(with_joins=False):
-                    if resource.physical_resource_id == node.instance_uuid:
-                        return resource
+            if all_resources is None:
+                resource_list = cls.list_all_resources(request)
+            else:
+                resource_list = all_resources
+            for resource in resource_list:
+                if resource.physical_resource_id == node.instance_uuid:
+                    return resource
         msg = _('Could not find resource matching node "%s"') % node.uuid
         raise exceptions.NotFound(msg)
+
+    @classmethod
+    def list_all_resources(cls, request):
+        """Iterate through all the stacks and return all relevant resources
+
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :return: list of resources
+        :rtype:  list of tuskar_ui.api.heat.Resource
+        """
+        all_resources = []
+        for stack in Stack.list(request):
+            all_resources.extend(stack.resources(with_joins=False))
+        return all_resources
 
     @cached_property
     def role(self):

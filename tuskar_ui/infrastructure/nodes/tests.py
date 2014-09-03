@@ -95,9 +95,10 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                 'image_get.return_value': image,
             }),
             patch('tuskar_ui.api.heat.Resource', **{
-                'spec_set': ['get_by_node'],  # Only allow these attributes
+                'spec_set': ['get_by_node', 'list_all_resources'],
                 'get_by_node.side_effect': (
                     self._raise_horizon_exception_not_found),
+                'list_all_resources.return_value': [],
             }),
         ) as (_OvercloudRole, Node, _nova, _glance, _resource):
             res = self.client.get(INDEX_URL + '?tab=nodes__registered')
@@ -315,9 +316,10 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                 'image_get.return_value': image,
             }),
             patch('tuskar_ui.api.heat.Resource', **{
-                'spec_set': ['get_by_node'],  # Only allow these attributes
+                'spec_set': ['get_by_node', 'list_all_resources'],
                 'get_by_node.side_effect': (
                     self._raise_horizon_exception_not_found),
+                'list_all_resources.return_value': [],
             }),
         ) as (mock_node_client, mock_node, mock_role, mock_nova, mock_glance,
               mock_resource):
@@ -362,9 +364,10 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                 'image_get.return_value': image,
             }),
             patch('tuskar_ui.api.heat.Resource', **{
-                'spec_set': ['get_by_node'],  # Only allow these attributes
+                'spec_set': ['get_by_node', 'list_all_resources'],
                 'get_by_node.side_effect': (
                     self._raise_horizon_exception_not_found),
+                'list_all_resources.return_value': [],
             }),
         ) as (mock_node_client, mock_node, mock_role, mock_nova, mock_glance,
               mock_resource):
