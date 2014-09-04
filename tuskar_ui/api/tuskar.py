@@ -50,7 +50,7 @@ def tuskarclient(request, password=None):
 
 
 class OvercloudPlan(base.APIResourceWrapper):
-    _attrs = ('id', 'uuid', 'name', 'description', 'created_at', 'modified_at',
+    _attrs = ('uuid', 'name', 'description', 'created_at', 'modified_at',
               'roles', 'parameters')
 
     def __init__(self, apiresource, request=None):
@@ -78,7 +78,7 @@ class OvercloudPlan(base.APIResourceWrapper):
         return cls(plan, request=request)
 
     @classmethod
-    def patch(cls, request, plan_id, name, description):
+    def patch(cls, request, plan_id, parameters):
         """Update an OvercloudPlan in Tuskar
 
         :param request: request object
@@ -87,18 +87,17 @@ class OvercloudPlan(base.APIResourceWrapper):
         :param plan_id: id of the plan we want to update
         :type  plan_id: string
 
-        :param name: plan name
-        :type  name: string
-
-        :param description: plan description
-        :type  description: string
+        :param parameters: new values for the plan's parameters
+        :type  parameters: dict
 
         :return: the updated OvercloudPlan object
         :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
         """
-        plan = tuskarclient(request).plans.patch(plan_uuid=plan_id,
-                                                 name=name,
-                                                 description=description)
+        parameter_list = [{
+            'name': unicode(name),
+            'value': unicode(value),
+        } for (name, value) in parameters.items()]
+        plan = tuskarclient(request).plans.patch(plan_id, parameter_list)
         return cls(plan, request=request)
 
     @classmethod
@@ -206,6 +205,10 @@ class OvercloudPlan(base.APIResourceWrapper):
         if parameter is not None:
             return parameter['value']
         return default
+
+    @property
+    def id(self):
+        return self.uuid
 
 
 class OvercloudRole(base.APIResourceWrapper):
