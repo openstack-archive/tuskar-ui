@@ -6,7 +6,7 @@ django_openstack_auth>=1.1.6
 eventlet>=0.15.1
 kombu>=2.4.8
 iso8601>=0.1.9
-netaddr>=0.7.6
+netaddr>=0.7.12
 os-cloud-config
 python-cinderclient>=1.0.7
 python-glanceclient>=0.13.1
