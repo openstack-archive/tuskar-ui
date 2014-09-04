@@ -140,8 +140,10 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
             else:
                 # stack is active
                 total = sum(d['total_node_count'] for d in roles)
-                context['progress'] = 100 * sum(d.get('deployed_node_count', 0)
-                                                for d in roles) // (total or 1)
+                context['progress'] = max(
+                    5, 100 * sum(d.get('deployed_node_count', 0)
+                                 for d in roles) // (total or 1)
+                )
                 context['dashboard_urls'] = stack.dashboard_urls
 
         return context

@@ -90,7 +90,7 @@ class OverviewTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(
             res, 'infrastructure/overview/index.html')
         self.assertTemplateUsed(
-            res, 'infrastructure/overview/_role_nodes.html')
+            res, 'infrastructure/overview/role_nodes_edit.html')
 
     def test_index_stack_not_created_post(self):
         with contextlib.nested(
@@ -140,7 +140,7 @@ class OverviewTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(
             res, 'infrastructure/overview/index.html')
         self.assertTemplateUsed(
-            res, 'infrastructure/overview/_deployment_status.html')
+            res, 'infrastructure/overview/deployment_live.html')
 
     def test_index_stack_undeploy_in_progress(self):
         stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
@@ -163,7 +163,7 @@ class OverviewTests(test.BaseAdminViewTests):
         self.assertTemplateUsed(
             res, 'infrastructure/overview/index.html')
         self.assertTemplateUsed(
-            res, 'infrastructure/overview/_deployment_status.html')
+            res, 'infrastructure/overview/deployment_progress.html')
 
     def test_deploy_get(self):
         with _mock_plan():
