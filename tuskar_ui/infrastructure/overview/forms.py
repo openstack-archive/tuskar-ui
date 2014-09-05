@@ -114,23 +114,23 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
     def build_endpoints(self, plan):
         return {
             "ceilometer": {
-                "password": plan.parameter_value('CeilometerPassword')},
+                "password": plan.parameter_value('controller-1::CeilometerPassword')},
             "cinder": {
-                "password": plan.parameter_value('CinderPassword')},
+                "password": plan.parameter_value('controller-1::CinderPassword')},
             "ec2": {
-                "password": plan.parameter_value('GlancePassword')},
+                "password": plan.parameter_value('controller-1::GlancePassword')},
             "glance": {
-                "password": plan.parameter_value('GlancePassword')},
+                "password": plan.parameter_value('controller-1::GlancePassword')},
             "heat": {
-                "password": plan.parameter_value('HeatPassword')},
+                "password": plan.parameter_value('controller-1::HeatPassword')},
             "neutron": {
-                "password": plan.parameter_value('NeutronPassword')},
+                "password": plan.parameter_value('controller-1::NeutronPassword')},
             "nova": {
-                "password": plan.parameter_value('NovaPassword')},
+                "password": plan.parameter_value('controller-1::NovaPassword')},
             "novav3": {
-                "password": plan.parameter_value('NovaPassword')},
+                "password": plan.parameter_value('controller-1::NovaPassword')},
             "swift": {
-                "password": plan.parameter_value('SwiftPassword')},
+                "password": plan.parameter_value('controller-1::SwiftPassword')},
             "horizon": {'port': ''}}
 
     def handle(self, request, data):
@@ -138,9 +138,10 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
             plan = api.tuskar.Plan.get_the_plan(request)
             stack = api.heat.Stack.get_by_plan(self.request, plan)
 
-            admin_token = plan.parameter_value('AdminToken')
-            admin_password = plan.parameter_value('AdminPassword')
+            admin_token = plan.parameter_value('controller-1::AdminToken')
+            admin_password = plan.parameter_value('controller-1::AdminPassword')
             admin_email = 'example@example.org'
+
             auth_ip = stack.keystone_ip
             auth_url = stack.keystone_auth_url
             auth_tenant = 'admin'

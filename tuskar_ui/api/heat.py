@@ -10,6 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import yaml
 import logging
 import urlparse
 
@@ -87,9 +88,41 @@ class Stack(base.APIResourceWrapper):
             'template': template,
             'environment': environment,
             'files': provider_resource_templates,
-            'password': 'password',
+            'password': '',
         }
-        stack = heat.stack_create(request, **fields)
+        with open('plan_template', 'w') as f:
+            f.write(template)
+
+
+        parameters = yaml.load(fields['environment'])
+        new_params = {'parameters': {
+             'compute-1::SnmpdReadonlyUserPassword': 'f8bdf41e6fc95e742aac592a8613fe105ca91d94',
+             'compute-1::SnmpdReadonlyUserName': 'ro_snmp_user',
+             'compute-1::count': '1',
+             'controller-1::KeystoneSigningCertificate': "-----BEGIN CERTIFICATE-----\nMIIDJDCCAgygAwIBAgIBAjANBgkqhkiG9w0BAQUFADBTMQswCQYDVQQGEwJYWDEO\nMAwGA1UECBMFVW5zZXQxDjAMBgNVBAcTBVVuc2V0MQ4wDAYDVQQKEwVVbnNldDEU\nMBIGA1UEAxMLS2V5c3RvbmUgQ0EwHhcNMTQwODI4MTA1ODQ2WhcNMjQwODI1MTA1\nODQ2WjBYMQswCQYDVQQGEwJYWDEOMAwGA1UECBMFVW5zZXQxDjAMBgNVBAcTBVVu\nc2V0MQ4wDAYDVQQKEwVVbnNldDEZMBcGA1UEAxMQS2V5c3RvbmUgU2lnbmluZzCC\nASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANbS0JohYNK1TUXtiyjlM+OW\nr/TU81mawgVGUkzIRgbqD0XL3cHxxTAXbnPRQ8PwV8xB62kOn4mUiIpwoNOY2uHI\niIjfjMx1fXxX+IfMVA5NklugVdcbP2Exjf7uI3h+JZYb3wBqhGBvh+Y9qZE//ohF\nsRumli/8X/FdRd3wojuvD4yV8P+d3/Ji/hRqvHhNcSbGgQD9NnZGPkSe4tbhKIm0\nf7+lbYsjl6rHnYsBB7rVAjdy6CZJltmUwTfyLjLX+FYJ8Dqinz2oroWGtoRoIaH9\ns4mw32nLiG+h+xLN2tKBMdtlsb7GGZhshet528TANimRWYaBfyVRDzD7sPLWFPMC\nAwEAATANBgkqhkiG9w0BAQUFAAOCAQEAQic/jmHGqQjlixrILvzamEOm24Ej/Q6x\niX65TxQU2IsxOroxbTTXqdizLu9k4PA4iESrJhhxv2AwQZtNdIbb4xZiPEnKpKoz\nR7m+mKasebLTH9MLE9uSQzzA+C8RENP3egMnokl+3/CAZRpqI2v5A/IQBgGmROCn\n26NEd5swFAH1Yo9edbRoKVWTrFv3maDwKhoLcZvPi8d87+T7U6DYIBsY58KljUJI\nSGFEfHbvIoChWbj6HRqwZvvFw5isdhnM7UM4OjU/XQw1W2a8BFiGHTZWc84hSIE9\nFqxboFkNFjWqAm/IhaxWbvq5wgVQLFalx8gS76ZKlBW0mi58n30U2A==\n-----END CERTIFICATE-----\n",
+             'controller-1::KeystoneCACertificate': "-----BEGIN CERTIFICATE-----\nMIIDNzCCAh+gAwIBAgIBATANBgkqhkiG9w0BAQUFADBTMQswCQYDVQQGEwJYWDEO\nMAwGA1UECBMFVW5zZXQxDjAMBgNVBAcTBVVuc2V0MQ4wDAYDVQQKEwVVbnNldDEU\nMBIGA1UEAxMLS2V5c3RvbmUgQ0EwHhcNMTQwODI4MTA1ODQ2WhcNMjQwODI1MTA1\nODQ2WjBTMQswCQYDVQQGEwJYWDEOMAwGA1UECBMFVW5zZXQxDjAMBgNVBAcTBVVu\nc2V0MQ4wDAYDVQQKEwVVbnNldDEUMBIGA1UEAxMLS2V5c3RvbmUgQ0EwggEiMA0G\nCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDJaTHMlUZ3/8d1axL/C7tV8JsSqU8D\nhHq7y5mfXppOI8xKi8eiIYdxNzqqoADPLZmU8MciDHkOY2bR4CSS8Qn+GJj8ocIi\nuH6G9w8tNokktmMuD8jCYOFFKklWcWrB8KTV4y0zVWX9CjFp9bw3N0I5owjq6+P9\nC+pbC2ETqxmP0Ma6FDm8moGj3dSL4cAyEUU7PZ7DaQ2k/j6ol0AXbdI041AyD4Zi\nqLcKKOgfwNIzfUjGONk3VhDb/Q0m3PG61H3+Ep6IUZooUhrP5LzLNl9ZgBiHntXM\nQtpvKgBwFdRaALptZBTJKQzHh48VHV54jbpc4C+b0ywhAGwNN5qeP0GVAgMBAAGj\nFjAUMBIGA1UdEwEB/wQIMAYBAf8CAQAwDQYJKoZIhvcNAQEFBQADggEBAEdMjrlY\njslUkWGpKHZa03FeChg7m+drVjlhLhDqOI2wfqHQiXjoCKNDf5tV1C5ihvy//L1Q\nK5xTmAR3Oqv1oXvnx907Zee02SZswlPk9gt20UmJd/0mOX0DVXANRvqbRzXOPX0Z\nS6VLA6lDIG2jyLZby2qIXK0dobJEK1WfuqBE9fSId3+V76quok8Q1EPUSuLGvcR8\nWT7WQrutvynDSVZe0pJLd/Qgp6vGrATPyhFctFGKMHNqwCY8qnn5vi6VEg1LZLqr\nu0wYU+9PtbsjiHbpf7vNkio0hP4iXF7VxVxBhQxKKgVu+UZVmjltyTUVOrl0pG/N\nU2JqNP9SiGnLtcQ=\n-----END CERTIFICATE-----\n",
+             'controller-1::SnmpdReadonlyUserPassword': 'f8bdf41e6fc95e742aac592a8613fe105ca91d94',
+             'controller-1::count': '1',
+             'controller-1::KeystoneSigningKey': "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDW0tCaIWDStU1F\n7Yso5TPjlq/01PNZmsIFRlJMyEYG6g9Fy93B8cUwF25z0UPD8FfMQetpDp+JlIiK\ncKDTmNrhyIiI34zMdX18V/iHzFQOTZJboFXXGz9hMY3+7iN4fiWWG98AaoRgb4fm\nPamRP/6IRbEbppYv/F/xXUXd8KI7rw+MlfD/nd/yYv4Uarx4TXEmxoEA/TZ2Rj5E\nnuLW4SiJtH+/pW2LI5eqx52LAQe61QI3cugmSZbZlME38i4y1/hWCfA6op89qK6F\nhraEaCGh/bOJsN9py4hvofsSzdrSgTHbZbG+xhmYbIXredvEwDYpkVmGgX8lUQ8w\n+7Dy1hTzAgMBAAECggEAM08U3ctdGdaNx0buNu1PkGs8SYjXOq6Y6rOaEpa/CwW6\nchw4Mgtx4oOmMOlpexIblkCkXmpMtoqQdihicUeP999ypOZn9amWOC22wZCO/v+O\nFm5cMk1ivO8eECaGuE/A4HJ1t965EWNyHQ7bQkL7o0ap/4WxV3K646Y4esLvrLs6\nQDV6xqbqZgp2ggDFnau7meH0gr73l7uYR4ELoIc06rmAZM1pKGRdcFL5UhdYnibh\nY9Joesmj0mQiwMB+jknFRu+KnwVmfKZ5dpRbzG7fpBMKSZm4drSOp2esRNnX+04U\ndp/x7b/giH1MgjDvcM8XVmdX+uFgJTq9Wb6AW5lq+QKBgQDrpSDGmYUJl16Y3TA8\nutRzIH0rSvWasibRXg3hsRlpZnoMheg6s2Ce2zrXwIsM/a8cGCPs+h5y6Cfsgoqe\naP5LF4thst9Jxoev6lYyiwMz6iIUKtVeZJbh+CWHBlL+vZGVoRRWXqy3iJpaNSKd\nf3FL/b9sdsweNgPVMa7i2iDLJQKBgQDpYUFnPHJYgcOB4L2FzOwPODl/PZHRAWrF\ncX6Fg1kh7/tzK+f7roGrnyZMyAu6T0CyBWfu9/6+aaH/ZW0Rc7idWicyfkbmJ4wu\nbSuaWc9+mvKxbpcsS8rL/CqaeUT9dZMpNcfnLie0hCNnj/tV/T2kS7u1x2Ha1S9i\n1+drsE2wNwKBgBWqx0q7jvoEyxPvMqJC44n6cMfsSo0A2ITjyw73g8inPY2tOl87\nYyT4L37rG14EbXd92L/Pd8FFC3a5whkyuj8ZWR2Qnutfr9ZDC8317kN1wdBs59WY\nFi+M65ZwxGzb7Wj+uKoAZo0xqE+nFxm4QCimmlVUzwvwF4Yg3V3KhL1pAoGANWXW\nRBu1ggC2zfmxA3M+s8DGjxF0UqEDYAe2zi+ebkBthQ2Pt6tW6gCxD7JZ1Jgbkl/g\nRvIhLEoZEcmQKgUTQZWGEGyKJlD4Jws9hcR00F/9lZFbL3xr+z5INS34FhIXyL8Q\nbRnHZesx+pkcBbG6r+PQIChtgFd0zyXdQmuFawMCgYEAgJYGey9Zj5xB6uaXRQfi\nLQG2blqIEsXNQkryzV4LJl/w6I9uThrsFafXZfbQL8kKAMp+GRG+675K0DankZUk\nKyZm9etkT9vkRpg1XFV2hqBlrZLxDn8R1/nxjnN938zfJBJrATrSV1x6P2hsGKQ0\nJk6XQWnmEqQfjYbg85GQk6M=\n-----END PRIVATE KEY-----\n",
+             'controller-1::SnmpdReadonlyUserName': 'ro_snmp_user',
+             'NeutronControlPlaneID': 'be31a08e-4b1a-4392-a21b-86e82b8311db',
+             'NeutronEnableTunnelling': False
+            },
+            'resource_registry': {
+                'Tuskar::controller-1': 'provider-controller-1.yaml',
+                'Tuskar::compute-1': 'provider-compute-1.yaml'}}
+
+        parameters.update(new_params)
+
+        fields['environment'] = yaml.dump(parameters)
+
+        #fields['template'] = yaml.dump(yaml.load(open("plan.yaml", 'r')))
+        #fields['environment'] = yaml.dump(yaml.load(open("plan-env.yaml", 'r')))
+
+        try:
+            stack = heat.stack_create(request, **fields)
+        except Exception as e:
+            import pdb; pdb.set_trace()
         return cls(stack, request=request)
 
     @classmethod
@@ -338,7 +371,7 @@ class Stack(base.APIResourceWrapper):
             return overcloud_keystoneclient(
                 self._request,
                 self.keystone_auth_url,
-                self.plan.parameter_value('AdminPassword'))
+                self.plan.parameter_value('controller-1::AdminPassword'))
         except Exception:
             LOG.debug('Unable to connect to overcloud keystone.')
             return None
