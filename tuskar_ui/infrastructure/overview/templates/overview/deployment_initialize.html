@@ -4,7 +4,7 @@
 {% load url from future%}
 
 {% block deployment-icon %}
-  <i class="glyphicon glyphicon-warning-sign text-warning"></i>
+  <i class="fa fa-exclamation-triangle text-warning"></i>
 {% endblock %}
 
 {% block deployment-title %}{% trans "Initialization" %}{% endblock %}
@@ -17,7 +17,7 @@
   {{ block.super }}
   <a href="{% url 'horizon:infrastructure:overview:post_deploy_init' %}"
      class="btn btn-primary ajax-modal">
-     <i class="glyphicon glyphicon-flag"></i>
+     <i class="fa fa-flag-checkered"></i>
      {% trans "Initialize" %}
   </a>
 {% endblock %}

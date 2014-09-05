@@ -4,7 +4,7 @@
 {% load url from future%}
 
 {% block deployment-icon %}
-  <i class="glyphicon glyphicon-ok-circle text-success"></i>
+  <i class="fa fa-check-circle text-success"></i>
 {% endblock %}
 
 {% block deployment-title %}
@@ -14,7 +14,7 @@
 {% block deployment-buttons %}
   <a href="{% url 'horizon:infrastructure:overview:deploy_confirmation' %}"
    class="btn btn-primary ajax-modal btn-default">
-    <i class="glyphicon glyphicon-ok"></i>
+    <i class="fa fa-rocket"></i>
     {% trans "Deploy" %}
   </a>
 {% endblock %}
