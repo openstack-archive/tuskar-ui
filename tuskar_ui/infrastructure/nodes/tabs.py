@@ -84,16 +84,17 @@ class RegisteredTab(tabs.TableTab):
         if 'errors' in self.request.GET:
             return api.node.filter_nodes(nodes, healthy=False)
 
-        for node in nodes:
-            # TODO(tzumainn): this could probably be done more efficiently
-            # by getting the resource for all nodes at once
-            try:
-                resource = api.heat.Resource.get_by_node(self.request, node)
-                node.role_name = resource.role.name
-                node.role_id = resource.role.id
-                node.stack_id = resource.stack.id
-            except exceptions.NotFound:
-                node.role_name = '-'
+        if nodes:
+            all_resources = api.heat.Resource.list_all_resources(self.request)
+            for node in nodes:
+                try:
+                    resource = api.heat.Resource.get_by_node(
+                        self.request, node, all_resources=all_resources)
+                    node.role_name = resource.role.name
+                    node.role_id = resource.role.id
+                    node.stack_id = resource.stack.id
+                except exceptions.NotFound:
+                    node.role_name = '-'
 
         return nodes
 
