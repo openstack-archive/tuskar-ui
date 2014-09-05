@@ -131,7 +131,7 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
                 "password": plan.parameter_value('NovaPassword')},
             "swift": {
                 "password": plan.parameter_value('SwiftPassword')},
-            "horizon": {}}
+            "horizon": {'port': ''}}
 
     def handle(self, request, data):
         try:
