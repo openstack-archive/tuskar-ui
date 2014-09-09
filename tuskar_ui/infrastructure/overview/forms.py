@@ -37,7 +37,7 @@ def _get_role_count(plan, role):
 class EditPlan(horizon.forms.SelfHandlingForm):
     def __init__(self, *args, **kwargs):
         super(EditPlan, self).__init__(*args, **kwargs)
-        self.plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+        self.plan = api.tuskar.Plan.get_the_plan(self.request)
         self.fields.update(self._role_count_fields(self.plan))
 
     def _role_count_fields(self, plan):
@@ -73,7 +73,7 @@ class EditPlan(horizon.forms.SelfHandlingForm):
 class DeployOvercloud(horizon.forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
-            plan = api.tuskar.OvercloudPlan.get_the_plan(request)
+            plan = api.tuskar.Plan.get_the_plan(request)
             stack = api.heat.Stack.get_by_plan(self.request, plan)
             if not stack:
                 api.heat.Stack.create(request,
@@ -95,7 +95,7 @@ class DeployOvercloud(horizon.forms.SelfHandlingForm):
 class UndeployOvercloud(horizon.forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
-            plan = api.tuskar.OvercloudPlan.get_the_plan(request)
+            plan = api.tuskar.Plan.get_the_plan(request)
             stack = api.heat.Stack.get_by_plan(self.request, plan)
             if stack:
                 api.heat.Stack.delete(request, stack.id)
@@ -135,7 +135,7 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
 
     def handle(self, request, data):
         try:
-            plan = api.tuskar.OvercloudPlan.get_the_plan(request)
+            plan = api.tuskar.Plan.get_the_plan(request)
             stack = api.heat.Stack.get_by_plan(self.request, plan)
 
             admin_token = plan.parameter_value('AdminToken')

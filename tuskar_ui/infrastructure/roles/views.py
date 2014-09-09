@@ -26,12 +26,12 @@ from tuskar_ui.infrastructure.roles import tables
 INDEX_URL = 'horizon:infrastructure:roles:index'
 
 
-class OvercloudRoleMixin(object):
+class RoleMixin(object):
     @memoized.memoized
     def get_role(self, redirect=None):
         role_id = self.kwargs['role_id']
-        role = api.tuskar.OvercloudRole.get(self.request, role_id,
-                                            _error_redirect=redirect)
+        role = api.tuskar.Role.get(self.request, role_id,
+                                   _error_redirect=redirect)
         return role
 
 
@@ -40,7 +40,7 @@ class StackMixin(object):
     def get_stack(self, redirect=None):
         if redirect is None:
             redirect = reverse(INDEX_URL)
-        plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+        plan = api.tuskar.Plan.get_the_plan(self.request)
         stack = api.heat.Stack.get_by_plan(self.request, plan)
 
         return stack
@@ -51,8 +51,8 @@ class IndexView(horizon_tables.DataTableView):
     template_name = "infrastructure/roles/index.html"
 
     def get_data(self):
-        roles = api.tuskar.OvercloudRole.list(self.request)
-        plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+        roles = api.tuskar.Role.list(self.request)
+        plan = api.tuskar.Plan.get_the_plan(self.request)
         for role in roles:
             role_flavor = role.flavor(plan)
             role_image = role.image(plan)
@@ -68,7 +68,7 @@ class IndexView(horizon_tables.DataTableView):
         return roles
 
 
-class DetailView(horizon_tables.DataTableView, OvercloudRoleMixin, StackMixin):
+class DetailView(horizon_tables.DataTableView, RoleMixin, StackMixin):
     table_class = tables.NodeTable
     template_name = 'infrastructure/roles/detail.html'
 
@@ -101,7 +101,7 @@ class DetailView(horizon_tables.DataTableView, OvercloudRoleMixin, StackMixin):
         context = super(DetailView, self).get_context_data(**kwargs)
         redirect = reverse(INDEX_URL)
 
-        plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+        plan = api.tuskar.Plan.get_the_plan(self.request)
         stack = self.get_stack(redirect)
         role = self.get_role(redirect)
 

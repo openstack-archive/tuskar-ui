@@ -35,15 +35,15 @@ from tuskar_ui.infrastructure.parameters import views
 class ParametersTest(test.BaseAdminViewTests):
 
     def test_index(self):
-        plans = [api.tuskar.OvercloudPlan(plan)
+        plans = [api.tuskar.Plan(plan)
                  for plan in self.tuskarclient_plans.list()]
-        roles = [api.tuskar.OvercloudRole(role)
+        roles = [api.tuskar.Role(role)
                  for role in self.tuskarclient_roles.list()]
 
         with contextlib.nested(
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+                patch('tuskar_ui.api.tuskar.Plan.list',
                       return_value=plans),
-                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                patch('tuskar_ui.api.tuskar.Role.list',
                       return_value=roles),
         ):
             res = self.client.get(INDEX_URL)
