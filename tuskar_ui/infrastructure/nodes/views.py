@@ -111,10 +111,10 @@ class PerformanceView(base.TemplateView):
     LABELS = {
         'hardware.cpu.load.1min': _("CPU load 1 min average"),
         'hardware.system_stats.cpu.util': _("CPU utilization"),
-        'hardware.system_stats.io.raw_sent': _("IO raw sent"),
-        'hardware.system_stats.io.raw_received': _("IO raw received"),
-        'hardware.network.ip.out_requests': _("IP out requests"),
-        'hardware.network.ip.in_receives': _("IP in requests"),
+        'hardware.system_stats.io.outgoing.blocks': _("IO raw sent"),
+        'hardware.system_stats.io.incoming.blocks': _("IO raw received"),
+        'hardware.network.ip.outgoing.datagrams': _("IP out requests"),
+        'hardware.network.ip.incoming.datagrams': _("IP in requests"),
         'hardware.memory.swap.util': _("Swap utilization"),
     }
 
@@ -167,13 +167,13 @@ class PerformanceView(base.TemplateView):
             # Disk and Network I/O: data from 2 meters in one chart
             if meter == 'disk-io':
                 meters = metering_utils.get_meters([
-                    'hardware.system_stats.io.raw_sent',
-                    'hardware.system_stats.io.raw_received'
+                    'hardware.system_stats.io.outgoing.blocks',
+                    'hardware.system_stats.io.incoming.blocks'
                 ])
             elif meter == 'network-io':
                 meters = metering_utils.get_meters([
-                    'hardware.network.ip.out_requests',
-                    'hardware.network.ip.in_receives'
+                    'hardware.network.ip.outgoing.datagrams',
+                    'hardware.network.ip.incoming.datagrams'
                 ])
             else:
                 meters = metering_utils.get_meters([meter])
