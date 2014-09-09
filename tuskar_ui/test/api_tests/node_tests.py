@@ -59,6 +59,24 @@ class NodeAPITests(test.APITestCase):
         self.assertIsInstance(ret_val, api.node.Node)
         self.assertIsInstance(ret_instance, servers.Server)
 
+    def test_node_get_with_ironic(self):
+        node = self.ironicclient_nodes.first()
+        instance = self.novaclient_servers.first()
+
+        with patch('tuskar_ui.api.node.NodeClient.ironic_enabled',
+                   return_value=True):
+            with patch('openstack_dashboard.api.nova.server_get',
+                       return_value=instance):
+                with patch('ironicclient.v1.node.NodeManager.get',
+                           return_value=node):
+                    with patch('openstack_dashboard.api.nova.server_list',
+                               return_value=([instance], False)):
+                        ret_val = api.node.Node.get(self.request, node.uuid)
+                        ret_instance = ret_val.instance
+
+        self.assertIsInstance(ret_val, api.node.Node)
+        self.assertIsInstance(ret_instance, servers.Server)
+
     def test_node_get_by_instance_uuid(self):
         instance = self.novaclient_servers.first()
         node = self.baremetalclient_nodes.first()

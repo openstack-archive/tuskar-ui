@@ -485,7 +485,7 @@ class Node(base.APIResourceWrapper):
             driver=driver))
 
     @classmethod
-    @handle_errors(_("Unable to retrieve node"))
+    #@handle_errors(_("Unable to retrieve node"))
     def get(cls, request, uuid):
         node = NodeClient(request).node_class.get(request, uuid)
         if node.instance_uuid is not None:
