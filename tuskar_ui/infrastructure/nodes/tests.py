@@ -65,7 +65,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
     def test_registered_nodes(self):
         registered_nodes = [api.node.Node(api.node.IronicNode(node))
                             for node in self.ironicclient_nodes.list()]
-        roles = [api.tuskar.OvercloudRole(r)
+        roles = [api.tuskar.Role(r)
                  for r in TEST_DATA.tuskarclient_roles.list()]
         instance = TEST_DATA.novaclient_servers.first()
         image = TEST_DATA.glanceclient_images.first()
@@ -77,7 +77,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             node.ip_address = '1.1.1.1'
 
         with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
+            patch('tuskar_ui.api.tuskar.Role', **{
                 'spec_set': ['list', 'name'],
                 'list.return_value': roles,
             }),
@@ -100,7 +100,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                     self._raise_horizon_exception_not_found),
                 'list_all_resources.return_value': [],
             }),
-        ) as (_OvercloudRole, Node, _nova, _glance, _resource):
+        ) as (_Role, Node, _nova, _glance, _resource):
             res = self.client.get(INDEX_URL + '?tab=nodes__registered')
             # FIXME(lsmola) horrible count, optimize
             self.assertEqual(Node.list.call_count, 6)
@@ -285,7 +285,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         registered_nodes = [api.node.Node(api.node.IronicNode(node))
                             for node in self.ironicclient_nodes.list()]
         node = registered_nodes[6]
-        roles = [api.tuskar.OvercloudRole(r)
+        roles = [api.tuskar.Role(r)
                  for r in TEST_DATA.tuskarclient_roles.list()]
         instance = TEST_DATA.novaclient_servers.first()
         image = TEST_DATA.glanceclient_images.first()
@@ -302,7 +302,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                 'list.return_value': registered_nodes,
                 'set_power_state.return_value': node,
             }),
-            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
+            patch('tuskar_ui.api.tuskar.Role', **{
                 'spec_set': ['list', 'name'],
                 'list.return_value': roles,
             }),
@@ -333,7 +333,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         registered_nodes = [api.node.Node(api.node.IronicNode(node))
                             for node in self.ironicclient_nodes.list()]
         node = registered_nodes[8]
-        roles = [api.tuskar.OvercloudRole(r)
+        roles = [api.tuskar.Role(r)
                  for r in TEST_DATA.tuskarclient_roles.list()]
         instance = TEST_DATA.novaclient_servers.first()
         image = TEST_DATA.glanceclient_images.first()
@@ -350,7 +350,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                 'list.return_value': registered_nodes,
                 'set_power_state.return_value': node,
             }),
-            patch('tuskar_ui.api.tuskar.OvercloudRole', **{
+            patch('tuskar_ui.api.tuskar.Role', **{
                 'spec_set': ['list', 'name'],
                 'list.return_value': roles,
             }),

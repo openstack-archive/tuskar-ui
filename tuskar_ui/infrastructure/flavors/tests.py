@@ -67,15 +67,15 @@ def _prepare_create():
 class FlavorsTest(test.BaseAdminViewTests):
 
     def test_index(self):
-        plans = [api.tuskar.OvercloudPlan(plan, self.request)
+        plans = [api.tuskar.Plan(plan, self.request)
                  for plan in TEST_DATA.tuskarclient_plans.list()]
-        roles = [api.tuskar.OvercloudRole(role)
+        roles = [api.tuskar.Role(role)
                  for role in self.tuskarclient_roles.list()]
 
         with contextlib.nested(
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+                patch('tuskar_ui.api.tuskar.Plan.list',
                       return_value=plans),
-                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                patch('tuskar_ui.api.tuskar.Role.list',
                       return_value=roles),
                 patch('openstack_dashboard.api.nova.flavor_list',
                       return_value=TEST_DATA.novaclient_flavors.list()),
@@ -140,9 +140,9 @@ class FlavorsTest(test.BaseAdminViewTests):
                 patch('openstack_dashboard.api.nova.flavor_delete'),
                 patch('openstack_dashboard.api.nova.server_list',
                       return_value=([], False)),
-                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                patch('tuskar_ui.api.tuskar.Role.list',
                       return_value=[]),
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+                patch('tuskar_ui.api.tuskar.Plan.list',
                       return_value=[]),
                 patch('openstack_dashboard.api.glance.image_list_detailed',
                       return_value=([], False)),
@@ -170,9 +170,9 @@ class FlavorsTest(test.BaseAdminViewTests):
                 patch('openstack_dashboard.api.nova.flavor_delete'),
                 patch('openstack_dashboard.api.nova.server_list',
                       return_value=([server], False)),
-                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                patch('tuskar_ui.api.tuskar.Role.list',
                       return_value=[]),
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+                patch('tuskar_ui.api.tuskar.Plan.list',
                       return_value=[]),
                 patch('openstack_dashboard.api.glance.image_list_detailed',
                       return_value=([], False)),
@@ -194,9 +194,9 @@ class FlavorsTest(test.BaseAdminViewTests):
                       side_effect=images),
                 patch('tuskar_ui.api.flavor.Flavor.get',
                       return_value=flavor),
-                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                patch('tuskar_ui.api.tuskar.Role.list',
                       return_value=roles),
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.get_the_plan',
+                patch('tuskar_ui.api.tuskar.Plan.get_the_plan',
                       side_effect=Exception)
         ) as (image_mock, get_mock, roles_mock, plan_mock):
             res = self.client.get(urlresolvers.reverse(DETAILS_VIEW,
@@ -211,7 +211,7 @@ class FlavorsTest(test.BaseAdminViewTests):
         flavor = api.flavor.Flavor(TEST_DATA.novaclient_flavors.first())
         images = TEST_DATA.glanceclient_images.list()[:2]
         roles = TEST_DATA.tuskarclient_roles.list()
-        plan = api.tuskar.OvercloudPlan(
+        plan = api.tuskar.Plan(
             TEST_DATA.tuskarclient_plans.first())
         stack = api.heat.Stack(
             TEST_DATA.heatclient_stacks.first())
@@ -220,9 +220,9 @@ class FlavorsTest(test.BaseAdminViewTests):
                       side_effect=images),
                 patch('tuskar_ui.api.flavor.Flavor.get',
                       return_value=flavor),
-                patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+                patch('tuskar_ui.api.tuskar.Role.list',
                       return_value=roles),
-                patch('tuskar_ui.api.tuskar.OvercloudPlan.get_the_plan',
+                patch('tuskar_ui.api.tuskar.Plan.get_the_plan',
                       return_value=plan),
                 patch('tuskar_ui.api.heat.Stack.get',
                       return_value=stack),

@@ -42,17 +42,17 @@ tuskar_data.data(TEST_DATA)
 class RolesTest(test.BaseAdminViewTests):
 
     def test_index_get(self):
-        roles = [api.tuskar.OvercloudRole(role)
+        roles = [api.tuskar.Role(role)
                  for role in self.tuskarclient_roles.list()]
-        plans = [api.tuskar.OvercloudPlan(plan)
+        plans = [api.tuskar.Plan(plan)
                  for plan in self.tuskarclient_plans.list()]
         flavor = self.novaclient_flavors.first()
         image = self.glanceclient_images.first()
 
         with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+            patch('tuskar_ui.api.tuskar.Plan.list',
                   return_value=plans),
-            patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+            patch('tuskar_ui.api.tuskar.Role.list',
                   return_value=roles),
             patch('openstack_dashboard.api.glance.image_get',
                   return_value=image),
@@ -63,16 +63,16 @@ class RolesTest(test.BaseAdminViewTests):
         self.assertTemplateUsed(res, 'infrastructure/roles/index.html')
 
     def test_detail_get(self):
-        roles = [api.tuskar.OvercloudRole(role)
+        roles = [api.tuskar.Role(role)
                  for role in self.tuskarclient_roles.list()]
-        plans = [api.tuskar.OvercloudPlan(plan)
+        plans = [api.tuskar.Plan(plan)
                  for plan in self.tuskarclient_plans.list()]
         flavor = self.novaclient_flavors.first()
         image = self.glanceclient_images.first()
         stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
 
         with contextlib.nested(
-            patch('tuskar_ui.api.tuskar.OvercloudRole.list',
+            patch('tuskar_ui.api.tuskar.Role.list',
                   return_value=roles),
             patch('tuskar_ui.api.heat.Stack.get_by_plan',
                   return_value=stack),
@@ -80,7 +80,7 @@ class RolesTest(test.BaseAdminViewTests):
                   return_value=[]),
             patch('tuskar_ui.api.heat.Stack.resources',
                   return_value=[]),
-            patch('tuskar_ui.api.tuskar.OvercloudPlan.list',
+            patch('tuskar_ui.api.tuskar.Plan.list',
                   return_value=plans),
             patch('openstack_dashboard.api.glance.image_get',
                   return_value=image),

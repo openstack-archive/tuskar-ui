@@ -122,7 +122,7 @@ class Stack(base.APIResourceWrapper):
     @classmethod
     @handle_errors(_("Unable to retrieve stack"))
     def get_by_plan(cls, request, plan):
-        """Return the Heat Stack associated with an OvercloudPlan
+        """Return the Heat Stack associated with a Plan
 
         :return: Heat Stack associated with the plan; or None
                  if no Stack is associated, or no Stack can be
@@ -211,7 +211,7 @@ class Stack(base.APIResourceWrapper):
         """Return count of associated Resources
 
         :param overcloud_role: role of resources to be counted; None means all
-        :type  overcloud_role: tuskar_ui.api.tuskar.OvercloudRole
+        :type  overcloud_role: tuskar_ui.api.tuskar.Role
 
         :return: Number of matching resources
         :rtype:  int
@@ -228,21 +228,21 @@ class Stack(base.APIResourceWrapper):
 
     @cached_property
     def plan(self):
-        """return associated OvercloudPlan if a plan_id exists within stack
+        """return associated Plan if a plan_id exists within stack
         parameters.
 
-        :return: associated OvercloudPlan if plan_id exists and a matching plan
+        :return: associated Plan if plan_id exists and a matching plan
                  exists as well; None otherwise
-        :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
+        :rtype:  tuskar_ui.api.tuskar.Plan
         """
         # TODO(lsmola) replace this by actual reference, I am pretty sure
         # the relation won't be stored in parameters, that would mean putting
         # that into template, which doesn't make sense
         #if 'plan_id' in self.parameters:
-        #    return tuskar.OvercloudPlan.get(self._request,
+        #    return tuskar.Plan.get(self._request,
         #                                    self.parameters['plan_id'])
         try:
-            plan = tuskar.OvercloudPlan.list(self._request)[0]
+            plan = tuskar.Plan.list(self._request)[0]
         except IndexError:
             return None
         return plan
@@ -436,11 +436,11 @@ class Resource(base.APIResourceWrapper):
 
     @cached_property
     def role(self):
-        """Return the OvercloudRole associated with this Resource
+        """Return the Role associated with this Resource
 
-        :return: OvercloudRole associated with this Resource, or None if no
-                 OvercloudRole is associated
-        :rtype:  tuskar_ui.api.tuskar.OvercloudRole
+        :return: Role associated with this Resource, or None if no
+                 Role is associated
+        :rtype:  tuskar_ui.api.tuskar.Role
         """
         if hasattr(self, '_role'):
             return self._role

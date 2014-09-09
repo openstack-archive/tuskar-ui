@@ -66,9 +66,9 @@ def _mock_plan(**kwargs):
     }
     params.update(kwargs)
     with patch(
-            'tuskar_ui.api.tuskar.OvercloudPlan', **params) as OvercloudPlan:
-        plan = OvercloudPlan
-        yield OvercloudPlan
+            'tuskar_ui.api.tuskar.Plan', **params) as Plan:
+        plan = Plan
+        yield Plan
 
 
 class OverviewTests(test.BaseAdminViewTests):
@@ -80,7 +80,7 @@ class OverviewTests(test.BaseAdminViewTests):
                       return_value=[]),
         ):
             res = self.client.get(INDEX_URL)
-            get_the_plan = api.tuskar.OvercloudPlan.get_the_plan
+            get_the_plan = api.tuskar.Plan.get_the_plan
             request = get_the_plan.call_args_list[0][0][0]
             self.assertListEqual(get_the_plan.call_args_list, [
                 call(request),
@@ -107,13 +107,13 @@ class OverviewTests(test.BaseAdminViewTests):
             res = self.client.post(INDEX_URL, data)
             self.assertNoFormErrors(res)
             self.assertRedirectsNoFollow(res, INDEX_URL)
-            get_the_plan = api.tuskar.OvercloudPlan.get_the_plan
+            get_the_plan = api.tuskar.Plan.get_the_plan
             request = get_the_plan.call_args_list[0][0][0]
             self.assertListEqual(get_the_plan.call_args_list, [
                 call(request),
             ])
             self.assertListEqual(
-                api.tuskar.OvercloudPlan.patch.call_args_list,
+                api.tuskar.Plan.patch.call_args_list,
                 [call(request, plan.id, {})],
             )
 
@@ -126,11 +126,11 @@ class OverviewTests(test.BaseAdminViewTests):
                       return_value=stack),
                 patch('tuskar_ui.api.heat.Stack.events',
                       return_value=[]),
-        ) as (OvercloudPlan, stack_get_mock, stack_events_mock):
+        ) as (Plan, stack_get_mock, stack_events_mock):
             res = self.client.get(INDEX_URL)
-            request = OvercloudPlan.get_the_plan.call_args_list[0][0][0]
+            request = Plan.get_the_plan.call_args_list[0][0][0]
             self.assertListEqual(
-                OvercloudPlan.get_the_plan.call_args_list,
+                Plan.get_the_plan.call_args_list,
                 [
                     call(request),
                     call(request),

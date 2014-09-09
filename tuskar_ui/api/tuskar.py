@@ -49,17 +49,17 @@ def tuskarclient(request, password=None):
     return client
 
 
-class OvercloudPlan(base.APIResourceWrapper):
+class Plan(base.APIResourceWrapper):
     _attrs = ('uuid', 'name', 'description', 'created_at', 'modified_at',
               'roles', 'parameters')
 
     def __init__(self, apiresource, request=None):
-        super(OvercloudPlan, self).__init__(apiresource)
+        super(Plan, self).__init__(apiresource)
         self._request = request
 
     @classmethod
     def create(cls, request, name, description):
-        """Create an OvercloudPlan in Tuskar
+        """Create a Plan in Tuskar
 
         :param request: request object
         :type  request: django.http.HttpRequest
@@ -70,8 +70,8 @@ class OvercloudPlan(base.APIResourceWrapper):
         :param description: plan description
         :type  description: string
 
-        :return: the created OvercloudPlan object
-        :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
+        :return: the created Plan object
+        :rtype:  tuskar_ui.api.tuskar.Plan
         """
         plan = tuskarclient(request).plans.create(name=name,
                                                   description=description)
@@ -79,7 +79,7 @@ class OvercloudPlan(base.APIResourceWrapper):
 
     @classmethod
     def patch(cls, request, plan_id, parameters):
-        """Update an OvercloudPlan in Tuskar
+        """Update a Plan in Tuskar
 
         :param request: request object
         :type  request: django.http.HttpRequest
@@ -90,8 +90,8 @@ class OvercloudPlan(base.APIResourceWrapper):
         :param parameters: new values for the plan's parameters
         :type  parameters: dict
 
-        :return: the updated OvercloudPlan object
-        :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
+        :return: the updated Plan object
+        :rtype:  tuskar_ui.api.tuskar.Plan
         """
         parameter_list = [{
             'name': unicode(name),
@@ -108,7 +108,7 @@ class OvercloudPlan(base.APIResourceWrapper):
         :type  request: django.http.HttpRequest
 
         :return: list of OvercloudPlans, or an empty list if there are none
-        :rtype:  list of tuskar_ui.api.tuskar.OvercloudPlan
+        :rtype:  list of tuskar_ui.api.tuskar.Plan
         """
         plans = tuskarclient(request).plans.list()
         return [cls(plan, request=request) for plan in plans]
@@ -116,17 +116,17 @@ class OvercloudPlan(base.APIResourceWrapper):
     @classmethod
     @handle_errors(_("Unable to retrieve plan"))
     def get(cls, request, plan_id):
-        """Return the OvercloudPlan that matches the ID
+        """Return the Plan that matches the ID
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param plan_id: id of OvercloudPlan to be retrieved
+        :param plan_id: id of Plan to be retrieved
         :type  plan_id: int
 
-        :return: matching OvercloudPlan, or None if no OvercloudPlan matches
+        :return: matching Plan, or None if no Plan matches
                  the ID
-        :rtype:  tuskar_ui.api.tuskar.OvercloudPlan
+        :rtype:  tuskar_ui.api.tuskar.Plan
         """
         plan = tuskarclient(request).plans.get(plan_uuid=plan_id)
         return cls(plan, request=request)
@@ -150,7 +150,7 @@ class OvercloudPlan(base.APIResourceWrapper):
 
     @classmethod
     def delete(cls, request, plan_id):
-        """Delete an OvercloudPlan
+        """Delete a Plan
 
         :param request: request object
         :type  request: django.http.HttpRequest
@@ -162,7 +162,7 @@ class OvercloudPlan(base.APIResourceWrapper):
 
     @cached_property
     def role_list(self):
-        return [OvercloudRole.get(self._request, role.uuid)
+        return [Role.get(self._request, role.uuid)
                 for role in self.roles]
 
     @cached_property
@@ -211,11 +211,11 @@ class OvercloudPlan(base.APIResourceWrapper):
         return self.uuid
 
 
-class OvercloudRole(base.APIResourceWrapper):
+class Role(base.APIResourceWrapper):
     _attrs = ('uuid', 'name', 'version', 'description', 'created')
 
     def __init__(self, apiresource, request=None):
-        super(OvercloudRole, self).__init__(apiresource)
+        super(Role, self).__init__(apiresource)
         self._request = request
 
     @classmethod
@@ -228,7 +228,7 @@ class OvercloudRole(base.APIResourceWrapper):
 
         :return: list of Overcloud Roles, or an empty list if there
                  are none
-        :rtype:  list of tuskar_ui.api.tuskar.OvercloudRole
+        :rtype:  list of tuskar_ui.api.tuskar.Role
         """
         roles = tuskarclient(request).roles.list()
         return [cls(role, request=request) for role in roles]
@@ -236,42 +236,42 @@ class OvercloudRole(base.APIResourceWrapper):
     @classmethod
     @handle_errors(_("Unable to retrieve overcloud role"))
     def get(cls, request, role_id):
-        """Return the Tuskar OvercloudRole that matches the ID
+        """Return the Tuskar Role that matches the ID
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
-        :param role_id: ID of OvercloudRole to be retrieved
+        :param role_id: ID of Role to be retrieved
         :type  role_id: int
 
-        :return: matching OvercloudRole, or None if no matching
-                 OvercloudRole can be found
-        :rtype:  tuskar_ui.api.tuskar.OvercloudRole
+        :return: matching Role, or None if no matching
+                 Role can be found
+        :rtype:  tuskar_ui.api.tuskar.Role
         """
-        for role in OvercloudRole.list(request):
+        for role in Role.list(request):
             if role.uuid == role_id:
                 return role
 
     @classmethod
     @handle_errors(_("Unable to retrieve overcloud role"))
     def get_by_image(cls, request, plan, image):
-        """Return the Tuskar OvercloudRole whose ImageID
+        """Return the Tuskar Role whose ImageID
         parameter matches the passed in image
 
         :param request: request object
         :type  request: django.http.HttpRequest
 
         :param plan: associated plan to check against
-        :type  plan: OvercloudPlan
+        :type  plan: Plan
 
         :param image: image to be matched
         :type  image: Image
 
-        :return: matching OvercloudRole, or None if no matching
-                 OvercloudRole can be found
-        :rtype:  tuskar_ui.api.tuskar.OvercloudRole
+        :return: matching Role, or None if no matching
+                 Role can be found
+        :rtype:  tuskar_ui.api.tuskar.Role
         """
-        for role in OvercloudRole.list(request):
+        for role in Role.list(request):
             image_id_from_plan = plan.parameter_value(
                 role.image_id_parameter_name)
             if image_id_from_plan == image.id:
@@ -280,7 +280,7 @@ class OvercloudRole(base.APIResourceWrapper):
     @classmethod
     @handle_errors(_("Unable to retrieve overcloud role"))
     def get_by_resource_type(cls, request, resource_type):
-        for role in OvercloudRole.list(request):
+        for role in Role.list(request):
             if role.provider_resource_type == resource_type:
                 return role
 

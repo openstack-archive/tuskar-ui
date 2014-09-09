@@ -108,7 +108,7 @@ class Flavor(object):
         servers = nova.server_list(request)[0]
         deployed_ids = set(server.flavor['id'] for server in servers)
         deployed_names = []
-        for plan in tuskar_ui.api.tuskar.OvercloudPlan.list(request):
+        for plan in tuskar_ui.api.tuskar.Plan.list(request):
             deployed_names.extend(
                 [plan.parameter_value(role.instance_type_parameter_name)
                  for role in plan.role_list])

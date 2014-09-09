@@ -32,7 +32,7 @@ class IndexView(horizon_tables.DataTableView):
     template_name = "infrastructure/parameters/index.html"
 
     def get_data(self):
-        plan = api.tuskar.OvercloudPlan.get_the_plan(self.request)
+        plan = api.tuskar.Plan.get_the_plan(self.request)
         base_parameters = plan.parameter_list(
             include_key_parameters=False)
         params = [ServiceParameter(param, ind)
