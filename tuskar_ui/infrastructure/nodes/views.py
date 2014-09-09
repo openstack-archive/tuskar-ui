@@ -156,13 +156,13 @@ class PerformanceView(base.TemplateView):
         series = []
 
         try:
-            ip_addr = node.ip_address
+            instance_uuid = node.instance_uuid
         except AttributeError:
             pass
         else:
             query = [{'field': 'resource_id',
                       'op': 'eq',
-                      'value': ip_addr}]
+                      'value': instance_uuid}]
 
             # Disk and Network I/O: data from 2 meters in one chart
             if meter == 'disk-io':
