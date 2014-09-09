@@ -84,7 +84,7 @@ Set up your ``local_settings.py`` file:
 
 ::
 
-    cp ../tuskar-ui/local_settings.py.example openstack_dashboard/local/local_settings.py
+    cp openstack_dashboard/local/local_settings.py.example openstack_dashboard/local/local_settings.py
 
 Open up the copied ``local_settings.py`` file in your preferred text
 editor. You will want to customize several settings:
@@ -94,8 +94,6 @@ editor. You will want to customize several settings:
    ``OPENSTACK_KEYSTONE_DEFAULT_ROLE`` settings are correct for your
    environment. (They should be correct unless you modified your
    OpenStack server to change them.)
--  ``TUSKAR_ENDPOINT_URL`` should point to the Tuskar server you
-   configured. It normally runs on port 8585.
 
 Install Tuskar UI with all dependencies in your virtual environment::
 
