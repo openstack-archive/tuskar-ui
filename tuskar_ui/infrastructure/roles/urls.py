@@ -22,4 +22,6 @@ urlpatterns = urls.patterns(
     urls.url(r'^$', views.IndexView.as_view(), name='index'),
     urls.url(r'^(?P<role_id>[^/]+)/$', views.DetailView.as_view(),
              name='detail'),
+    urls.url(r'^(?P<role_id>[^/]+)/performance/$',
+             views.PerformanceView.as_view(), name='performance'),
 )
