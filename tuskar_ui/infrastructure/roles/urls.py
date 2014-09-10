@@ -24,5 +24,6 @@ urlpatterns = urls.patterns(
              name='detail'),
     urls.url(r'^(?P<role_id>[^/]+)/edit$', views.UpdateView.as_view(),
              name='update'),
-
+    urls.url(r'^(?P<role_id>[^/]+)/performance/$',
+             views.PerformanceView.as_view(), name='performance'),
 )
