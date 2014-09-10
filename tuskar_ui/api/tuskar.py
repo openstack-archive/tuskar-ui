@@ -162,7 +162,7 @@ class Plan(base.APIResourceWrapper):
 
     @cached_property
     def role_list(self):
-        return [Role.get(self._request, role.uuid)
+        return [Role.get(self._request, role['uuid'])
                 for role in self.roles]
 
     @cached_property
@@ -302,14 +302,14 @@ class Role(base.APIResourceWrapper):
 
     @property
     def image_id_parameter_name(self):
-        return self.parameter_prefix + 'image_id'
+        return self.parameter_prefix + 'Image'
 
     @property
     def instance_type_parameter_name(self):
-        return self.parameter_prefix + 'instance_type'
+        return self.parameter_prefix + 'Flavor'
 
     def image(self, plan):
-        image_id = plan.parameter_value(self.image_id_parameter_name)
+        image_id = 'd25459d4-2284-473c-9f8d-aa8dd0903d69' #plan.parameter_value(self.image_id_parameter_name)
         if image_id:
             return glance.image_get(self._request, image_id)
 
