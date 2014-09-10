@@ -302,11 +302,11 @@ class Role(base.APIResourceWrapper):
 
     @property
     def image_id_parameter_name(self):
-        return self.parameter_prefix + 'image_id'
+        return self.parameter_prefix + 'Image'
 
     @property
     def instance_type_parameter_name(self):
-        return self.parameter_prefix + 'instance_type'
+        return self.parameter_prefix + 'Flavor'
 
     def image(self, plan):
         image_id = plan.parameter_value(self.image_id_parameter_name)
