@@ -11,10 +11,13 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import json
 
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
+from django import http
 from django.utils.translation import ugettext_lazy as _
+from django.views.generic import base
 
 from glanceclient import exc as glance_exc
 from horizon import exceptions as horizon_exceptions
@@ -22,9 +25,12 @@ from horizon import tables as horizon_tables
 from horizon import utils
 from horizon import workflows
 
+from openstack_dashboard.api import base as api_base
+
 from tuskar_ui import api
 from tuskar_ui.infrastructure.roles import tables
 from tuskar_ui.infrastructure.roles import workflows as role_workflows
+from tuskar_ui.utils import metering as metering_utils
 
 
 INDEX_URL = 'horizon:infrastructure:roles:index'
@@ -123,6 +129,23 @@ class DetailView(horizon_tables.DataTableView, RoleMixin, StackMixin):
         # won't work right now
         context['image'] = role.image(plan)
 
+        if stack:
+            if api_base.is_service_enabled(self.request, 'metering'):
+                # Meter configuration in the following format:
+                # (meter label, url part, barchart (True/False))
+                context['meter_conf'] = (
+                    (_('System Load'),
+                     metering_utils.url_part('hardware.cpu.load.1min', False),
+                     None),
+                    (_('CPU Utilization'),
+                     metering_utils.url_part('hardware.system_stats.cpu.util',
+                                             True),
+                     '100'),
+                    (_('Swap Utilization'),
+                     metering_utils.url_part('hardware.memory.swap.util',
+                                             True),
+                     '100'),
+                )
         return context
 
 
@@ -157,3 +180,31 @@ class UpdateView(workflows.WorkflowView):
                 'flavor': role_flavor,
                 'image': role_image,
                 }
+
+
+class PerformanceView(base.TemplateView, RoleMixin, StackMixin):
+    def get(self, request, *args, **kwargs):
+        meter = request.GET.get('meter')
+        date_options = request.GET.get('date_options')
+        date_from = request.GET.get('date_from')
+        date_to = request.GET.get('date_to')
+        stats_attr = request.GET.get('stats_attr', 'avg')
+        barchart = bool(request.GET.get('barchart'))
+
+        plan = api.tuskar.Plan.get_the_plan(self.request)
+        role = self.get_role(None)
+        role.image(plan)
+
+        try:
+            image = role.image(plan)
+            image_uuid = image.id
+        except AttributeError:
+            json_output = None
+        else:
+            json_output = metering_utils.get_nodes_stats(
+                request, image_uuid, meter, date_options=date_options,
+                date_from=date_from, date_to=date_to, stats_attr=stats_attr,
+                barchart=barchart, group_by='image_id')
+
+        return http.HttpResponse(json.dumps(json_output),
+                                 mimetype='application/json')

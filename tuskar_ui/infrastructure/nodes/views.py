@@ -132,103 +132,26 @@ class DetailView(horizon_tabs.TabView):
 
 
 class PerformanceView(base.TemplateView):
-    LABELS = {
-        'hardware.cpu.load.1min': _("CPU load 1 min average"),
-        'hardware.system_stats.cpu.util': _("CPU utilization"),
-        'hardware.system_stats.io.outgoing.blocks': _("IO raw sent"),
-        'hardware.system_stats.io.incoming.blocks': _("IO raw received"),
-        'hardware.network.ip.outgoing.datagrams': _("IP out requests"),
-        'hardware.network.ip.incoming.datagrams': _("IP in requests"),
-        'hardware.memory.swap.util': _("Swap utilization"),
-    }
-
-    @staticmethod
-    def _series_for_meter(aggregates,
-                          meter_id,
-                          meter_name,
-                          stats_name,
-                          unit):
-        """Construct datapoint series for a meter from resource aggregates."""
-        series = []
-        for resource in aggregates:
-            if resource.get_meter(meter_name):
-                name = PerformanceView.LABELS.get(meter_id, meter_name)
-                point = {'unit': unit,
-                         'name': unicode(name),
-                         'meter': meter_id,
-                         'data': []}
-                for statistic in resource.get_meter(meter_name):
-                    date = statistic.duration_end[:19]
-                    value = float(getattr(statistic, stats_name))
-                    point['data'].append({'x': date, 'y': value})
-                series.append(point)
-        return series
-
     def get(self, request, *args, **kwargs):
         meter = request.GET.get('meter')
         date_options = request.GET.get('date_options')
         date_from = request.GET.get('date_from')
         date_to = request.GET.get('date_to')
         stats_attr = request.GET.get('stats_attr', 'avg')
-        group_by = request.GET.get('group_by')
         barchart = bool(request.GET.get('barchart'))
 
         node_uuid = kwargs.get('node_uuid')
         node = api.node.Node.get(request, node_uuid)
 
-        unit = ''
-        series = []
-
         try:
             instance_uuid = node.instance_uuid
         except AttributeError:
-            pass
+            json_output = None
         else:
-            query = [{'field': 'resource_id',
-                      'op': 'eq',
-                      'value': instance_uuid}]
-
-            # Disk and Network I/O: data from 2 meters in one chart
-            if meter == 'disk-io':
-                meters = metering_utils.get_meters([
-                    'hardware.system_stats.io.outgoing.blocks',
-                    'hardware.system_stats.io.incoming.blocks'
-                ])
-            elif meter == 'network-io':
-                meters = metering_utils.get_meters([
-                    'hardware.network.ip.outgoing.datagrams',
-                    'hardware.network.ip.incoming.datagrams'
-                ])
-            else:
-                meters = metering_utils.get_meters([meter])
-
-            date_from, date_to = metering_utils._calc_date_args(
-                date_from,
-                date_to,
-                date_options)
-
-            for meter_id, meter_name in meters:
-                resources, unit = metering_utils.query_data(
-                    request=request,
-                    date_from=date_from,
-                    date_to=date_to,
-                    group_by=group_by,
-                    meter=meter_id,
-                    query=query)
-                serie = self._series_for_meter(
-                    resources,
-                    meter_id,
-                    meter_name,
-                    stats_attr,
-                    unit)
-                series += serie
-
-        json_output = metering_utils.create_json_output(
-            series,
-            barchart,
-            unit,
-            date_from,
-            date_to)
+            json_output = metering_utils.get_nodes_stats(
+                request, instance_uuid, meter, date_options=date_options,
+                date_from=date_from, date_to=date_to, stats_attr=stats_attr,
+                barchart=barchart)
 
         return http.HttpResponse(json.dumps(json_output),
                                  content_type='application/json')
