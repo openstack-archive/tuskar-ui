@@ -58,6 +58,15 @@ SETTINGS = {
     }
 }
 
+LABELS = {
+    'hardware.cpu.load.1min': _("CPU load 1 min average"),
+    'hardware.system_stats.cpu.util': _("CPU utilization"),
+    'hardware.system_stats.io.outgoing.blocks': _("IO raw sent"),
+    'hardware.system_stats.io.incoming.blocks': _("IO raw received"),
+    'hardware.network.ip.outgoing.datagrams': _("IP out requests"),
+    'hardware.network.ip.incoming.datagrams': _("IP in requests"),
+    'hardware.memory.swap.util': _("Swap utilization"),
+}
 
 #TODO(lsmola) this should probably live in Horizon common
 def query_data(request,
@@ -90,20 +99,21 @@ def query_data(request,
         unit = meter_list[0].unit
     except Exception:
         unit = ""
-    if group_by == "resources":
-        # TODO(lsmola) need to implement group_by groups of resources
-        resources = []
-        unit = ""
-    else:
-        ceilometer_usage = ceilometer.CeilometerUsage(request)
-        try:
+
+    ceilometer_usage = ceilometer.CeilometerUsage(request)
+    try:
+        if group_by:
+            resources = ceilometer_usage.resource_aggregates_with_statistics(
+                query, [meter], period=period, stats_attr=None,
+                additional_query=additional_query)
+        else:
             resources = ceilometer_usage.resources_with_statistics(
                 query, [meter], period=period, stats_attr=None,
                 additional_query=additional_query)
-        except Exception:
-            resources = []
-            exceptions.handle(request,
-                              _('Unable to retrieve statistics.'))
+    except Exception:
+        resources = []
+        exceptions.handle(request,
+                          _('Unable to retrieve statistics.'))
     return resources, unit
 
 
@@ -217,4 +227,88 @@ def create_json_output(series, barchart, unit, date_from, date_to):
 
     json_output = {'series': series}
     json_output = dict(json_output.items() + settings.items())
+    return json_output
+
+def _series_for_meter(aggregates,
+                      meter_id,
+                      meter_name,
+                      stats_name,
+                      unit):
+    """Construct datapoint series for a meter from resource aggregates."""
+    series = []
+    for resource in aggregates:
+        if resource.get_meter(meter_name):
+            name = LABELS.get(meter_id, meter_name)
+            point = {'unit': unit,
+                     'name': unicode(name),
+                     'meter': meter_id,
+                     'data': []}
+            for statistic in resource.get_meter(meter_name):
+                date = statistic.duration_end[:19]
+                value = float(getattr(statistic, stats_name))
+                point['data'].append({'x': date, 'y': value})
+            series.append(point)
+    return series
+
+def get_nodes_stats(request, uuid, meter, date_options=None, date_from=None,
+                    date_to=None, stats_attr=None, barchart=None,
+                    group_by=None):
+
+    unit = ''
+    series = []
+
+    if uuid:
+        if group_by == "image_id":
+            query = {}
+            image_query = [{"field": "metadata.%s" % group_by,
+                            "op": "eq",
+                            "value": uuid}]
+            query[uuid] = image_query
+        else:
+            query = [{'field': 'resource_id',
+                      'op': 'eq',
+                      'value': uuid}]
+
+    # Disk and Network I/O: data from 2 meters in one chart
+    if meter == 'disk-io':
+        meters = get_meters([
+            'hardware.system_stats.io.outgoing.blocks',
+            'hardware.system_stats.io.incoming.blocks'
+        ])
+    elif meter == 'network-io':
+        meters = get_meters([
+            'hardware.network.ip.outgoing.datagrams',
+            'hardware.network.ip.incoming.datagrams'
+        ])
+    else:
+        meters = get_meters([meter])
+
+    date_from, date_to = _calc_date_args(
+        date_from,
+        date_to,
+        date_options)
+
+    for meter_id, meter_name in meters:
+        resources, unit = query_data(
+            request=request,
+            date_from=date_from,
+            date_to=date_to,
+            group_by=group_by,
+            meter=meter_id,
+            query=query)
+        serie = _series_for_meter(
+            resources,
+            meter_id,
+            meter_name,
+            stats_attr,
+            unit)
+        series += serie
+
+    json_output = create_json_output(
+        series,
+        barchart,
+        unit,
+        date_from,
+        date_to)
+
     return json_output
