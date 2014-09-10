@@ -23,7 +23,6 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 
 from openstack_dashboard.api import ceilometer
-from openstack_dashboard.dashboards.admin.metering import views as metering
 
 SETTINGS = {
     'settings': {
@@ -94,7 +93,7 @@ def query_data(request,
     # TODO(lsmola) replace this by logic implemented in I1 in bugs
     # 1226479 and 1226482, this is just a quick fix for RC1
     try:
-        meter_list = [m for m in metering.meter_list(request)
+        meter_list = [m for m in ceilometer.meter_list(request)
                       if m.name == meter]
         unit = meter_list[0].unit
     except Exception:
