@@ -90,20 +90,21 @@ def query_data(request,
         unit = meter_list[0].unit
     except Exception:
         unit = ""
-    if group_by == "resources":
-        # TODO(lsmola) need to implement group_by groups of resources
-        resources = []
-        unit = ""
-    else:
-        ceilometer_usage = ceilometer.CeilometerUsage(request)
-        try:
+
+    ceilometer_usage = ceilometer.CeilometerUsage(request)
+    try:
+        if group_by:
+            resources = ceilometer_usage.resource_aggregates_with_statistics(
+                query, [meter], period=period, stats_attr=None,
+                additional_query=additional_query)
+        else:
             resources = ceilometer_usage.resources_with_statistics(
                 query, [meter], period=period, stats_attr=None,
                 additional_query=additional_query)
-        except Exception:
-            resources = []
-            exceptions.handle(request,
-                              _('Unable to retrieve statistics.'))
+    except Exception:
+        resources = []
+        exceptions.handle(request,
+                          _('Unable to retrieve statistics.'))
     return resources, unit
 
 

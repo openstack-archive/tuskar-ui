@@ -150,6 +150,7 @@ class PerformanceView(base.TemplateView):
         barchart = bool(request.GET.get('barchart'))
 
         node_uuid = kwargs.get('node_uuid')
+        image_uuid = kwargs.get('node_uuid')
         node = api.node.Node.get(request, node_uuid)
 
         unit = ''
@@ -160,9 +161,16 @@ class PerformanceView(base.TemplateView):
         except AttributeError:
             pass
         else:
-            query = [{'field': 'resource_id',
-                      'op': 'eq',
-                      'value': instance_uuid}]
+            if group_by == "image_id":
+                query = {}
+                image_query = [{"field": "metadata.image_id",
+                                "op": "eq",
+                                "value": image_uuid}]
+                query[image_uuid] = image_query
+            else:
+                query = [{'field': 'resource_id',
+                          'op': 'eq',
+                          'value': instance_uuid}]
 
             # Disk and Network I/O: data from 2 meters in one chart
             if meter == 'disk-io':
