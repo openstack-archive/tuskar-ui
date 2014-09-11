@@ -108,18 +108,21 @@ class PerformanceView(base.TemplateView):
         stats_attr = request.GET.get('stats_attr', 'avg')
         barchart = bool(request.GET.get('barchart'))
 
-        node_uuid = kwargs.get('node_uuid')
-        node = api.node.Node.get(request, node_uuid)
-
-        try:
-            instance_uuid = node.instance_uuid
-        except AttributeError:
-            json_output = None
+        node_uuid = kwargs.get('node_uuid', None)
+        if node_uuid:
+            node = api.node.Node.get(request, node_uuid)
+            try:
+                instance_uuid = node.instance_uuid
+            except AttributeError:
+                json_output = None
         else:
-            json_output = metering_utils.get_nodes_stats(
-                request, instance_uuid, meter, date_options=date_options,
-                date_from=date_from, date_to=date_to, stats_attr=stats_attr,
-                barchart=barchart)
+            # Aggregated stats for all nodes
+            instance_uuid = None
+
+        json_output = metering_utils.get_nodes_stats(
+            request, instance_uuid, meter, date_options=date_options,
+            date_from=date_from, date_to=date_to,
+            stats_attr=stats_attr, barchart=barchart)
 
         return http.HttpResponse(json.dumps(json_output),
                                  content_type='application/json')
