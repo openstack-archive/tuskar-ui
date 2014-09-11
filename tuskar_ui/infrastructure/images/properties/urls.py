@@ -1,5 +1,3 @@
-# -*- coding: utf8 -*-
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -12,17 +10,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf import urls
+from django.conf.urls import patterns  # noqa
+from django.conf.urls import url  # noqa
 
-from tuskar_ui.infrastructure.images.properties import urls as properties_urls
-from tuskar_ui.infrastructure.images import views
+from tuskar_ui.infrastructure.images.properties import views
 
-urlpatterns = urls.patterns(
+urlpatterns = patterns(
     '',
-    urls.url(r'^$', views.IndexView.as_view(), name='index'),
-    urls.url(r'^create/$', views.CreateView.as_view(), name='create'),
-    urls.url(r'^(?P<image_id>[^/]+)/update/$',
-             views.UpdateView.as_view(), name='update'),
-    urls.url(r'^(?P<id>[^/]+)/properties/',
-             urls.include(properties_urls, namespace='properties')),
+    url(r'^$', views.IndexView.as_view(), name='index'),
+    url(r'^create/$', views.CreateView.as_view(), name='create'),
+    url(r'^(?P<key>[^/]+)/edit/$', views.EditView.as_view(), name='edit')
 )
