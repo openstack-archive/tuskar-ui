@@ -33,6 +33,13 @@ class DeleteImage(project_tables.DeleteImage):
             return True
 
 
+class ViewCustomProperties(tables.LinkAction):
+    name = "properties"
+    verbose_name = _("View Custom Properties")
+    url = "horizon:infrastructure:images:properties:index"
+    classes = ("btn-edit",)
+
+
 class UpdateRow(tables.Row):
     ajax = True
 
@@ -74,4 +81,4 @@ class ImagesTable(tables.DataTable):
         multi_select = False
         table_actions = (CreateImage, DeleteImage,
                          ImageFilterAction)
-        row_actions = (EditImage, DeleteImage)
+        row_actions = (EditImage, ViewCustomProperties, DeleteImage)
