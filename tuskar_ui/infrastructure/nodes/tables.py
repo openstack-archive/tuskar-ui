@@ -136,7 +136,7 @@ class RegisteredNodesTable(tables.DataTable):
     class Meta:
         name = "nodes_table"
         verbose_name = _("Registered Nodes")
-        table_actions = (NodeFilterAction,)
+        table_actions = (NodeFilterAction, DeleteNode)
         row_actions = (DeleteNode, SetPowerStateOn, SetPowerStateOff)
 
     def get_object_id(self, datum):
