@@ -1,38 +1,29 @@
 <div class="well tab-pane{% if active %} active{% endif %}"
      id="tab-{{ form.prefix }}">
-  <div class="form form-inline"><fieldset>
-    <div class="row">
-      <h4>Node Detail</h4>
-    </div>
-    <div class="row">
+  <fieldset>
+    <h4>Node Detail</h4>
+    <div class="fieldgroup">
       <h5>Power Management</h5>
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.driver required=True %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_address %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_username %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_password %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_address %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_username %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_key_contents %}
+      {% include 'horizon/common/_form_field.html' with field=form.driver required=True %}
+      {% include 'horizon/common/_form_field.html' with field=form.ipmi_address %}
+      {% include 'horizon/common/_form_field.html' with field=form.ipmi_username %}
+      {% include 'horizon/common/_form_field.html' with field=form.ipmi_password %}
+      {% include 'horizon/common/_form_field.html' with field=form.ssh_address %}
+      {% include 'horizon/common/_form_field.html' with field=form.ssh_username %}
+      {% include 'horizon/common/_form_field.html' with field=form.ssh_key_contents %}
     </div>
-    <div class="row">
+    <div class="fieldgroup">
       <h5>Networking</h5>
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.mac_addresses required=True %}
+      {% include 'horizon/common/_form_field.html' with field=form.mac_addresses required=True %}
     </div>
-    <div class="row">
-      <div class="col-xs-4">
-        <h5>Hardware</h5>
-      </div>
-      <label class="col-xs-6 checkbox checkbox-inline">
-        {{ form.introspect_hardware }}<small> {{ form.introspect_hardware.label }}</small>
-      </label>
+    <div class="fieldgroup">
+      <h5>Hardware</h5>
+      {% include 'horizon/common/_form_field.html' with field=form.cpu_arch required=True %}
+      {% include 'horizon/common/_form_field.html' with field=form.cpus extra_text=_('units') required=True %}
+      {% include 'horizon/common/_form_field.html' with field=form.memory_mb extra_text=_('MB') required=True %}
+      {% include 'horizon/common/_form_field.html' with field=form.local_gb extra_text=_('GB') required=True %}
     </div>
-    <div class="row" id="register-hardware-fields">
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.cpu_arch required=True %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.cpus extra_text=_('units') required=True %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.memory_mb extra_text=_('MB') required=True %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.local_gb extra_text=_('GB') required=True %}
-    </div>
-  </fieldset></div>
+  </fieldset>
 </div>
 
 <script type="text/javascript">
