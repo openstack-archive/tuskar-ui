@@ -39,6 +39,7 @@ class IndexView(horizon_tabs.TabbedTableView):
         context = super(IndexView, self).get_context_data(**kwargs)
         context['ironic_enabled'] = api.node.NodeClient.ironic_enabled(
             self.request)
+
         return context
 
 
@@ -116,11 +117,15 @@ class PerformanceView(base.TemplateView):
         stats_attr = request.GET.get('stats_attr', 'avg')
         barchart = bool(request.GET.get('barchart'))
 
-        node_uuid = kwargs.get('node_uuid')
-        node = api.node.Node.get(request, node_uuid)
+        node_uuid = kwargs.get('node_uuid', None)
+        if node_uuid:
+            node = api.node.Node.get(request, node_uuid)
 
         try:
-            instance_uuid = node.instance_uuid
+            if node_uuid:
+                instance_uuid = node.instance_uuid
+            else:
+                instance_uuid = None
         except AttributeError:
             json_output = None
         else:
