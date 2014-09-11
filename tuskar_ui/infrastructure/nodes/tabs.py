@@ -18,8 +18,11 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import tabs
 
+from openstack_dashboard.api import base as api_base
+
 from tuskar_ui import api
 from tuskar_ui.infrastructure.nodes import tables
+from tuskar_ui.utils import metering as metering_utils
 
 
 class OverviewTab(tabs.Tab):
@@ -47,7 +50,7 @@ class OverviewTab(tabs.Tab):
         total_nodes_healthy = api.node.filter_nodes(total_nodes, healthy=True)
         total_nodes_up = api.node.filter_nodes(total_nodes, power_state=True)
 
-        return {
+        context = {
             'cpus': cpus,
             'memory_gb': memory_mb / 1024.0,
             'local_gb': local_gb,
@@ -62,6 +65,23 @@ class OverviewTab(tabs.Tab):
             'free_nodes_error': free_nodes_error,
             'free_nodes_down': free_nodes_down,
         }
+
+        if api_base.is_service_enabled(self.request, 'metering'):
+            context['meter_conf'] = (
+                (_('System Load'),
+                 metering_utils.url_part('hardware.cpu.load.1min', False),
+                 None),
+                (_('CPU Utilization'),
+                 metering_utils.url_part('hardware.system_stats.cpu.util',
+                                         True),
+                 '100'),
+                (_('Swap Utilization'),
+                 metering_utils.url_part('hardware.memory.swap.util',
+                                         True),
+                 '100'),
+            )
+
+        return context
 
 
 class RegisteredTab(tabs.TableTab):
