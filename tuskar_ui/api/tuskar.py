@@ -191,7 +191,7 @@ class Plan(base.APIResourceWrapper):
             for role in self.role_list:
                 key_params.extend([role.node_count_parameter_name,
                                    role.image_id_parameter_name,
-                                   role.instance_type_parameter_name])
+                                   role.flavor_parameter_name])
             params = [p for p in params if p['name'] not in key_params]
         return params
 
@@ -302,11 +302,11 @@ class Role(base.APIResourceWrapper):
 
     @property
     def image_id_parameter_name(self):
-        return self.parameter_prefix + 'image_id'
+        return self.parameter_prefix + 'Image'
 
     @property
-    def instance_type_parameter_name(self):
-        return self.parameter_prefix + 'instance_type'
+    def flavor_parameter_name(self):
+        return self.parameter_prefix + 'Flavor'
 
     def image(self, plan):
         image_id = plan.parameter_value(self.image_id_parameter_name)
@@ -314,10 +314,10 @@ class Role(base.APIResourceWrapper):
             return glance.image_get(self._request, image_id)
 
     def flavor(self, plan):
-        instance_type = plan.parameter_value(
-            self.instance_type_parameter_name)
-        if instance_type:
-            return flavor.Flavor.get_by_name(self._request, instance_type)
+        flavor_name = plan.parameter_value(
+            self.flavor_parameter_name)
+        if flavor_name:
+            return flavor.Flavor.get_by_name(self._request, flavor_name)
 
     @property
     def id(self):
