@@ -14,6 +14,7 @@
 
 from django.conf import urls
 
+from tuskar_ui.infrastructure.images.properties import urls as properties_urls
 from tuskar_ui.infrastructure.images import views
 
 urlpatterns = urls.patterns(
@@ -24,4 +25,6 @@ urlpatterns = urls.patterns(
              views.UpdateView.as_view(), name='update'),
     urls.url(r'^(?P<image_id>[^/]+)/detail/$',
              views.DetailView.as_view(), name='detail'),
+    urls.url(r'^(?P<id>[^/]+)/properties/',
+             urls.include(properties_urls, namespace='properties')),
 )
