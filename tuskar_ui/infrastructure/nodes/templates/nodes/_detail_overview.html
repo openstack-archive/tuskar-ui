@@ -1,12 +1,5 @@
-{% extends 'infrastructure/base.html' %}
 {% load i18n %}
-{% block title %}{{ title }}{% endblock %}
 
-{% block page_header %}
-{% include 'horizon/common/_page_header.html' with title=title %}
-{% endblock page_header %}
-
-{% block main %}
 <div class="row node-details">
   <div class="col-lg-6 col-xs-12">
     <h3>{% trans "Status" %}</h3>
@@ -170,5 +163,4 @@
       {% endif %}
     </div>
   </div>
-  {% endblock %}
 </div>
