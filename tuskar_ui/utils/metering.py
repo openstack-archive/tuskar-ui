@@ -270,6 +270,11 @@ def get_nodes_stats(request, uuid, meter, date_options=None, date_from=None,
             query = [{'field': 'resource_id',
                       'op': 'eq',
                       'value': uuid}]
+    else:
+        # query will be aggregated across all resources
+        group_by = "all"
+        query = {}
+        query['all'] = []
 
     # Disk and Network I/O: data from 2 meters in one chart
     if meter == 'disk-io':
