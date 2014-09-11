@@ -266,7 +266,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             )
             self.assertEqual(mock_node.get.call_count, 1)
 
-        self.assertTemplateUsed(res, 'infrastructure/nodes/details.html')
+        self.assertTemplateUsed(res, 'infrastructure/nodes/detail.html')
         self.assertEqual(res.context['node'], node)
 
     def test_node_detail_exception(self):

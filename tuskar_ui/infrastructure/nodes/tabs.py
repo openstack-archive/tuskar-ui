@@ -115,6 +115,15 @@ class MaintenanceTab(tabs.TableTab):
         return nodes
 
 
+class DetailOverviewTab(tabs.Tab):
+    name = _("Overview")
+    slug = "detail_overview"
+    template_name = 'infrastructure/nodes/_detail_overview.html'
+
+    def get_context_data(self, request):
+        return {"node": self.tab_group.kwargs['node']}
+
+
 class NodeTabs(tabs.TabGroup):
     slug = "nodes"
     tabs = (OverviewTab, RegisteredTab)
@@ -125,3 +134,8 @@ class NodeTabs(tabs.TabGroup):
         if api.node.NodeClient.ironic_enabled(request):
             self.tabs = self.tabs + (MaintenanceTab,)
         super(NodeTabs, self).__init__(request, **kwargs)
+
+
+class NodeDetailTabs(tabs.TabGroup):
+    slug = "node_details"
+    tabs = (DetailOverviewTab,)
