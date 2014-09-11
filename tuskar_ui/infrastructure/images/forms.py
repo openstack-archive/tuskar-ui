@@ -1,5 +1,3 @@
-# -*- coding: utf8 -*-
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -12,16 +10,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.conf import urls
+from openstack_dashboard.dashboards.project.images.images import forms
 
-from tuskar_ui.infrastructure.images import views
 
-urlpatterns = urls.patterns(
-    '',
-    urls.url(r'^$', views.IndexView.as_view(), name='index'),
-    urls.url(r'^create/$', views.CreateView.as_view(), name='create'),
-    urls.url(r'^(?P<image_id>[^/]+)/update/$',
-             views.UpdateView.as_view(), name='update'),
-    urls.url(r'^(?P<image_id>[^/]+)/detail/$',
-             views.DetailView.as_view(), name='detail'),
-)
+class CreateImageForm(forms.CreateImageForm):
+    pass
+
+
+class UpdateImageForm(forms.UpdateImageForm):
+    pass

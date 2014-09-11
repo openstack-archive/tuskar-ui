@@ -16,13 +16,17 @@ import contextlib
 
 from django.core import urlresolvers
 
-from mock import patch, call  # noqa
+import mock
+from mock import patch  # noqa
 
 from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 
 INDEX_URL = urlresolvers.reverse(
     'horizon:infrastructure:images:index')
+CREATE_URL = urlresolvers.reverse(
+    'horizon:infrastructure:images:create')
+UPDATE_URL = 'horizon:infrastructure:images:update'
 
 
 class ImagesTest(test.BaseAdminViewTests):
@@ -43,3 +47,28 @@ class ImagesTest(test.BaseAdminViewTests):
             res = self.client.get(INDEX_URL)
 
         self.assertTemplateUsed(res, 'infrastructure/images/index.html')
+
+    def test_create_get(self):
+        res = self.client.get(CREATE_URL)
+
+        self.assertTemplateUsed(res, 'infrastructure/images/create.html')
+
+    def test_update_get(self):
+        image = self.images.list()[0]
+
+        with contextlib.nested(
+            patch('openstack_dashboard.api.glance.image_get',
+                  return_value=image),) as (mocked_get,):
+            res = self.client.post(
+                urlresolvers.reverse(UPDATE_URL, args=(image.id,)))
+
+        mocked_get.assert_called_once_with(mock.ANY, image.id)
+        self.assertTemplateUsed(res, 'infrastructure/images/update.html')
+
+    def test_create_post(self):
+        #TODO(lsmola) can be tested once Tuskar ui is merged into Horizon
+        pass
+
+    def test_update_put(self):
+        #TODO(lsmola) can be tested once Tuskar ui is merged into Horizon
+        pass
