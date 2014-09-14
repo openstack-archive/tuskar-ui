@@ -32,7 +32,29 @@ DRIVER_CHOICES = [
 ]
 
 
-class NodeForm(django.forms.Form):
+def get_driver_info_dict(data):
+    driver = data['driver']
+    driver_dict = {
+        'driver': driver
+    }
+    if driver == 'ipmi':
+        driver_dict.update(
+            # TODO(rdopieralski) If ipmi_address is no longer required,
+            # then we will need to use something else here?
+            ipmi_address=data['ipmi_address'],
+            ipmi_username=data.get('ipmi_username'),
+            ipmi_password=data.get('ipmi_password'),
+        )
+    elif driver == 'pxe_ssh':
+        driver_dict.update(
+            ssh_address=data['ssh_address'],
+            ssh_username=data['ssh_username'],
+            ssh_key_contents=data['ssh_key_contents'],
+        )
+    return driver_dict
+
+
+class BaseNodeFormMixin(django.forms.Form):
     id = django.forms.IntegerField(
         label="",
         required=False,
@@ -112,6 +134,8 @@ class NodeForm(django.forms.Form):
         }),
     )
 
+
+class NodeForm(BaseNodeFormMixin, django.forms.Form):
     cpu_arch = django.forms.ChoiceField(
         label=_("Architecture"),
         required=True,
@@ -159,29 +183,13 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
         success = True
         for form in self:
             data = form.cleaned_data
-            driver = data['driver']
-            kwargs = {}
-            if driver == 'ipmi':
-                kwargs.update(
-                    # TODO(rdopieralski) If ipmi_address is no longer required,
-                    # then we will need to use something else here?
-                    ipmi_address=data['ipmi_address'],
-                    ipmi_username=data.get('ipmi_username'),
-                    ipmi_password=data.get('ipmi_password'),
-                )
-            elif driver == 'pxe_ssh':
-                kwargs.update(
-                    ssh_address=data['ssh_address'],
-                    ssh_username=data['ssh_username'],
-                    ssh_key_contents=data['ssh_key_contents'],
-                )
+            kwargs = get_driver_info_dict(data)
             kwargs.update(
                 cpu_arch=data.get('cpu_arch'),
                 cpus=data.get('cpus'),
                 memory_mb=data.get('memory_mb'),
                 local_gb=data.get('local_gb'),
                 mac_addresses=data['mac_addresses'].split(),
-                driver=driver,
             )
             try:
                 api.node.Node.create(request, **kwargs)
@@ -211,48 +219,18 @@ NodeFormset = django.forms.formsets.formset_factory(NodeForm, extra=1,
                                                     formset=BaseNodeFormset)
 
 
-class AutoDiscoverNodeForm(horizon.forms.SelfHandlingForm):
-    id = django.forms.IntegerField(
-        label="",
-        required=False,
-        widget=django.forms.HiddenInput(),
-    )
-    ssh_address = django.forms.IPAddressField(
-        label=_("SSH Address"),
-        required=False,
-        widget=django.forms.TextInput,
-    )
-    ssh_username = django.forms.CharField(
-        label=_("SSH User"),
-        required=False,
-        widget=django.forms.TextInput,
-    )
-    ssh_key_contents = django.forms.CharField(
-        label=_("SSH Key Contents"),
-        required=False,
-        widget=django.forms.Textarea(attrs={
-            'rows': 2,
-        }),
-    )
-    mac_addresses = tuskar_ui.forms.MultiMACField(
-        label=_("NIC MAC Addresses"),
-        widget=django.forms.Textarea(attrs={
-            'rows': '2',
-        }),
-    )
+class AutoDiscoverNodeForm(BaseNodeFormMixin, horizon.forms.SelfHandlingForm):
 
     def handle(self, request, data):
         success = True
         try:
             mac_addresses = data['mac_addresses'].split()
+            kwargs = get_driver_info_dict(data)
             for mac_address in mac_addresses:
                 node = api.node.Node.create(
                     request,
-                    ssh_address=data['ssh_address'],
-                    ssh_username=data.get('ssh_username'),
-                    ssh_key_contents=data.get('ssh_key_contents'),
                     mac_addresses=[mac_address],
-                    driver='pxe_ssh'
+                    **kwargs
                 )
                 api.node.Node.set_maintenance(request,
                                               node.uuid,
