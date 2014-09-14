@@ -16,7 +16,6 @@ import django.forms
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
-import horizon.forms
 from tuskar_ui import api
 import tuskar_ui.forms
 
@@ -32,7 +31,29 @@ DRIVER_CHOICES = [
 ]
 
 
-class NodeForm(django.forms.Form):
+def get_driver_info_dict(data):
+    driver = data['driver']
+    driver_dict = {
+        'driver': driver
+    }
+    if driver == 'ipmi':
+        driver_dict.update(
+            # TODO(rdopieralski) If ipmi_address is no longer required,
+            # then we will need to use something else here?
+            ipmi_address=data['ipmi_address'],
+            ipmi_username=data.get('ipmi_username'),
+            ipmi_password=data.get('ipmi_password'),
+        )
+    elif driver == 'pxe_ssh':
+        driver_dict.update(
+            ssh_address=data['ssh_address'],
+            ssh_username=data['ssh_username'],
+            ssh_key_contents=data['ssh_key_contents'],
+        )
+    return driver_dict
+
+
+class BaseNodeForm(django.forms.Form):
     id = django.forms.IntegerField(
         label="",
         required=False,
@@ -104,6 +125,18 @@ class NodeForm(django.forms.Form):
             'rows': 2,
         }),
     )
+
+    def get_name(self):
+        try:
+            name = (self.fields['ipmi_address'].value() or
+                    self.fields['ssh_address'].value())
+        except AttributeError:
+            # when the field is not bound
+            name = _("Undefined node")
+        return name
+
+
+class RegisterNodeForm(BaseNodeForm):
     mac_addresses = tuskar_ui.forms.MultiMACField(
         label=_("NIC MAC Addresses"),
         widget=django.forms.Textarea(attrs={
@@ -111,7 +144,6 @@ class NodeForm(django.forms.Form):
             'rows': '2',
         }),
     )
-
     cpu_arch = django.forms.ChoiceField(
         label=_("Architecture"),
         required=True,
@@ -144,44 +176,19 @@ class NodeForm(django.forms.Form):
             attrs={'class': 'form-control'}),
     )
 
-    def get_name(self):
-        try:
-            name = (self.fields['ipmi_address'].value() or
-                    self.fields['ssh_address'].value())
-        except AttributeError:
-            # when the field is not bound
-            name = _("Undefined node")
-        return name
 
-
-class BaseNodeFormset(django.forms.formsets.BaseFormSet):
+class RegisterNodeFormset(django.forms.formsets.BaseFormSet):
     def handle(self, request, data):
         success = True
         for form in self:
             data = form.cleaned_data
-            driver = data['driver']
-            kwargs = {}
-            if driver == 'ipmi':
-                kwargs.update(
-                    # TODO(rdopieralski) If ipmi_address is no longer required,
-                    # then we will need to use something else here?
-                    ipmi_address=data['ipmi_address'],
-                    ipmi_username=data.get('ipmi_username'),
-                    ipmi_password=data.get('ipmi_password'),
-                )
-            elif driver == 'pxe_ssh':
-                kwargs.update(
-                    ssh_address=data['ssh_address'],
-                    ssh_username=data['ssh_username'],
-                    ssh_key_contents=data['ssh_key_contents'],
-                )
+            kwargs = get_driver_info_dict(data)
             kwargs.update(
                 cpu_arch=data.get('cpu_arch'),
                 cpus=data.get('cpus'),
                 memory_mb=data.get('memory_mb'),
                 local_gb=data.get('local_gb'),
                 mac_addresses=data['mac_addresses'].split(),
-                driver=driver,
             )
             try:
                 api.node.Node.create(request, **kwargs)
@@ -207,52 +214,36 @@ class BaseNodeFormset(django.forms.formsets.BaseFormSet):
                 form.cleaned_data['ipmi_password'] = None
 
 
-NodeFormset = django.forms.formsets.formset_factory(NodeForm, extra=1,
-                                                    formset=BaseNodeFormset)
+RegisterNodeFormset = django.forms.formsets.formset_factory(
+    RegisterNodeForm, extra=1,
+    formset=RegisterNodeFormset)
 
 
-class AutoDiscoverNodeForm(horizon.forms.SelfHandlingForm):
-    id = django.forms.IntegerField(
-        label="",
-        required=False,
-        widget=django.forms.HiddenInput(),
-    )
-    ssh_address = django.forms.IPAddressField(
-        label=_("SSH Address"),
-        required=False,
-        widget=django.forms.TextInput,
-    )
-    ssh_username = django.forms.CharField(
-        label=_("SSH User"),
-        required=False,
-        widget=django.forms.TextInput,
-    )
-    ssh_key_contents = django.forms.CharField(
-        label=_("SSH Key Contents"),
+class AutoDiscoverNodeForm(BaseNodeForm):
+    mac_addresses = tuskar_ui.forms.MultiMACField(
+        label=_("NIC MAC Addresses"),
         required=False,
         widget=django.forms.Textarea(attrs={
+            'class': 'form-control switched',
+            'data-switch-on': 'driver',
+            'data-driver-pxe_ssh': _("PXE + SSH"),
             'rows': 2,
         }),
     )
-    mac_addresses = tuskar_ui.forms.MultiMACField(
-        label=_("NIC MAC Addresses"),
-        widget=django.forms.Textarea(attrs={
-            'rows': '2',
-        }),
-    )
+
+
+class AutoDiscoverNodeFormset(django.forms.formsets.BaseFormSet):
 
     def handle(self, request, data):
         success = True
-        try:
-            mac_addresses = data['mac_addresses'].split()
-            for mac_address in mac_addresses:
+        for form in self:
+            data = form.cleaned_data
+            kwargs = get_driver_info_dict(data)
+            try:
                 node = api.node.Node.create(
                     request,
-                    ssh_address=data['ssh_address'],
-                    ssh_username=data.get('ssh_username'),
-                    ssh_key_contents=data.get('ssh_key_contents'),
-                    mac_addresses=[mac_address],
-                    driver='pxe_ssh'
+                    mac_addresses=data['mac_addresses'].split(),
+                    **kwargs
                 )
                 api.node.Node.set_maintenance(request,
                                               node.uuid,
@@ -260,10 +251,14 @@ class AutoDiscoverNodeForm(horizon.forms.SelfHandlingForm):
                 api.node.Node.set_power_state(request,
                                               node.uuid,
                                               'reboot')
-        except Exception:
-            success = False
-            exceptions.handle(request, _('Unable to register node.'))
-            # TODO(rdopieralski) Somehow find out if any port creation
-            # failed and remove the mac addresses that succeeded from
-            # the form.
+            except Exception:
+                success = False
+                exceptions.handle(request, _('Unable to register node.'))
+                # TODO(tzumainn) If there is a failure between steps, do we
+                # have to unregister nodes, delete ports, etc?
         return success
+
+
+AutoDiscoverNodeFormset = django.forms.formsets.formset_factory(
+    AutoDiscoverNodeForm, extra=1,
+    formset=AutoDiscoverNodeFormset)
