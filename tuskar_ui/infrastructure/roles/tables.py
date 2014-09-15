@@ -19,6 +19,14 @@ from horizon import tables
 from tuskar_ui.infrastructure.nodes import tables as nodes_tables
 
 
+class UpdateRole(tables.LinkAction):
+    name = "update"
+    verbose_name = _("Edit Role")
+    url = "horizon:infrastructure:roles:update"
+    classes = ("ajax-modal",)
+    icon = "pencil"
+
+
 class RolesTable(tables.DataTable):
 
     name = tables.Column('name',
@@ -36,7 +44,7 @@ class RolesTable(tables.DataTable):
         name = "roles"
         verbose_name = _("Deployment Roles")
         table_actions = ()
-        row_actions = ()
+        row_actions = (UpdateRole,)
 
 
 class NodeTable(nodes_tables.RegisteredNodesTable):

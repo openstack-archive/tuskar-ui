@@ -13,21 +13,25 @@
 #    under the License.
 
 from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
+from glanceclient import exc as glance_exc
 from horizon import exceptions as horizon_exceptions
 from horizon import tables as horizon_tables
-from horizon.utils import memoized
+from horizon import utils
+from horizon import workflows
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.roles import tables
+from tuskar_ui.infrastructure.roles import workflows as role_workflows
 
 
 INDEX_URL = 'horizon:infrastructure:roles:index'
 
 
 class RoleMixin(object):
-    @memoized.memoized
+    @utils.memoized.memoized
     def get_role(self, redirect=None):
         role_id = self.kwargs['role_id']
         role = api.tuskar.Role.get(self.request, role_id,
@@ -36,7 +40,7 @@ class RoleMixin(object):
 
 
 class StackMixin(object):
-    @memoized.memoized
+    @utils.memoized.memoized
     def get_stack(self, redirect=None):
         if redirect is None:
             redirect = reverse(INDEX_URL)
@@ -55,7 +59,11 @@ class IndexView(horizon_tables.DataTableView):
         plan = api.tuskar.Plan.get_the_plan(self.request)
         for role in roles:
             role_flavor = role.flavor(plan)
-            role_image = role.image(plan)
+            try:
+                role_image = role.image(plan)
+            except glance_exc.HTTPNotFound:
+                # Glance returns a 404 if the image doesn't exist
+                role_image = None
             if role_flavor:
                 role.flavor = role_flavor.name
             else:
@@ -72,7 +80,7 @@ class DetailView(horizon_tables.DataTableView, RoleMixin, StackMixin):
     table_class = tables.NodeTable
     template_name = 'infrastructure/roles/detail.html'
 
-    @memoized.memoized
+    @utils.memoized.memoized
     def _get_nodes(self, stack, role):
         resources = stack.resources(role=role, with_joins=True)
         nodes = [r.node for r in resources]
@@ -116,3 +124,36 @@ class DetailView(horizon_tables.DataTableView, RoleMixin, StackMixin):
         context['image'] = role.image(plan)
 
         return context
+
+
+class UpdateView(workflows.WorkflowView):
+    workflow_class = role_workflows.UpdateRole
+
+    def get_initial(self):
+        role_id = self.kwargs['role_id']
+
+        try:
+            # Get initial role information
+            plan = api.tuskar.Plan.get_the_plan(self.request)
+            role = api.tuskar.Role.get(self.request, role_id)
+        except Exception:
+            horizon_exceptions.handle(self.request,
+                                      _('Unable to retrieve role details.'),
+                                      redirect=reverse_lazy(INDEX_URL))
+
+        role_flavor = role.flavor(plan)
+        if role_flavor is None:
+            role_flavor = ''
+        else:
+            role_flavor = role_flavor.name
+        try:
+            role_image = role.image(plan).id
+        except glance_exc.HTTPNotFound:
+            # Glance returns a 404 if the image doesn't exist
+            role_image = ''
+
+        return {'role_id': role.id,
+                'name': role.name,
+                'flavor': role_flavor,
+                'image': role_image,
+                }
