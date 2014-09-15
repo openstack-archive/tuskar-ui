@@ -113,5 +113,5 @@ class Flavor(object):
                 [plan.parameter_value(role.flavor_parameter_name)
                  for role in plan.role_list])
         return [flavor.id for flavor in cls.list(request)
-                if flavor.id not in deployed_ids
-                and flavor.name not in deployed_names]
+                if flavor.id in deployed_ids
+                or flavor.name in deployed_names]
