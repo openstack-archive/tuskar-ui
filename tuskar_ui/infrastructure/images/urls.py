@@ -20,6 +20,8 @@ urlpatterns = urls.patterns(
     '',
     urls.url(r'^$', views.IndexView.as_view(), name='index'),
     urls.url(r'^create/$', views.CreateView.as_view(), name='create'),
+    urls.url(r'^(?P<id>[^/]+)/update_metadata/$',
+             views.UpdateMetadataView.as_view(), name='update_metadata'),
     urls.url(r'^(?P<image_id>[^/]+)/update/$',
              views.UpdateView.as_view(), name='update'),
 )

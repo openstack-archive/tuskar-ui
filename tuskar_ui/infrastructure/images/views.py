@@ -22,6 +22,7 @@ from horizon import tables as horizon_tables
 from horizon.utils import memoized
 
 from openstack_dashboard import api
+from openstack_dashboard.dashboards.admin.images import views as admin_views
 from openstack_dashboard.dashboards.project.images.images import views
 
 from tuskar_ui import api as tuskar_api
@@ -122,3 +123,9 @@ class UpdateView(views.UpdateView):
             msg = _('Unable to retrieve image.')
             url = reverse_lazy('horizon:infrastructure:images:index')
             exceptions.handle(self.request, msg, redirect=url)
+
+
+class UpdateMetadataView(admin_views.UpdateMetadataView):
+    template_name = "infrastructure/images/update_metadata.html"
+    form_class = forms.UpdateMetadataForm
+    success_url = reverse_lazy('horizon:infrastructure:images:index')
