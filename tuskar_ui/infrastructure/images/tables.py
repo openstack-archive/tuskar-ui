@@ -16,6 +16,46 @@ from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
 
+from openstack_dashboard import api
+from openstack_dashboard.dashboards.project.images.images \
+    import tables as project_tables
+
+
+class CreateImage(project_tables.CreateImage):
+    url = "horizon:infrastructure:images:create"
+
+
+class DeleteImage(project_tables.DeleteImage):
+    def allowed(self, request, image=None):
+        if image and image.protected:
+            return False
+        else:
+            return True
+
+
+class UpdateRow(tables.Row):
+    ajax = True
+
+    def get_data(self, request, image_id):
+        image = api.glance.image_get(request, image_id)
+        return image
+
+
+class ImageFilterAction(tables.FilterAction):
+    filter_type = "server"
+    filter_choices = (('name', _("Image Name ="), True),
+                      ('status', _('Status ='), True),
+                      ('disk_format', _('Format ='), True),
+                      ('size_min', _('Min. Size (MB)'), True),
+                      ('size_max', _('Max. Size (MB)'), True))
+
+
+class EditImage(project_tables.EditImage):
+    url = "horizon:infrastructure:images:update"
+
+    def allowed(self, request, image=None):
+        return True
+
 
 class ImagesTable(tables.DataTable):
 
@@ -29,7 +69,9 @@ class ImagesTable(tables.DataTable):
 
     class Meta:
         name = "images"
+        row_class = UpdateRow
         verbose_name = _("Provisioning Images")
         multi_select = False
-        table_actions = ()
-        row_actions = ()
+        table_actions = (CreateImage, DeleteImage,
+                         ImageFilterAction)
+        row_actions = (EditImage, DeleteImage)
