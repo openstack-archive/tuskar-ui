@@ -166,6 +166,19 @@ class Plan(base.APIResourceWrapper):
                 for role in self.roles]
 
     @cached_property
+    def _roles_by_name(self):
+        return dict((role.name, role) for role in self.role_list)
+
+    def get_role_by_name(self, role_name):
+        """Get the role with the given name."""
+        return self._roles_by_name[role_name]
+
+    def get_role_node_count(self, role):
+        """Get the node count for the given role."""
+        return int(self.parameter_value(role.node_count_parameter_name,
+                                        0) or 0)
+
+    @cached_property
     def templates(self):
         return tuskarclient(self._request).plans.templates(self.uuid)
 
