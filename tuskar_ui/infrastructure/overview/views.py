@@ -34,8 +34,7 @@ def _get_role_data(plan, stack, role, field):
         'id': role.id,
         'role': role,
         'name': role.name,
-        'planned_node_count': plan.parameter_value(
-            role.node_count_parameter_name, 0),
+        'planned_node_count': plan.get_role_node_count(role),
         'field': field,
     }
 
@@ -145,7 +144,11 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
                                  for d in roles) // (total or 1)
                 )
                 context['dashboard_urls'] = stack.dashboard_urls
-
+        else:
+            messages = forms.validate_plan(request, plan)
+            context['plan_messages'] = messages
+            context['plan_invalid'] = any(message.get('is_critical')
+                                          for message in messages)
         return context
 
 
