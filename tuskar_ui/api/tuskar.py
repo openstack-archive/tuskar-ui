@@ -56,6 +56,7 @@ class Plan(base.APIResourceWrapper):
     def __init__(self, apiresource, request=None):
         super(Plan, self).__init__(apiresource)
         self._request = request
+        self._roles_by_name = None
 
     @classmethod
     def create(cls, request, name, description):
@@ -164,6 +165,18 @@ class Plan(base.APIResourceWrapper):
     def role_list(self):
         return [Role.get(self._request, role.uuid)
                 for role in self.roles]
+
+    def get_role_by_name(self, role_name):
+        """Get the role with the given name."""
+        if self._roles_by_name is None:
+            self._roles_by_name = dict((role.name, role)
+                                       for role in self.role_list)
+        return self._roles_by_name[role_name]
+
+    def get_role_node_count(self, role):
+        """Get the node count for the given role."""
+        return int(self.parameter_value(role.node_count_parameter_name,
+                                        0) or 0)
 
     @cached_property
     def templates(self):
