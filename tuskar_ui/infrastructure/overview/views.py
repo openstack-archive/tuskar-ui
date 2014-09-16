@@ -145,7 +145,11 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
                                  for d in roles) // (total or 1)
                 )
                 context['dashboard_urls'] = stack.dashboard_urls
-
+        else:
+            messages = forms.validate_plan(request, plan)
+            context['plan_messages'] = messages
+            context['plan_invalid'] = any(message.get('is_critical')
+                                          for message in messages)
         return context
 
 
