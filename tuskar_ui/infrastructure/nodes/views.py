@@ -207,4 +207,4 @@ class PerformanceView(base.TemplateView):
             date_to)
 
         return http.HttpResponse(json.dumps(json_output),
-                                 mimetype='application/json')
+                                 content_type='application/json')

@@ -124,6 +124,11 @@ LOGGING['loggers']['selenium'] = {
     'propagate': False,
 }
 
+LOGGING['loggers']['tuskar_ui'] = {
+    'handlers': ['test'],
+    'propagate': False,
+}
+
 SECURITY_GROUP_RULES = {
     'all_tcp': {
         'name': 'ALL TCP',

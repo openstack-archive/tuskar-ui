@@ -11,8 +11,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
+
 from django import template
-from django.utils import simplejson
+
 
 register = template.Library()
 
@@ -50,4 +52,4 @@ def all_used_instances(obj):
 
         all_used_instances_info.append(info)
 
-    return simplejson.dumps(all_used_instances_info)
+    return json.dumps(all_used_instances_info)
