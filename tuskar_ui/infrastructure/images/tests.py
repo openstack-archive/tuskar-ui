@@ -134,8 +134,8 @@ class ImagesTest(test.BaseAdminViewTests):
         mocked_get.assert_called_once_with(mock.ANY, image.id)
         mocked_update.assert_called_once_with(
             mock.ANY, image.id, name='Fedora', container_format='bare',
-            min_ram=512, disk_format='qcow2', protected=False,
-            is_public=False, min_disk=15, purge_props=False,
+            disk_format='qcow2', protected=False,
+            purge_props=False, is_public=False,
             properties={'description': 'Login with admin/admin',
                         'architecture': 'x86-64'})
 
