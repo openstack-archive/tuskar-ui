@@ -14,6 +14,7 @@
 
 import logging
 
+from django.core.urlresolvers import reverse_lazy
 import django.forms
 from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
@@ -30,8 +31,93 @@ import tuskar_ui.forms
 LOG = logging.getLogger(__name__)
 
 
-def _get_role_count(plan, role):
-    return plan.parameter_value(role.node_count_parameter_name, 0)
+def validate_plan(request, plan):
+    """Validates the plan and returns a list of dicts describing the issues."""
+    messages = []
+    try:
+        controller_role = plan.get_role_by_name("controller")
+    except KeyError:
+        messages.append({
+            'text': _(u"No controller role."),
+            'is_critical': True,
+        })
+    else:
+        if plan.get_role_node_count(controller_role) not in (1, 3):
+            messages.append({
+                'text': _(u"You should have either 1 or 3 controller nodes."),
+                'is_critical': True,
+            })
+    try:
+        compute_role = plan.get_role_by_name("compute")
+    except KeyError:
+        messages.append({
+            'text': _(u"No compute role."),
+            'is_critical': True,
+        })
+    else:
+        if plan.get_role_node_count(compute_role) < 1:
+            messages.append({
+                'text': _(u"You need at least 1 compute node."),
+                'is_critical': True,
+            })
+    requested_nodes = 0
+    previous_snmp_password = None
+    for role in plan.role_list:
+        if role.image(plan) is None:
+            messages.append({
+                'text': _(u"Role %s has no image.") % role.name,
+                'is_critical': False,
+                'link_url': reverse_lazy('horizon:infrastructure:roles:index'),
+                'link_label': _(u"Associate this role with an image."),
+            })
+        if role.flavor(plan) is None:
+            messages.append({
+                'text': _(u"Role %s has no flavor.") % role.name,
+                'is_critical': False,
+                'link_url': reverse_lazy('horizon:infrastructure:roles:index'),
+                'link_label': _(u"Associate this role with a flavor."),
+            })
+        requested_nodes += plan.get_role_node_count(role)
+        snmp_password = plan.parameter_value(
+            role.paremeter_prefix + 'SnmpdReadonlyUserPassword')
+        if (not snmp_password or
+                previous_snmp_password and
+                previous_snmp_password != snmp_password):
+            messages.append({
+                'text': _(u"Set your SNMP password for role %n.") % role.name,
+                'is_critical': True,
+                'link_url': reverse_lazy(
+                    'horizon:infrastructure:parameters:index'),
+                'link_label': _(u"Configure."),
+            })
+        previous_snmp_password = snmp_password
+    available_flavors = len(api.flavor.Flavor.list(request))
+    if available_flavors == 0:
+        messages.append({
+            'text': _(u"You have no flavors defined."),
+            'is_critical': True,
+            'link_url': reverse_lazy('horizon:infrastructure:flavors:index'),
+            'link_label': _(u"Define flavors."),
+        })
+    available_nodes = len(api.node.Node.list(request, associated=False))
+    if available_nodes == 0:
+            messages.append({
+                'text': _(u"You have no nodes available."),
+                'is_critical': True,
+                'link_url': reverse_lazy('horizon:infrastructure:nodes:index'),
+                'link_label': _(u"Register nodes."),
+            })
+    elif requested_nodes > available_nodes:
+            messages.append({
+                'text': _(u"Not enough registered nodes for this plan. "
+                          u"You need %d more.") % (
+                              requested_nodes - available_nodes),
+                'is_critical': True,
+                'link_url': reverse_lazy('horizon:infrastructure:nodes:index'),
+                'link_label': _(u"Register more nodes."),
+            })
+    # TODO(rdopieralski) Add more checks.
+    return messages
 
 
 class EditPlan(horizon.forms.SelfHandlingForm):
@@ -46,9 +132,9 @@ class EditPlan(horizon.forms.SelfHandlingForm):
             field = django.forms.IntegerField(
                 label=role.name,
                 widget=tuskar_ui.forms.NumberPickerInput,
-                initial=_get_role_count(plan, role),
+                initial=plan.get_role_node_count(role),
                 # XXX Dirty hack for requiring a controller node.
-                required=(role.name == 'Controller'),
+                required=(role.name in ('Controller', 'Compute')),
             )
             field.role = role
             fields['%s-count' % role.id] = field
@@ -74,6 +160,16 @@ class DeployOvercloud(horizon.forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
             plan = api.tuskar.Plan.get_the_plan(request)
+        except Exception as e:
+            LOG.exception(e)
+            horizon.exceptions.handle(request,
+                                      _("Unable to deploy overcloud."))
+            return False
+        for message in validate_plan(request, plan):
+            if message['is_critical']:
+                horizon.messages.success(request, message.text)
+                return False
+        try:
             stack = api.heat.Stack.get_by_plan(self.request, plan)
             if not stack:
                 api.heat.Stack.create(request,

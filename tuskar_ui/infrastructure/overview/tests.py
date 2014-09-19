@@ -53,6 +53,8 @@ def _mock_plan(**kwargs):
             'parameters',
             'role_list',
             'parameter_value',
+            'get_role_by_name',
+            'get_role_node_count',
         ],
         'create.side_effect': lambda *args, **kwargs: plan,
         'delete.return_value': None,
@@ -63,6 +65,8 @@ def _mock_plan(**kwargs):
         'patch.side_effect': lambda *args, **kwargs: plan,
         'role_list': [],
         'parameter_value.return_value': None,
+        'get_role_by_name.side_effect': KeyError,
+        'get_role_node_count.return_value': 0,
     }
     params.update(kwargs)
     with patch(
@@ -75,9 +79,10 @@ class OverviewTests(test.BaseAdminViewTests):
 
     def test_index_stack_not_created(self):
         with contextlib.nested(
-                _mock_plan(),
-                patch('tuskar_ui.api.heat.Stack.list',
-                      return_value=[]),
+            _mock_plan(),
+            patch('tuskar_ui.api.heat.Stack.list', return_value=[]),
+            patch('tuskar_ui.api.node.Node.list', return_value=[]),
+            patch('tuskar_ui.api.flavor.Flavor.list', return_value=[]),
         ):
             res = self.client.get(INDEX_URL)
             get_the_plan = api.tuskar.Plan.get_the_plan
@@ -87,6 +92,15 @@ class OverviewTests(test.BaseAdminViewTests):
                 call(request),
                 call(request),
             ])
+            self.assertListEqual(api.heat.Stack.list.call_args_list, [
+                call(request),
+            ])
+            self.assertListEqual(api.node.Node.list.call_args_list, [
+                call(request, associated=False),
+            ])
+            self.assertListEqual(api.flavor.Flavor.list.call_args_list, [
+                call(request),
+            ])
         self.assertTemplateUsed(
             res, 'infrastructure/overview/index.html')
         self.assertTemplateUsed(
@@ -94,10 +108,11 @@ class OverviewTests(test.BaseAdminViewTests):
 
     def test_index_stack_not_created_post(self):
         with contextlib.nested(
-                _mock_plan(),
-                patch('tuskar_ui.api.heat.Stack.list',
-                      return_value=[]),
-        ) as (plan, _stack_list):
+            _mock_plan(),
+            patch('tuskar_ui.api.heat.Stack.list', return_value=[]),
+            patch('tuskar_ui.api.node.Node.list', return_value=[]),
+            patch('tuskar_ui.api.flavor.Flavor.list', return_value=[]),
+        ) as (plan, _stack_list, _node_list, _flavor_list):
             data = {
                 'role-1-count': 1,
                 'role-2-count': 0,

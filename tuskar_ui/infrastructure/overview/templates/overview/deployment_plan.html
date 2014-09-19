@@ -4,17 +4,40 @@
 {% load url from future%}
 
 {% block deployment-icon %}
+{% if plan_invalid %}
+  <i class="fa fa-exclamation-circle text-danger"></i>
+{% else %}
   <i class="fa fa-check-circle text-success"></i>
+{% endif %}
 {% endblock %}
 
 {% block deployment-title %}
+{% if plan_invalid %}
+  {% trans "Design your deployment" %}
+{% else %}
   {% trans "Ready to get deployed" %}
+{% endif %}
+{% endblock %}
+
+{% block deployment-info %}
+<ul class="list-unstyled">
+    {% for message in plan_messages %}
+    <li class="{% if message.is_critical %}text-danger{% else %}text-warning{% endif %}"><p>
+        {{ message.text }}
+        {% if message.link_url %}
+          <a href="{{ message.link_url }}">
+            {{ message.link_label|default:message.link_url }}
+          </a>
+        {% endif %}
+    </p></li>
+    {% endfor %}
+</ul>
 {% endblock %}
 
 {% block deployment-buttons %}
-  <a href="{% url 'horizon:infrastructure:overview:deploy_confirmation' %}"
-   class="btn btn-primary ajax-modal btn-default">
-    <i class="fa fa-rocket"></i>
-    {% trans "Deploy" %}
-  </a>
+<a href="{% url 'horizon:infrastructure:overview:deploy_confirmation' %}"
+class="btn btn-primary ajax-modal btn-default {% if plan_invalid %}disabled{% endif %}">
+<i class="fa fa-rocket"></i>
+{% trans "Deploy" %}
+</a>
 {% endblock %}
