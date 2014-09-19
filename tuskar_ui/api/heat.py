@@ -13,6 +13,7 @@
 import logging
 import urlparse
 
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
@@ -87,7 +88,7 @@ class Stack(base.APIResourceWrapper):
             'template': template,
             'environment': environment,
             'files': provider_resource_templates,
-            'password': 'password',
+            'password': getattr(settings, 'UNDERCLOUD_ADMIN_PASSWORD', None),
         }
         stack = heat.stack_create(request, **fields)
         return cls(stack, request=request)
