@@ -21,12 +21,13 @@ from django.views.generic import base
 from horizon import exceptions
 from horizon import forms as horizon_forms
 from horizon import tabs as horizon_tabs
-from horizon import views as horizon_views
+from horizon.utils import memoized
 
 from openstack_dashboard.api import base as api_base
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.nodes import forms
+from tuskar_ui.infrastructure.nodes import tables
 from tuskar_ui.infrastructure.nodes import tabs
 from tuskar_ui.utils import metering as metering_utils
 
@@ -66,23 +67,31 @@ class AutoDiscoverView(horizon_forms.ModalFormView):
         'horizon:infrastructure:nodes:index')
 
 
-class DetailView(horizon_views.APIView):
-    template_name = 'infrastructure/nodes/details.html'
+class DetailView(horizon_tabs.TabView):
+    tab_group_class = tabs.NodeDetailTabs
+    template_name = 'infrastructure/nodes/detail.html'
 
-    def get_data(self, request, context, *args, **kwargs):
-        node_uuid = kwargs.get('node_uuid')
-        redirect = reverse_lazy('horizon:infrastructure:nodes:index')
-        node = api.node.Node.get(request, node_uuid, _error_redirect=redirect)
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        node = self.get_data()
+
+        if node.maintenance:
+            table = tables.MaintenanceNodesTable(self.request)
+        else:
+            table = tables.RegisteredNodesTable(self.request)
+
         context['node'] = node
-        context['title'] = _("Node Details: %(uuid)s") % {'uuid': node.uuid}
+        context['title'] = _("Node: %(uuid)s") % {'uuid': node.uuid}
+        context['url'] = self.get_redirect_url()
+        context['actions'] = table.render_row_actions(node)
         try:
-            resource = api.heat.Resource.get_by_node(request, node)
+            resource = api.heat.Resource.get_by_node(self.request, node)
             context['role'] = resource.role
             context['stack'] = resource.stack
         except exceptions.NotFound:
             pass
         if node.instance_uuid:
-            if api_base.is_service_enabled(request, 'metering'):
+            if api_base.is_service_enabled(self.request, 'metering'):
                 # Meter configuration in the following format:
                 # (meter label, url part, barchart (True/False))
                 context['meter_conf'] = (
@@ -105,6 +114,21 @@ class DetailView(horizon_views.APIView):
                      None),
                 )
         return context
+
+    @memoized.memoized_method
+    def get_data(self):
+        node_uuid = self.kwargs.get('node_uuid')
+        node = api.node.Node.get(self.request, node_uuid,
+                                 _error_redirect=self.get_redirect_url())
+        return node
+
+    def get_tabs(self, request, **kwargs):
+        node = self.get_data()
+        return self.tab_group_class(self.request, node=node, **kwargs)
+
+    @staticmethod
+    def get_redirect_url():
+        return reverse_lazy('horizon:infrastructure:nodes:index')
 
 
 class PerformanceView(base.TemplateView):
