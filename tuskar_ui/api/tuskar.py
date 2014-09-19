@@ -290,7 +290,7 @@ class Role(base.APIResourceWrapper):
 
     @property
     def provider_resource_group_name(self):
-        return "{0}-{1}-resource-servers".format(self.name, self.version)
+        return "{0}-{1}-servers".format(self.name, self.version)
 
     @property
     def parameter_prefix(self):
