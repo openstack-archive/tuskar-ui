@@ -14,6 +14,7 @@ import logging
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from glanceclient import exc as glance_exceptions
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from tuskarclient import client as tuskar_client
@@ -311,7 +312,12 @@ class Role(base.APIResourceWrapper):
     def image(self, plan):
         image_id = plan.parameter_value(self.image_id_parameter_name)
         if image_id:
-            return glance.image_get(self._request, image_id)
+            try:
+                return glance.image_get(self._request, image_id)
+            except glance_exceptions.HTTPNotFound:
+                LOG.error("Couldn't obtain image")
+                return None
+
 
     def flavor(self, plan):
         flavor_name = plan.parameter_value(
