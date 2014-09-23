@@ -134,9 +134,12 @@ class OverviewTests(test.BaseAdminViewTests):
 
     def test_index_stack_deployed(self):
         stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
+        roles = [api.tuskar.Role(role)
+                 for role in self.tuskarclient_roles.list()]
 
         with contextlib.nested(
-                _mock_plan(),
+                _mock_plan(**{'get_role_by_name.side_effect': None,
+                              'get_role_by_name.return_value': roles[0]}),
                 patch('tuskar_ui.api.heat.Stack.get_by_plan',
                       return_value=stack),
                 patch('tuskar_ui.api.heat.Stack.events',

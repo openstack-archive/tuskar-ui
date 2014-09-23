@@ -138,6 +138,10 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
                     5, 100 * (total_num_nodes_count - resources_count))
             else:
                 # stack is active
+                controller_role = plan.get_role_by_name("controller")
+                context['admin_password'] = plan.parameter_value(
+                    controller_role.parameter_prefix + 'AdminPassword')
+
                 total = sum(d['total_node_count'] for d in roles)
                 context['progress'] = max(
                     5, 100 * sum(d.get('deployed_node_count', 0)
