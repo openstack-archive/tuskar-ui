@@ -57,6 +57,14 @@ class EditImage(project_tables.EditImage):
         return True
 
 
+class UpdateMetadata(tables.LinkAction):
+    url = "horizon:infrastructure:images:update_metadata"
+    name = "update_metadata"
+    verbose_name = _("Update Metadata")
+    classes = ("ajax-modal",)
+    icon = "pencil"
+
+
 class ImagesTable(tables.DataTable):
 
     name = tables.Column('name',
@@ -74,4 +82,4 @@ class ImagesTable(tables.DataTable):
         multi_select = False
         table_actions = (CreateImage, DeleteImage,
                          ImageFilterAction)
-        row_actions = (EditImage, DeleteImage)
+        row_actions = (EditImage, UpdateMetadata, DeleteImage)

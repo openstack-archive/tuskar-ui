@@ -10,6 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from openstack_dashboard.dashboards.admin.images import forms as admin_forms
 from openstack_dashboard.dashboards.project.images.images import forms
 
 
@@ -18,4 +19,8 @@ class CreateImageForm(forms.CreateImageForm):
 
 
 class UpdateImageForm(forms.UpdateImageForm):
+    pass
+
+
+class UpdateMetadataForm(admin_forms.UpdateMetadataForm):
     pass
