@@ -15,8 +15,19 @@
   <dd><a href="{{ dashboard_url }}">{{ dashboard_url }}</a></dd>
   {% endfor %}
   <dt>{% trans "User name" %}</dt>
-  <dd>TO BE ADDED</dd>
-  <dt>{% trans "Password" %}</dt>
-  <dd>TO BE ADDED</dd>
+  <dd>admin</dd>
+  <dt></dt>
+  <dd>
+    <form>
+        <fieldset>
+            <div class="form-group">
+              <label class="control-label  required" for="id_password">{% trans "Password" %}</label>
+              <div>
+                <input class="form-control" id="id_password" type="password" value="{{ admin_password }}" disabled="true" readonly="true"/>
+              </div>
+            </div>
+        </fieldset>
+    </form>
+  </dd>
 </dl>
 {% endblock %}
