@@ -79,7 +79,7 @@ def validate_plan(request, plan):
             })
         requested_nodes += plan.get_role_node_count(role)
         snmp_password = plan.parameter_value(
-            role.paremeter_prefix + 'SnmpdReadonlyUserPassword')
+            role.parameter_prefix + 'SnmpdReadonlyUserPassword')
         if (not snmp_password or
                 previous_snmp_password and
                 previous_snmp_password != snmp_password):
