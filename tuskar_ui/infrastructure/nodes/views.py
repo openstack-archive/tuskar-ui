@@ -18,12 +18,9 @@ from django import http
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base
 
-from horizon import exceptions
 from horizon import forms as horizon_forms
 from horizon import tabs as horizon_tabs
 from horizon.utils import memoized
-
-from openstack_dashboard.api import base as api_base
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.nodes import forms
@@ -84,35 +81,6 @@ class DetailView(horizon_tabs.TabView):
         context['title'] = _("Node: %(uuid)s") % {'uuid': node.uuid}
         context['url'] = self.get_redirect_url()
         context['actions'] = table.render_row_actions(node)
-        try:
-            resource = api.heat.Resource.get_by_node(self.request, node)
-            context['role'] = resource.role
-            context['stack'] = resource.stack
-        except exceptions.NotFound:
-            pass
-        if node.instance_uuid:
-            if api_base.is_service_enabled(self.request, 'metering'):
-                # Meter configuration in the following format:
-                # (meter label, url part, barchart (True/False))
-                context['meter_conf'] = (
-                    (_('System Load'),
-                     metering_utils.url_part('hardware.cpu.load.1min', False),
-                     None),
-                    (_('CPU Utilization'),
-                     metering_utils.url_part('hardware.system_stats.cpu.util',
-                                             True),
-                     '100'),
-                    (_('Swap Utilization'),
-                     metering_utils.url_part('hardware.memory.swap.util',
-                                             True),
-                     '100'),
-                    (_('Disk I/O '),
-                     metering_utils.url_part('disk-io', False),
-                     None),
-                    (_('Network I/O '),
-                     metering_utils.url_part('network-io', False),
-                     None),
-                )
         return context
 
     @memoized.memoized_method

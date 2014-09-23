@@ -18,8 +18,11 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import tabs
 
+from openstack_dashboard.api import base as api_base
+
 from tuskar_ui import api
 from tuskar_ui.infrastructure.nodes import tables
+from tuskar_ui.utils import metering as metering_utils
 
 
 class OverviewTab(tabs.Tab):
@@ -121,7 +124,38 @@ class DetailOverviewTab(tabs.Tab):
     template_name = 'infrastructure/nodes/_detail_overview.html'
 
     def get_context_data(self, request):
-        return {"node": self.tab_group.kwargs['node']}
+        node = self.tab_group.kwargs['node']
+        context = {'node': node}
+        try:
+            resource = api.heat.Resource.get_by_node(self.request, node)
+            context['role'] = resource.role
+            context['stack'] = resource.stack
+        except exceptions.NotFound:
+            pass
+        if node.instance_uuid:
+            if api_base.is_service_enabled(self.request, 'metering'):
+                # Meter configuration in the following format:
+                # (meter label, url part, barchart (True/False))
+                context['meter_conf'] = (
+                    (_('System Load'),
+                     metering_utils.url_part('hardware.cpu.load.1min', False),
+                     None),
+                    (_('CPU Utilization'),
+                     metering_utils.url_part('hardware.system_stats.cpu.util',
+                                             True),
+                     '100'),
+                    (_('Swap Utilization'),
+                     metering_utils.url_part('hardware.memory.swap.util',
+                                             True),
+                     '100'),
+                    (_('Disk I/O '),
+                     metering_utils.url_part('disk-io', False),
+                     None),
+                    (_('Network I/O '),
+                     metering_utils.url_part('network-io', False),
+                     None),
+                )
+        return context
 
 
 class NodeTabs(tabs.TabGroup):
