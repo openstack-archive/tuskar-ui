@@ -11,11 +11,15 @@
 #    under the License.
 
 import logging
+import random
+import string
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
+from openstack_dashboard.api import neutron
+from os_cloud_config import keystone_pki
 from tuskarclient import client as tuskar_client
 
 from tuskar_ui.api import flavor
@@ -26,6 +30,11 @@ LOG = logging.getLogger(__name__)
 MASTER_TEMPLATE_NAME = 'plan.yaml'
 ENVIRONMENT_NAME = 'environment.yaml'
 TUSKAR_SERVICE = 'management'
+
+SSL_HIDDEN_PARAMS = ('SSLCertificate', 'SSLKey')
+KEYSTONE_CERTIFICATE_PARAMS = (
+    'KeystoneSigningCertificate', 'KeystoneCACertificate',
+    'KeystoneSigningKey')
 
 
 # FIXME: request isn't used right in the tuskar client right now,
@@ -47,6 +56,48 @@ def tuskarclient(request, password=None):
                                       password=password,
                                       os_auth_token=request.user.token.id)
     return client
+
+
+def password_generator(size=40, chars=(string.ascii_uppercase +
+                                       string.ascii_lowercase +
+                                       string.digits)):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
+def strip_prefix(parameter_name):
+    return parameter_name.split('::', 1)[-1]
+
+
+def _is_blank(parameter):
+    return not parameter['value'] or parameter['value'] == 'unset'
+
+
+def _should_generate_password(parameter):
+    # TODO(lsmola) Filter out SSL params for now. Once it will be generated
+    # in TripleO add it here too. Note: this will also affect how endpoints are
+    # created
+    key = parameter['name']
+    return all([
+        parameter['hidden'],
+        _is_blank(parameter),
+        strip_prefix(key) not in SSL_HIDDEN_PARAMS,
+        strip_prefix(key) not in KEYSTONE_CERTIFICATE_PARAMS,
+        key != 'SnmpdReadonlyUserPassword',
+    ])
+
+
+def _should_generate_keystone_cert(parameter):
+    return all([
+        strip_prefix(parameter['name']) in KEYSTONE_CERTIFICATE_PARAMS,
+        _is_blank(parameter),
+    ])
+
+
+def _should_generate_neutron_control_plane(parameter):
+    return all([
+        strip_prefix(parameter['name']) == 'NeutronControlPlaneID',
+        _is_blank(parameter),
+    ])
 
 
 class Plan(base.APIResourceWrapper):
@@ -218,6 +269,73 @@ class Plan(base.APIResourceWrapper):
         if parameter is not None:
             return parameter['value']
         return default
+
+    def list_generated_parameters(self, with_prefix=True):
+        if with_prefix:
+            key_format = lambda key: key
+        else:
+            key_format = strip_prefix
+
+        # Get all password like parameters
+        return dict(
+            (key_format(parameter['name']), parameter)
+            for parameter in self.parameter_list()
+            if any([
+                _should_generate_password(parameter),
+                _should_generate_keystone_cert(parameter),
+                _should_generate_neutron_control_plane(parameter),
+            ])
+        )
+
+    def _make_keystone_certificates(self, wanted_generated_params):
+        generated_params = {}
+        for cert_param in KEYSTONE_CERTIFICATE_PARAMS:
+            if cert_param in wanted_generated_params.keys():
+                # If one of the keystone certificates is not set, we have
+                # to generate all of them.
+                generate_certificates = True
+                break
+        else:
+            generate_certificates = False
+
+        # Generate keystone certificates
+        if generate_certificates:
+            ca_key_pem, ca_cert_pem = keystone_pki.create_ca_pair()
+            signing_key_pem, signing_cert_pem = (
+                keystone_pki.create_signing_pair(ca_key_pem, ca_cert_pem))
+            generated_params['KeystoneSigningCertificate'] = (
+                signing_cert_pem)
+            generated_params['KeystoneCACertificate'] = ca_cert_pem
+            generated_params['KeystoneSigningKey'] = signing_key_pem
+        return generated_params
+
+    def make_generated_parameters(self):
+        wanted_generated_params = self.list_generated_parameters(
+            with_prefix=False)
+
+        # Generate keystone certificates
+        generated_params = self._make_keystone_certificates(
+            wanted_generated_params)
+
+        # Generate passwords and control plane id
+        for (key, param) in wanted_generated_params.items():
+            if _should_generate_password(param):
+                generated_params[key] = password_generator()
+            elif _should_generate_neutron_control_plane(param):
+                generated_params[key] = neutron.network_list(
+                    self._request, name='ctlplane')[0].id
+
+        # Fill all the Tuskar parameters with generated content. There are
+        # parameters that has just different prefix, such parameters should
+        # have the same values.
+        wanted_prefixed_params = self.list_generated_parameters(
+            with_prefix=True)
+        tuskar_params = {}
+
+        for (key, param) in wanted_prefixed_params.items():
+            tuskar_params[key] = generated_params[strip_prefix(key)]
+
+        return tuskar_params
 
     @property
     def id(self):
