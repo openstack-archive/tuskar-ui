@@ -72,6 +72,13 @@ class AutoDiscoverView(horizon_forms.ModalFormView):
                           prefix=self.form_prefix)
 
 
+class AutoDiscoverCSVView(horizon_forms.ModalFormView):
+    form_class = forms.AutoDiscoverCSVNodeForm
+    template_name = 'infrastructure/nodes/auto_discover_csv.html'
+    success_url = reverse_lazy(
+        'horizon:infrastructure:nodes:index')
+
+
 class DetailView(horizon_tabs.TabView):
     tab_group_class = tabs.NodeDetailTabs
     template_name = 'infrastructure/nodes/detail.html'
