@@ -102,3 +102,15 @@ class NetworkField(forms.fields.Field):
             return str(netaddr.IPNetwork(value, version=4))
         except netaddr.AddrFormatError:
             raise forms.ValidationError(_("Enter valid IPv4 network address."))
+
+
+class SelfHandlingFormset(forms.formsets.BaseFormSet):
+    def handle(self, request, data):
+        success = True
+        for form in self:
+            form_success = form.handle(request, data)
+            if not form_success:
+                success = False
+            else:
+                pass
+        return success
