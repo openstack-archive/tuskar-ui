@@ -12,10 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import csv
 import django.forms
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
+from horizon import forms
 from tuskar_ui import api
 import tuskar_ui.forms
 
@@ -51,6 +53,19 @@ def get_driver_info_dict(data):
             ssh_key_contents=data['ssh_key_contents'],
         )
     return driver_dict
+
+
+def auto_discover_node(request, kwargs):
+    node = api.node.Node.create(
+        request,
+        **kwargs
+    )
+    api.node.Node.set_maintenance(request,
+                                  node.uuid,
+                                  True)
+    api.node.Node.set_power_state(request,
+                                  node.uuid,
+                                  'reboot')
 
 
 class BaseNodeForm(django.forms.Form):
@@ -214,18 +229,10 @@ class AutoDiscoverNodeForm(BaseNodeForm):
 
     def create_node(self, request, data):
         kwargs = get_driver_info_dict(data)
-
-        node = api.node.Node.create(
-            request,
+        kwargs.update(
             mac_addresses=data['mac_addresses'].split(),
-            **kwargs
         )
-        api.node.Node.set_maintenance(request,
-                                      node.uuid,
-                                      True)
-        api.node.Node.set_power_state(request,
-                                      node.uuid,
-                                      'reboot')
+        auto_discover_node(request, kwargs)
 
 
 class BaseNodeFormset(tuskar_ui.forms.SelfHandlingFormset):
@@ -249,3 +256,40 @@ RegisterNodeFormset = django.forms.formsets.formset_factory(
 AutoDiscoverNodeFormset = django.forms.formsets.formset_factory(
     AutoDiscoverNodeForm, extra=1,
     formset=BaseNodeFormset)
+
+
+class AutoDiscoverCSVNodeForm(forms.SelfHandlingForm):
+    csv_file = forms.FileField(label=_("CSV File"),
+                               required=False)
+
+    def handle(self, request, data):
+        success = True
+        all_node_data = csv.reader(data['csv_file'])
+        for node_data in all_node_data:
+            driver = node_data[0]
+            kwargs = {
+                'driver': driver
+            }
+            if driver == 'pxe_ssh':
+                kwargs.update(
+                    ssh_address=node_data[1],
+                    ssh_username=node_data[2],
+                    ssh_key_contents=node_data[3],
+                    mac_addresses=node_data[4].split()
+                )
+            else:
+                kwargs.update(
+                    ipmi_address=node_data[1],
+                    ipmi_username=node_data[2],
+                    ipmi_password=node_data[3],
+                )
+
+            try:
+                auto_discover_node(request, kwargs)
+            except Exception:
+                success = False
+                exceptions.handle(request, _('Unable to register node.'))
+                # TODO(tzumainn) If there is a failure between steps, do we
+                # have to unregister nodes, delete ports, etc?
+
+        return success

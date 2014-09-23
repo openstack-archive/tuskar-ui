@@ -20,6 +20,10 @@
           <span class="fa fa-search-plus"></span>
           {% trans 'Auto-Discover Nodes' %}
         </a>
+        <a href="{% url 'horizon:infrastructure:nodes:auto-discover-csv' %}" class="btn btn-primary ajax-modal">
+          <span class="fa fa-search-plus"></span>
+          {% trans 'Auto-Discover Nodes (Upload CSV)' %}
+        </a>
       {% endif %}
     </div>
     {{ tab_group.render }}

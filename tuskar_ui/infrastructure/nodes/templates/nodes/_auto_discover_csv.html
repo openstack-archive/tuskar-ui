@@ -1,0 +1,21 @@
+{% extends "horizon/common/_modal_form.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block form_id %}autodiscover_csv_nodes_form{% endblock %}
+{% block form_action %}{% url 'horizon:infrastructure:nodes:auto-discover-csv' %}{% endblock %}
+{% block modal_id %}autodiscover_csv_nodes_modal{% endblock %}
+{% block modal-header %}{% trans "Auto-Discover Nodes (Upload CSV)" %}{% endblock %}
+{% block form_attrs %}enctype="multipart/form-data"{% endblock %}
+
+{% block modal-body %}
+  {% include "horizon/common/_form_fields.html" %}
+{% endblock %}
+
+{% block modal-footer %}
+  <input class="btn btn-primary pull-right" type="submit"
+         value="{% trans "Register Nodes" %}" />
+  <a href="{% url 'horizon:infrastructure:nodes:index' %}"
+     class="btn secondary cancel close">{% trans "Cancel" %}</a>
+{% endblock %}
+
