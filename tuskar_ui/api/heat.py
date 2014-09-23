@@ -80,7 +80,6 @@ class Stack(base.APIResourceWrapper):
         self._request = request
 
     @classmethod
-    @handle_errors(_("Unable to create Heat stack"), [])
     def create(cls, request, stack_name, template, environment,
                provider_resource_templates):
         fields = {

@@ -168,6 +168,13 @@ class DeployOvercloud(horizon.forms.SelfHandlingForm):
             horizon.exceptions.handle(request,
                                       _("Unable to deploy overcloud."))
             return False
+
+        # Auto-generate missing passwords and certificates
+        if plan.list_generated_parameters():
+            generated_params = plan.make_generated_parameters()
+            plan = plan.patch(request, plan.uuid, generated_params)
+
+        # Validate plan and create stack
         for message in validate_plan(request, plan):
             if message['is_critical']:
                 horizon.messages.success(request, message.text)
@@ -182,8 +189,9 @@ class DeployOvercloud(horizon.forms.SelfHandlingForm):
                                       plan.provider_resource_templates)
         except Exception as e:
             LOG.exception(e)
-            horizon.exceptions.handle(request,
-                                      _("Unable to deploy overcloud."))
+            horizon.exceptions.handle(
+                request, _("Unable to deploy overcloud. Reason: {0}").format(
+                    e.error['error']['message']))
             return False
         else:
             msg = _('Deployment in progress.')

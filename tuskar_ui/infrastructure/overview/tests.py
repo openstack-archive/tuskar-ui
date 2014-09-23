@@ -55,6 +55,8 @@ def _mock_plan(**kwargs):
             'parameter_value',
             'get_role_by_name',
             'get_role_node_count',
+            'list_generated_parameters',
+            'make_generated_parameters',
         ],
         'create.side_effect': lambda *args, **kwargs: plan,
         'delete.return_value': None,
@@ -67,6 +69,8 @@ def _mock_plan(**kwargs):
         'parameter_value.return_value': None,
         'get_role_by_name.side_effect': KeyError,
         'get_role_node_count.return_value': 0,
+        'list_generated_parameters.return_value': {},
+        'make_generated_parameters.return_value': {},
     }
     params.update(kwargs)
     with patch(
