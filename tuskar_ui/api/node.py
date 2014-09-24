@@ -91,15 +91,20 @@ class IronicNode(base.APIResourceWrapper):
                 'password': ipmi_password
             }
 
+        properties = {}
+        if cpus:
+            properties.update(cpus=cpus)
+        if memory_mb:
+            properties.update(memory_mb=memory_mb)
+        if local_gb:
+            properties.update(local_gb=local_gb)
+        if cpu_arch:
+            properties.update(cpu_arch=cpu_arch)
+
         node = ironicclient(request).node.create(
             driver=driver,
             driver_info=driver_info,
-            properties={
-                'cpus': cpus,
-                'memory_mb': memory_mb,
-                'local_gb': local_gb,
-                'cpu_arch': cpu_arch,
-            }
+            properties=properties,
         )
         for mac_address in mac_addresses:
             ironicclient(request).port.create(
@@ -246,19 +251,19 @@ class IronicNode(base.APIResourceWrapper):
 
     @cached_property
     def cpus(self):
-        return self.properties['cpus']
+        return self.properties.get('cpus', None)
 
     @cached_property
     def memory_mb(self):
-        return self.properties['memory_mb']
+        return self.properties.get('memory_mb', None)
 
     @cached_property
     def local_gb(self):
-        return self.properties['local_gb']
+        return self.properties.get('local_gb', None)
 
     @cached_property
     def cpu_arch(self):
-        return self.properties['cpu_arch']
+        return self.properties.get('cpu_arch', None)
 
 
 class BareMetalNode(base.APIResourceWrapper):
