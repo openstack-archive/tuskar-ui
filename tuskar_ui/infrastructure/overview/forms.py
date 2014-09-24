@@ -306,7 +306,8 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
             # do the keystone init
             keystone_config.initialize(
                 auth_ip, admin_token, admin_email, admin_password,
-                region='regionOne', ssl=None, public=None, user='heat-admin')
+                region='regionOne', ssl=None, public=None, user='heat-admin',
+                pki_setup=False)
 
             # retrieve needed Overcloud clients
             keystone_client = clients.get_keystone_client(
