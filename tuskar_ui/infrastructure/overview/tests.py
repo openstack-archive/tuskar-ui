@@ -273,7 +273,8 @@ class OverviewTests(test.BaseAdminViewTests):
 
         mock_initialize.assert_called_once_with(
             '192.0.2.23', None, 'example@example.org', None, ssl=None,
-            region='regionOne', user='heat-admin', public=None)
+            region='regionOne', user='heat-admin', public=None,
+            pki_setup=False)
         mock_setup_endpoints.assert_called_once_with(
             {'nova': {'password': None},
              'heat': {'password': None},
