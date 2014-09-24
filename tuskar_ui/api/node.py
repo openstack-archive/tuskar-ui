@@ -91,15 +91,20 @@ class IronicNode(base.APIResourceWrapper):
                 'password': ipmi_password
             }
 
+        properties = {}
+        if cpus:
+            properties.update(cpus=cpus)
+        if memory_mb:
+            properties.update(memory_mb=memory_mb)
+        if local_gb:
+            properties.update(local_gb=local_gb)
+        if cpu_arch:
+            properties.update(cpu_arch=cpu_arch)
+
         node = ironicclient(request).node.create(
             driver=driver,
             driver_info=driver_info,
-            properties={
-                'cpus': cpus,
-                'memory_mb': memory_mb,
-                'local_gb': local_gb,
-                'cpu_arch': cpu_arch,
-            }
+            properties=properties,
         )
         for mac_address in mac_addresses:
             ironicclient(request).port.create(
