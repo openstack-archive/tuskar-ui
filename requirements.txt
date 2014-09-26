@@ -7,7 +7,7 @@ Django>=1.4.2,<1.7
 django_compressor>=1.4
 django_openstack_auth>=1.1.7
 eventlet>=0.15.1
-kombu>=2.4.8
+kombu>=2.5.0
 iso8601>=0.1.9
 netaddr>=0.7.12
 os-cloud-config
