@@ -17,11 +17,11 @@ from django.utils.translation import ugettext_lazy as _
 import horizon
 
 from tuskar_ui.infrastructure import dashboard
-
+from tuskar_ui.infrastructure import flavors
 
 class Flavors(horizon.Panel):
     name = _("Flavors")
     slug = "flavors"
 
-
-dashboard.Infrastructure.register(Flavors)
+if flavors.is_flavor_matching():
+    dashboard.Infrastructure.register(Flavors)
