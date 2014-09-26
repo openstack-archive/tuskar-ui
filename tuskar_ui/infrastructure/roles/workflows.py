@@ -37,6 +37,13 @@ class UpdateRoleInfoAction(workflows.Action):
         slug = 'update_role_info'
         help_text = _("Edit the role details. Roles define the yadyadayada ")
 
+    def __init__(self, request, context, *args, **kwargs):
+        super(UpdateRoleInfoAction, self).__init__(request, context, *args,
+                                                   **kwargs)
+        plan = api.tuskar.Plan.get_the_plan(request)
+        if not plan.flavor_matching:
+            del self.fields['flavor']
+
     def populate_flavor_choices(self, request, context):
         flavors = api.flavor.Flavor.list(self.request)
         choices = [(f.name, f.name) for f in flavors]
@@ -83,9 +90,10 @@ class UpdateRole(workflows.Workflow):
                 _('Unable to retrieve role details.'),
                 redirect=reverse_lazy(self.index_url))
 
-        plan.patch(request,
-                   plan.uuid,
-                   {role.image_id_parameter_name: data['image'],
-                    role.flavor_parameter_name: data['flavor']})
+        parameters = {role.image_id_parameter_name: data['image']}
+        if plan.flavor_matching:
+            parameters[role.flavor_parameter_name] = data['flavor']
+
+        plan.patch(request, plan.uuid, parameters)
         # success
         return True

@@ -31,6 +31,7 @@ LOG = logging.getLogger(__name__)
 MASTER_TEMPLATE_NAME = 'plan.yaml'
 ENVIRONMENT_NAME = 'environment.yaml'
 TUSKAR_SERVICE = 'management'
+FLAVOR_MATCHING_PARAM = 'FlavorMatching'
 
 SSL_HIDDEN_PARAMS = ('SSLCertificate', 'SSLKey')
 KEYSTONE_CERTIFICATE_PARAMS = (
@@ -248,6 +249,11 @@ class Plan(base.APIResourceWrapper):
         del template_dict[MASTER_TEMPLATE_NAME]
         del template_dict[ENVIRONMENT_NAME]
         return template_dict
+
+    @cached_property
+    def flavor_matching(self):
+        matching = self.parameter_value(FLAVOR_MATCHING_PARAM, '')
+        return matching.lower() not in ('false', 'no', 'off', '0')
 
     def parameter_list(self, include_key_parameters=True):
         params = self.parameters
