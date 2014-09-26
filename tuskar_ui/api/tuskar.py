@@ -31,6 +31,7 @@ LOG = logging.getLogger(__name__)
 MASTER_TEMPLATE_NAME = 'plan.yaml'
 ENVIRONMENT_NAME = 'environment.yaml'
 TUSKAR_SERVICE = 'management'
+FLAVOR_MATCHING_PARAM = 'FlavorMatching'
 
 SSL_HIDDEN_PARAMS = ('SSLCertificate', 'SSLKey')
 KEYSTONE_CERTIFICATE_PARAMS = (
