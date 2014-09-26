@@ -3,7 +3,7 @@
 {% load form_helpers %}
 
 <h4>{% trans "Deployment Roles" %}</h4>
-<form method="POST" action="." class="deployment-roles-form">
+<form method="POST" action="." class="deployment-roles-form" hr-node-form="">
 {% csrf_token %}
 {% include 'horizon/common/_form_errors.html' with form=form %}
 {% for role in roles %}
