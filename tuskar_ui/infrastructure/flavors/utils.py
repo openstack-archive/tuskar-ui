@@ -12,24 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.utils.translation import ugettext_lazy as _
-
-import horizon
-
-from tuskar_ui.infrastructure import dashboard
-from tuskar_ui.infrastructure import flavors
+from django.conf import settings
 
 
-class Flavors(horizon.Panel):
-    name = _("Flavors")
-    slug = "flavors"
-
-    def can_access(self, context):
-        if not flavors.utils.matching_deployment_mode():
-            return False
-
-        return super(Flavors, self).can_access(context)
-
-
-
-dashboard.Infrastructure.register(Flavors)
+def matching_deployment_mode():
+    deployment_mode = getattr(settings, 'DEPLOYMENT_MODE', 'scale')
+    return deployment_mode.lower() == 'scale'
