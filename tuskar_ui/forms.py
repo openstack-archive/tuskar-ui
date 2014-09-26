@@ -60,6 +60,16 @@ class NumberPickerInput(NumberInput):
         super(NumberPickerInput, self).__init__(default_attrs)
 
 
+class NodeCountInput(NumberInput):
+    """Input for the node counts."""
+
+    def __init__(self, attrs=None):
+        default_attrs = {'hr-node-count': '', 'ng-cloak': '', }
+        if attrs:
+            default_attrs.update(attrs)
+        super(NodeCountInput, self).__init__(default_attrs)
+
+
 class MACField(forms.fields.Field):
     """A form field for entering a single MAC address."""
 
