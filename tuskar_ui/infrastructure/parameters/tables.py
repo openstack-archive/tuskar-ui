@@ -21,7 +21,7 @@ class ParametersTable(tables.DataTable):
     label = tables.Column('label',
                           verbose_name=_("Parameter Name"))
     value = tables.Column('value',
-                          verbose_name=_("Default Value"))
+                          verbose_name=_("Value"))
     description = tables.Column('description',
                                 verbose_name=("Detailed Description"))
 

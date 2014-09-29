@@ -12,9 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from django.core.urlresolvers import reverse_lazy
+import horizon.forms
 from horizon import tables as horizon_tables
 
 from tuskar_ui import api
+from tuskar_ui.infrastructure.parameters import forms
 from tuskar_ui.infrastructure.parameters import tables
 
 
@@ -22,9 +25,28 @@ class ServiceParameter:
     def __init__(self, params_dict, id):
         self.id = id
         self.label = params_dict.get('name')
-        self.value = params_dict.get('default')
+        self.value = params_dict.get('value')
         self.category = params_dict.get('parameter_group')
         self.description = params_dict.get('description')
+
+
+class ServiceConfigView(horizon.forms.ModalFormView):
+    template_name = "infrastructure/parameters/service_config.html"
+    form_class = forms.EditServiceConfig
+    success_url = reverse_lazy('horizon:infrastructure:parameters:index')
+
+    def get_initial(self):
+        plan = api.tuskar.Plan.get_the_plan(self.request)
+        compute_prefix = plan.get_role_by_name('compute').parameter_prefix
+
+        virt_type = plan.parameter_value(
+            compute_prefix + 'NovaComputeLibvirtType')
+        #TODO(tzumainn): what if compute and control values are different...
+        snmp_password = plan.parameter_value(
+            compute_prefix + 'SnmpdReadonlyUserPassword')
+
+        return {'virt_type': virt_type,
+                'snmp_password': snmp_password}
 
 
 class IndexView(horizon_tables.DataTableView):

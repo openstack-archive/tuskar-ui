@@ -25,6 +25,8 @@ from tuskar_ui.test.test_data import tuskar_data
 
 INDEX_URL = urlresolvers.reverse(
     'horizon:infrastructure:parameters:index')
+SERVICE_CONFIG_URL = urlresolvers.reverse(
+    'horizon:infrastructure:parameters:service_configuration')
 
 TEST_DATA = utils.TestDataContainer()
 tuskar_data.data(TEST_DATA)
@@ -52,10 +54,41 @@ class ParametersTest(test.BaseAdminViewTests):
 
     def test_param_object(self):
         param_dict = {'parameter_group': 'Neutron',
-                      'default': '1.2.3.4',
+                      'value': '1.2.3.4',
                       'name': 'Ip Address',
                       'description': 'This is an IP Address'}
 
         p = views.ServiceParameter(param_dict, 5)
         self.assertEqual(p.id, 5)
         self.assertEqual(p.value, '1.2.3.4')
+
+    def test_service_config_get(self):
+        plan = api.tuskar.Plan(self.tuskarclient_plans.first())
+        role = api.tuskar.Role(self.tuskarclient_roles.first())
+        with contextlib.nested(
+            patch('tuskar_ui.api.tuskar.Plan.get_the_plan',
+                  return_value=plan),
+            patch('tuskar_ui.api.tuskar.Plan.get_role_by_name',
+                  return_value=role),
+        ):
+            res = self.client.get(SERVICE_CONFIG_URL)
+            self.assertTemplateUsed(
+                res, 'infrastructure/parameters/service_config.html')
+
+    def test_service_config_post(self):
+        plan = api.tuskar.Plan(self.tuskarclient_plans.first())
+        role = api.tuskar.Role(self.tuskarclient_roles.first())
+        data = {
+            'virt_type': 'qemu',
+            'snmp_password': 'password',
+        }
+        with contextlib.nested(
+            patch('tuskar_ui.api.tuskar.Plan.get_the_plan',
+                  return_value=plan),
+            patch('tuskar_ui.api.tuskar.Plan.patch',
+                  return_value=plan),
+            patch('tuskar_ui.api.tuskar.Plan.get_role_by_name',
+                  return_value=role),
+        ):
+            res = self.client.post(SERVICE_CONFIG_URL, data)
+            self.assertRedirectsNoFollow(res, INDEX_URL)
