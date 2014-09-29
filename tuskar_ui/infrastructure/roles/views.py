@@ -165,15 +165,10 @@ class UpdateView(workflows.WorkflowView):
                                       redirect=reverse_lazy(INDEX_URL))
 
         role_flavor = role.flavor(plan)
-        if role_flavor is None:
-            role_flavor = ''
-        else:
-            role_flavor = role_flavor.name
-        try:
-            role_image = role.image(plan).id
-        except glance_exc.HTTPNotFound:
-            # Glance returns a 404 if the image doesn't exist
-            role_image = ''
+        role_flavor = '' if role_flavor is None else role_flavor.name
+
+        role_image = role.image(plan)
+        role_image = '' if role_image is None else role_image.id
 
         return {'role_id': role.id,
                 'name': role.name,
