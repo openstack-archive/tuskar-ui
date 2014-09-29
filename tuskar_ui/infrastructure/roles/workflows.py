@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 from django.core.urlresolvers import reverse_lazy
+from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
@@ -23,7 +24,28 @@ from tuskar_ui import api
 from tuskar_ui.infrastructure import flavors
 
 
+# This is a custom widget to show the information just as text,
+# as readonly inputs are confusing.
+class LabelWidget(forms.Widget):
+    def render(self, name, value, attrs=None):
+        if value:
+            return escape(value)
+        return ''
+
+
 class UpdateRoleInfoAction(workflows.Action):
+    name = forms.CharField(
+        label=_("Name"),
+        widget=LabelWidget(),
+        required=False,
+    )
+
+    description = forms.CharField(
+        label=_("Description"),
+        widget=LabelWidget(),
+        required=False,
+    )
+
     flavor = forms.ChoiceField(
         label=_("Flavor"),
     )
@@ -36,7 +58,7 @@ class UpdateRoleInfoAction(workflows.Action):
         name = _("Role Information")
         help_text = _("helptext here")
         slug = 'update_role_info'
-        help_text = _("Edit the role details. Roles define the yadyadayada ")
+        help_text = _("Edit the role details.")
 
     def __init__(self, request, context, *args, **kwargs):
         super(UpdateRoleInfoAction, self).__init__(request, context, *args,
@@ -72,10 +94,14 @@ class UpdateRole(workflows.Workflow):
         'horizon:infrastructure:roles:index')
 
     def name(self):
-        return _('Edit Role "%s"') % self.context['name']
+        # Use context_seed here, as context['name'] returns empty
+        # as it's one of the fields.
+        return _('Edit Role "%s"') % self.context_seed['name']
 
     def format_status_message(self, message):
-        return message % self.context['name']
+        # Use context_seed here, as context['name'] returns empty
+        # as it's one of the fields.
+        return message % self.context_seed['name']
 
     def handle(self, request, data):
         # save it!
