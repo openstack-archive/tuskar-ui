@@ -136,8 +136,7 @@ class EditPlan(horizon.forms.SelfHandlingForm):
                 label=role.name,
                 widget=tuskar_ui.forms.NumberPickerInput,
                 initial=plan.get_role_node_count(role),
-                # XXX Dirty hack for requiring a controller node.
-                required=(role.name in ('Controller', 'Compute')),
+                required=False
             )
             field.role = role
             fields['%s-count' % role.id] = field

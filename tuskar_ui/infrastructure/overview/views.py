@@ -24,7 +24,7 @@ from tuskar_ui.infrastructure.overview import forms
 INDEX_URL = 'horizon:infrastructure:overview:index'
 
 
-def _get_role_data(plan, stack, role, field):
+def _get_role_data(plan, stack, form, role):
     """Gathers data about a single deployment role from the related Overcloud
     and Role objects, and presents it in the form convenient for use
     from the template.
@@ -35,7 +35,7 @@ def _get_role_data(plan, stack, role, field):
         'role': role,
         'name': role.name,
         'planned_node_count': plan.get_role_node_count(role),
-        'field': field,
+        'field': form['%s-count' % role.id],
     }
 
     if stack:
@@ -97,13 +97,13 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
     def get_data(self, request, context, *args, **kwargs):
         plan = api.tuskar.Plan.get_the_plan(request)
         stack = self.get_stack()
+        form = context['form']
 
         context['plan'] = plan
         context['stack'] = stack
 
-        roles = [_get_role_data(plan, stack, role, field)
-                 for role, field in zip(plan.role_list,
-                                        context['form'].visible_fields())]
+        roles = [_get_role_data(plan, stack, form, role)
+                 for role in plan.role_list]
         context['roles'] = roles
 
         if stack:
