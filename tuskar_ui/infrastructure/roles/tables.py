@@ -16,6 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
 
+from tuskar_ui import api
 from tuskar_ui.infrastructure.nodes import tables as nodes_tables
 
 
@@ -25,6 +26,14 @@ class UpdateRole(tables.LinkAction):
     url = "horizon:infrastructure:roles:update"
     classes = ("ajax-modal",)
     icon = "pencil"
+
+    def allowed(self, request, datum):
+        role_name = datum.name
+        plan = api.tuskar.Plan.get_the_plan(request)
+
+        if role_name in [role.name for role in plan.role_list]:
+            return True
+        return False
 
 
 class RolesTable(tables.DataTable):

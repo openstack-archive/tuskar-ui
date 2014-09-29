@@ -169,11 +169,14 @@ class UpdateView(workflows.WorkflowView):
             role_flavor = ''
         else:
             role_flavor = role_flavor.name
+
         try:
-            role_image = role.image(plan).id
+            role_image = role.image(plan)
         except glance_exc.HTTPNotFound:
             # Glance returns a 404 if the image doesn't exist
             role_image = ''
+        else:
+            role_image = '' if role_image is None else role_image.id
 
         return {'role_id': role.id,
                 'name': role.name,
