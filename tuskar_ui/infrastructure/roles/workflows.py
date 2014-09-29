@@ -20,7 +20,7 @@ from horizon import workflows
 
 from openstack_dashboard.api import glance
 from tuskar_ui import api
-from tuskar_ui.infrastructure import flavors
+from tuskar_ui.infrastructure.flavors import utils
 
 
 class UpdateRoleInfoAction(workflows.Action):
@@ -41,7 +41,7 @@ class UpdateRoleInfoAction(workflows.Action):
     def __init__(self, request, context, *args, **kwargs):
         super(UpdateRoleInfoAction, self).__init__(request, context, *args,
                                                    **kwargs)
-        if not flavors.utils.matching_deployment_mode():
+        if not utils.matching_deployment_mode():
             del self.fields['flavor']
 
     def populate_flavor_choices(self, request, context):
@@ -91,7 +91,7 @@ class UpdateRole(workflows.Workflow):
                 redirect=reverse_lazy(self.index_url))
 
         parameters = {role.image_id_parameter_name: data['image']}
-        if flavors.utils.matching_deployment_mode():
+        if utils.matching_deployment_mode():
             parameters[role.flavor_parameter_name] = data['flavor']
 
         plan.patch(request, plan.uuid, parameters)
