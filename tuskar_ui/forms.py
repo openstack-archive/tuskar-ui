@@ -14,7 +14,9 @@
 import re
 
 from django import forms
+from django.utils import html
 from django.utils.translation import ugettext_lazy as _
+
 import netaddr
 
 
@@ -114,3 +116,15 @@ class SelfHandlingFormset(forms.formsets.BaseFormSet):
             else:
                 pass
         return success
+
+
+class LabelWidget(forms.Widget):
+    """This is a custom widget to show context information just as text,
+       as readonly inputs are confusing.
+       Note that the field also must be required=False, as no input
+       is rendered, and it must be ignored in the handle() method.
+    """
+    def render(self, name, value, attrs=None):
+        if value:
+            return html.escape(value)
+        return ''

@@ -20,10 +20,23 @@ from horizon import workflows
 
 from openstack_dashboard.api import glance
 from tuskar_ui import api
+from tuskar_ui import forms as tuskar_forms
 from tuskar_ui.infrastructure.flavors import utils
 
 
 class UpdateRoleInfoAction(workflows.Action):
+    name = forms.CharField(
+        label=_("Name"),
+        widget=tuskar_forms.LabelWidget(),
+        required=False,
+    )
+
+    description = forms.CharField(
+        label=_("Description"),
+        widget=tuskar_forms.LabelWidget(),
+        required=False,
+    )
+
     flavor = forms.ChoiceField(
         label=_("Flavor"),
     )
@@ -36,7 +49,7 @@ class UpdateRoleInfoAction(workflows.Action):
         name = _("Role Information")
         help_text = _("helptext here")
         slug = 'update_role_info'
-        help_text = _("Edit the role details. Roles define the yadyadayada ")
+        help_text = _("Edit the role details.")
 
     def __init__(self, request, context, *args, **kwargs):
         super(UpdateRoleInfoAction, self).__init__(request, context, *args,
@@ -72,10 +85,14 @@ class UpdateRole(workflows.Workflow):
         'horizon:infrastructure:roles:index')
 
     def name(self):
-        return _('Edit Role "%s"') % self.context['name']
+        # Use context_seed here, as context['name'] returns empty
+        # as it's one of the fields.
+        return _('Edit Role "%s"') % self.context_seed['name']
 
     def format_status_message(self, message):
-        return message % self.context['name']
+        # Use context_seed here, as context['name'] returns empty
+        # as it's one of the fields.
+        return message % self.context_seed['name']
 
     def handle(self, request, data):
         # save it!
