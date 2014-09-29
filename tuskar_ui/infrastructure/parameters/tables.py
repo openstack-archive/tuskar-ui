@@ -17,12 +17,18 @@ from horizon import tables
 
 
 class ParametersTable(tables.DataTable):
-    label = tables.Column('label',
-                          verbose_name=_("Parameter Name"))
+    role = tables.Column(lambda param:
+                         param.role.name if param.role else _('General'),
+                         verbose_name=_("Role"))
+    name = tables.Column('stripped_name',
+                         verbose_name=_("Parameter Name"))
     value = tables.Column('value',
                           verbose_name=_("Value"))
     description = tables.Column('description',
-                                verbose_name=("Detailed Description"))
+                                verbose_name=_("Detailed Description"))
+
+    def get_object_id(self, datum):
+        return datum.name
 
     class Meta:
         name = "parameters"

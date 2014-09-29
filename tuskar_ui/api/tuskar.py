@@ -259,17 +259,17 @@ class Plan(base.APIResourceWrapper):
                                    role.image_id_parameter_name,
                                    role.flavor_parameter_name])
             params = [p for p in params if p['name'] not in key_params]
-        return params
+        return [Parameter(p, plan=self) for p in params]
 
     def parameter(self, param_name):
         for parameter in self.parameters:
             if parameter['name'] == param_name:
-                return parameter
+                return Parameter(parameter, plan=self)
 
     def parameter_value(self, param_name, default=None):
         parameter = self.parameter(param_name)
         if parameter is not None:
-            return parameter['value']
+            return parameter.value
         return default
 
     def list_generated_parameters(self, with_prefix=True):
@@ -458,3 +458,27 @@ class Role(base.APIResourceWrapper):
     @property
     def id(self):
         return self.uuid
+
+
+class Parameter(base.APIDictWrapper):
+
+    _attrs = ['name', 'value', 'default', 'description', 'hidden', 'label']
+
+    def __init__(self, apidict, plan=None):
+        super(Parameter, self).__init__(apidict)
+        self._plan = plan
+
+    @property
+    def stripped_name(self):
+        return strip_prefix(self.name)
+
+    @property
+    def plan(self):
+        return self._plan
+
+    @property
+    def role(self):
+        if self.plan:
+            for role in self.plan.role_list:
+                if self.name.startswith(role.parameter_prefix):
+                    return role
