@@ -17,7 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 import horizon
 
 from tuskar_ui.infrastructure import dashboard
-from tuskar_ui.infrastructure import flavors
+from tuskar_ui.infrastructure.flavors import utils
 
 
 class Flavors(horizon.Panel):
@@ -25,7 +25,7 @@ class Flavors(horizon.Panel):
     slug = "flavors"
 
     def can_access(self, context):
-        if not flavors.utils.matching_deployment_mode():
+        if not utils.matching_deployment_mode():
             return False
 
         return super(Flavors, self).can_access(context)
