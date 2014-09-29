@@ -109,3 +109,22 @@ class TuskarAPITests(test.APITestCase):
                 self.request, plan, image)
         self.assertIsInstance(ret_val, api.tuskar.Role)
         self.assertEqual(ret_val.name, 'Controller')
+
+    def test_parameter_stripped_name(self):
+        plan = api.tuskar.Plan(self.tuskarclient_plans.first())
+        param = plan.parameter('Controller-1::count')
+
+        ret_val = param.stripped_name
+        self.assertEqual(ret_val, 'count')
+
+    def test_parameter_role(self):
+        plan = api.tuskar.Plan(self.tuskarclient_plans.first(),
+                               request=self.request)
+        param = plan.parameter('Controller-1::count')
+        roles = self.tuskarclient_roles.list()
+
+        with patch('tuskarclient.v2.roles.RoleManager.list',
+                   return_value=roles):
+            ret_val = param.role
+        self.assertIsInstance(ret_val, api.tuskar.Role)
+        self.assertEqual(ret_val.name, 'Controller')

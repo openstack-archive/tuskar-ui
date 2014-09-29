@@ -21,15 +21,6 @@ from tuskar_ui.infrastructure.parameters import forms
 from tuskar_ui.infrastructure.parameters import tables
 
 
-class ServiceParameter:
-    def __init__(self, params_dict, id):
-        self.id = id
-        self.label = params_dict.get('name')
-        self.value = params_dict.get('value')
-        self.category = params_dict.get('parameter_group')
-        self.description = params_dict.get('description')
-
-
 class ServiceConfigView(horizon.forms.ModalFormView):
     template_name = "infrastructure/parameters/service_config.html"
     form_class = forms.EditServiceConfig
@@ -55,8 +46,4 @@ class IndexView(horizon_tables.DataTableView):
 
     def get_data(self):
         plan = api.tuskar.Plan.get_the_plan(self.request)
-        base_parameters = plan.parameter_list(
-            include_key_parameters=False)
-        params = [ServiceParameter(param, ind)
-                  for ind, param in enumerate(base_parameters)]
-        return params
+        return plan.parameter_list(include_key_parameters=False)
