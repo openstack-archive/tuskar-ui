@@ -13,7 +13,6 @@
 #    under the License.
 
 import contextlib
-import json
 
 import mock
 from mock import patch, call  # noqa
@@ -25,10 +24,7 @@ from tuskar_ui.test import helpers as test
 
 INDEX_URL = urlresolvers.reverse(
     'horizon:infrastructure:images:index')
-CREATE_URL = urlresolvers.reverse(
-    'horizon:infrastructure:images:create')
 UPDATE_URL = 'horizon:infrastructure:images:update'
-IMAGE_METADATA_URL = 'horizon:infrastructure:images:update_metadata'
 
 
 class ImagesTest(test.BaseAdminViewTests):
@@ -51,11 +47,6 @@ class ImagesTest(test.BaseAdminViewTests):
 
         self.assertTemplateUsed(res, 'infrastructure/images/index.html')
 
-    def test_create_get(self):
-        res = self.client.get(CREATE_URL)
-
-        self.assertTemplateUsed(res, 'infrastructure/images/create.html')
-
     def test_update_get(self):
         image = self.images.list()[0]
 
@@ -68,39 +59,6 @@ class ImagesTest(test.BaseAdminViewTests):
 
         mocked_get.assert_called_once_with(mock.ANY, image.id)
         self.assertTemplateUsed(res, 'infrastructure/images/update.html')
-
-    def test_create_post(self):
-        image = self.images.list()[0]
-        data = {
-            'name': 'Fedora',
-            'description': 'Login with admin/admin',
-            'source_type': 'url',
-            'copy_from': 'http://test_url.com',
-            'disk_format': 'qcow2',
-            'architecture': 'x86-64',
-            'minimum_disk': 15,
-            'minimum_ram': 512,
-            'is_public': True,
-            'protected': False}
-
-        forms.IMAGE_FORMAT_CHOICES = [('qcow2', 'qcow2')]
-
-        with contextlib.nested(
-            patch('openstack_dashboard.api.glance.image_create',
-                  return_value=image),) as (mocked_create,):
-
-            res = self.client.post(CREATE_URL, data)
-
-        self.assertNoFormErrors(res)
-        self.assertEqual(res.status_code, 302)
-        self.assertRedirectsNoFollow(res, INDEX_URL)
-
-        mocked_create.assert_called_once_with(
-            mock.ANY, name=u'Fedora', container_format='bare', min_ram=512,
-            disk_format=u'qcow2', copy_from=u'http://test_url.com',
-            protected=False, min_disk=15, is_public=True,
-            properties={'description': u'Login with admin/admin',
-                        'architecture': u'x86-64'})
 
     def test_update_post(self):
         image = self.images.list()[0]
@@ -166,56 +124,5 @@ class ImagesTest(test.BaseAdminViewTests):
         mock_image_delete.has_calls(
             call(mock.ANY, images[0].id),
             call(mock.ANY, images[1].id))
-        self.assertNoFormErrors(res)
-        self.assertRedirectsNoFollow(res, INDEX_URL)
-
-    def test_images_metadata_get(self):
-        image = self.images.first()
-        namespaces = self.metadata_defs.list()
-
-        with contextlib.nested(
-            patch('openstack_dashboard.api.glance.image_get',
-                  return_value=image),
-            patch('openstack_dashboard.api.glance.metadefs_namespace_list',
-                  return_value=(namespaces, False, False)),
-            patch('openstack_dashboard.api.glance.metadefs_namespace_get',
-                  return_value=namespaces[0]),) as (
-                mocked_get, mocked_namespaces_list, mocked_namespace_get,):
-
-            res = self.client.get(
-                urlresolvers.reverse(IMAGE_METADATA_URL, args=(image.id,)))
-
-        mocked_get.assert_called_once_with(mock.ANY, image.id)
-        mocked_namespaces_list.assert_called_once_with(
-            mock.ANY, filters={'resource_types': ['OS::Glance::Image']})
-
-        self.assertEqual(mocked_namespace_get.call_count, 4)
-
-        self.assertTemplateUsed(
-            res, 'infrastructure/images/update_metadata.html')
-
-    def test_images_metadata_update(self):
-        image = self.images.first()
-
-        metadata = [{"value": "mock_value", "key": "hw_machine_type"}]
-        formData = {"metadata": json.dumps(metadata)}
-
-        with contextlib.nested(
-            patch('openstack_dashboard.api.glance.image_get',
-                  return_value=image),
-            patch('openstack_dashboard.api.glance.image_update_properties',
-                  return_value=None),) as (
-
-                mocked_get, mocked_update,):
-
-            res = self.client.post(
-                urlresolvers.reverse(IMAGE_METADATA_URL, args=(image.id,)),
-                formData)
-
-        mocked_get.assert_called_once_with(mock.ANY, image.id)
-        mocked_update.assert_called_once_with(
-            mock.ANY,  image.id, ['image_type'], hw_machine_type='mock_value')
-
-        self.assertEqual(res.status_code, 302)
         self.assertNoFormErrors(res)
         self.assertRedirectsNoFollow(res, INDEX_URL)
