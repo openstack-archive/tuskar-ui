@@ -11,8 +11,12 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+import json
+
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
+from django import http
 import heatclient
 import horizon.forms
 from horizon.utils import memoized
@@ -154,6 +158,28 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
             context['plan_invalid'] = any(message.get('is_critical')
                                           for message in messages)
         return context
+
+    def post(self, request, *args, **kwargs):
+        """If the post comes from ajax, return validation results as json."""
+
+        if not request.META.get('HTTP_X_HORIZON_VALIDATE', ''):
+            return super(IndexView, self).post(request, *args, **kwargs)
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        if form.is_valid():
+            form.handle(self.request, form.cleaned_data)
+        plan = api.tuskar.Plan.get_the_plan(request)
+        messages = forms.validate_plan(request, plan)
+        # We need to unlazify all the lazy urls and translations.
+        return http.HttpResponse(json.dumps({
+            'plan_invalid': any(m.get('is_critical') for m in messages),
+            'messages': [{
+                'text': unicode(m.get('text', '')),
+                'is_critical': m.get('is_critical', False),
+                'link_url': unicode(m.get('link_url', '')),
+                'link_label': unicode(m.get('link_label', '')),
+            } for m in messages],
+        }), mimetype='application/json')
 
 
 class DeployConfirmationView(horizon.forms.ModalFormView, StackMixin):
