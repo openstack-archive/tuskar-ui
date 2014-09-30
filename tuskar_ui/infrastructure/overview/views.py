@@ -11,8 +11,12 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+import json
+
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
+from django import http
 import heatclient
 import horizon.forms
 from horizon.utils import memoized
@@ -35,7 +39,7 @@ def _get_role_data(plan, stack, form, role):
         'role': role,
         'name': role.name,
         'planned_node_count': plan.get_role_node_count(role),
-        'field': form['%s-count' % role.id],
+        'field': form['%s-count' % role.id] if form else '',
     }
 
     if stack:
@@ -57,7 +61,15 @@ def _get_role_data(plan, stack, form, role):
                                    if node.instance.status == 'ERROR')
             waiting_node_count = (node_count - deployed_node_count -
                                   deploying_node_count - error_node_count)
+            if error_node_count:
+                status = 'danger'
+            elif deployed_node_count == data['planned_node_count']:
+                status = 'success'
+            else:
+                status = 'info'
         data.update({
+            'status': status,
+            'finished': deployed_node_count == data['planned_node_count'],
             'total_node_count': node_count,
             'deployed_node_count': deployed_node_count,
             'deploying_node_count': deploying_node_count,
@@ -86,6 +98,33 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
     form_class = forms.EditPlan
     success_url = reverse_lazy(INDEX_URL)
 
+    def get(self, request, *args, **kwargs):
+        if request.META.get('HTTP_X_HORIZON_PROGRESS', ''):
+            data = self.get_data(request, {})
+            return http.HttpResponse(json.dumps({
+                'progress': data.get('progress'),
+                'last_failed_events': [{
+                    'event_time': event.event_time,
+                    'resource_name': event.resource_name,
+                    'resource_status': event.resource_status,
+                    'resource_statys_reason': event.resource_statys_reason,
+                } for event in data.get('last_failed_events', [])],
+                'roles': [{
+                    'status': role.get('status', 'warning'),
+                    'finished': role.get('finished', False),
+                    'name': role.get('name', ''),
+                    'id': role.get('id', ''),
+                    'total_node_count': role.get('node_count', 0),
+                    'deployed_node_count': role.get('deployed_node_count', 0),
+                    'deploying_node_count': role.get('deploying_node_count',
+                                                     0),
+                    'waiting_node_count': role.get('waiting_node_count', 0),
+                    'error_node_count': role.get('error_node_count', 0),
+                    'planned_node_count': role.get('planned_node_count', 0),
+                } for role in data.get('roles', [])],
+            }), mimetype='application/json')
+        return super(IndexView, self).get(request, *args, **kwargs)
+
     def get_form(self, form_class):
         return form_class(self.request, **self.get_form_kwargs())
 
@@ -97,7 +136,7 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
     def get_data(self, request, context, *args, **kwargs):
         plan = api.tuskar.Plan.get_the_plan(request)
         stack = self.get_stack()
-        form = context['form']
+        form = context.get('form')
 
         context['plan'] = plan
         context['stack'] = stack
@@ -134,19 +173,21 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
                 total_num_nodes_count = max(
                     resources_count, total_num_nodes_count)
 
-                context['progress'] = max(
-                    5, 100 * (total_num_nodes_count - resources_count))
+                context['progress'] = min(95, max(
+                    5, 100 * float(resources_count) / total_num_nodes_count))
+            elif stack.is_deploying:
+                total = sum(d['total_node_count'] for d in roles)
+                context['progress'] = min(95, max(
+                    5, 100 * sum(float(d.get('deployed_node_count', 0))
+                                 for d in roles) / (total or 1)
+                ))
             else:
                 # stack is active
+                context['progress'] = 100
                 controller_role = plan.get_role_by_name("controller")
                 context['admin_password'] = plan.parameter_value(
                     controller_role.parameter_prefix + 'AdminPassword')
 
-                total = sum(d['total_node_count'] for d in roles)
-                context['progress'] = max(
-                    5, 100 * sum(d.get('deployed_node_count', 0)
-                                 for d in roles) // (total or 1)
-                )
                 context['dashboard_urls'] = stack.dashboard_urls
         else:
             messages = forms.validate_plan(request, plan)
