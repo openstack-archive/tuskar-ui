@@ -21,10 +21,6 @@ from openstack_dashboard.dashboards.project.images.images \
     import tables as project_tables
 
 
-class CreateImage(project_tables.CreateImage):
-    url = "horizon:infrastructure:images:create"
-
-
 class DeleteImage(project_tables.DeleteImage):
     def allowed(self, request, image=None):
         if image and image.protected:
@@ -57,14 +53,6 @@ class EditImage(project_tables.EditImage):
         return True
 
 
-class UpdateMetadata(tables.LinkAction):
-    url = "horizon:infrastructure:images:update_metadata"
-    name = "update_metadata"
-    verbose_name = _("Update Metadata")
-    classes = ("ajax-modal",)
-    icon = "pencil"
-
-
 class ImagesTable(tables.DataTable):
 
     name = tables.Column('name',
@@ -80,6 +68,6 @@ class ImagesTable(tables.DataTable):
         row_class = UpdateRow
         verbose_name = _("Provisioning Images")
         multi_select = False
-        table_actions = (CreateImage, DeleteImage,
+        table_actions = (DeleteImage,
                          ImageFilterAction)
-        row_actions = (EditImage, UpdateMetadata, DeleteImage)
+        row_actions = (EditImage, DeleteImage)
