@@ -19,9 +19,11 @@ tuskar.number_picker = (function () {
             }
             $this.next('a.arrow-right').click(function () {
                 $this.val((+$this.val()) + 1);
+                $this.trigger('change');
             });
             $this.prev('a.arrow-left').click(function () {
                 $this.val(Math.max(0, (+$this.val()) - 1));
+                $this.trigger('change');
             });
         });
     };
