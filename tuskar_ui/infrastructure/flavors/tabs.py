@@ -44,6 +44,9 @@ class FlavorsTab(horizon.tabs.TableTab):
     template_name = ("horizon/common/_detail_table.html")
     preload = False
 
+    def get_items_count(self):
+        return len(self.get_flavors_data())
+
     def get_flavors_data(self):
         flavors = api.flavor.Flavor.list(self.request)
         flavors.sort(key=lambda np: (np.vcpus, np.ram, np.disk))
@@ -127,6 +130,9 @@ class FlavorSuggestionsTab(horizon.tabs.TableTab):
     template_name = ("horizon/common/_detail_table.html")
     preload = False
 
+    def get_items_count(self):
+        return len(self.get_flavor_suggestions_data())
+
     def get_flavor_suggestions_data(self):
         return list(get_flavor_suggestions(self.request))
 
@@ -138,3 +144,4 @@ class FlavorTabs(horizon.tabs.TabGroup):
         FlavorSuggestionsTab,
     )
     sticky = True
+    template_name = "horizon/common/_items_count_tab_group.html"

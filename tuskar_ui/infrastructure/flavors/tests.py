@@ -85,7 +85,7 @@ class FlavorsTest(test.BaseAdminViewTests):
             res = self.client.get(INDEX_URL)
             self.assertEqual(plans_mock.call_count, 1)
             self.assertEqual(roles_mock.call_count, 4)
-            self.assertEqual(flavors_mock.call_count, 2)
+            self.assertEqual(flavors_mock.call_count, 5)
             self.assertEqual(servers_mock.call_count, 1)
 
         self.assertTemplateUsed(res, 'infrastructure/flavors/index.html')
