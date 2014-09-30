@@ -25,10 +25,13 @@ div.number_picker {
       cursor: default;
     }
     &.arrow-left {
-      left: -14px;
+      left: -12px;
     }
     &.arrow-right {
-      right: -14px;
+      right: -16px;
     }
+  }
+  &.readonly a {
+      display: none;
   }
 }

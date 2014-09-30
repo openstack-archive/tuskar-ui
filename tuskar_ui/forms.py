@@ -54,7 +54,7 @@ class NumberPickerInput(NumberInput):
     """A form input that is rendered as a big number picker."""
 
     def __init__(self, attrs=None):
-        default_attrs = {'hr-number-picker': '', 'ng-cloak': '', }
+        default_attrs = {'class': 'number-picker'}
         if attrs:
             default_attrs.update(attrs)
         super(NumberPickerInput, self).__init__(default_attrs)
