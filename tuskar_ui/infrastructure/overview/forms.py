@@ -148,14 +148,12 @@ class EditPlan(horizon.forms.SelfHandlingForm):
             for (name, field) in self.fields.items() if name.endswith('-count')
         )
         try:
-            self.plan.patch(request, self.plan.uuid, parameters)
+            self.plan = self.plan.patch(request, self.plan.uuid, parameters)
         except Exception as e:
             horizon.exceptions.handle(request, _("Unable to update the plan."))
             LOG.exception(e)
             return False
-        else:
-            horizon.messages.success(request, _("Plan updated."))
-            return True
+        return True
 
 
 class DeployOvercloud(horizon.forms.SelfHandlingForm):
