@@ -26,6 +26,15 @@
             {% else %}
               <dt>IP Address</dt> <dd>{{ node.driver_info.ipmi_address|default:"&mdash;" }}</dd>
               <dt>IPMI User</dt> <dd>{{ node.driver_info.ipmi_username|default:"&mdash;" }}</dd>
+              <dt>IPMI Password</dt>
+              <dd><form><fieldset><div class="form-group"><div>
+                <input
+                  class="form-control"
+                  type="password"
+                  value="{{ node.driver_info.ipmi_password|default:'&mdash;' }}"
+                  disabled="true"
+                  readonly="true"/>
+              </div></div></fieldset></form></dd>
             {% endif %}
           </dl>
         </div>
