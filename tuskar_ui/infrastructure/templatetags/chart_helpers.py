@@ -45,9 +45,9 @@ def all_used_instances(obj):
         info['popup_used'] = (
             '<p> {0}% total,'
             ' <strong> {1} instances</strong> of {2}</p>'.format(
-            flavor.used_instances,
-            flavor.used_instances,
-            flavor.name))
+                flavor.used_instances,
+                flavor.used_instances,
+                flavor.name))
         info['used_instances'] = str(flavor.used_instances)
 
         all_used_instances_info.append(info)

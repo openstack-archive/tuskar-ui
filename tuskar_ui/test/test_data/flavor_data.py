@@ -10,9 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from openstack_dashboard.test.test_data import utils as test_data_utils
-
 from novaclient.v1_1 import flavors
+from openstack_dashboard.test.test_data import utils as test_data_utils
 
 
 def data(TEST):

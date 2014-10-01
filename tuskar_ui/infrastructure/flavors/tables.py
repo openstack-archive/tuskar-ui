@@ -14,9 +14,8 @@
 
 from django.utils.translation import ugettext_lazy as _
 from horizon import tables
-
-from openstack_dashboard.dashboards.admin.flavors \
-    import tables as flavor_tables
+from openstack_dashboard.dashboards.admin.flavors import (
+    tables as flavor_tables)
 
 from tuskar_ui import api
 

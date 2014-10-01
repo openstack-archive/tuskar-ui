@@ -22,6 +22,7 @@ def load_test_data(load_onto=None):
     from openstack_dashboard.test.test_data import neutron_data
     from openstack_dashboard.test.test_data import nova_data
     from openstack_dashboard.test.test_data import swift_data
+
     from tuskar_ui.test.test_data import exceptions
     from tuskar_ui.test.test_data import flavor_data
     from tuskar_ui.test.test_data import heat_data as tuskar_heat_data

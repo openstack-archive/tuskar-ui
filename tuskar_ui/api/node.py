@@ -75,8 +75,7 @@ class IronicNode(base.APIResourceWrapper):
                memory_mb=None, local_gb=None, mac_addresses=[],
                ipmi_username=None, ipmi_password=None, ssh_address=None,
                ssh_username=None, ssh_key_contents=None, driver=None):
-        """Create a Node in Ironic
-        """
+        """Create a Node in Ironic."""
         if driver == 'pxe_ssh':
             driver_info = {
                 'ssh_address': ssh_address,
@@ -177,7 +176,9 @@ class IronicNode(base.APIResourceWrapper):
 
     @classmethod
     def delete(cls, request, uuid):
-        """Remove the IronicNode matching the ID if it
+        """Delete an IronicNode
+
+        Remove the IronicNode matching the ID if it
         exists; otherwise, does nothing.
 
         :param request: request object
@@ -275,8 +276,7 @@ class BareMetalNode(base.APIResourceWrapper):
                local_gb, mac_addresses, ipmi_username=None, ipmi_password=None,
                ssh_address=None, ssh_username=None, ssh_key_contents=None,
                driver=None):
-        """Create a Nova BareMetalNode
-        """
+        """Create a Nova BareMetalNode."""
         node = baremetalclient(request).create(
             service_host='undercloud',
             cpus=cpus,
@@ -402,8 +402,7 @@ class BareMetalNode(base.APIResourceWrapper):
 
     @cached_property
     def driver(self):
-        """Return driver for this BareMetalNode
-        """
+        """Return driver for this BareMetalNode."""
         return "IPMI + PXE"
 
     @cached_property

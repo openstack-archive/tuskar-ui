@@ -25,7 +25,9 @@ INDEX_URL = 'horizon:infrastructure:overview:index'
 
 
 def _get_role_data(plan, stack, form, role):
-    """Gathers data about a single deployment role from the related Overcloud
+    """Gathers data about a single deployment role.
+
+    Gathers data about a single deployment role from the related Overcloud
     and Role objects, and presents it in the form convenient for use
     from the template.
 

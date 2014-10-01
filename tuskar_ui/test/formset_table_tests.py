@@ -12,8 +12,8 @@
 #    under the License.
 
 import django.forms
-
 from horizon import tables
+
 import tuskar_ui.tables
 from tuskar_ui.test import helpers as test
 

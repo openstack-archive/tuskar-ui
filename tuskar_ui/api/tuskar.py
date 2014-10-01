@@ -387,8 +387,7 @@ class Role(base.APIResourceWrapper):
     @classmethod
     @handle_errors(_("Unable to retrieve overcloud role"))
     def get_by_image(cls, request, plan, image):
-        """Return the Tuskar Role whose ImageID
-        parameter matches the passed in image
+        """Return the Role whose ImageID parameter matches the image.
 
         :param request: request object
         :type  request: django.http.HttpRequest

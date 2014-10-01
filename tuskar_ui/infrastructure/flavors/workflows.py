@@ -14,13 +14,12 @@
 
 from django.forms import fields
 from django.utils.translation import ugettext_lazy as _
-
 from horizon import exceptions
 from horizon import workflows
-
 from openstack_dashboard.api import glance
-from openstack_dashboard.dashboards.admin.flavors \
-    import workflows as flavor_workflows
+from openstack_dashboard.dashboards.admin.flavors import (
+    workflows as flavor_workflows)
+
 from tuskar_ui import api
 
 

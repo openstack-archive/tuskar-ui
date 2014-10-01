@@ -14,10 +14,8 @@
 
 from django.core import urlresolvers
 from django.utils.translation import ugettext_lazy as _
-
 from horizon import exceptions
 from horizon import tabs
-
 from openstack_dashboard.api import base as api_base
 
 from tuskar_ui import api

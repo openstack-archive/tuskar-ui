@@ -14,7 +14,6 @@
 
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
-
 import horizon.exceptions
 import horizon.tables
 import horizon.tabs

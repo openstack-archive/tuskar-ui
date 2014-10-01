@@ -41,7 +41,7 @@ class ServiceConfigView(horizon.forms.ModalFormView):
 
         virt_type = plan.parameter_value(
             compute_prefix + 'NovaComputeLibvirtType')
-        #TODO(tzumainn): what if compute and control values are different...
+        # TODO(tzumainn): what if compute and control values are different...
         snmp_password = plan.parameter_value(
             compute_prefix + 'SnmpdReadonlyUserPassword')
 

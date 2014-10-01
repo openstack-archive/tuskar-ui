@@ -15,13 +15,11 @@
 import contextlib
 
 from django.core import urlresolvers
-
-from mock import patch, call  # noqa
-
-from novaclient.v1_1 import servers
-
 from horizon import exceptions
+from mock import patch, call  # noqa
+from novaclient.v1_1 import servers
 from openstack_dashboard.test.test_data import utils
+
 from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import flavor_data
@@ -110,7 +108,7 @@ class FlavorsTest(test.BaseAdminViewTests):
             self.client.get(CREATE_URL)
             # FIXME(tzumainn): I expected the following to work, seems similar
             # to comment on test_index_recoverable_failure
-            #self.assertMessageCount(error=1, warning=0)
+            # self.assertMessageCount(error=1, warning=0)
 
     def test_create_post_ok(self):
         images = TEST_DATA.glanceclient_images.list()
