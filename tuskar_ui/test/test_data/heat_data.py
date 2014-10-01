@@ -10,13 +10,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from openstack_dashboard.test.test_data import utils as test_data_utils
-
 from glanceclient.v1 import images
 from heatclient.v1 import events
 from heatclient.v1 import resources
 from heatclient.v1 import stacks
 from novaclient.v1_1 import servers
+from openstack_dashboard.test.test_data import utils as test_data_utils
 
 
 def data(TEST):

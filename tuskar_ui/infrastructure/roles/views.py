@@ -18,13 +18,11 @@ from django.core.urlresolvers import reverse_lazy
 from django import http
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base
-
 from glanceclient import exc as glance_exc
 from horizon import exceptions as horizon_exceptions
 from horizon import tables as horizon_tables
 from horizon import utils
 from horizon import workflows
-
 from openstack_dashboard.api import base as api_base
 
 from tuskar_ui import api

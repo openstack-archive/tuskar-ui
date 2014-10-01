@@ -13,7 +13,6 @@
 
 from django.conf import urls
 from django.views import generic
-
 import openstack_dashboard.urls
 
 urlpatterns = urls.patterns(

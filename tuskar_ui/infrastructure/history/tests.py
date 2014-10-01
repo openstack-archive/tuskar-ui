@@ -15,10 +15,9 @@
 import contextlib
 
 from django.core import urlresolvers
-
 from mock import patch, call  # noqa
-
 from openstack_dashboard.test.test_data import utils
+
 from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import heat_data

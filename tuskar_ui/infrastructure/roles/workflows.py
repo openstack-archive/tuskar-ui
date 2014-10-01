@@ -13,12 +13,11 @@
 #    under the License.
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
-
 from horizon import exceptions
 from horizon import forms
 from horizon import workflows
-
 from openstack_dashboard.api import glance
+
 from tuskar_ui import api
 from tuskar_ui import forms as tuskar_forms
 from tuskar_ui.infrastructure.flavors import utils
