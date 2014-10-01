@@ -15,10 +15,8 @@ import urlparse
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-
 from horizon import exceptions
 from horizon.utils import memoized
-
 from openstack_dashboard.api import base
 from openstack_dashboard.api import heat
 from openstack_dashboard.api import keystone
@@ -131,9 +129,9 @@ class Stack(base.APIResourceWrapper):
         """
         # TODO(lsmola) until we have working deployment through Tuskar-API,
         # this will not work
-        #for stack in Stack.list(request):
-        #    if stack.plan and (stack.plan.id == plan.id):
-        #        return stack
+        # for stack in Stack.list(request):
+        #     if stack.plan and (stack.plan.id == plan.id):
+        #         return stack
         try:
             stack = Stack.list(request)[0]
         except IndexError:
@@ -149,8 +147,10 @@ class Stack(base.APIResourceWrapper):
 
     @memoized.memoized
     def resources(self, with_joins=True, role=None):
-        """Return list of OS::Nova::Server Resources associated with the Stack
-           and which are associated with a Role
+        """Return list of OS::Nova::Server Resources
+
+        Return list of OS::Nova::Server Resources associated with the Stack
+        and which are associated with a Role
 
         :param with_joins: should we also retrieve objects associated with each
                            retrieved Resource?
@@ -228,8 +228,7 @@ class Stack(base.APIResourceWrapper):
 
     @cached_property
     def plan(self):
-        """return associated Plan if a plan_id exists within stack
-        parameters.
+        """return associated Plan if a plan_id exists within stack parameters.
 
         :return: associated Plan if plan_id exists and a matching plan
                  exists as well; None otherwise
@@ -238,9 +237,9 @@ class Stack(base.APIResourceWrapper):
         # TODO(lsmola) replace this by actual reference, I am pretty sure
         # the relation won't be stored in parameters, that would mean putting
         # that into template, which doesn't make sense
-        #if 'plan_id' in self.parameters:
-        #    return tuskar.Plan.get(self._request,
-        #                                    self.parameters['plan_id'])
+        # if 'plan_id' in self.parameters:
+        #     return tuskar.Plan.get(self._request,
+        #                                     self.parameters['plan_id'])
         try:
             plan = tuskar.Plan.list(self._request)[0]
         except IndexError:

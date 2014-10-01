@@ -14,10 +14,9 @@
 from __future__ import absolute_import
 
 from django.utils import unittest
+from heatclient.v1 import events
 import mock
 from mock import patch  # noqa
-
-from heatclient.v1 import events
 from novaclient.v1_1 import servers
 
 from tuskar_ui import api

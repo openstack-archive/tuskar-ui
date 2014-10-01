@@ -10,11 +10,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from openstack_dashboard.test.test_data import utils as test_data_utils
-
 from ironicclient.v1 import node
 from ironicclient.v1 import port
 from novaclient.v1_1.contrib import baremetal
+from openstack_dashboard.test.test_data import utils as test_data_utils
 
 
 def data(TEST):

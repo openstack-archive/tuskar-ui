@@ -16,11 +16,9 @@ import logging
 
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
-
 from horizon import exceptions
 from horizon import tables as horizon_tables
 from horizon.utils import memoized
-
 from openstack_dashboard import api
 from openstack_dashboard.dashboards.admin.images import views as admin_views
 from openstack_dashboard.dashboards.project.images.images import views

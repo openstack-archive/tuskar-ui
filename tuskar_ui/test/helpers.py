@@ -16,8 +16,8 @@ import warnings
 
 from django.core.handlers import wsgi
 from django.utils import unittest
-
 from openstack_dashboard.test import helpers as openstack_dashboard_helpers
+
 from tuskar_ui.test.test_data import utils as test_data_utils
 
 
@@ -37,8 +37,9 @@ def create_stubs(stubs_to_create={}):
 @unittest.skipIf(os.environ.get('SKIP_UNITTESTS', False),
                  "The SKIP_UNITTESTS env variable is set.")
 class TestCase(openstack_dashboard_helpers.TestCase):
-    """Specialized base test case class for Horizon which gives access to
-    numerous additional features:
+    """Specialized base test case class for Horizon.
+
+    TestCase gives access to numerous additional features:
 
       * A full suite of test data through various attached objects and
         managers (e.g. ``self.servers``, ``self.user``, etc.). See the
@@ -69,8 +70,9 @@ class TestCase(openstack_dashboard_helpers.TestCase):
 
 
 class BaseAdminViewTests(openstack_dashboard_helpers.BaseAdminViewTests):
-    """A ``TestCase`` subclass which sets an active user with the "admin" role
-    for testing admin-only views and functionality.
+    """A ``TestCase`` subclass which sets an active user with the "admin" role.
+
+    This is for testing admin-only views and functionality.
     """
     def setUp(self):
         super(BaseAdminViewTests, self).setUp()
@@ -80,7 +82,9 @@ class BaseAdminViewTests(openstack_dashboard_helpers.BaseAdminViewTests):
 
 
 class APITestCase(openstack_dashboard_helpers.APITestCase):
-    """The ``APITestCase`` class is for use with tests which deal with the
+    """TestCase for testing API clients.
+
+    The ``APITestCase`` class is for use with tests which deal with the
     underlying clients rather than stubbing out the
     openstack_dashboard.api.* methods.
     """

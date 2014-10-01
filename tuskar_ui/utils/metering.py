@@ -12,16 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import copy
-
 from datetime import datetime  # noqa
 from datetime import timedelta  # noqa
 
 from django.utils.http import urlencode
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-
 from horizon import exceptions
-
 from openstack_dashboard.api import ceilometer
 
 SETTINGS = {
@@ -68,7 +65,7 @@ LABELS = {
 }
 
 
-#TODO(lsmola) this should probably live in Horizon common
+# TODO(lsmola) this should probably live in Horizon common
 def query_data(request,
                date_from,
                date_to,
@@ -117,7 +114,7 @@ def query_data(request,
     return resources, unit
 
 
-#TODO(lsmola) push this function to Horizon common then delete this
+# TODO(lsmola) push this function to Horizon common then delete this
 def _calc_period(date_from, date_to, number_of_samples=400):
     if date_from and date_to:
         if date_to < date_from:
@@ -136,7 +133,7 @@ def _calc_period(date_from, date_to, number_of_samples=400):
     return period
 
 
-#TODO(lsmola) push this function to Horizon common then delete this
+# TODO(lsmola) push this function to Horizon common then delete this
 def _calc_date_args(date_from, date_to, date_options):
     # TODO(lsmola) all timestamps should probably work with
     # current timezone. And also show the current timezone in chart.
@@ -198,8 +195,7 @@ def get_barchart_stats(series, unit):
                         '%(first_date)s, to: %(last_date)s') % (
                             dict(average=average, unit=unit,
                                  first_date=first_date,
-                                 last_date=last_date)
-                        )
+                                 last_date=last_date))
     return average, used, tooltip_average
 
 

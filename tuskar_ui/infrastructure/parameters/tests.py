@@ -19,6 +19,7 @@ from mock import patch, call  # noqa
 from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui import api
+from tuskar_ui.infrastructure.parameters import views
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import tuskar_data
 
@@ -30,8 +31,6 @@ SERVICE_CONFIG_URL = urlresolvers.reverse(
 
 TEST_DATA = utils.TestDataContainer()
 tuskar_data.data(TEST_DATA)
-
-from tuskar_ui.infrastructure.parameters import views
 
 
 class ParametersTest(test.BaseAdminViewTests):

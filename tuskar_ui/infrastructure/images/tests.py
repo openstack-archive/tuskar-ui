@@ -14,11 +14,10 @@
 
 import contextlib
 import json
+
 import mock
 from mock import patch, call  # noqa
-
 from django.core import urlresolvers
-
 from openstack_dashboard.dashboards.project.images.images import forms
 
 from tuskar_ui import api

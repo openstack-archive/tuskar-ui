@@ -17,7 +17,6 @@ from django.core.urlresolvers import reverse_lazy
 from django import http
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base
-
 from horizon import forms as horizon_forms
 from horizon import tabs as horizon_tabs
 from horizon.utils import memoized

@@ -16,12 +16,11 @@ import contextlib
 import json
 
 from django.core import urlresolvers
-
-from mock import patch, call  # noqa
-
 from horizon import exceptions as horizon_exceptions
+from mock import patch, call  # noqa
 from openstack_dashboard.test import helpers
 from openstack_dashboard.test.test_data import utils
+
 from tuskar_ui import api
 from tuskar_ui.handle_errors import handle_errors  # noqa
 from tuskar_ui.test import helpers as test

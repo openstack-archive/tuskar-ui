@@ -13,11 +13,10 @@
 #    under the License.
 
 import contextlib
+
 from django.core import urlresolvers
-
-from mock import patch, call  # noqa
-
 from openstack_dashboard.test.test_data import utils
+from mock import patch, call  # noqa
 
 from tuskar_ui import api
 from tuskar_ui.test import helpers as test
