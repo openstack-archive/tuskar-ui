@@ -2,6 +2,7 @@
 
 {% load i18n %}
 {% load url from future%}
+{% load horizon %}
 
 {% block deployment-icon %}
 {% if plan_invalid %}
@@ -40,4 +41,30 @@ class="btn btn-primary ajax-modal btn-default {% if plan_invalid %}disabled{% en
 <i class="fa fa-rocket"></i>
 {% trans "Deploy" %}
 </a>
+{% endblock %}
+
+{% block templates %}
+<script type="text/html" id="title-template">{% spaceless %}{% jstemplate %}
+<h4>
+[[#plan_invalid]]{% trans "Design your deployment" %}[[/plan_invalid]]
+[[^plan_invalid]]{% trans "Ready to get deployed" %}[[/plan_invalid]]
+</h4>
+{% endjstemplate %}{% endspaceless %}</script>
+<script type="text/html" id="message-template">{% spaceless %}{% jstemplate %}
+<ul class="list-unstyled">
+[[#messages ]]
+  <li class="
+    [[#is_critical]]text-danger[[/is_critical]]
+    [[^is_critical]]text-warning[[/is_critical]]
+  "><p>
+    [[text]]
+    [[#link_label]]
+      <a href="[[link_url]]">
+        [[link_label]]
+      </a>
+    [[/link_label]]
+  </p></li>
+[[/messages]]
+</ul>
+{% endjstemplate %}{% endspaceless %}</script>
 {% endblock %}
