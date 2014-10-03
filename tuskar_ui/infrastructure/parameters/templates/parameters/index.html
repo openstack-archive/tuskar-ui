@@ -1,5 +1,6 @@
 {% extends 'infrastructure/base.html' %}
 {% load i18n %}
+{% load url from future %}
 {% block title %}{% trans 'Service Configuration' %}{% endblock %}
 
 {% block page_header %}
@@ -15,9 +16,7 @@
         {% trans 'Edit Configuration' %}
       </a>
     </div>
-    <div class="no-table-title">
-      {{ table.render }}
-    </div>
+    {{ tab_group.render }}
   </div>
 </div>
 
