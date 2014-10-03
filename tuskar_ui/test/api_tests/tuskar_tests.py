@@ -12,8 +12,9 @@
 #    under the License.
 
 from __future__ import absolute_import
+import contextlib
 
-from mock import patch  # noqa
+from mock import patch, call  # noqa
 
 from tuskar_ui import api
 from tuskar_ui.test import helpers as test
@@ -128,3 +129,153 @@ class TuskarAPITests(test.APITestCase):
             ret_val = param.role
         self.assertIsInstance(ret_val, api.tuskar.Role)
         self.assertEqual(ret_val.name, 'Controller')
+
+    def test_list_generated_parameters(self):
+        plan = api.tuskar.Plan(self.tuskarclient_plans.first())
+        with contextlib.nested(
+            patch('tuskar_ui.api.tuskar.Plan.parameter_list',
+                  return_value=plan.parameters),
+        ) as (mock_parameter_list, ):
+            ret_val = plan.list_generated_parameters()
+
+        self.assertEqual(
+            ret_val,
+            {'Controller-1::KeystoneCACertificate': {
+                'description': 'Keystone CA CertificateAdmin',
+                'hidden': True,
+                'name': 'Controller-1::KeystoneCACertificate',
+                'value': 'unset',
+                'label': 'Keystone CA CertificateAdmin'},
+             'Controller-1::SnmpdReadonlyUserPassword': {
+                'description': 'Snmpd password',
+                'hidden': True,
+                'name': 'Controller-1::SnmpdReadonlyUserPassword',
+                'value': '',
+                'label': 'Snmpd password'},
+             'Controller-1::AdminPassword': {
+                'description': 'Admin password',
+                'hidden': True,
+                'name': 'Controller-1::AdminPassword',
+                'value': 'unset',
+                'label': 'Admin Password'},
+             'Controller-1::AdminToken': {
+                'description': 'Admin Token',
+                'hidden': True,
+                'name': 'Controller-1::AdminToken',
+                'value': '',
+                'label': 'Admin Token'},
+             'Compute-1::SnmpdReadonlyUserPassword': {
+                'description': 'Snmpd password',
+                'hidden': True,
+                'name': 'Compute-1::SnmpdReadonlyUserPassword',
+                'value': 'unset',
+                'label': 'Snmpd password'}})
+
+        mock_parameter_list.assert_called_once_with()
+
+    def test_list_generated_parameters_without_prefix(self):
+        plan = api.tuskar.Plan(self.tuskarclient_plans.first())
+        with contextlib.nested(
+            patch('tuskar_ui.api.tuskar.Plan.parameter_list',
+                  return_value=plan.parameters),
+        ) as (mock_parameter_list, ):
+            ret_val = plan.list_generated_parameters(with_prefix=False)
+
+        self.assertEqual(
+            ret_val,
+            {'SnmpdReadonlyUserPassword': {
+                'description': 'Snmpd password',
+                'hidden': True,
+                'name': 'Compute-1::SnmpdReadonlyUserPassword',
+                'value': 'unset',
+                'label': 'Snmpd password'},
+             'KeystoneCACertificate': {
+                'description': 'Keystone CA CertificateAdmin',
+                'hidden': True,
+                'name': 'Controller-1::KeystoneCACertificate',
+                'value': 'unset',
+                'label': 'Keystone CA CertificateAdmin'},
+             'AdminToken': {
+                'description': 'Admin Token',
+                'hidden': True,
+                'name': 'Controller-1::AdminToken',
+                'value': '',
+                'label': 'Admin Token'},
+             'AdminPassword': {
+                'description': 'Admin password',
+                'hidden': True,
+                'name': 'Controller-1::AdminPassword',
+                'value': 'unset',
+                'label': 'Admin Password'}})
+
+        mock_parameter_list.assert_called_once_with()
+
+    def test_make_keystone_certificates(self):
+        plan = api.tuskar.Plan(self.tuskarclient_plans.first())
+        with contextlib.nested(
+            patch('os_cloud_config.keystone_pki.create_ca_pair',
+                  return_value=('ca_key_pem', 'ca_cert_pem')),
+            patch('os_cloud_config.keystone_pki.create_signing_pair',
+                  return_value=('signing_key_pem', 'signing_cert_pem'))
+        ) as (mock_create_ca_pair, mock_create_signing_pair):
+            ret_val = plan._make_keystone_certificates(
+                {'KeystoneSigningCertificate': {}})
+
+        self.assertEqual(
+            ret_val,
+            {'KeystoneCACertificate': 'ca_cert_pem',
+             'KeystoneSigningCertificate': 'signing_cert_pem',
+             'KeystoneSigningKey': 'signing_key_pem'})
+
+        mock_create_ca_pair.assert_called_once_with()
+        mock_create_signing_pair.assert_called_once_with(
+            'ca_key_pem', 'ca_cert_pem')
+
+    def test_make_generated_parameters(self):
+        plan = api.tuskar.Plan(self.tuskarclient_plans.first())
+
+        with contextlib.nested(
+            patch('tuskar_ui.api.tuskar.Plan.parameter_list',
+                  return_value=plan.parameters),
+            patch('tuskar_ui.api.tuskar.Plan._make_keystone_certificates',
+                  return_value={'KeystoneCACertificate': 'ca_cert_pem'}),
+            patch('tuskar_ui.api.tuskar.password_generator',
+                  return_value='generated_password')
+        ) as (mock_parameter_list, mock_make_keystone_certificates,
+              mock_password_generator):
+            ret_val = plan.make_generated_parameters()
+
+        self.assertEqual(
+            ret_val,
+            {'Controller-1::KeystoneCACertificate': 'ca_cert_pem',
+             'Controller-1::SnmpdReadonlyUserPassword': 'generated_password',
+             'Controller-1::AdminPassword': 'generated_password',
+             'Controller-1::AdminToken': 'generated_password',
+             'Compute-1::SnmpdReadonlyUserPassword': 'generated_password'})
+
+        mock_parameter_list.assert_has_calls([
+            call(), call()])
+        mock_make_keystone_certificates.assert_called_once_with({
+            'SnmpdReadonlyUserPassword': {
+                'description': 'Snmpd password',
+                'hidden': True,
+                'name': 'Compute-1::SnmpdReadonlyUserPassword',
+                'value': 'unset',
+                'label': 'Snmpd password'},
+            'KeystoneCACertificate': {
+                'description': 'Keystone CA CertificateAdmin',
+                'hidden': True, 'name':
+                'Controller-1::KeystoneCACertificate',
+                'value': 'unset',
+                'label': 'Keystone CA CertificateAdmin'},
+            'AdminToken': {
+                'description': 'Admin Token',
+                'hidden': True,
+                'name': 'Controller-1::AdminToken',
+                'value': '', 'label': 'Admin Token'},
+            'AdminPassword': {
+                'description': 'Admin password',
+                'hidden': True,
+                'name': 'Controller-1::AdminPassword',
+                'value': 'unset',
+                'label': 'Admin Password'}})
