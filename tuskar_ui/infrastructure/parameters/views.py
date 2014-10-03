@@ -14,11 +14,11 @@
 
 from django.core.urlresolvers import reverse_lazy
 import horizon.forms
-from horizon import tables as horizon_tables
+from horizon import tabs as horizon_tabs
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.parameters import forms
-from tuskar_ui.infrastructure.parameters import tables
+from tuskar_ui.infrastructure.parameters import tabs
 
 
 class ServiceConfigView(horizon.forms.ModalFormView):
@@ -40,10 +40,6 @@ class ServiceConfigView(horizon.forms.ModalFormView):
                 'snmp_password': snmp_password}
 
 
-class IndexView(horizon_tables.DataTableView):
-    table_class = tables.ParametersTable
+class IndexView(horizon_tabs.TabbedTableView):
+    tab_group_class = tabs.ParametersTabs
     template_name = "infrastructure/parameters/index.html"
-
-    def get_data(self):
-        plan = api.tuskar.Plan.get_the_plan(self.request)
-        return plan.parameter_list(include_key_parameters=False)
