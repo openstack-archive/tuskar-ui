@@ -591,36 +591,23 @@ class Node(base.APIResourceWrapper):
         return _("Free")
 
 
-def filter_nodes(nodes, healthy=None, power_state=None):
+def filter_nodes(nodes, **kwargs):
     """Filters the list of Nodes and returns the filtered list.
 
-    :param nodes:   list of tuskar_ui.api.node.Node objects to filter
-    :type  nodes:   list
-    :param healthy: retrieve all Nodes (healthy=None),
-                    only the healthly ones (healthy=True),
-                    or only those in an error state (healthy=False)
-    :type  healthy: None or bool
-    :param power_state: retrieve all Nodes (power_state=None),
-                    only those that are running (power_state=True),
-                    or only those that are stopped (power_state=False)
-    :type  power_state: None or bool
-    :return:        list of filtered tuskar_ui.api.node.Node objects
-    :rtype:         list
+    Example usage:
+    >>> filter_nodes(nodes, power_state='error')
+    >>> filter_nodes(nodes, power_state__in=('on', 'power on'))
     """
-    if healthy is not None:
-        if healthy:
-            nodes = [node for node in nodes
-                     if node.power_state not in ERROR_STATES]
+    for node in nodes:
+        for name, value in kwargs.items():
+            if name.endswith('__in'):
+                if getattr(node, name[:-len('__in')]) not in value:
+                    break
+            elif name.endswith('__not_in'):
+                if getattr(node, name[:-len('__not_in')]) in value:
+                    break
+            else:
+                if getattr(node, name) != value:
+                    break
         else:
-            nodes = [node for node in nodes
-                     if node.power_state in ERROR_STATES]
-
-    if power_state is not None:
-        if power_state:
-            nodes = [node for node in nodes
-                     if node.power_state in POWER_ON_STATES]
-        else:
-            nodes = [node for node in nodes
-                     if node.power_state not in POWER_ON_STATES]
-
-    return nodes
+            yield node

@@ -149,9 +149,9 @@ class NodeAPITests(test.APITestCase):
 
         with patch('novaclient.v1_1.contrib.baremetal.'
                    'BareMetalNodeManager.list', return_value=nodes):
-            all_nodes = api.node.filter_nodes(nodes)
-            healthy_nodes = api.node.filter_nodes(nodes, healthy=True)
-            defective_nodes = api.node.filter_nodes(nodes, healthy=False)
-        self.assertEqual(len(all_nodes), num_nodes)
-        self.assertEqual(len(healthy_nodes), num_nodes - 1)
-        self.assertEqual(len(defective_nodes), 1)
+            healthy_nodes = api.node.filter_nodes(
+                nodes, power_state__not_in=api.node.ERROR_STATES)
+            defective_nodes = api.node.filter_nodes(
+                nodes, power_state__in=api.node.ERROR_STATES)
+        self.assertEqual(sum(1 for _node in healthy_nodes), num_nodes - 1)
+        self.assertEqual(sum(1 for _node in defective_nodes), 1)
