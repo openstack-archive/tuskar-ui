@@ -26,13 +26,13 @@
       <h3>{% trans 'Free Nodes' %}</h3>
       <div class="d3_pie_chart_distribution" data-used="Provisioned={{ nodes_provisioned_count }}|Free={{ nodes_free_count }}"></div>
       <div class="widget-info">
-        <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+        <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered&free">
           <span class="info">{{ nodes_free_count }}</span>
           {% trans 'Free Nodes' %}
         </a>
       </div>
       <div class="widget-info">
-        <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+        <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered&provisioned">
           <span class="info">{{ nodes_provisioned_count }}</span>
           {% trans 'Provisioned Nodes' %}
         </a>
@@ -128,7 +128,7 @@
     <div id="node-charts" class="nodes row">
       <div class="col-lg-1">
         <div class="widget-info">
-          <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+          <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered&provisioned">
             <span class="info">{{ nodes_provisioned_count }}</span><br>
             {% trans 'Provisioned' %}<br>
             {% trans 'Nodes' %}<br>

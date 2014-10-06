@@ -91,8 +91,16 @@ class RegisteredTab(tabs.TableTab):
 
     def get_nodes_table_data(self):
         redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
-        nodes = api.node.Node.list(self.request, maintenance=False,
-                                   _error_redirect=redirect)
+
+        if 'provisioned' in self.request.GET:
+            associated = True
+        elif 'free' in self.request.GET:
+            associated = False
+        else:
+            associated = None
+
+        nodes = api.node.Node.list(self.request, associated=associated,
+                                   maintenance=False, _error_redirect=redirect)
 
         if nodes:
             all_resources = api.heat.Resource.list_all_resources(self.request)
