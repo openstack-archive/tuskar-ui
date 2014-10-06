@@ -4,7 +4,7 @@ tuskar.deployment_progress = (function () {
   var module = {};
 
   module.init = function () {
-    if (!$('div.deployment-box div.progress')) { return; }
+    if (!$('div.deployment-box div.progress').length) { return; }
     module.interval = setInterval(module.check_progress, 30000);
     module.events_template = Hogan.compile($('#events-template').html() || '');
     module.roles_template = Hogan.compile($('#roles-template').html() || '');

@@ -6,10 +6,8 @@ tuskar.edit_plan = (function () {
     module.debounce_timer = null;
 
     module.init = function () {
+        if (!$('form.deployment-roles-form').length) { return; }
         // Attach event listeners and hide the submit button.
-        if (!$('form.deployment-roles-form')) {
-            return;
-        }
         $('form.deployment-roles-form input.number-picker'
             ).change(module.on_change);
         $('form.deployment-roles-form [type=submit]').hide();
