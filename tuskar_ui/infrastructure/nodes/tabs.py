@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import itertools
+
 from django.core import urlresolvers
 from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
@@ -21,6 +23,7 @@ from openstack_dashboard.api import base as api_base
 from tuskar_ui import api
 from tuskar_ui.infrastructure.nodes import tables
 from tuskar_ui.utils import metering as metering_utils
+from tuskar_ui.utils import utils
 
 
 class OverviewTab(tabs.Tab):
@@ -34,34 +37,26 @@ class OverviewTab(tabs.Tab):
         memory_mb = sum(int(node.memory_mb) for node in nodes if
                         node.memory_mb)
         local_gb = sum(int(node.local_gb) for node in nodes if node.local_gb)
-        deployed_nodes = api.node.Node.list(request, associated=True)
-        free_nodes = api.node.Node.list(request, associated=False)
-        deployed_nodes_error = api.node.filter_nodes(
-            deployed_nodes, healthy=False)
-        deployed_nodes_down = api.node.filter_nodes(
-            deployed_nodes, power_state=False)
-        free_nodes_error = api.node.filter_nodes(free_nodes, healthy=False)
-        free_nodes_down = api.node.filter_nodes(free_nodes, power_state=False)
-        total_nodes = deployed_nodes + free_nodes
-        total_nodes_error = deployed_nodes_error + free_nodes_error
-        total_nodes_down = deployed_nodes_down + free_nodes_down
-        total_nodes_healthy = api.node.filter_nodes(total_nodes, healthy=True)
-        total_nodes_up = api.node.filter_nodes(total_nodes, power_state=True)
+
+        nodes_provisioned = api.node.Node.list(request, associated=True)
+        nodes_free = api.node.Node.list(request, associated=False)
+        nodes_provisioned_down = utils.filter_items(
+            nodes_provisioned, power_state__not_in=api.node.POWER_ON_STATES)
+        nodes_free_down = utils.filter_items(
+            nodes_free, power_state__not_in=api.node.POWER_ON_STATES)
+
+        nodes_down = itertools.chain(nodes_provisioned_down, nodes_free_down)
+        nodes_up = utils.filter_items(
+            nodes, power_state__in=api.node.POWER_ON_STATES)
 
         context = {
             'cpus': cpus,
             'memory_gb': memory_mb / 1024.0,
             'local_gb': local_gb,
-            'total_nodes_healthy': total_nodes_healthy,
-            'total_nodes_up': total_nodes_up,
-            'total_nodes_error': total_nodes_error,
-            'total_nodes_down': total_nodes_down,
-            'deployed_nodes': deployed_nodes,
-            'deployed_nodes_error': deployed_nodes_error,
-            'deployed_nodes_down': deployed_nodes_down,
-            'free_nodes': free_nodes,
-            'free_nodes_error': free_nodes_error,
-            'free_nodes_down': free_nodes_down,
+            'nodes_up_count': utils.length(nodes_up),
+            'nodes_down_count': utils.length(nodes_down),
+            'nodes_provisioned_count': utils.length(nodes_provisioned),
+            'nodes_free_count': utils.length(nodes_free),
         }
 
         if api_base.is_service_enabled(self.request, 'metering'):
@@ -98,9 +93,6 @@ class RegisteredTab(tabs.TableTab):
         redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
         nodes = api.node.Node.list(self.request, maintenance=False,
                                    _error_redirect=redirect)
-
-        if 'errors' in self.request.GET:
-            return api.node.filter_nodes(nodes, healthy=False)
 
         if nodes:
             all_resources = api.heat.Resource.list_all_resources(self.request)
