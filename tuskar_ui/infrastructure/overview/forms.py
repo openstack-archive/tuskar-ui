@@ -68,14 +68,14 @@ def validate_plan(request, plan):
     for role in plan.role_list:
         if role.image(plan) is None:
             messages.append({
-                'text': _(u"Role %s has no image.") % role.name,
+                'text': _(u"Role {0} has no image.").format(role.name),
                 'is_critical': False,
                 'link_url': reverse_lazy('horizon:infrastructure:roles:index'),
                 'link_label': _(u"Associate this role with an image."),
             })
         if role.flavor(plan) is None:
             messages.append({
-                'text': _(u"Role %s has no flavor.") % role.name,
+                'text': _(u"Role {0} has no flavor.").format(role.name),
                 'is_critical': False,
                 'link_url': reverse_lazy('horizon:infrastructure:roles:index'),
                 'link_label': _(u"Associate this role with a flavor."),
@@ -87,7 +87,8 @@ def validate_plan(request, plan):
                 previous_snmp_password and
                 previous_snmp_password != snmp_password):
             messages.append({
-                'text': _(u"Set your SNMP password for role %n.") % role.name,
+                'text': _(
+                    u"Set your SNMP password for role {0}.").format(role.name),
                 'is_critical': True,
                 'link_url': reverse_lazy(
                     'horizon:infrastructure:parameters:index'),
@@ -113,7 +114,7 @@ def validate_plan(request, plan):
     elif requested_nodes > available_nodes:
             messages.append({
                 'text': _(u"Not enough registered nodes for this plan. "
-                          u"You need %d more.") % (
+                          u"You need {0} more.").format(
                               requested_nodes - available_nodes),
                 'is_critical': True,
                 'link_url': reverse_lazy('horizon:infrastructure:nodes:index'),
