@@ -34,3 +34,11 @@ def list_to_dict(object_list, key_attribute='id'):
     :rtype: dict
     """
     return dict((getattr(o, key_attribute), o) for o in object_list)
+
+
+def length(iterator):
+    """A length function for iterators
+
+    Returns the number of items in the specified iterator.
+    """
+    return sum(1 for _item in iterator)
