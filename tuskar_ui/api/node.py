@@ -589,38 +589,3 @@ class Node(base.APIResourceWrapper):
         if self.instance_uuid:
             return _("Provisioned")
         return _("Free")
-
-
-def filter_nodes(nodes, healthy=None, power_state=None):
-    """Filters the list of Nodes and returns the filtered list.
-
-    :param nodes:   list of tuskar_ui.api.node.Node objects to filter
-    :type  nodes:   list
-    :param healthy: retrieve all Nodes (healthy=None),
-                    only the healthly ones (healthy=True),
-                    or only those in an error state (healthy=False)
-    :type  healthy: None or bool
-    :param power_state: retrieve all Nodes (power_state=None),
-                    only those that are running (power_state=True),
-                    or only those that are stopped (power_state=False)
-    :type  power_state: None or bool
-    :return:        list of filtered tuskar_ui.api.node.Node objects
-    :rtype:         list
-    """
-    if healthy is not None:
-        if healthy:
-            nodes = [node for node in nodes
-                     if node.power_state not in ERROR_STATES]
-        else:
-            nodes = [node for node in nodes
-                     if node.power_state in ERROR_STATES]
-
-    if power_state is not None:
-        if power_state:
-            nodes = [node for node in nodes
-                     if node.power_state in POWER_ON_STATES]
-        else:
-            nodes = [node for node in nodes
-                     if node.power_state not in POWER_ON_STATES]
-
-    return nodes

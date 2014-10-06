@@ -34,3 +34,44 @@ def list_to_dict(object_list, key_attribute='id'):
     :rtype: dict
     """
     return dict((getattr(o, key_attribute), o) for o in object_list)
+
+
+def length(iterator):
+    """A length function for iterators
+
+    Returns the number of items in the specified iterator. Note that this
+    function consumes the iterator in the process.
+    """
+    return sum(1 for _item in iterator)
+
+
+def filter_items(items, **kwargs):
+    """Filters the list of items and returns the filtered list.
+
+    Example usage:
+    >>> class Item(object):
+    ...     def __init__(self, index):
+    ...         self.index = index
+    ...     def __repr__(self):
+    ...         return '<Item index=%d>' % self.index
+    >>> items = [Item(i) for i in range(7)]
+    >>> list(filter_items(items, index=1))
+    [<Item index=1>]
+    >>> list(filter_items(items, index__in=(1, 2, 3)))
+    [<Item index=1>, <Item index=2>, <Item index=3>]
+    >>> list(filter_items(items, index__not_in=(1, 2, 3)))
+    [<Item index=0>, <Item index=4>, <Item index=5>, <Item index=6>]
+    """
+    for item in items:
+        for name, value in kwargs.items():
+            if name.endswith('__in'):
+                if getattr(item, name[:-len('__in')]) not in value:
+                    break
+            elif name.endswith('__not_in'):
+                if getattr(item, name[:-len('__not_in')]) in value:
+                    break
+            else:
+                if getattr(item, name) != value:
+                    break
+        else:
+            yield item
