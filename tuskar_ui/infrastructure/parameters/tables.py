@@ -17,9 +17,6 @@ from horizon import tables
 
 
 class ParametersTable(tables.DataTable):
-    role = tables.Column(lambda param:
-                         param.role.name if param.role else _('General'),
-                         verbose_name=_("Role"))
     name = tables.Column('stripped_name',
                          verbose_name=_("Parameter Name"))
     value = tables.Column('value',
