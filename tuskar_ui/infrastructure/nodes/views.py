@@ -12,11 +12,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import json
+import csv
 
 from django.core.urlresolvers import reverse_lazy
-from django import http
+import django.forms
+import django.http
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base
+from horizon import exceptions
 from horizon import forms as horizon_forms
 from horizon import tabs as horizon_tabs
 from horizon.utils import memoized
@@ -50,32 +53,33 @@ class RegisterView(horizon_forms.ModalFormView):
         return []
 
     def get_form(self, form_class):
-        return form_class(self.request.POST or None,
-                          initial=self.get_data(),
-                          prefix=self.form_prefix)
+        if self.request.META['CONTENT_TYPE'].startswith('multipart/form-data'):
+            csv_form = forms.UploadNodeForm(
+                self.request, **self.get_form_kwargs())
+            if csv_form.is_valid():
+                initial = csv_form.get_data()
+                errors = []
+            else:
+                initial = []
+                errors = [_(u"Invalid upload.")]
+            form = forms.RegisterNodeFormset(None,
+                initial=initial, prefix=self.form_prefix)
+            form.errors.extend(errors)
+        else:
+            form = forms.RegisterNodeFormset(self.request.POST or None,
+                initial=self.get_data(), prefix=self.form_prefix)
+        return form
 
 
-class AutoDiscoverView(horizon_forms.ModalFormView):
-    form_class = forms.AutoDiscoverNodeFormset
-    form_prefix = 'auto_discover_nodes'
-    template_name = 'infrastructure/nodes/auto_discover.html'
+class UploadView(horizon_forms.ModalFormView):
+    form_class = forms.UploadNodeForm
+    template_name = 'infrastructure/nodes/upload.html'
     success_url = reverse_lazy(
         'horizon:infrastructure:nodes:index')
 
-    def get_data(self):
-        return []
-
-    def get_form(self, form_class):
-        return form_class(self.request.POST or None,
-                          initial=self.get_data(),
-                          prefix=self.form_prefix)
-
-
-class AutoDiscoverCSVView(horizon_forms.ModalFormView):
-    form_class = forms.AutoDiscoverCSVNodeForm
-    template_name = 'infrastructure/nodes/auto_discover_csv.html'
-    success_url = reverse_lazy(
-        'horizon:infrastructure:nodes:index')
+    def post(self, request, *args, **kwargs):
+        # This form's POST is handled in RegisterView.
+        raise exceptions.NotFound()
 
 
 class DetailView(horizon_tabs.TabView):
@@ -138,5 +142,5 @@ class PerformanceView(base.TemplateView):
             date_from=date_from, date_to=date_to,
             stats_attr=stats_attr, barchart=barchart)
 
-        return http.HttpResponse(json.dumps(json_output),
-                                 content_type='application/json')
+        return django.http.HttpResponse(
+            json.dumps(json_output), content_type='application/json')
