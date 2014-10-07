@@ -32,7 +32,7 @@ tuskar.menu_formset = (function () {
 
     function add_delete_link($nav_item) {
       var $form = $content.find($nav_item.find('a').attr('href'));
-      $nav_item.prepend('<span class="btn-small pull-right delete-icon"><i class="fa fa-trash"></i></span>');
+      $nav_item.prepend('<span class="btn-small pull-right delete-icon"><i class="fa fa-times"></i></span>');
       $nav_item.find('span.delete-icon:first').click(function () {
           var count;
           $form.remove();
@@ -53,13 +53,24 @@ tuskar.menu_formset = (function () {
       $nav.append('<li><a href="#' + id + '" data-toggle="tab">Undefined node</a></li>');
       $new_nav = $nav.find('li > a:last');
       add_delete_link($new_nav.parent());
-      $new_nav.click(function () { $(this).tab('show'); });
+      $new_nav.click(function () {
+        $(this).tab('show');
+        $('select.switchable').trigger('change');
+      });
       $new_nav.tab('show');
+      $('select.switchable').trigger('change');
     }
 
     // Connect all signals.
     $('a.add-node-link').click(add_node);
-    $nav.find('li').each(function () { add_delete_link($(this)); });
+    $nav.find('li').each(function () {
+      add_delete_link($(this));
+    });
+    $nav.find('li a').click(function () {
+      window.setTimeout(function () {
+        $('select.switchable').trigger('change');
+      }, 0);
+    });
 
     // Activate the first field that has errors.
     $content.find('.control-group.error').each(function () {
@@ -68,6 +79,7 @@ tuskar.menu_formset = (function () {
         activated = true;
       }
     });
+
   };
 
   return module;
