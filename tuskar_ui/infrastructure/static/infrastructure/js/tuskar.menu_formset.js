@@ -32,7 +32,7 @@ tuskar.menu_formset = (function () {
 
     function add_delete_link($nav_item) {
       var $form = $content.find($nav_item.find('a').attr('href'));
-      $nav_item.prepend('<span class="btn-small pull-right delete-icon"><i class="fa fa-trash"></i></span>');
+      $nav_item.prepend('<span class="btn-small pull-right delete-icon"><i class="fa fa-times"></i></span>');
       $nav_item.find('span.delete-icon:first').click(function () {
           var count;
           $form.remove();
