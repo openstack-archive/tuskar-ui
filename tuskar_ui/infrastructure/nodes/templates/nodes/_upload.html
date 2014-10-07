@@ -2,10 +2,10 @@
 {% load i18n %}
 {% load url from future %}
 
-{% block form_id %}autodiscover_csv_nodes_form{% endblock %}
-{% block form_action %}{% url 'horizon:infrastructure:nodes:register' %}{% endblock %}
+{% block form_id %}upload_nodes_form{% endblock %}
+{% block form_action %}{% url 'horizon:infrastructure:nodes:register' %}?upload{% endblock %}
 
-{% block modal_id %}autodiscover_csv_nodes_modal{% endblock %}
+{% block modal_id %}upload_nodes_modal{% endblock %}
 {% block modal-header %}{% trans "Upload Nodes" %}{% endblock %}
 {% block form_attrs %}enctype="multipart/form-data"{% endblock %}
 
@@ -21,3 +21,4 @@
   <a href="{% url 'horizon:infrastructure:nodes:index' %}"
      class="btn secondary cancel close">{% trans "Cancel" %}</a>
 {% endblock %}
+
