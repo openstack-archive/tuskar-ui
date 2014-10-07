@@ -1,0 +1,11 @@
+{% extends "infrastructure/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Upload Nodes" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Upload Nodes") %}
+{% endblock %}
+
+{% block main %}
+  {% include "infrastructure/nodes/_upload.html" %}
+{% endblock %}
