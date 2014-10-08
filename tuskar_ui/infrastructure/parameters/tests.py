@@ -15,7 +15,7 @@
 import contextlib
 
 from django.core import urlresolvers
-from mock import patch, call  # noqa
+from mock import patch, call, ANY  # noqa
 from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui import api
@@ -65,7 +65,10 @@ class ParametersTest(test.BaseAdminViewTests):
 
     def test_service_config_post(self):
         plan = api.tuskar.Plan(self.tuskarclient_plans.first())
-        role = api.tuskar.Role(self.tuskarclient_roles.first())
+        roles = [api.tuskar.Role(role) for role in
+                 self.tuskarclient_roles.list()]
+        plan.role_list = roles
+
         data = {
             'virt_type': 'qemu',
             'snmp_password': 'password',
@@ -76,7 +79,15 @@ class ParametersTest(test.BaseAdminViewTests):
             patch('tuskar_ui.api.tuskar.Plan.patch',
                   return_value=plan),
             patch('tuskar_ui.api.tuskar.Plan.get_role_by_name',
-                  return_value=role),
-        ):
+                  return_value=roles[0]),
+        ) as (get_the_plan, plan_patch, get_role_by_name):
             res = self.client.post(SERVICE_CONFIG_URL, data)
-            self.assertRedirectsNoFollow(res, INDEX_URL)
+
+        self.assertRedirectsNoFollow(res, INDEX_URL)
+
+        plan_patch.assert_called_once_with(ANY, plan.uuid, {
+            'Controller-1::NovaComputeLibvirtType': u'qemu',
+            'Compute-1::SnmpdReadonlyUserPassword': u'password',
+            'Block Storage-1::SnmpdReadonlyUserPassword': u'password',
+            'Object Storage-1::SnmpdReadonlyUserPassword': u'password',
+            'Controller-1::SnmpdReadonlyUserPassword': u'password'})
