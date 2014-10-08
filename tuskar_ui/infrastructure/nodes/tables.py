@@ -42,8 +42,12 @@ class ActivateNode(tables.BatchAction):
     data_type_plural = _("Nodes")
 
     def allowed(self, request, obj=None):
-        return (obj.cpus and obj.memory_mb and
-                obj.local_gb and obj.cpu_arch)
+        if not obj:
+            # this is necessary because table actions use this function
+            # with obj=None
+            return True
+        return (obj.cpus and obj.memory_mb and obj.local_gb and
+                obj.cpu_arch)
 
     def action(self, request, obj_id):
         api.node.Node.set_maintenance(request, obj_id, False)
@@ -58,6 +62,10 @@ class SetPowerStateOn(tables.BatchAction):
     data_type_plural = _("Nodes")
 
     def allowed(self, request, obj=None):
+        if not obj:
+            # this is necessary because table actions use this function
+            # with obj=None
+            return True
         if api.node.NodeClient.ironic_enabled(request):
             return obj.power_state not in api.node.POWER_ON_STATES
         return False
@@ -76,6 +84,10 @@ class SetPowerStateOff(tables.BatchAction):
     data_type_plural = _("Nodes")
 
     def allowed(self, request, obj=None):
+        if not obj:
+            # this is necessary because table actions use this function
+            # with obj=None
+            return True
         return (api.node.NodeClient.ironic_enabled(request)
                 and obj.power_state in api.node.POWER_ON_STATES
                 and getattr(obj, 'instance_uuid', None) is None)
@@ -135,8 +147,9 @@ class RegisteredNodesTable(tables.DataTable):
     class Meta:
         name = "nodes_table"
         verbose_name = _("Registered Nodes")
-        table_actions = (NodeFilterAction, DeleteNode)
-        row_actions = (DeleteNode, SetPowerStateOn, SetPowerStateOff)
+        table_actions = (NodeFilterAction, SetPowerStateOn, SetPowerStateOff,
+                         DeleteNode)
+        row_actions = (SetPowerStateOn, SetPowerStateOff, DeleteNode)
 
     def get_object_id(self, datum):
         return datum.uuid
@@ -165,7 +178,7 @@ class MaintenanceNodesTable(tables.DataTable):
     class Meta:
         name = "maintenance_nodes_table"
         verbose_name = _("Nodes (Maintenance)")
-        table_actions = (NodeFilterAction,)
+        table_actions = (NodeFilterAction, ActivateNode, DeleteNode)
         row_actions = (ActivateNode, DeleteNode,)
 
     def get_object_id(self, datum):
