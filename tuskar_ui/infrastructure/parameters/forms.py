@@ -43,17 +43,26 @@ class EditServiceConfig(horizon.forms.SelfHandlingForm):
         required=False,
         widget=django.forms.PasswordInput(render_value=True))
 
+    @staticmethod
+    def _load_snmp_parameters(plan, data):
+        params = {}
+        password = data.get('snmp_password')
+        # Set the same SNMPd password in all roles.
+        for role in plan.role_list:
+            key = role.parameter_prefix + 'SnmpdReadonlyUserPassword'
+            params[key] = password
+
+        return params
+
     def handle(self, request, data):
         plan = api.tuskar.Plan.get_the_plan(self.request)
         compute_prefix = plan.get_role_by_name('compute').parameter_prefix
-        control_prefix = plan.get_role_by_name('controller').parameter_prefix
         virt_type = data.get('virt_type')
-        snmp_password = data.get('snmp_password')
         parameters = {
             compute_prefix + 'NovaComputeLibvirtType': virt_type,
-            compute_prefix + 'SnmpdReadonlyUserPassword': snmp_password,
-            control_prefix + 'SnmpdReadonlyUserPassword': snmp_password,
         }
+        parameters.update(self._load_snmp_parameters(plan, data))
+
         try:
             plan.patch(request, plan.uuid, parameters)
         except Exception as e:

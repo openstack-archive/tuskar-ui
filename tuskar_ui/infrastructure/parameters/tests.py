@@ -65,7 +65,8 @@ class ParametersTest(test.BaseAdminViewTests):
 
     def test_service_config_post(self):
         plan = api.tuskar.Plan(self.tuskarclient_plans.first())
-        role = api.tuskar.Role(self.tuskarclient_roles.first())
+        roles = [api.tuskar.Role(role) for role in
+                 self.tuskarclient_roles.list()]
         data = {
             'virt_type': 'qemu',
             'snmp_password': 'password',
@@ -76,7 +77,15 @@ class ParametersTest(test.BaseAdminViewTests):
             patch('tuskar_ui.api.tuskar.Plan.patch',
                   return_value=plan),
             patch('tuskar_ui.api.tuskar.Plan.get_role_by_name',
-                  return_value=role),
-        ):
+                  return_value=roles[0]),
+            patch('tuskar_ui.api.tuskar.Plan.role_list',
+                  return_value=roles),
+        ) as (get_the_plan, plan_patch, get_role_by_name, role_list):
             res = self.client.post(SERVICE_CONFIG_URL, data)
             self.assertRedirectsNoFollow(res, INDEX_URL)
+            request = plan_patch.call_args_list[0][0][0]
+            self.assertListEqual(plan_patch.call_args_list, [
+                call(request, plan.uuid, {
+                    'Controller-1::NovaComputeLibvirtType': u'qemu',
+                }),
+            ])
