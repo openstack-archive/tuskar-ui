@@ -18,9 +18,11 @@ from django.core import urlresolvers
 from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import tabs
+from horizon.utils import functions
 from openstack_dashboard.api import base as api_base
 
 from tuskar_ui import api
+from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.infrastructure.nodes import tables
 from tuskar_ui.utils import metering as metering_utils
 from tuskar_ui.utils import utils
@@ -87,9 +89,10 @@ class RegisteredTab(tabs.TableTab):
         super(RegisteredTab, self).__init__(tab_group, request)
 
     def get_items_count(self):
-        return len(self.get_nodes_table_data())
+        return len(self._nodes)
 
-    def get_nodes_table_data(self):
+    @cached_property
+    def _nodes(self):
         redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
 
         if 'provisioned' in self.request.GET:
@@ -99,8 +102,50 @@ class RegisteredTab(tabs.TableTab):
         else:
             associated = None
 
-        nodes = api.node.Node.list(self.request, associated=associated,
-                                   maintenance=False, _error_redirect=redirect)
+        return api.node.Node.list(self.request, associated=associated,
+                                  maintenance=False, _error_redirect=redirect)
+
+    @cached_property
+    def _nodes_info(self):
+        page_size = functions.get_page_size(self.request)
+
+        prev_marker = self.request.GET.get(
+            tables.RegisteredNodesTable._meta.prev_pagination_param, None)
+
+        if prev_marker is not None:
+            sort_dir = 'asc'
+            marker = prev_marker
+        else:
+            sort_dir = 'desc'
+            marker = self.request.GET.get(
+                tables.RegisteredNodesTable._meta.pagination_param, None)
+
+        nodes = self._nodes
+
+        if marker:
+            node_ids = [node.uuid for node in self._nodes]
+            position = node_ids.index(marker)
+            if sort_dir == 'asc':
+                start = max(0, position - page_size)
+                end = position
+            else:
+                start = position + 1
+                end = start + page_size
+
+            more = len(nodes) > end
+        else:
+            start = 0
+            end = page_size
+
+        prev = start != 0
+        more = len(nodes) > end
+        return nodes[start:end], prev, more
+
+    def get_nodes_table_data(self):
+        nodes, prev, more = self._nodes_info
+
+        if 'errors' in self.request.GET:
+            return api.node.filter_nodes(nodes, healthy=False)
 
         if nodes:
             all_resources = api.heat.Resource.list_all_resources(self.request)
@@ -115,6 +160,12 @@ class RegisteredTab(tabs.TableTab):
                     node.role_name = '-'
 
         return nodes
+
+    def has_prev_data(self, table):
+        return self._nodes_info[1]
+
+    def has_more_data(self, table):
+        return self._nodes_info[2]
 
 
 class MaintenanceTab(tabs.TableTab):
