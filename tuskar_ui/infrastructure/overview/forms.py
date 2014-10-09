@@ -265,7 +265,9 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
                     controller_role.parameter_prefix + 'NovaPassword')},
             "swift": {
                 "password": plan.parameter_value(
-                    controller_role.parameter_prefix + 'SwiftPassword')},
+                    controller_role.parameter_prefix + 'SwiftPassword'),
+                'path': '/v1/AUTH_%(tenant_id)s',
+                'admin_path': '/v1'},
             "horizon": {'port': ''}}
 
     def build_neutron_setup(self, data):
