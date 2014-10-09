@@ -10,8 +10,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import logging
 
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
 from ironicclient import client as ironic_client
@@ -19,6 +21,7 @@ from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from openstack_dashboard.api import nova
+import requests
 
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
@@ -188,6 +191,23 @@ class IronicNode(base.APIResourceWrapper):
         :type  uuid: str
         """
         return ironicclient(request).node.delete(uuid)
+
+    @classmethod
+    def discover(cls, request, uuids):
+        """Set the maintenance status of node
+
+        :param request: request object
+        :type  request: django.http.HttpRequest
+
+        :param uuids: IDs of IronicNodes
+        :type  uuids: list of str
+        """
+        url = getattr(settings, 'IRONIC_DISCOVERD_URL', None)
+        if url:
+            headers = {'content-type': 'application/json',
+                       'x-auth-token': request.user.token.id}
+            requests.post(url + "/v1/discover",
+                          data=json.dumps(uuids), headers=headers)
 
     @classmethod
     def set_maintenance(cls, request, uuid, maintenance):
@@ -365,6 +385,11 @@ class BareMetalNode(base.APIResourceWrapper):
         return baremetalclient(request).delete(uuid)
 
     @classmethod
+    def discover(cls, request, uuids):
+        raise NotImplementedError(
+            "discover is not defined for Nova BareMetal nodes")
+
+    @classmethod
     def set_maintenance(cls, request, uuid, maintenance):
         raise NotImplementedError(
             "set_maintenance is not defined for Nova BareMetal nodes")
@@ -532,6 +557,10 @@ class Node(base.APIResourceWrapper):
     @classmethod
     def delete(cls, request, uuid):
         NodeClient(request).node_class.delete(request, uuid)
+
+    @classmethod
+    def discover(cls, request, uuids):
+        return NodeClient(request).node_class.discover(request, uuids)
 
     @classmethod
     def set_maintenance(cls, request, uuid, maintenance):

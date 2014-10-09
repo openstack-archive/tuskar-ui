@@ -64,9 +64,7 @@ def auto_discover_node(request, kwargs):
     api.node.Node.set_maintenance(request,
                                   node.uuid,
                                   True)
-    api.node.Node.set_power_state(request,
-                                  node.uuid,
-                                  'reboot')
+    api.node.Node.discover(request, [node.uuid])
 
 
 class BaseNodeForm(django.forms.Form):
