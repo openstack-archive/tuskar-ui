@@ -27,8 +27,18 @@ LOG = logging.getLogger(__name__)
 
 
 VIRT_TYPE_CHOICES = [
-    ('kvm', _("Virtualized (kvm)")),
-    ('qemu', _("Baremetal (qemu)")),
+    ('kvm', _("Baremetal (kvm)")),
+    ('qemu', _("Virtualized (qemu)")),
+]
+
+NEUTRON_PUBLIC_INTERFACE_CHOICES = [
+    ('em2', _("Baremetal (em2)")),
+    ('eth0', _("Virtualized (eth0)")),
+]
+
+CINDER_ISCSI_HELPER_CHOICES = [
+    ('tgtadm', _('tgtadm')),
+    ('lioadm', _('lioadm')),
 ]
 
 
@@ -37,11 +47,33 @@ class EditServiceConfig(horizon.forms.SelfHandlingForm):
         label=_("Deployment Type"),
         choices=VIRT_TYPE_CHOICES,
         required=True,
-    )
+        help_text=_('If you are testing OpenStack in a virtual machine, '
+                    'you must configure Compute to use qemu without KVM '
+                    'and hardware virtualization.'))
+    neutron_public_interface = django.forms.ChoiceField(
+        label=_("Deployment Type"),
+        choices=NEUTRON_PUBLIC_INTERFACE_CHOICES,
+        required=True,
+        help_text=_('What interface to bridge onto br-ex for network nodes. '
+                    'If you are testing OpenStack in a virtual machine'
+                    'you must configure interface to eth0.'))
     snmp_password = django.forms.CharField(
         label=_("SNMP Password"),
-        required=False,
+        required=True,
+        help_text=_('The user password for SNMPd with readonly '
+                    'rights running on all Overcloud nodes'),
         widget=django.forms.PasswordInput(render_value=True))
+    cloud_name = django.forms.CharField(
+        label=_("Cloud name"),
+        required=True,
+        initial="overcloud",
+        help_text=_('The DNS name of this cloud. '
+                    'E.g. ci-overcloud.tripleo.org'))
+    cinder_iscsi_helper = django.forms.ChoiceField(
+        label=_("Cinder ISCSI helper"),
+        choices=CINDER_ISCSI_HELPER_CHOICES,
+        required=True,
+        help_text=_('The iSCSI helper to use with cinder.'))
 
     @staticmethod
     def _load_snmp_parameters(plan, data):
@@ -57,9 +89,27 @@ class EditServiceConfig(horizon.forms.SelfHandlingForm):
     def handle(self, request, data):
         plan = api.tuskar.Plan.get_the_plan(self.request)
         compute_prefix = plan.get_role_by_name('compute').parameter_prefix
+        controller_prefix = plan.get_role_by_name(
+            'controller').parameter_prefix
+        cinder_prefix = plan.get_role_by_name(
+            'cinder-storage').parameter_prefix
+
         virt_type = data.get('virt_type')
+        neutron_public_interface = data.get('neutron_public_interface')
+        cloud_name = data.get('cloud_name')
+        cinder_iscsi_helper = data.get('cinder_iscsi_helper')
+
         parameters = {
             compute_prefix + 'NovaComputeLibvirtType': virt_type,
+            controller_prefix + 'CinderISCSIHelper': cinder_iscsi_helper,
+            cinder_prefix + 'CinderISCSIHelper': cinder_iscsi_helper,
+            controller_prefix + 'CloudName': cloud_name,
+            controller_prefix + 'NeutronPublicInterface':
+                neutron_public_interface,
+            compute_prefix + 'NeutronPublicInterface':
+                neutron_public_interface,
+            cinder_prefix + 'NeutronPublicInterface':
+                neutron_public_interface,
         }
         parameters.update(self._load_snmp_parameters(plan, data))
 

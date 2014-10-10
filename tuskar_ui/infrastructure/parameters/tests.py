@@ -72,6 +72,9 @@ class ParametersTest(test.BaseAdminViewTests):
         data = {
             'virt_type': 'qemu',
             'snmp_password': 'password',
+            'cinder_iscsi_helper': 'lioadm',
+            'cloud_name': 'cloud_name',
+            'neutron_public_interface': 'eth0'
         }
         with contextlib.nested(
             patch('tuskar_ui.api.tuskar.Plan.get_the_plan',
@@ -86,8 +89,11 @@ class ParametersTest(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
         plan_patch.assert_called_once_with(ANY, plan.uuid, {
+            'Controller-1::CloudName': u'cloud_name',
+            'Controller-1::SnmpdReadonlyUserPassword': u'password',
+            'Controller-1::NeutronPublicInterface': u'eth0',
+            'Controller-1::CinderISCSIHelper': u'lioadm',
             'Controller-1::NovaComputeLibvirtType': u'qemu',
             'Compute-1::SnmpdReadonlyUserPassword': u'password',
             'Block Storage-1::SnmpdReadonlyUserPassword': u'password',
-            'Object Storage-1::SnmpdReadonlyUserPassword': u'password',
-            'Controller-1::SnmpdReadonlyUserPassword': u'password'})
+            'Object Storage-1::SnmpdReadonlyUserPassword': u'password'})
