@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import logging
 
 import django.forms
@@ -19,6 +20,7 @@ from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
 import horizon.forms
 import horizon.messages
+
 
 from tuskar_ui import api
 
@@ -74,15 +76,31 @@ class EditServiceConfig(horizon.forms.SelfHandlingForm):
         choices=CINDER_ISCSI_HELPER_CHOICES,
         required=True,
         help_text=_('The iSCSI helper to use with cinder.'))
+    extra_config = django.forms.CharField(
+        label=_("Extra Config"),
+        required=False,
+        widget=django.forms.Textarea(attrs={'rows': 2}),
+        help_text=("Additional configuration to inject into the cluster."
+                   "The data format of this field is JSON."
+                   "See http://git.io/PuwLXQ for more information."))
+
+    def clean_extra_config(self):
+        data = self.cleaned_data['extra_config']
+        try:
+            json.loads(data)
+        except Exception as json_error:
+            raise django.forms.ValidationError(
+                _("%(err_msg)s"), params={'err_msg': json_error.message})
+        return data
 
     @staticmethod
-    def _load_snmp_parameters(plan, data):
+    def _load_additional_parameters(plan, data, form_key, param_name):
         params = {}
-        password = data.get('snmp_password')
-        # Set the same SNMPd password in all roles.
+        param_value = data.get(form_key)
+        # Set the same parameter and value in all roles.
         for role in plan.role_list:
-            key = role.parameter_prefix + 'SnmpdReadonlyUserPassword'
-            params[key] = password
+            key = role.parameter_prefix + param_name
+            params[key] = param_value
 
         return params
 
@@ -111,7 +129,12 @@ class EditServiceConfig(horizon.forms.SelfHandlingForm):
             cinder_prefix + 'NeutronPublicInterface':
                 neutron_public_interface,
         }
-        parameters.update(self._load_snmp_parameters(plan, data))
+        parameters.update(self._load_additional_parameters(
+            plan, data,
+            'snmp_password', 'SnmpdReadonlyUserPassword'))
+        parameters.update(self._load_additional_parameters(
+            plan, data,
+            'extra_config', 'ExtraConfig'))
 
         try:
             plan.patch(request, plan.uuid, parameters)
