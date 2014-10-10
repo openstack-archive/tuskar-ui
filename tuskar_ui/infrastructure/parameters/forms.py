@@ -43,13 +43,21 @@ CINDER_ISCSI_HELPER_CHOICES = [
 
 
 class EditServiceConfig(horizon.forms.SelfHandlingForm):
-    virt_type = django.forms.ChoiceField(
-        label=_("Deployment Type"),
-        choices=VIRT_TYPE_CHOICES,
+    extra_config = django.forms.CharField(
+        label=_("ExtraConfig"),
+        required=False,
+        widget=django.forms.Textarea(attrs={'rows': 2}))
+    cinder_iscsi_helper = django.forms.ChoiceField(
+        label=_("Cinder ISCSI helper"),
+        choices=CINDER_ISCSI_HELPER_CHOICES,
         required=True,
-        help_text=_('If you are testing OpenStack in a virtual machine, '
-                    'you must configure Compute to use qemu without KVM '
-                    'and hardware virtualization.'))
+        help_text=_('The iSCSI helper to use with cinder.'))
+    cloud_name = django.forms.CharField(
+        label=_("Cloud name"),
+        required=True,
+        initial="overcloud",
+        help_text=_('The DNS name of this cloud. '
+                    'E.g. ci-overcloud.tripleo.org'))
     neutron_public_interface = django.forms.ChoiceField(
         label=_("Deployment Type"),
         choices=NEUTRON_PUBLIC_INTERFACE_CHOICES,
@@ -63,26 +71,22 @@ class EditServiceConfig(horizon.forms.SelfHandlingForm):
         help_text=_('The user password for SNMPd with readonly '
                     'rights running on all Overcloud nodes'),
         widget=django.forms.PasswordInput(render_value=True))
-    cloud_name = django.forms.CharField(
-        label=_("Cloud name"),
+    virt_type = django.forms.ChoiceField(
+        label=_("Deployment Type"),
+        choices=VIRT_TYPE_CHOICES,
         required=True,
-        initial="overcloud",
-        help_text=_('The DNS name of this cloud. '
-                    'E.g. ci-overcloud.tripleo.org'))
-    cinder_iscsi_helper = django.forms.ChoiceField(
-        label=_("Cinder ISCSI helper"),
-        choices=CINDER_ISCSI_HELPER_CHOICES,
-        required=True,
-        help_text=_('The iSCSI helper to use with cinder.'))
+        help_text=_('If you are testing OpenStack in a virtual machine, '
+                    'you must configure Compute to use qemu without KVM '
+                    'and hardware virtualization.'))
 
     @staticmethod
-    def _load_snmp_parameters(plan, data):
+    def _load_additional_parameters(plan, data, form_key, param_name):
         params = {}
-        password = data.get('snmp_password')
-        # Set the same SNMPd password in all roles.
+        param_value = data.get(form_key)
+        # Set the same parameter and value in all roles.
         for role in plan.role_list:
-            key = role.parameter_prefix + 'SnmpdReadonlyUserPassword'
-            params[key] = password
+            key = role.parameter_prefix + param_name
+            params[key] = param_value
 
         return params
 
@@ -111,7 +115,12 @@ class EditServiceConfig(horizon.forms.SelfHandlingForm):
             cinder_prefix + 'NeutronPublicInterface':
                 neutron_public_interface,
         }
-        parameters.update(self._load_snmp_parameters(plan, data))
+        parameters.update(self._load_additional_parameters(
+            plan, data,
+            'snmp_password', 'SnmpdReadonlyUserPassword'))
+        parameters.update(self._load_additional_parameters(
+            plan, data,
+            'extra_config', 'ExtraConfig'))
 
         try:
             plan.patch(request, plan.uuid, parameters)
