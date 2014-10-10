@@ -22,9 +22,9 @@ from tuskar_ui.infrastructure.parameters import tabs
 
 
 class ServiceConfigView(horizon.forms.ModalFormView):
-    template_name = "infrastructure/parameters/service_config.html"
     form_class = forms.EditServiceConfig
     success_url = reverse_lazy('horizon:infrastructure:parameters:index')
+    template_name = "infrastructure/parameters/service_config.html"
 
     def get_initial(self):
         plan = api.tuskar.Plan.get_the_plan(self.request)
@@ -32,23 +32,26 @@ class ServiceConfigView(horizon.forms.ModalFormView):
         controller_prefix = plan.get_role_by_name(
             'controller').parameter_prefix
 
-        virt_type = plan.parameter_value(
-            compute_prefix + 'NovaComputeLibvirtType')
-        snmp_password = plan.parameter_value(
-            controller_prefix + 'SnmpdReadonlyUserPassword')
+        extra_config = plan.parameter_value(
+            controller_prefix + 'ExtraConfig')
         cinder_iscsi_helper = plan.parameter_value(
             controller_prefix + 'CinderISCSIHelper')
         cloud_name = plan.parameter_value(
             controller_prefix + 'CloudName')
         neutron_public_interface = plan.parameter_value(
             controller_prefix + 'NeutronPublicInterface')
+        snmp_password = plan.parameter_value(
+            controller_prefix + 'SnmpdReadonlyUserPassword')
+        virt_type = plan.parameter_value(
+            compute_prefix + 'NovaComputeLibvirtType')
 
         return {
-            'virt_type': virt_type,
-            'snmp_password': snmp_password,
+            'extra_config': extra_config,
             'cinder_iscsi_helper': cinder_iscsi_helper,
             'cloud_name': cloud_name,
-            'neutron_public_interface': neutron_public_interface}
+            'neutron_public_interface': neutron_public_interface,
+            'snmp_password': snmp_password,
+            'virt_type': virt_type}
 
 
 class IndexView(horizon_tabs.TabbedTableView):
