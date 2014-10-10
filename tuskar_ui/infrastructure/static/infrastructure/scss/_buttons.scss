@@ -31,3 +31,14 @@ input {
 .btn-toolbar.pull-right {
   margin: 0;
 }
+
+.modal-footer {
+  .cancel {
+    float: unset;
+    margin-right: 5px; // If the button doesn't have a close class.
+  }
+
+  .btn-primary {
+    float: right;
+  }
+}
