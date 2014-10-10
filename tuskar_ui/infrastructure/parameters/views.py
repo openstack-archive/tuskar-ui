@@ -29,15 +29,26 @@ class ServiceConfigView(horizon.forms.ModalFormView):
     def get_initial(self):
         plan = api.tuskar.Plan.get_the_plan(self.request)
         compute_prefix = plan.get_role_by_name('compute').parameter_prefix
+        controller_prefix = plan.get_role_by_name(
+            'controller').parameter_prefix
 
         virt_type = plan.parameter_value(
             compute_prefix + 'NovaComputeLibvirtType')
-        # TODO(tzumainn): what if compute and control values are different...
         snmp_password = plan.parameter_value(
-            compute_prefix + 'SnmpdReadonlyUserPassword')
+            controller_prefix + 'SnmpdReadonlyUserPassword')
+        cinder_iscsi_helper = plan.parameter_value(
+            controller_prefix + 'CinderISCSIHelper')
+        cloud_name = plan.parameter_value(
+            controller_prefix + 'CloudName')
+        neutron_public_interface = plan.parameter_value(
+            controller_prefix + 'NeutronPublicInterface')
 
-        return {'virt_type': virt_type,
-                'snmp_password': snmp_password}
+        return {
+            'virt_type': virt_type,
+            'snmp_password': snmp_password,
+            'cinder_iscsi_helper': cinder_iscsi_helper,
+            'cloud_name': cloud_name,
+            'neutron_public_interface': neutron_public_interface}
 
 
 class IndexView(horizon_tabs.TabbedTableView):
