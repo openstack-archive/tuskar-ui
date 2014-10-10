@@ -133,6 +133,30 @@ def data(TEST):
             'description': 'Snmpd password',
             'hidden': True,
             'value': 'unset',
+        }, {
+            'name': 'Controller-1::ExtraConfig',
+            'label': 'Extra Config',
+            'description': 'Extra Config',
+            'hidden': False,
+            'value': '{}',
+        }, {
+            'name': 'Compute-1::ExtraConfig',
+            'label': 'Extra Config',
+            'description': 'Extra Config',
+            'hidden': False,
+            'value': '{}',
+        }, {
+            'name': 'Block Storage-1::ExtraConfig',
+            'label': 'Extra Config',
+            'description': 'Extra Config',
+            'hidden': False,
+            'value': '{}',
+        }, {
+            'name': 'Object Storage-1::ExtraConfig',
+            'label': 'Extra Config',
+            'description': 'Extra Config',
+            'hidden': False,
+            'value': '{}',
         }],
     })
     TEST.tuskarclient_plans.add(plan_1)
