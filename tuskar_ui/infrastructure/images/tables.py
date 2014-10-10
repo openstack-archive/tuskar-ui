@@ -65,7 +65,6 @@ class ImagesTable(tables.DataTable):
         name = "images"
         row_class = UpdateRow
         verbose_name = _("Provisioning Images")
-        multi_select = False
         table_actions = (DeleteImage,
                          ImageFilterAction)
         row_actions = (EditImage, DeleteImage)
