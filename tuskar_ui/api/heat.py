@@ -173,6 +173,8 @@ class Stack(base.APIResourceWrapper):
             resource_group = heat.resource_get(self._request,
                                                self.id,
                                                resource_group_name)
+            if not resource_group.physical_resource_id:
+                continue
             group_resources = heat.resources_list(
                 self._request, resource_group.physical_resource_id)
             for group_resource in group_resources:
