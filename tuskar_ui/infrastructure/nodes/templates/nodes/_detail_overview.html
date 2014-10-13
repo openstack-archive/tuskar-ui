@@ -56,6 +56,7 @@
       </dd>
       <dt>{% trans "Registered HW" %}</dt>
       <dd>
+        {{ node.cpu_arch|default:"&mdash;" }}<br />
         {{ node.cpus|default:"&mdash;" }} {% trans "CPU" %}<br />
         {{ node.memory_mb|default:"&mdash;" }} {% trans "RAM (MB)" %}<br />
         {{ node.local_gb|default:"&mdash;" }} {% trans "HDD (GB)" %}

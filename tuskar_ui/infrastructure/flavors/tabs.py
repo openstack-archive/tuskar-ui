@@ -71,7 +71,7 @@ class FlavorSuggestion(object):
             vcpus=int(node.cpus),
             ram=int(node.memory_mb),
             disk=int(node.local_gb),
-            # TODO(rdopieralski) Add architecture when available.
+            cpu_arch=node.cpu_arch
         )
 
     @classmethod
@@ -80,7 +80,7 @@ class FlavorSuggestion(object):
             vcpus=flavor.vcpus,
             ram_bytes=flavor.ram_bytes,
             disk_bytes=flavor.disk_bytes,
-            # TODO(rdopieralski) Add architecture when available.
+            cpu_arch=flavor.cpu_arch
         )
 
     @property
