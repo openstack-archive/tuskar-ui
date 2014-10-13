@@ -227,15 +227,15 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
     float_allocation_start = horizon.forms.CharField(
         label=_("Float Allocation Start"), initial="10.0.0.2")
     float_allocation_end = horizon.forms.CharField(
-        label=_("Float Allocation Start"), initial="10.255.255.254")
+        label=_("Float Allocation End"), initial="10.255.255.254")
     float_cidr = horizon.forms.CharField(
         label=_("Float CIDR"), initial="10.0.0.0/8")
     external_allocation_start = horizon.forms.CharField(
-        label=_("External Allocation Start"), initial="192.0.2.45")
+        label=_("External Allocation Start"), initial="172.17.0.45")
     external_allocation_end = horizon.forms.CharField(
-        label=_("External Allocation Start"), initial="192.0.2.64")
+        label=_("External Allocation End"), initial="172.17.0.64")
     external_cidr = horizon.forms.CharField(
-        label=_("External CIDR"), initial="192.0.2.0/24")
+        label=_("External CIDR"), initial="172.17.0.0/16")
 
     def build_endpoints(self, plan, controller_role):
         return {
