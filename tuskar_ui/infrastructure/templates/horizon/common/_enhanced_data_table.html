@@ -1,0 +1,16 @@
+{% extends "horizon/common/_data_table.html" %}
+
+{% block table_caption %}
+  <tr class='table_caption'>
+    <th class='table_header' colspan='{{ columns|length }}'>
+      <h3 class='table_title'>{{ table }}</h3>
+    </th>
+  </tr>
+  {% if table.get_table_actions %}
+  <tr class='table_actions_row'>
+    <th class='table_header' colspan='{{ columns|length }}'>
+      {{ table.render_table_actions }}
+    </th>
+  </tr>
+  {% endif %}
+{% endblock table_caption %}

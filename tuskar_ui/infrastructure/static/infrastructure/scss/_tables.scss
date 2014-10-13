@@ -1,0 +1,75 @@
+// Some tables should not have a title because it just repeats the page title.
+.no-table-title tr.table_caption {
+    display: none;
+}
+
+tr.table_actions_row {
+  th.table_header {
+    background: #f9f9f9;
+    border-top-width: 2px !important;
+    .table_actions {
+      float: none;
+      .table_search, .table_filter {
+        .filter_select {
+          display: inline-block;
+          position: relative;
+          background: rgb(243, 243, 243);
+          margin-right: -4px;
+          &:after, &:before {
+            left: 100%;
+            top: 50%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+            z-index: 3;
+          }
+
+          &:after {
+            border-color: rgba(243, 243, 243, 0);
+            border-left-color: #f3f3f3;
+            border-width: 14px;
+            margin-top: -14px;
+          }
+          &:before {
+            border-color: rgba(204, 204, 204, 0);
+            border-left-color: #cccccc;
+            border-width: 16px;
+            margin-top: -16px;
+          }
+          select {
+            overflow:hidden;
+            width: 120%;
+            border-right: none;
+            box-shadow: none;
+            background: transparent;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+          }
+          .caret {
+            position: absolute;
+            right: 0;
+            top: 47%;
+          }
+        }
+        input[type="text"] {
+          padding-right: 5px;
+        }
+        input.filter_select_input {
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+          border-left: none;
+          padding-left: 20px;
+          &:focus {
+            box-shadow: none;
+          }
+        }
+      }
+      .table_actions_buttons {
+        display: inline-block;
+      }
+    }
+  }
+}
