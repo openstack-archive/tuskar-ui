@@ -10,7 +10,7 @@
 
 {% block main %}
 <div class="row">
-  <div class="col-xs-3">
+  <div class="col-xs-5">
     {% if stack %}
       {% if stack.is_deleting or stack.is_deploying %}
         {% include "infrastructure/overview/deployment_progress.html" %}
@@ -25,7 +25,7 @@
       {% include "infrastructure/overview/deployment_plan.html" %}
     {% endif %}
   </div>
-  <div class="col-xs-6">
+  <div class="col-xs-4">
     {% if stack %}
       {% include "infrastructure/overview/role_nodes_status.html" %}
     {% else %}

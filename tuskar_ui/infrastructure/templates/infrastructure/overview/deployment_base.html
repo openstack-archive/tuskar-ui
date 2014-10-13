@@ -1,6 +1,10 @@
 {% load i18n %}
 {% load url from future%}
 
+<div class="deployment-heading">
+  {% block deployment-heading %}{% endblock %}
+</div>
+<div class="clear"></div>
 <div class="deployment-icon">
   {% block deployment-icon %}
     <i class="fa fa-cloud text-info"></i>
