@@ -117,7 +117,7 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
                 'roles': [{
                     'status': role.get('status', 'warning'),
                     'finished': role.get('finished', False),
-                    'name': role.get('name', ''),
+                    'name': role.get('name', '').capitalize(),
                     'id': role.get('id', ''),
                     'total_node_count': role.get('node_count', 0),
                     'deployed_node_count': role.get('deployed_node_count', 0),

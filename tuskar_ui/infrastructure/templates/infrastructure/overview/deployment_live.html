@@ -3,31 +3,40 @@
 {% load i18n %}
 {% load url from future%}
 
-{% block deployment-icon %}
-  <i class="fa fa-check-circle-o text-success"></i>
+{% block deployment-heading %}
+  <i class="fa fa-check text-success pull-left"></i>
+  <h4>{% trans "Deployment is Live" %}</h4>
 {% endblock %}
-{% block deployment-title %}{% trans "Deployment is live" %}{% endblock %}
+
+{% block deployment-icon %}
+  <i class="fa fa-key"></i>
+{% endblock %}
+{% block deployment-title %}{% trans "Access Information" %}{% endblock %}
 {% block deployment-info %}
-<strong>{% trans "Access information" %}</strong>
-<dl>
+<div>
   {% for dashboard_url in dashboard_urls %}
-  <dt>{% trans "Horizon URL" %}</dt>
-  <dd><a href="{{ dashboard_url }}">{{ dashboard_url }}</a></dd>
+  <div class="row">
+    <div class="col-xs-3">{% trans "Horizon URL:" %}</div>
+    <div class="col-xs-9"><a href="{{ dashboard_url }}">{{ dashboard_url }}</a></div>
+  </div>
   {% endfor %}
-  <dt>{% trans "User name" %}</dt>
-  <dd>admin</dd>
-  <dt></dt>
-  <dd>
-    <form>
-        <fieldset>
-            <div class="form-group">
-              <label class="control-label  required" for="id_password">{% trans "Password" %}</label>
-              <div>
-                <input class="form-control" id="id_password" type="password" value="{{ admin_password }}" disabled="true" readonly="true"/>
-              </div>
-            </div>
-        </fieldset>
-    </form>
-  </dd>
-</dl>
+  <div class="row">
+    <div class="col-xs-3">{% trans "User name:" %}</div>
+    <div class="col-xs-9">admin</div>
+  </div>
+  <form>
+    <fieldset>
+      <div class="form-group">
+        <div class="row">
+          <div class="col-xs-3">
+            {% trans "Password" %}
+          </div>
+          <div class="col-xs-9">
+            <input class="form-control" id="id_password" type="password" value="{{ admin_password }}" disabled="true" readonly="true"/>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+</div>
 {% endblock %}
