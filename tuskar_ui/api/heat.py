@@ -15,6 +15,7 @@ import urlparse
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+import heatclient
 from horizon import exceptions
 from horizon.utils import memoized
 from openstack_dashboard.api import base
@@ -170,21 +171,26 @@ class Stack(base.APIResourceWrapper):
         # drill down and retrieve those that match a tuskar role
         for role in roles:
             resource_group_name = role.provider_resource_group_name
-            resource_group = heat.resource_get(self._request,
-                                               self.id,
-                                               resource_group_name)
-            group_resources = heat.resources_list(
-                self._request, resource_group.physical_resource_id)
-            for group_resource in group_resources:
-                if not group_resource.physical_resource_id:
-                    # Skip groups who has no physical resource.
-                    continue
-                nova_resources = heat.resources_list(
-                    self._request,
-                    group_resource.physical_resource_id)
-                resource_dicts.extend([{"resource": resource,
-                                        "role": role}
-                                       for resource in nova_resources])
+            try:
+                resource_group = heat.resource_get(self._request,
+                                                   self.id,
+                                                   resource_group_name)
+
+                group_resources = heat.resources_list(
+                    self._request, resource_group.physical_resource_id)
+                for group_resource in group_resources:
+                    if not group_resource.physical_resource_id:
+                        # Skip groups who has no physical resource.
+                        continue
+                    nova_resources = heat.resources_list(
+                        self._request,
+                        group_resource.physical_resource_id)
+                    resource_dicts.extend([{"resource": resource,
+                                            "role": role}
+                                           for resource in nova_resources])
+
+            except heatclient.exc.HTTPNotFound:
+                pass
 
         if not with_joins:
             return [Resource(rd['resource'], request=self._request,
