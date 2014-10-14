@@ -16,13 +16,23 @@ tuskar.number_picker = (function () {
             if ($this.attr('readonly')) {
                 $this.parent().addClass('readonly');
             }
-            $this.next('a.arrow-right').click(function () {
-                $this.val((+$this.val()) + 1);
+            function change(step) {
+                var value = +$this.val();
+                var maximum = +$this.attr('max');
+                var minimum = +$this.attr('min');
+                value += step;
+                if (!isNaN(maximum)) { value = Math.min(maximum, value); }
+                if (!isNaN(minimum)) { value = Math.max(minimum, value); }
+                $this.val(value);
                 $this.trigger('change');
+            }
+            $this.next('a.arrow-right').click(function () {
+                var step = +($this.attr('step') || 1);
+                change(step);
             });
             $this.prev('a.arrow-left').click(function () {
-                $this.val(Math.max(0, (+$this.val()) - 1));
-                $this.trigger('change');
+                var step = -($this.attr('step') || 1);
+                change(step);
             });
         });
     };
