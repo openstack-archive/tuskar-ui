@@ -46,8 +46,11 @@ class="btn btn-primary ajax-modal btn-default {% if plan_invalid %}disabled{% en
 {% block templates %}
 <script type="text/html" id="title-template">{% spaceless %}{% jstemplate %}
 <h4>
-[[#plan_invalid]]{% trans "Design your deployment" %}[[/plan_invalid]]
-[[^plan_invalid]]{% trans "Ready to get deployed" %}[[/plan_invalid]]
+[[#validating]]{% trans "Validating the plan..." %}[[/validating]]
+[[^validating]]
+  [[#plan_invalid]]{% trans "Design your deployment" %}[[/plan_invalid]]
+  [[^plan_invalid]]{% trans "Ready to get deployed" %}[[/plan_invalid]]
+[[/validating]]
 </h4>
 {% endjstemplate %}{% endspaceless %}</script>
 <script type="text/html" id="message-template">{% spaceless %}{% jstemplate %}

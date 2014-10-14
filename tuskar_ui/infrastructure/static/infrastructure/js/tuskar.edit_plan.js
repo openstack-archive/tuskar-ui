@@ -40,25 +40,24 @@ tuskar.edit_plan = (function () {
     };
 
     module.update_messages = function (data) {
-        $('div.deployment-box ul').replaceWith(
-            module.message_template.render(data));
         if (data === null) {
             $('div.deployment-buttons a.btn-primary').addClass('disabled');
             $('div.deployment-icon i').replaceWith(
                 '<i class="fa fa-spinner fa-spin text-info"></i>');
+            data = {validating:true};
         } else if (data.plan_invalid) {
             $('div.deployment-buttons a.btn-primary').addClass('disabled');
             $('div.deployment-icon i').replaceWith(
                 '<i class="fa fa-exclamation-circle text-danger"></i>');
-            $('div.deployment-box h4').replaceWith(
-                module.title_template.render(data));
         } else {
-            $('div.deploymnet-buttons a.btn-primary').removeClass('disabled');
+            $('div.deployment-buttons a.btn-primary').removeClass('disabled');
             $('div.deployment-icon i').replaceWith(
                 '<i class="fa fa-check-circle text-success"></i>');
-            $('div.deployment-box h4').replaceWith(
-                module.title_template.render(data));
         }
+        $('div.deployment-box h4').replaceWith(
+            module.title_template.render(data));
+        $('div.deployment-box ul').replaceWith(
+            module.message_template.render(data));
     };
 
     horizon.addInitFunction(module.init);
