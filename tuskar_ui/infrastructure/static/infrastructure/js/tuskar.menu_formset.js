@@ -59,6 +59,7 @@ tuskar.menu_formset = (function () {
       });
       $new_nav.tab('show');
       $('select.switchable').trigger('change');
+      horizon.forms.add_password_fields_reveal_buttons($new_form);
     }
 
     // Connect all signals.
