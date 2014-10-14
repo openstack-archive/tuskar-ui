@@ -13,6 +13,7 @@
 #    under the License.
 
 from django.core.urlresolvers import reverse_lazy
+from django.utils.translation import ugettext_lazy as _
 import horizon.forms
 from horizon import tabs as horizon_tabs
 
@@ -25,6 +26,7 @@ class ServiceConfigView(horizon.forms.ModalFormView):
     template_name = "infrastructure/parameters/service_config.html"
     form_class = forms.EditServiceConfig
     success_url = reverse_lazy('horizon:infrastructure:parameters:index')
+    submit_label = _("Save Configuration")
 
     def get_initial(self):
         plan = api.tuskar.Plan.get_the_plan(self.request)

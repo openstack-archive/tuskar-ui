@@ -12,13 +12,3 @@
 {% block modal-body %}
   {% include "horizon/common/_form_fields.html" %}
 {% endblock %}
-
-{% block modal-footer %}
-  <button class="btn btn-primary pull-right" type="submit">
-    <i class="fa fa-upload"></i>
-    {% trans "Upload" %}
-  </button>
-  <a href="{% url 'horizon:infrastructure:nodes:index' %}"
-     class="btn secondary cancel close">{% trans "Cancel" %}</a>
-{% endblock %}
-

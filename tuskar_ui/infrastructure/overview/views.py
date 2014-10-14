@@ -236,6 +236,7 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
 class DeployConfirmationView(horizon.forms.ModalFormView, StackMixin):
     form_class = forms.DeployOvercloud
     template_name = 'infrastructure/overview/deploy_confirmation.html'
+    submit_label = _("Deploy")
 
     def get_context_data(self, **kwargs):
         context = super(DeployConfirmationView,
@@ -253,6 +254,7 @@ class DeployConfirmationView(horizon.forms.ModalFormView, StackMixin):
 class UndeployConfirmationView(horizon.forms.ModalFormView, StackMixin):
     form_class = forms.UndeployOvercloud
     template_name = 'infrastructure/overview/undeploy_confirmation.html'
+    submit_label = _("Undeploy")
 
     def get_success_url(self):
         return reverse(INDEX_URL)
@@ -272,6 +274,7 @@ class UndeployConfirmationView(horizon.forms.ModalFormView, StackMixin):
 class PostDeployInitView(horizon.forms.ModalFormView, StackMixin):
     form_class = forms.PostDeployInit
     template_name = 'infrastructure/overview/post_deploy_init.html'
+    submit_label = _("Initialize")
 
     def get_success_url(self):
         return reverse(INDEX_URL)

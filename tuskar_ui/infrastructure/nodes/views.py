@@ -47,6 +47,7 @@ class RegisterView(horizon_forms.ModalFormView):
     template_name = 'infrastructure/nodes/register.html'
     success_url = reverse_lazy(
         'horizon:infrastructure:nodes:index')
+    submit_label = _("Register Nodes")
 
     def get_data(self):
         return []
@@ -77,6 +78,7 @@ class UploadView(horizon_forms.ModalFormView):
     template_name = 'infrastructure/nodes/upload.html'
     success_url = reverse_lazy(
         'horizon:infrastructure:nodes:index')
+    submit_label = _("Upload Nodes")
 
     def post(self, request, *args, **kwargs):
         # This form's POST is handled in RegisterView.

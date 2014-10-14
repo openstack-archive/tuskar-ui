@@ -24,9 +24,3 @@
     </p>
 </div>
 {% endblock %}
-
-{% block modal-footer %}
-  <input class="btn btn-primary" type="submit" value="{% trans "Save Configuration" %}" />
-  <a href="{% url 'horizon:infrastructure:parameters:index' %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
-{% endblock %}
-{% load form_helpers %}
