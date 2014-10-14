@@ -103,7 +103,8 @@ def validate_plan(request, plan):
             'link_url': reverse_lazy('horizon:infrastructure:flavors:index'),
             'link_label': _(u"Define flavors."),
         })
-    available_nodes = len(api.node.Node.list(request, associated=False))
+    available_nodes = len(api.node.Node.list(request, associated=False,
+                                             maintenance=False))
     if available_nodes == 0:
             messages.append({
                 'text': _(u"You have no nodes available."),

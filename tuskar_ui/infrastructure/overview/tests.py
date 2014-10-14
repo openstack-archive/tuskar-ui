@@ -100,7 +100,7 @@ class OverviewTests(test.BaseAdminViewTests):
                 call(request),
             ])
             self.assertListEqual(api.node.Node.list.call_args_list, [
-                call(request, associated=False),
+                call(request, associated=False, maintenance=False),
             ])
             self.assertListEqual(api.flavor.Flavor.list.call_args_list, [
                 call(request),
