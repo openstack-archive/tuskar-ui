@@ -17,7 +17,7 @@ import json
 
 from django.core import urlresolvers
 from horizon import exceptions as horizon_exceptions
-from mock import patch, call  # noqa
+from mock import patch, call, ANY  # noqa
 from openstack_dashboard.test import helpers
 from openstack_dashboard.test.test_data import utils
 
@@ -157,11 +157,11 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'create.return_value': node,
         }) as Node:
             res = self.client.post(REGISTER_URL, data)
+            self.assertNoFormErrors(res)
             self.assertRedirectsNoFollow(res, INDEX_URL)
-            request = Node.create.call_args_list[0][0][0]  # This is a hack.
             self.assertListEqual(Node.create.call_args_list, [
                 call(
-                    request,
+                    ANY,
                     ipmi_address=u'127.0.0.1',
                     cpu_arch='x86',
                     cpus=1,
@@ -173,7 +173,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                     driver='ipmi',
                 ),
                 call(
-                    request,
+                    ANY,
                     ipmi_address=u'127.0.0.2',
                     cpu_arch='x86',
                     cpus=4,
@@ -216,10 +216,9 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         }) as Node:
             res = self.client.post(REGISTER_URL, data)
             self.assertEqual(res.status_code, 200)
-            request = Node.create.call_args_list[0][0][0]  # This is a hack.
             self.assertListEqual(Node.create.call_args_list, [
                 call(
-                    request,
+                    ANY,
                     ipmi_address=u'127.0.0.1',
                     cpu_arch='x86',
                     cpus=1,
@@ -231,7 +230,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                     driver='ipmi',
                 ),
                 call(
-                    request,
+                    ANY,
                     ipmi_address=u'127.0.0.2',
                     cpu_arch='x86',
                     cpus=4,

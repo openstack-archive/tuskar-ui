@@ -109,7 +109,7 @@ class SelfHandlingFormset(forms.formsets.BaseFormSet):
     def handle(self, request, data):
         success = True
         for form in self:
-            form_success = form.handle(request, data)
+            form_success = form.handle(request, form.cleaned_data)
             if not form_success:
                 success = False
             else:
