@@ -135,7 +135,10 @@ class EditPlan(horizon.forms.SelfHandlingForm):
         for role in plan.role_list:
             field = django.forms.IntegerField(
                 label=role.name,
-                widget=tuskar_ui.forms.NumberPickerInput,
+                widget=tuskar_ui.forms.NumberPickerInput(attrs={
+                    'min': 1 if role.name in ('controller', 'compute') else 0,
+                    'step': 2 if role.name == 'controller' else 1,
+                }),
                 initial=plan.get_role_node_count(role),
                 required=False
             )
