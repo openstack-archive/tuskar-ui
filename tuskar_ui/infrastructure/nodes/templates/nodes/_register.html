@@ -10,11 +10,3 @@
 {% block modal-body %}
 {% include "formset_table/menu_formset.html" with formset=form  form_template="infrastructure/nodes/_nodes_formset_form.html" %}
 {% endblock %}
-
-{% block modal-footer %}
-  <input class="btn btn-primary pull-right" type="submit"
-         value="{% trans "Register Nodes" %}" />
-  <a href="{% url 'horizon:infrastructure:nodes:index' %}"
-     class="btn secondary cancel close">{% trans "Cancel" %}</a>
-{% endblock %}
-

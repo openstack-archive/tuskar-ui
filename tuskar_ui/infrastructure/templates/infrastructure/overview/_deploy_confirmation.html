@@ -19,8 +19,3 @@
     <p>{% trans "This operation cannot be undone. Are you sure you want to do that?" %}</p>
 </div>
 {% endblock %}
-
-{% block modal-footer %}
-  <input class="btn btn-primary" type="submit" value="{% trans "Deploy" %}" />
-  <a href="{% url 'horizon:infrastructure:overview:index' %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
-{% endblock %}

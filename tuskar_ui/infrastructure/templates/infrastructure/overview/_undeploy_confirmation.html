@@ -18,8 +18,3 @@
   </fieldset>
 </div>
 {% endblock %}
-
-{% block modal-footer %}
-  <input class="btn btn-primary" type="submit" value="{% trans "Undeploy" %}" />
-  <a href="{% url 'horizon:infrastructure:overview:index' %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
-{% endblock %}
