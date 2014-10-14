@@ -1,0 +1,9 @@
+Verified+2: Jenkins
+Code-Review+2: Akihiro Motoki <motoki@da.jp.nec.com>
+Workflow+1: Akihiro Motoki <motoki@da.jp.nec.com>
+Code-Review+2: Tatiana Ovchinnikova <t.v.ovtchinnikova@gmail.com>
+Submitted-by: Jenkins
+Submitted-at: Tue, 14 Oct 2014 05:47:40 +0000
+Reviewed-on: https://review.openstack.org/128048
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
