@@ -19,6 +19,33 @@ from tuskar_ui import api
 from tuskar_ui.infrastructure.flavors import tables
 
 
+SUGGESTED_FLAVOR_NAMES = [
+    _("apple"),
+    _("apricot"),
+    _("banana"),
+    _("blueberry"),
+    _("cherry"),
+    _("chocolate"),
+    _("ginger"),
+    _("guacamole"),
+    _("lemon"),
+    _("licorice"),
+    _("lime"),
+    _("mango"),
+    _("melon"),
+    _("orange"),
+    _("papaya"),
+    _("peach"),
+    _("pear"),
+    _("pistachio"),
+    _("raspberry"),
+    _("straciatella"),
+    _("strawberry"),
+    _("tutti-frutti"),
+    _("vanilla"),
+]
+
+
 def _get_unmatched_suggestions(request):
     unmatched_suggestions = []
     flavor_suggestions = [FlavorSuggestion.from_flavor(flavor)
@@ -85,12 +112,13 @@ class FlavorSuggestion(object):
 
     @property
     def name(self):
-        return '%s-%s-%s-%s' % (
+        seed = '%s-%s-%s-%s' % (
             self.vcpus or '0',
             self.cpu_arch or '',
             self.ram or '0',
             self.disk or '0',
         )
+        return SUGGESTED_FLAVOR_NAMES[hash(seed) % len(SUGGESTED_FLAVOR_NAMES)]
 
     @property
     def ram(self):
