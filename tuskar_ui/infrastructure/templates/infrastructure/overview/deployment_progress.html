@@ -46,6 +46,18 @@
   </dl>
 </div>
 {% endfor %}
+{% elif last_event %}
+  <div>
+    <dl>
+      <dt>{% trans "Last Update" %}</dt>
+      <dd>
+        <time datetime="{{ last_event.event_time }}">{{ last_event.event_time }}</time>
+        <br />
+        {{ last_event.resource_name }}
+        {{ last_event.resource_status }}
+      </dd>
+    </dl>
+  </div>
 {% endif %}
 <p><a href="{% url 'horizon:infrastructure:history:index' %}">See full log</a></p>
 </div>
@@ -64,8 +76,8 @@
 
 {% block templates %}
 <script type="text/html" id="events-template">{% spaceless %}{% jstemplate %}
-<strong>{% trans "Last failed events:" %}</strong>
 [[#last_failed_events]]
+<strong>{% trans "Last failed events:" %}</strong>
 <div>
   <dl>
     <dt>{% trans "Timestamp" %}</dt>
@@ -79,5 +91,19 @@
   </dl>
 </div>
 [[/last_failed_events]]
+[[#last_event]]
+<div>
+  <dl>
+    <dt>{% trans "Last Update" %}</dt>
+    <dd>
+      <time datetime="[[ event_time ]]">[[ event_time ]]</time>
+      <br />
+      [[ resource_name ]]
+      [[ resource_status ]]
+    </dd>
+  </dl>
+</div>
+[[/last_event]]
+<p><a href="{% url 'horizon:infrastructure:history:index' %}">See full log</a></p>
 {% endjstemplate %}{% endspaceless %}</script>
 {% endblock %}

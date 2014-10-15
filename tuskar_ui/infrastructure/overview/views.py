@@ -106,13 +106,19 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
     def get(self, request, *args, **kwargs):
         if request.META.get('HTTP_X_HORIZON_PROGRESS', ''):
             data = self.get_data(request, {})
+
             return http.HttpResponse(json.dumps({
                 'progress': data.get('progress'),
+                'last_event': {
+                    'event_time': data.get('last_event').event_time,
+                    'resource_name': data.get('last_event').resource_name,
+                    'resource_status': data.get('last_event').resource_status,
+                } if data.get('last_event') else None,
                 'last_failed_events': [{
                     'event_time': event.event_time,
                     'resource_name': event.resource_name,
                     'resource_status': event.resource_status,
-                    'resource_statys_reason': event.resource_statys_reason,
+                    'resource_status_reason': event.resource_status_reason,
                 } for event in data.get('last_failed_events', [])],
                 'roles': [{
                     'status': role.get('status', 'warning'),
@@ -156,8 +162,7 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
                 if e.resource_status == 'DELETE_FAILED'][-3:]
 
             if stack.is_deleting or stack.is_delete_failed:
-                # stack is being deleted
-
+                context['last_event'] = stack.events[0]
                 # TODO(lsmola) since at this point we don't have total number
                 # of nodes we will hack this around, till API can show this
                 # information. So it will actually show progress like the total
@@ -181,6 +186,7 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
                 context['progress'] = min(95, max(
                     5, 100 * float(resources_count) / total_num_nodes_count))
             elif stack.is_deploying:
+                context['last_event'] = stack.events[0]
                 total = sum(d['total_node_count'] for d in roles)
                 context['progress'] = min(95, max(
                     5, 100 * sum(float(d.get('deployed_node_count', 0))
