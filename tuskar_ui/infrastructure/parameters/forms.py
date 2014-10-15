@@ -74,6 +74,12 @@ class EditServiceConfig(horizon.forms.SelfHandlingForm):
         choices=CINDER_ISCSI_HELPER_CHOICES,
         required=True,
         help_text=_('The iSCSI helper to use with cinder.'))
+    ntp_server = django.forms.CharField(
+        label=_("NTP server"),
+        required=False,
+        initial="",
+        help_text=_('Address of the NTP server. If blank, public NTP servers '
+                    'will be used.'))
 
     @staticmethod
     def _load_snmp_parameters(plan, data):
@@ -98,6 +104,7 @@ class EditServiceConfig(horizon.forms.SelfHandlingForm):
         neutron_public_interface = data.get('neutron_public_interface')
         cloud_name = data.get('cloud_name')
         cinder_iscsi_helper = data.get('cinder_iscsi_helper')
+        ntp_server = data.get('ntp_server')
 
         parameters = {
             compute_prefix + 'NovaComputeLibvirtType': virt_type,
@@ -110,6 +117,10 @@ class EditServiceConfig(horizon.forms.SelfHandlingForm):
                 neutron_public_interface,
             cinder_prefix + 'NeutronPublicInterface':
                 neutron_public_interface,
+            controller_prefix + 'NtpServer':
+                ntp_server,
+            compute_prefix + 'NtpServer':
+                ntp_server,
         }
         parameters.update(self._load_snmp_parameters(plan, data))
 

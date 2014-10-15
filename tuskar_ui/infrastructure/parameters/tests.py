@@ -96,4 +96,5 @@ class ParametersTest(test.BaseAdminViewTests):
             'Controller-1::NovaComputeLibvirtType': u'qemu',
             'Compute-1::SnmpdReadonlyUserPassword': u'password',
             'Block Storage-1::SnmpdReadonlyUserPassword': u'password',
-            'Object Storage-1::SnmpdReadonlyUserPassword': u'password'})
+            'Object Storage-1::SnmpdReadonlyUserPassword': u'password',
+            'Controller-1::NtpServer': u''})
