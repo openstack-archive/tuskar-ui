@@ -44,13 +44,16 @@ class ServiceConfigView(horizon.forms.ModalFormView):
             controller_prefix + 'CloudName')
         neutron_public_interface = plan.parameter_value(
             controller_prefix + 'NeutronPublicInterface')
+        ntp_server = plan.parameter_value(
+            controller_prefix + 'NtpServer')
 
         return {
             'virt_type': virt_type,
             'snmp_password': snmp_password,
             'cinder_iscsi_helper': cinder_iscsi_helper,
             'cloud_name': cloud_name,
-            'neutron_public_interface': neutron_public_interface}
+            'neutron_public_interface': neutron_public_interface,
+            'ntp_server': ntp_server}
 
 
 class IndexView(horizon_tabs.TabbedTableView):
