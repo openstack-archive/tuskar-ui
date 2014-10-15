@@ -51,7 +51,7 @@ class EditServiceConfig(horizon.forms.SelfHandlingForm):
                     'you must configure Compute to use qemu without KVM '
                     'and hardware virtualization.'))
     neutron_public_interface = django.forms.ChoiceField(
-        label=_("Deployment Type"),
+        label=_("Public Interface"),
         choices=NEUTRON_PUBLIC_INTERFACE_CHOICES,
         required=True,
         help_text=_('What interface to bridge onto br-ex for network nodes. '
