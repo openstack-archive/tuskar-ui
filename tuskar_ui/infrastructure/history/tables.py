@@ -34,3 +34,4 @@ class HistoryTable(tables.DataTable):
         multi_select = False
         table_actions = ()
         row_actions = ()
+        template = "horizon/common/_enhanced_data_table.html"

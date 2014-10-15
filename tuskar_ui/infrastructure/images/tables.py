@@ -68,3 +68,4 @@ class ImagesTable(tables.DataTable):
         table_actions = (DeleteImage,
                          ImageFilterAction)
         row_actions = (EditImage, DeleteImage)
+        template = "horizon/common/_enhanced_data_table.html"

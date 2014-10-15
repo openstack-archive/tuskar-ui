@@ -32,3 +32,4 @@ class ParametersTable(tables.DataTable):
         verbose_name = _("Service Configuration")
         table_actions = ()
         row_actions = ()
+        template = "horizon/common/_enhanced_data_table.html"

@@ -1,6 +1,6 @@
 /* Additional CSS for infrastructure. */
-@import "/bootstrap/scss/bootstrap/variables";
 @import "/dashboard/scss/variables";
+@import "/bootstrap/scss/bootstrap/variables";
 
 @import "_numberpicker";
 @import "_breadcrumbs";
@@ -10,8 +10,4 @@
 @import "_formsets";
 @import "_index_pages";
 @import "_individual_pages";
-
-// Some tables should not have a title because it just repeats the page title.
-.no-table-title h3.table_title {
-    display: none;
-}
+@import "_tables";

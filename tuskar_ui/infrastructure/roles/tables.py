@@ -52,6 +52,7 @@ class RolesTable(tables.DataTable):
         verbose_name = _("Deployment Roles")
         table_actions = ()
         row_actions = (UpdateRole,)
+        template = "horizon/common/_enhanced_data_table.html"
 
 
 class NodeTable(nodes_tables.RegisteredNodesTable):
@@ -61,3 +62,4 @@ class NodeTable(nodes_tables.RegisteredNodesTable):
         verbose_name = _("Nodes")
         table_actions = ()
         row_actions = ()
+        template = "horizon/common/_enhanced_data_table.html"

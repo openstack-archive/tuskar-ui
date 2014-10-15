@@ -73,6 +73,7 @@ class FlavorsTable(tables.DataTable):
                          DeleteFlavor,
                          flavor_tables.FlavorFilterAction)
         row_actions = (DeleteFlavor,)
+        template = "horizon/common/_enhanced_data_table.html"
 
 
 class FlavorRolesTable(tables.DataTable):
@@ -97,6 +98,7 @@ class FlavorRolesTable(tables.DataTable):
         verbose_name = _("Overcloud Roles")
         table_actions = ()
         row_actions = ()
+        template = "horizon/common/_enhanced_data_table.html"
 
 
 class FlavorSuggestionsTable(tables.DataTable):
@@ -112,3 +114,4 @@ class FlavorSuggestionsTable(tables.DataTable):
         verbose_name = _("Flavor Suggestions")
         table_actions = ()
         row_actions = (CreateSuggestedFlavor,)
+        template = "horizon/common/_enhanced_data_table.html"

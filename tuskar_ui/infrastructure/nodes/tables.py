@@ -150,6 +150,7 @@ class RegisteredNodesTable(tables.DataTable):
         table_actions = (NodeFilterAction, SetPowerStateOn, SetPowerStateOff,
                          DeleteNode)
         row_actions = (SetPowerStateOn, SetPowerStateOff, DeleteNode)
+        template = "horizon/common/_enhanced_data_table.html"
 
     def get_object_id(self, datum):
         return datum.uuid
@@ -180,6 +181,7 @@ class MaintenanceNodesTable(tables.DataTable):
         verbose_name = _("Nodes (Maintenance)")
         table_actions = (NodeFilterAction, ActivateNode, DeleteNode)
         row_actions = (ActivateNode, DeleteNode,)
+        template = "horizon/common/_enhanced_data_table.html"
 
     def get_object_id(self, datum):
         return datum.uuid
