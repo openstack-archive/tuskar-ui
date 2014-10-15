@@ -74,7 +74,8 @@ class ParametersTest(test.BaseAdminViewTests):
             'snmp_password': 'password',
             'cinder_iscsi_helper': 'lioadm',
             'cloud_name': 'cloud_name',
-            'neutron_public_interface': 'eth0'
+            'neutron_public_interface': 'eth0',
+            'extra_config': '{}'
         }
         with contextlib.nested(
             patch('tuskar_ui.api.tuskar.Plan.get_the_plan',
@@ -97,4 +98,8 @@ class ParametersTest(test.BaseAdminViewTests):
             'Compute-1::SnmpdReadonlyUserPassword': u'password',
             'Block Storage-1::SnmpdReadonlyUserPassword': u'password',
             'Object Storage-1::SnmpdReadonlyUserPassword': u'password',
-            'Controller-1::NtpServer': u''})
+            'Controller-1::NtpServer': u'',
+            'Controller-1::ExtraConfig': u'{}',
+            'Compute-1::ExtraConfig': u'{}',
+            'Block Storage-1::ExtraConfig': u'{}',
+            'Object Storage-1::ExtraConfig': u'{}'})
