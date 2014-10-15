@@ -69,7 +69,7 @@ def validate_plan(request, plan):
         if role.image(plan) is None:
             messages.append({
                 'text': _(u"Role {0} has no image.").format(role.name),
-                'is_critical': False,
+                'is_critical': True,
                 'link_url': reverse_lazy('horizon:infrastructure:roles:index'),
                 'link_label': _(u"Associate this role with an image."),
             })
