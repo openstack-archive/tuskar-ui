@@ -1,5 +1,5 @@
 // buttons
-.btn-default:not(.btn-danger) {
+.btn-default:not(.btn-danger, .btn-primary) {
   background: rgb(243, 243, 243);
   &:hover {
     background: rgb( 235, 235, 235);
