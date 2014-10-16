@@ -19,6 +19,13 @@ from tuskar_ui import api
 from tuskar_ui.infrastructure.flavors import tables
 
 
+def _safe_int_cast(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
 def _get_unmatched_suggestions(request):
     unmatched_suggestions = []
     flavor_suggestions = [FlavorSuggestion.from_flavor(flavor)
@@ -68,9 +75,9 @@ class FlavorSuggestion(object):
     def from_node(cls, node):
         return cls(
             node_id=node.uuid,
-            vcpus=int(node.cpus),
-            ram=int(node.memory_mb),
-            disk=int(node.local_gb),
+            vcpus=_safe_int_cast(node.cpus),
+            ram=_safe_int_cast(node.memory_mb),
+            disk=_safe_int_cast(node.local_gb),
             cpu_arch=node.cpu_arch
         )
 
