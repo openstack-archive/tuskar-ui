@@ -102,6 +102,7 @@ class FlavorRolesTable(tables.DataTable):
 
 
 class FlavorSuggestionsTable(tables.DataTable):
+    name = tables.Column('name', verbose_name=_('Suggested Name'))
     arch = tables.Column('cpu_arch', verbose_name=_('Architecture'))
     vcpus = tables.Column('vcpus', verbose_name=_('CPUs'))
     ram = tables.Column(flavor_tables.get_size, verbose_name=_('Memory'),

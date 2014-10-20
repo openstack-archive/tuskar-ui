@@ -92,7 +92,7 @@ class FlavorSuggestion(object):
 
     @property
     def name(self):
-        return '%s-%s-%s-%s' % (
+        return 'Flavor-%scpu-%s-%sMB-%sGB' % (
             self.vcpus or '0',
             self.cpu_arch or '',
             self.ram or '0',
