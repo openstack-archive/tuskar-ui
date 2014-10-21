@@ -28,6 +28,13 @@ class DeleteNode(tables.BatchAction):
     classes = ('btn-danger',)
 
     def allowed(self, request, obj=None):
+        if not obj:
+            # this is necessary because table actions use this function
+            # with obj=None
+            return True
+        if api.node.NodeClient.ironic_enabled(request):
+            return (getattr(obj, 'instance_uuid', None) is None and
+                    obj.power_state not in api.node.POWER_ON_STATES)
         return getattr(obj, 'instance_uuid', None) is None
 
     def action(self, request, obj_id):
