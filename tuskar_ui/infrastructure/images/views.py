@@ -25,6 +25,7 @@ from openstack_dashboard.dashboards.project.images.images import views
 from tuskar_ui import api as tuskar_api
 from tuskar_ui.infrastructure.images import forms
 from tuskar_ui.infrastructure.images import tables
+from tuskar_ui.utils import utils
 
 LOG = logging.getLogger(__name__)
 
@@ -33,40 +34,21 @@ class IndexView(horizon_tables.DataTableView):
     table_class = tables.ImagesTable
     template_name = "infrastructure/images/index.html"
 
-    def has_prev_data(self, table):
-        return self._prev
-
-    def has_more_data(self, table):
-        return self._more
-
     def get_data(self):
         images = []
         filters = self.get_filters()
-        prev_marker = self.request.GET.get(
-            tables.ImagesTable._meta.prev_pagination_param, None)
 
-        if prev_marker is not None:
-            sort_dir = 'asc'
-            marker = prev_marker
-        else:
-            sort_dir = 'desc'
-            marker = self.request.GET.get(
-                tables.ImagesTable._meta.pagination_param, None)
+        sort_dir = 'desc'
         try:
             images, self._more, self._prev = api.glance.image_list_detailed(
                 self.request,
-                marker=marker,
-                paginate=True,
+                paginate=False,
                 filters=filters,
                 sort_dir=sort_dir)
-
-            if prev_marker is not None:
-                images = sorted(images, key=lambda image:
-                                getattr(image, 'created_at'), reverse=True)
-
+            images = [image for image in images
+                      if utils.check_image_type(image,
+                                                'overcloud provisioning')]
         except Exception:
-            self._prev = False
-            self._more = False
             msg = _('Unable to retrieve image list.')
             exceptions.handle(self.request, msg)
 
