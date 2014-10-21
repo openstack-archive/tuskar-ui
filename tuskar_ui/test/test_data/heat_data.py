@@ -203,17 +203,56 @@ def data(TEST):
     image_1 = images.Image(
         images.ImageManager(None),
         {'id': '2',
-         'name': 'overcloud-control'})
+         'name': 'overcloud-control',
+         'is_public': True,
+         'protected': False,
+         'properties': {
+             'type': 'overcloud provisioning'
+         }})
     image_2 = images.Image(
         images.ImageManager(None),
         {'id': '1',
-         'name': 'overcloud-compute'})
+         'name': 'overcloud-compute',
+         'is_public': True,
+         'protected': False,
+         'properties': {
+             'type': 'overcloud provisioning'
+         }})
     image_3 = images.Image(
         images.ImageManager(None),
         {'id': '3',
-         'name': 'Object Storage Image'})
+         'name': 'Object Storage Image',
+         'is_public': True,
+         'protected': False,
+         'properties': {
+             'type': 'overcloud provisioning'
+         }})
     image_4 = images.Image(
         images.ImageManager(None),
         {'id': '4',
-         'name': 'Block Storage Image'})
-    TEST.glanceclient_images.add(image_1, image_2, image_3, image_4)
+         'name': 'Block Storage Image',
+         'is_public': True,
+         'protected': False,
+         'properties': {
+             'type': 'overcloud provisioning'
+         }})
+    image_5 = images.Image(
+        images.ImageManager(None),
+        {'id': '5',
+         'name': 'Discovery Ramdisk',
+         'is_public': True,
+         'protected': False,
+         'properties': {
+             'type': 'discovery ramdisk'
+         }})
+    image_6 = images.Image(
+        images.ImageManager(None),
+        {'id': '6',
+         'name': 'Discovery Kernel',
+         'is_public': True,
+         'protected': False,
+         'properties': {
+             'type': 'discovery kernel'
+         }})
+    TEST.glanceclient_images.add(image_1, image_2, image_3, image_4,
+                                 image_5, image_6)
