@@ -25,6 +25,7 @@ from openstack_dashboard.dashboards.project.images.images import views
 from tuskar_ui import api as tuskar_api
 from tuskar_ui.infrastructure.images import forms
 from tuskar_ui.infrastructure.images import tables
+from tuskar_ui.utils import utils
 
 LOG = logging.getLogger(__name__)
 
@@ -59,6 +60,9 @@ class IndexView(horizon_tables.DataTableView):
                 paginate=True,
                 filters=filters,
                 sort_dir=sort_dir)
+            images = [image for image in images
+                      if utils.check_image_type(image,
+                                                'overcloud provisioning')]
 
             if prev_marker is not None:
                 images = sorted(images, key=lambda image:
