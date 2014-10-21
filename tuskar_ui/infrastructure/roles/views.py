@@ -45,13 +45,9 @@ class RoleMixin(object):
 
 class StackMixin(object):
     @utils.memoized.memoized
-    def get_stack(self, redirect=None):
-        if redirect is None:
-            redirect = reverse(INDEX_URL)
+    def get_stack(self):
         plan = api.tuskar.Plan.get_the_plan(self.request)
-        stack = api.heat.Stack.get_by_plan(self.request, plan)
-
-        return stack
+        return api.heat.Stack.get_by_plan(self.request, plan)
 
 
 class IndexView(horizon_tables.DataTableView):
@@ -103,7 +99,7 @@ class DetailView(horizon_tables.DataTableView, RoleMixin, StackMixin):
 
     def get_data(self):
         redirect = reverse(INDEX_URL)
-        stack = self.get_stack(redirect)
+        stack = self.get_stack()
         if stack:
             role = self.get_role(redirect)
             return self._get_nodes(stack, role)
@@ -114,7 +110,7 @@ class DetailView(horizon_tables.DataTableView, RoleMixin, StackMixin):
         redirect = reverse(INDEX_URL)
 
         plan = api.tuskar.Plan.get_the_plan(self.request)
-        stack = self.get_stack(redirect)
+        stack = self.get_stack()
         role = self.get_role(redirect)
 
         context['role'] = role
