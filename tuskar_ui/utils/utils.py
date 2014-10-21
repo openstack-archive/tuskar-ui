@@ -45,6 +45,10 @@ def length(iterator):
     return sum(1 for _item in iterator)
 
 
+def check_image_type(image, type):
+    return (image.properties.get('type', type) == type)
+
+
 def filter_items(items, **kwargs):
     """Filters the list of items and returns the filtered list.
 

@@ -41,7 +41,8 @@ class ImagesTest(test.BaseAdminViewTests):
             patch('tuskar_ui.api.tuskar.Plan.list',
                   return_value=plans),
             patch('openstack_dashboard.api.glance.image_list_detailed',
-                  return_value=[self.images.list(), False, False]),):
+                  return_value=[self.glanceclient_images.list(),
+                                False, False]),):
 
             res = self.client.get(INDEX_URL)
 
@@ -103,7 +104,7 @@ class ImagesTest(test.BaseAdminViewTests):
                  self.tuskarclient_roles.list()]
         plans = [api.tuskar.Plan(plan) for plan in
                  self.tuskarclient_plans.list()]
-        images = self.images.list()
+        images = self.glanceclient_images.list()
 
         data = {'action': 'images__delete',
                 'object_ids': [images[0].id, images[1].id]}
