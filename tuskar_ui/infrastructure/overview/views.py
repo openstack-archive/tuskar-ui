@@ -89,13 +89,9 @@ def _get_role_data(plan, stack, form, role):
 
 class StackMixin(object):
     @memoized.memoized
-    def get_stack(self, redirect=None):
-        if redirect is None:
-            redirect = reverse(INDEX_URL)
+    def get_stack(self):
         plan = api.tuskar.Plan.get_the_plan(self.request)
-        stack = api.heat.Stack.get_by_plan(self.request, plan)
-
-        return stack
+        return api.heat.Stack.get_by_plan(self.request, plan)
 
 
 class IndexView(horizon.forms.ModalFormView, StackMixin):
