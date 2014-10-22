@@ -234,6 +234,8 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
         label=_("Float Allocation End"), initial="10.255.255.254")
     float_cidr = horizon.forms.CharField(
         label=_("Float CIDR"), initial="10.0.0.0/8")
+    nameserver = horizon.forms.CharField(
+        label=_("Nameserver"), initial="192.0.2.1")
     external_allocation_start = horizon.forms.CharField(
         label=_("External Allocation Start"), initial="172.17.0.45")
     external_allocation_end = horizon.forms.CharField(
@@ -282,7 +284,8 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
                 "name": "default-net",
                 "allocation_start": data['float_allocation_start'],
                 "allocation_end": data['float_allocation_end'],
-                "cidr": data['float_cidr']
+                "cidr": data['float_cidr'],
+                "nameserver": data['nameserver']
             },
             "external": {
                 "name": "ext-net",
