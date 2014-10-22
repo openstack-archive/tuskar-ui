@@ -59,6 +59,8 @@ class OverviewTab(tabs.Tab):
             'nodes_down_count': utils.length(nodes_down),
             'nodes_provisioned_count': utils.length(nodes_provisioned),
             'nodes_free_count': utils.length(nodes_free),
+            'nodes_all_count': (utils.length(nodes_provisioned) +
+                                utils.length(nodes_free))
         }
 
         if api_base.is_service_enabled(self.request, 'metering'):
