@@ -14,6 +14,7 @@
 import copy
 from datetime import datetime  # noqa
 from datetime import timedelta  # noqa
+import pytz
 
 from django.utils.http import urlencode
 from django.utils import timezone
@@ -140,8 +141,8 @@ def _calc_date_args(date_from, date_to, date_options):
     if date_options == "other":
         try:
             if date_from:
-                date_from = datetime.strptime(date_from,
-                                              "%Y-%m-%d")
+                date_from = pytz.utc.localize(
+                    datetime.strptime(date_from, "%Y-%m-%d"))
             else:
                 # TODO(lsmola) there should be probably the date
                 # of the first sample as default, so it correctly
@@ -149,8 +150,8 @@ def _calc_date_args(date_from, date_to, date_options):
                 # and limit of samples to obtain that.
                 pass
             if date_to:
-                date_to = datetime.strptime(date_to,
-                                            "%Y-%m-%d")
+                date_to = pytz.utc.localize(
+                    datetime.strptime(date_to, "%Y-%m-%d"))
                 # It return beginning of the day, I want the and of
                 # the day, so i will add one day without a second.
                 date_to = (date_to + timedelta(days=1) -
