@@ -1,0 +1,91 @@
+{% load i18n %}
+{% load url from future%}
+
+{% if meter_conf %}
+  <div class="nodes row">
+    <div id="ceilometer-stats" class="clearfix">
+      <form class="form-inline performance_charts" id="linechart_general_form">
+        <div class="pull-right">
+          <div class="form-group">
+            <div class="input-group input-group-sm">
+              <div class="input-group-addon"><i class="fa fa-clock-o"></i></div>
+              <select data-line-chart-command="select_box_change"
+                      id="date_options"
+                      name="date_options"
+                      class="form-control">
+                <option value="0.041666">{% trans "Last hour" %}</option>
+                <option value="0.25">{% trans "Last 6 hours" %}</option>
+                <option value="0.5">{% trans "Last 12 hours" %}</option>
+                <option value="1" selected="selected">{% trans "Last day" %}</option>
+                <option value="7">{% trans "Last week" %}</option>
+                <option value="{% now 'j' %}">{% trans "Month to date" %}</option>
+                <option value="15">{% trans "Last 15 days" %}</option>
+                <option value="30">{% trans "Last 30 days" %}</option>
+                <option value="365">{% trans "Last year" %}</option>
+                <option value="other">{% trans "Other" %}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" id="date_from_group">
+            <div class="input-group input-group-sm">
+              <div class="input-group-addon">{% trans "From" %}</div>
+              <input data-line-chart-command="date_picker_change"
+                    type="text"
+                    id="date_from"
+                    name="date_from"
+                    class="form-control"/>
+            </div>
+          </div>
+          <div class="form-group" id="date_to_group">
+            <div class="input-group input-group-sm">
+              <div class="input-group-addon">{% trans "To" %}</div>
+              <input data-line-chart-command="date_picker_change"
+                     type="text"
+                     id="date_from"
+                     name="date_from"
+                     class="form-control"/>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    if (typeof $ !== 'undefined') {
+      show_hide_datepickers();
+    } else {
+      addHorizonLoadEvent(function() {
+        show_hide_datepickers();
+      });
+    }
+    // TODO(lsmola) Pull the common code into a js file.
+    function show_hide_datepickers() {
+      var date_options = $("#date_options");
+      date_options.change(function(evt) {
+        if ($(this).find("option:selected").val() === "other"){
+          evt.stopPropagation();
+          $("#date_from, #date_to").val('');
+          $("#date_from_group, #date_to_group").show();
+        } else {
+          $("#date_from_group, #date_to_group").hide();
+        }
+      });
+      if (date_options.find("option:selected").val() === "other"){
+        $("#date_from_group, #date_to_group").show();
+      } else {
+        $("#date_from_group, #date_to_group").hide();
+      }
+    }
+  </script>
+
+  <div id="node-charts" class="nodes row">
+    {% for meter_label, url_part, y_max in meter_conf %}
+      <div class="col-lg-3">
+        {% include "infrastructure/_performance_chart.html" with label=meter_label y_max=y_max url=node_perf_url|add:"?"|add:url_part only %}
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+    <p>{% trans 'Metering service is not enabled.' %}</p>
+{% endif %}
