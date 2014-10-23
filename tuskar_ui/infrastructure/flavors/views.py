@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
@@ -36,6 +37,16 @@ def image_get(request, image_id, error_message):
 class IndexView(horizon.tabs.TabbedTableView):
     tab_group_class = tabs.FlavorTabs
     template_name = 'infrastructure/flavors/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        create_action = {
+            'name': _("New Flavor"),
+            'url': reverse('horizon:infrastructure:flavors:create'),
+            'icon': 'fa-plus',
+        }
+        context['header_actions'] = [create_action]
+        return context
 
 
 class CreateView(horizon.workflows.WorkflowView):

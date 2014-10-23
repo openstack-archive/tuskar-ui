@@ -69,9 +69,7 @@ class FlavorsTable(tables.DataTable):
     class Meta:
         name = "flavors"
         verbose_name = _("Available")
-        table_actions = (CreateFlavor,
-                         DeleteFlavor,
-                         flavor_tables.FlavorFilterAction)
+        table_actions = (DeleteFlavor, flavor_tables.FlavorFilterAction)
         row_actions = (DeleteFlavor,)
         template = "horizon/common/_enhanced_data_table.html"
 
