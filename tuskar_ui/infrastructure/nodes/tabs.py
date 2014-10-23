@@ -42,6 +42,22 @@ class OverviewTab(tabs.Tab):
 
         nodes_provisioned = api.node.Node.list(request, associated=True)
         nodes_free = api.node.Node.list(request, associated=False)
+        nodes_all_count = (utils.length(nodes_provisioned) +
+                           utils.length(nodes_free))
+
+        nodes_provisioned_maintenance = list(utils.filter_items(
+            nodes_provisioned, maintenance__in=[True]))
+        nodes_provisioned = list(
+            set(nodes_provisioned) - set(nodes_provisioned_maintenance))
+
+        nodes_free_maintenance = list(utils.filter_items(
+            nodes_free, maintenance__in=[True]))
+        nodes_free = list(
+            set(nodes_free) - set(nodes_free_maintenance))
+
+        nodes_maintenance = (
+            nodes_provisioned_maintenance + nodes_free_maintenance)
+
         nodes_provisioned_down = utils.filter_items(
             nodes_provisioned, power_state__not_in=api.node.POWER_ON_STATES)
         nodes_free_down = utils.filter_items(
@@ -59,8 +75,8 @@ class OverviewTab(tabs.Tab):
             'nodes_down_count': utils.length(nodes_down),
             'nodes_provisioned_count': utils.length(nodes_provisioned),
             'nodes_free_count': utils.length(nodes_free),
-            'nodes_all_count': (utils.length(nodes_provisioned) +
-                                utils.length(nodes_free))
+            'nodes_maintenance_count': utils.length(nodes_maintenance),
+            'nodes_all_count': nodes_all_count
         }
 
         if api_base.is_service_enabled(self.request, 'metering'):
