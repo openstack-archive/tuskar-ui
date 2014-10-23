@@ -81,7 +81,7 @@
 
   <div id="node-charts" class="nodes row">
     {% for meter_label, url_part, y_max in meter_conf %}
-      <div class="col-lg-4">
+      <div class="col-lg-{{col_size}}">
         {% include "infrastructure/_performance_chart.html" with label=meter_label y_max=y_max url=node_perf_url|add:"?"|add:url_part only %}
       </div>
     {% endfor %}
