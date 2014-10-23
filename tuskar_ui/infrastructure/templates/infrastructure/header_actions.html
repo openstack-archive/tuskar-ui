@@ -1,0 +1,16 @@
+{% load i18n %}
+
+<div class="actions pull-right">
+  <a href="{% url 'horizon:infrastructure:nodes:register' %}"
+     class="btn btn-primary ajax-modal">
+    <span class="fa fa-plus"></span>
+    {% trans 'Register Nodes' %}
+  </a>
+  {% if ironic_enabled %}
+  <a href="{% url 'horizon:infrastructure:nodes:auto-discover-csv' %}"
+     class="btn btn-primary ajax-modal">
+    <span class="fa fa-upload"></span>
+    {% trans 'Upload Nodes' %}
+  </a>
+  {% endif %}
+</div>
