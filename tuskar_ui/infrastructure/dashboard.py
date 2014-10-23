@@ -15,9 +15,9 @@ from django.utils.translation import ugettext_lazy as _
 import horizon
 
 
-class BasePanels(horizon.PanelGroup):
-    slug = "infrastructure"
+class Infrastructure(horizon.Dashboard):
     name = _("Infrastructure")
+    slug = "infrastructure"
     panels = (
         'overview',
         'parameters',
@@ -26,14 +26,6 @@ class BasePanels(horizon.PanelGroup):
         'flavors',
         'images',
         'history',
-    )
-
-
-class Infrastructure(horizon.Dashboard):
-    name = _("Infrastructure")
-    slug = "infrastructure"
-    panels = (
-        BasePanels,
     )
     default_panel = 'overview'
     permissions = ('openstack.roles.admin',)
