@@ -1,0 +1,9 @@
+<div class="actions pull-right">
+  {% for action in header_actions %}
+  <a href="{{ action.url }}"
+     class="btn btn-primary ajax-modal">
+    <span class="fa {{ action.icon }}"></span>
+    {{ action.name }}
+  </a>
+  {% endfor %}
+</div>
