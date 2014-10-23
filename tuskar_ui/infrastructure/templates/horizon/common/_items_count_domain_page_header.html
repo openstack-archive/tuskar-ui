@@ -1,6 +1,7 @@
 {% load i18n %}
 {% block page_header %}
   <div class='page-header'>
+    {% include 'infrastructure/header_actions.html' %}
     <h1>
     {% if request.session.domain_context_name %}
       <em>{{ request.session.domain_context_name }}:</em>

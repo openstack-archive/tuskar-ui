@@ -4,18 +4,12 @@
 {% block title %}{% trans 'Service Configuration' %}{% endblock %}
 
 {% block page_header %}
-  {% include 'horizon/common/_page_header.html' with title=_('Service Configuration') %}
+  {% include 'horizon/common/_items_count_domain_page_header.html' with title=_('Service Configuration') %}
 {% endblock page_header %}
 
 {% block main %}
 <div class="row">
   <div class="col-xs-12">
-    <div class="actions pull-right">
-      <a href="{% url 'horizon:infrastructure:parameters:service_configuration' %}" class="btn btn-primary ajax-modal">
-        <span class="fa fa-pencil"></span>
-        {% trans 'Edit Configuration' %}
-      </a>
-    </div>
     {{ tab_group.render }}
   </div>
 </div>

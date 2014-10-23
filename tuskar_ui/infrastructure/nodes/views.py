@@ -13,6 +13,7 @@
 #    under the License.
 import json
 
+from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 import django.forms
 import django.http
@@ -36,8 +37,21 @@ class IndexView(horizon_tabs.TabbedTableView):
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        context['ironic_enabled'] = api.node.NodeClient.ironic_enabled(
-            self.request)
+        register_action = {
+            'name': _('Register Nodes'),
+            'url': reverse('horizon:infrastructure:nodes:register'),
+            'icon': 'fa-plus',
+        }
+        context['header_actions'] = [register_action]
+
+        if api.node.NodeClient.ironic_enabled(self.request):
+            upload_action = {
+                'name': _('Upload Nodes'),
+                'url': reverse('horizon:infrastructure:nodes:auto-discover'
+                               '-csv'),
+                'icon': 'fa-upload',
+            }
+            context['header_actions'].append(upload_action)
         return context
 
 

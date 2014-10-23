@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 import horizon.forms
@@ -62,3 +63,14 @@ class ServiceConfigView(horizon.forms.ModalFormView):
 class IndexView(horizon_tabs.TabbedTableView):
     tab_group_class = tabs.ParametersTabs
     template_name = "infrastructure/parameters/index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        edit_action = {
+            'name': _('Edit Configuration'),
+            'url': reverse('horizon:infrastructure:parameters:'
+                           'service_configuration'),
+            'icon': 'fa-pencil',
+        }
+        context['header_actions'] = [edit_action]
+        return context
