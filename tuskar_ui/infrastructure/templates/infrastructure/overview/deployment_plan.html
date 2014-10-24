@@ -5,11 +5,7 @@
 {% load horizon %}
 
 {% block deployment-icon %}
-{% if plan_invalid %}
-  <i class="fa fa-exclamation-circle text-danger"></i>
-{% else %}
-  <i class="fa fa-check-circle text-success"></i>
-{% endif %}
+{% if plan_invalid %}fa-exclamation-circle{% else %}fa-check-circle{% endif %}
 {% endblock %}
 
 {% block deployment-title %}
@@ -21,16 +17,17 @@
 {% endblock %}
 
 {% block deployment-info %}
-<ul class="list-unstyled">
+<ul class="fa-ul">
     {% for message in plan_messages %}
-    <li class="{% if message.is_critical %}text-danger{% else %}text-warning{% endif %}"><p>
+    <li>
+        <i class="fa-li fa {% if message.is_critical %}fa-exclamation-circle text-danger{% else %}fa-exclamation-triangle text-warning{% endif %}"></i>
         {{ message.text }}
         {% if message.link_url %}
-          <a href="{{ message.link_url }}">
+          (<a href="{{ message.link_url }}">
             {{ message.link_label|default:message.link_url }}
-          </a>
+          </a>)
         {% endif %}
-    </p></li>
+    </li>
     {% endfor %}
 </ul>
 {% endblock %}
@@ -38,8 +35,7 @@
 {% block deployment-buttons %}
 <a href="{% url 'horizon:infrastructure:overview:deploy_confirmation' %}"
 class="btn btn-primary ajax-modal btn-default {% if plan_invalid %}disabled{% endif %}">
-<i class="fa fa-rocket"></i>
-{% trans "Deploy" %}
+<i class="fa fa-lg fa-rocket"></i>&nbsp;{% trans "Deploy" %}
 </a>
 {% endblock %}
 
@@ -54,19 +50,17 @@ class="btn btn-primary ajax-modal btn-default {% if plan_invalid %}disabled{% en
 </h4>
 {% endjstemplate %}{% endspaceless %}</script>
 <script type="text/html" id="message-template">{% spaceless %}{% jstemplate %}
-<ul class="list-unstyled">
+<ul class="fa-ul">
 [[#messages ]]
-  <li class="
-    [[#is_critical]]text-danger[[/is_critical]]
-    [[^is_critical]]text-warning[[/is_critical]]
-  "><p>
+  <li><i class="fa-li fa
+    [[#is_critical]]fa-exclamation-circle text-danger[[/is_critical]]
+    [[^is_critical]]fa-exclamation-triangle text-warning[[/is_critical]]
+  "></i>
     [[text]]
     [[#link_label]]
-      <a href="[[link_url]]">
-        [[link_label]]
-      </a>
+      (<a href="[[link_url]]">[[link_label]]</a>)
     [[/link_label]]
-  </p></li>
+  </li>
 [[/messages]]
 </ul>
 {% endjstemplate %}{% endspaceless %}</script>
