@@ -4,6 +4,14 @@ tuskar.edit_plan = (function () {
     var module = {};
 
     module.debounce_timer = null;
+    module.ICON_CLASSES = (
+	'fa-spinner ' + 
+	'fa-spin ' +
+	'fa-cloud ' +
+	'fa-exclamation-circle ' +
+	'fa-check-circle ' +
+	''
+    );
 
     module.init = function () {
         if (!$('form.deployment-roles-form').length) { return; }
@@ -42,17 +50,17 @@ tuskar.edit_plan = (function () {
     module.update_messages = function (data) {
         if (data === null) {
             $('div.deployment-buttons a.btn-primary').addClass('disabled');
-            $('div.deployment-icon i').replaceWith(
-                '<i class="fa fa-spinner fa-spin text-info"></i>');
+            $('div.deployment-icon i').removeClass(module.ICON_CLASSES
+		).addClass('fa-spinner fa-spin');
             data = {validating:true};
         } else if (data.plan_invalid) {
             $('div.deployment-buttons a.btn-primary').addClass('disabled');
-            $('div.deployment-icon i').replaceWith(
-                '<i class="fa fa-exclamation-circle text-danger"></i>');
+            $('div.deployment-icon i').removeClass(module.ICON_CLASSES
+		).addClass('fa-exclamation-circle');
         } else {
             $('div.deployment-buttons a.btn-primary').removeClass('disabled');
-            $('div.deployment-icon i').replaceWith(
-                '<i class="fa fa-check-circle text-success"></i>');
+            $('div.deployment-icon i').removeClass(module.ICON_CLASSES
+		).addClass('fa-check-circle');
         }
         $('div.deployment-box h4').replaceWith(
             module.title_template.render(data));

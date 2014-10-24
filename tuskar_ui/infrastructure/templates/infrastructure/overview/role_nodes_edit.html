@@ -9,9 +9,12 @@
 {% for role in roles %}
     <div class="form-group well well-sm clearfix{% if field.errors %} error{% endif %} {{ field.css_classes }}">
       <div class="col-xs-2">
-        {{ role.field|add_bootstrap_class }}
+        <a
+          href="{% url 'horizon:infrastructure:roles:detail' role_id=role.id %}"
+          class="btn"
+        ><i class="fa fa-3x fa-fw fa-pencil"></i></a>
       </div>
-      <div class="col-xs-10">
+      <div class="col-xs-8 deploy-role-name">
         <a
           href="{% url 'horizon:infrastructure:roles:detail' role_id=role.id %}"
           class="deployment-roles-label"
@@ -21,6 +24,9 @@
           {{ error }}
         </span></span>
         {% endfor %}
+      </div>
+      <div class="col-xs-2 deploy-role-count">
+        {{ role.field|add_bootstrap_class }}
       </div>
     </div>
 {% endfor %}
