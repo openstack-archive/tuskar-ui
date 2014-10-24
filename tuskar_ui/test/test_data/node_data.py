@@ -137,6 +137,7 @@ def data(TEST):
          'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
+         'provision_state': 'active',
          'extra': {}
          })
     node_2 = node.Node(
@@ -162,6 +163,7 @@ def data(TEST):
          'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
+         'provision_state': 'active',
          'extra': {}
          })
     node_3 = node.Node(
@@ -187,6 +189,7 @@ def data(TEST):
          'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
+         'provision_state': 'deploying',
          'extra': {}
          })
     node_4 = node.Node(
@@ -212,6 +215,7 @@ def data(TEST):
          'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
+         'provision_state': 'deploying',
          'extra': {}
          })
     node_5 = node.Node(
@@ -237,6 +241,7 @@ def data(TEST):
          'provision_state': 'error',
          'maintenance': None,
          'newly_discovered': None,
+         'provision_state': 'deploying',
          'extra': {}
          })
     node_6 = node.Node(
@@ -262,6 +267,7 @@ def data(TEST):
          'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
+         'provision_state': 'active',
          'extra': {}
          })
     node_7 = node.Node(
@@ -286,6 +292,7 @@ def data(TEST):
          'target_power_state': 'on',
          'maintenance': True,
          'newly_discovered': None,
+         'provision_state': 'deploying',
          'extra': {}
          })
     node_8 = node.Node(
@@ -310,6 +317,7 @@ def data(TEST):
          'target_power_state': 'on',
          'maintenance': True,
          'newly_discovered': True,
+         'provision_state': 'active',
          'extra': {}
          })
     node_9 = node.Node(
@@ -334,6 +342,7 @@ def data(TEST):
          'target_power_state': 'on',
          'maintenance': True,
          'newly_discovered': True,
+         'provision_state': 'active',
          'extra': {}
          })
     TEST.ironicclient_nodes.add(node_1, node_2, node_3, node_4, node_5, node_6,

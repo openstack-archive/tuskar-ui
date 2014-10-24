@@ -17,7 +17,7 @@
     </div>
     <div class="widget">
       <h3>{% trans 'Nodes Status' %}</h3>
-      <div class="d3_pie_chart_distribution" data-used="Provisioned={{ nodes_provisioned_count }}|Free={{ nodes_free_count }}|Maintenance={{ nodes_maintenance_count }}"></div>
+      <div class="d3_pie_chart_distribution" data-used="{{ nodes_status_data }}"></div>
     </div>
     <div class="widget">
       <h3>{% trans 'Power Status' %}</h3>
@@ -33,6 +33,54 @@
             <span class="info">{{ nodes_provisioned_count }} {% trans 'provisioned nodes' %}</span>
           </a>
         </div>
+        {% if nodes_provisioning_count %}
+          <div class="widget-info">
+            <i class="fa fa-spinner fa-spin text-info"></i><a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+              {% blocktrans count nodes_provisioning_count as counter %}
+                {{ counter }} node
+              {% plural %}
+                {{ counter }} nodes
+              {% endblocktrans %}
+            </a>
+            {% blocktrans count nodes_provisioning_count as counter %}
+              is being provisioned
+            {% plural %}
+              are being provisioned
+            {% endblocktrans %}
+          </div>
+        {% endif %}
+        {% if nodes_deleting_count %}
+          <div class="widget-info">
+            <i class="fa fa-spinner fa-spin text-info"></i><a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+              {% blocktrans count nodes_deleting_count as counter %}
+                {{ counter }} node
+              {% plural %}
+                {{ counter }} nodes
+              {% endblocktrans %}
+            </a>
+            {% blocktrans count nodes_deleting_count as counter %}
+              is being deleted
+            {% plural %}
+              are being deleted
+            {% endblocktrans %}
+          </div>
+        {% endif %}
+        {% if nodes_error_count %}
+          <div class="widget-info">
+            <i class="fa fa-exclamation-circle text-info"></i><a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+              {% blocktrans count nodes_error_count as counter %}
+                {{ counter }} node
+              {% plural %}
+                {{ counter }} nodes
+              {% endblocktrans %}
+            </a>
+            {% blocktrans count nodes_error_count as counter %}
+              {{ counter }} failed
+            {% plural %}
+              {{ counter }} failed
+            {% endblocktrans %}
+          </div>
+        {% endif %}
       </div>
     </div>
     {% url 'horizon:infrastructure:nodes:nodes_performance' as node_perf_url %}

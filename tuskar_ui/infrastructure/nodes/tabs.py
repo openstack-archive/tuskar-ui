@@ -40,23 +40,31 @@ class OverviewTab(tabs.Tab):
                         node.memory_mb)
         local_gb = sum(int(node.local_gb) for node in nodes if node.local_gb)
 
-        nodes_provisioned = api.node.Node.list(request, associated=True)
-        nodes_free = api.node.Node.list(request, associated=False)
-        nodes_all_count = (utils.length(nodes_provisioned) +
-                           utils.length(nodes_free))
+        nodes_provisioned = set(utils.filter_items(
+            nodes, provision_state__in=api.node.PROVISION_STATE_PROVISIONED))
+        nodes_free = set(utils.filter_items(
+            nodes, provision_state__in=api.node.PROVISION_STATE_FREE))
+        nodes_deleting = set(utils.filter_items(
+            nodes, provision_state__in=api.node.PROVISION_STATE_DELETING))
+        nodes_error = set(utils.filter_items(
+            nodes, provision_state__in=api.node.PROVISION_STATE_ERROR))
 
-        nodes_provisioned_maintenance = list(utils.filter_items(
+        nodes_provisioned_maintenance = set(utils.filter_items(
             nodes_provisioned, maintenance=True))
-        nodes_provisioned_not_maintenance = list(
-            set(nodes_provisioned) - set(nodes_provisioned_maintenance))
+        nodes_provisioned_not_maintenance = (
+            nodes_provisioned - nodes_provisioned_maintenance)
 
-        nodes_free_maintenance = list(utils.filter_items(
+        nodes_provisioning = set(utils.filter_items(
+            nodes,
+            provision_state__in=api.node.PROVISION_STATE_PROVISIONING))
+
+        nodes_free_maintenance = set(utils.filter_items(
             nodes_free, maintenance=True))
-        nodes_free_not_maintenance = list(
-            set(nodes_free) - set(nodes_free_maintenance))
+        nodes_free_not_maintenance = (
+            nodes_free - nodes_free_maintenance)
 
         nodes_maintenance = (
-            nodes_provisioned_maintenance + nodes_free_maintenance)
+            nodes_provisioned_maintenance | nodes_free_maintenance)
 
         nodes_provisioned_down = utils.filter_items(
             nodes_provisioned, power_state__not_in=api.node.POWER_ON_STATES)
@@ -67,18 +75,42 @@ class OverviewTab(tabs.Tab):
         nodes_up = utils.filter_items(
             nodes, power_state__in=api.node.POWER_ON_STATES)
 
+        nodes_free_count = len(nodes_free_not_maintenance)
+        nodes_provisioned_count = len(
+            nodes_provisioned_not_maintenance)
+        nodes_provisioning_count = len(nodes_provisioning)
+        nodes_maintenance_count = len(nodes_maintenance)
+        nodes_deleting_count = len(nodes_deleting)
+        nodes_error_count = len(nodes_error)
+
         context = {
             'cpus': cpus,
             'memory_gb': memory_mb / 1024.0,
             'local_gb': local_gb,
             'nodes_up_count': utils.length(nodes_up),
             'nodes_down_count': utils.length(nodes_down),
-            'nodes_provisioned_count': utils.length(
-                nodes_provisioned_not_maintenance),
-            'nodes_free_count': utils.length(nodes_free_not_maintenance),
-            'nodes_maintenance_count': utils.length(nodes_maintenance),
-            'nodes_all_count': nodes_all_count
+            'nodes_provisioned_count': nodes_provisioned_count,
+            'nodes_provisioning_count': nodes_provisioning_count,
+            'nodes_free_count': nodes_free_count,
+            'nodes_deleting_count': nodes_deleting_count,
+            'nodes_error_count': nodes_error_count,
+            'nodes_maintenance_count': nodes_maintenance_count,
+            'nodes_all_count': len(nodes),
+            'nodes_status_data':
+                'Provisioned={0}|Free={1}|Maintenance={2}'.format(
+                    nodes_provisioned_count, nodes_free_count,
+                    nodes_maintenance_count)
         }
+        # additional node status pie chart data, showing only if it appears
+        if nodes_provisioning_count:
+            context['nodes_status_data'] += '|Provisioning={0}'.format(
+                nodes_provisioning_count)
+        if nodes_deleting_count:
+            context['nodes_status_data'] += '|Deleting={0}'.format(
+                nodes_deleting_count)
+        if nodes_error_count:
+            context['nodes_status_data'] += '|Error={0}'.format(
+                nodes_error_count)
 
         if api_base.is_service_enabled(self.request, 'metering'):
             context['meter_conf'] = (
