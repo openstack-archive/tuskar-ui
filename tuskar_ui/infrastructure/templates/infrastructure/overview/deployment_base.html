@@ -6,9 +6,7 @@
 </div>
 <div class="clear"></div>
 <div class="deployment-icon">
-  {% block deployment-icon %}
-    <i class="fa fa-cloud text-info"></i>
-  {% endblock %}
+<i class="fa {% block deployment-icon %}fa-cloud{% endblock %} fa-3x fa-fw"></i>
 </div>
 <div class="deployment-box clearfix">
   <h4>{% block deployment-title %}{% endblock %}</h4>
@@ -18,8 +16,7 @@
       <a
     href="{% url 'horizon:infrastructure:overview:undeploy_confirmation' %}"
     class="btn btn-danger ajax-modal">
-        <i class="fa fa-trash"></i>
-        {% trans "Undeploy" %}
+        <i class="fa fa-lg fa-fire"></i> {% trans "Undeploy" %}
       </a>
     {% endblock %}
   </div>
