@@ -55,7 +55,7 @@ class RolesTable(tables.DataTable):
         template = "horizon/common/_enhanced_data_table.html"
 
 
-class NodeTable(nodes_tables.RegisteredNodesTable):
+class NodeTable(nodes_tables.ProvisionedNodesTable):
 
     class Meta:
         name = "nodetable"

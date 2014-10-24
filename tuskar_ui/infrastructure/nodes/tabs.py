@@ -81,38 +81,28 @@ class OverviewTab(tabs.Tab):
         return context
 
 
-class RegisteredTab(tabs.TableTab):
-    table_classes = (tables.RegisteredNodesTable,)
-    name = _("Registered")
-    slug = "registered"
+class BaseTab(tabs.TableTab):
+    table_classes = (tables.BaseNodesTable,)
+    name = _("Nodes")
+    slug = "nodes"
     template_name = "horizon/common/_detail_table.html"
 
     def __init__(self, tab_group, request):
-        super(RegisteredTab, self).__init__(tab_group, request)
-
-    def get_items_count(self):
-        return len(self._nodes)
+        super(BaseTab, self).__init__(tab_group, request)
 
     @cached_property
     def _nodes(self):
-        redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
+        return []
 
-        if 'provisioned' in self.request.GET:
-            associated = True
-        elif 'free' in self.request.GET:
-            associated = False
-        else:
-            associated = None
-
-        return api.node.Node.list(self.request, associated=associated,
-                                  maintenance=False, _error_redirect=redirect)
+    def get_items_count(self):
+        return len(self._nodes)
 
     @cached_property
     def _nodes_info(self):
         page_size = functions.get_page_size(self.request)
 
         prev_marker = self.request.GET.get(
-            tables.RegisteredNodesTable._meta.prev_pagination_param, None)
+            self.table_classes[0]._meta.prev_pagination_param, None)
 
         if prev_marker is not None:
             sort_dir = 'asc'
@@ -120,7 +110,7 @@ class RegisteredTab(tabs.TableTab):
         else:
             sort_dir = 'desc'
             marker = self.request.GET.get(
-                tables.RegisteredNodesTable._meta.pagination_param, None)
+                self.table_classes[0]._meta.pagination_param, None)
 
         nodes = self._nodes
 
@@ -141,7 +131,59 @@ class RegisteredTab(tabs.TableTab):
         more = len(nodes) > end
         return nodes[start:end], prev, more
 
-    def get_nodes_table_data(self):
+    def get_base_nodes_table_data(self):
+        nodes, prev, more = self._nodes_info
+
+        if 'errors' in self.request.GET:
+            return api.node.filter_nodes(nodes, healthy=False)
+
+        return nodes
+
+    def has_prev_data(self, table):
+        return self._nodes_info[1]
+
+    def has_more_data(self, table):
+        return self._nodes_info[2]
+
+
+class AllTab(BaseTab):
+    table_classes = (tables.AllNodesTable,)
+    name = _("All")
+    slug = "all"
+
+    def __init__(self, tab_group, request):
+        super(AllTab, self).__init__(tab_group, request)
+
+    @cached_property
+    def _nodes(self):
+        redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
+
+        return api.node.Node.list(self.request, _error_redirect=redirect)
+
+    def get_all_nodes_table_data(self):
+        nodes, prev, more = self._nodes_info
+
+        if 'errors' in self.request.GET:
+            return api.node.filter_nodes(nodes, healthy=False)
+
+        return nodes
+
+
+class ProvisionedTab(BaseTab):
+    table_classes = (tables.ProvisionedNodesTable,)
+    name = _("Provisioned")
+    slug = "provisioned"
+
+    def __init__(self, tab_group, request):
+        super(ProvisionedTab, self).__init__(tab_group, request)
+
+    @cached_property
+    def _nodes(self):
+        redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
+        return api.node.Node.list(self.request, associated=True,
+                                  maintenance=False, _error_redirect=redirect)
+
+    def get_provisioned_nodes_table_data(self):
         nodes, prev, more = self._nodes_info
 
         if 'errors' in self.request.GET:
@@ -161,27 +203,46 @@ class RegisteredTab(tabs.TableTab):
 
         return nodes
 
-    def has_prev_data(self, table):
-        return self._nodes_info[1]
 
-    def has_more_data(self, table):
-        return self._nodes_info[2]
+class FreeTab(BaseTab):
+    table_classes = (tables.FreeNodesTable,)
+    name = _("Free")
+    slug = "free"
+
+    def __init__(self, tab_group, request):
+        super(FreeTab, self).__init__(tab_group, request)
+
+    @cached_property
+    def _nodes(self):
+        redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
+        return api.node.Node.list(self.request, associated=False,
+                                  maintenance=False, _error_redirect=redirect)
+
+    def get_free_nodes_table_data(self):
+        nodes, prev, more = self._nodes_info
+
+        if 'errors' in self.request.GET:
+            return api.node.filter_nodes(nodes, healthy=False)
+
+        return nodes
 
 
-class MaintenanceTab(tabs.TableTab):
+class MaintenanceTab(BaseTab):
     table_classes = (tables.MaintenanceNodesTable,)
     name = _("Maintenance")
     slug = "maintenance"
-    template_name = "horizon/common/_detail_table.html"
 
-    def get_items_count(self):
-        return len(self.get_maintenance_nodes_table_data())
+    def __init__(self, tab_group, request):
+        super(MaintenanceTab, self).__init__(tab_group, request)
+
+    @cached_property
+    def _nodes(self):
+        redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
+        return api.node.Node.list(self.request, maintenance=True,
+                                  _error_redirect=redirect)
 
     def get_maintenance_nodes_table_data(self):
-        redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
-        nodes = api.node.Node.list(self.request, maintenance=True,
-                                   _error_redirect=redirect)
-        return nodes
+        return self._nodes
 
 
 class DetailOverviewTab(tabs.Tab):
@@ -226,7 +287,7 @@ class DetailOverviewTab(tabs.Tab):
 
 class NodeTabs(tabs.TabGroup):
     slug = "nodes"
-    tabs = (OverviewTab, RegisteredTab)
+    tabs = (OverviewTab, AllTab, ProvisionedTab, FreeTab, MaintenanceTab,)
     sticky = True
     template_name = "horizon/common/_items_count_tab_group.html"
 
