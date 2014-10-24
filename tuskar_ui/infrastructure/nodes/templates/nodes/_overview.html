@@ -17,7 +17,7 @@
     </div>
     <div class="widget">
       <h3>{% trans 'Nodes Status' %}</h3>
-      <div class="d3_pie_chart_distribution" data-used="Provisioned={{ nodes_provisioned_count }}|Free={{ nodes_free_count }}|Maintenance={{ nodes_maintenance_count }}"></div>
+      <div class="d3_pie_chart_distribution" data-used="{{ nodes_status_data }}"></div>
     </div>
     <div class="widget">
       <h3>{% trans 'Power Status' %}</h3>
@@ -33,6 +33,27 @@
             <span class="info">{{ nodes_provisioned_count }} {% trans 'provisioned nodes' %}</span>
           </a>
         </div>
+        {% if nodes_provisioning_count %}
+          <div class="widget-info">
+            <i class="fa fa-spinner fa-spin text-info"></i><a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+              {{ nodes_provisioning_count }} nodes
+            </a>are being provisioned
+          </div>
+        {% endif %}
+        {% if nodes_deleting_count %}
+          <div class="widget-info">
+            <i class="fa fa-spinner fa-spin text-info"></i><a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+              {{ nodes_deleting_count }} nodes
+            </a>are being deleted
+          </div>
+        {% endif %}
+        {% if nodes_error_count %}
+          <div class="widget-info">
+            <i class="fa fa-exclamation-circle text-info"></i><a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+              {{ nodes_error_count }} nodes
+            </a>failed
+          </div>
+        {% endif %}
       </div>
     </div>
     {% url 'horizon:infrastructure:nodes:nodes_performance' as node_perf_url %}

@@ -32,6 +32,7 @@ from tuskar_ui.utils import utils
 ERROR_STATES = set(['deploy failed', 'error'])
 POWER_ON_STATES = set(['on', 'power on'])
 
+# TODO(tzumainn) this states doesn't seems to be correct, please fix this
 # overall state of the node; not power states
 DISCOVERING_STATE = 'discovering'
 DISCOVERED_STATE = 'discovered'
@@ -39,6 +40,13 @@ PROVISIONED_STATE = 'provisioned'
 PROVISIONING_FAILED_STATE = 'provisioning failed'
 PROVISIONING_STATE = 'provisioning'
 FREE_STATE = 'free'
+# TODO(tzumain) the below should be correct
+PROVISION_STATE_FREE = ['deleted', None]
+PROVISION_STATE_PROVISIONED = ['active']
+PROVISION_STATE_PROVISIONING = [
+    'deploying', 'wait call-back', 'rebuild', 'deploy complete']
+PROVISION_STATE_DELETING = ['deleting']
+PROVISION_STATE_ERROR = ['error', 'deploy failed']
 
 LOG = logging.getLogger(__name__)
 
@@ -490,6 +498,16 @@ class BareMetalNode(base.APIResourceWrapper):
         return [interface["address"] for interface in
                 self.interfaces]
 
+    @cached_property
+    def extra(self):
+        """Ironic compatibility parameter."""
+        return {}
+
+    @cached_property
+    def provision_state(self):
+        """Ironic compatibility parameter."""
+        return None
+
 
 class NodeClient(object):
 
@@ -507,7 +525,8 @@ class NodeClient(object):
 class Node(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'driver', 'driver_info', 'state',
               'power_state', 'target_power_state', 'addresses', 'maintenance',
-              'cpus', 'memory_mb', 'local_gb', 'cpu_arch')
+              'cpus', 'memory_mb', 'local_gb', 'cpu_arch', 'extra',
+              'provision_state')
 
     def __init__(self, apiresource, request=None, **kwargs):
         """Initialize a Node
