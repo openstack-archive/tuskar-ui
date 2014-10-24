@@ -13,20 +13,50 @@
 #    under the License.
 
 from django.utils.translation import ugettext_lazy as _
-from horizon import tables
+import horizon.exceptions
+import horizon.tables
 from openstack_dashboard.dashboards.admin.flavors import (
     tables as flavor_tables)
 
 from tuskar_ui import api
+from tuskar_ui.infrastructure.flavors import utils
 
 
 class CreateFlavor(flavor_tables.CreateFlavor):
-    verbose_name = _("New Flavor")
+    verbose_name = _(u"New Flavor")
     url = "horizon:infrastructure:flavors:create"
 
 
-class CreateSuggestedFlavor(CreateFlavor):
-    verbose_name = _("Create")
+class CreateSuggestedFlavor(horizon.tables.Action):
+    name = 'create'
+    verbose_name = _(u"Create")
+    verbose_name_plural = _(u"Create Suggested Flavors")
+    method = 'POST'
+    icon = 'plus'
+
+    def create_flavor(self, request, node_id):
+        node = api.node.Node.get(request, node_id)
+        suggestion = utils.FlavorSuggestion.from_node(node)
+        return suggestion.create_flavor(request)
+
+    def handle(self, data_table, request, node_ids):
+        success = True
+        for node_id in node_ids:
+            try:
+                self.create_flavor(request, node_id)
+            except Exception:
+                horizon.exceptions.handle(
+                    request,
+                    _(u"Unable to create flavor for node %r") % node_id,
+                )
+                success = False
+        return success
+
+
+class EditAndCreateSuggestedFlavor(CreateFlavor):
+    name = 'edit_and_create'
+    verbose_name = _(u"Edit before creating")
+    icon = 'pencil'
 
 
 class DeleteFlavor(flavor_tables.DeleteFlavor):
@@ -54,28 +84,33 @@ class DeleteFlavor(flavor_tables.DeleteFlavor):
         return super(DeleteFlavor, self).allowed(request, datum)
 
 
-class FlavorsTable(tables.DataTable):
-    name = tables.Column('name', verbose_name=_('Flavor'),
-                         link="horizon:infrastructure:flavors:details")
-    arch = tables.Column('cpu_arch', verbose_name=_('Architecture'))
-    vcpus = tables.Column('vcpus', verbose_name=_('CPUs'))
-    ram = tables.Column(flavor_tables.get_size,
-                        verbose_name=_('Memory'),
-                        attrs={'data-type': 'size'})
-    disk = tables.Column(flavor_tables.get_disk_size,
-                         verbose_name=_('Disk'),
-                         attrs={'data-type': 'size'})
+class FlavorsTable(horizon.tables.DataTable):
+    name = horizon.tables.Column('name', verbose_name=_('Flavor'),
+                                 link="horizon:infrastructure:flavors:details")
+    arch = horizon.tables.Column('cpu_arch', verbose_name=_('Architecture'))
+    vcpus = horizon.tables.Column('vcpus', verbose_name=_('CPUs'))
+    ram = horizon.tables.Column(flavor_tables.get_size,
+                                verbose_name=_('Memory'),
+                                attrs={'data-type': 'size'})
+    disk = horizon.tables.Column(flavor_tables.get_disk_size,
+                                 verbose_name=_('Disk'),
+                                 attrs={'data-type': 'size'})
 
     class Meta:
         name = "flavors"
         verbose_name = _("Available")
-        table_actions = (DeleteFlavor, flavor_tables.FlavorFilterAction)
-        row_actions = (DeleteFlavor,)
+        table_actions = (
+            DeleteFlavor,
+            flavor_tables.FlavorFilterAction,
+        )
+        row_actions = (
+            DeleteFlavor,
+        )
         template = "horizon/common/_enhanced_data_table.html"
 
 
-class FlavorRolesTable(tables.DataTable):
-    name = tables.Column('name', verbose_name=_('Role Name'))
+class FlavorRolesTable(horizon.tables.DataTable):
+    name = horizon.tables.Column('name', verbose_name=_('Role Name'))
 
     def __init__(self, request, *args, **kwargs):
         # TODO(dtantsur): support multiple overclouds
@@ -85,7 +120,7 @@ class FlavorRolesTable(tables.DataTable):
             count_getter = lambda role: _("Not deployed")
         else:
             count_getter = stack.resources_count
-        self._columns['count'] = tables.Column(
+        self._columns['count'] = horizon.tables.Column(
             count_getter,
             verbose_name=_("Instances Count")
         )
@@ -99,18 +134,25 @@ class FlavorRolesTable(tables.DataTable):
         template = "horizon/common/_enhanced_data_table.html"
 
 
-class FlavorSuggestionsTable(tables.DataTable):
-    name = tables.Column('name', verbose_name=_('Suggested Name'))
-    arch = tables.Column('cpu_arch', verbose_name=_('Architecture'))
-    vcpus = tables.Column('vcpus', verbose_name=_('CPUs'))
-    ram = tables.Column(flavor_tables.get_size, verbose_name=_('Memory'),
-                        attrs={'data-type': 'size'})
-    disk = tables.Column(flavor_tables.get_disk_size,
-                         verbose_name=_('Disk'), attrs={'data-type': 'size'})
+class FlavorSuggestionsTable(horizon.tables.DataTable):
+    name = horizon.tables.Column('name', verbose_name=_('Suggested Name'))
+    arch = horizon.tables.Column('cpu_arch', verbose_name=_('Architecture'))
+    vcpus = horizon.tables.Column('vcpus', verbose_name=_('CPUs'))
+    ram = horizon.tables.Column(flavor_tables.get_size,
+                                verbose_name=_('Memory'),
+                                attrs={'data-type': 'size'})
+    disk = horizon.tables.Column(flavor_tables.get_disk_size,
+                                 verbose_name=_('Disk'),
+                                 attrs={'data-type': 'size'})
 
     class Meta:
         name = "flavor_suggestions"
         verbose_name = _("Flavor Suggestions")
-        table_actions = ()
-        row_actions = (CreateSuggestedFlavor,)
+        table_actions = (
+            CreateSuggestedFlavor,
+        )
+        row_actions = (
+            CreateSuggestedFlavor,
+            EditAndCreateSuggestedFlavor,
+        )
         template = "horizon/common/_enhanced_data_table.html"
