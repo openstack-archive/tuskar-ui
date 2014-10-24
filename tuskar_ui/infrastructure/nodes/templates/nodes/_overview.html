@@ -36,7 +36,7 @@
       </div>
     </div>
     {% url 'horizon:infrastructure:nodes:nodes_performance' as node_perf_url %}
-    {% include "infrastructure/_performance_chart_box.html" with meter_conf=meter_conf node_perf_url=node_perf_url %}
+    {% include "infrastructure/_performance_chart_box.html" with meter_conf=meter_conf node_perf_url=node_perf_url col_size=4 %}
   </div>
 </div>
 
