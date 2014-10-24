@@ -21,6 +21,7 @@ from openstack_dashboard.dashboards.admin.flavors import (
     workflows as flavor_workflows)
 
 from tuskar_ui import api
+from tuskar_ui.utils import utils
 
 
 class CreateFlavorAction(flavor_workflows.CreateFlavorInfoAction):
@@ -37,12 +38,16 @@ class CreateFlavorAction(flavor_workflows.CreateFlavorInfoAction):
         try:
             kernel_images = glance.image_list_detailed(
                 self.request,
-                filters={'disk_format': 'aki'}
             )[0]
+            kernel_images = [image for image in kernel_images
+                             if utils.check_image_type(image,
+                                                       'discovery kernel')]
             ramdisk_images = glance.image_list_detailed(
                 self.request,
-                filters={'disk_format': 'ari'}
             )[0]
+            ramdisk_images = [image for image in ramdisk_images
+                              if utils.check_image_type(image,
+                                                        'discovery ramdisk')]
         except Exception:
             exceptions.handle(self.request,
                               _('Unable to retrieve images list.'))

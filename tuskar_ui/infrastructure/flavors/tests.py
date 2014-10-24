@@ -48,8 +48,8 @@ def _prepare_create():
             'memory_mb': 1024,
             'disk_gb': 40,
             'arch': 'amd64',
-            'kernel_image_id': images[0].id,
-            'ramdisk_image_id': images[1].id}
+            'kernel_image_id': images[5].id,
+            'ramdisk_image_id': images[4].id}
     with contextlib.nested(
             patch('tuskar_ui.api.flavor.Flavor.create',
                   return_value=flavor),
@@ -119,8 +119,8 @@ class FlavorsTest(test.BaseAdminViewTests):
             request = create_mock.call_args_list[0][0][0]
             self.assertListEqual(create_mock.call_args_list, [
                 call(request, name=u'foobar', memory=1024, vcpus=3, disk=40,
-                     cpu_arch='amd64', kernel_image_id=images[0].id,
-                     ramdisk_image_id=images[1].id)
+                     cpu_arch='amd64', kernel_image_id=images[5].id,
+                     ramdisk_image_id=images[4].id)
             ])
 
     def test_create_post_name_exists(self):

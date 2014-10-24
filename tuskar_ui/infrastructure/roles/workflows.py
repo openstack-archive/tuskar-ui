@@ -21,6 +21,7 @@ from openstack_dashboard.api import glance
 from tuskar_ui import api
 from tuskar_ui import forms as tuskar_forms
 from tuskar_ui.infrastructure.flavors import utils
+from tuskar_ui.utils import utils as tuskar_utils
 
 
 class UpdateRoleInfoAction(workflows.Action):
@@ -63,6 +64,9 @@ class UpdateRoleInfoAction(workflows.Action):
 
     def populate_image_choices(self, request, context):
         images = glance.image_list_detailed(self.request)[0]
+        images = [image for image in images
+                  if tuskar_utils.check_image_type(image,
+                                                   'overcloud provisioning')]
         choices = [(i.id, i.name) for i in images]
         return [('', _('Unknown'))] + choices
 
