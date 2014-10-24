@@ -1,15 +1,12 @@
 {% load i18n %}
+{% load icon_helpers %}
 
 <div class="row node-details">
   <div class="col-lg-6 col-xs-12">
-    <h3>{% trans "Status" %}</h3>
-    <p>
-      <i class="fa fa-play-circle powerstate"></i>
-      <span>{% trans "Powered" %} {{ node.power_state|default:"&mdash;" }}</span>
-    </p>
+    <h4> {{ node.power_state|iconized_node_power_state|safe }} </h4>
 
     <h3>{% trans "Inventory" %}</h3>
-    <dl class="dl-horizontal">
+    <dl class="dl-horizontal dl-horizontal-left">
       <dt>{% trans "Node UUID" %}</dt>
       <dd>{{ node.uuid|default:"&mdash;" }}</dd>
       <dt>{% trans "Driver" %}</dt>
@@ -43,7 +40,7 @@
       <dt>{% trans "Network Cards" %}</dt>
       <dd>
         <a data-toggle="collapse" href="#collapseNetworkCards">
-          {{ node.addresses|length }}
+          {{ node.addresses|length }} {% trans "interfaces" %}
           <span class="caret"></span>
         </a>
         <div id="collapseNetworkCards" class="panel-collapse collapse">
@@ -64,7 +61,7 @@
     </dl>
 
     <h3>{% trans "Deployment" %}</h3>
-    <dl class="dl-horizontal">
+    <dl class="dl-horizontal dl-horizontal-left">
       <dt>{% trans "Deployment Role" %}</dt>
       {% if stack and role %}
         <dd><a href="{% url 'horizon:infrastructure:roles:detail' role.id %}">{{ role.name }}</a></dd>
@@ -90,45 +87,46 @@
     {% if meter_conf %}
     {% url 'horizon:infrastructure:nodes:performance' node.uuid as node_perf_url %}
     <div id="ceilometer-stats" class="clearfix">
-      <form class="form-horizontal" id="linechart_general_form">
-        <div class="form-group">
-          <label for="date_options" class="control-label col-sm-3">{% trans "Period" %}:&nbsp;</label>
-          <div class="col-sm-9">
-            <select data-line-chart-command="select_box_change"
-                    id="date_options"
-                    name="date_options"
-                    class="form-control">
-              <option value="0.041666">{% trans "Last hour" %}</option>
-              <option value="0.25">{% trans "Last 6 hours" %}</option>
-              <option value="0.5">{% trans "Last 12 hours" %}</option>
-              <option value="1" selected="selected">{% trans "Last day" %}</option>
-              <option value="7">{% trans "Last week" %}</option>
-              <option value="{% now 'j' %}">{% trans "Month to date" %}</option>
-              <option value="15">{% trans "Last 15 days" %}</option>
-              <option value="30">{% trans "Last 30 days" %}</option>
-              <option value="365">{% trans "Last year" %}</option>
-              <option value="other">{% trans "Other" %}</option>
-            </select>
+      <form class="form-inline performance_charts" id="linechart_general_form">
+        <div class="pull-right">
+          <div class="form-group">
+            <div class="input-group input-group-sm">
+              <div class="input-group-addon"><i class="fa fa-clock-o"></i></div>
+              <select data-line-chart-command="select_box_change"
+                      id="date_options"
+                      name="date_options"
+                      class="form-control">
+                <option value="0.041666">{% trans "Last hour" %}</option>
+                <option value="0.25">{% trans "Last 6 hours" %}</option>
+                <option value="0.5">{% trans "Last 12 hours" %}</option>
+                <option value="1" selected="selected">{% trans "Last day" %}</option>
+                <option value="7">{% trans "Last week" %}</option>
+                <option value="{% now 'j' %}">{% trans "Month to date" %}</option>
+                <option value="15">{% trans "Last 15 days" %}</option>
+                <option value="30">{% trans "Last 30 days" %}</option>
+                <option value="365">{% trans "Last year" %}</option>
+                <option value="other">{% trans "Other" %}</option>
+              </select>
+            </div>
           </div>
-        </div>
-        <div class="form-group" id="date_from_group">
-          <label for="date_from" class="control-label col-sm-3">{% trans "From" %}:&nbsp;</label>
-          <div class="col-sm-9">
-            <input data-line-chart-command="date_picker_change"
-                   type="text"
-                   id="date_from"
-                   name="date_from"
-                   class="form-control"/>
+          <div class="form-group" id="date_from_group">
+            <div class="input-group input-group-sm">
+              <div class="input-group-addon">{% trans "From" %}</div>
+              <input data-line-chart-command="date_picker_change"
+                     type="text"
+                     id="date_from"
+                     name="date_from"
+                     class="form-control"/>
+            </div>
           </div>
-        </div>
-        <div class="form-group" id="date_to_group">
-          <label for="date_to" class="control-label col-sm-3">{% trans "To" %}:&nbsp;</label>
-          <div class="col-sm-9">
-            <input data-line-chart-command="date_picker_change"
-                   type="text"
-                   id="date_to"
-                   name="date_to"
-                   class="form-control"/>
+          <div class="form-group" id="date_to_group">
+            <div class="input-group input-group-sm">
+              <div class="input-group-addon">{% trans "To" %}</div>
+              <input data-line-chart-command="date_picker_change"
+                     type="text"
+                     id="date_to"
+                     name="date_to"
+                     class="form-control"/>
           </div>
         </div>
       </form>
