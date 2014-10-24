@@ -4,13 +4,15 @@
 {% load url from future%}
 
 {% block deployment-heading %}
-  <i class="fa fa-check text-success pull-left"></i>
-  <h4>{% trans "Deployment is Live" %}</h4>
+  <div class="deployment-icon">
+      <i class="fa fa-check fa-3x fa-fw"></i>
+  </div>
+  <div class="deployment-box clearfix">
+    <h4>{% trans "Deployment is live" %}</h4>
+  </div>
 {% endblock %}
 
-{% block deployment-icon %}
-  <i class="fa fa-key"></i>
-{% endblock %}
+{% block deployment-icon %}fa-key{% endblock %}
 {% block deployment-title %}{% trans "Access Information" %}{% endblock %}
 {% block deployment-info %}
 <div>

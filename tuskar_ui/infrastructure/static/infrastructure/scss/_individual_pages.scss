@@ -158,21 +158,20 @@ $link-color: #428bca;
 
 .deployment-heading {
     font-size: 32px;
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 .deployment-icon {
-    font-size: 32px;
-    vertical-align: top;
+    vertical-align: middle;
     float: left;
-    background: #fff;
-    width: 36px;
     text-align: center;
+    color: #ddd;
+    background: #fff;
 }
 
 .deployment-box {
     border-left: 4px solid #eee;
-    margin-left: 16px;
+    margin-left: 24px;
     margin-bottom: 12px;
     padding-left: 20px;
 }

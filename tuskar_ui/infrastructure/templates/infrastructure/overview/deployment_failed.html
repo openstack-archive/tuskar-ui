@@ -3,9 +3,7 @@
 {% load i18n %}
 {% load url from future%}
 
-{% block deployment-icon %}
-  <i class="fa fa-exclamation-circle text-danger"></i>
-{% endblock %}
+{% block deployment-icon %}fa-exclamation-circle{% endblock %}
 
 {% block deployment-title %}
             {% if stack.is_delete_failed %}
