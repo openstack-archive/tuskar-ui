@@ -136,6 +136,8 @@ def data(TEST):
          'target_power_state': 'on',
          'maintenance': None,
          'newly_discovered': None,
+         'provision_state': 'active',
+         'extra': {}
          })
     node_2 = node.Node(
         node.NodeManager(None),
@@ -159,6 +161,8 @@ def data(TEST):
          'target_power_state': 'on',
          'maintenance': None,
          'newly_discovered': None,
+         'provision_state': 'active',
+         'extra': {}
          })
     node_3 = node.Node(
         node.NodeManager(None),
@@ -182,6 +186,8 @@ def data(TEST):
          'target_power_state': 'on',
          'maintenance': None,
          'newly_discovered': None,
+         'provision_state': 'deploying',
+         'extra': {}
          })
     node_4 = node.Node(
         node.NodeManager(None),
@@ -205,6 +211,8 @@ def data(TEST):
          'target_power_state': 'on',
          'maintenance': None,
          'newly_discovered': None,
+         'provision_state': 'deploying',
+         'extra': {}
          })
     node_5 = node.Node(
         node.NodeManager(None),
@@ -228,6 +236,8 @@ def data(TEST):
          'target_power_state': 'on',
          'maintenance': None,
          'newly_discovered': None,
+         'provision_state': 'deploying',
+         'extra': {}
          })
     node_6 = node.Node(
         node.NodeManager(None),
@@ -251,6 +261,8 @@ def data(TEST):
          'target_power_state': 'on',
          'maintenance': None,
          'newly_discovered': None,
+         'provision_state': 'active',
+         'extra': {}
          })
     node_7 = node.Node(
         node.NodeManager(None),
@@ -274,6 +286,8 @@ def data(TEST):
          'target_power_state': 'on',
          'maintenance': True,
          'newly_discovered': None,
+         'provision_state': 'deploying',
+         'extra': {}
          })
     node_8 = node.Node(
         node.NodeManager(None),
@@ -297,6 +311,8 @@ def data(TEST):
          'target_power_state': 'on',
          'maintenance': True,
          'newly_discovered': True,
+         'provision_state': 'active',
+         'extra': {}
          })
     node_9 = node.Node(
         node.NodeManager(None),
@@ -320,6 +336,8 @@ def data(TEST):
          'target_power_state': 'on',
          'maintenance': True,
          'newly_discovered': True,
+         'provision_state': 'active',
+         'extra': {}
          })
     TEST.ironicclient_nodes.add(node_1, node_2, node_3, node_4, node_5, node_6,
                                 node_7, node_8, node_9)
