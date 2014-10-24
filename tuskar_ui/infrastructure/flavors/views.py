@@ -23,6 +23,7 @@ import horizon.workflows
 from tuskar_ui import api
 from tuskar_ui.infrastructure.flavors import tables
 from tuskar_ui.infrastructure.flavors import tabs
+from tuskar_ui.infrastructure.flavors import utils
 from tuskar_ui.infrastructure.flavors import workflows
 
 
@@ -58,7 +59,7 @@ class CreateView(horizon.workflows.WorkflowView):
         if not suggestion_id:
             return super(CreateView, self).get_initial()
         node = api.node.Node.get(self.request, suggestion_id)
-        suggestion = tabs.FlavorSuggestion.from_node(node)
+        suggestion = utils.FlavorSuggestion.from_node(node)
         return {
             'name': suggestion.name,
             'vcpus': suggestion.vcpus,
