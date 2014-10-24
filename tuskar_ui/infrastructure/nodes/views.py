@@ -110,7 +110,7 @@ class DetailView(horizon_tabs.TabView):
         if node.maintenance:
             table = tables.MaintenanceNodesTable(self.request)
         else:
-            table = tables.RegisteredNodesTable(self.request)
+            table = tables.ProvisionedNodesTable(self.request)
 
         context['node'] = node
         context['title'] = _("Node: %(uuid)s") % {'uuid': node.uuid}
