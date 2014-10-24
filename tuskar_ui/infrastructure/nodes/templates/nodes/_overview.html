@@ -17,7 +17,7 @@
     </div>
     <div class="widget">
       <h3>{% trans 'Nodes Status' %}</h3>
-      <div class="d3_pie_chart_distribution" data-used="Provisioned={{ nodes_provisioned_count }}|Free={{ nodes_free_count }}|Maintenance={{ nodes_maintenance_count }}"></div>
+      <div class="d3_pie_chart_distribution" data-used="{{ nodes_status_data }}"></div>
     </div>
     <div class="widget">
       <h3>{% trans 'Power Status' %}</h3>
@@ -33,10 +33,51 @@
             <span class="info">{{ nodes_provisioned_count }} {% trans 'provisioned nodes' %}</span>
           </a>
         </div>
+        {% if nodes_provisioning_count %}
+          <div class="widget-info">
+            <i class="fa fa-spinner fa-spin text-info"></i><a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+              {{ nodes_provisioning_count }} nodes
+            </a>are being provisioned
+          </div>
+        {% endif %}
+        {% if nodes_deleting_count %}
+          <div class="widget-info">
+            <i class="fa fa-spinner fa-spin text-info"></i><a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+              {{ nodes_deleting_count }} nodes
+            </a>are being deleted
+          </div>
+        {% endif %}
+        {% if nodes_error_count %}
+          <div class="widget-info">
+            <i class="fa fa-exclamation-circle text-info"></i><a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__registered">
+              {{ nodes_error_count }} nodes
+            </a>failed
+          </div>
+        {% endif %}
       </div>
     </div>
     {% url 'horizon:infrastructure:nodes:nodes_performance' as node_perf_url %}
     {% include "infrastructure/_performance_chart_box.html" with meter_conf=meter_conf node_perf_url=node_perf_url col_size=4 %}
+    <div class="nodes row">
+      <div class="col-xs-12">
+        <h3>{% trans "Nodes Discovery" %}</h3>
+        <div class="widget-info">
+          <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__maintenance">
+            <span class="info">{{ nodes_provisioned_count }} {% trans 'discovered nodes' %}</span>
+          </a>(waiting for activation)
+        </div>
+        <div class="widget-info">
+          <i class="fa fa-spinner fa-spin text-info"></i><a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__maintenance">
+            1 node
+          </a>are being discovered
+        </div>
+        <div class="widget-info">
+          <i class="fa fa-exclamation-circle text-danger"></i><a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__maintenance">
+            1 node
+          </a>discovery failed
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
