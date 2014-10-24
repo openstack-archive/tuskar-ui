@@ -618,3 +618,26 @@ class Node(base.APIResourceWrapper):
         if self.instance_uuid:
             return _("Provisioned")
         return _("Free")
+
+    @cached_property
+    def state(self):
+        """Return a power state of this Node
+
+        :return: power state of this node
+        :rtype:  str
+        """
+        task_state_dict = {
+            'active': 'powered on',
+            'wait call-back': 'waiting',
+            'deploying': 'deploying',
+            'deploy failed': 'deployment failed',
+            'deploy complete': 'deployment complete',
+            'deleting': 'deleting',
+            'deleted': 'deleted',
+            'error': 'error',
+            'rebuild': 'rebuilding',
+            'power on': 'powered on',
+            'power off': 'powered off',
+            'rebooting': 'rebooting',
+        }
+        return task_state_dict.get(self.power_state, 'off')
