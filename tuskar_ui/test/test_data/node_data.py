@@ -134,6 +134,7 @@ def data(TEST):
          },
          'power_state': 'on',
          'target_power_state': 'on',
+         'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
          })
@@ -157,6 +158,7 @@ def data(TEST):
          },
          'power_state': 'on',
          'target_power_state': 'on',
+         'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
          })
@@ -180,6 +182,7 @@ def data(TEST):
          },
          'power_state': 'rebooting',
          'target_power_state': 'on',
+         'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
          })
@@ -203,6 +206,7 @@ def data(TEST):
          },
          'power_state': 'on',
          'target_power_state': 'on',
+         'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
          })
@@ -226,6 +230,7 @@ def data(TEST):
          },
          'power_state': 'error',
          'target_power_state': 'on',
+         'provision_state': 'error',
          'maintenance': None,
          'newly_discovered': None,
          })
@@ -249,6 +254,7 @@ def data(TEST):
          },
          'power_state': 'on',
          'target_power_state': 'on',
+         'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
          })

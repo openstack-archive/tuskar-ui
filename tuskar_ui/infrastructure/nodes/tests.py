@@ -55,15 +55,15 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         }) as mock:
             res = self.client.get(INDEX_URL)
             # FIXME(lsmola) optimize, this should call 1 time, what the hell
-            self.assertEqual(mock.list.call_count, 4)
+            self.assertEqual(mock.list.call_count, 7)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
         self.assertTemplateUsed(res, 'infrastructure/nodes/_overview.html')
 
-    def test_registered_nodes(self):
-        registered_nodes = [api.node.Node(api.node.IronicNode(node))
-                            for node in self.ironicclient_nodes.list()]
+    def test_all_nodes(self):
+        all_nodes = [api.node.Node(api.node.IronicNode(node))
+                     for node in self.ironicclient_nodes.list()]
         roles = [api.tuskar.Role(r)
                  for r in TEST_DATA.tuskarclient_roles.list()]
         instance = TEST_DATA.novaclient_servers.first()
@@ -72,7 +72,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         # TODO(akrivoka): this should be placed in the test data, but currently
         # that's not possible due to the drawbacks in the Node architecture.
         # We should rework the entire api/node.py and fix this problem.
-        for node in registered_nodes:
+        for node in all_nodes:
             node.ip_address = '1.1.1.1'
 
         with contextlib.nested(
@@ -82,7 +82,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             }),
             patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list'],
-                'list.return_value': registered_nodes,
+                'list.return_value': all_nodes,
             }),
             patch('tuskar_ui.api.node.nova', **{
                 'spec_set': ['server_get', 'server_list'],
@@ -100,24 +100,24 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                 'list_all_resources.return_value': [],
             }),
         ) as (_Role, Node, _nova, _glance, _resource):
-            res = self.client.get(INDEX_URL + '?tab=nodes__registered')
+            res = self.client.get(INDEX_URL + '?tab=nodes__all')
             # FIXME(lsmola) horrible count, optimize
-            self.assertEqual(Node.list.call_count, 4)
+            self.assertEqual(Node.list.call_count, 7)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
         self.assertTemplateUsed(res, 'horizon/common/_detail_table.html')
-        self.assertItemsEqual(res.context['nodes_table_table'].data,
-                              registered_nodes)
+        self.assertItemsEqual(res.context['all_nodes_table_table'].data,
+                              all_nodes)
 
-    def test_registered_nodes_list_exception(self):
+    def test_all_nodes_list_exception(self):
         instance = TEST_DATA.novaclient_servers.first()
         with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['list', 'instance'],
             'instance': instance,
             'list.side_effect': self._raise_tuskar_exception,
         }) as mock:
-            res = self.client.get(INDEX_URL + '?tab=nodes__registered')
+            res = self.client.get(INDEX_URL + '?tab=nodes__all')
             self.assertEqual(mock.list.call_count, 4)
 
         self.assertRedirectsNoFollow(res, INDEX_URL)
@@ -280,14 +280,14 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
     def test_node_set_power_on(self):
-        registered_nodes = [api.node.Node(api.node.IronicNode(node))
-                            for node in self.ironicclient_nodes.list()]
-        node = registered_nodes[6]
+        all_nodes = [api.node.Node(api.node.IronicNode(node))
+                     for node in self.ironicclient_nodes.list()]
+        node = all_nodes[6]
         roles = [api.tuskar.Role(r)
                  for r in TEST_DATA.tuskarclient_roles.list()]
         instance = TEST_DATA.novaclient_servers.first()
         image = TEST_DATA.glanceclient_images.first()
-        data = {'action': "nodes_table__set_power_state_on__{0}".format(
+        data = {'action': "all_nodes_table__set_power_state_on__{0}".format(
             node.uuid)}
 
         with contextlib.nested(
@@ -297,7 +297,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             }),
             patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list', 'set_power_state'],
-                'list.return_value': registered_nodes,
+                'list.return_value': all_nodes,
                 'set_power_state.return_value': node,
             }),
             patch('tuskar_ui.api.tuskar.Role', **{
@@ -321,21 +321,21 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             }),
         ) as (mock_node_client, mock_node, mock_role, mock_nova, mock_glance,
               mock_resource):
-            res = self.client.post(INDEX_URL + '?tab=nodes__registered', data)
+            res = self.client.post(INDEX_URL + '?tab=nodes__all', data)
             self.assertNoFormErrors(res)
             self.assertEqual(mock_node.set_power_state.call_count, 1)
             self.assertRedirectsNoFollow(res,
-                                         INDEX_URL + '?tab=nodes__registered')
+                                         INDEX_URL + '?tab=nodes__all')
 
     def test_node_set_power_off(self):
-        registered_nodes = [api.node.Node(api.node.IronicNode(node))
-                            for node in self.ironicclient_nodes.list()]
-        node = registered_nodes[8]
+        all_nodes = [api.node.Node(api.node.IronicNode(node))
+                     for node in self.ironicclient_nodes.list()]
+        node = all_nodes[8]
         roles = [api.tuskar.Role(r)
                  for r in TEST_DATA.tuskarclient_roles.list()]
         instance = TEST_DATA.novaclient_servers.first()
         image = TEST_DATA.glanceclient_images.first()
-        data = {'action': "nodes_table__set_power_state_off__{0}".format(
+        data = {'action': "all_nodes_table__set_power_state_off__{0}".format(
             node.uuid)}
 
         with contextlib.nested(
@@ -345,7 +345,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             }),
             patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list', 'set_power_state'],
-                'list.return_value': registered_nodes,
+                'list.return_value': all_nodes,
                 'set_power_state.return_value': node,
             }),
             patch('tuskar_ui.api.tuskar.Role', **{
@@ -369,11 +369,11 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             }),
         ) as (mock_node_client, mock_node, mock_role, mock_nova, mock_glance,
               mock_resource):
-            res = self.client.post(INDEX_URL + '?tab=nodes__registered', data)
+            res = self.client.post(INDEX_URL + '?tab=nodes__all', data)
             self.assertNoFormErrors(res)
             self.assertEqual(mock_node.set_power_state.call_count, 1)
             self.assertRedirectsNoFollow(res,
-                                         INDEX_URL + '?tab=nodes__registered')
+                                         INDEX_URL + '?tab=nodes__all')
 
     def test_performance(self):
         node = api.node.Node(self.ironicclient_nodes.list()[0])

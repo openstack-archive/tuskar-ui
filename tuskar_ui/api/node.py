@@ -67,7 +67,7 @@ def image_get(request, image_id):
 class IronicNode(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'driver', 'driver_info',
               'properties', 'power_state', 'target_power_state',
-              'maintenance')
+              'provision_state', 'maintenance', 'extra')
 
     def __init__(self, apiresource, request=None):
         super(IronicNode, self).__init__(apiresource)
@@ -286,6 +286,21 @@ class IronicNode(base.APIResourceWrapper):
     def cpu_arch(self):
         return self.properties.get('cpu_arch', None)
 
+    @cached_property
+    def state(self):
+        if self.maintenance:
+            if self.extra.get('on_discovery', 'false') == 'true':
+                return _("Discovering")
+            return _("Discovered")
+        else:
+            if self.instance_uuid:
+                if self.provision_state == 'active':
+                    return _("Provisioned")
+                if self.provision_state in ('deploy failed', 'error'):
+                    return _("Provisioning Failed")
+                return _("Provisioning")
+        return _("Free")
+
 
 class BareMetalNode(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'memory_mb', 'cpus', 'local_gb',
@@ -422,6 +437,10 @@ class BareMetalNode(base.APIResourceWrapper):
         return task_state_dict.get(self.task_state, 'off')
 
     @cached_property
+    def state(self):
+        return self.power_state
+
+    @cached_property
     def target_power_state(self):
         return None
 
@@ -477,7 +496,7 @@ class NodeClient(object):
 
 
 class Node(base.APIResourceWrapper):
-    _attrs = ('id', 'uuid', 'instance_uuid', 'driver', 'driver_info',
+    _attrs = ('id', 'uuid', 'instance_uuid', 'driver', 'driver_info', 'state',
               'power_state', 'target_power_state', 'addresses', 'maintenance',
               'cpus', 'memory_mb', 'local_gb', 'cpu_arch')
 
