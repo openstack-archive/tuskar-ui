@@ -31,6 +31,13 @@ from tuskar_ui.utils import utils
 ERROR_STATES = set(['deploy failed', 'error'])
 POWER_ON_STATES = set(['on', 'power on'])
 
+PROVISION_STATE_FREE = ['deleted', None]
+PROVISION_STATE_PROVISIONED = ['active']
+PROVISION_STATE_PROVISIONING = [
+    'deploying', 'wait call-back', 'rebuild', 'deploy complete']
+PROVISION_STATE_DELETING = ['deleting']
+PROVISION_STATE_ERROR = ['error', 'deploy failed']
+
 LOG = logging.getLogger(__name__)
 
 
@@ -67,7 +74,7 @@ def image_get(request, image_id):
 class IronicNode(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'driver', 'driver_info',
               'properties', 'power_state', 'target_power_state',
-              'maintenance')
+              'maintenance', 'extra', 'provision_state')
 
     def __init__(self, apiresource, request=None):
         super(IronicNode, self).__init__(apiresource)
@@ -462,6 +469,16 @@ class BareMetalNode(base.APIResourceWrapper):
         return [interface["address"] for interface in
                 self.interfaces]
 
+    @cached_property
+    def extra(self):
+        """Ironic compatibility parameter."""
+        return {}
+
+    @cached_property
+    def provision_state(self):
+        """Ironic compatibility parameter."""
+        return None
+
 
 class NodeClient(object):
 
@@ -479,7 +496,8 @@ class NodeClient(object):
 class Node(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'driver', 'driver_info',
               'power_state', 'target_power_state', 'addresses', 'maintenance',
-              'cpus', 'memory_mb', 'local_gb', 'cpu_arch')
+              'cpus', 'memory_mb', 'local_gb', 'cpu_arch', 'extra',
+              'provision_state')
 
     def __init__(self, apiresource, request=None, **kwargs):
         """Initialize a Node

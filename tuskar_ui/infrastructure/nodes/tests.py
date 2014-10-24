@@ -55,7 +55,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         }) as mock:
             res = self.client.get(INDEX_URL)
             # FIXME(lsmola) optimize, this should call 1 time, what the hell
-            self.assertEqual(mock.list.call_count, 4)
+            self.assertEqual(mock.list.call_count, 2)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
@@ -102,7 +102,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         ) as (_Role, Node, _nova, _glance, _resource):
             res = self.client.get(INDEX_URL + '?tab=nodes__registered')
             # FIXME(lsmola) horrible count, optimize
-            self.assertEqual(Node.list.call_count, 4)
+            self.assertEqual(Node.list.call_count, 2)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
@@ -118,7 +118,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'list.side_effect': self._raise_tuskar_exception,
         }) as mock:
             res = self.client.get(INDEX_URL + '?tab=nodes__registered')
-            self.assertEqual(mock.list.call_count, 4)
+            self.assertEqual(mock.list.call_count, 2)
 
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
