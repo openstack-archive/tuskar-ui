@@ -11,6 +11,7 @@
 
 <div class="row">
   <div class="col-xs-3">
+    <h3>{% trans "Properties" %}</h3>
     <p><strong>{% blocktrans count counter=nodes|length %}{{ counter }} instance{% plural %}{{ counter }} instances{% endblocktrans %}</strong></p>
     <dl>
       <dt>{% trans 'Flavor' %}</dt>
@@ -28,90 +29,9 @@
     </dl>
   </div>
   <div class="col-xs-9">
-    {% if meter_conf %}
-      {% url 'horizon:infrastructure:roles:performance' role.uuid as role_perf_url %}
-      <div id="ceilometer-stats" class="row">
-        <form class="form-horizontal" id="linechart_general_form">
-          <div class="form-group">
-            <label for="date_options" class="control-label col-sm-3">{% trans "Period" %}:&nbsp;</label>
-            <div class="col-sm-4">
-              <select data-line-chart-command="select_box_change"
-                      id="date_options"
-                      name="date_options"
-                      class="form-control">
-                <option value="0.041666">{% trans "Last hour" %}</option>
-                <option value="0.25">{% trans "Last 6 hours" %}</option>
-                <option value="0.5">{% trans "Last 12 hours" %}</option>
-                <option value="1" selected="selected">{% trans "Last day" %}</option>
-                <option value="7">{% trans "Last week" %}</option>
-                <option value="{% now 'j' %}">{% trans "Month to date" %}</option>
-                <option value="15">{% trans "Last 15 days" %}</option>
-                <option value="30">{% trans "Last 30 days" %}</option>
-                <option value="365">{% trans "Last year" %}</option>
-                <option value="other">{% trans "Other" %}</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group" id="date_from_group">
-            <label for="date_from" class="control-label col-sm-3">{% trans "From" %}:&nbsp;</label>
-            <div class="col-sm-4">
-              <input data-line-chart-command="date_picker_change"
-                     type="text"
-                     id="date_from"
-                     name="date_from"
-                     class="form-control"/>
-            </div>
-          </div>
-          <div class="form-group" id="date_to_group">
-            <label for="date_to" class="control-label col-sm-3">{% trans "To" %}:&nbsp;</label>
-            <div class="col-sm-4">
-              <input data-line-chart-command="date_picker_change"
-                     type="text"
-                     id="date_to"
-                     name="date_to"
-                     class="form-control"/>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <script type="text/javascript">
-        if (typeof $ !== 'undefined') {
-          show_hide_datepickers();
-        } else {
-          addHorizonLoadEvent(function() {
-            show_hide_datepickers();
-          });
-        }
-
-        function show_hide_datepickers() {
-          var date_options = $("#date_options");
-          date_options.change(function(evt) {
-            if ($(this).find("option:selected").val() === "other") {
-              evt.stopPropagation();
-              $("#date_from, #date_to").val('');
-              $("#date_from_group, #date_to_group").show();
-            } else {
-              $("#date_from_group, #date_to_group").hide();
-            }
-          });
-          if (date_options.find("option:selected").val() === "other") {
-            $("#date_from_group, #date_to_group").show();
-          } else {
-            $("#date_from_group, #date_to_group").hide();
-          }
-        }
-      </script>
-      <div id="node-charts" class="row">
-        {% for meter_label, url_part, y_max in meter_conf %}
-        <div class="col-lg-4">
-          {% include "infrastructure/_performance_chart.html" with label=meter_label y_max=y_max url=role_perf_url|add:"?"|add:url_part only %}
-        </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <p>{% trans 'Metering service is not enabled.' %}</p>
-    {% endif %}
+    <h3>{% trans "Performance & Metrics" %}</h3>
+    {% url 'horizon:infrastructure:roles:performance' role.uuid as node_perf_url %}
+    {% include "infrastructure/_performance_chart_box.html" with meter_conf=meter_conf node_perf_url=node_perf_url col_size=4 %}
   </div>
 </div>
 <div class="row">
