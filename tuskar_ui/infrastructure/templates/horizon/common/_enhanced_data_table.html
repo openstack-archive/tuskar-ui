@@ -3,7 +3,9 @@
 {% block table_caption %}
   <tr class='table_caption'>
     <th class='table_header' colspan='{{ columns|length }}'>
+      {% if not table.no_title %}
       <h3 class='table_title'>{{ table }}</h3>
+      {% endif %}
     </th>
   </tr>
   {% if table.get_table_actions %}
