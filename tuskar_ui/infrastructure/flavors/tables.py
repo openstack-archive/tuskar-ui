@@ -83,7 +83,7 @@ class DeleteFlavor(flavor_tables.DeleteFlavor):
 
 
 class FlavorsTable(horizon.tables.DataTable):
-    name = horizon.tables.Column('name', verbose_name=_('Flavor'),
+    name = horizon.tables.Column('name',
                                  link="horizon:infrastructure:flavors:details")
     arch = horizon.tables.Column('cpu_arch', verbose_name=_('Architecture'))
     vcpus = horizon.tables.Column('vcpus', verbose_name=_('CPUs'))
@@ -133,7 +133,7 @@ class FlavorRolesTable(horizon.tables.DataTable):
 
 
 class FlavorSuggestionsTable(horizon.tables.DataTable):
-    name = horizon.tables.Column('name', verbose_name=_('Suggested Name'))
+    name = horizon.tables.Column('name',)
     arch = horizon.tables.Column('cpu_arch', verbose_name=_('Architecture'))
     vcpus = horizon.tables.Column('vcpus', verbose_name=_('CPUs'))
     ram = horizon.tables.Column(flavor_tables.get_size,
@@ -144,11 +144,8 @@ class FlavorSuggestionsTable(horizon.tables.DataTable):
                                  attrs={'data-type': 'size'})
 
     class Meta:
-        name = "flavor_suggestions"
-        verbose_name = _("Flavor Suggestions")
-        table_actions = (
-            CreateSuggestedFlavor,
-        )
+        name = "suggested_flavors"
+        verbose_name = _("Suggested")
         row_actions = (
             CreateSuggestedFlavor,
             EditAndCreateSuggestedFlavor,
