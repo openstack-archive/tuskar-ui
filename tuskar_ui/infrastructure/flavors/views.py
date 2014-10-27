@@ -22,7 +22,6 @@ import horizon.workflows
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.flavors import tables
-from tuskar_ui.infrastructure.flavors import tabs
 from tuskar_ui.infrastructure.flavors import utils
 from tuskar_ui.infrastructure.flavors import workflows
 
@@ -35,8 +34,8 @@ def image_get(request, image_id, error_message):
         horizon.exceptions.handle(request, error_message)
 
 
-class IndexView(horizon.tabs.TabbedTableView):
-    tab_group_class = tabs.FlavorTabs
+class IndexView(horizon.tables.MultiTableView):
+    table_classes = (tables.FlavorsTable, tables.FlavorSuggestionsTable)
     template_name = 'infrastructure/flavors/index.html'
 
     def get_context_data(self, **kwargs):
@@ -47,7 +46,23 @@ class IndexView(horizon.tabs.TabbedTableView):
             'icon': 'fa-plus',
         }
         context['header_actions'] = [create_action]
+        context['flavors_count'] = self.get_flavors_count()
+        context['suggested_flavors_count'] = self.get_suggested_flavors_count()
         return context
+
+    def get_flavors_data(self):
+        flavors = api.flavor.Flavor.list(self.request)
+        flavors.sort(key=lambda np: (np.vcpus, np.ram, np.disk))
+        return flavors
+
+    def get_suggested_flavors_data(self):
+        return list(utils.get_flavor_suggestions(self.request))
+
+    def get_flavors_count(self):
+        return len(self.get_flavors_data())
+
+    def get_suggested_flavors_count(self):
+        return len(self.get_suggested_flavors_data())
 
 
 class CreateView(horizon.workflows.WorkflowView):
