@@ -8,11 +8,10 @@
 {% endblock page_header %}
 
 {% block main %}
-<div class="row">
-  <div class="col-xs-12">
-    <div class="no-table-title"> {% comment %}This will likely move to the tables Meta in the future{% endcomment %}
-      {{ tab_group.render }}
-    </div>
-  </div>
+<div id="flavor-suggestions">
+  {{ flavor_suggestions_table.render }}
+</div>
+<div id="flavors">
+  {{ flavors_table.render }}
 </div>
 {% endblock %}
