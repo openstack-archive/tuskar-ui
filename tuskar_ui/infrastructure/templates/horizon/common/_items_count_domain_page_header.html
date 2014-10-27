@@ -6,10 +6,12 @@
     {% if request.session.domain_context_name %}
       <em>{{ request.session.domain_context_name }}:</em>
     {% endif %}
-    {% if items_count %}
-      {{ items_count }}
-    {% endif %}
     {{ title }}
+      {% if items_count %}
+      <span id="icon-number" class="small">
+        {{ items_count }}
+      </span>
+      {% endif %}
     </h1>
   </div>
 {% endblock %}
