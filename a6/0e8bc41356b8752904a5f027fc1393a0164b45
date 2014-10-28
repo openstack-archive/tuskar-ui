@@ -1,0 +1,10 @@
+Verified+2: Jenkins
+Code-Review+1: Tzu-Mainn Chen <tzumainn@redhat.com>
+Code-Review+2: Radomir Dopieralski <openstack@sheep.art.pl>
+Workflow+1: Radomir Dopieralski <openstack@sheep.art.pl>
+Workflow+1: Ana Krivokapic <akrivoka@redhat.com>
+Submitted-by: Jenkins
+Submitted-at: Tue, 28 Oct 2014 14:03:10 +0000
+Reviewed-on: https://review.openstack.org/131425
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
