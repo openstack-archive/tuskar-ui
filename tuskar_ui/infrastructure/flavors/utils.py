@@ -54,7 +54,7 @@ class FlavorSuggestion(object):
                  ram_bytes=None, disk_bytes=None, node_id=None):
         self.vcpus = vcpus
         self.ram_bytes = ram_bytes or ram * 1024 * 1024 or 0
-        self.disk_bytes = disk_bytes or disk * 1024 * 1024 * 1024 or 0
+        self.disk_bytes = disk_bytes or (disk or 0) * 1024 * 1024 * 1024
         self.cpu_arch = cpu_arch
         self.id = node_id
 
