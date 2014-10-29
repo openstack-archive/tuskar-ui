@@ -52,7 +52,16 @@ class IndexView(horizon_tabs.TabbedTableView):
                 'icon': 'fa-upload',
             }
             context['header_actions'].append(upload_action)
+
+        context['items_count'] = self.get_items_count()
         return context
+
+    @memoized.memoized_method
+    def get_data(self):
+        return api.node.Node.list(self.request)
+
+    def get_items_count(self):
+        return len(self.get_data())
 
 
 class RegisterView(horizon_forms.ModalFormView):

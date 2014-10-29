@@ -54,6 +54,7 @@ class IndexView(horizon_tables.DataTableView):
     table_class = tables.RolesTable
     template_name = "infrastructure/roles/index.html"
 
+    @utils.memoized.memoized
     def get_data(self):
         roles = api.tuskar.Role.list(self.request)
         plan = api.tuskar.Plan.get_the_plan(self.request)
@@ -74,6 +75,14 @@ class IndexView(horizon_tables.DataTableView):
                 role.image = _('Unknown')
 
         return roles
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        context['items_count'] = self.get_items_count()
+        return context
+
+    def get_items_count(self):
+        return len(self.get_data())
 
 
 class DetailView(horizon_tables.DataTableView, RoleMixin, StackMixin):

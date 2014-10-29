@@ -34,6 +34,7 @@ class IndexView(horizon_tables.DataTableView):
     table_class = tables.ImagesTable
     template_name = "infrastructure/images/index.html"
 
+    @memoized.memoized_method
     def get_data(self):
         images = []
         filters = self.get_filters()
@@ -59,6 +60,14 @@ class IndexView(horizon_tables.DataTableView):
                 self.request, plan, image)
 
         return images
+
+    def get_items_count(self):
+        return len(self.get_data())
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        context['items_count'] = self.get_items_count()
+        return context
 
     def get_filters(self):
         filters = {'is_public': None}
