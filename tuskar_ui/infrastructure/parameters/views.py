@@ -16,11 +16,11 @@ from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 import horizon.forms
-from horizon import tabs as horizon_tabs
+import horizon.tables
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.parameters import forms
-from tuskar_ui.infrastructure.parameters import tabs
+from tuskar_ui.infrastructure.parameters import tables
 
 
 class ServiceConfigView(horizon.forms.ModalFormView):
@@ -60,9 +60,42 @@ class ServiceConfigView(horizon.forms.ModalFormView):
             'virt_type': virt_type}
 
 
-class IndexView(horizon_tabs.TabbedTableView):
-    tab_group_class = tabs.ParametersTabs
+class IndexView(horizon.tables.MultiTableView):
+    table_classes = (
+        tables.GlobalParametersTable,
+        tables.ControllerParametersTable,
+        tables.ComputeParametersTable,
+        tables.BlockStorageParametersTable,
+        tables.ObjectStorageParametersTable,
+    )
     template_name = "infrastructure/parameters/index.html"
+
+    def get(self, request, *args, **kwargs):
+        self.plan = api.tuskar.Plan.get_the_plan(request)
+        self.parameters = self.plan.parameter_list(
+            include_key_parameters=False)
+        return super(IndexView, self).get(request, *args, **kwargs)
+
+    def _get_parameters(self, role_name=None):
+        if not role_name:
+            return [p for p in self.parameters if p.role is None]
+        return [p for p in self.parameters
+                if p.role and p.role.name == role_name]
+
+    def get_global_parameters_data(self):
+        return self._get_parameters(None)
+
+    def get_controller_parameters_data(self):
+        return self._get_parameters('controller')
+
+    def get_compute_parameters_data(self):
+        return self._get_parameters('compute')
+
+    def get_block_storage_parameters_data(self):
+        return self._get_parameters('cinder-storage')
+
+    def get_object_storage_parameters_data(self):
+        return self._get_parameters('swift-storage')
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)

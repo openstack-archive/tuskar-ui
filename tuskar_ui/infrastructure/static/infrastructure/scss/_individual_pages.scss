@@ -194,3 +194,39 @@ $link-color: #428bca;
 #suggested-flavors-header {
   margin-bottom: 0px;
 }
+
+/* Configuration parameters */
+table .data-table-config-label {
+    width: 20em;
+    vertical-align: top;
+}
+table .data-table-config-value {
+    font-weight: bold;
+}
+table.definition-list-table > thead {
+    display: none;
+}
+table.definition-list-table > tbody > tr > td {
+    border: 0;
+}
+ul.nav-arrow {
+  & > li {
+      z-index: 1000;
+      position: relative;
+      margin-right: -32px;
+  }
+  & > li.active:after {
+    display: block;
+    content: '';
+    position: absolute;
+    top: 1px;
+    right: -7px;
+    border-top: 18px solid transparent;
+    border-bottom: 18px solid transparent;
+    border-left: 8px solid $link-color;
+  }
+}
+
+.configuration-panel {
+    min-height: 40em;
+}
