@@ -16,11 +16,11 @@ from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 import horizon.forms
-from horizon import tabs as horizon_tabs
+import horizon.tables
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.parameters import forms
-from tuskar_ui.infrastructure.parameters import tabs
+from tuskar_ui.infrastructure.parameters import tables
 
 
 class ServiceConfigView(horizon.forms.ModalFormView):
@@ -60,9 +60,13 @@ class ServiceConfigView(horizon.forms.ModalFormView):
             'virt_type': virt_type}
 
 
-class IndexView(horizon_tabs.TabbedTableView):
-    tab_group_class = tabs.ParametersTabs
+class IndexView(horizon.tables.DataTableView):
+    table_class = tables.ParametersTable
     template_name = "infrastructure/parameters/index.html"
+
+    def get_data(self):
+        plan = api.tuskar.Plan.get_the_plan(self.request)
+        return plan.parameter_list(include_key_parameters=False)
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
