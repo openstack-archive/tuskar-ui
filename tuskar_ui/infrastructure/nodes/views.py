@@ -28,10 +28,12 @@ from tuskar_ui import api
 from tuskar_ui.infrastructure.nodes import forms
 from tuskar_ui.infrastructure.nodes import tables
 from tuskar_ui.infrastructure.nodes import tabs
+import tuskar_ui.infrastructure.views as infrastructure_views
 from tuskar_ui.utils import metering as metering_utils
 
 
-class IndexView(horizon_tabs.TabbedTableView):
+class IndexView(infrastructure_views.ItemCountMixin,
+                horizon_tabs.TabbedTableView):
     tab_group_class = tabs.NodeTabs
     template_name = 'infrastructure/nodes/index.html'
 
@@ -53,6 +55,10 @@ class IndexView(horizon_tabs.TabbedTableView):
             }
             context['header_actions'].append(upload_action)
         return context
+
+    @memoized.memoized_method
+    def get_data(self):
+        return api.node.Node.list(self.request)
 
 
 class RegisterView(horizon_forms.ModalFormView):

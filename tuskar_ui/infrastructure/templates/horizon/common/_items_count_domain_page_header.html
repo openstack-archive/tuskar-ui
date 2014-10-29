@@ -7,7 +7,7 @@
       <em>{{ request.session.domain_context_name }}:</em>
     {% endif %}
     {{ title }}
-      {% if items_count %}
+      {% if items_count or items_count == 0%}
       <span class="badge">
         {{ items_count }}
       </span>
