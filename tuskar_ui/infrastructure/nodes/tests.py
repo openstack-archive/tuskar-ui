@@ -54,7 +54,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'list.return_value': [],
         }) as mock:
             res = self.client.get(INDEX_URL)
-            self.assertEqual(mock.list.call_count, 5)
+            self.assertEqual(mock.list.call_count, 6)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
@@ -75,7 +75,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'list.return_value': nodes,
         }) as Node:
             res = self.client.get(INDEX_URL + '?tab=nodes__' + tab_name)
-            self.assertEqual(Node.list.call_count, 5)
+            self.assertEqual(Node.list.call_count, 6)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
