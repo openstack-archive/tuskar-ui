@@ -1,0 +1,13 @@
+{% extends "horizon/common/_enhanced_data_table.html" %}
+
+{% block table_caption %}
+  <tr class='table_caption'>
+    <th class='table_header' colspan='{{ columns|length }}'>
+      {{ table.render_table_actions }}
+    </th>
+  </tr>
+{% endblock table_caption %}
+
+{% block table_css_classes %}table table-condensed definition-list-table {{ table.css_classes }}{% endblock %}
+
+{% block table_footer %}{% endblock %}
