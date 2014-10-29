@@ -28,6 +28,11 @@ from tuskar_ui.utils import metering as metering_utils
 from tuskar_ui.utils import utils
 
 
+def filter_extra(nodes, index, value):
+    return (node for node in nodes
+            if node.extra.get(index, None) == value)
+
+
 class OverviewTab(tabs.Tab):
     name = _("Overview")
     slug = "overview"
@@ -71,6 +76,13 @@ class OverviewTab(tabs.Tab):
         nodes_free_down = utils.filter_items(
             nodes_free, power_state__not_in=api.node.POWER_ON_STATES)
 
+        nodes_on_discovery = filter_extra(
+            nodes_maintenance, 'on_discovery', 'true')
+        nodes_discovered = filter_extra(
+            nodes_maintenance, 'newly_discovered', 'true')
+        nodes_discovery_failed = filter_extra(
+            nodes_maintenance, 'discovery_failed', 'true')
+
         nodes_down = itertools.chain(nodes_provisioned_down, nodes_free_down)
         nodes_up = utils.filter_items(
             nodes, power_state__in=api.node.POWER_ON_STATES)
@@ -96,6 +108,10 @@ class OverviewTab(tabs.Tab):
             'nodes_error_count': nodes_error_count,
             'nodes_maintenance_count': nodes_maintenance_count,
             'nodes_all_count': utils.length(nodes),
+            'nodes_on_discovery_count': utils.length(nodes_on_discovery),
+            'nodes_discovered_count': utils.length(nodes_discovered),
+            'nodes_discovery_failed_count': utils.length(
+                nodes_discovery_failed),
             'nodes_status_data':
                 'Provisioned={0}|Free={1}|Maintenance={2}'.format(
                     nodes_provisioned_count, nodes_free_count,
