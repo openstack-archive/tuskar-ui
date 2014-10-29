@@ -85,6 +85,62 @@
     </div>
     {% url 'horizon:infrastructure:nodes:nodes_performance' as node_perf_url %}
     {% include "infrastructure/_performance_chart_box.html" with meter_conf=meter_conf node_perf_url=node_perf_url col_size=4 %}
+    {% if nodes_on_discovery_count or nodes_discovered_count or nodes_discovery_failed_count %}
+      <div class="nodes row">
+        <div class="col-xs-12">
+          <h3>{% trans "Nodes Discovery" %}</h3>
+          {% if nodes_discovered_count %}
+            <div class="widget-info">
+              <a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__maintenance">
+                <span class="info">
+                  {% blocktrans count nodes_discovered_count as counter %}
+                    {{ counter }} discovered node
+                  {% plural %}
+                    {{ counter }} discovered nodes
+                  {% endblocktrans %}
+                </span>
+              </a>({% blocktrans count nodes_discovered_count as counter %}
+                    {{ counter }} waiting for activation
+                  {% plural %}
+                    {{ counter }} waiting for activation
+                  {% endblocktrans %})
+            </div>
+          {% endif %}
+          {% if nodes_on_discovery_count %}
+            <div class="widget-info">
+              <i class="fa fa-spinner fa-spin text-info"></i><a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__maintenance">
+                {% blocktrans count nodes_on_discovery_count as counter %}
+                  {{ counter }} node
+                {% plural %}
+                  {{ counter }} nodes
+                {% endblocktrans %}
+              </a>
+              {% blocktrans count nodes_on_discovery_count as counter %}
+                is being discovered
+              {% plural %}
+                are being discovered
+              {% endblocktrans %}
+            </div>
+          {% endif %}
+          {% if nodes_discovery_failed_count %}
+            <div class="widget-info">
+              <i class="fa fa-exclamation-circle text-danger"></i><a href="{% url 'horizon:infrastructure:nodes:index' %}?tab=nodes__maintenance">
+                {% blocktrans count nodes_discovery_failed as counter %}
+                  {{ counter }} node
+                {% plural %}
+                  {{ counter }} nodes
+                {% endblocktrans %}
+              </a>
+              {% blocktrans count nodes_discovery_failed as counter %}
+                discovery failed
+              {% plural %}
+                discovery failed
+              {% endblocktrans %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
   </div>
 </div>
 
