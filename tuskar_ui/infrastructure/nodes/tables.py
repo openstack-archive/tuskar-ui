@@ -136,24 +136,41 @@ def get_power_state_with_transition(node):
     return node.power_state
 
 
-class RegisteredNodesTable(tables.DataTable):
+def get_state_string(node):
+    state_dict = {
+        api.node.DISCOVERING_STATE: _('Discovering'),
+        api.node.DISCOVERED_STATE: _('Discovered'),
+        api.node.PROVISIONED_STATE: _('Provisioned'),
+        api.node.PROVISIONING_FAILED_STATE: _('Provisioning Failed'),
+        api.node.PROVISIONING_STATE: _('Provisioning'),
+        api.node.FREE_STATE: _('Free'),
+    }
+
+    node_state = node.state
+    return state_dict.get(node_state, node_state)
+
+
+class BaseNodesTable(tables.DataTable):
     node = tables.Column('uuid',
                          link="horizon:infrastructure:nodes:detail",
                          verbose_name=_("Node Name"))
-    instance_ip = tables.Column(lambda n:
-                                n.ip_address if n.instance else '-',
-                                verbose_name=_("Instance IP"))
-    provisioning_status = tables.Column('provisioning_status',
-                                        verbose_name=_("Provisioned"))
     role_name = tables.Column('role_name',
                               link=get_role_link,
                               verbose_name=_("Deployment Role"))
-    power_state = tables.Column(get_power_state_with_transition,
-                                verbose_name=_("Power"))
+    cpus = tables.Column('cpus',
+                         verbose_name=_("CPU (cores)"))
+    memory_mb = tables.Column('memory_mb',
+                              verbose_name=_("Memory (MB)"))
+    local_gb = tables.Column('local_gb',
+                             verbose_name=_("Disk (GB)"))
+    power_status = tables.Column(get_power_state_with_transition,
+                                 verbose_name=_("Power Status"))
+    state = tables.Column(get_state_string,
+                          verbose_name=_("Status"))
 
     class Meta:
         name = "nodes_table"
-        verbose_name = _("Registered Nodes")
+        verbose_name = _("Nodes")
         table_actions = (NodeFilterAction, SetPowerStateOn, SetPowerStateOff,
                          DeleteNode)
         row_actions = (SetPowerStateOn, SetPowerStateOff, DeleteNode)
@@ -166,32 +183,51 @@ class RegisteredNodesTable(tables.DataTable):
         return datum.uuid
 
 
-class MaintenanceNodesTable(tables.DataTable):
-    node = tables.Column('uuid',
-                         link="horizon:infrastructure:nodes:detail",
-                         verbose_name=_("Node Name"))
-    cpu_arch = tables.Column('cpu_arch',
-                             verbose_name=_("Arch."))
-    cpus = tables.Column('cpus',
-                         verbose_name=_("CPU (cores)"))
-    memory_mb = tables.Column('memory_mb',
-                              verbose_name=_("Memory (MB)"))
-    local_gb = tables.Column('local_gb',
-                             verbose_name=_("Disk (GB)"))
-    driver = tables.Column('driver',
-                           verbose_name=_("Driver"))
-    nics = tables.Column(lambda n: len(n.addresses),
-                         verbose_name=_("NICs"))
+class AllNodesTable(BaseNodesTable):
+
+    class Meta:
+        name = "all_nodes_table"
+        verbose_name = _("All")
+        columns = ('node', 'cpus', 'memory_mb', 'local_gb', 'power_status',
+                   'state')
+        table_actions = (NodeFilterAction, SetPowerStateOn, SetPowerStateOff,
+                         DeleteNode)
+        row_actions = (SetPowerStateOn, SetPowerStateOff, DeleteNode)
+        template = "horizon/common/_enhanced_data_table.html"
+
+
+class ProvisionedNodesTable(BaseNodesTable):
+
+    class Meta:
+        name = "provisioned_nodes_table"
+        verbose_name = _("Provisioned")
+        table_actions = (NodeFilterAction, SetPowerStateOn, SetPowerStateOff,
+                         DeleteNode)
+        row_actions = (SetPowerStateOn, SetPowerStateOff, DeleteNode)
+        template = "horizon/common/_enhanced_data_table.html"
+
+
+class FreeNodesTable(BaseNodesTable):
+
+    class Meta:
+        name = "free_nodes_table"
+        verbose_name = _("Free")
+        columns = ('node', 'cpus', 'memory_mb', 'local_gb', 'power_status')
+        table_actions = (NodeFilterAction, SetPowerStateOn, SetPowerStateOff,
+                         DeleteNode)
+        row_actions = (SetPowerStateOn, SetPowerStateOff, DeleteNode,)
+        template = "horizon/common/_enhanced_data_table.html"
+
+
+class MaintenanceNodesTable(BaseNodesTable):
 
     class Meta:
         name = "maintenance_nodes_table"
-        verbose_name = _("Nodes (Maintenance)")
-        table_actions = (NodeFilterAction, ActivateNode, DeleteNode)
-        row_actions = (ActivateNode, DeleteNode,)
+        verbose_name = _("Maintenance")
+        columns = ('node', 'cpus', 'memory_mb', 'local_gb', 'power_status',
+                   'state')
+        table_actions = (NodeFilterAction, ActivateNode, SetPowerStateOn,
+                         SetPowerStateOff, DeleteNode)
+        row_actions = (ActivateNode, SetPowerStateOn, SetPowerStateOff,
+                       DeleteNode)
         template = "horizon/common/_enhanced_data_table.html"
-
-    def get_object_id(self, datum):
-        return datum.uuid
-
-    def get_object_display(self, datum):
-        return datum.uuid
