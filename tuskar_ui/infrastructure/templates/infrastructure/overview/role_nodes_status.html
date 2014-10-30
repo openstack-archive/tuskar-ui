@@ -5,24 +5,24 @@
 <h4>{% trans "Deployment Roles" %}</h4>
 <div class="deploy-role-status">
 {% for role in roles %}
-    <div class="alert well-sm clearfix alert-{{ role.status }}">
-      <div class="col-xs-2">
+    <div class="well well-sm clearfix">
+      <div class="col-xs-2 deploy-role-icon">
         {% if role.finished %}
-          <i class="fa fa-check"></i>
+          <i class="fa fa-fw fa-lg fa-check"></i>
         {% else %}
-          <i class="fa fa-spinner fa-spin"></i>
+          <i class="fa fa-fw fa-lg fa-spinner fa-spin"></i>
         {% endif %}
       </div>
-      <div class="col-xs-8">
-        <a
-          href='{% url "horizon:infrastructure:roles:detail" role_id=role.id %}'
-        >{{ role.name|capfirst }}</a>
+      <div class="col-xs-8 deploy-role-name">
+        <strong
+          class="deployment-roles-label"
+        >{{ role.name|capfirst }}</strong>
       </div>
-      <div class="col-xs-2">
+      <div class="col-xs-2 deploy-role-count">
         {% if  role.finished %}
-          <strong>{{ role.deployed_node_count }}</strong>
+          {{ role.deployed_node_count }}
         {% else %}
-          <strong>{{ role.deployed_node_count }}</strong><small class="text-muted">/{{ role.planned_node_count }}</small>
+          {{ role.deployed_node_count }}<small class="text-muted">/{{ role.planned_node_count }}</small>
         {% endif %}
       </div>
     </div>
@@ -31,23 +31,22 @@
 
 <script type="text/html" id="roles-template">{% spaceless %}{% jstemplate %}
 [[#roles]]
-    <div class="alert well-sm clearfix alert-[[status]]">
-      <div class="col-xs-2">
+    <div class="well well-sm clearfix">
+      <div class="col-xs-2 deploy-role-icon">
         [[#finished]]
-          <i class="fa fa-check"></i>
+          <i class="fa fa-fw fa-lg fa-check"></i>
         [[/finished]]
         [[^finished]]
-          <i class="fa fa-spinner fa-spin"></i>
+          <i class="fa fa-fw fa-lg fa-spinner fa-spin"></i>
         [[/finished]]
       </div>
-      <div class="col-xs-8"><strong>[[ name ]]</strong></div>
-      <div class="col-xs-2">
+      <div class="col-xs-8 deploy-role-name"><strong class="deployment-roles-label" >[[ name ]]</strong></div>
+      <div class="col-xs-2 deploy-role-count">
         [[#finished]]
-          <strong>[[ deployed_node_count ]]</strong>
+          [[ deployed_node_count ]]
         [[/finished]]
         [[^finished]]
-          <strong>[[ deployed_node_count ]]</strong>
-          <small class="text-muted">/[[ planned_node_count ]]</small>
+          [[ deployed_node_count ]]<small class="text-muted">/[[ planned_node_count ]]</small>
         [[/finished]]
       </div>
 

@@ -8,10 +8,13 @@
 {% include 'horizon/common/_form_errors.html' with form=form %}
 {% for role in roles %}
     <div class="form-group well well-sm clearfix{% if field.errors %} error{% endif %} {{ field.css_classes }}">
-      <div class="col-xs-2">
-        {{ role.field|add_bootstrap_class }}
+      <div class="col-xs-2 deploy-role-icon">
+        <a
+          href="{% url 'horizon:infrastructure:roles:detail' role_id=role.id %}"
+          class="btn"
+        ><b class="fa fa-lg fa-fw fa-pencil"></b></a>
       </div>
-      <div class="col-xs-10">
+      <div class="col-xs-8 deploy-role-name">
         <a
           href="{% url 'horizon:infrastructure:roles:detail' role_id=role.id %}"
           class="deployment-roles-label"
@@ -21,6 +24,9 @@
           {{ error }}
         </span></span>
         {% endfor %}
+      </div>
+      <div class="col-xs-2 deploy-role-count">
+        {{ role.field|add_bootstrap_class }}
       </div>
     </div>
 {% endfor %}
