@@ -32,21 +32,26 @@ from tuskar_ui.utils import utils
 ERROR_STATES = set(['deploy failed', 'error'])
 POWER_ON_STATES = set(['on', 'power on'])
 
-# TODO(tzumainn) this states doesn't seems to be correct, please fix this
-# overall state of the node; not power states
-DISCOVERING_STATE = 'discovering'
-DISCOVERED_STATE = 'discovered'
-PROVISIONED_STATE = 'provisioned'
-PROVISIONING_FAILED_STATE = 'provisioning failed'
-PROVISIONING_STATE = 'provisioning'
-FREE_STATE = 'free'
-# TODO(tzumain) the below should be correct
+# provision_states of ironic aggregated to reasonable groups
 PROVISION_STATE_FREE = ['deleted', None]
 PROVISION_STATE_PROVISIONED = ['active']
 PROVISION_STATE_PROVISIONING = [
     'deploying', 'wait call-back', 'rebuild', 'deploy complete']
 PROVISION_STATE_DELETING = ['deleting']
 PROVISION_STATE_ERROR = ['error', 'deploy failed']
+
+# names for states of ironic used in UI,
+# provison_states + discovery states
+DISCOVERING_STATE = 'discovering'
+DISCOVERED_STATE = 'discovered'
+DISCOVERY_FAILED_STATE = 'discovery failed'
+MAINTENANCE_STATE = 'maintenance'
+PROVISIONED_STATE = 'provisioned'
+PROVISIONING_FAILED_STATE = 'provisioning failed'
+PROVISIONING_STATE = 'provisioning'
+DELETING_STATE = 'deleting'
+FREE_STATE = 'free'
+
 
 LOG = logging.getLogger(__name__)
 
@@ -306,17 +311,26 @@ class IronicNode(base.APIResourceWrapper):
     @cached_property
     def state(self):
         if self.maintenance:
-            if self.extra.get('on_discovery', 'false') == 'true':
+            if self.extra.get('on_discovery', None) == 'true':
                 return DISCOVERING_STATE
-            return DISCOVERED_STATE
+            elif self.extra.get('newly_discovered', None) == 'true':
+                return DISCOVERED_STATE
+            elif self.extra.get('discovery_failed', None) == 'true':
+                return DISCOVERY_FAILED_STATE
+            return MAINTENANCE_STATE
         else:
-            if self.instance_uuid:
-                if self.provision_state == 'active':
-                    return PROVISIONED_STATE
-                if self.provision_state in ('deploy failed', 'error'):
-                    return PROVISIONING_FAILED_STATE
+            if self.provision_state in PROVISION_STATE_FREE:
+                return FREE_STATE
+            if self.provision_state in PROVISION_STATE_PROVISIONING:
                 return PROVISIONING_STATE
-        return FREE_STATE
+            if self.provision_state in PROVISION_STATE_PROVISIONED:
+                return PROVISIONED_STATE
+            if self.provision_state in PROVISION_STATE_DELETING:
+                return DELETING_STATE
+            if self.provision_state in PROVISION_STATE_ERROR:
+                return PROVISIONING_FAILED_STATE
+        # Unknown state
+        return None
 
 
 class BareMetalNode(base.APIResourceWrapper):
