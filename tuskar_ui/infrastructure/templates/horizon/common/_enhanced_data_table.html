@@ -1,18 +1,54 @@
 {% extends "horizon/common/_data_table.html" %}
 
-{% block table_caption %}
-  {% if not hidden_title %}
-  <tr class='table_caption'>
-    <th class='table_header' colspan='{{ columns|length }}'>
-        <h3 class='table_title'>{{ table }}</h3>
-    </th>
-  </tr>
-  {% endif %}
-  {% if table.get_table_actions %}
-  <tr class='table_actions_row'>
-    <th class='table_header' colspan='{{ columns|length }}'>
-      {{ table.render_table_actions }}
-    </th>
-  </tr>
-  {% endif %}
-{% endblock table_caption %}
+
+{% block table %}
+  <table id="{{ table.slugify_name }}" class="{% block table_css_classes %}table table-striped datatable {{ table.css_classes }}{% endblock %}">
+    <thead>
+      {% block table_caption %}
+        {% if not hidden_title %}
+        <tr class='table_caption'>
+          <th class='table_header' colspan='{{ columns|length }}'>
+              <h3 class='table_title'>{{ table }}</h3>
+          </th>
+        </tr>
+        {% endif %}
+        {% if table.get_table_actions %}
+        <tr class='table_actions_row'>
+          <th class='table_header' colspan='{{ columns|length }}'>
+            {{ table.render_table_actions }}
+          </th>
+        </tr>
+        {% endif %}
+      {% endblock table_caption %}
+
+      {% block table_breadcrumb %}
+        {{ block.super }}
+      {% endblock table_breadcrumb %}
+
+      {% block table_columns %}
+        {% if not table.is_browser_table %}
+        <tr class="column_headers">
+          {% for column in columns %}
+            <th {{ column.attr_string|safe }}>
+              {{ column }}
+              {% if column.help_text %}
+                <span class="help-icon" data-toggle="tooltip" title="{{ column.help_text }}">
+                  <span class="glyphicon glyphicon-question-sign"></span>
+                </span>
+              {% endif %}
+            </th>
+          {% endfor %}
+        </tr>
+        {% endif %}
+      {% endblock table_columns %}
+    </thead>
+
+    {% block table_body %}
+      {{ block.super }}
+    {% endblock table_body %}
+
+    {% block table_footer %}
+      {{ block.super }}
+    {% endblock table_footer %}
+  </table>
+{% endblock table %}
