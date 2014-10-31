@@ -73,3 +73,10 @@ tr.table_actions_row {
     }
   }
 }
+
+.table > thead > tr > th {
+  border-bottom: none;
+}
+tr.column_headers th {
+  border: 1px solid #cccccc !important;
+}
