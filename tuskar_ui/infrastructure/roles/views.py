@@ -28,6 +28,7 @@ from openstack_dashboard.api import base as api_base
 from tuskar_ui import api
 from tuskar_ui.infrastructure.roles import tables
 from tuskar_ui.infrastructure.roles import workflows as role_workflows
+import tuskar_ui.infrastructure.views as infrastructure_views
 from tuskar_ui.utils import metering as metering_utils
 
 
@@ -50,10 +51,12 @@ class StackMixin(object):
         return api.heat.Stack.get_by_plan(self.request, plan)
 
 
-class IndexView(horizon_tables.DataTableView):
+class IndexView(infrastructure_views.ItemCountMixin,
+                horizon_tables.DataTableView):
     table_class = tables.RolesTable
     template_name = "infrastructure/roles/index.html"
 
+    @utils.memoized.memoized
     def get_data(self):
         roles = api.tuskar.Role.list(self.request)
         plan = api.tuskar.Plan.get_the_plan(self.request)

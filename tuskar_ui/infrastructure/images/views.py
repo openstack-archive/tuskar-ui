@@ -25,15 +25,18 @@ from openstack_dashboard.dashboards.project.images.images import views
 from tuskar_ui import api as tuskar_api
 from tuskar_ui.infrastructure.images import forms
 from tuskar_ui.infrastructure.images import tables
+import tuskar_ui.infrastructure.views as infrastructure_views
 from tuskar_ui.utils import utils
 
 LOG = logging.getLogger(__name__)
 
 
-class IndexView(horizon_tables.DataTableView):
+class IndexView(infrastructure_views.ItemCountMixin,
+                horizon_tables.DataTableView):
     table_class = tables.ImagesTable
     template_name = "infrastructure/images/index.html"
 
+    @memoized.memoized_method
     def get_data(self):
         images = []
         filters = self.get_filters()
