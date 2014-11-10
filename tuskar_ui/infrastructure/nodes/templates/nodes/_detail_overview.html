@@ -1,15 +1,12 @@
 {% load i18n %}
+{% load icon_helpers %}
 
 <div class="row node-details">
   <div class="col-lg-6 col-xs-12">
-    <h3>{% trans "Status" %}</h3>
-    <p>
-      <i class="fa fa-play-circle powerstate"></i>
-      <span>{% trans "Powered" %} {{ node.power_state|default:"&mdash;" }}</span>
-    </p>
+    <h4> {{ node.power_state|iconized_ironic_node_state|safe }} </h4>
 
     <h3>{% trans "Inventory" %}</h3>
-    <dl class="dl-horizontal">
+    <dl class="dl-horizontal dl-horizontal-left">
       <dt>{% trans "Node UUID" %}</dt>
       <dd>{{ node.uuid|default:"&mdash;" }}</dd>
       <dt>{% trans "Driver" %}</dt>
@@ -43,7 +40,11 @@
       <dt>{% trans "Network Cards" %}</dt>
       <dd>
         <a data-toggle="collapse" href="#collapseNetworkCards">
-          {{ node.addresses|length }}
+          {% blocktrans count addresses_length=node.addresses|length %}
+            {{ addresses_length }} interface
+            {% plural %}
+            {{ addresses_length }} interfaces
+          {% endblocktrans %}
           <span class="caret"></span>
         </a>
         <div id="collapseNetworkCards" class="panel-collapse collapse">
@@ -64,7 +65,7 @@
     </dl>
 
     <h3>{% trans "Deployment" %}</h3>
-    <dl class="dl-horizontal">
+    <dl class="dl-horizontal dl-horizontal-left">
       <dt>{% trans "Deployment Role" %}</dt>
       {% if stack and role %}
         <dd><a href="{% url 'horizon:infrastructure:roles:detail' role.id %}">{{ role.name }}</a></dd>
