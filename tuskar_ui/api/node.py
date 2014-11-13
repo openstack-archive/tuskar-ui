@@ -112,7 +112,7 @@ class IronicNode(base.APIResourceWrapper):
             driver_info = {
                 'ipmi_address': ipmi_address,
                 'ipmi_username': ipmi_username,
-                'password': ipmi_password
+                'ipmi_password': ipmi_password
             }
 
         properties = {}
