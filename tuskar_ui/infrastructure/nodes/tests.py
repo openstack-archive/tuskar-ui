@@ -130,7 +130,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-INITIAL_FORMS': 1,
             'register_nodes-MAX_NUM_FORMS': 1000,
 
-            'register_nodes-0-driver': 'ipmi',
+            'register_nodes-0-driver': 'pxe_ipmitool',
             'register_nodes-0-ipmi_address': '127.0.0.1',
             'register_nodes-0-ipmi_username': 'username',
             'register_nodes-0-ipmi_password': 'password',
@@ -140,7 +140,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-0-memory_mb': '2',
             'register_nodes-0-local_gb': '3',
 
-            'register_nodes-1-driver': 'ipmi',
+            'register_nodes-1-driver': 'pxe_ipmitool',
             'register_nodes-1-ipmi_address': '127.0.0.2',
             'register_nodes-1-mac_addresses': 'de:ad:be:ef:ca:ff',
             'register_nodes-1-cpu_arch': 'x86',
@@ -166,7 +166,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                     mac_addresses=['DE:AD:BE:EF:CA:FE'],
                     ipmi_username=u'username',
                     ipmi_password=u'password',
-                    driver='ipmi',
+                    driver='pxe_ipmitool',
                 ),
                 call(
                     ANY,
@@ -178,7 +178,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                     mac_addresses=['DE:AD:BE:EF:CA:FF'],
                     ipmi_username=None,
                     ipmi_password=None,
-                    driver='ipmi',
+                    driver='pxe_ipmitool',
                 ),
             ])
 
@@ -188,7 +188,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-INITIAL_FORMS': 1,
             'register_nodes-MAX_NUM_FORMS': 1000,
 
-            'register_nodes-0-driver': 'ipmi',
+            'register_nodes-0-driver': 'pxe_ipmitool',
             'register_nodes-0-ipmi_address': '127.0.0.1',
             'register_nodes-0-ipmi_username': 'username',
             'register_nodes-0-ipmi_password': 'password',
@@ -198,7 +198,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             'register_nodes-0-memory_mb': '2',
             'register_nodes-0-local_gb': '3',
 
-            'register_nodes-1-driver': 'ipmi',
+            'register_nodes-1-driver': 'pxe_ipmitool',
             'register_nodes-1-ipmi_address': '127.0.0.2',
             'register_nodes-1-mac_addresses': 'de:ad:be:ef:ca:ff',
             'register_nodes-1-cpu_arch': 'x86',
@@ -223,7 +223,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                     mac_addresses=['DE:AD:BE:EF:CA:FE'],
                     ipmi_username=u'username',
                     ipmi_password=u'password',
-                    driver='ipmi',
+                    driver='pxe_ipmitool',
                 ),
                 call(
                     ANY,
@@ -235,7 +235,7 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
                     mac_addresses=['DE:AD:BE:EF:CA:FF'],
                     ipmi_username=None,
                     ipmi_password=None,
-                    driver='ipmi',
+                    driver='pxe_ipmitool',
                 ),
             ])
         self.assertTemplateUsed(

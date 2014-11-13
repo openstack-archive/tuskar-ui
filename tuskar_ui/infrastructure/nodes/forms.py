@@ -29,7 +29,7 @@ CPU_ARCH_CHOICES = [
     ('x86_64', _("x86_64")),
 ]
 DRIVER_CHOICES = [
-    ('ipmi', _("IPMI Driver")),
+    ('pxe_ipmitool', _("IPMI Driver")),
     ('pxe_ssh', _("PXE + SSH")),
 ]
 
@@ -37,7 +37,7 @@ DRIVER_CHOICES = [
 def get_driver_info_dict(data):
     driver = data['driver']
     driver_dict = {'driver': driver}
-    if driver == 'ipmi':
+    if driver == 'pxe_ipmitool':
         driver_dict.update(
             # TODO(rdopieralski) If ipmi_address is no longer required,
             # then we will need to use something else here?
@@ -253,7 +253,7 @@ class UploadNodeForm(forms.SelfHandlingForm):
                     driver=driver,
                     do_autodiscovery=True,
                 )
-            elif driver == 'ipmi':
+            elif driver == 'pxe_ipmitool':
                 node = dict(
                     ipmi_address=row[1],
                     ipmi_username=row[2],
