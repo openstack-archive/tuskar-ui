@@ -29,7 +29,7 @@ CPU_ARCH_CHOICES = [
     ('x86_64', _("x86_64")),
 ]
 DRIVER_CHOICES = [
-    ('ipmi', _("IPMI Driver")),
+    ('pxe_ipmitool', _("IPMI Driver")),
     ('pxe_ssh', _("PXE + SSH")),
 ]
 
