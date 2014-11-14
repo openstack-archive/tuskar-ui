@@ -129,6 +129,7 @@ class FlavorRolesTable(horizon.tables.DataTable):
         verbose_name = _("Overcloud Roles")
         table_actions = ()
         row_actions = ()
+        hidden_title = False
         template = "horizon/common/_enhanced_data_table.html"
 
 

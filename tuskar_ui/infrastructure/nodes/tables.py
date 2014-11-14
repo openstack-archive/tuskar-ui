@@ -188,6 +188,7 @@ class AllNodesTable(BaseNodesTable):
     class Meta:
         name = "all_nodes_table"
         verbose_name = _("All")
+        hidden_title = False
         columns = ('node', 'cpus', 'memory_mb', 'local_gb', 'power_status',
                    'state')
         table_actions = (NodeFilterAction, SetPowerStateOn, SetPowerStateOff,
@@ -201,6 +202,7 @@ class ProvisionedNodesTable(BaseNodesTable):
     class Meta:
         name = "provisioned_nodes_table"
         verbose_name = _("Provisioned")
+        hidden_title = False
         table_actions = (NodeFilterAction, SetPowerStateOn, SetPowerStateOff,
                          DeleteNode)
         row_actions = (SetPowerStateOn, SetPowerStateOff, DeleteNode)
@@ -212,6 +214,7 @@ class FreeNodesTable(BaseNodesTable):
     class Meta:
         name = "free_nodes_table"
         verbose_name = _("Free")
+        hidden_title = False
         columns = ('node', 'cpus', 'memory_mb', 'local_gb', 'power_status')
         table_actions = (NodeFilterAction, SetPowerStateOn, SetPowerStateOff,
                          DeleteNode)
@@ -224,6 +227,7 @@ class MaintenanceNodesTable(BaseNodesTable):
     class Meta:
         name = "maintenance_nodes_table"
         verbose_name = _("Maintenance")
+        hidden_title = False
         columns = ('node', 'cpus', 'memory_mb', 'local_gb', 'power_status',
                    'state')
         table_actions = (NodeFilterAction, ActivateNode, SetPowerStateOn,

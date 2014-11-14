@@ -1,8 +1,3 @@
-// Some tables should not have a title because it just repeats the page title.
-.no-table-title tr.table_caption {
-    display: none;
-}
-
 tr.table_actions_row {
   th.table_header {
     background: #f9f9f9;

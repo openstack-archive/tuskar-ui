@@ -1,11 +1,13 @@
 {% extends "horizon/common/_data_table.html" %}
 
 {% block table_caption %}
+  {% if not hidden_title %}
   <tr class='table_caption'>
     <th class='table_header' colspan='{{ columns|length }}'>
-      <h3 class='table_title'>{{ table }}</h3>
+        <h3 class='table_title'>{{ table }}</h3>
     </th>
   </tr>
+  {% endif %}
   {% if table.get_table_actions %}
   <tr class='table_actions_row'>
     <th class='table_header' colspan='{{ columns|length }}'>
