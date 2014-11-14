@@ -50,32 +50,27 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
 
     def test_index_get(self):
         with patch('tuskar_ui.api.node.Node', **{
-            'spec_set': ['list'],  # Only allow these attributes
+            'spec_set': ['list'],
             'list.return_value': [],
         }) as mock:
             res = self.client.get(INDEX_URL)
-            self.assertEqual(mock.list.call_count, 6)
+            self.assertEqual(mock.list.call_count, 3)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
         self.assertTemplateUsed(res, 'infrastructure/nodes/_overview.html')
 
-    def _test_index_tab(self, tab_name):
-        nodes = [api.node.Node(api.node.IronicNode(node))
-                 for node in self.ironicclient_nodes.list()]
+    def _all_mocked_nodes(self):
+        return [api.node.Node(api.node.IronicNode(node))
+                for node in self.ironicclient_nodes.list()]
 
-        # TODO(akrivoka): this should be placed in the test data, but currently
-        # that's not possible due to the drawbacks in the Node architecture.
-        # We should rework the entire api/node.py and fix this problem.
-        for node in nodes:
-            node.ip_address = '1.1.1.1'
-
+    def _test_index_tab(self, tab_name, nodes):
         with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['list'],
             'list.return_value': nodes,
         }) as Node:
             res = self.client.get(INDEX_URL + '?tab=nodes__' + tab_name)
-            self.assertEqual(Node.list.call_count, 6)
+            self.assertEqual(Node.list.call_count, 3)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
@@ -85,16 +80,20 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             nodes)
 
     def test_all_nodes(self):
-        self._test_index_tab('all')
+        nodes = self._all_mocked_nodes()
+        self._test_index_tab('all', nodes)
 
     def test_provisioned_nodes(self):
-        self._test_index_tab('provisioned')
+        nodes = self._all_mocked_nodes()
+        self._test_index_tab('provisioned', nodes)
 
     def test_free_nodes(self):
-        self._test_index_tab('free')
+        nodes = self._all_mocked_nodes()
+        self._test_index_tab('free', nodes)
 
     def test_maintenance_nodes(self):
-        self._test_index_tab('maintenance')
+        nodes = self._all_mocked_nodes()[6:]
+        self._test_index_tab('maintenance', nodes)
 
     def _test_index_tab_list_exception(self, tab_name):
         with patch('tuskar_ui.api.node.Node', **{
@@ -246,11 +245,11 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
 
         with contextlib.nested(
             patch('tuskar_ui.api.node.Node', **{
-                'spec_set': ['get'],  # Only allow these attributes
+                'spec_set': ['get'],
                 'get.return_value': node,
             }),
             patch('tuskar_ui.api.heat.Resource', **{
-                'spec_set': ['get_by_node'],  # Only allow these attributes
+                'spec_set': ['get_by_node'],
                 'get_by_node.side_effect': (
                     self._raise_horizon_exception_not_found),
             }),

@@ -134,7 +134,6 @@ def data(TEST):
          },
          'power_state': 'on',
          'target_power_state': 'on',
-         'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
          'provision_state': 'active',
@@ -160,7 +159,6 @@ def data(TEST):
          },
          'power_state': 'on',
          'target_power_state': 'on',
-         'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
          'provision_state': 'active',
@@ -186,7 +184,6 @@ def data(TEST):
          },
          'power_state': 'rebooting',
          'target_power_state': 'on',
-         'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
          'provision_state': 'deploying',
@@ -212,7 +209,6 @@ def data(TEST):
          },
          'power_state': 'on',
          'target_power_state': 'on',
-         'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
          'provision_state': 'deploying',
@@ -241,7 +237,6 @@ def data(TEST):
          'provision_state': 'error',
          'maintenance': None,
          'newly_discovered': None,
-         'provision_state': 'deploying',
          'extra': {}
          })
     node_6 = node.Node(
@@ -264,7 +259,6 @@ def data(TEST):
          },
          'power_state': 'on',
          'target_power_state': 'on',
-         'provision_state': 'active',
          'maintenance': None,
          'newly_discovered': None,
          'provision_state': 'active',

@@ -39,7 +39,7 @@ class OverviewTab(tabs.Tab):
     template_name = "infrastructure/nodes/_overview.html"
 
     def get_context_data(self, request):
-        nodes = api.node.Node.list(request)
+        nodes = self.tab_group.kwargs['nodes']
         cpus = sum(int(node.cpus) for node in nodes if node.cpus)
         memory_mb = sum(int(node.memory_mb) for node in nodes if
                         node.memory_mb)
@@ -198,10 +198,6 @@ class BaseTab(tabs.TableTab):
 
     def get_base_nodes_table_data(self):
         nodes, prev, more = self._nodes_info
-
-        if 'errors' in self.request.GET:
-            return api.node.filter_nodes(nodes, healthy=False)
-
         return nodes
 
     def has_prev_data(self, table):
@@ -221,16 +217,10 @@ class AllTab(BaseTab):
 
     @cached_property
     def _nodes(self):
-        redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
-
-        return api.node.Node.list(self.request, _error_redirect=redirect)
+        return self.tab_group.kwargs['nodes']
 
     def get_all_nodes_table_data(self):
         nodes, prev, more = self._nodes_info
-
-        if 'errors' in self.request.GET:
-            return api.node.filter_nodes(nodes, healthy=False)
-
         return nodes
 
 
@@ -250,9 +240,6 @@ class ProvisionedTab(BaseTab):
 
     def get_provisioned_nodes_table_data(self):
         nodes, prev, more = self._nodes_info
-
-        if 'errors' in self.request.GET:
-            return api.node.filter_nodes(nodes, healthy=False)
 
         if nodes:
             all_resources = api.heat.Resource.list_all_resources(self.request)
@@ -285,10 +272,6 @@ class FreeTab(BaseTab):
 
     def get_free_nodes_table_data(self):
         nodes, prev, more = self._nodes_info
-
-        if 'errors' in self.request.GET:
-            return api.node.filter_nodes(nodes, healthy=False)
-
         return nodes
 
 
@@ -302,9 +285,8 @@ class MaintenanceTab(BaseTab):
 
     @cached_property
     def _nodes(self):
-        redirect = urlresolvers.reverse('horizon:infrastructure:nodes:index')
-        return api.node.Node.list(self.request, maintenance=True,
-                                  _error_redirect=redirect)
+        nodes = self.tab_group.kwargs['nodes']
+        return list(utils.filter_items(nodes, maintenance=True))
 
     def get_maintenance_nodes_table_data(self):
         return self._nodes
