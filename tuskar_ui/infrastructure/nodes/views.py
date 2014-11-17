@@ -60,6 +60,10 @@ class IndexView(infrastructure_views.ItemCountMixin,
     def get_data(self):
         return api.node.Node.list(self.request)
 
+    def get_tabs(self, request, **kwargs):
+        nodes = self.get_data()
+        return self.tab_group_class(request, nodes=nodes, **kwargs)
+
 
 class RegisterView(horizon_forms.ModalFormView):
     form_class = forms.RegisterNodeFormset
