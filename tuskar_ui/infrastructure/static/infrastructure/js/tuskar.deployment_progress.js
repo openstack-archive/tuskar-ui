@@ -5,9 +5,9 @@ tuskar.deployment_progress = (function () {
 
   module.init = function () {
     if (!$('div.deployment-box div.progress').length) { return; }
-    module.interval = setInterval(module.check_progress, 30000);
-    module.events_template = Hogan.compile($('#events-template').html() || '');
-    module.roles_template = Hogan.compile($('#roles-template').html() || '');
+    this.interval = setInterval(module.check_progress, 30000);
+    this.events_template = Hogan.compile($('#events-template').html() || '');
+    this.roles_template = Hogan.compile($('#roles-template').html() || '');
   };
 
   module.check_progress = function () {
@@ -18,7 +18,7 @@ tuskar.deployment_progress = (function () {
       url: $form.attr('action'),
       dataType: 'json',
       async: true,
-      success: module.update_progress
+      success: this.update_progress
     });
   };
 
