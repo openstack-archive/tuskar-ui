@@ -92,11 +92,12 @@ class DetailView(horizon_tables.DataTableView, RoleMixin, StackMixin):
             # by getting the resource for all nodes at once
             try:
                 resource = api.heat.Resource.get_by_node(self.request, node)
+            except LookupError:
+                node.role_name = '-'
+            else:
                 node.role_name = resource.role.name
                 node.role_id = resource.role.id
                 node.stack_id = resource.stack.id
-            except horizon_exceptions.NotFound:
-                node.role_name = '-'
 
         return nodes
 
