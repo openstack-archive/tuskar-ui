@@ -16,7 +16,6 @@ import urlparse
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 import heatclient
-from horizon import exceptions
 from horizon.utils import memoized
 from openstack_dashboard.api import base
 from openstack_dashboard.api import heat
@@ -398,7 +397,15 @@ class Resource(base.APIResourceWrapper):
             self._role = kwargs['role']
 
     @classmethod
-    def get_by_node(cls, request, node, all_resources=None):
+    @memoized.memoized
+    def _resources_by_nodes(cls, request):
+        return dict(
+            (resource.physical_resource_id, resource)
+            for resource in cls.list_all_resources(request)
+        )
+
+    @classmethod
+    def get_by_node(cls, request, node):
         """Return the specified Heat Resource given a Node
 
         :param request: request object
@@ -411,18 +418,7 @@ class Resource(base.APIResourceWrapper):
                  the Node
         :rtype:  tuskar_ui.api.heat.Resource
         """
-        # TODO(tzumainn): this is terribly inefficient, but I don't see a
-        # better way.  Maybe if Heat set some node metadata. . . ?
-        if node.instance_uuid:
-            if all_resources is None:
-                resource_list = cls.list_all_resources(request)
-            else:
-                resource_list = all_resources
-            for resource in resource_list:
-                if resource.physical_resource_id == node.instance_uuid:
-                    return resource
-        msg = _('Could not find resource matching node "%s"') % node.uuid
-        raise exceptions.NotFound(msg)
+        return cls._resources_by_nodes(request)[node.instance_uuid]
 
     @classmethod
     def list_all_resources(cls, request):
