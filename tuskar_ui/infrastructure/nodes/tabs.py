@@ -16,7 +16,6 @@ import itertools
 
 from django.core import urlresolvers
 from django.utils.translation import ugettext_lazy as _
-from horizon import exceptions
 from horizon import tabs
 from horizon.utils import functions
 from openstack_dashboard.api import base as api_base
@@ -242,16 +241,16 @@ class ProvisionedTab(BaseTab):
         nodes, prev, more = self._nodes_info
 
         if nodes:
-            all_resources = api.heat.Resource.list_all_resources(self.request)
             for node in nodes:
                 try:
                     resource = api.heat.Resource.get_by_node(
-                        self.request, node, all_resources=all_resources)
+                        self.request, node)
+                except LookupError:
+                    node.role_name = '-'
+                else:
                     node.role_name = resource.role.name
                     node.role_id = resource.role.id
                     node.stack_id = resource.stack.id
-                except exceptions.NotFound:
-                    node.role_name = '-'
 
         return nodes
 
@@ -302,10 +301,11 @@ class DetailOverviewTab(tabs.Tab):
         context = {'node': node}
         try:
             resource = api.heat.Resource.get_by_node(self.request, node)
+        except LookupError:
+            pass
+        else:
             context['role'] = resource.role
             context['stack'] = resource.stack
-        except exceptions.NotFound:
-            pass
         if node.instance_uuid:
             if api_base.is_service_enabled(self.request, 'metering'):
                 # Meter configuration in the following format:
