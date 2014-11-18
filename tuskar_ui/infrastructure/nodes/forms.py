@@ -92,7 +92,7 @@ class NodeForm(django.forms.Form):
         widget=django.forms.TextInput(attrs={
             'class': 'form-control switched',
             'data-switch-on': 'driver',
-            'data-driver-ipmi': _("IPMI Driver"),
+            'data-driver-pxe_ipmitool': _("IPMI Driver"),
         }),
     )
     ipmi_username = django.forms.CharField(
@@ -101,7 +101,7 @@ class NodeForm(django.forms.Form):
         widget=django.forms.TextInput(attrs={
             'class': 'form-control switched',
             'data-switch-on': 'driver',
-            'data-driver-ipmi': _("IPMI Driver"),
+            'data-driver-pxe_ipmitool': _("IPMI Driver"),
         }),
     )
     ipmi_password = django.forms.CharField(
@@ -110,7 +110,7 @@ class NodeForm(django.forms.Form):
         widget=django.forms.PasswordInput(render_value=False, attrs={
             'class': 'form-control switched',
             'data-switch-on': 'driver',
-            'data-driver-ipmi': _("IPMI Driver"),
+            'data-driver-pxe_ipmitool': _("IPMI Driver"),
         }),
     )
     ssh_address = django.forms.IPAddressField(
