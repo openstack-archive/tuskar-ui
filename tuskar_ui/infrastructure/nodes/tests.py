@@ -250,8 +250,8 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
             }),
             patch('tuskar_ui.api.heat.Resource', **{
                 'spec_set': ['get_by_node'],
-                'get_by_node.side_effect': (
-                    self._raise_horizon_exception_not_found),
+                'get_by_node.side_effect': lambda *args, **kwargs: {}[None],
+                # Raises LookupError
             }),
         ) as (mock_node, mock_heat):
             res = self.client.get(
