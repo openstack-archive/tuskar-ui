@@ -107,7 +107,7 @@ class NodeForm(django.forms.Form):
     ipmi_password = django.forms.CharField(
         label=_("IPMI Password"),
         required=False,
-        widget=django.forms.PasswordInput(render_value=False, attrs={
+        widget=django.forms.PasswordInput(render_value=True, attrs={
             'class': 'form-control switched',
             'data-switch-on': 'driver',
             'data-driver-pxe_ipmitool': _("IPMI Driver"),
