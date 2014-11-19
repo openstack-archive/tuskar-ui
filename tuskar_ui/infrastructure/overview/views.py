@@ -17,6 +17,7 @@ import json
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django import http
+import django.utils.text
 from django.utils.translation import ugettext_lazy as _
 import heatclient
 import horizon.forms
@@ -99,38 +100,45 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
     form_class = forms.EditPlan
     success_url = reverse_lazy(INDEX_URL)
 
+    def get_progress_update(self, request, data):
+        last_event = data.get('last_event')
+        return {
+            'progress': data.get('progress'),
+            'last_event': {
+                'event_time': last_event.event_time,
+                'resource_name': last_event.resource_name,
+                'resource_status': last_event.resource_status,
+            } if last_event else None,
+            'last_failed_events': [{
+                'event_time': event.event_time,
+                'resource_name': event.resource_name,
+                'resource_status': event.resource_status,
+                'resource_status_reason': event.resource_status_reason,
+            } for event in data.get('last_failed_events', [])],
+            'roles': [{
+                'status': role.get('status', 'warning'),
+                'finished': role.get('finished', False),
+                'name': role.get('name', '').capitalize(),
+                'slug': django.util.text.slugify(role.get('name', '')),
+                'id': role.get('id', ''),
+                'total_node_count': role.get('node_count', 0),
+                'deployed_node_count': role.get('deployed_node_count', 0),
+                'deploying_node_count': role.get('deploying_node_count',
+                                                 0),
+                'waiting_node_count': role.get('waiting_node_count', 0),
+                'error_node_count': role.get('error_node_count', 0),
+                'planned_node_count': role.get('planned_node_count', 0),
+            } for role in data.get('roles', [])],
+        }
+
     def get(self, request, *args, **kwargs):
         if request.META.get('HTTP_X_HORIZON_PROGRESS', ''):
+            # If it's an AJAX call for progress update, send it.
             data = self.get_data(request, {})
-            last_event = data.get('last_event')
-
-            return http.HttpResponse(json.dumps({
-                'progress': data.get('progress'),
-                'last_event': {
-                    'event_time': last_event.event_time,
-                    'resource_name': last_event.resource_name,
-                    'resource_status': last_event.resource_status,
-                } if last_event else None,
-                'last_failed_events': [{
-                    'event_time': event.event_time,
-                    'resource_name': event.resource_name,
-                    'resource_status': event.resource_status,
-                    'resource_status_reason': event.resource_status_reason,
-                } for event in data.get('last_failed_events', [])],
-                'roles': [{
-                    'status': role.get('status', 'warning'),
-                    'finished': role.get('finished', False),
-                    'name': role.get('name', '').capitalize(),
-                    'id': role.get('id', ''),
-                    'total_node_count': role.get('node_count', 0),
-                    'deployed_node_count': role.get('deployed_node_count', 0),
-                    'deploying_node_count': role.get('deploying_node_count',
-                                                     0),
-                    'waiting_node_count': role.get('waiting_node_count', 0),
-                    'error_node_count': role.get('error_node_count', 0),
-                    'planned_node_count': role.get('planned_node_count', 0),
-                } for role in data.get('roles', [])],
-            }), mimetype='application/json')
+            return http.HttpResponse(
+                json.dumps(self.get_progress_update(request, data)),
+                mimetype='application/json',
+            )
         return super(IndexView, self).get(request, *args, **kwargs)
 
     def get_form(self, form_class):
