@@ -29,4 +29,7 @@ urlpatterns = urls.patterns(
     urls.url(r'^post-deploy-init$',
              views.PostDeployInitView.as_view(),
              name='post_deploy_init'),
+    urls.url(r'^scale-out$',
+             views.ScaleOutView.as_view(),
+             name='scale_out'),
 )

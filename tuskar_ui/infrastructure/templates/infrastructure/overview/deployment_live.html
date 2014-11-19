@@ -1,7 +1,7 @@
 {% extends "infrastructure/overview/deployment_base.html" %}
 
 {% load i18n %}
-{% load url from future%}
+{% load url from future %}
 
 {% block deployment-heading %}
   <div class="deployment-icon">
@@ -15,30 +15,44 @@
 {% block deployment-icon %}fa-key{% endblock %}
 {% block deployment-title %}{% trans "Access Information" %}{% endblock %}
 {% block deployment-info %}
-<div>
+<div class="container-fluid">
   {% for dashboard_url in dashboard_urls %}
   <div class="row">
-    <div class="col-xs-3">{% trans "Horizon URL:" %}</div>
-    <div class="col-xs-9"><a href="{{ dashboard_url }}">{{ dashboard_url }}</a></div>
+    <div class="col-xs-4">{% trans "Horizon URL:" %}</div>
+    <div class="col-xs-8"><a href="{{ dashboard_url }}">{{ dashboard_url }}</a></div>
   </div>
   {% endfor %}
   <div class="row">
-    <div class="col-xs-3">{% trans "User name:" %}</div>
-    <div class="col-xs-9">admin</div>
+    <div class="col-xs-4">{% trans "User name:" %}</div>
+    <div class="col-xs-8">admin</div>
   </div>
-  <form>
-    <fieldset>
-      <div class="form-group">
-        <div class="row">
-          <div class="col-xs-3">
-            {% trans "Password" %}
-          </div>
-          <div class="col-xs-9">
-            <input class="form-control" id="id_password" type="password" value="{{ admin_password }}" disabled="true" readonly="true"/>
-          </div>
-        </div>
-      </div>
-    </fieldset>
-  </form>
+  <div class="row">
+    <div class="col-xs-4">{% trans "Password" %}</div>
+    <div class="col-xs-8">
+        <span class="btn btn-xs btn-default password-button"
+              data-content="{{ admin_password }}"
+        ><i class="fa fa-eye"></i> {% trans "Reveal" %}</span>
+    </div>
+  </div>
 </div>
+
+<script type="text/javascript">
+(window.$ || window.addHorizonLoadEvent)(function () {
+    $('span.password-button').popover({
+        trigger: 'click',
+        placement: 'top'
+    });
+});
+</script>
+{% endblock %}
+
+{% block deployment-buttons %}
+  {{ block.super }}
+<a
+   href="{% url 'horizon:infrastructure:overview:scale_out' %}"
+   class="btn ajax-modal btn-default"
+>
+   <i class="fa fa-lg fa-arrows-alt"></i> {% trans "Scale-out" %}
+</a>
+
 {% endblock %}

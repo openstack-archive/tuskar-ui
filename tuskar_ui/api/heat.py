@@ -99,7 +99,7 @@ class Stack(base.APIResourceWrapper):
             'environment': environment,
             'files': provider_resource_templates,
         }
-        password = getattr(settings, 'UNDERCLOUD_ADMIN_PASSWORD', None),
+        password = getattr(settings, 'UNDERCLOUD_ADMIN_PASSWORD', None)
 
         # TODO(lsmola) Bug #1394505. Until then we are calling the client
         # directly. When it's fixed, we should use heat_update from
