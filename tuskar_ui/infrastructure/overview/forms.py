@@ -161,6 +161,33 @@ class EditPlan(horizon.forms.SelfHandlingForm):
         return True
 
 
+class ScaleOut(EditPlan):
+    def __init__(self, *args, **kwargs):
+        super(ScaleOut, self).__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if name.endswith('-count'):
+                field.widget.attrs['min'] = field.initial
+
+    def handle(self, request, data):
+        if not super(ScaleOut, self).handle(request, data):
+            return False
+        plan = self.plan
+        try:
+            stack = api.heat.Stack.get_by_plan(self.request, plan)
+            stack.update(request, plan.name, plan.master_template,
+                         plan.environment, plan.provider_resource_templates)
+        except Exception as e:
+            LOG.exception(e)
+            horizon.exceptions.handle(
+                request, _("Unable to deploy overcloud. Reason: {0}").format(
+                    e.error['error']['message']))
+            return False
+        else:
+            msg = _('Deployment in progress.')
+            horizon.messages.success(request, msg)
+            return True
+
+
 class DeployOvercloud(horizon.forms.SelfHandlingForm):
     def handle(self, request, data):
         try:

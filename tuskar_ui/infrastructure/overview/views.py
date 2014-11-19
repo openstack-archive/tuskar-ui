@@ -292,3 +292,27 @@ class PostDeployInitView(horizon.forms.ModalFormView, StackMixin):
         initial = super(PostDeployInitView, self).get_initial(**kwargs)
         initial['stack_id'] = self.get_stack().id
         return initial
+
+
+class ScaleOutView(horizon.forms.ModalFormView, StackMixin):
+    form_class = forms.ScaleOut
+    template_name = "infrastructure/overview/scale_out.html"
+    submit_label = _("Deploy Changes")
+
+    def get_success_url(self):
+        return reverse(INDEX_URL)
+
+    def get_form(self, form_class):
+        return form_class(self.request, **self.get_form_kwargs())
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(ScaleOutView, self).get_context_data(*args, **kwargs)
+        plan = api.tuskar.Plan.get_the_plan(self.request)
+        form = context.get('form')
+        roles = [_get_role_data(plan, None, form, role)
+                 for role in plan.role_list]
+        context.update({
+            'roles': roles,
+            'plan': plan,
+        })
+        return context
