@@ -1,0 +1,11 @@
+{% extends 'infrastructure/base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Scale-out Deployment" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Scale-out Deployment") %}
+{% endblock page_header %}
+
+{% block infrastructure_main %}
+    {% include "infrastructure/overview/_scale_out.html" %}
+{% endblock %}
