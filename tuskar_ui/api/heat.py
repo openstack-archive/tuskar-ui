@@ -91,6 +91,18 @@ class Stack(base.APIResourceWrapper):
         stack = heat.stack_create(request, **fields)
         return cls(stack, request=request)
 
+    def update(self, request, stack_name, template, environment,
+               provider_resource_templates):
+        fields = {
+            'stack_name': stack_name,
+            'template': template,
+            'environment': environment,
+            'files': provider_resource_templates,
+            'password': getattr(settings, 'UNDERCLOUD_ADMIN_PASSWORD', None),
+        }
+        heat.stack_update(request, stack_id=self.id, **fields)
+        return self
+
     @classmethod
     @handle_errors(_("Unable to retrieve heat stacks"), [])
     def list(cls, request):
