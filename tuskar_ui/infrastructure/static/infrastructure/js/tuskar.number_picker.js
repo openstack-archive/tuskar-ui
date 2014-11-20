@@ -13,6 +13,8 @@ tuskar.number_picker = (function () {
         '<i class="fa fa-chevron-right"></i></a>').each(
         function () {
             var $this = $(this);
+            var $right_arrow = $this.next('a.arrow-right');
+            var $left_arrow = $this.prev('a.arrow-left');
             if ($this.attr('readonly')) {
                 $this.parent().addClass('readonly');
             }
@@ -23,17 +25,24 @@ tuskar.number_picker = (function () {
                 value += step;
                 if (!isNaN(maximum)) { value = Math.min(maximum, value); }
                 if (!isNaN(minimum)) { value = Math.max(minimum, value); }
+                $right_arrow.toggleClass('disabled', (value === maximum));
+                $left_arrow.toggleClass('disabled', (value === minimum));
                 $this.val(value);
                 $this.trigger('change');
             }
-            $this.next('a.arrow-right').click(function () {
+            $right_arrow.click(function () {
                 var step = +($this.attr('step') || 1);
                 change(step);
             });
-            $this.prev('a.arrow-left').click(function () {
+            $left_arrow.click(function () {
                 var step = -($this.attr('step') || 1);
                 change(step);
             });
+            change(0);
+            var step = +($this.attr('step') || 1);
+            if (step !== 1) {
+              $this.after('<span class="step">+' + step + '</span>');
+            }
         });
     };
 
