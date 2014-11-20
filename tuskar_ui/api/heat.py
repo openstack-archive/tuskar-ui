@@ -91,6 +91,22 @@ class Stack(base.APIResourceWrapper):
         stack = heat.stack_create(request, **fields)
         return cls(stack, request=request)
 
+    def update(self, request, stack_name, template, environment,
+               provider_resource_templates):
+        fields = {
+            'stack_name': stack_name,
+            'template': template,
+            'environment': environment,
+            'files': provider_resource_templates,
+        }
+        password = getattr(settings, 'UNDERCLOUD_ADMIN_PASSWORD', None),
+
+        # TODO(lsmola) Bug #1394505. Until then we are calling the client
+        # directly. When it's fixed, we should use heat_update from
+        # openstack_dashboard api.
+        heat.heatclient(request, password).stacks.update(self.id, **fields)
+        return self
+
     @classmethod
     @handle_errors(_("Unable to retrieve heat stacks"), [])
     def list(cls, request):
