@@ -10,7 +10,7 @@
     <div class="form-group well well-sm clearfix{% if field.errors %} error{% endif %} {{ field.css_classes }}">
       <div class="col-xs-2 deploy-role-icon">
         <a
-          href="{% url 'horizon:infrastructure:roles:detail' role_id=role.id %}"
+          href="{% url 'horizon:infrastructure:roles:update' role_id=role.id %}"
           class="btn"
         ><b class="fa fa-lg fa-fw fa-pencil"></b></a>
       </div>
