@@ -41,7 +41,9 @@
 
 <script type="text/javascript">
 (window.$ || window.addHorizonLoadEvent)(function () {
-    $('a.help-icon').popover({
+    $('a.help-icon').click(function () {
+        return false;
+    }).popover({
         trigger: 'focus',
         placement: 'right'
     });
