@@ -164,7 +164,7 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
         if stack:
             context['last_failed_events'] = [
                 e for e in stack.events
-                if e.resource_status == 'DELETE_FAILED'][-3:]
+                if 'FAILED' in e.resource_status][-3:]
 
             if stack.is_deleting or stack.is_delete_failed:
                 context['last_event'] = stack.events[0]
