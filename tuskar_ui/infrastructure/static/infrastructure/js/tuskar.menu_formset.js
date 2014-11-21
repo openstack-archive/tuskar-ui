@@ -10,6 +10,13 @@ tuskar.menu_formset = (function () {
     var $nav = $('#formset-' + prefix + ' .nav');
     var activated = false;
 
+    function add_node_ip_onchange ($form) {
+      var $nav_link = $('a[href="#' + $form.attr('id') + '"]');
+      $form.find('input[name$="_address"]').change(function () {
+        $nav_link.html($(this).val() || 'Undefined node');
+      });
+    }
+
     function renumber_form($form, prefix, count) {
       $form.find('input, textarea, select').each(function () {
         var input = $(this);
@@ -60,6 +67,8 @@ tuskar.menu_formset = (function () {
       $new_nav.tab('show');
       $('select.switchable').trigger('change');
       horizon.forms.add_password_fields_reveal_buttons($new_form);
+      // Attach node IP onchange to the newly created form
+      add_node_ip_onchange($new_form);
     }
 
     // Connect all signals.
@@ -72,6 +81,9 @@ tuskar.menu_formset = (function () {
         $('select.switchable').trigger('change');
       }, 0);
     });
+
+    // Attach node IP onchange to the first form
+    add_node_ip_onchange($content.find('.tab-pane:first'));
 
     // Activate the first field that has errors.
     $content.find('.control-group.error').each(function () {

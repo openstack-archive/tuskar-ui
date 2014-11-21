@@ -38,12 +38,6 @@
 (window.$ || window.addHorizonLoadEvent)(function () {
   var form_prefix = '{{ form.prefix|escapejs }}';
   var $form = $('#tab-' + form_prefix);
-  var $nav_link = $('a[href="#' + $form.attr('id') + '"]');
-  var undefined_name = '{{ form.get_name|escapejs }}';
-
-  $form.find('input[name$="-ipmi_address"]').change(function () {
-    $nav_link.html($(this).val() || undefined_name);
-  });
 
   $form.find('input[name$="-do_autodiscovery"]').change(function () {
     var $this = $(this);
