@@ -12,7 +12,6 @@
 #    under the License.
 
 from openstack_dashboard.test.test_data import exceptions
-
 from tuskarclient.openstack.common.apiclient import exceptions as tuskarclient
 
 

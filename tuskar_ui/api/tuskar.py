@@ -21,7 +21,6 @@ from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from openstack_dashboard.api import neutron
 from os_cloud_config import keystone_pki
-
 from tuskarclient import client as tuskar_client
 
 from tuskar_ui.api import flavor
