@@ -73,14 +73,23 @@ def _get_role_data(plan, stack, form, role):
             else:
                 status = 'info'
 
+        finished = deployed_node_count == data['planned_node_count']
+        if finished:
+            icon = 'fa-check'
+        elif status in ('danger', 'warning'):
+            icon = 'fa-exclamation'
+        else:
+            icon = 'fa-spinner fa-spin'
+
         data.update({
             'status': status,
-            'finished': deployed_node_count == data['planned_node_count'],
+            'finished': finished,
             'total_node_count': node_count,
             'deployed_node_count': deployed_node_count,
             'deploying_node_count': deploying_node_count,
             'waiting_node_count': waiting_node_count,
             'error_node_count': error_node_count,
+            'icon': icon,
         })
 
     # TODO(rdopieralski) get this from ceilometer
@@ -127,6 +136,7 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
                 'waiting_node_count': role.get('waiting_node_count', 0),
                 'error_node_count': role.get('error_node_count', 0),
                 'planned_node_count': role.get('planned_node_count', 0),
+                'icon': role.get('icon', ''),
             } for role in data.get('roles', [])],
         }
 

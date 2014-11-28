@@ -7,10 +7,8 @@
 {% for role in roles %}
     <div class="well well-sm clearfix">
       <div class="col-xs-2 deploy-role-icon">
-        {% if role.finished %}
-          <i class="fa fa-fw fa-lg fa-check"></i>
-        {% else %}
-          <i class="fa fa-fw fa-lg fa-spinner fa-spin"></i>
+        {% if role.planned_node_count %}
+          <i class="fa fa-fw fa-lg {{ role.icon }}"></i>
         {% endif %}
       </div>
       <div class="col-xs-8 deploy-role-name">
@@ -33,12 +31,9 @@
 [[#roles]]
     <div class="well well-sm clearfix">
       <div class="col-xs-2 deploy-role-icon">
-        [[#finished]]
-          <i class="fa fa-fw fa-lg fa-check"></i>
-        [[/finished]]
-        [[^finished]]
-          <i class="fa fa-fw fa-lg fa-spinner fa-spin"></i>
-        [[/finished]]
+        [[#planned_node_count]]
+          <i class="fa fa-fw fa-lg [[ icon ]]"></i>
+        [[/planned_node_count]]
       </div>
       <div class="col-xs-8 deploy-role-name"><strong class="deployment-roles-label" >[[ name ]]</strong></div>
       <div class="col-xs-2 deploy-role-count">
