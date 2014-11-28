@@ -7,10 +7,14 @@
 {% for role in roles %}
     <div class="well well-sm clearfix">
       <div class="col-xs-2 deploy-role-icon">
-        {% if role.finished %}
-          <i class="fa fa-fw fa-lg fa-check"></i>
-        {% else %}
-          <i class="fa fa-fw fa-lg fa-spinner fa-spin"></i>
+        {% if role.planned_node_count %}
+          {% if role.finished %}
+            <i class="fa fa-fw fa-lg fa-check"></i>
+          {% elif role.status == "danger" or role.status == "warning" %}
+            <i class="fa fa-fw fa-lg fa-exclamation"></i>
+          {% else %}
+            <i class="fa fa-fw fa-lg fa-spinner fa-spin"></i>
+          {% endif %}
         {% endif %}
       </div>
       <div class="col-xs-8 deploy-role-name">
