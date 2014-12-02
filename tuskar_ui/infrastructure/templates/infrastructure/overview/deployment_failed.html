@@ -16,24 +16,7 @@
 {% endblock %}
 
 {% block deployment-info %}
-{% if last_failed_events %}
-<strong>{% trans "Last failed events:" %}</strong>
-{% for event in last_failed_events %}
-<div>
-  <dl>
-    <dt>{% trans "Timestamp" %}</dt>
-    <dd><time datetime="{{ event.event_time }}">{{ event.event_time }}</time></dd>
-    <dt>{% trans "Resource Name" %}</dt>
-    <dd>{{ event.resource_name }}</dd>
-    <dt>{% trans "Status" %}</dt>
-    <dd>{{ event.resource_status }}</dd>
-    <dt>{% trans "Reason" %}</dt>
-    <dd>{{ event.resource_status_reason }}</dd>
-  </dl>
-</div>
-{% endfor %}
-{% endif %}
-<p><a href="{% url 'horizon:infrastructure:history:index' %}">See full log</a></p>
+{% include "infrastructure/overview/_last_events.html" %}
 {% endblock %}
 
 {% block deployment-buttons %}
