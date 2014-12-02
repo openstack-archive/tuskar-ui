@@ -28,36 +28,23 @@
   </div>
 {% endif %}
 <div class="deploy-last-events">
-{% if last_failed_events %}
-  <strong>{% trans "Last failed events:" %}</strong>
-{% for event in last_failed_events %}
-<div>
-  <dl>
-    <dt>{% trans "Timestamp" %}</dt>
-    <dd><time datetime="{{ event.event_time }}">{{ event.event_time }}</time></dd>
-    <dt>{% trans "Resource Name" %}</dt>
-    <dd>{{ event.resource_name }}</dd>
-    <dt>{% trans "Status" %}</dt>
-    <dd>{{ event.resource_status }}</dd>
-    <dt>{% trans "Reason" %}</dt>
-    <dd>{{ event.resource_status_reason }}</dd>
-  </dl>
-</div>
-{% endfor %}
-{% elif last_event %}
+  {% if show_last_events %}
+  <strong>{{ last_events_title }}</strong>
   <div>
     <dl>
-      <dt>{% trans "Last Update" %}</dt>
+      {% for event in last_events %}
       <dd>
-        <time datetime="{{ last_event.event_time }}">{{ last_event.event_time }}</time>
+        <time datetime="{{ last_event.event_time }}">{{ event.event_time }}</time>
         <br />
-        {{ last_event.resource_name }}
-        {{ last_event.resource_status }}
+        {{ event.resource_name }} |
+        {{ event.resource_status }} |
+        {{ event.resource_status_reason }}
       </dd>
+      {% endfor %}
     </dl>
   </div>
-{% endif %}
-<p><a href="{% url 'horizon:infrastructure:history:index' %}">See full log</a></p>
+  {% endif %}
+  <p><a href="{% url 'horizon:infrastructure:history:index' %}">See full log</a></p>
 </div>
 {% endblock %}
 
@@ -74,34 +61,22 @@
 
 {% block templates %}
 <script type="text/html" id="events-template">{% spaceless %}{% jstemplate %}
-[[#last_failed_events]]
-<strong>{% trans "Last failed events:" %}</strong>
+[[#show_last_events]]
+<strong>[[ last_events_title ]]</strong>
 <div>
   <dl>
-    <dt>{% trans "Timestamp" %}</dt>
-    <dd><time datetime="[[ event_time ]]">[[ event_time ]]</time></dd>
-    <dt>{% trans "Resource Name" %}</dt>
-    <dd>[[ resource_name ]]</dd>
-    <dt>{% trans "Status" %}</dt>
-    <dd>[[ resource_status ]]</dd>
-    <dt>{% trans "Reason" %}</dt>
-    <dd>[[ resource_status_reason ]]</dd>
-  </dl>
-</div>
-[[/last_failed_events]]
-[[#last_event]]
-<div>
-  <dl>
-    <dt>{% trans "Last Update" %}</dt>
+    [[#last_events]]
     <dd>
       <time datetime="[[ event_time ]]">[[ event_time ]]</time>
       <br />
-      [[ resource_name ]]
-      [[ resource_status ]]
+      [[ resource_name ]] |
+      [[ resource_status ]] |
+      [[ resource_status_reason ]]
     </dd>
+    [[/last_events]]
   </dl>
 </div>
-[[/last_event]]
+[[/show_last_events]]
 <p><a href="{% url 'horizon:infrastructure:history:index' %}">See full log</a></p>
 {% endjstemplate %}{% endspaceless %}</script>
 {% endblock %}

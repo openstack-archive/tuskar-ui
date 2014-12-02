@@ -16,19 +16,18 @@
 {% endblock %}
 
 {% block deployment-info %}
-{% if last_failed_events %}
-<strong>{% trans "Last failed events:" %}</strong>
-{% for event in last_failed_events %}
+{% if show_last_events %}
+<strong>{{ last_events_title }}</strong>
 <div>
   <dl>
-    <dt>{% trans "Timestamp" %}</dt>
-    <dd><time datetime="{{ event.event_time }}">{{ event.event_time }}</time></dd>
-    <dt>{% trans "Resource Name" %}</dt>
-    <dd>{{ event.resource_name }}</dd>
-    <dt>{% trans "Status" %}</dt>
-    <dd>{{ event.resource_status }}</dd>
-    <dt>{% trans "Reason" %}</dt>
-    <dd>{{ event.resource_status_reason }}</dd>
+    {% for event in last_events %}
+    <dd>
+      <time datetime="{{ last_event.event_time }}">{{ event.event_time }}</time>
+      <br />
+      {{ event.resource_name }} |
+      {{ event.resource_status }} |
+      {{ event.resource_status_reason }}
+    </dd>
   </dl>
 </div>
 {% endfor %}
