@@ -32,7 +32,17 @@ div.number_picker {
       right: -16px;
     }
   }
+  a.disabled {
+      opacity: 0.25;
+  }
   &.readonly a {
       display: none;
+  }
+  span.step {
+      display: block;
+      font-size: 75%;
+      position: absolute;
+      top: -2px;
+      right: -14px;
   }
 }
