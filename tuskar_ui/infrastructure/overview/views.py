@@ -110,20 +110,16 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
     success_url = reverse_lazy(INDEX_URL)
 
     def get_progress_update(self, request, data):
-        last_event = data.get('last_event')
         return {
             'progress': data.get('progress'),
-            'last_event': {
-                'event_time': last_event.event_time,
-                'resource_name': last_event.resource_name,
-                'resource_status': last_event.resource_status,
-            } if last_event else None,
-            'last_failed_events': [{
+            'show_last_events': data.get('show_last_events'),
+            'last_events_title': unicode(data.get('last_events_title')),
+            'last_events': [{
                 'event_time': event.event_time,
                 'resource_name': event.resource_name,
                 'resource_status': event.resource_status,
                 'resource_status_reason': event.resource_status_reason,
-            } for event in data.get('last_failed_events', [])],
+            } for event in data.get('last_events', [])],
             'roles': [{
                 'status': role.get('status', 'warning'),
                 'finished': role.get('finished', False),
@@ -171,12 +167,19 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
         context['roles'] = roles
 
         if stack:
-            context['last_failed_events'] = [
-                e for e in stack.events
-                if 'FAILED' in e.resource_status][-3:]
+            context['show_last_events'] = True
+            failed_events = [e for e in stack.events
+                             if 'FAILED' in e.resource_status and
+                             'aborted' not in e.resource_status_reason][-3:]
+
+            if failed_events:
+                context['last_events_title'] = _('Last failed events')
+                context['last_events'] = failed_events
+            else:
+                context['last_events_title'] = _('Last event')
+                context['last_events'] = [stack.events[0]]
 
             if stack.is_deleting or stack.is_delete_failed:
-                context['last_event'] = stack.events[0]
                 # TODO(lsmola) since at this point we don't have total number
                 # of nodes we will hack this around, till API can show this
                 # information. So it will actually show progress like the total
@@ -200,7 +203,6 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
                 context['progress'] = min(95, max(
                     5, 100 * float(resources_count) / total_num_nodes_count))
             elif stack.is_deploying:
-                context['last_event'] = stack.events[0]
                 total = sum(d['total_node_count'] for d in roles)
                 context['progress'] = min(95, max(
                     5, 100 * sum(float(d.get('deployed_node_count', 0))
@@ -208,6 +210,7 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
                 ))
             else:
                 # stack is active
+                context['show_last_events'] = False
                 context['progress'] = 100
                 controller_role = plan.get_role_by_name("controller")
                 context['admin_password'] = plan.parameter_value(
