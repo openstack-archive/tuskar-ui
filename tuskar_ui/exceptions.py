@@ -12,7 +12,6 @@
 #    under the License.
 
 from openstack_dashboard import exceptions
-
 from tuskarclient.openstack.common.apiclient import exceptions as tuskarclient
 
 NOT_FOUND = exceptions.NOT_FOUND
