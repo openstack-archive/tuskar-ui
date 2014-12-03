@@ -191,7 +191,7 @@ class FormsetDataTableMixin(object):
                 prefix=self._meta.name)
         return self._formset
 
-    def get_empty_row(self):
+    def getEmptyRow(self):
         """Return a row with no data, for adding at the end of the table."""
         return self._meta.row_class(self, None, self.get_formset().empty_form)
 
