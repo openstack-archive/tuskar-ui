@@ -32,7 +32,7 @@
 <script type="text/javascript">
 (window.$ || window.addHorizonLoadEvent)(function () {
   var prefix = '{{ formset.prefix|escapejs }}';
-  var empty_form_html = '{% filter escapejs %}{% include form_template with form=formset.empty_form %}{% endfilter %}';
-  tuskar.menu_formset.init(prefix, empty_form_html);
+  var emptyFormHtml = '{% filter escapejs %}{% include form_template with form=formset.empty_form %}{% endfilter %}';
+  tuskar.menuFormset.init(prefix, emptyFormHtml);
 });
 </script>

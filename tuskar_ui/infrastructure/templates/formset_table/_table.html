@@ -30,14 +30,14 @@
     (window.$ || window.addHorizonLoadEvent)(function () {
         // prepare the js-enabled parts of the formset data table
         var prefix = '{{ table.name|escapejs }}';
-        var empty_row_html = '{% filter escapejs %}{% include "formset_table/_row.html" with row=table.get_empty_row %}{% endfilter %}';
+        var emptyRowHtml = '{% filter escapejs %}{% include "formset_table/_row.html" with row=table.getEmptyRow %}{% endfilter %}';
         {% if table.formset_class.extra %}
-        var add_label = '{% filter escapejs %}{% trans "Add a row" %}{% endfilter %}';
+        var addLabel = '{% filter escapejs %}{% trans "Add a row" %}{% endfilter %}';
         {% else %}
-        var add_label = '';
+        var addLabel = '';
         {% endif %}
 
-        tuskar.formset_table.init(prefix, empty_row_html, add_label);
+        tuskar.formsetTable.init(prefix, emptyRowHtml, addLabel);
     });
 </script>
 {% endblock table %}

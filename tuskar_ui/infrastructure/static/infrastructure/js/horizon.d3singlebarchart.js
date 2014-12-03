@@ -8,14 +8,14 @@
 
     Example:
     <div class="flavor_usage_bar"
-      data-popup-free='<p>Capacity remaining by flavors: </p>
-        {{resource_class.all_instances_flavors_info}}'
+      data-popup-free="<p>Capacity remaining by flavors: </p>
+        {{resource_class.all_instances_flavors_info}}"
       data-single-bar-orientation="horizontal"
       data-single-bar-height="50"
       data-single-bar-width="100%"
       data-single-bar-used="{{ resource_class.all_used_instances_info }}"
       data-single-bar-auto-scale-selector=".flavors_scale_selector"
-      data-single-bar-color-scale-range='["#000060", "#99FFFF"]'>
+      data-single-bar-color-scale-range="[\"#000060\", \"#99FFFF\"]">
     </div>
 
     The available data- attributes are:
@@ -39,11 +39,11 @@
             Integer representing the percent used.
           2. Array
             Array of following structure:
-            [{"popup_used": "Popup html 1", "used_instances": "5"},
-             {"popup_used": "Popup html 2", "used_instances": "15"},....]
+            [{"popupUsed": "Popup html 1", "used_instances": "5"},
+             {"popupUsed": "Popup html 2", "used_instances": "15"},....]
 
             used_instances: Integer representing the percent used.
-            popup_used: Html that will be displayed in popup window over
+            popupUsed: Html that will be displayed in popup window over
               this area.
 
       data-single-bar-used-average="integer" OPTIONAL
@@ -65,261 +65,270 @@
 
       data-single-bar-color-scale-range OPTIONAL
           Array representing linear scale of colors.
-          E.g '["#000060", "#99FFFF"]'
+          E.g "[\"#000060\", \"#99FFFF\"]"
 
 */
 
-horizon.d3_single_bar_chart = {
-  SingleBarChart: function(chart_class, html_element){
+/* global $ horizon d3 */
+
+horizon.d3SingleBarChart = {
+  SingleBarChart: function(chartClass, htmlElement){
+    "use strict";
+
     var self = this;
-    self.chart_class = chart_class;
+    self.chartClass = chartClass;
 
-    self.html_element = html_element;
-    self.jquery_element = $(self.html_element);
+    self.htmlElement = htmlElement;
+    self.jqueryElement = $(self.htmlElement);
     // Using only percent, so limit is 100%
-    self.single_bar_limit = 100;
+    self.singleBarLimit = 100;
 
-    self.single_bar_used = $.parseJSON(self.jquery_element.attr('data-single-bar-used'));
-    self.average_used = parseInt(self.jquery_element.attr('data-single-bar-average-used'), 10);
+    self.singleBarUsed = $.parseJSON(self.jqueryElement.attr("data-single-bar-used"));
+    self.averageUsed = parseInt(self.jqueryElement.attr("data-single-bar-average-used"), 10);
 
     self.data = {};
 
-    // Percentage and used_px  count
-    if ($.isArray(self.single_bar_used)){
-      self.data.used_px = 0;
-      self.data.percentage_used = Array();
-      self.data.tooltip_used_contents = Array();
-      for (var i = 0; i < self.single_bar_used.length; ++i) {
-        if (!isNaN(self.single_bar_limit) && !isNaN(self.single_bar_used[i].used_instances)) {
-          used = Math.round((self.single_bar_used[i].used_instances / self.single_bar_limit) * 100);
+    // Percentage and usedpx  count
+    if ($.isArray(self.singleBarUsed)){
+      self.data.usedpx = 0;
+      self.data.percentageUsed = [];
+      self.data.tooltipUsedContents = [];
+      for (var i = 0; i < self.singleBarUsed.length; ++i) {
+        if (!isNaN(self.singleBarLimit) && !isNaN(self.singleBarUsed[i].used_instances)) {
+          var used = Math.round((self.singleBarUsed[i].used_instances / self.singleBarLimit) * 100);
 
-          self.data.percentage_used.push(used);
+          self.data.percentageUsed.push(used);
           // for multi-bar chart, tooltip is in the data
-          self.data.tooltip_used_contents.push(self.single_bar_used[i].popup_used);
+          self.data.tooltipUsedContents.push(self.singleBarUsed[i].popupUsed);
 
-          self.data.used_px += self.jquery_element.width() / 100 * used;
-        } else { // If NaN self.data.percentage_used is 0
-
+          self.data.usedpx += self.jqueryElement.width() / 100 * used;
         }
       }
 
     }
     else {
-      if (!isNaN(self.single_bar_limit) && !isNaN(self.single_bar_used)) {
-        self.data.percentage_used = Math.round((self.single_bar_used / self.single_bar_limit) * 100);
-        self.data.used_px = self.jquery_element.width() / 100 * self.data.percentage_used;
+      if (!isNaN(self.singleBarLimit) && !isNaN(self.singleBarUsed)) {
+        self.data.percentageUsed = Math.round((self.singleBarUsed / self.singleBarLimit) * 100);
+        self.data.usedpx = self.jqueryElement.width() / 100 * self.data.percentageUsed;
 
-      } else { // If NaN self.data.percentage_used is 0
-        self.data.percentage_used = 0;
-        self.data.used_px = 0;
+      } else { // If NaN self.data.percentageUsed is 0
+        self.data.percentageUsed = 0;
+        self.data.usedpx = 0;
       }
 
-      if (!isNaN(self.single_bar_limit) && !isNaN(self.average_used)) {
-        self.data.percentage_average = ((self.average_used / self.single_bar_limit) * 100);
+      if (!isNaN(self.singleBarLimit) && !isNaN(self.averageUsed)) {
+        self.data.percentageAverage = ((self.averageUsed / self.singleBarLimit) * 100);
       } else {
-        self.data.percentage_average = 0;
+        self.data.percentageAverage = 0;
       }
     }
 
     // Width and height of bar
-    self.data.width = self.jquery_element.data('single-bar-width');
-    self.data.height = self.jquery_element.data('single-bar-height');
+    self.data.width = self.jqueryElement.data("single-bar-width");
+    self.data.height = self.jqueryElement.data("single-bar-height");
 
     // Color scales
-    self.auto_scale_selector = function () {
-      return self.jquery_element.data('single-bar-auto-scale-selector');
+    self.autoScaleSelector = function () {
+      return self.jqueryElement.data("single-bar-auto-scale-selector");
     };
-    self.is_auto_scaling = function () {
-      return self.auto_scale_selector();
+    self.isAutoScaling = function () {
+      return self.autoScaleSelector();
     };
-    self.auto_scale = function () {
-      var max_scale = 0;
-      $(self.auto_scale_selector()).each(function() {
-        var scale = parseInt($(this).data('single-bar-used'));
-        if (scale > max_scale)
-          max_scale = scale;
+    self.autoScale = function () {
+      var maxScale = 0;
+      $(self.autoScaleSelector()).each(function() {
+        var scale = parseInt($(this).data("single-bar-used"));
+        if (scale > maxScale) {
+          maxScale = scale;
+        }
       });
-      return [0, max_scale];
+      return [0, maxScale];
     };
 
-    if (self.jquery_element.data('single-bar-color-scale-domain'))
-      self.data.color_scale_domain =
-        self.jquery_element.data('single-bar-color-scale-domain');
-    else if (self.is_auto_scaling())
+    if (self.jqueryElement.data("single-bar-color-scale-domain")) {
+      self.data.colorScaleDomain =
+        self.jqueryElement.data("single-bar-color-scale-domain");
+    } else if (self.isAutoScaling()) {
       // Dynamically set scale based on biggest value
-      self.data.color_scale_domain = self.auto_scale();
-    else
-      self.data.color_scale_domain = [0,100];
-
-    if (self.jquery_element.data('single-bar-color-scale-range'))
-      self.data.color_scale_range =
-        self.jquery_element.data('single-bar-color-scale-range');
-    else
-      self.data.color_scale_range = ["#000000", "#0000FF"];
-
+      self.data.colorScaleDomain = self.autoScale();
+    } else {
+      self.data.colorScaleDomain = [0, 100];
+    }
+    if (self.jqueryElement.data("single-bar-color-scale-range")) {
+      self.data.colorScaleRange =
+        self.jqueryElement.data("single-bar-color-scale-range");
+    } else {
+      self.data.colorScaleRange = ["#000000", "#0000FF"];
+    }
     // Tooltips data
-    self.data.popup_average = self.jquery_element.data('popup-average');
-    self.data.popup_free = self.jquery_element.data('popup-free');
-    self.data.popup_used = self.jquery_element.data('popup-used');
+    self.data.popupAverage = self.jqueryElement.data("popup-average");
+    self.data.popupFree = self.jqueryElement.data("popup-free");
+    self.data.popupUsed = self.jqueryElement.data("popup-used");
 
     // Orientation of the Bar chart
-    self.data.orientation = self.jquery_element.data('single-bar-orientation');
+    self.data.orientation = self.jqueryElement.data("single-bar-orientation");
 
     // Refresh method
     self.refresh = function (){
-      self.chart_class.render(self.html_element, self.data);
+      self.chartClass.render(self.htmlElement, self.data);
     };
   },
   BaseComponent: function(data){
+    "use strict";
+
     var self = this;
 
     self.data = data;
 
     self.w = data.width;
     self.h = data.height;
-    self.lvl_curve = 3;
+    self.lvlCurve = 3;
     self.bkgrnd = "#F2F2F2";
     self.frgrnd = "grey";
-    self.color_scale_max = 25;
+    self.colorScaleMax = 25; // Is this used? /lregebro
 
-    self.percentage_used = data.percentage_used;
-    self.total_used_perc = 0;
-    self.used_px = data.used_px;
-    self.percentage_average = data.percentage_average;
-    self.tooltip_used_contents = data.tooltip_used_contents;
+    self.percentageUsed = data.percentageUsed;
+    self.totalUsedPerc = 0;
+    self.usedpx = data.usedpx;
+    self.percentageAverage = data.percentageAverage;
+    self.tooltipUsedContents = data.tooltipUsedContents;
 
     // set scales
-    self.usage_color = d3.scale.linear()
-      .domain(data.color_scale_domain)
-      .range(data.color_scale_range);
+    self.usageColor = d3.scale.linear()
+      .domain(data.colorScaleDomain)
+      .range(data.colorScaleRange);
 
     // return true if it renders used percentage multiple in one chart
-    self.used_multi = function (){
-      return ($.isArray(self.percentage_used));
+    self.usedMulti = function (){
+      return ($.isArray(self.percentageUsed));
     };
 
     // deals with percentage if there should be multiple in one chart
-    self.used_multi_iterator = 0;
-    self.percentage_used_value = function(){
-      if (self.used_multi()){
-        return self.percentage_used[self.used_multi_iterator];
+    self.usedMultiIterator = 0;
+    self.percentageUsedValue = function(){
+      if (self.usedMulti()){
+        return self.percentageUsed[self.usedMultiIterator];
       } else {
-        return self.percentage_used;
+        return self.percentageUsed;
       }
     };
     // deals with html tooltips if there should be multiple in one chart
-    self.tooltip_used_value = function (){
-      if (self.used_multi()){
-        return self.tooltip_used_contents[self.used_multi_iterator];
+    self.tooltipUsedValue = function (){
+      if (self.usedMulti()){
+        return self.tooltipUsedContents[self.usedMultiIterator];
       } else {
         return "";
       }
     };
 
     // return true if it chart is oriented horizontally
-    self.horizontal_orientation = function (){
-      return (self.data.orientation == "horizontal");
+    self.horizontalOrientation = function (){
+      return (self.data.orientation === "horizontal");
     };
 
   },
-  UsedComponent: function(base_component){
+  UsedComponent: function(baseComponent){
+    "use strict";
+
     var self = this;
-    self.base_component = base_component;
+    self.baseComponent = baseComponent;
 
     // FIXME would be good to abstract all attributes and resolve orientation inside
-    if (base_component.horizontal_orientation()){
+    if (baseComponent.horizontalOrientation()){
       // Horizontal Bars
       self.y = 0;
-      self.x = base_component.total_used_perc + "%";
+      self.x = baseComponent.totalUsedPerc + "%";
       self.width = 0;
-      self.height = base_component.h;
-      self.trasition_attr = "width";
-      self.trasition_value = base_component.percentage_used_value() + "%";
+      self.height = baseComponent.h;
+      self.transitionAttr = "width";
+      self.transitionValue = baseComponent.percentageUsedValue() + "%";
     } else { // Vertical Bars
-      self.y = base_component.h;
+      self.y = baseComponent.h;
       self.x = 0;
-      self.width = base_component.w;
-      self.height = base_component.percentage_used_value() + "%";
-      self.trasition_attr = "y";
-      self.trasition_value = 100 - base_component.percentage_used_value() + "%";
+      self.width = baseComponent.w;
+      self.height = baseComponent.percentageUsedValue() + "%";
+      self.transitionAttr = "y";
+      self.transitionValue = 100 - baseComponent.percentageUsedValue() + "%";
     }
 
-    self.append =  function(bar, tooltip){
-      var used_component = self;
-      var base_component = self.base_component;
+    self.append = function(bar, tooltip){
+      var usedComponent = self;
 
       bar.append("rect")
         .attr("class", "usedbar")
-        .attr("y", used_component.y)
-        .attr("x", used_component.x)
-        .attr("width", used_component.width)
-        .attr("height", used_component.height)
-        //.attr("rx", base_component.lvl_curve)
-        //.attr("ry", base_component.lvl_curve)
-        .style("fill", base_component.usage_color(base_component.percentage_used_value()))
+        .attr("y", usedComponent.y)
+        .attr("x", usedComponent.x)
+        .attr("width", usedComponent.width)
+        .attr("height", usedComponent.height)
+        //.attr("rx", baseComponent.lvlCurve)
+        //.attr("ry", baseComponent.lvlCurve)
+        .style("fill", baseComponent.usageColor(baseComponent.percentageUsedValue()))
         .style("stroke", "#bebebe")
         .style("stroke-width", 0)
-        .attr("d", base_component.percentage_used_value())
-        .attr("popup-used", base_component.tooltip_used_value())
-        .on("mouseover", function(d){
-          if ($(this).attr('popup-used')){
-            tooltip.html($(this).attr('popup-used'));
+        .attr("d", baseComponent.percentageUsedValue())
+        .attr("popup-used", baseComponent.tooltipUsedValue())
+        .on("mouseover", function(){
+          if ($(this).attr("popup-used")){
+            tooltip.html($(this).attr("popup-used"));
           }
           tooltip.style("visibility", "visible");})
-        .on("mousemove", function(d){tooltip.style("top",
-          (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
-        .on("mouseout", function(d){tooltip.style("visibility", "hidden");})
+        .on("mousemove", function(event){tooltip.style("top",
+          (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px");})
+        .on("mouseout", function(){tooltip.style("visibility", "hidden");})
         .transition()
           .duration(500)
-          .attr(used_component.trasition_attr, used_component.trasition_value);
+          .attr(usedComponent.transitionAttr, usedComponent.transitionValue);
     };
   },
-  AverageComponent: function(base_component){
+  AverageComponent: function(baseComponent){
+    "use strict";
+
     var self = this;
-    self.base_component = base_component;
+    self.baseComponent = baseComponent;
 
     // FIXME would be good to abstract all attributes and resolve orientation inside
-    if (base_component.horizontal_orientation()){
+    if (baseComponent.horizontalOrientation()){
       // Horizontal Bars
       self.y = 1;
       self.x = 0;
       self.width = 1;
-      self.height = base_component.h;
-      self.trasition_attr = "x";
-      self.trasition_value = base_component.percentage_average + "%";
+      self.height = baseComponent.h;
+      self.transitionAttr = "x";
+      self.transitionValue = baseComponent.percentageAverage + "%";
     } else { // Vertical Bars
       self.y = 0;
       self.x = 0;
-      self.width = base_component.w;
+      self.width = baseComponent.w;
       self.height = 1;
-      self.trasition_attr = "y";
-      self.trasition_value = 100 - base_component.percentage_average + "%";
+      self.transitionAttr = "y";
+      self.transitionValue = 100 - baseComponent.percentageAverage + "%";
     }
 
     self.append = function(bar, tooltip){
-      var average_component = self;
-      var base_component = self.base_component;
+      var averageComponent = self;
 
       bar.append("rect")
-        .attr("y", average_component.y)
-        .attr("x", average_component.x)
+        .attr("y", averageComponent.y)
+        .attr("x", averageComponent.x)
         .attr("class", "average")
-        .attr("height", average_component.height)
-        .attr("width", average_component.width)
+        .attr("height", averageComponent.height)
+        .attr("width", averageComponent.width)
         .style("fill", "black")
         .on("mouseover", function(){tooltip.style("visibility", "visible");})
-        .on("mousemove", function(){tooltip.style("top",
-          (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+        .on("mousemove", function(event){tooltip.style("top",
+          (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px");})
         .on("mouseout", function(){tooltip.style("visibility", "hidden");})
         .transition()
           .duration(500)
-          .attr(average_component.trasition_attr, average_component.trasition_value);
+          .attr(averageComponent.transitionAttr, averageComponent.transitionValue);
     };
   },
   /* TODO rewrite below as components */
   /* FIXME use some pretty tooltip from some library we will use
    * this one is just temporary */
-  append_tooltip: function(tooltip, html_content){
+  appendTooltip: function(tooltip, htmlContent){
+    "use strict";
+
     return tooltip
       .style("position", "absolute")
       .style("z-index", "10")
@@ -332,144 +341,159 @@ horizon.d3_single_bar_chart = {
       .style("padding", "8px")
       .style("padding-top", "5px")
       .style("background-color", "white")
-      .html(html_content);
+      .html(htmlContent);
   },
-  append_unused: function(bar, base_component, tooltip_free){
+  appendUnused: function(bar, baseComponent, tooltipFree){
+    "use strict";
+
     bar.append("rect")
       .attr("y", 0)
-      .attr("width", base_component.w)
-      .attr("height", base_component.h)
-      .attr("rx", base_component.lvl_curve)
-      .attr("ry", base_component.lvl_curve)
-      .style("fill", base_component.bkgrnd)
+      .attr("width", baseComponent.w)
+      .attr("height", baseComponent.h)
+      .attr("rx", baseComponent.lvlCurve)
+      .attr("ry", baseComponent.lvlCurve)
+      .style("fill", baseComponent.bkgrnd)
       .style("stroke", "#e0e0e0")
       .style("stroke-width", 1)
-      .on("mouseover", function(d){tooltip_free.style("visibility", "visible");})
-      .on("mousemove", function(d){tooltip_free.style("top",
-        (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
-      .on("mouseout", function(d){tooltip_free.style("visibility", "hidden");});
+      .on("mouseover", function(){tooltipFree.style("visibility", "visible");})
+      .on("mousemove", function(event){tooltipFree.style("top",
+        (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px");})
+      .on("mouseout", function(){tooltipFree.style("visibility", "hidden");});
   },
   // TODO This have to be enhanced, so this library can replace jtomasek capacity charts
-  append_text: function(bar, base_component, tooltip){
+  appendText: function(bar, baseComponent, tooltip){
+    "use strict";
+
     bar.append("text")
       .text("FREE")
-      .attr("y", base_component.h/2)
+      .attr("y", baseComponent.h / 2)
       .attr("x", 3)
       .attr("dominant-baseline", "middle")
       .attr("font-size", 13)
-      .on("mouseover", function(d){tooltip.style("visibility", "visible");})
-      .on("mousemove", function(d){tooltip.style("top",
-        (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
-      .on("mouseout", function(d){tooltip.style("visibility", "hidden");})
+      .on("mouseover", function(){tooltip.style("visibility", "visible");})
+      .on("mousemove", function(event){tooltip.style("top",
+        (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px");})
+      .on("mouseout", function(){tooltip.style("visibility", "hidden");})
       .transition()
         .duration(500)
         .attr("x", function() {
-          // FIXME when another panel is active, this page is hidden and used_px return 0
+          // FIXME when another panel is active, this page is hidden and usedpx return 0
           // text is then badly positioned, quick fix will be to refresh charts when panel
           // is switched. Need to find better solution.
-          if (base_component.total_used_perc > 90 && base_component.used_px > 25)
-            return base_component.used_px - 20;
-          else
-            return base_component.used_px + 20;
+          if (baseComponent.totalUsedPerc > 90 && baseComponent.usedpx > 25) {
+            return baseComponent.usedpx - 20;
+          } else {
+            return baseComponent.usedpx + 20;
+          }
         });
   },
-  append_border: function(bar){
+  appendBorder: function(bar){
+    "use strict";
+
     bar.append("rect")
       .attr("x", 0)
       .attr("y", 0)
-      .attr("height", '100%')
-      .attr("width", '100%')
+      .attr("height", "100%")
+      .attr("width", "100%")
       .style("stroke", "#bebebe")
       .style("fill", "none")
       .style("stroke-width", 1);
   },
   //  INIT
   init: function() {
-    var self = this;
-    this.single_bars = $('div[data-single-bar-used]');
+    "use strict";
 
-    this.single_bars.each(function() {
+    var self = this;
+    this.singleBars = $("div[data-single-bar-used]");
+
+    this.singleBars.each(function() {
       self.refresh(this);
     });
   },
-  refresh: function(html_element){
-    var chart = new this.SingleBarChart(this, html_element);
+  refresh: function(htmlElement){
+    "use strict";
+
+    var chart = new this.SingleBarChart(this, htmlElement);
     // FIXME save chart objects somewhere so I can use them again when
     // e.g. I am swithing tabs, or if I want to update them
     // via web sockets
     // this.charts.add_or_update(chart)
     chart.refresh();
   },
-  render: function(html_element, data) {
-    var jquery_element  = $(html_element);
+  render: function(htmlElement, data) {
+    "use strict";
 
-    // Initialize base_component
-    var base_component = new this.BaseComponent(data);
+    // var jqueryElement = $(htmlElement);
+
+    // Initialize baseComponent
+    var baseComponent = new this.BaseComponent(data);
 
     // Bar
-    var bar_html = d3.select(html_element);
+    var barHtml = d3.select(htmlElement);
 
     // Tooltips
-    var tooltip_average = bar_html.append("div");
-    if (data.popup_average)
-      tooltip_average = this.append_tooltip(tooltip_average, data.popup_average);
-
-    var tooltip_free = bar_html.append("div");
-    if (data.popup_free)
-      tooltip_free = this.append_tooltip(tooltip_free, data.popup_free);
-
-    var tooltip_used = bar_html.append("div");
-    if (data.popup_used)
-      tooltip_used = this.append_tooltip(tooltip_used, data.popup_used);
-
+    var tooltipAverage = barHtml.append("div");
+    if (data.popupAverage) {
+      tooltipAverage = this.appendTooltip(tooltipAverage, data.popupAverage);
+    }
+    var tooltipFree = barHtml.append("div");
+    if (data.popupFree) {
+      tooltipFree = this.appendTooltip(tooltipFree, data.popupFree);
+    }
+    var tooltipUsed = barHtml.append("div");
+    if (data.popupUsed)  {
+      tooltipUsed = this.appendTooltip(tooltipUsed, data.popupUsed);
+    }
     // append layout for bar chart
-    var bar = bar_html.append("svg:svg")
+    var bar = barHtml.append("svg:svg")
       .attr("class", "chart")
-      .attr("width", base_component.w)
-      .attr("height", base_component.h)
+      .attr("width", baseComponent.w)
+      .attr("height", baseComponent.h)
       .style("background-color", "white")
       .append("g");
-    var used_component;
+    var usedComponent;
 
     // append Unused resources Bar
-    this.append_unused(bar, base_component, tooltip_free);
+    this.appendUnused(bar, baseComponent, tooltipFree);
 
-    if (base_component.used_multi()){
+    if (baseComponent.usedMulti()){
       // If Used is shown as multiple values in one chart
-      for (var i = 0; i < base_component.percentage_used.length; ++i) {
+      for (var i = 0; i < baseComponent.percentageUsed.length; ++i) {
         // FIXME write proper iterator
-        base_component.used_multi_iterator = i;
+        baseComponent.usedMultiIterator = i;
 
         // Use general tooltip, content of tooltip will be changed
         // by inner used compoentnts on their hover
-        tooltip_used = this.append_tooltip(tooltip_used, "");
+        tooltipUsed = this.appendTooltip(tooltipUsed, "");
 
         // append used so it will be shown as multiple values in one chart
-        used_component = new this.UsedComponent(base_component);
-        used_component.append(bar, tooltip_used);
+        usedComponent = new this.UsedComponent(baseComponent);
+        usedComponent.append(bar, tooltipUsed);
 
         // append Used resources to Bar
-        base_component.total_used_perc += base_component.percentage_used_value();
+        baseComponent.totalUsedPerc += baseComponent.percentageUsedValue();
       }
 
       // append Text to Bar
-      this.append_text(bar, base_component, tooltip_free);
+      this.appendText(bar, baseComponent, tooltipFree);
 
     } else {
       // used is show as one value it the chart
-      used_component = new this.UsedComponent(base_component);
-      used_component.append(bar, tooltip_used);
+      usedComponent = new this.UsedComponent(baseComponent);
+      usedComponent.append(bar, tooltipUsed);
 
       // append average value to Bar
-      var average_component = new this.AverageComponent(base_component);
-      average_component.append(bar, tooltip_average);
+      var averageComponent = new this.AverageComponent(baseComponent);
+      averageComponent.append(bar, tooltipAverage);
     }
     // append border of whole Bar
-    this.append_border(bar);
+    this.appendBorder(bar);
   }
 };
 
 
 horizon.addInitFunction(function () {
-  horizon.d3_single_bar_chart.init();
+  "use strict";
+
+  horizon.d3SingleBarChart.init();
 });

@@ -26,15 +26,18 @@
           Integer representing the average usage of given capacity.
 */
 
+/* global $ horizon d3*/
 horizon.Capacity = {
-  capacity_bars: [],
+  capacityBars: [],
 
   //  Determines the capacity bars to be used for capacity display.
   init: function() {
-    this.capacity_bars = $('div[data-chart-type="capacity_bar_chart"]');
+    "use strict";
+
+    this.capacityBars = $("div[data-chart-type=\"capacity_bar_chart\"]");
 
     // Draw the capacity bars
-    this._initialCreation(this.capacity_bars);
+    this.initialCreation(this.capacityBars);
   },
 
 
@@ -42,18 +45,20 @@ horizon.Capacity = {
     Create a new d3 bar and populate it with the current amount used,
     average used, and percentage label
   */
-  drawUsed: function(element, used_perc, used_px, average_perc) {
-    var w= "100%";
-    var h= 15;
-    var lvl_curve= 3;
-    var bkgrnd= "#F2F2F2";
-    var frgrnd= "grey";
-    var usage_color = d3.scale.linear()
+  drawUsed: function(element, usedPerc, usedpx, averagePerc) {
+    "use strict";
+
+    var w = "100%";
+    var h = 15;
+    var lvlCurve = 3;
+    var bkgrnd = "#F2F2F2";
+    var frgrnd = "#bebebe";
+    var usageColor = d3.scale.linear()
                               .domain([0, 50, 75, 90, 100])
                               .range(["#669900", "#669900", "#FF9900", "#FF3300", "#CC0000"]);
 
     // Horizontal Bars
-    var bar = d3.select("#"+element).append("svg:svg")
+    var bar = d3.select("#" + element).append("svg:svg")
         .attr("class", "chart")
         .attr("width", w)
         .attr("height", h)
@@ -65,49 +70,49 @@ horizon.Capacity = {
       .attr("y", 0)
       .attr("width", w)
       .attr("height", h)
-      .attr("rx", lvl_curve)
-      .attr("ry", lvl_curve)
+      .attr("rx", lvlCurve)
+      .attr("ry", lvlCurve)
       .style("fill", bkgrnd)
-      .style("stroke", "#bebebe")
+      .style("stroke", frgrnd)
       .style("stroke-width", 1);
 
     // used resources
-    if (used_perc) {
+    if (usedPerc) {
       bar.append("rect")
          .attr("class", "usedbar")
          .attr("y", 0)
          .attr("id", "test")
          .attr("width", 0)
          .attr("height", h)
-         .attr("rx", lvl_curve)
-         .attr("ry", lvl_curve)
-         .style("fill", usage_color(used_perc))
+         .attr("rx", lvlCurve)
+         .attr("ry", lvlCurve)
+         .style("fill", usageColor(usedPerc))
          .style("stroke", "#a0a0a0")
          .style("stroke-width", 1)
-         .attr("d", used_perc)
+         .attr("d", usedPerc)
          .transition()
             .duration(500)
-            .attr("width", used_perc + "%");
+            .attr("width", usedPerc + "%");
       }
 
     // average
-    if (average_perc) {
+    if (averagePerc) {
       bar.append("rect")
-         .attr("y",1)
+         .attr("y", 1)
          .attr("x", 0)
          .attr("class", "average")
-         .attr("height", h-2)
+         .attr("height", h - 2)
          .attr("width", 1)
          .style("fill", "black")
          .transition()
             .duration(500)
-            .attr("x", average_perc + "%");
+            .attr("x", averagePerc + "%");
     }
 
     // used text
-    if (used_perc) {
+    if (usedPerc) {
       bar.append("text")
-         .text(used_perc + "%")
+         .text(usedPerc + "%")
          .attr("y", 8)
          .attr("x", 3)
          .attr("dominant-baseline", "middle")
@@ -116,12 +121,12 @@ horizon.Capacity = {
             .duration(500)
             .attr("x", function() {
               // position the percentage label
-              if (used_perc > 99 && used_px > 25){
-                return used_px - 30;
-              } else if (used_px > 25) {
-                return used_px - 25;
+              if (usedPerc > 99 && usedpx > 25){
+                return usedpx - 30;
+              } else if (usedpx > 25) {
+                return usedpx - 25;
               } else {
-                return used_px + 3;
+                return usedpx + 3;
               }
             });
     }
@@ -129,32 +134,36 @@ horizon.Capacity = {
 
 
   // Draw the initial d3 bars
-  _initialCreation: function(bars) {
+  initialCreation: function(bars) {
+    "use strict";
+
     var scope = this;
 
     $(bars).each(function(index, element) {
-      var progress_element = $(element);
+      var progressElement = $(element);
 
-      var capacity_limit = parseInt(progress_element.attr('data-capacity-limit'), 10);
-      var capacity_used = parseInt(progress_element.attr('data-capacity-used'), 10);
-      var average_used = parseInt(progress_element.attr('data-average-capacity-used'), 10);
-      var percentage_used = 0;
-      var average_percentage = 0;
-      var _used_px = 0;
+      var capacityLimit = parseInt(progressElement.attr("data-capacity-limit"), 10);
+      var capacityUsed = parseInt(progressElement.attr("data-capacity-used"), 10);
+      var averageUsed = parseInt(progressElement.attr("data-average-capacity-used"), 10);
+      var percentageUsed = 0;
+      var averagePercentage = 0;
+      var usedpx = 0;
 
-      if (!isNaN(capacity_limit) && !isNaN(average_used)) {
-        average_percentage = ((average_used / capacity_limit) * 100);
+      if (!isNaN(capacityLimit) && !isNaN(averageUsed)) {
+        averagePercentage = ((averageUsed / capacityLimit) * 100);
       }
-      if (!isNaN(capacity_limit) && !isNaN(capacity_used)) {
-        percentage_used = Math.round((capacity_used / capacity_limit) * 100);
-        _used_px = progress_element.width() / 100 * percentage_used;
+      if (!isNaN(capacityLimit) && !isNaN(capacityUsed)) {
+        percentageUsed = Math.round((capacityUsed / capacityLimit) * 100);
+        usedpx = progressElement.width() / 100 * percentageUsed;
       }
 
-      scope.drawUsed($(element).attr('id'), percentage_used, _used_px, average_percentage);
+      scope.drawUsed($(element).attr("id"), percentageUsed, usedpx, averagePercentage);
     });
   }
 };
 
 horizon.addInitFunction(function () {
+  "use strict";
+
   horizon.Capacity.init();
 });
