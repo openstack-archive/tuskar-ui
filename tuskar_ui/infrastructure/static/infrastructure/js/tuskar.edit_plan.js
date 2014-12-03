@@ -1,73 +1,74 @@
-tuskar.edit_plan = (function () {
-    'use strict';
+/* global $ horizon tuskar Hogan window */
+tuskar.editPlan = (function () {
+    "use strict";
 
     var module = {};
 
-    module.debounce_timer = null;
+    module.debounceTimer = null;
     module.ICON_CLASSES = (
-	'fa-spinner ' + 
-	'fa-spin ' +
-	'fa-cloud ' +
-	'fa-exclamation-circle ' +
-	'fa-check-circle ' +
-	''
+	"fa-spinner " +
+	"fa-spin " +
+	"fa-cloud " +
+	"fa-exclamation-circle " +
+	"fa-check-circle " +
+	""
     );
 
     module.init = function () {
-        if (!$('form.deployment-roles-form').length) { return; }
+        if (!$("form.deployment-roles-form").length) { return; }
         // Attach event listeners and hide the submit button.
-        $('form.deployment-roles-form input.number-picker'
-            ).change(module.on_change);
-        $('form.deployment-roles-form [type=submit]').hide();
+        $("form.deployment-roles-form input.number-picker"
+            ).change(module.onChange);
+        $("form.deployment-roles-form [type=submit]").hide();
         // Compile the templates.
-        module.message_template = Hogan.compile(
-            $('#message-template').html() || '');
-        module.title_template = Hogan.compile(
-            $('#title-template').html() || '');
+        module.messageTemplate = Hogan.compile(
+            $("#message-template").html() || "");
+        module.titleTemplate = Hogan.compile(
+            $("#title-template").html() || "");
     };
 
-    module.on_change = function () {
+    module.onChange = function () {
         // Only save when there was no activity for half a second.
-        window.clearTimeout(module.debounce_timer);
-        module.debounce_timer = window.setTimeout(module.save_form, 500);
+        window.clearTimeout(module.debounceTimer);
+        module.debounceTimer = window.setTimeout(module.saveForm, 500);
     };
 
-    module.save_form = function () {
+    module.saveForm = function () {
         // Save the current plan and get validation results.
-        var $form = $('form.deployment-roles-form');
-        module.update_messages(null);
+        var $form = $("form.deployment-roles-form");
+        module.updateMessages(null);
         $.ajax({
-          type: 'POST',
-          headers: {'X-Horizon-Validate': 'true'},
-          url: $form.attr('action'),
+          type: "POST",
+          headers: {"X-Horizon-Validate": "true"},
+          url: $form.attr("action"),
           data: $form.serialize(),
-          dataType: 'json',
+          dataType: "json",
           async: true,
-          success: module.update_messages,
+          success: module.updateMessages
         });
     };
 
-    module.update_messages = function (data) {
+    module.updateMessages = function (data) {
         if (data === null) {
-            $('div.deployment-buttons a.btn-primary').addClass('disabled');
-            $('div.deployment-icon i').removeClass(module.ICON_CLASSES
-		).addClass('fa-spinner fa-spin');
-            data = {validating:true};
+            $("div.deployment-buttons a.btn-primary").addClass("disabled");
+            $("div.deployment-icon i").removeClass(module.ICON_CLASSES
+		).addClass("fa-spinner fa-spin");
+            data = {validating: true};
         } else if (data.plan_invalid) {
-            $('div.deployment-buttons a.btn-primary').addClass('disabled');
-            $('div.deployment-icon i').removeClass(module.ICON_CLASSES
-		).addClass('fa-exclamation-circle');
+            $("div.deployment-buttons a.btn-primary").addClass("disabled");
+            $("div.deployment-icon i").removeClass(module.ICON_CLASSES
+		).addClass("fa-exclamation-circle");
         } else {
-            $('div.deployment-buttons a.btn-primary').removeClass('disabled');
-            $('div.deployment-icon i').removeClass(module.ICON_CLASSES
-		).addClass('fa-check-circle');
+            $("div.deployment-buttons a.btn-primary").removeClass("disabled");
+            $("div.deployment-icon i").removeClass(module.ICON_CLASSES
+		).addClass("fa-check-circle");
         }
-        $('div.deployment-box h4').replaceWith(
-            module.title_template.render(data));
-        $('div.deployment-box ul').replaceWith(
-            module.message_template.render(data));
+        $("div.deployment-box h4").replaceWith(
+            module.titleTemplate.render(data));
+        $("div.deployment-box ul").replaceWith(
+            module.messageTemplate.render(data));
     };
 
     horizon.addInitFunction(module.init);
     return module;
-} ());
+}());
