@@ -14,4 +14,4 @@ To enable Bare Metal driver in DevStack you need to:
     + BM_DNSMASQ_FROM_NOVA_NETWORK=`trueorfalse True $BM_DNSMASQ_FROM_NOVA_NETWORK`
 
 See `Bare Metal DevStack documentation <http://devstack.org/lib/baremetal.html>`_
-or `baremetal file itself <https://github.com/openstack-dev/devstack/blob/master/lib/baremetal>`_
+or `baremetal file itself <https://git.openstack.org/cgit/openstack-dev/devstack/blob/master/lib/baremetal>`_

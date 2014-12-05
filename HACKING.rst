@@ -14,7 +14,7 @@ We use OpenStack's Gerrit for the code contributions:
 
 `<https://review.openstack.org/#/q/status:open+project:openstack/tuskar-ui,n,z>`__
 
-and we follow the `OpenStack Gerrit Workflow <https://wiki.openstack.org/wiki/Gerrit_Workflow>`__.
+and we follow the `OpenStack Gerrit Workflow <http://docs.openstack.org/infra/manual/developers.html#development-workflow>`__.
 
 If you're interested in the code, here are some key places to start:
 
