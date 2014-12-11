@@ -133,8 +133,6 @@ class EditServiceConfig(horizon.forms.SelfHandlingForm):
                 neutron_public_interface,
             compute_prefix + 'NeutronPublicInterface':
                 neutron_public_interface,
-            cinder_prefix + 'NeutronPublicInterface':
-                neutron_public_interface,
             controller_prefix + 'NtpServer':
                 ntp_server,
             compute_prefix + 'NtpServer':
