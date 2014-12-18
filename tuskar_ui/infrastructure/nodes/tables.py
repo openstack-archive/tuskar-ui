@@ -111,11 +111,12 @@ class NodeFilterAction(tables.FilterAction):
         q = filter_string.lower()
 
         def comp(node):
-            return any(q in attr for attr in
-                       (node.ip_address,
-                        node.cpus,
-                        node.memory_mb,
-                        node.local_gb,))
+            return any(q in unicode(value).lower() for value in (
+                node.ip_address,
+                node.cpus,
+                node.memory_mb,
+                node.local_gb,
+            ))
 
         return filter(comp, nodes)
 
