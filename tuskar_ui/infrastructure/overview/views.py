@@ -66,7 +66,8 @@ def _get_role_data(plan, stack, form, role):
                                    if node.instance.status == 'ERROR')
             waiting_node_count = (node_count - deployed_node_count -
                                   deploying_node_count - error_node_count)
-            if error_node_count:
+
+            if error_node_count or 'FAILED' in stack.stack_status:
                 status = 'danger'
             elif deployed_node_count == data['planned_node_count']:
                 status = 'success'
