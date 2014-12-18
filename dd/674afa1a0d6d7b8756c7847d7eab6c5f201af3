@@ -1,0 +1,9 @@
+Verified+2: Jenkins
+Code-Review+2: Tatiana Ovchinnikova <t.v.ovtchinnikova@gmail.com>
+Workflow+1: Tatiana Ovchinnikova <t.v.ovtchinnikova@gmail.com>
+Code-Review+2: Ana Krivokapic <akrivoka@redhat.com>
+Submitted-by: Jenkins
+Submitted-at: Thu, 18 Dec 2014 10:56:12 +0000
+Reviewed-on: https://review.openstack.org/142716
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
