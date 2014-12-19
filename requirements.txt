@@ -25,4 +25,3 @@ pytz>=2013.6
 lockfile>=0.8
 
 python-ironicclient>=0.2.1
-http://tarballs.openstack.org/python-tuskarclient/python-tuskarclient-master.tar.gz#egg=python-tuskarclient
