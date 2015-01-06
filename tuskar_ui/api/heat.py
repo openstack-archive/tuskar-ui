@@ -289,13 +289,21 @@ class Stack(base.APIResourceWrapper):
 
     @cached_property
     def is_deploying(self):
-        """Check if this Stack is currently deploying or updating.
+        """Check if this Stack is currently deploying.
 
         :return: True if deployment is in progress, False otherwise.
         :rtype: bool
         """
-        return self.stack_status in ('CREATE_IN_PROGRESS',
-                                     'UPDATE_IN_PROGRESS')
+        return self.stack_status in ('CREATE_IN_PROGRESS',)
+
+    @cached_property
+    def is_updating(self):
+        """Check if this Stack is currently updating.
+
+        :return: True if updating is in progress, False otherwise.
+        :rtype: bool
+        """
+        return self.stack_status in ('UPDATE_IN_PROGRESS',)
 
     @cached_property
     def is_failed(self):

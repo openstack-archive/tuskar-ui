@@ -11,6 +11,8 @@
                 {% trans "Undeploying..." %}
             {% elif stack.is_deploying %}
                 {% trans "Deploying..." %}
+            {% elif stack.is_updating %}
+                {% trans "Updating..." %}
             {% endif %}
 {% endblock %}
 
@@ -33,7 +35,7 @@
 {% endblock %}
 
 {% block deployment-buttons %}
-    {% if stack.is_deploying %}
+    {% if stack.is_deploying or stack.is_updating %}
       <a
     href="{% url 'horizon:infrastructure:overview:undeploy_confirmation' %}"
     class="btn btn-danger ajax-modal">
