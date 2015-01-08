@@ -652,8 +652,12 @@ class Node(base.APIResourceWrapper):
 
     @cached_property
     def ip_address(self):
-        return (self.instance._apiresource.addresses['ctlplane'][0]
-                ['addr'])
+        try:
+            apiresource = self.instace._apiresource
+        except AttributeError:
+            LOG.error("Couldn't obtain IP address")
+            return None
+        return apiresource.addresses['ctlplane'][0]['addr']
 
     @cached_property
     def image_name(self):
