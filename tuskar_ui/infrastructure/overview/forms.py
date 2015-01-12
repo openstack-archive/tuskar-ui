@@ -148,10 +148,17 @@ class EditPlan(horizon.forms.SelfHandlingForm):
         return fields
 
     def handle(self, request, data):
-        parameters = dict(
-            (field.role.node_count_parameter_name, data[name])
-            for (name, field) in self.fields.items() if name.endswith('-count')
-        )
+        parameters = dict()
+        for (name, field) in self.fields.items():
+            if name.endswith('-count'):
+                parameters[field.role.node_count_parameter_name] = data[name]
+                # NOTE(gfidente): this is a bad hack meant to magically add the
+                # specific parameter which enables NeutronL3HA when number of
+                # Controllers is > 1
+                if ('controller' in field.role.node_count_parameter_name
+                        and data[name] > 1):
+                    l3ha_param = field.role.parameter_prefix + 'NeutronL3HA'
+                    parameters[l3ha_param] = 'True'
         try:
             self.plan = self.plan.patch(request, self.plan.uuid, parameters)
         except Exception as e:
