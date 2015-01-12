@@ -152,6 +152,10 @@ class EditPlan(horizon.forms.SelfHandlingForm):
             (field.role.node_count_parameter_name, data[name])
             for (name, field) in self.fields.items() if name.endswith('-count')
         )
+        controller_role = self.plan.get_role_by_name('controller')
+        if parameters[controller_role.node_count_parameter_name] > 1:
+            l3ha_param = controller_role.parameter_prefix + 'NeutronL3HA'
+            parameters[l3ha_param] = 'True'
         try:
             self.plan = self.plan.patch(request, self.plan.uuid, parameters)
         except Exception as e:
