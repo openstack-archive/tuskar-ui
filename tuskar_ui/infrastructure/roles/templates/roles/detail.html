@@ -34,9 +34,6 @@
     {% include "infrastructure/_performance_chart_box.html" with meter_conf=meter_conf node_perf_url=node_perf_url col_size=4 %}
   </div>
 </div>
-<div class="row">
-  <div class="col-xs-12">
-    {{ table.render }}
-  </div>
-</div>
+
+{{ table.render }}
 {% endblock %}
