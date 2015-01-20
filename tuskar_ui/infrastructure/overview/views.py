@@ -21,10 +21,10 @@ import django.utils.text
 from django.utils.translation import ugettext_lazy as _
 import heatclient
 import horizon.forms
-from horizon.utils import memoized
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.overview import forms
+import tuskar_ui.infrastructure.views as infrastructure_views
 
 
 INDEX_URL = 'horizon:infrastructure:overview:index'
@@ -98,14 +98,7 @@ def _get_role_data(plan, stack, form, role):
     return data
 
 
-class StackMixin(object):
-    @memoized.memoized
-    def get_stack(self):
-        plan = api.tuskar.Plan.get_the_plan(self.request)
-        return api.heat.Stack.get_by_plan(self.request, plan)
-
-
-class IndexView(horizon.forms.ModalFormView, StackMixin):
+class IndexView(horizon.forms.ModalFormView, infrastructure_views.StackMixin):
     template_name = 'infrastructure/overview/index.html'
     form_class = forms.EditPlan
     success_url = reverse_lazy(INDEX_URL)
@@ -258,7 +251,8 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
         }), mimetype='application/json')
 
 
-class DeployConfirmationView(horizon.forms.ModalFormView, StackMixin):
+class DeployConfirmationView(horizon.forms.ModalFormView,
+                             infrastructure_views.StackMixin):
     form_class = forms.DeployOvercloud
     template_name = 'infrastructure/overview/deploy_confirmation.html'
     submit_label = _("Deploy")
@@ -276,7 +270,8 @@ class DeployConfirmationView(horizon.forms.ModalFormView, StackMixin):
         return reverse(INDEX_URL)
 
 
-class UndeployConfirmationView(horizon.forms.ModalFormView, StackMixin):
+class UndeployConfirmationView(horizon.forms.ModalFormView,
+                               infrastructure_views.StackMixin):
     form_class = forms.UndeployOvercloud
     template_name = 'infrastructure/overview/undeploy_confirmation.html'
     submit_label = _("Undeploy")
@@ -296,7 +291,8 @@ class UndeployConfirmationView(horizon.forms.ModalFormView, StackMixin):
         return initial
 
 
-class PostDeployInitView(horizon.forms.ModalFormView, StackMixin):
+class PostDeployInitView(horizon.forms.ModalFormView,
+                         infrastructure_views.StackMixin):
     form_class = forms.PostDeployInit
     template_name = 'infrastructure/overview/post_deploy_init.html'
     submit_label = _("Initialize")
@@ -316,7 +312,8 @@ class PostDeployInitView(horizon.forms.ModalFormView, StackMixin):
         return initial
 
 
-class ScaleOutView(horizon.forms.ModalFormView, StackMixin):
+class ScaleOutView(horizon.forms.ModalFormView,
+                   infrastructure_views.StackMixin):
     form_class = forms.ScaleOut
     template_name = "infrastructure/overview/scale_out.html"
     submit_label = _("Deploy Changes")
