@@ -60,6 +60,7 @@ class NodeTable(nodes_tables.ProvisionedNodesTable):
     class Meta:
         name = "nodetable"
         verbose_name = _("Nodes")
+        hidden_title = False
         table_actions = ()
         row_actions = ()
         template = "horizon/common/_enhanced_data_table.html"
