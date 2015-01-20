@@ -28,31 +28,14 @@ from openstack_dashboard.api import base as api_base
 from tuskar_ui import api
 from tuskar_ui.infrastructure.roles import tables
 from tuskar_ui.infrastructure.roles import workflows as role_workflows
-import tuskar_ui.infrastructure.views as infrastructure_views
+import tuskar_ui.infrastructure.views as views
 from tuskar_ui.utils import metering as metering_utils
 
 
 INDEX_URL = 'horizon:infrastructure:roles:index'
 
 
-class RoleMixin(object):
-    @utils.memoized.memoized
-    def get_role(self, redirect=None):
-        role_id = self.kwargs['role_id']
-        role = api.tuskar.Role.get(self.request, role_id,
-                                   _error_redirect=redirect)
-        return role
-
-
-class StackMixin(object):
-    @utils.memoized.memoized
-    def get_stack(self):
-        plan = api.tuskar.Plan.get_the_plan(self.request)
-        return api.heat.Stack.get_by_plan(self.request, plan)
-
-
-class IndexView(infrastructure_views.ItemCountMixin,
-                horizon_tables.DataTableView):
+class IndexView(views.ItemCountMixin, horizon_tables.DataTableView):
     table_class = tables.RolesTable
     template_name = "infrastructure/roles/index.html"
 
@@ -79,7 +62,8 @@ class IndexView(infrastructure_views.ItemCountMixin,
         return roles
 
 
-class DetailView(horizon_tables.DataTableView, RoleMixin, StackMixin):
+class DetailView(horizon_tables.DataTableView, views.RoleMixin,
+                 views.StackMixin):
     table_class = tables.NodeTable
     template_name = 'infrastructure/roles/detail.html'
 
@@ -175,7 +159,7 @@ class UpdateView(workflows.WorkflowView):
                 }
 
 
-class PerformanceView(base.TemplateView, RoleMixin, StackMixin):
+class PerformanceView(base.TemplateView, views.RoleMixin, views.StackMixin):
     def get(self, request, *args, **kwargs):
         meter = request.GET.get('meter')
         date_options = request.GET.get('date_options')
