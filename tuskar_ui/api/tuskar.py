@@ -345,7 +345,7 @@ class Plan(base.APIResourceWrapper):
 
 
 class Role(base.APIResourceWrapper):
-    _attrs = ('uuid', 'name', 'version', 'description', 'created')
+    _attrs = ('uuid', 'name', 'version', 'description')
 
     def __init__(self, apiresource, request=None):
         super(Role, self).__init__(apiresource)
@@ -481,6 +481,13 @@ class Role(base.APIResourceWrapper):
     @property
     def id(self):
         return self.uuid
+
+    def to_dict(self):
+        data = {}
+        for attr in self._attrs:
+            data[attr] = getattr(self, attr)
+        return data
+
 
 
 class Parameter(base.APIDictWrapper):

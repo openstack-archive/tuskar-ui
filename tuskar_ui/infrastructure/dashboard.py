@@ -13,6 +13,7 @@
 
 from django.utils.translation import ugettext_lazy as _
 import horizon
+import tuskar_ui.api.rest
 
 
 class Infrastructure(horizon.Dashboard):
