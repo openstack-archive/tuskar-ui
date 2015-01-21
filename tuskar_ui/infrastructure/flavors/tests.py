@@ -21,6 +21,7 @@ from novaclient.v1_1 import servers
 from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui import api
+from tuskar_ui.infrastructure.flavors import utils as flavors_utils
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import flavor_data
 from tuskar_ui.test.test_data import heat_data
@@ -223,3 +224,50 @@ class FlavorsTest(test.BaseAdminViewTests):
             self.assertEqual(get_mock.call_count, 1)
             self.assertEqual(plan_mock.call_count, 1)
         self.assertTemplateUsed(res, 'infrastructure/flavors/details.html')
+
+
+class FlavorsUtilsTest(test.TestCase):
+    def test_safe_int_cast(self):
+        ret = flavors_utils._safe_int_cast(1)
+        self.assertEqual(ret, 1)
+        ret = flavors_utils._safe_int_cast('1')
+        self.assertEqual(ret, 1)
+        ret = flavors_utils._safe_int_cast('')
+        self.assertEqual(ret, 0)
+        ret = flavors_utils._safe_int_cast(None)
+        self.assertEqual(ret, 0)
+        ret = flavors_utils._safe_int_cast(object())
+        self.assertEqual(ret, 0)
+
+    def test_get_unmached_suggestions(self):
+        flavors = [api.flavor.Flavor(flavor)
+                   for flavor in TEST_DATA.novaclient_flavors.list()]
+        nodes = [api.node.Node(api.node.IronicNode(node))
+                 for node in self.ironicclient_nodes.list()]
+        with (
+            patch('tuskar_ui.api.flavor.Flavor.list', return_value=flavors)
+        ), (
+            patch('tuskar_ui.api.node.Node.list', return_value=nodes)
+        ):
+            ret = flavors_utils.get_flavor_suggestions(None)
+        FS = flavors_utils.FlavorSuggestion
+        self.assertEqual(ret, set([
+            FS(vcpus=8, ram_bytes=4294967296, disk_bytes=10737418240,
+               cpu_arch='x86_64', node_id='aa-11'),
+            FS(vcpus=16, ram_bytes=4294967296, disk_bytes=107374182400,
+               cpu_arch='x86_64', node_id='bb-22'),
+            FS(vcpus=32, ram_bytes=8589934592, disk_bytes=1073741824,
+               cpu_arch='x86_64', node_id='cc-33'),
+            FS(vcpus=8, ram_bytes=4294967296, disk_bytes=10737418240,
+               cpu_arch='x86_64', node_id='cc-44'),
+            FS(vcpus=8, ram_bytes=4294967296, disk_bytes=10737418240,
+               cpu_arch='x86_64', node_id='dd-55'),
+            FS(vcpus=8, ram_bytes=4294967296, disk_bytes=10737418240,
+               cpu_arch='x86_64', node_id='ff-66'),
+            FS(vcpus=8, ram_bytes=4294967296, disk_bytes=10737418240,
+               cpu_arch='x86_64', node_id='gg-77'),
+            FS(vcpus=8, ram_bytes=4294967296, disk_bytes=10737418240,
+               cpu_arch='x86_64', node_id='hh-88'),
+            FS(vcpus=16, ram_bytes=8589934592, disk_bytes=1073741824000,
+               cpu_arch='x86_64', node_id='ii-99'),
+        ]))
