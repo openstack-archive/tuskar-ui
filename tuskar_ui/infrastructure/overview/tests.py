@@ -19,6 +19,7 @@ from mock import patch, call  # noqa
 from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui import api
+from tuskar_ui.infrastructure.overview import forms
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import heat_data
 from tuskar_ui.test.test_data import tuskar_data
@@ -80,7 +81,6 @@ def _mock_plan(**kwargs):
 
 
 class OverviewTests(test.BaseAdminViewTests):
-
     def test_index_stack_not_created(self):
         with contextlib.nested(
             _mock_plan(),
@@ -309,3 +309,32 @@ class OverviewTests(test.BaseAdminViewTests):
             'admin', None, 'admin', stack.keystone_auth_url)
         mock_get_neutron_client.assert_called_once_with(
             'admin', None, 'admin', stack.keystone_auth_url)
+
+    def test_validate_plan_empty(self):
+        with (
+            _mock_plan()
+        ) as plan, (
+            patch('tuskar_ui.api.node.Node.list', return_value=[])
+        ), (
+            patch('tuskar_ui.api.flavor.Flavor.list', return_value=[])
+        ):
+            ret = forms.validate_plan(None, plan)
+        self.assertEqual(ret, [
+            {
+                'is_critical': True,
+                'text': u'No controller role.',
+            }, {
+                'is_critical': True,
+                'text': u'No compute role.',
+            }, {
+                'is_critical': True,
+                'link_label': u'Define flavors.',
+                'link_url': '/infrastructure/flavors/',
+                'text': u'You have no flavors defined.',
+            }, {
+                'is_critical': True,
+                'link_label': u'Register nodes.',
+                'link_url': '/infrastructure/nodes/',
+                'text': u'You have no nodes available.',
+            },
+        ])
