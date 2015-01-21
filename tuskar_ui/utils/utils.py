@@ -85,3 +85,10 @@ def filter_items(items, **kwargs):
                     break
         else:
             yield item
+
+
+def safe_int_cast(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
