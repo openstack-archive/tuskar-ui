@@ -203,7 +203,7 @@ class IndexView(horizon.forms.ModalFormView, StackMixin):
 
                 context['progress'] = min(95, max(
                     5, 100 * float(resources_count) / total_num_nodes_count))
-            elif stack.is_deploying:
+            elif stack.is_deploying or stack.is_updating:
                 total = sum(d['total_node_count'] for d in roles)
                 context['progress'] = min(95, max(
                     5, 100 * sum(float(d.get('deployed_node_count', 0))

@@ -68,6 +68,16 @@ class HeatAPITests(test.APITestCase):
         ret_val = stack.is_deployed
         self.assertFalse(ret_val)
 
+    def test_stack_is_updating(self):
+        stack = api.heat.Stack(self.heatclient_stacks.first())
+        ret_val = stack.is_updating
+        self.assertFalse(ret_val)
+
+    def test_stack_is_deploying(self):
+        stack = api.heat.Stack(self.heatclient_stacks.first())
+        ret_val = stack.is_deploying
+        self.assertFalse(ret_val)
+
     @unittest.skip("Add appropriate test data to deal with nested stacks.")
     def test_stack_resources(self):
         stack = api.heat.Stack(self.heatclient_stacks.first(),

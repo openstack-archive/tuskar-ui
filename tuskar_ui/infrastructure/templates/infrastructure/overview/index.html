@@ -12,7 +12,7 @@
 <div class="row">
   <div class="col-xs-4">
     {% if stack %}
-      {% if stack.is_deleting or stack.is_deploying %}
+      {% if stack.is_deleting or stack.is_deploying or stack.is_updating %}
         {% include "infrastructure/overview/deployment_progress.html" %}
       {% elif stack.is_delete_failed or stack.is_failed %}
         {% include "infrastructure/overview/deployment_failed.html" %}
