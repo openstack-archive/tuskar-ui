@@ -23,6 +23,7 @@ from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui import api
 from tuskar_ui.handle_errors import handle_errors  # noqa
+from tuskar_ui.infrastructure.nodes import forms
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import heat_data
 from tuskar_ui.test.test_data import node_data
@@ -401,3 +402,63 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn('series', json_content)
         self.assertIn('settings', json_content)
+
+    def test_get_driver_info_dict(self):
+        data = {
+            'driver': 'pxe_ipmitool',
+            'ipmi_address': '127.0.0.1',
+            'ipmi_username': 'root',
+            'ipmi_password': 'P@55W0rd',
+        }
+        ret = forms.get_driver_info_dict(data)
+        self.assertEqual(ret, {
+            'driver': 'pxe_ipmitool',
+            'ipmi_address': '127.0.0.1',
+            'ipmi_username': 'root',
+            'ipmi_password': 'P@55W0rd',
+        })
+        data = {
+            'driver': 'pxe_ssh',
+            'ssh_address': '127.0.0.1',
+            'ssh_username': 'root',
+            'ssh_key_contents': 'P@55W0rd',
+        }
+        ret = forms.get_driver_info_dict(data)
+        self.assertEqual(ret, {
+            'driver': 'pxe_ssh',
+            'ssh_address': '127.0.0.1',
+            'ssh_username': 'root',
+            'ssh_key_contents': 'P@55W0rd',
+        })
+
+    def test_create_node(self):
+        data = {
+            'ipmi_address': '127.0.0.1',
+            'cpu_arch': 'x86',
+            'cpus': 1,
+            'memory_mb': 2,
+            'local_gb': 3,
+            'mac_addresses': 'DE:AD:BE:EF:CA:FE',
+            'ipmi_username': 'username',
+            'ipmi_password': 'password',
+            'driver': 'pxe_ipmitool',
+        }
+        with patch('tuskar_ui.api.node.Node', **{
+            'spec_set': ['create', 'set_maintenance', 'discover'],
+            'create.return_value': None,
+        }) as Node:
+            forms.create_node(None, data)
+            self.assertListEqual(Node.create.call_args_list, [
+                call(
+                    ANY,
+                    ipmi_address=u'127.0.0.1',
+                    cpu_arch='x86',
+                    cpus=1,
+                    memory_mb=2,
+                    local_gb=3,
+                    mac_addresses=['DE:AD:BE:EF:CA:FE'],
+                    ipmi_username=u'username',
+                    ipmi_password=u'password',
+                    driver='pxe_ipmitool',
+                ),
+            ])
