@@ -156,10 +156,7 @@ class PerformanceView(base.TemplateView):
         node_uuid = kwargs.get('node_uuid', None)
         if node_uuid:
             node = api.node.Node.get(request, node_uuid)
-            try:
-                instance_uuid = node.instance_uuid
-            except AttributeError:
-                json_output = None
+            instance_uuid = node.instance_uuid
         else:
             # Aggregated stats for all nodes
             instance_uuid = None
