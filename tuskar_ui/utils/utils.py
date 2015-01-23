@@ -13,12 +13,12 @@
 #    under the License.
 import re
 
-CAMEL_RE = re.compile(r'([a-z]|SSL)([A-Z])')
+CAMEL_RE = re.compile(r'([A-Z][a-z]+|[A-Z]+(?=[A-Z\s]|$))')
 
 
 def de_camel_case(text):
     """Convert CamelCase names to human-readable format."""
-    return CAMEL_RE.sub(lambda m: m.group(1) + ' ' + m.group(2), text)
+    return ' '.join(w.strip() for w in CAMEL_RE.split(text) if w.strip())
 
 
 def list_to_dict(object_list, key_attribute='id'):
