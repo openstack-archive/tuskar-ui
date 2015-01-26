@@ -12,6 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from horizon.utils import memoized
+
+from tuskar_ui import api
+
 
 class ItemCountMixin(object):
     def get_items_count(self):
@@ -21,3 +25,19 @@ class ItemCountMixin(object):
         context = super(ItemCountMixin, self).get_context_data(**kwargs)
         context['items_count'] = self.get_items_count()
         return context
+
+
+class StackMixin(object):
+    @memoized.memoized
+    def get_stack(self):
+        plan = api.tuskar.Plan.get_the_plan(self.request)
+        return api.heat.Stack.get_by_plan(self.request, plan)
+
+
+class RoleMixin(object):
+    @memoized.memoized
+    def get_role(self, redirect=None):
+        role_id = self.kwargs['role_id']
+        role = api.tuskar.Role.get(self.request, role_id,
+                                   _error_redirect=redirect)
+        return role
