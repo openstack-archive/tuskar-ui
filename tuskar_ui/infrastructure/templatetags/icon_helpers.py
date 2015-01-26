@@ -51,8 +51,8 @@ IRONIC_NODE_STATE_ICON_DICT = {
 @register.filter(is_safe=True)
 def iconized_ironic_node_state(node_power_state):
     state = IRONIC_NODE_STATE_STRING_DICT.get(node_power_state, "&mdash;")
-    icon = IRONIC_NODE_STATE_ICON_DICT.get(node_power_state, None)
-    html_string = """<span class="fa %s powerstate"></span>
-                     <span>%s</span> """ % (icon, state)
+    icon = IRONIC_NODE_STATE_ICON_DICT.get(node_power_state, 'fa-question')
+    html_string = (u"""<span class="fa %s powerstate"></span>"""
+                   u"""<span>%s</span> """) % (icon, unicode(state))
 
     return html_string
