@@ -60,3 +60,15 @@ class UtilsTests(helpers.TestCase):
         self.assertEqual(ret, [Item(1), Item(2), Item(3)])
         ret = list(utils.filter_items(items, index__not_in=(1, 2, 3)))
         self.assertEqual(ret, [Item(0), Item(4), Item(5), Item(6)])
+
+    def test_safe_int_cast(self):
+        ret = utils.safe_int_cast(1)
+        self.assertEqual(ret, 1)
+        ret = utils.safe_int_cast('1')
+        self.assertEqual(ret, 1)
+        ret = utils.safe_int_cast('')
+        self.assertEqual(ret, 0)
+        ret = utils.safe_int_cast(None)
+        self.assertEqual(ret, 0)
+        ret = utils.safe_int_cast(object())
+        self.assertEqual(ret, 0)

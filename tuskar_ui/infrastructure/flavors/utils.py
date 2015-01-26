@@ -15,18 +15,12 @@
 from django.conf import settings
 
 from tuskar_ui import api
+from tuskar_ui.utils import utils
 
 
 def matching_deployment_mode():
     deployment_mode = getattr(settings, 'DEPLOYMENT_MODE', 'scale')
     return deployment_mode.lower() == 'scale'
-
-
-def _safe_int_cast(value):
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return 0
 
 
 def _get_unmatched_suggestions(request):
@@ -62,9 +56,9 @@ class FlavorSuggestion(object):
     def from_node(cls, node):
         return cls(
             node_id=node.uuid,
-            vcpus=_safe_int_cast(node.cpus),
-            ram=_safe_int_cast(node.memory_mb),
-            disk=_safe_int_cast(node.local_gb),
+            vcpus=utils.safe_int_cast(node.cpus),
+            ram=utils.safe_int_cast(node.memory_mb),
+            disk=utils.safe_int_cast(node.local_gb),
             cpu_arch=node.cpu_arch
         )
 
