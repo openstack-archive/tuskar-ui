@@ -19,6 +19,7 @@ from mock import patch, call  # noqa
 from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui import api
+from tuskar_ui.infrastructure.overview import views
 from tuskar_ui.test import helpers as test
 from tuskar_ui.test.test_data import heat_data
 from tuskar_ui.test.test_data import tuskar_data
@@ -309,3 +310,25 @@ class OverviewTests(test.BaseAdminViewTests):
             'admin', None, 'admin', stack.keystone_auth_url)
         mock_get_neutron_client.assert_called_once_with(
             'admin', None, 'admin', stack.keystone_auth_url)
+
+    def test_get_role_data(self):
+        plan = api.tuskar.Plan(self.tuskarclient_plans.first())
+        stack = api.heat.Stack(self.heatclient_stacks.first())
+        role = api.tuskar.Role(self.tuskarclient_roles.first())
+        stack.resources = lambda *args, **kwargs: []
+        ret = views._get_role_data(plan, stack, None, role)
+        self.assertEqual(ret, {
+            'deployed_node_count': 0,
+            'deploying_node_count': 0,
+            'error_node_count': 0,
+            'field': '',
+            'finished': False,
+            'icon': 'fa-exclamation',
+            'id': 'role-1',
+            'name': 'Controller',
+            'planned_node_count': 1,
+            'role': role,
+            'status': 'warning',
+            'total_node_count': 0,
+            'waiting_node_count': 0,
+        })
