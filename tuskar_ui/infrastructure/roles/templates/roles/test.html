@@ -1,0 +1,55 @@
+{% extends 'infrastructure/base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Roles" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_domain_page_header.html" with title=_("Roles") %}
+{% endblock page_header %}
+
+{% block main %}
+<form>{% csrf_token %}
+  <div ng-controller="tkRolesCtrl">
+    <table class="table table-bordered table-striped" hz-table st-table="roles" st-safe-src="roles">
+      <thead>
+        <tr>
+          <!-- Table Headers -->
+          <th class="multi_select_column">
+            <input type="checkbox" hz-select-all="idata">
+          </th>
+          <th>{% trans "Role" %}</th>
+          <th>{% trans "Flavor" %}</th>
+          <th>{% trans "Image" %}</th>
+          <th>{% trans "Actions" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-hide="roles">
+          <td colspan="5" style="text-align: center;"><i style="font-size: 3em;" class="fa fa-spinner fa-spin"></i></td>
+        </tr>
+        <!-- Table Row -->
+        <tr ng-repeat="role in roles">
+          <td class="multi_select_column">
+            <input type="checkbox" ng-model="checked[role.id]">
+          </td>
+          <td><a ng-href="role.id" ng-bind="role.name"></a></td>
+          <td ng-bind="role.flavor"></td>
+          <td ng-bind="role.image"></td>
+          <!-- Row Actions -->
+          <td class="actions_column">
+            <button class="btn btn-default btn-sm" type="button" ng-click="editRole(role)" title="Edit"><i class="fa fa-pencil"></i></button>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr ng-show="roles">
+          <td colspan="100">
+            <!-- TODO@Thai: rewrite this to address internationalization -->
+            <span class="display">Displaying {$ roles.length $} items</span>
+            <div st-pagination="" st-items-by-page="2" st-displayed-pages="10"></div>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</form>
+{% endblock %}
