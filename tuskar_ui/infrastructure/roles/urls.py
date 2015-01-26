@@ -13,12 +13,17 @@
 #    under the License.
 
 from django.conf import urls
+from django.views import generic
 
 from tuskar_ui.infrastructure.roles import views
 
 
 urlpatterns = urls.patterns(
     '',
+    urls.url(r'^test/$',
+        generic.TemplateView.as_view(
+            template_name="infrastructure/roles/test.html"),
+            name='testo'),
     urls.url(r'^$', views.IndexView.as_view(), name='index'),
     urls.url(r'^(?P<role_id>[^/]+)/$', views.DetailView.as_view(),
              name='detail'),

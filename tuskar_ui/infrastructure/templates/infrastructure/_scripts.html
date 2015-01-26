@@ -1,4 +1,7 @@
+{% extends "horizon/_scripts.html" %}
+
 {% block custom_js_files %}
+  {{ block.super }}
   <script src='{{ STATIC_URL }}infrastructure/js/horizon.capacity.js' type='text/javascript' charset='utf-8'></script>
   <script src='{{ STATIC_URL }}infrastructure/js/horizon.d3circleschart.js' type='text/javascript' charset='utf-8'></script>
   <script src='{{ STATIC_URL }}infrastructure/js/horizon.d3singlebarchart.js' type='text/javascript' charset='utf-8'></script>
@@ -10,6 +13,8 @@
   <script src='{{ STATIC_URL }}infrastructure/js/tuskar.edit_plan.js' type='text/javascript' charset='utf-8'></script>
   <script src='{{ STATIC_URL }}infrastructure/js/tuskar.deployment_progress.js' type='text/javascript' charset='utf-8'></script>
   <script src='{{ STATIC_URL }}infrastructure/js/tuskar.performance.js' type='text/javascript' charset='utf-8'></script>
+
+  <script src='{{ STATIC_URL }}infrastructure/js/angular/tk.roles.js' type='text/javascript' charset='utf-8'></script>
 {% endblock %}
 
 {% comment %} Tuskar-UI Client-side Templates (These should *not* be inside the "compress" tag.) {% endcomment %}
