@@ -93,6 +93,7 @@ def query_data(request,
                       if m.name == meter]
         unit = meter_list[0].unit
     except Exception:
+        raise
         unit = ""
 
     ceilometer_usage = ceilometer.CeilometerUsage(request)
