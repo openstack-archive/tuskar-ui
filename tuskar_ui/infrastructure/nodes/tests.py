@@ -18,7 +18,6 @@ import json
 from django.core import urlresolvers
 from horizon import exceptions as horizon_exceptions
 from mock import patch, call, ANY  # noqa
-from openstack_dashboard.test import helpers
 from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui import api
@@ -40,7 +39,10 @@ heat_data.data(TEST_DATA)
 tuskar_data.data(TEST_DATA)
 
 
-class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
+class NodesTests(
+    test.NodesTestMixin,
+    test.BaseAdminViewTests,
+):
     @handle_errors("Error!", [])
     def _raise_tuskar_exception(self, request, *args, **kwargs):
         raise self.exceptions.tuskar
