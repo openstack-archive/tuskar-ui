@@ -15,10 +15,10 @@
 import contextlib
 import json
 
+from ceilometerclient.v2 import client as ceilometer_client
 from django.core import urlresolvers
 from horizon import exceptions as horizon_exceptions
 from mock import patch, call, ANY  # noqa
-from openstack_dashboard.test import helpers
 from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui import api
@@ -40,7 +40,7 @@ heat_data.data(TEST_DATA)
 tuskar_data.data(TEST_DATA)
 
 
-class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
+class NodesTests(test.BaseAdminViewTests):
     @handle_errors("Error!", [])
     def _raise_tuskar_exception(self, request, *args, **kwargs):
         raise self.exceptions.tuskar
@@ -48,6 +48,13 @@ class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
     @handle_errors("Error!", [])
     def _raise_horizon_exception_not_found(self, request, *args, **kwargs):
         raise horizon_exceptions.NotFound
+
+    def stub_ceilometerclient(self):
+        if not hasattr(self, "ceilometerclient"):
+            self.mox.StubOutWithMock(ceilometer_client, 'Client')
+            self.ceilometerclient = self.mox.\
+                CreateMock(ceilometer_client.Client)
+        return self.ceilometerclient
 
     def test_index_get(self):
         with patch('tuskar_ui.api.node.Node', **{
