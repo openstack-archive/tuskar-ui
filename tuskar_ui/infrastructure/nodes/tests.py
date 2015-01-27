@@ -40,7 +40,10 @@ heat_data.data(TEST_DATA)
 tuskar_data.data(TEST_DATA)
 
 
-class NodesTests(test.BaseAdminViewTests, helpers.APITestCase):
+class NodesTests(
+    test.NodesTestMixin,
+    test.BaseAdminViewTests,
+):
     @handle_errors("Error!", [])
     def _raise_tuskar_exception(self, request, *args, **kwargs):
         raise self.exceptions.tuskar
