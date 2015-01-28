@@ -107,8 +107,6 @@ class DetailView(horizon_tables.DataTableView, views.RoleMixin,
         else:
             context['nodes'] = []
         context['flavor'] = role.flavor(plan)
-        # TODO(tzumainn): we don't mock images, so calling role.image(plan)
-        # won't work right now
         context['image'] = role.image(plan)
 
         if stack:
