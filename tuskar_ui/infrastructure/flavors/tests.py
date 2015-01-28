@@ -187,26 +187,10 @@ class FlavorsTest(test.BaseAdminViewTests):
     def test_details_no_overcloud(self):
         flavor = api.flavor.Flavor(TEST_DATA.novaclient_flavors.first())
         images = TEST_DATA.glanceclient_images.list()[:2]
-        with contextlib.nested(
-                patch('openstack_dashboard.api.glance.image_get',
-                      side_effect=images),
-                patch('tuskar_ui.api.flavor.Flavor.get',
-                      return_value=flavor),
-                patch('tuskar_ui.api.tuskar.Plan.get_the_plan',
-                      side_effect=Exception)
-        ) as (image_mock, get_mock, plan_mock):
-            res = self.client.get(urlresolvers.reverse(DETAILS_VIEW,
-                                                       args=(flavor.id,)))
-            self.assertEqual(image_mock.call_count, 1)  # memoized
-            self.assertEqual(get_mock.call_count, 1)
-            self.assertEqual(plan_mock.call_count, 1)
-        self.assertTemplateUsed(res, 'infrastructure/flavors/details.html')
+        plan = api.tuskar.Plan(TEST_DATA.tuskarclient_plans.first())
+        roles = [api.tuskar.Role(role)
+                 for role in self.tuskarclient_roles.list()]
 
-    def test_details(self):
-        flavor = api.flavor.Flavor(TEST_DATA.novaclient_flavors.first())
-        images = TEST_DATA.glanceclient_images.list()[:2]
-        plan = api.tuskar.Plan(
-            TEST_DATA.tuskarclient_plans.first())
         with contextlib.nested(
                 patch('openstack_dashboard.api.glance.image_get',
                       side_effect=images),
@@ -214,15 +198,51 @@ class FlavorsTest(test.BaseAdminViewTests):
                       return_value=flavor),
                 patch('tuskar_ui.api.tuskar.Plan.get_the_plan',
                       return_value=plan),
+                patch('tuskar_ui.api.tuskar.Role.list', return_value=roles),
+                patch('tuskar_ui.api.tuskar.Role.flavor', return_value=flavor),
+        ) as (image_mock, get_mock, plan_mock, roles_mock, role_flavor_mock):
+            res = self.client.get(urlresolvers.reverse(DETAILS_VIEW,
+                                                       args=(flavor.id,)))
+            self.assertEqual(image_mock.call_count, 1)
+            self.assertEqual(get_mock.call_count, 1)
+            self.assertEqual(plan_mock.call_count, 2)
+            self.assertEqual(roles_mock.call_count, 1)
+            self.assertEqual(role_flavor_mock.call_count, 4)
+        self.assertTemplateUsed(res, 'infrastructure/flavors/details.html')
+
+    def test_details(self):
+        flavor = api.flavor.Flavor(TEST_DATA.novaclient_flavors.first())
+        images = TEST_DATA.glanceclient_images.list()[:2]
+        plan = api.tuskar.Plan(TEST_DATA.tuskarclient_plans.first())
+        roles = [api.tuskar.Role(role)
+                 for role in self.tuskarclient_roles.list()]
+        stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
+
+        with contextlib.nested(
+                patch('openstack_dashboard.api.glance.image_get',
+                      side_effect=images),
+                patch('tuskar_ui.api.flavor.Flavor.get',
+                      return_value=flavor),
+                patch('tuskar_ui.api.tuskar.Plan.get_the_plan',
+                      return_value=plan),
+                patch('tuskar_ui.api.tuskar.Role.list', return_value=roles),
+                patch('tuskar_ui.api.tuskar.Role.flavor', return_value=flavor),
+                patch('tuskar_ui.api.heat.Stack.get_by_plan',
+                      return_value=stack),
                 # __name__ is required for horizon.tables
                 patch('tuskar_ui.api.heat.Stack.resources_count',
                       return_value=42, __name__='')
-        ) as (image_mock, get_mock, plan_mock, count_mock):
+        ) as (image_mock, flavor_mock, plan_mock, roles_mock, role_flavor_mock,
+              stack_mock, count_mock):
             res = self.client.get(urlresolvers.reverse(DETAILS_VIEW,
                                                        args=(flavor.id,)))
-            self.assertEqual(image_mock.call_count, 1)  # memoized
-            self.assertEqual(get_mock.call_count, 1)
-            self.assertEqual(plan_mock.call_count, 1)
+            self.assertEqual(image_mock.call_count, 1)
+            self.assertEqual(flavor_mock.call_count, 1)
+            self.assertEqual(plan_mock.call_count, 2)
+            self.assertEqual(roles_mock.call_count, 1)
+            self.assertEqual(role_flavor_mock.call_count, 4)
+            self.assertEqual(stack_mock.call_count, 1)
+            self.assertEqual(count_mock.call_count, 4)
         self.assertTemplateUsed(res, 'infrastructure/flavors/details.html')
 
 
