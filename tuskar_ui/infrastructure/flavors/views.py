@@ -112,6 +112,12 @@ class DetailView(horizon.tables.DataTableView):
         return context
 
     def get_data(self):
-        # TODO(tzumainn): fix role relation, if possible; the plan needs to be
-        # considered as well
-        return []
+        roles = []
+        plan = api.tuskar.Plan.get_the_plan(self.request)
+
+        for role in api.tuskar.Role.list(self.request):
+            flavor = role.flavor(plan)
+            if flavor.id == self.kwargs.get('flavor_id'):
+                roles.append(role)
+
+        return roles
