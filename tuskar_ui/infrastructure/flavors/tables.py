@@ -112,14 +112,16 @@ class FlavorRolesTable(horizon.tables.DataTable):
 
     def __init__(self, request, *args, **kwargs):
         # TODO(dtantsur): support multiple overclouds
-        try:
-            stack = api.tuskar.Plan.get_the_plan(request).stack
-        except Exception:
-            count_getter = lambda role: _("Not deployed")
+        plan = api.tuskar.Plan.get_the_plan(request)
+        stack = api.heat.Stack.get_by_plan(request, plan)
+
+        if stack is None:
+            count = lambda role: _('Not Deployed')
         else:
-            count_getter = stack.resources_count
+            count = stack.resources_count
+
         self._columns['count'] = horizon.tables.Column(
-            count_getter,
+            count,
             verbose_name=_("Instances Count")
         )
         super(FlavorRolesTable, self).__init__(request, *args, **kwargs)
