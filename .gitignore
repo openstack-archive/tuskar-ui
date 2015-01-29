@@ -26,3 +26,4 @@ AUTHORS
 ChangeLog
 tags
 openstack_dashboard/dummydb.sqlite
+*.lock
