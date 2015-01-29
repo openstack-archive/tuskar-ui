@@ -68,9 +68,9 @@ class CreateFlavorAction(flavor_workflows.CreateFlavorInfoAction):
 
     class Meta:
         name = _("Flavor")
-        # FIXME(dtantsur): maybe better help text?
-        help_text = _("From here you can create a new "
-                      "flavor to organize instance resources.")
+        help_text = _("Flavors define the sizes for RAM, disk, number of "
+                      "cores, and other resources. Flavors should be "
+                      "associated with roles when planning a deployment.")
 
 
 class CreateFlavorStep(workflows.Step):
