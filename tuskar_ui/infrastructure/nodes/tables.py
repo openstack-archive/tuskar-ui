@@ -15,6 +15,7 @@
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from horizon import tables
+from horizon.utils import memoized
 
 from tuskar_ui import api
 
@@ -121,9 +122,8 @@ class NodeFilterAction(tables.FilterAction):
         return filter(comp, nodes)
 
 
+@memoized.memoized_method
 def get_role_link(datum):
-    # TODO(tzumainn): this could probably be done more efficiently
-    # by getting the resource for all nodes at once
     if datum.role_id:
         return reverse('horizon:infrastructure:roles:detail',
                        kwargs={'role_id': datum.role_id})
