@@ -233,12 +233,17 @@ class IndexView(horizon.forms.ModalFormView, views.StackMixin):
         if handled:
             messages = forms.validate_plan(request, form.plan)
         else:
-            # TODO(rdopieralski) Actually iterate over the form errors and
-            # add them all to the messages here.
             messages = [{
                 'text': _(u"Error saving the plan."),
                 'is_critical': True,
             }]
+            messages.extend({
+                'text': repr(error),
+            } for error in form.non_field_errors)
+            messages.extend({
+                'text': repr(error),
+            } for field in form.fields for error in field.errors)
+
         # We need to unlazify all the lazy urls and translations.
         return http.HttpResponse(json.dumps({
             'plan_invalid': any(m.get('is_critical') for m in messages),
