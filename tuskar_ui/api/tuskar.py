@@ -38,8 +38,6 @@ KEYSTONE_CERTIFICATE_PARAMS = (
     'KeystoneSigningKey')
 
 
-# FIXME: request isn't used right in the tuskar client right now,
-# but looking at other clients, it seems like it will be in the future
 def tuskarclient(request, password=None):
     api_version = "2"
     insecure = getattr(settings, 'OPENSTACK_SSL_NO_VERIFY', False)
