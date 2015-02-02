@@ -12,15 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import copy
-from datetime import datetime  # noqa
-from datetime import timedelta  # noqa
 
 from django.utils.http import urlencode
-from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from openstack_dashboard.api import ceilometer
-import pytz
+from openstack_dashboard.utils import metering
 
 SETTINGS = {
     'settings': {
@@ -77,7 +74,7 @@ def query_data(request,
                additional_query=None):
 
     if not period:
-        period = _calc_period(date_from, date_to, 50)
+        period = metering.calc_period(date_from, date_to, 50)
     if additional_query is None:
         additional_query = []
     if date_from:
@@ -113,62 +110,6 @@ def query_data(request,
         exceptions.handle(request,
                           _('Unable to retrieve statistics.'))
     return resources, unit
-
-
-# TODO(lsmola) push this function to Horizon common then delete this
-def _calc_period(date_from, date_to, number_of_samples=400):
-    if date_from and date_to:
-        if date_to < date_from:
-            # TODO(lsmola) propagate the Value error through Horizon
-            # handler to the client with verbose message.
-            raise ValueError("Date to must be bigger than date "
-                             "from.")
-            # get the time delta in seconds
-        delta = date_to - date_from
-        delta_in_seconds = delta.days * 24 * 3600 + delta.seconds
-
-        period = delta_in_seconds / number_of_samples
-    else:
-        # If some date is missing, just set static window to one day.
-        period = 3600 * 24
-    return period
-
-
-# TODO(lsmola) push this function to Horizon common then delete this
-def _calc_date_args(date_from, date_to, date_options):
-    # TODO(lsmola) all timestamps should probably work with
-    # current timezone. And also show the current timezone in chart.
-    if date_options == "other":
-        try:
-            if date_from:
-                date_from = pytz.utc.localize(
-                    datetime.strptime(date_from, "%Y-%m-%d"))
-            else:
-                # TODO(lsmola) there should be probably the date
-                # of the first sample as default, so it correctly
-                # counts the time window. Though I need ordering
-                # and limit of samples to obtain that.
-                pass
-            if date_to:
-                date_to = pytz.utc.localize(
-                    datetime.strptime(date_to, "%Y-%m-%d"))
-                # It return beginning of the day, I want the and of
-                # the day, so i will add one day without a second.
-                date_to = (date_to + timedelta(days=1) -
-                           timedelta(seconds=1))
-            else:
-                date_to = timezone.now()
-        except Exception:
-            raise ValueError("The dates haven't been "
-                             "recognized")
-    else:
-        try:
-            date_from = timezone.now() - timedelta(days=float(date_options))
-            date_to = timezone.now()
-        except Exception:
-            raise ValueError("The time delta must be an "
-                             "integer representing days.")
-    return date_from, date_to
 
 
 def url_part(meter_name, barchart):
@@ -227,28 +168,6 @@ def create_json_output(series, barchart, unit, date_from, date_to):
     return json_output
 
 
-def _series_for_meter(aggregates,
-                      meter_id,
-                      meter_name,
-                      stats_name,
-                      unit):
-    """Construct datapoint series for a meter from resource aggregates."""
-    series = []
-    for resource in aggregates:
-        if resource.get_meter(meter_name):
-            name = LABELS.get(meter_id, meter_name)
-            point = {'unit': unit,
-                     'name': unicode(name),
-                     'meter': meter_id,
-                     'data': []}
-            for statistic in resource.get_meter(meter_name):
-                date = statistic.duration_end[:19]
-                value = float(getattr(statistic, stats_name))
-                point['data'].append({'x': date, 'y': value})
-            series.append(point)
-    return series
-
-
 def get_nodes_stats(request, uuid, meter, date_options=None, date_from=None,
                     date_to=None, stats_attr=None, barchart=None,
                     group_by=None):
@@ -270,8 +189,7 @@ def get_nodes_stats(request, uuid, meter, date_options=None, date_from=None,
     else:
         # query will be aggregated across all resources
         group_by = "all"
-        query = {}
-        query['all'] = []
+        query = {'all': []}
 
     # Disk and Network I/O: data from 2 meters in one chart
     if meter == 'disk-io':
@@ -287,12 +205,13 @@ def get_nodes_stats(request, uuid, meter, date_options=None, date_from=None,
     else:
         meters = get_meters([meter])
 
-    date_from, date_to = _calc_date_args(
+    date_from, date_to = metering.calc_date_args(
         date_from,
         date_to,
         date_options)
 
     for meter_id, meter_name in meters:
+        label = unicode(LABELS.get(meter_id, meter_name))
         resources, unit = query_data(
             request=request,
             date_from=date_from,
@@ -300,13 +219,11 @@ def get_nodes_stats(request, uuid, meter, date_options=None, date_from=None,
             group_by=group_by,
             meter=meter_id,
             query=query)
-        serie = _series_for_meter(
-            resources,
-            meter_id,
-            meter_name,
-            stats_attr,
-            unit)
-        series += serie
+        s = metering.series_for_meter(request, resources, group_by, meter_id,
+                                      meter_name, stats_attr, unit, label)
+        series += s
+
+    series = metering.normalize_series_by_unit(series)
 
     json_output = create_json_output(
         series,
