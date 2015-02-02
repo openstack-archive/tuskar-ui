@@ -27,14 +27,6 @@ from tuskar_ui.infrastructure.flavors import utils
 from tuskar_ui.infrastructure.flavors import workflows
 
 
-def image_get(request, image_id, error_message):
-    # TODO(dtantsur): there should be generic way to handle exceptions
-    try:
-        return api.node.image_get(request, image_id)
-    except Exception:
-        horizon.exceptions.handle(request, error_message)
-
-
 class IndexView(horizon.tables.MultiTableView):
     table_classes = (tables.FlavorsTable, tables.FlavorSuggestionsTable)
     template_name = 'infrastructure/flavors/index.html'
@@ -99,15 +91,13 @@ class DetailView(horizon.tables.DataTableView):
             kwargs.get('flavor_id'),
             _error_redirect=self.error_redirect
         )
-        context['kernel_image'] = image_get(
+        context['kernel_image'] = api.node.image_get(
             self.request,
-            context['flavor'].kernel_image_id,
-            error_message=_("Cannot get kernel image details")
+            context['flavor'].kernel_image_id
         )
-        context['ramdisk_image'] = image_get(
+        context['ramdisk_image'] = api.node.image_get(
             self.request,
-            context['flavor'].ramdisk_image_id,
-            error_message=_("Cannot get ramdisk image details")
+            context['flavor'].ramdisk_image_id
         )
         return context
 

@@ -70,6 +70,7 @@ def ironicclient(request):
 
 # FIXME(lsmola) This should be done in Horizon, they don't have caching
 @memoized.memoized
+@handle_errors(_("Unable to retrieve image."))
 def image_get(request, image_id):
     """Returns an Image object with metadata
 
