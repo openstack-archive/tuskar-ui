@@ -13,8 +13,12 @@
 #    under the License.
 
 import collections
+import datetime
+
+import mock
 
 from tuskar_ui.test import helpers
+from tuskar_ui.utils import metering
 from tuskar_ui.utils import utils
 
 
@@ -72,3 +76,132 @@ class UtilsTests(helpers.TestCase):
         self.assertEqual(ret, 0)
         ret = utils.safe_int_cast(object())
         self.assertEqual(ret, 0)
+
+
+class MeteringTests(helpers.TestCase):
+    def test_query_data(self):
+        Meter = collections.namedtuple('Meter', 'name unit')
+        request = 'request'
+        from_date = datetime.datetime(2015, 1, 1, 13, 45)
+        to_date = datetime.datetime(2015, 1, 2, 13, 45)
+        with mock.patch(
+            'openstack_dashboard.api.ceilometer.meter_list',
+            return_value=[Meter('foo.bar', u'µD')],
+        ), mock.patch(
+            'openstack_dashboard.api.ceilometer.CeilometerUsage',
+            return_value=mock.MagicMock(**{
+                'resource_aggregates_with_statistics.return_value': 'plonk',
+            }),
+        ):
+            ret = metering.query_data(request, from_date, to_date,
+                                      'all', 'foo.bar')
+        self.assertEqual(ret, ('plonk', u'µD'))
+
+    def test_url_part(self):
+        ret = metering.url_part('foo_bar_baz', True)
+        self.assertTrue('meter=foo_bar_baz' in ret)
+        self.assertTrue('barchart=True' in ret)
+        ret = metering.url_part('foo_bar_baz', False)
+        self.assertTrue('meter=foo_bar_baz' in ret)
+        self.assertFalse('barchart=True' in ret)
+
+    def test_get_meter_name(self):
+        ret = metering.get_meter_name('foo.bar.baz')
+        self.assertEqual(ret, 'foo_bar_baz')
+
+    def test_get_meters(self):
+        ret = metering.get_meters(['foo.bar', 'foo.baz'])
+        self.assertEqual(ret, [('foo.bar', 'foo_bar'), ('foo.baz', 'foo_baz')])
+
+    def test_get_barchart_stats(self):
+        series = [
+            {'data': [{'x': 1, 'y': 1}, {'x': 4, 'y': 4}]},
+            {'data': [{'x': 2, 'y': 2}, {'x': 5, 'y': 5}]},
+            {'data': [{'x': 3, 'y': 3}, {'x': 6, 'y': 6}]},
+        ]
+        # Arrogance is measured in IT in micro-Dijkstras, µD.
+        average, used, tooltip_average = metering.get_barchart_stats(series,
+                                                                     u'µD')
+        self.assertEqual(average, 2)
+        self.assertEqual(used, 4)
+        self.assertEqual(tooltip_average, u'Average 2 µD<br> From: 1, to: 4')
+
+    def test_create_json_output(self):
+        ret = metering.create_json_output([], False, u'µD', None, None)
+        self.assertEqual(ret, {
+            'series': [],
+            'settings': {
+                'higlight_last_point': True,
+                'axes_x': False,
+                'axes_y': True,
+                'xMin': '',
+                'renderer': 'StaticAxes',
+                'xMax': '',
+                'axes_y_label': False,
+                'auto_size': False,
+                'auto_resize': False,
+            },
+        })
+
+        series = [
+            {'data': [{'x': 1, 'y': 1}, {'x': 4, 'y': 4}]},
+            {'data': [{'x': 2, 'y': 2}, {'x': 5, 'y': 5}]},
+            {'data': [{'x': 3, 'y': 3}, {'x': 6, 'y': 6}]},
+        ]
+        ret = metering.create_json_output(series, True, u'µD', None, None)
+        self.assertEqual(ret, {
+            'series': series,
+            'stats': {
+                'average': 2,
+                'used': 4,
+                'tooltip_average': u'Average 2 µD<br> From: 1, to: 4',
+            },
+            'settings': {
+                'yMin': 0,
+                'yMax': 100,
+                'higlight_last_point': True,
+                'axes_x': False,
+                'axes_y': True,
+                'bar_chart_settings': {
+                    'color_scale_domain': [0, 80, 80, 100],
+                    'orientation': 'vertical',
+                    'color_scale_range': [
+                        '#0000FF',
+                        '#0000FF',
+                        '#FF0000',
+                        '#FF0000',
+                    ],
+                    'width': 30,
+                    'average_color_scale_domain': [0, 100],
+                    'used_label_placement': 'left',
+                    'average_color_scale_range': ['#0000FF', '#0000FF'],
+                },
+                'xMin': '',
+                'renderer': 'StaticAxes',
+                'xMax': '',
+                'axes_y_label': False,
+                'auto_size': False,
+                'auto_resize': False,
+            },
+        })
+
+    def test_get_nodes_stats(self):
+        request = 'request'
+        with mock.patch(
+            'tuskar_ui.utils.metering.create_json_output',
+            return_value='',
+        ) as create_json_output, mock.patch(
+            'tuskar_ui.utils.metering.query_data',
+            return_value=([], u'µD'),
+        ), mock.patch(
+            'openstack_dashboard.utils.metering.series_for_meter',
+            return_value=[],
+        ), mock.patch(
+            'openstack_dashboard.utils.metering.calc_date_args',
+            return_value=('from date', 'to date'),
+        ):
+            ret = metering.get_nodes_stats(request, 'abc', 'foo.bar')
+        self.assertEqual(ret, '')
+        self.assertEqual(create_json_output.call_args_list, [
+            mock.call([], None, u'µD', 'from date', 'to date')
+        ])
