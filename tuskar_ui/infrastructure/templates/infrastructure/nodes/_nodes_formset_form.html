@@ -8,28 +8,26 @@
     <div class="row">
       <h4>{% trans "Node Detail" %}</h4>
     </div>
-    <h5 class="row">{% trans "Power Management" %}</h5>
-    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.driver required=True %}
-    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_address %}
-    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_username %}
-    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_password %}
-    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_address %}
-    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_username %}
-    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_key_contents %}
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <label class="checkbox">
-        {{ form.do_autodiscovery|add_bootstrap_class }}
-        {{ form.do_autodiscovery.label }}
-        </label>
-      </div>
+    <div class="param-section">
+      <h5 class="row">{% trans "Power Management" %}</h5>
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.driver required=True %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_address %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_username %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_password %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_address %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_username %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_key_contents %}
+    </div>
+    <div class="param-section">
       <h5 class="row">{% trans "Networking" %}</h5>
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.mac_addresses required=True %}
+    </div>
+    <div class="param-section">
       <h5 class="row">{% trans "Hardware" %}</h5>
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.cpu_arch required=True %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.cpus extra_text=_('units') required=True %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.memory_mb extra_text=_('MB') required=True %}
-      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.local_gb extra_text=_('GB') required=True %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.cpu_arch %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.cpus extra_text=_('units') %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.memory_mb extra_text=_('MB') %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.local_gb extra_text=_('GB') %}
     </div>
   </fieldset></div>
 </div>
@@ -43,12 +41,6 @@
   $form.find('input[name$="_address"]').change(function () {
     var $nav_link = $('a[href="#' + $form.attr('id') + '"]');
     $nav_link.html($(this).val() || undefined_name);
-  });
-
-  $form.find('input[name$="-do_autodiscovery"]').change(function () {
-    var $this = $(this);
-    $this.closest('.panel').find(
-      '.form-group .row').toggleClass('required', !($this.attr('checked')));
   });
 });
 </script>

@@ -55,16 +55,23 @@ def get_driver_info_dict(data):
 
 
 def create_node(request, data):
+    cpu_arch = data.get('cpu_arch')
+    cpus = data.get('cpus')
+    memory_mb = data.get('memory_mb')
+    local_gb = data.get('local_gb')
+
     kwargs = get_driver_info_dict(data)
     kwargs.update(
-        cpu_arch=data.get('cpu_arch'),
-        cpus=data.get('cpus'),
-        memory_mb=data.get('memory_mb'),
-        local_gb=data.get('local_gb'),
+        cpu_arch=cpu_arch,
+        cpus=cpus,
+        memory_mb=memory_mb,
+        local_gb=local_gb,
         mac_addresses=data['mac_addresses'].split(),
     )
     node = api.node.Node.create(request, **kwargs)
-    if data.get('do_autodiscovery', False):
+
+    # If not all the parameters have been filled in, run the autodiscovery
+    if not all([cpu_arch, cpus, memory_mb, local_gb]):
         api.node.Node.set_maintenance(request, node.uuid, True)
         api.node.Node.discover(request, [node.uuid])
 
@@ -141,13 +148,9 @@ class NodeForm(django.forms.Form):
             'rows': 2,
         }),
     )
-    do_autodiscovery = django.forms.BooleanField(
-        label=_("Discover missing attributes"),
-        required=False,
-    )
     mac_addresses = tuskar_ui.forms.MultiMACField(
         label=_("NIC MAC Addresses"),
-        required=False,
+        required=True,
         widget=django.forms.Textarea(attrs={
             'placeholder': _('unspecified'),
             'rows': '2',
@@ -208,23 +211,6 @@ class NodeForm(django.forms.Form):
     def clean_ipmi_password(self):
         return self.cleaned_data.get('ipmi_password') or None
 
-    def clean(self):
-        cleaned_data = super(NodeForm, self).clean()
-        if not cleaned_data.get('do_autodiscovery', False):
-            for field_name in [
-                'mac_addresses',
-                'cpu_arch',
-                'cpus',
-                'memory_mb',
-                'local_gb',
-            ]:
-                if not cleaned_data.get(field_name):
-                    self._errors[field_name] = self.error_class([(
-                        u"This field is required "
-                        u"when autodiscovery is disabled."
-                    )])
-        return cleaned_data
-
 
 class BaseNodeFormset(tuskar_ui.forms.SelfHandlingFormset):
     def clean(self):
@@ -251,7 +237,6 @@ class UploadNodeForm(forms.SelfHandlingForm):
                     ssh_key_contents=row[3],
                     mac_addresses=row[4],
                     driver=driver,
-                    do_autodiscovery=True,
                 )
             elif driver == 'pxe_ipmitool':
                 node = dict(
@@ -259,7 +244,6 @@ class UploadNodeForm(forms.SelfHandlingForm):
                     ipmi_username=row[2],
                     ipmi_password=row[3],
                     driver=driver,
-                    do_autodiscovery=True,
                 )
             data.append(node)
         return data
