@@ -29,8 +29,10 @@ from tuskar_ui import api
 import tuskar_ui.api.heat
 import tuskar_ui.api.tuskar
 import tuskar_ui.forms
+import tuskar_ui.infrastructure.flavors.utils as flavors_utils
 
 
+MATCHING_DEPLOYMENT_MODE = flavors_utils.matching_deployment_mode()
 LOG = logging.getLogger(__name__)
 
 
@@ -121,7 +123,17 @@ def validate_plan(request, plan):
                 'link_url': reverse_lazy('horizon:infrastructure:nodes:index'),
                 'link_label': _(u"Register more nodes."),
             })
-    # TODO(rdopieralski) Add more checks.
+    if not MATCHING_DEPLOYMENT_MODE:
+        # All roles have to have the same flavor.
+        default_flavor_name = api.flavor.Flavor.list(request)[0].name
+        for role in plan.role_list:
+            if role.flavor(plan).name != default_flavor_name:
+                messages.append({
+                    'text': _(u"Role {0} doesn't use default flavor.").format(
+                        role.name,
+                    ),
+                    'is_critical': False,
+                })
     return messages
 
 
