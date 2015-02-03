@@ -98,7 +98,43 @@ class ServiceConfig(horizon.forms.SelfHandlingForm):
         pass
 
 
-class EditServiceConfig(horizon.forms.SelfHandlingForm):
+class AdvancedEditServiceConfig(ServiceConfig):
+    def __init__(self, *args, **kwargs):
+        super(AdvancedEditServiceConfig, self).__init__(*args, **kwargs)
+
+        plan = api.tuskar.Plan.get_the_plan(self.request)
+        parameters = plan.parameter_list(include_key_parameters=False)
+
+        for p in parameters:
+            if p.hidden:
+                self.fields[p.name] = django.forms.CharField(
+                    required=False,
+                    widget=django.forms.PasswordInput(render_value=True),
+                    label=name_with_tooltip(p))
+            else:
+                self.fields[p.name] = django.forms.CharField(
+                    required=False,
+                    label=name_with_tooltip(p))
+
+    def handle(self, request, data):
+        plan = api.tuskar.Plan.get_the_plan(self.request)
+
+        try:
+            plan.patch(request, plan.uuid, data)
+        except Exception as e:
+            horizon.exceptions.handle(
+                request,
+                _("Unable to update the service configuration."))
+            LOG.exception(e)
+            return False
+        else:
+            horizon.messages.success(
+                request,
+                _("Service configuration updated."))
+            return True
+
+
+class SimpleEditServiceConfig(horizon.forms.SelfHandlingForm):
     virt_type = django.forms.ChoiceField(
         label=_("Deployment Type"),
         choices=VIRT_TYPE_CHOICES,
