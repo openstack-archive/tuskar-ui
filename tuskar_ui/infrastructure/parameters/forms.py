@@ -14,15 +14,18 @@
 
 import json
 import logging
+import re
 
 import django.forms
+from django.utils.html import escape  # noqa
+from django.utils.safestring import mark_safe  # noqa
 from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
 import horizon.forms
 import horizon.messages
 
-
 from tuskar_ui import api
+import tuskar_ui.forms
 
 
 LOG = logging.getLogger(__name__)
@@ -42,6 +45,61 @@ CINDER_ISCSI_HELPER_CHOICES = [
     ('tgtadm', _('tgtadm')),
     ('lioadm', _('lioadm')),
 ]
+
+
+def name_with_tooltip(parameter):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1 \2', parameter.stripped_name)
+    humanized_name = re.sub('([a-z0-9])([A-Z])', r'\1 \2', s1)
+    if not parameter.description:
+        return humanized_name
+    return mark_safe(
+        u'%s&nbsp;<a class="help-icon fa fa-question-circle" '
+        u'data-content="%s" tabindex="0" href="#" '
+        u'title="%s"></a>' % (
+            escape(humanized_name),
+            escape(parameter.description),
+            escape(humanized_name),
+        ),
+    )
+
+
+class ServiceConfig(horizon.forms.SelfHandlingForm):
+    def __init__(self, *args, **kwargs):
+        super(ServiceConfig, self).__init__(*args, **kwargs)
+
+        plan = api.tuskar.Plan.get_the_plan(self.request)
+        parameters = plan.parameter_list(include_key_parameters=False)
+
+        for p in parameters:
+            if p.hidden:
+                self.fields[p.name] = django.forms.CharField(
+                    required=False,
+                    # widget=django.forms.PasswordInput(render_value = True),
+                    widget=tuskar_ui.forms.StaticTextPasswordWidget(),
+                    label=name_with_tooltip(p))
+            else:
+                self.fields[p.name] = django.forms.CharField(
+                    required=False,
+                    widget=tuskar_ui.forms.StaticTextWidget(),
+                    label=name_with_tooltip(p))
+
+    def global_fieldset(self):
+        return tuskar_ui.forms.fieldset(self, prefix='^(?!.*::)')
+
+    def controller_fieldset(self):
+        return tuskar_ui.forms.fieldset(self, prefix='controller-1')
+
+    def compute_fieldset(self):
+        return tuskar_ui.forms.fieldset(self, prefix='compute-1')
+
+    def block_storage_fieldset(self):
+        return tuskar_ui.forms.fieldset(self, prefix='cinder-storage-1')
+
+    def object_storage_fieldset(self):
+        return tuskar_ui.forms.fieldset(self, prefix='swift-storage-1')
+
+    def handle():
+        pass
 
 
 class EditServiceConfig(horizon.forms.SelfHandlingForm):
