@@ -22,11 +22,11 @@ from tuskar_ui import api
 from tuskar_ui.infrastructure.parameters import forms
 
 
-class ServiceConfigView(horizon.forms.ModalFormView):
-    form_class = forms.EditServiceConfig
+class SimpleServiceConfigView(horizon.forms.ModalFormView):
+    form_class = forms.SimpleEditServiceConfig
     success_url = reverse_lazy('horizon:infrastructure:parameters:index')
     submit_label = _("Save Configuration")
-    template_name = "infrastructure/parameters/service_config.html"
+    template_name = "infrastructure/parameters/simple_service_config.html"
 
     def get_initial(self):
         plan = api.tuskar.Plan.get_the_plan(self.request)
@@ -61,6 +61,7 @@ class ServiceConfigView(horizon.forms.ModalFormView):
 
 class IndexView(horizon.forms.ModalFormView):
     form_class = forms.ServiceConfig
+    form_id = "service_config"
     template_name = "infrastructure/parameters/index.html"
 
     def get_initial(self):
@@ -71,11 +72,36 @@ class IndexView(horizon.forms.ModalFormView):
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        edit_action = {
-            'name': _('Edit Configuration'),
+        advanced_edit_action = {
+            'name': _('Advanced Configuration'),
             'url': reverse('horizon:infrastructure:parameters:'
-                           'service_configuration'),
+                           'advanced_service_configuration'),
             'icon': 'fa-pencil',
+            'ajax_modal': False,
         }
-        context['header_actions'] = [edit_action]
+        simplified_edit_action = {
+            'name': _('Simplified Configuration'),
+            'url': reverse('horizon:infrastructure:parameters:'
+                           'simple_service_configuration'),
+            'icon': 'fa-pencil-square-o',
+            'ajax_modal': True,
+        }
+        context['header_actions'] = [advanced_edit_action,
+                                     simplified_edit_action]
+        return context
+
+
+class AdvancedServiceConfigView(IndexView):
+    form_class = forms.AdvancedEditServiceConfig
+    form_id = "advanced_service_config"
+    success_url = reverse_lazy('horizon:infrastructure:parameters:index')
+    submit_label = _("Save Configuration")
+    submit_url = reverse_lazy('horizon:infrastructure:parameters:'
+                              'advanced_service_configuration')
+    template_name = "infrastructure/parameters/advanced_service_config.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(AdvancedServiceConfigView,
+                        self) .get_context_data(**kwargs)
+        context['header_actions'] = []
         return context
