@@ -248,7 +248,7 @@ ul.nav-arrow {
 }
 
 .configuration-panel {
-  padding: 15px 15px 15px 30px !important;
+  padding: 15px 0 0px 30px !important;
   border: none;
   border-left: 1px solid $border-color;
   border-radius: 0;
@@ -265,4 +265,8 @@ ul.nav-arrow {
   .popover-content {
     font-weight: normal;
   }
+}
+
+.page_form_actions {
+  margin-top: -3.4em;
 }

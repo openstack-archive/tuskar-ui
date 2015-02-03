@@ -3,7 +3,7 @@
 {% load url from future %}
 
 {% block form_id %}configuration_form{% endblock %}
-{% block form_action %}{% url 'horizon:infrastructure:parameters:service_configuration' %}{% endblock %}
+{% block form_action %}{% url 'horizon:infrastructure:parameters:simple_service_configuration' %}{% endblock %}
 
 {% block modal_id %}provision_modal{% endblock %}
 {% block modal-header %}{% trans "Service Configuration" %}{% endblock %}

@@ -25,8 +25,10 @@ from tuskar_ui.test.test_data import tuskar_data
 
 INDEX_URL = urlresolvers.reverse(
     'horizon:infrastructure:parameters:index')
-SERVICE_CONFIG_URL = urlresolvers.reverse(
-    'horizon:infrastructure:parameters:service_configuration')
+SIMPLE_SERVICE_CONFIG_URL = urlresolvers.reverse(
+    'horizon:infrastructure:parameters:simple_service_configuration')
+ADVANCED_SERVICE_CONFIG_URL = urlresolvers.reverse(
+    'horizon:infrastructure:parameters:advanced_service_configuration')
 
 TEST_DATA = utils.TestDataContainer()
 tuskar_data.data(TEST_DATA)
@@ -50,7 +52,7 @@ class ParametersTest(test.BaseAdminViewTests):
 
         self.assertTemplateUsed(res, 'infrastructure/parameters/index.html')
 
-    def test_service_config_get(self):
+    def test_simple_service_config_get(self):
         plan = api.tuskar.Plan(self.tuskarclient_plans.first())
         role = api.tuskar.Role(self.tuskarclient_roles.first())
         with contextlib.nested(
@@ -59,11 +61,32 @@ class ParametersTest(test.BaseAdminViewTests):
             patch('tuskar_ui.api.tuskar.Plan.get_role_by_name',
                   return_value=role),
         ):
-            res = self.client.get(SERVICE_CONFIG_URL)
+            res = self.client.get(SIMPLE_SERVICE_CONFIG_URL)
             self.assertTemplateUsed(
-                res, 'infrastructure/parameters/service_config.html')
+                res, 'infrastructure/parameters/simple_service_config.html')
 
-    def test_service_config_post(self):
+    def test_advanced_service_config_post(self):
+        plan = api.tuskar.Plan(self.tuskarclient_plans.first())
+
+        data = {
+            'Block Storage-1::SnmpdReadonlyUserPassword': u'password',
+        }
+
+        with contextlib.nested(
+            patch('tuskar_ui.api.tuskar.Plan.get_the_plan',
+                  return_value=plan),
+            patch('tuskar_ui.api.tuskar.Plan.patch',
+                  return_value=plan),
+        ) as (get_the_plan, plan_patch):
+            res = self.client.post(ADVANCED_SERVICE_CONFIG_URL, data)
+
+        self.assertRedirectsNoFollow(res, INDEX_URL)
+
+        get_the_plan.assert_called_once_with(ANY, plan.uuid)
+        plan_patch.assert_called_once_with(ANY, plan.uuid, {
+            'Block Storage-1::SnmpdReadonlyUserPassword': u'password' })
+
+    def test_simple_service_config_post(self):
         plan = api.tuskar.Plan(self.tuskarclient_plans.first())
         roles = [api.tuskar.Role(role) for role in
                  self.tuskarclient_roles.list()]
@@ -85,7 +108,7 @@ class ParametersTest(test.BaseAdminViewTests):
             patch('tuskar_ui.api.tuskar.Plan.get_role_by_name',
                   return_value=roles[0]),
         ) as (get_the_plan, plan_patch, get_role_by_name):
-            res = self.client.post(SERVICE_CONFIG_URL, data)
+            res = self.client.post(SIMPLE_SERVICE_CONFIG_URL, data)
 
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
