@@ -1,0 +1,82 @@
+{% extends "infrastructure/base.html" %}
+{% load i18n %}
+{% load url from future %}
+{% block title %}{% trans "Advanced Service Configuration" %}{% endblock %}
+
+{% block page_header %}
+  {% include 'horizon/common/_items_count_domain_page_header.html' with title=_('Advanced Service Configuration') %}
+{% endblock %}
+
+{% block main %}
+  <div class="row">
+    <form id="{% block form_id %}{{ form_id }}{% endblock %}"
+        name="{% block form_name %}{% endblock %}"
+        autocomplete="{% block autocomplete %}{% if form.no_autocomplete %}off{% endif %}{% endblock %}"
+        class="{% block form_class %}{% endblock %} form-horizontal"
+        action="{% block form_action %}{{ submit_url }}{% endblock %}"
+        method="{% block form-method %}POST{% endblock %}"
+        {% block form_validation %}{% endblock %}
+        {% if add_to_field %}data-add-to-field="{{ add_to_field }}"{% endif %} {% block form_attrs %}{% endblock %}>{% csrf_token %}
+        <div class="col-sm-12 page_form_actions">
+          <div class="pull-right">
+            <a href="{% block cancel_url %}{{ cancel_url }}{% endblock %}"
+               class="btn btn-default cancel">
+              {{ cancel_label }}
+            </a>
+            <input class="btn btn-primary" type="submit" value="{{ submit_label }}">
+          </div>
+        </div>
+      {% include 'horizon/common/_form_errors.html' with form=form %}
+      <div class="col-md-2">
+        <ul class="nav nav-pills nav-stacked nav-arrow" role="tablist">
+          <li class="active"><a href="#global" role="tab" data-toggle="tab">{% trans "Global" %}</a></li>
+          <li><a href="#controller" role="tab" data-toggle="tab">{% trans "Controller" %}</a></li>
+          <li><a href="#compute" role="tab" data-toggle="tab">{% trans "Compute" %}</a></li>
+          <li><a href="#block-storage" role="tab" data-toggle="tab">{% trans "Block Storage" %}</a></li>
+          <li><a href="#object-storage" role="tab" data-toggle="tab">{% trans "Object Storage" %}</a></li>
+        </ul>
+      </div>
+      <div class="col-md-10">
+        <div class="tab-content panel panel-default configuration-panel">
+          <div class="tab-pane active" id="global">
+            {% for field in form.global_fieldset %}
+              {% include 'horizon/common/_horizontal_field.html' with field=field %}
+            {% endfor %}
+          </div>
+          <div class="tab-pane" id="controller">
+            {% for field in form.controller_fieldset %}
+              {% include 'horizon/common/_horizontal_field.html' with field=field %}
+            {% endfor %}
+          </div>
+          <div class="tab-pane" id="compute">
+            {% for field in form.compute_fieldset %}
+              {% include 'horizon/common/_horizontal_field.html' with field=field %}
+            {% endfor %}
+          </div>
+          <div class="tab-pane" id="block-storage">
+            {% for field in form.block_storage_fieldset %}
+              {% include 'horizon/common/_horizontal_field.html' with field=field %}
+            {% endfor %}
+          </div>
+          <div class="tab-pane" id="object-storage">
+            {% for field in form.object_storage_fieldset %}
+              {% include 'horizon/common/_horizontal_field.html' with field=field %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script type="text/javascript">
+    (window.$ || window.addHorizonLoadEvent)(function () {
+        $(document).tooltip('hide'); // prevent horizon from adding tooltip
+        $('a.help-icon').click(function () {
+            return false;
+        }).popover({
+            trigger: 'focus',
+            placement: 'right'
+        });
+    });
+  </script>
+{% endblock %}

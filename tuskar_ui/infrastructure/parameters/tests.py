@@ -26,7 +26,7 @@ from tuskar_ui.test.test_data import tuskar_data
 INDEX_URL = urlresolvers.reverse(
     'horizon:infrastructure:parameters:index')
 SERVICE_CONFIG_URL = urlresolvers.reverse(
-    'horizon:infrastructure:parameters:service_configuration')
+    'horizon:infrastructure:parameters:simple_service_configuration')
 
 TEST_DATA = utils.TestDataContainer()
 tuskar_data.data(TEST_DATA)
@@ -61,7 +61,7 @@ class ParametersTest(test.BaseAdminViewTests):
         ):
             res = self.client.get(SERVICE_CONFIG_URL)
             self.assertTemplateUsed(
-                res, 'infrastructure/parameters/service_config.html')
+                res, 'infrastructure/parameters/simple_service_config.html')
 
     def test_service_config_post(self):
         plan = api.tuskar.Plan(self.tuskarclient_plans.first())
