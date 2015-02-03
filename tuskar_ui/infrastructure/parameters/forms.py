@@ -44,6 +44,20 @@ CINDER_ISCSI_HELPER_CHOICES = [
 ]
 
 
+class ServiceConfig(horizon.forms.SelfHandlingForm):
+    def __init__(self, request, *args, **kwargs):
+        super(ServiceConfig, self).__init__(self, request, *args, **kwargs)
+
+        plan = api.tuskar.Plan.get_the_plan(request)
+        parameters = plan.parameter_list(include_key_parameters=False)
+
+        # for p in parameters:
+        #     self.fields['{p.name}'] = django.forms.CharField()
+        self.fields['test_field'] = django.forms.CharField()
+
+    def handle():
+        pass
+
 class EditServiceConfig(horizon.forms.SelfHandlingForm):
     virt_type = django.forms.ChoiceField(
         label=_("Deployment Type"),
