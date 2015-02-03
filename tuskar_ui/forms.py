@@ -15,6 +15,7 @@ import re
 
 from django import forms
 from django.utils import html
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 import netaddr
 
@@ -25,10 +26,11 @@ SEPARATOR_RE = re.compile('[\s,;|]+', re.UNICODE)
 def fieldset(self, *args, **kwargs):
     """A helper function for grouping fields based on their names."""
 
-    prefix = kwargs.pop('prefix', None)
+    prefix = kwargs.pop('prefix', '.*')
     names = args or self.fields.keys()
+
     for name in names:
-        if prefix is None or name.startswith(prefix):
+        if prefix is not None and re.match(prefix, name):
             yield forms.forms.BoundField(self, self.fields[name], name)
 
 
@@ -129,3 +131,26 @@ class LabelWidget(forms.Widget):
         if value:
             return html.escape(value)
         return ''
+
+
+class StaticTextWidget(forms.Widget):
+    def render(self, name, value, attrs=None):
+        if value is None:
+            value = ''
+        return html.format_html('<p class="form-control-static">{0}</p>',
+                                value)
+
+
+class StaticTextPasswordWidget(forms.Widget):
+    def render(self, name, value, attrs=None):
+        if value is None:
+            value = ''
+        return mark_safe(
+            u'<p class="form-control-static">'
+            u'<a href="" class="btn btn-default btn-xs password-button"'
+            u' data-content="%s"><i class="fa fa-eye"></i>&nbsp;%s</a>'
+            u'</p>' % (
+                html.escape(value),
+                html.escape(_(u"Reveal")),
+            ),
+        )

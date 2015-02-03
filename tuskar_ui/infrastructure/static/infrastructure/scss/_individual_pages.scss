@@ -218,29 +218,50 @@ table.definition-list-table > thead {
 table.definition-list-table > tbody > tr > td {
     border: 0;
 }
+
+
 ul.nav-arrow {
+  padding-top: 30px;
   & > li {
-      z-index: 1000;
-      position: relative;
-      margin-right: -32px;
-  }
-  & > li.active:after {
-    display: block;
-    content: '';
-    position: absolute;
-    top: 1px;
-    right: -7px;
-    border-top: 18px solid transparent;
-    border-bottom: 18px solid transparent;
-    border-left: 8px solid $link-color;
+    z-index: 1000;
+    position: relative;
+    margin-right: -30px;
+    & > a {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    &.active {
+      margin-right: -31px;
+      &:after {
+        display: block;
+        content: '';
+        position: absolute;
+        top: 0px;
+        right: -12px;
+        border-top: 19px solid transparent;
+        border-bottom: 19px solid transparent;
+        border-left: 12px solid $link-color;
+      }
+    }
   }
 }
 
 .configuration-panel {
-    min-height: 40em;
+  padding: 15px 15px 15px 30px !important;
+  border: none;
+  border-left: 1px solid $border-color;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .password-button + div.popover {
     white-space: pre-wrap;
     word-wrap: break-word;
+}
+
+.form-horizontal label .popover {
+  min-width: 250px;
+  .popover-content {
+    font-weight: normal;
+  }
 }
