@@ -20,7 +20,10 @@ from tuskar_ui.infrastructure.parameters import views
 urlpatterns = urls.patterns(
     '',
     urls.url(r'^$', views.IndexView.as_view(), name='index'),
-    urls.url(r'^service-config$',
-             views.ServiceConfigView.as_view(),
-             name='service_configuration'),
+    urls.url(r'^simple-service-config$',
+             views.SimpleServiceConfigView.as_view(),
+             name='simple_service_configuration'),
+    urls.url(r'^advanced-service-config$',
+             views.AdvancedServiceConfigView.as_view(),
+             name='advanced_service_configuration'),
 )
