@@ -22,14 +22,15 @@ import netaddr
 SEPARATOR_RE = re.compile('[\s,;|]+', re.UNICODE)
 
 
-def fieldset(self, *args, **kwargs):
+def fieldset(form, *args, **kwargs):
     """A helper function for grouping fields based on their names."""
 
-    prefix = kwargs.pop('prefix', None)
-    names = args or self.fields.keys()
+    prefix = kwargs.pop('prefix', '.*')
+    names = args or form.fields.keys()
+
     for name in names:
-        if prefix is None or name.startswith(prefix):
-            yield forms.forms.BoundField(self, self.fields[name], name)
+        if prefix is not None and re.match(prefix, name):
+            yield forms.forms.BoundField(form, form.fields[name], name)
 
 
 class MACDialect(netaddr.mac_eui48):
@@ -133,3 +134,23 @@ class LabelWidget(forms.Widget):
         if value:
             return html.escape(value)
         return ''
+
+
+class StaticTextWidget(forms.Widget):
+    def render(self, name, value, attrs=None):
+        if value is None:
+            value = ''
+        return html.format_html('<p class="form-control-static">{0}</p>',
+                                value)
+
+
+class StaticTextPasswordWidget(forms.Widget):
+    def render(self, name, value, attrs=None):
+        if value is None:
+            value = ''
+        return html.format_html(
+            u'<p class="form-control-static">'
+            u'<a href="" class="btn btn-default btn-xs password-button"'
+            u' data-content="{0}"><i class="fa fa-eye"></i>&nbsp;{1}</a>'
+            u'</p>', value, _(u"Reveal")
+        )
