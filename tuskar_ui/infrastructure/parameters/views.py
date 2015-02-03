@@ -60,6 +60,17 @@ class ServiceConfigView(horizon.forms.ModalFormView):
             'virt_type': virt_type}
 
 
+class NewIndexView(horizon.forms.ModalFormView):
+    form_class = forms.ServiceConfig
+    template_name = "infrastructure/parameters/newindex.html"
+
+    def get_initial(self):
+        self.plan = api.tuskar.Plan.get_the_plan(self.request)
+        self.parameters = self.plan.parameter_list(
+            include_key_parameters=False)
+        return { p.name:p.value for p in self.parameters }
+
+
 class IndexView(horizon.tables.MultiTableView):
     table_classes = (
         tables.GlobalParametersTable,
