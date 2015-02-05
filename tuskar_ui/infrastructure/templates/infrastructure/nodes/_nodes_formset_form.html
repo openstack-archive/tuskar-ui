@@ -10,12 +10,12 @@
     </div>
     <h5 class="row">{% trans "Power Management" %}</h5>
     {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.driver required=True %}
-    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_address %}
+    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_address required=True %}
     {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_username %}
     {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ipmi_password %}
-    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_address %}
-    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_username %}
-    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_key_contents %}
+    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_address required=True %}
+    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_username required=True %}
+    {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.ssh_key_contents required=True %}
     <div class="panel panel-default">
       <div class="panel-heading">
         <label class="checkbox">
