@@ -25,7 +25,6 @@ class NodeAPITests(test.APITestCase):
     def test_node_create(self):
         node = api.node.BareMetalNode(self.baremetalclient_nodes.first())
 
-        # FIXME(lsmola) this should be mocking client call no Node
         with patch('novaclient.v1_1.contrib.baremetal.'
                    'BareMetalNodeManager.create',
                    return_value=node):
