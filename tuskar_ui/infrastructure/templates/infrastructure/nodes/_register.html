@@ -6,6 +6,7 @@
 {% block form_action %}{% url 'horizon:infrastructure:nodes:register' %}{% endblock %}
 {% block modal_id %}register_nodes_modal{% endblock %}
 {% block modal-header %}{% trans "Register Nodes" %}{% endblock %}
+{% block form_attrs %}enctype="multipart/form-data"{% endblock %}
 
 {% block modal-body %}
 {% include "formset_table/menu_formset.html" with formset=form  form_template="infrastructure/nodes/_nodes_formset_form.html" %}

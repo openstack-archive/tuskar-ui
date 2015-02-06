@@ -133,6 +133,7 @@ class NodesTests(test.BaseAdminViewTests):
 
     def test_register_post(self):
         node = TEST_DATA.ironicclient_nodes.first
+        nodes = self._all_mocked_nodes()
         data = {
             'register_nodes-TOTAL_FORMS': 2,
             'register_nodes-INITIAL_FORMS': 1,
@@ -157,8 +158,9 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-1-local_gb': '6',
         }
         with patch('tuskar_ui.api.node.Node', **{
-            'spec_set': ['create'],
+            'spec_set': ['create', 'get_all_mac_addresses'],
             'create.return_value': node,
+            'get_all_mac_addresses.return_value': set(nodes),
         }) as Node:
             res = self.client.post(REGISTER_URL, data)
             self.assertNoFormErrors(res)
@@ -191,6 +193,7 @@ class NodesTests(test.BaseAdminViewTests):
             ])
 
     def test_register_post_exception(self):
+        nodes = self._all_mocked_nodes()
         data = {
             'register_nodes-TOTAL_FORMS': 2,
             'register_nodes-INITIAL_FORMS': 1,
@@ -215,8 +218,9 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-1-local_gb': '6',
         }
         with patch('tuskar_ui.api.node.Node', **{
-            'spec_set': ['create'],
+            'spec_set': ['create', 'get_all_mac_addresses'],
             'create.side_effect': self.exceptions.tuskar,
+            'get_all_mac_addresses.return_value': set(nodes),
         }) as Node:
             res = self.client.post(REGISTER_URL, data)
             self.assertEqual(res.status_code, 200)
