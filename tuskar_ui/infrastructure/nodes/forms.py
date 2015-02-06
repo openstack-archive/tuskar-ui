@@ -39,8 +39,6 @@ def get_driver_info_dict(data):
     driver_dict = {'driver': driver}
     if driver == 'pxe_ipmitool':
         driver_dict.update(
-            # TODO(rdopieralski) If ipmi_address is no longer required,
-            # then we will need to use something else here?
             ipmi_address=data['ipmi_address'],
             ipmi_username=data.get('ipmi_username'),
             ipmi_password=data.get('ipmi_password'),
@@ -208,8 +206,22 @@ class NodeForm(django.forms.Form):
     def clean_ipmi_password(self):
         return self.cleaned_data.get('ipmi_password') or None
 
+    def _require_field(self, field_name, cleaned_data):
+        if cleaned_data.get(field_name):
+            return
+        self._errors[field_name] = self.error_class([_(
+            u"This field is required"
+        )])
+
     def clean(self):
         cleaned_data = super(NodeForm, self).clean()
+        driver = cleaned_data['driver']
+        if driver == 'pxe_ipmitool':
+            self._require_field('ipmi_address', cleaned_data)
+        elif driver == 'pxe_ssh':
+            self._require_field('ssh_address', cleaned_data)
+            self._require_field('ssh_username', cleaned_data)
+            self._require_field('ssh_key_contents', cleaned_data)
         if not cleaned_data.get('do_autodiscovery', False):
             for field_name in [
                 'mac_addresses',
