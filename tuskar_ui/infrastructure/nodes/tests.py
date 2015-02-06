@@ -157,8 +157,9 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-1-local_gb': '6',
         }
         with patch('tuskar_ui.api.node.Node', **{
-            'spec_set': ['create'],
+            'spec_set': ['create', 'list'],
             'create.return_value': node,
+            'list.return_value': set(),
         }) as Node:
             res = self.client.post(REGISTER_URL, data)
             self.assertNoFormErrors(res)
@@ -215,8 +216,9 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-1-local_gb': '6',
         }
         with patch('tuskar_ui.api.node.Node', **{
-            'spec_set': ['create'],
+            'spec_set': ['create', 'list'],
             'create.side_effect': self.exceptions.tuskar,
+            'list.return_value': set(),
         }) as Node:
             res = self.client.post(REGISTER_URL, data)
             self.assertEqual(res.status_code, 200)

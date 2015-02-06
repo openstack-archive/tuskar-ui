@@ -63,7 +63,7 @@ tuskar.menu_formset = (function () {
     }
 
     // Connect all signals.
-    $('a.add-node-link').click(add_node);
+    $('#add-node-link').click(add_node);
     $nav.find('li').each(function () {
       add_delete_link($(this));
     });
