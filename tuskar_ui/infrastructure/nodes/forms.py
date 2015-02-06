@@ -12,11 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import csv
+import urllib2
 
 import django.forms
 from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import forms
+from horizon import messages
 
 from tuskar_ui import api
 import tuskar_ui.forms
@@ -239,31 +241,55 @@ class BaseNodeFormset(tuskar_ui.forms.SelfHandlingFormset):
 
 
 class UploadNodeForm(forms.SelfHandlingForm):
-    csv_file = forms.FileField(label=_("CSV File"), required=True)
+    csv_upload = forms.FileField(label='', required=False)
+    csv_url = forms.URLField(label='', required=False,
+                             widget=django.forms.widgets.URLInput(
+                                 attrs={'placeholder': _('URL')}))
 
     def handle(self, request, data):
         return True
 
     def get_data(self):
         data = []
-        for row in csv.reader(self.cleaned_data['csv_file']):
-            driver = row[0].strip()
-            if driver == 'pxe_ssh':
-                node = dict(
-                    ssh_address=row[1],
-                    ssh_username=row[2],
-                    ssh_key_contents=row[3],
-                    mac_addresses=row[4],
-                    driver=driver,
-                )
-            elif driver == 'pxe_ipmitool':
-                node = dict(
-                    ipmi_address=row[1],
-                    ipmi_username=row[2],
-                    ipmi_password=row[3],
-                    driver=driver,
-                )
-            data.append(node)
+        sources = []
+        csv_upload = self.cleaned_data['csv_upload']
+        csv_url = self.cleaned_data['csv_url']
+
+        if csv_upload:
+            sources.append(csv_upload)
+        if csv_url:
+            sources.append(urllib2.urlopen(csv_url))
+
+        for source in sources:
+            for row in csv.reader(source):
+                try:
+                    driver = row[0].strip()
+                except IndexError:
+                    messages.error(self.request,
+                                   _("Unable to parse the CSV file."))
+                    return []
+
+                if driver == 'pxe_ssh':
+                    node = dict(
+                        ssh_address=row[1],
+                        ssh_username=row[2],
+                        ssh_key_contents=row[3],
+                        mac_addresses=row[4],
+                        driver=driver,
+                    )
+                    data.append(node)
+                elif driver == 'pxe_ipmitool':
+                    node = dict(
+                        ipmi_address=row[1],
+                        ipmi_username=row[2],
+                        ipmi_password=row[3],
+                        driver=driver,
+                    )
+                    data.append(node)
+                else:
+                    messages.error(self.request,
+                                   _("Unable to parse the CSV file."))
+                    return []
         return data
 
 
