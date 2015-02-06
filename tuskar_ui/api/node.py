@@ -684,3 +684,8 @@ class Node(base.APIResourceWrapper):
         if self.instance_uuid:
             return _("Provisioned")
         return _("Free")
+
+
+def get_all_mac_addresses(request):
+    macs = [node.addresses for node in Node.list(request)]
+    return set([mac.upper() for sublist in macs for mac in sublist])
