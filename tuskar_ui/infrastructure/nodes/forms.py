@@ -239,7 +239,12 @@ class BaseNodeFormset(tuskar_ui.forms.SelfHandlingFormset):
 
 
 class UploadNodeForm(forms.SelfHandlingForm):
-    csv_file = forms.FileField(label=_("CSV File"), required=True)
+    csv_file = forms.FileField(label='', required=False)
+    csv_url = django.forms.URLField(
+        label='',
+        required=False,
+        widget=django.forms.widgets.URLInput(
+            attrs={'placeholder': _('URL')}))
 
     def handle(self, request, data):
         return True

@@ -19,7 +19,6 @@ import django.forms
 import django.http
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base
-from horizon import exceptions
 from horizon import forms as horizon_forms
 from horizon import tabs as horizon_tabs
 from horizon.utils import memoized
@@ -45,15 +44,6 @@ class IndexView(infrastructure_views.ItemCountMixin,
             'icon': 'fa-plus',
         }
         context['header_actions'] = [register_action]
-
-        if api.node.NodeClient.ironic_enabled(self.request):
-            upload_action = {
-                'name': _('Upload Nodes'),
-                'url': reverse('horizon:infrastructure:nodes:auto-discover'
-                               '-csv'),
-                'icon': 'fa-upload',
-            }
-            context['header_actions'].append(upload_action)
         return context
 
     @memoized.memoized_method
@@ -96,17 +86,10 @@ class RegisterView(horizon_forms.ModalFormView):
             prefix=self.form_prefix,
         )
 
-
-class UploadView(horizon_forms.ModalFormView):
-    form_class = forms.UploadNodeForm
-    template_name = 'infrastructure/nodes/upload.html'
-    success_url = reverse_lazy(
-        'horizon:infrastructure:nodes:index')
-    submit_label = _("Upload Nodes")
-
-    def post(self, request, *args, **kwargs):
-        # This form's POST is handled in RegisterView.
-        raise exceptions.NotFound()
+    def get_context_data(self, **kwargs):
+        context = super(RegisterView, self).get_context_data(**kwargs)
+        context['upload_form'] = forms.UploadNodeForm(self.request)
+        return context
 
 
 class DetailView(horizon_tabs.TabView):
