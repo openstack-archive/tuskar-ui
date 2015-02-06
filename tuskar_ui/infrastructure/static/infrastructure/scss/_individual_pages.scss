@@ -18,9 +18,10 @@ $link-color: #428bca;
 
 // Register nodes formset
 .register-nodes-formset {
-  a.add-node-link {
+  a.node-icon {
     display: block;
     float: right;
+    padding-left: 10px;
   }
 
   .nav-pills > .active > a {

@@ -22,8 +22,6 @@ urlpatterns = urls.patterns(
     urls.url(r'^$', views.IndexView.as_view(), name='index'),
     urls.url(r'^register/$', views.RegisterView.as_view(),
              name='register'),
-    urls.url(r'^auto-discover-csv/$', views.UploadView.as_view(),
-             name='auto-discover-csv'),
     urls.url(r'^nodes_performance/$',
              views.PerformanceView.as_view(), name='nodes_performance'),
     urls.url(r'^(?P<node_uuid>[^/]+)/$', views.DetailView.as_view(),

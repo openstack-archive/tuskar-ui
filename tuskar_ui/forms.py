@@ -106,6 +106,10 @@ class NetworkField(forms.fields.Field):
 
 
 class SelfHandlingFormset(forms.formsets.BaseFormSet):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(SelfHandlingFormset, self).__init__(*args, **kwargs)
+
     def handle(self, request, data):
         success = True
         for form in self:

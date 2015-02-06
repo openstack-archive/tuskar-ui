@@ -6,10 +6,16 @@
 <div class="row register-nodes-formset" id="formset-{{ formset.prefix }}">
   <div class="col-xs-5">
     <div class="clearfix register-nav-head">
-      <a class="add-node-link" href="#">
-        <i class="fa fa-plus"></i> {% trans "Add Node" %}
+      <a class="node-icon" data-toggle="collapse" href="#collapse-upload-form">
+        <i class="fa fa-lg fa-upload"></i>
+      </a>
+      <a id="add-node-link" class="node-icon" href="#">
+        <i class="fa fa-lg fa-plus"></i>
       </a>
       <h4>Nodes to register</h4>
+    </div>
+    <div id="collapse-upload-form" class="panel-collapse collapse">
+      {% include 'infrastructure/nodes/_upload.html' with form=upload_form %}
     </div>
     <ul class="nav nav-pills nav-stacked">
       {% for form in formset %}
