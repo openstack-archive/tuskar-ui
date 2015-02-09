@@ -17,6 +17,7 @@ import string
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from glanceclient import exc as glance_exceptions
+from horizon.utils import memoized
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from openstack_dashboard.api import neutron
@@ -383,6 +384,12 @@ class Role(base.APIResourceWrapper):
                 return role
 
     @classmethod
+    @memoized.memoized
+    def _roles_by_image_id(cls, request, plan):
+        return {plan.parameter_value(role.image_id_parameter_name): role
+                for role in Role.list(request)}
+
+    @classmethod
     @handle_errors(_("Unable to retrieve overcloud role"))
     def get_by_image(cls, request, plan, image):
         """Return the Role whose ImageID parameter matches the image.
@@ -400,18 +407,26 @@ class Role(base.APIResourceWrapper):
                  Role can be found
         :rtype:  tuskar_ui.api.tuskar.Role
         """
-        for role in Role.list(request):
-            image_id_from_plan = plan.parameter_value(
-                role.image_id_parameter_name)
-            if image_id_from_plan == image.id:
-                return role
+        roles = cls._roles_by_image_id(request, plan)
+        try:
+            return roles[image.id]
+        except KeyError:
+            return None
+
+    @classmethod
+    @memoized.memoized
+    def _roles_by_resource_type(cls, request):
+        return {role.provider_resource_type: role
+                for role in Role.list(request)}
 
     @classmethod
     @handle_errors(_("Unable to retrieve overcloud role"))
     def get_by_resource_type(cls, request, resource_type):
-        for role in Role.list(request):
-            if role.provider_resource_type == resource_type:
-                return role
+        roles = cls._roles_by_resource_type(request)
+        try:
+            return roles[resource_type]
+        except KeyError:
+            return None
 
     @property
     def provider_resource_type(self):

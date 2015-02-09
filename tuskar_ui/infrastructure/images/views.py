@@ -55,7 +55,6 @@ class IndexView(infrastructure_views.ItemCountMixin,
             msg = _('Unable to retrieve image list.')
             exceptions.handle(self.request, msg)
 
-        # TODO(tzumainn): re-architect a bit to avoid inefficiency
         plan = tuskar_api.tuskar.Plan.get_the_plan(self.request)
         for image in images:
             image.role = tuskar_api.tuskar.Role.get_by_image(
