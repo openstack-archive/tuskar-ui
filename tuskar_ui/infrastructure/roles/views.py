@@ -72,8 +72,6 @@ class DetailView(horizon_tables.DataTableView, views.RoleMixin,
         resources = stack.resources(role=role, with_joins=True)
         nodes = [r.node for r in resources]
         for node in nodes:
-            # TODO(tzumainn): this could probably be done more efficiently
-            # by getting the resource for all nodes at once
             try:
                 resource = api.heat.Resource.get_by_node(self.request, node)
             except LookupError:
