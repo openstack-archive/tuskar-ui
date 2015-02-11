@@ -15,12 +15,9 @@ import itertools
 import logging
 import sys
 
-from django import forms
 from django import template
 from django.template import loader
 from django.utils import datastructures
-from django.utils import html
-from horizon import conf
 from horizon.tables import base as horizon_tables
 
 
@@ -28,76 +25,7 @@ LOG = logging.getLogger(__name__)
 STRING_SEPARATOR = "__"
 
 
-# FIXME: Remove this class and use Row directly after it becomes easier to
-# extend it, see bug #1229677
-class BaseCell(horizon_tables.Cell):
-    """Represents a single cell in the table."""
-    def __init__(self, datum, column, row, attrs=None, classes=None):
-        super(BaseCell, self).__init__(datum, None, column, row, attrs,
-                                       classes)
-        self.data = self.get_data(datum, column, row)
-
-    def get_data(self, datum, column, row):
-        """Fetches the data to be displayed in this cell."""
-        table = row.table
-        if column.auto == "multi_select":
-            widget = forms.CheckboxInput(check_test=lambda value: False)
-            # Convert value to string to avoid accidental type conversion
-            data = widget.render('object_ids',
-                                 unicode(table.get_object_id(datum)))
-            table._data_cache[column][table.get_object_id(datum)] = data
-        elif column.auto == "actions":
-            data = table.render_row_actions(datum)
-            table._data_cache[column][table.get_object_id(datum)] = data
-        else:
-            data = column.get_data(datum)
-        return data
-
-
-# FIXME: Remove this class and use Row directly after it becomes easier to
-# extend it, see bug #1229677
-class BaseRow(horizon_tables.Row):
-    """A DataTable Row class that is easier to extend.
-
-    All of this code is lifted from ``horizon_tables.Row`` and just split into
-    two separate methods, so that it is possible to override one of them
-    without touching the code of the other.
-    """
-
-    def load_cells(self, datum=None):
-        # Compile all the cells on instantiation.
-        table = self.table
-        if datum:
-            self.datum = datum
-        else:
-            datum = self.datum
-        cells = []
-        for column in table.columns.values():
-            cell = table._meta.cell_class(datum, column, self)
-            cells.append((column.name or column.auto, cell))
-        self.cells = datastructures.SortedDict(cells)
-
-        if self.ajax:
-            interval = conf.HORIZON_CONFIG['ajax_poll_interval']
-            self.attrs['data-update-interval'] = interval
-            self.attrs['data-update-url'] = self.get_ajax_update_url()
-            self.classes.append("ajax-update")
-
-        # Add the row's status class and id to the attributes to be rendered.
-        self.classes.append(self.status_class)
-        id_vals = {"table": self.table.name,
-                   "sep": STRING_SEPARATOR,
-                   "id": table.get_object_id(datum)}
-        self.id = "%(table)s%(sep)srow%(sep)s%(id)s" % id_vals
-        self.attrs['id'] = self.id
-
-        # Add the row's display name if available
-        display_name = table.get_object_display(datum)
-        if display_name:
-            self.attrs['data-display'] = html.escape(display_name)
-
-
-class FormsetCell(BaseCell):
+class FormsetCell(horizon_tables.Cell):
     """A DataTable cell that knows about its field from the fieldset."""
 
     def __init__(self, *args, **kwargs):
@@ -114,7 +42,7 @@ class FormsetCell(BaseCell):
                     unicode(error) for error in self.field.errors)
 
 
-class FormsetRow(BaseRow):
+class FormsetRow(horizon_tables.Row):
     """A DataTable row that knows about its form from the fieldset."""
 
     template_path = 'formset_table/_row.html'
