@@ -1,0 +1,10 @@
+Verified+2: Jenkins
+Code-Review+2: Zhenguo Niu <niuzhenguo@huawei.com>
+Workflow+1: Zhenguo Niu <niuzhenguo@huawei.com>
+Code-Review+2: Ana Krivokapic <akrivoka@redhat.com>
+Code-Review+1: Dougal Matthews <dougal@redhat.com>
+Submitted-by: Jenkins
+Submitted-at: Wed, 11 Feb 2015 13:39:17 +0000
+Reviewed-on: https://review.openstack.org/154006
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
