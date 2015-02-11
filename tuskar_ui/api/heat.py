@@ -418,10 +418,8 @@ class Resource(base.APIResourceWrapper):
     @classmethod
     @memoized.memoized
     def _resources_by_nodes(cls, request):
-        return dict(
-            (resource.physical_resource_id, resource)
-            for resource in cls.list_all_resources(request)
-        )
+        return {resource.physical_resource_id: resource
+                for resource in cls.list_all_resources(request)}
 
     @classmethod
     def get_by_node(cls, request, node):
