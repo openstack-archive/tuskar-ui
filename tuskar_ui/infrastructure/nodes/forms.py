@@ -67,12 +67,32 @@ def create_node(request, data):
         local_gb=local_gb,
         mac_addresses=data['mac_addresses'].split(),
     )
-    node = api.node.Node.create(request, **kwargs)
-
-    # If not all the parameters have been filled in, run the autodiscovery
-    if not all([cpu_arch, cpus, memory_mb, local_gb]):
-        api.node.Node.set_maintenance(request, node.uuid, True)
-        api.node.Node.discover(request, [node.uuid])
+    success = True
+    try:
+        node = api.node.Node.create(request, **kwargs)
+    except Exception:
+        success = False
+        exceptions.handle(request, _(u"Unable to register node."))
+    else:
+        # If not all the parameters have been filled in,
+        # run the auto-discovery. Note, that the node has been created,
+        # so even if we fail here, we report success.
+        if not all([cpu_arch, cpus, memory_mb, local_gb]):
+            node_uuid = node.uuid
+            try:
+                api.node.Node.set_maintenance(request, node_uuid, True)
+            except Exception:
+                exceptions.handle(request, _(
+                    u"Can't set maintenance mode on node {0}."
+                ).format(node_uuid))
+            else:
+                try:
+                    api.node.Node.discover(request, [node_uuid])
+                except Exception:
+                    exceptions.handle(request, _(
+                        u"Can't start discovery on node {0}."
+                    ).format(node_uuid))
+    return success
 
 
 class NodeForm(django.forms.Form):
@@ -194,15 +214,7 @@ class NodeForm(django.forms.Form):
         return name
 
     def handle(self, request, data):
-        success = True
-        try:
-            create_node(request, data)
-        except Exception:
-            success = False
-            exceptions.handle(request, _('Unable to register node.'))
-            # TODO(tzumainn) If there is a failure between steps, do we
-            # have to unregister nodes, delete ports, etc?
-        return success
+        return create_node(request, data)
 
     def clean_ipmi_username(self):
         return self.cleaned_data.get('ipmi_username') or None
