@@ -15,8 +15,8 @@
 import contextlib
 
 from django.core import urlresolvers
-from horizon import exceptions
 from mock import patch, call  # noqa
+from novaclient import exceptions as nova_exceptions
 from novaclient.v1_1 import servers
 from openstack_dashboard.test.test_data import utils
 
@@ -63,6 +63,10 @@ def _prepare_create():
             yield mocks[0], data
 
 
+def _raise_nova_client_exception(*args, **kwargs):
+    raise nova_exceptions.ClientException("Boom!")
+
+
 class FlavorsTest(test.BaseAdminViewTests):
 
     def test_index(self):
@@ -91,10 +95,17 @@ class FlavorsTest(test.BaseAdminViewTests):
 
     def test_index_recoverable_failure(self):
         with patch('openstack_dashboard.api.nova.flavor_list',
-                   side_effect=exceptions.Conflict):
-            self.client.get(INDEX_URL)
-            # FIXME(dtantsur): I expected the following to work:
-            # self.assertMessageCount(error=1, warning=0)
+                   side_effect=_raise_nova_client_exception) as flavor_list:
+            res = self.client.get(INDEX_URL)
+            self.assertEqual(flavor_list.call_count, 2)
+        self.assertEqual(
+            [(m.message, m.tags) for m in res.context['messages']],
+            [
+                (u'Unable to retrieve flavor list.', u'error'),
+                (u'Unable to retrieve nodes', u'error'),
+            ],
+        )
+        self.assertMessageCount(response=res, error=2, warning=0)
 
     def test_create_get(self):
         with patch('openstack_dashboard.api.glance.image_list_detailed',
@@ -105,11 +116,15 @@ class FlavorsTest(test.BaseAdminViewTests):
 
     def test_create_get_recoverable_failure(self):
         with patch('openstack_dashboard.api.glance.image_list_detailed',
-                   side_effect=exceptions.Conflict):
-            self.client.get(CREATE_URL)
-            # FIXME(tzumainn): I expected the following to work, seems similar
-            # to comment on test_index_recoverable_failure
-            # self.assertMessageCount(error=1, warning=0)
+                   side_effect=_raise_nova_client_exception):
+            res = self.client.get(CREATE_URL)
+        self.assertEqual(
+            [(m.message, m.tags) for m in res.context['messages']],
+            [
+                (u'Unable to retrieve images list.', u'error'),
+            ],
+        )
+        self.assertMessageCount(response=res, error=1, warning=0)
 
     def test_create_post_ok(self):
         images = TEST_DATA.glanceclient_images.list()
