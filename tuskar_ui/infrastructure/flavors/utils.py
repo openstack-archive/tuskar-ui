@@ -118,7 +118,4 @@ class FlavorSuggestion(object):
             vcpus=self.vcpus,
             disk=self.disk,
             cpu_arch=self.cpu_arch,
-            # TODO(rdopieralski) Should we use some defaults here? What?
-            kernel_image_id='',
-            ramdisk_image_id='',
         )
