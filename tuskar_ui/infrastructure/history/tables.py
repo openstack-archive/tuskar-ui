@@ -28,7 +28,7 @@ class HistoryTable(tables.DataTable):
     resource_status_reason = tables.Column('resource_status_reason',
                                            verbose_name=_("Reason"))
 
-    class Meta:
+    class Meta(object):
         name = "log"
         verbose_name = _("Deployment Log")
         multi_select = False
