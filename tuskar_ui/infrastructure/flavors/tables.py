@@ -94,7 +94,7 @@ class FlavorsTable(horizon.tables.DataTable):
                                  verbose_name=_('Disk'),
                                  attrs={'data-type': 'size'})
 
-    class Meta:
+    class Meta(object):
         name = "flavors"
         verbose_name = _("Available")
         table_actions = (
@@ -126,7 +126,7 @@ class FlavorRolesTable(horizon.tables.DataTable):
         )
         super(FlavorRolesTable, self).__init__(request, *args, **kwargs)
 
-    class Meta:
+    class Meta(object):
         name = "flavor_roles"
         verbose_name = _("Overcloud Roles")
         table_actions = ()
@@ -146,7 +146,7 @@ class FlavorSuggestionsTable(horizon.tables.DataTable):
                                  verbose_name=_('Disk'),
                                  attrs={'data-type': 'size'})
 
-    class Meta:
+    class Meta(object):
         name = "suggested_flavors"
         verbose_name = _("Suggested")
         row_actions = (

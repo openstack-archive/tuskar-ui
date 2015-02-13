@@ -66,7 +66,7 @@ class CreateFlavorAction(flavor_workflows.CreateFlavorInfoAction):
         # No idea why Horizon exposes this database detail
         del self.fields['flavor_id']
 
-    class Meta:
+    class Meta(object):
         name = _("Flavor")
         help_text = _("Flavors define the sizes for RAM, disk, number of "
                       "cores, and other resources. Flavors should be "

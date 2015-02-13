@@ -61,7 +61,7 @@ class ImagesTable(tables.DataTable):
                          image.role.name if image.role else '-',
                          verbose_name=_("Deployment Role"))
 
-    class Meta:
+    class Meta(object):
         name = "images"
         row_class = UpdateRow
         verbose_name = _("Provisioning Images")
