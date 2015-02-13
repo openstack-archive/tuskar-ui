@@ -37,6 +37,7 @@ class IndexView(horizon.tables.MultiTableView):
             'name': _("New Flavor"),
             'url': reverse('horizon:infrastructure:flavors:create'),
             'icon': 'fa-plus',
+            'ajax_modal': True,
         }
         context['header_actions'] = [create_action]
         context['flavors_count'] = self.get_flavors_count()

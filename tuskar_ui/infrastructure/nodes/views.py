@@ -42,6 +42,7 @@ class IndexView(infrastructure_views.ItemCountMixin,
             'name': _('Register Nodes'),
             'url': reverse('horizon:infrastructure:nodes:register'),
             'icon': 'fa-plus',
+            'ajax_modal': True,
         }
         context['header_actions'] = [register_action]
         return context
