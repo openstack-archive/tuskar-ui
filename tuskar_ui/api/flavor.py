@@ -76,10 +76,12 @@ class Flavor(object):
 
     @classmethod
     def create(cls, request, name, memory, vcpus, disk, cpu_arch,
-               kernel_image_id, ramdisk_image_id):
-        extras_dict = {'cpu_arch': cpu_arch,
-                       'baremetal:deploy_kernel_id': kernel_image_id,
-                       'baremetal:deploy_ramdisk_id': ramdisk_image_id}
+               kernel_image_id=None, ramdisk_image_id=None):
+        extras_dict = {'cpu_arch': cpu_arch}
+        if kernel_image_id is not None:
+            extras_dict['baremetal:deploy_kernel_id'] = kernel_image_id
+        if ramdisk_image_id is not None:
+            extras_dict['baremetal:deploy_ramdisk_id'] = ramdisk_image_id
         return cls(nova.flavor_create(request, name, memory, vcpus, disk,
                                       metadata=extras_dict))
 
