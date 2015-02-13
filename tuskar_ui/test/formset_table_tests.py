@@ -44,7 +44,7 @@ class FormsetTableTests(test.TestCase):
             name = tables.Column('name')
             value = tables.Column('value')
 
-            class Meta:
+            class Meta(object):
                 name = 'table'
 
         table = Table(self.request)
