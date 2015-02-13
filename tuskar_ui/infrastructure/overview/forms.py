@@ -68,21 +68,22 @@ def validate_plan(request, plan):
     requested_nodes = 0
     previous_snmp_password = None
     for role in plan.role_list:
-        if role.image(plan) is None:
+        node_count = plan.get_role_node_count(role)
+        if node_count and role.image(plan) is None:
             messages.append({
                 'text': _(u"Role {0} has no image.").format(role.name),
                 'is_critical': True,
                 'link_url': reverse_lazy('horizon:infrastructure:roles:index'),
                 'link_label': _(u"Associate this role with an image."),
             })
-        if role.flavor(plan) is None:
+        if node_count and role.flavor(plan) is None:
             messages.append({
                 'text': _(u"Role {0} has no flavor.").format(role.name),
                 'is_critical': False,
                 'link_url': reverse_lazy('horizon:infrastructure:roles:index'),
                 'link_label': _(u"Associate this role with a flavor."),
             })
-        requested_nodes += plan.get_role_node_count(role)
+        requested_nodes += node_count
         snmp_password = plan.parameter_value(
             role.parameter_prefix + 'SnmpdReadonlyUserPassword')
         if (not snmp_password or
