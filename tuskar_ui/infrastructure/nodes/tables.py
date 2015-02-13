@@ -173,7 +173,7 @@ class BaseNodesTable(tables.DataTable):
     state = tables.Column(get_state_string,
                           verbose_name=_("Status"))
 
-    class Meta:
+    class Meta(object):
         name = "nodes_table"
         verbose_name = _("Nodes")
         table_actions = (NodeFilterAction, SetPowerStateOn, SetPowerStateOff,
@@ -190,7 +190,7 @@ class BaseNodesTable(tables.DataTable):
 
 class AllNodesTable(BaseNodesTable):
 
-    class Meta:
+    class Meta(object):
         name = "all_nodes_table"
         verbose_name = _("All")
         hidden_title = False
@@ -204,7 +204,7 @@ class AllNodesTable(BaseNodesTable):
 
 class ProvisionedNodesTable(BaseNodesTable):
 
-    class Meta:
+    class Meta(object):
         name = "provisioned_nodes_table"
         verbose_name = _("Provisioned")
         hidden_title = False
@@ -216,7 +216,7 @@ class ProvisionedNodesTable(BaseNodesTable):
 
 class FreeNodesTable(BaseNodesTable):
 
-    class Meta:
+    class Meta(object):
         name = "free_nodes_table"
         verbose_name = _("Free")
         hidden_title = False
@@ -229,7 +229,7 @@ class FreeNodesTable(BaseNodesTable):
 
 class MaintenanceNodesTable(BaseNodesTable):
 
-    class Meta:
+    class Meta(object):
         name = "maintenance_nodes_table"
         verbose_name = _("Maintenance")
         hidden_title = False

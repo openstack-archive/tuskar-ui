@@ -45,7 +45,7 @@ class UpdateRoleInfoAction(workflows.Action):
         label=_("Image"),
     )
 
-    class Meta:
+    class Meta(object):
         name = _("Role Information")
         help_text = _("helptext here")
         slug = 'update_role_info'
