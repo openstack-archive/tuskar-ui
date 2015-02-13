@@ -59,8 +59,7 @@ class RegisterView(horizon_forms.ModalFormView):
     form_class = forms.RegisterNodeFormset
     form_prefix = 'register_nodes'
     template_name = 'infrastructure/nodes/register.html'
-    success_url = reverse_lazy(
-        'horizon:infrastructure:nodes:index')
+    success_url = reverse_lazy('horizon:infrastructure:nodes:index')
     submit_label = _("Register Nodes")
 
     def get_data(self):
