@@ -14,12 +14,35 @@
 import django.shortcuts
 from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
+import horizon.messages
 import horizon.tables
+from openstack_dashboard.api import glance
 from openstack_dashboard.dashboards.admin.flavors import (
     tables as flavor_tables)
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.flavors import utils
+
+
+def _guess_default_image_ids(request):
+    try:
+        images = glance.image_list_detailed(request)[0]
+    except Exception:
+        horizon.exceptions.handle(request,
+                                  _('Unable to retrieve images list.'))
+        kernel_images = []
+        ramdisk_images = []
+    else:
+        kernel_images = [image for image in images
+                         if utils.check_image_type(image, 'discovery kernel')]
+        ramdisk_images = [image for image in images
+                          if utils.check_image_type(image,
+                                                    'discovery ramdisk')]
+    if len(kernel_images) != 1:
+        raise ValueError("Multiple kernel images available.")
+    if len(ramdisk_images) != 1:
+        raise ValueError("Multiple ramdisk images available.")
+    return kernel_images[0].id. ramdisk_images[0].id
 
 
 class CreateFlavor(flavor_tables.CreateFlavor):
@@ -34,15 +57,24 @@ class CreateSuggestedFlavor(horizon.tables.Action):
     method = 'POST'
     icon = 'plus'
 
-    def create_flavor(self, request, node_id):
+    def create_flavor(self, request, node_id, images):
         node = api.node.Node.get(request, node_id)
         suggestion = utils.FlavorSuggestion.from_node(node)
-        return suggestion.create_flavor(request)
+        return suggestion.create_flavor(request, *images)
 
     def handle(self, data_table, request, node_ids):
+        try:
+            images = _guess_default_image_ids(request)
+        except ValueError:
+            horizon.messages.error(
+                request,
+                _("Multiple images available. Cowardly refusing to guess."),
+            )
+            return False
+
         for node_id in node_ids:
             try:
-                self.create_flavor(request, node_id)
+                self.create_flavor(request, node_id, images)
             except Exception:
                 horizon.exceptions.handle(
                     request,
