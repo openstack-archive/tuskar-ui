@@ -110,7 +110,8 @@ class FlavorSuggestion(object):
             )
         )
 
-    def create_flavor(self, request):
+    def create_flavor(self, request,
+                      kernel_image_id=None, ramdisk_image_id=None):
         return api.flavor.Flavor.create(
             request,
             name=self.name,
@@ -118,4 +119,6 @@ class FlavorSuggestion(object):
             vcpus=self.vcpus,
             disk=self.disk,
             cpu_arch=self.cpu_arch,
+            kernel_image_id=kernel_image_id,
+            ramdisk_image_id=ramdisk_image_id,
         )
