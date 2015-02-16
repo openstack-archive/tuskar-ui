@@ -14,12 +14,39 @@
 import django.shortcuts
 from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
+import horizon.messages
 import horizon.tables
+from openstack_dashboard.api import glance
 from openstack_dashboard.dashboards.admin.flavors import (
     tables as flavor_tables)
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.flavors import utils
+
+
+DEFAULT_KERNEL_IMAGE_NAME = 'discovery-kernel'
+DEFAULT_RAMDISK_IMAGE_NAME = 'discovery-ramdisk'
+
+
+def _guess_default_image_ids(request):
+    try:
+        images = glance.image_list_detailed(request)[0]
+    except Exception:
+        horizon.exceptions.handle(request,
+                                  _('Unable to retrieve images list.'))
+        kernel_images = []
+        ramdisk_images = []
+    else:
+        kernel_images = [image for image in images
+                         if utils.check_image_type(image, 'discovery kernel')
+                         and image.name == DEFAULT_KERNEL_IMAGE_NAME
+                         ]
+        ramdisk_images = [image for image in images
+                          if utils.check_image_type(image, 'discovery ramdisk')
+                          and image.name == DEFAULT_RAMDISK_IMAGE_NAME]
+    if not all(kernel_images, ramdisk_images):
+        raise ValueError("No default images")
+    return kernel_images[0].id, ramdisk_images[0].id
 
 
 class CreateFlavor(flavor_tables.CreateFlavor):
@@ -34,20 +61,31 @@ class CreateSuggestedFlavor(horizon.tables.Action):
     method = 'POST'
     icon = 'plus'
 
-    def create_flavor(self, request, node_id):
+    def create_flavor(self, request, node_id, images):
         node = api.node.Node.get(request, node_id)
         suggestion = utils.FlavorSuggestion.from_node(node)
-        return suggestion.create_flavor(request)
+        return suggestion.create_flavor(request, *images)
 
     def handle(self, data_table, request, node_ids):
-        for node_id in node_ids:
-            try:
-                self.create_flavor(request, node_id)
-            except Exception:
-                horizon.exceptions.handle(
-                    request,
-                    _(u"Unable to create flavor for node %r") % node_id,
-                )
+        try:
+            images = _guess_default_image_ids(request)
+        except ValueError:
+            horizon.messages.error(request, _(
+                "No default images available. "
+                "Create images called \"{0}\" and \"{1}\" or "
+                "use the \"{2}\" action to choose different image names."
+            ).format(
+                DEFAULT_KERNEL_IMAGE_NAME,
+                DEFAULT_RAMDISK_IMAGE_NAME,
+                EditAndCreateSuggestedFlavor.verbose_name,
+            ))
+        else:
+            for node_id in node_ids:
+                try:
+                    self.create_flavor(request, node_id, images)
+                except Exception:
+                    horizon.exceptions.handle(request,
+                        _(u"Unable to create flavor for node %r") % node_id,)
         return django.shortcuts.redirect(request.get_full_path())
 
 
