@@ -47,7 +47,7 @@ class RolesTable(tables.DataTable):
     def get_object_id(self, datum):
         return datum.uuid
 
-    class Meta:
+    class Meta(object):
         name = "roles"
         verbose_name = _("Deployment Roles")
         table_actions = ()
@@ -57,7 +57,7 @@ class RolesTable(tables.DataTable):
 
 class NodeTable(nodes_tables.ProvisionedNodesTable):
 
-    class Meta:
+    class Meta(object):
         name = "nodetable"
         verbose_name = _("Nodes")
         hidden_title = False
