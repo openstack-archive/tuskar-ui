@@ -127,20 +127,19 @@ class DetailView(horizon_tables.DataTableView, views.RoleMixin,
         return context
 
 
-class UpdateView(workflows.WorkflowView):
+class UpdateView(workflows.WorkflowView, views.StackMixin, views.RoleMixin):
     workflow_class = role_workflows.UpdateRole
 
     def get_initial(self):
-        role_id = self.kwargs['role_id']
+        plan = self.get_plan()
+        role = self.get_role()
 
-        try:
-            # Get initial role information
-            plan = api.tuskar.Plan.get_the_plan(self.request)
-            role = api.tuskar.Role.get(self.request, role_id)
-        except Exception:
-            horizon_exceptions.handle(self.request,
-                                      _('Unable to retrieve role details.'),
-                                      redirect=reverse_lazy(INDEX_URL))
+        stack = self.get_stack()
+        if stack:
+            resources = stack.resources(role=role, with_joins=True)
+            role_nodes = len(resources)
+        else:
+            role_nodes = 0
 
         role_flavor = role.flavor(plan)
         role_flavor = '' if role_flavor is None else role_flavor.name
@@ -148,11 +147,18 @@ class UpdateView(workflows.WorkflowView):
         role_image = role.image(plan)
         role_image = '' if role_image is None else role_image.id
 
-        return {'role_id': role.id,
-                'name': role.name,
-                'flavor': role_flavor,
-                'image': role_image,
-                }
+        free_nodes = len(api.node.Node.list(self.request, associated=False,
+                                            maintenance=False))
+        available_nodes = role_nodes + free_nodes
+
+        return {
+            'role_id': role.id,
+            'name': role.name,
+            'flavor': role_flavor,
+            'image': role_image,
+            'nodes': role_nodes,
+            'available_nodes': available_nodes,
+        }
 
 
 class PerformanceView(base.TemplateView, views.RoleMixin, views.StackMixin):
