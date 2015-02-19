@@ -29,9 +29,12 @@ class ItemCountMixin(object):
 
 class StackMixin(object):
     @memoized.memoized
+    def get_plan(self):
+        return api.tuskar.Plan.get_the_plan(self.request)
+
+    @memoized.memoized
     def get_stack(self):
-        plan = api.tuskar.Plan.get_the_plan(self.request)
-        return api.heat.Stack.get_by_plan(self.request, plan)
+        return api.heat.Stack.get_by_plan(self.request, self.get_plan())
 
 
 class RoleMixin(object):

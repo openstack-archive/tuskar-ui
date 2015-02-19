@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 from django.core.urlresolvers import reverse_lazy
+import django.forms
 from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import forms
@@ -28,22 +29,23 @@ from tuskar_ui.utils import utils as tuskar_utils
 class UpdateRoleInfoAction(workflows.Action):
     name = forms.CharField(
         label=_("Name"),
-        widget=tuskar_ui.forms.LabelWidget(),
-        required=False,
+        required=True,
     )
-
     description = forms.CharField(
         label=_("Description"),
-        widget=tuskar_ui.forms.LabelWidget(),
+        widget=django.forms.Textarea(),
         required=False,
     )
-
     flavor = forms.ChoiceField(
         label=_("Flavor"),
     )
-
     image = forms.ChoiceField(
         label=_("Image"),
+    )
+    nodes = forms.IntegerField(
+        label=_("Number of Nodes"),
+        required=False,
+        initial=0,
     )
 
     class Meta(object):
@@ -54,6 +56,13 @@ class UpdateRoleInfoAction(workflows.Action):
     def __init__(self, request, context, *args, **kwargs):
         super(UpdateRoleInfoAction, self).__init__(request, context, *args,
                                                    **kwargs)
+        self.available_nodes = context['available_nodes']
+        self.fields['nodes'].widget = tuskar_ui.forms.NumberInput(attrs={
+            'min': 0,
+            'max': self.available_nodes,
+        })
+        self.fields['nodes'].help_text = _(
+            "{0} nodes available").format(self.available_nodes)
         if not utils.matching_deployment_mode():
             del self.fields['flavor']
 
@@ -69,6 +78,24 @@ class UpdateRoleInfoAction(workflows.Action):
                                                    'overcloud provisioning')]
         choices = [(i.id, i.name) for i in images]
         return [('', _('Unknown'))] + choices
+
+    def clean_nodes(self):
+        new_count = int(self.cleaned_data['nodes'] or 0)
+        if new_count > self.available_nodes:
+            raise django.forms.ValidationError(_(
+                "There are only {0} nodes available "
+                "for the selected flavor."
+            ).format(self.available_nodes))
+        return str(new_count)
+
+    def handle(self, request, context):
+        return {
+            'name': self.cleaned_data['name'],
+            'description': self.cleaned_data['description'],
+            'flavor': self.cleaned_data.get('flavor'),
+            'image': self.cleaned_data['image'],
+            'nodes': self.cleaned_data['nodes'],
+        }
 
 
 class UpdateRoleConfigAction(workflows.Action):
@@ -92,8 +119,8 @@ class UpdateRoleConfigAction(workflows.Action):
 
 class UpdateRoleInfo(workflows.Step):
     action_class = UpdateRoleInfoAction
-    depends_on = ("role_id",)
-    contributes = ("name", "flavor", "image",)
+    depends_on = ("role_id", "available_nodes")
+    contributes = ("name", "description", "flavor", "image", "nodes")
 
 
 class UpdateRoleConfig(workflows.Step):
@@ -140,9 +167,10 @@ class UpdateRole(workflows.Workflow):
 
         parameters = data['parameters']
         parameters[role.image_id_parameter_name] = data['image']
+        parameters[role.node_count_parameter_name] = data['nodes']
         if utils.matching_deployment_mode():
             parameters[role.flavor_parameter_name] = data['flavor']
 
         plan.patch(request, plan.uuid, parameters)
-        # success
+        # TODO(rdopiera) Find out how to update role's name and description.
         return True
