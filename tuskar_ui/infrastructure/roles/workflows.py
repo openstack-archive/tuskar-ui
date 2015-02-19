@@ -19,21 +19,21 @@ from horizon import workflows
 from openstack_dashboard.api import glance
 
 from tuskar_ui import api
-from tuskar_ui import forms as tuskar_forms
+import tuskar_ui.forms
 from tuskar_ui.infrastructure.flavors import utils
+from tuskar_ui.infrastructure.parameters import forms as parameters_forms
 from tuskar_ui.utils import utils as tuskar_utils
-
 
 class UpdateRoleInfoAction(workflows.Action):
     name = forms.CharField(
         label=_("Name"),
-        widget=tuskar_forms.LabelWidget(),
+        widget=tuskar_ui.forms.LabelWidget(),
         required=False,
     )
 
     description = forms.CharField(
         label=_("Description"),
-        widget=tuskar_forms.LabelWidget(),
+        widget=tuskar_ui.forms.LabelWidget(),
         required=False,
     )
 
@@ -46,8 +46,7 @@ class UpdateRoleInfoAction(workflows.Action):
     )
 
     class Meta(object):
-        name = _("Role Information")
-        help_text = _("helptext here")
+        name = _("Overall Settings")
         slug = 'update_role_info'
         help_text = _("Edit the role details.")
 
@@ -71,10 +70,33 @@ class UpdateRoleInfoAction(workflows.Action):
         return [('', _('Unknown'))] + choices
 
 
+class UpdateRoleConfigAction(workflows.Action):
+    class Meta(object):
+        name = _("Service Configuration")
+        slug = 'update_role_config'
+        help_text = _("Edit the role's services configuration.")
+
+    def __init__(self, request, context, *args, **kwargs):
+        super(UpdateRoleConfigAction, self).__init__(request, context,
+                                                     *args, **kwargs)
+        self.fields.update(
+            parameters_forms.parameter_fields(request, prefix=context['name'])
+        )
+
+    def handle(self, request, context):
+        return {'parameters': self.cleared_data}
+
+
 class UpdateRoleInfo(workflows.Step):
     action_class = UpdateRoleInfoAction
     depends_on = ("role_id",)
     contributes = ("name", "flavor", "image",)
+
+
+class UpdateRoleConfig(workflows.Step):
+    action_class = UpdateRoleConfigAction
+    depends_on = ("role_id", "name")
+    contributes = ("parameters",)
 
 
 class UpdateRole(workflows.Workflow):
@@ -83,7 +105,10 @@ class UpdateRole(workflows.Workflow):
     success_message = _('Modified role "%s".')
     failure_message = _('Unable to modify role "%s".')
     index_url = "horizon:infrastructure:roles:index"
-    default_steps = (UpdateRoleInfo,)
+    default_steps = (
+        UpdateRoleInfo,
+        UpdateRoleConfig,
+    )
     success_url = reverse_lazy(
         'horizon:infrastructure:roles:index')
 
@@ -110,7 +135,8 @@ class UpdateRole(workflows.Workflow):
                 _('Unable to retrieve role details.'),
                 redirect=reverse_lazy(self.index_url))
 
-        parameters = {role.image_id_parameter_name: data['image']}
+        parameters = data['parameters']
+        parameters[role.image_id_parameter_name] = data['image']
         if utils.matching_deployment_mode():
             parameters[role.flavor_parameter_name] = data['flavor']
 

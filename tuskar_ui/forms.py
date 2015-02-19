@@ -22,6 +22,19 @@ import netaddr
 SEPARATOR_RE = re.compile('[\s,;|]+', re.UNICODE)
 
 
+def label_with_tooltip(label, tooltip=None, title=None):
+    if not tooltip:
+        return label
+    return html.format_html(
+        u'{0}&nbsp;<a class="help-icon fa fa-question-circle" '
+        u'data-content="{1}" tabindex="0" href="#" '
+        u'data-title="{2}"></a>',
+        html.escape(label),
+        html.escape(tooltip),
+        html.escape(title or label)
+    )
+
+
 def fieldset(form, *args, **kwargs):
     """A helper function for grouping fields based on their names."""
 

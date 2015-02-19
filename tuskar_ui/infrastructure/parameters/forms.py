@@ -16,7 +16,7 @@ import json
 import logging
 
 import django.forms
-from django.utils import html
+from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
 import horizon.forms
@@ -46,38 +46,40 @@ CINDER_ISCSI_HELPER_CHOICES = [
 ]
 
 
-def name_with_tooltip(parameter):
-    humanized_name = utils.de_camel_case(parameter.stripped_name)
-    if not parameter.description:
-        return humanized_name
-    return html.format_html(
-        u'{0}&nbsp;<a class="help-icon fa fa-question-circle" '
-        u'data-content="{1}" tabindex="0" href="#" '
-        u'title="{2}"></a>',
-        html.escape(humanized_name),
-        html.escape(parameter.description),
-        html.escape(humanized_name)
-    )
+def parameter_fields(request, prefix=None, read_only=False):
+    fields = SortedDict()
+    plan = api.tuskar.Plan.get_the_plan(request)
+    parameters = plan.parameter_list(include_key_parameters=False)
+
+    for p in parameters:
+        if prefix and not p.name.startswith(prefix):
+            continue
+        if read_only:
+            if p.hidden:
+                widget=tuskar_ui.forms.StaticTextPasswordWidget
+            else:
+                widget=tuskar_ui.forms.StaticTextWidget
+        else:
+            if p.hidden:
+                widget=django.forms.PasswordInput(render_value=True)
+            elif 'Certificate' in p.name:
+                widget = django.forms.Textarea
+            else:
+                widget = None
+        fields[p.name] = django.forms.CharField(
+            required=False,
+            widget=widget,
+            label=utils.de_camel_case(p.stripped_name),
+            initial=p.value,
+            help_text=p.description,
+        )
+    return fields
 
 
 class ServiceConfig(horizon.forms.SelfHandlingForm):
     def __init__(self, *args, **kwargs):
         super(ServiceConfig, self).__init__(*args, **kwargs)
-
-        plan = api.tuskar.Plan.get_the_plan(self.request)
-        parameters = plan.parameter_list(include_key_parameters=False)
-
-        for p in parameters:
-            if p.hidden:
-                self.fields[p.name] = django.forms.CharField(
-                    required=False,
-                    widget=tuskar_ui.forms.StaticTextPasswordWidget(),
-                    label=name_with_tooltip(p))
-            else:
-                self.fields[p.name] = django.forms.CharField(
-                    required=False,
-                    widget=tuskar_ui.forms.StaticTextWidget(),
-                    label=name_with_tooltip(p))
+        self.fields.update(parameter_fields(self.request), read_only=True)
 
     def global_fieldset(self):
         return tuskar_ui.forms.fieldset(self, prefix='^(?!.*::)')
@@ -101,20 +103,7 @@ class ServiceConfig(horizon.forms.SelfHandlingForm):
 class AdvancedEditServiceConfig(ServiceConfig):
     def __init__(self, *args, **kwargs):
         super(AdvancedEditServiceConfig, self).__init__(*args, **kwargs)
-
-        plan = api.tuskar.Plan.get_the_plan(self.request)
-        parameters = plan.parameter_list(include_key_parameters=False)
-
-        for p in parameters:
-            if p.hidden:
-                self.fields[p.name] = django.forms.CharField(
-                    required=False,
-                    widget=django.forms.PasswordInput(render_value=True),
-                    label=name_with_tooltip(p))
-            else:
-                self.fields[p.name] = django.forms.CharField(
-                    required=False,
-                    label=name_with_tooltip(p))
+        self.fields.update(parameter_fields(self.request))
 
     def handle(self, request, data):
         plan = api.tuskar.Plan.get_the_plan(self.request)
