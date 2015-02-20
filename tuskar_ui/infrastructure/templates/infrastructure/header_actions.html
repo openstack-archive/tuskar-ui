@@ -3,7 +3,8 @@
   <a href="{{ action.url }}"
      title="{{ action.name }}"
      class="btn btn-default btn-lg btn-no-border {% if action.ajax_modal %}ajax-modal{% endif %}">
-    <span class="fa {{ action.icon }}"></span>
+    {% if action.icon %}<span class="fa {{ action.icon }}"></span>{% endif %}
+    {% if action.show_name %}{{ action.name }}{% endif %}
   </a>
   {% endfor %}
 </div>
