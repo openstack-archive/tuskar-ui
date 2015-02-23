@@ -100,7 +100,9 @@ class IronicNode(base.APIResourceWrapper):
     def create(cls, request, ipmi_address=None, cpu_arch=None, cpus=None,
                memory_mb=None, local_gb=None, mac_addresses=[],
                ipmi_username=None, ipmi_password=None, ssh_address=None,
-               ssh_username=None, ssh_key_contents=None, driver=None):
+               ssh_username=None, ssh_key_contents=None,
+               deployment_kernel=None, deployment_ramdisk=None,
+               driver=None):
         """Create a Node in Ironic."""
         if driver == 'pxe_ssh':
             driver_info = {
@@ -115,6 +117,10 @@ class IronicNode(base.APIResourceWrapper):
                 'ipmi_username': ipmi_username,
                 'ipmi_password': ipmi_password
             }
+        driver_info.update(
+            pxe_deploy_kernel=deployment_kernel,
+            pxe_deploy_ramdisk=deployment_ramdisk
+        )
 
         properties = {}
         if cpus:
@@ -342,6 +348,7 @@ class BareMetalNode(base.APIResourceWrapper):
     def create(cls, request, ipmi_address, cpu_arch, cpus, memory_mb,
                local_gb, mac_addresses, ipmi_username=None, ipmi_password=None,
                ssh_address=None, ssh_username=None, ssh_key_contents=None,
+               deployment_kernel=None, deployment_ramdisk=None,
                driver=None):
         """Create a Nova BareMetalNode."""
         node = baremetalclient(request).create(
@@ -567,12 +574,15 @@ class Node(base.APIResourceWrapper):
     def create(cls, request, ipmi_address=None, cpu_arch=None, cpus=None,
                memory_mb=None, local_gb=None, mac_addresses=[],
                ipmi_username=None, ipmi_password=None, ssh_address=None,
-               ssh_username=None, ssh_key_contents=None, driver=None):
+               ssh_username=None, ssh_key_contents=None,
+               deployment_kernel=None, deployment_ramdisk=None, driver=None):
         return cls(NodeClient(request).node_class.create(
             request, ipmi_address, cpu_arch, cpus, memory_mb, local_gb,
             mac_addresses, ipmi_username=ipmi_username,
             ipmi_password=ipmi_password, ssh_address=ssh_address,
             ssh_username=ssh_username, ssh_key_contents=ssh_key_contents,
+            deployment_kernel=deployment_kernel,
+            deployment_ramdisk=deployment_ramdisk,
             driver=driver))
 
     @classmethod

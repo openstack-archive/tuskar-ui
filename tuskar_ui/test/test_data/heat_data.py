@@ -254,5 +254,23 @@ def data(TEST):
          'properties': {
              'type': 'discovery kernel'
          }})
+    image_7 = images.Image(
+        images.ImageManager(None),
+        {'id': '7',
+         'name': 'Baremetal Deployment Kernel',
+         'is_public': True,
+         'protected': False,
+         'properties': {
+             'type': 'deploy kernel'
+         }})
+    image_8 = images.Image(
+        images.ImageManager(None),
+        {'id': '8',
+         'name': 'Baremetal Deployment Ramdisk',
+         'is_public': True,
+         'protected': False,
+         'properties': {
+             'type': 'deploy ramdisk'
+         }})
     TEST.glanceclient_images.add(image_1, image_2, image_3, image_4,
-                                 image_5, image_6)
+                                 image_5, image_6, image_7, image_8)
