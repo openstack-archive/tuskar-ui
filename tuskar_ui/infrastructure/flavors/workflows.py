@@ -16,47 +16,19 @@ from django.forms import fields
 from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
 from horizon import workflows
-from openstack_dashboard.api import glance
 from openstack_dashboard.dashboards.admin.flavors import (
     workflows as flavor_workflows)
 
 from tuskar_ui import api
-from tuskar_ui.utils import utils
 
 
 class CreateFlavorAction(flavor_workflows.CreateFlavorInfoAction):
     arch = fields.ChoiceField(choices=(('i386', 'i386'), ('amd64', 'amd64'),
                                        ('x86_64', 'x86_64')),
                               label=_("Architecture"))
-    kernel_image_id = fields.ChoiceField(choices=(),
-                                         label=_("Deploy Kernel Image"))
-    ramdisk_image_id = fields.ChoiceField(choices=(),
-                                          label=_("Deploy Ramdisk Image"))
 
     def __init__(self, *args, **kwrds):
         super(CreateFlavorAction, self).__init__(*args, **kwrds)
-        try:
-            kernel_images = glance.image_list_detailed(
-                self.request,
-            )[0]
-            kernel_images = [image for image in kernel_images
-                             if utils.check_image_type(image,
-                                                       'discovery kernel')]
-            ramdisk_images = glance.image_list_detailed(
-                self.request,
-            )[0]
-            ramdisk_images = [image for image in ramdisk_images
-                              if utils.check_image_type(image,
-                                                        'discovery ramdisk')]
-        except Exception:
-            exceptions.handle(self.request,
-                              _('Unable to retrieve images list.'))
-            kernel_images = []
-            ramdisk_images = []
-        self.fields['kernel_image_id'].choices = [(img.id, img.name)
-                                                  for img in kernel_images]
-        self.fields['ramdisk_image_id'].choices = [(img.id, img.name)
-                                                   for img in ramdisk_images]
         # Delete what is not applicable to hardware
         del self.fields['eph_gb']
         del self.fields['swap_mb']
@@ -79,9 +51,7 @@ class CreateFlavorStep(workflows.Step):
                    "vcpus",
                    "memory_mb",
                    "disk_gb",
-                   "arch",
-                   "kernel_image_id",
-                   "ramdisk_image_id")
+                   "arch")
 
 
 class CreateFlavor(flavor_workflows.CreateFlavor):
@@ -101,9 +71,7 @@ class CreateFlavor(flavor_workflows.CreateFlavor):
                 memory=data['memory_mb'],
                 vcpus=data['vcpus'],
                 disk=data['disk_gb'],
-                cpu_arch=data['arch'],
-                kernel_image_id=data['kernel_image_id'],
-                ramdisk_image_id=data['ramdisk_image_id']
+                cpu_arch=data['arch']
             )
         except Exception:
             exceptions.handle(request, _("Unable to create flavor"))

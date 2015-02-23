@@ -124,7 +124,9 @@ def data(TEST):
              'ipmi_address': '1.1.1.1',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
-             'ip_address': '1.2.2.2'
+             'ip_address': '1.2.2.2',
+             'pxe_deploy_kernel': 'deploy-kernel-uuid',
+             'pxe_deploy_ramdisk': 'deploy-ramdisk-uuid',
          },
          'properties': {
              'cpus': '8',
@@ -149,7 +151,9 @@ def data(TEST):
              'ipmi_address': '2.2.2.2',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
-             'ip_address': '1.2.2.3'
+             'ip_address': '1.2.2.3',
+             'pxe_deploy_kernel': 'deploy-kernel-uuid',
+             'pxe_deploy_ramdisk': 'deploy-ramdisk-uuid',
          },
          'properties': {
              'cpus': '16',
@@ -174,7 +178,9 @@ def data(TEST):
              'ipmi_address': '3.3.3.3',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
-             'ip_address': '1.2.2.4'
+             'ip_address': '1.2.2.4',
+             'pxe_deploy_kernel': 'deploy-kernel-uuid',
+             'pxe_deploy_ramdisk': 'deploy-ramdisk-uuid',
          },
          'properties': {
              'cpus': '32',
@@ -199,7 +205,9 @@ def data(TEST):
              'ipmi_address': '4.4.4.4',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
-             'ip_address': '1.2.2.5'
+             'ip_address': '1.2.2.5',
+             'pxe_deploy_kernel': 'deploy-kernel-uuid',
+             'pxe_deploy_ramdisk': 'deploy-ramdisk-uuid',
          },
          'properties': {
              'cpus': '8',
@@ -224,7 +232,9 @@ def data(TEST):
              'ipmi_address': '5.5.5.5',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
-             'ip_address': '1.2.2.6'
+             'ip_address': '1.2.2.6',
+             'pxe_deploy_kernel': 'deploy-kernel-uuid',
+             'pxe_deploy_ramdisk': 'deploy-ramdisk-uuid',
          },
          'properties': {
              'cpus': '8',
@@ -249,7 +259,9 @@ def data(TEST):
              'ipmi_address': '5.5.5.5',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
-             'ip_address': '1.2.2.6'
+             'ip_address': '1.2.2.6',
+             'pxe_deploy_kernel': 'deploy-kernel-uuid',
+             'pxe_deploy_ramdisk': 'deploy-ramdisk-uuid',
          },
          'properties': {
              'cpus': '8',
@@ -274,7 +286,9 @@ def data(TEST):
              'ipmi_address': '7.7.7.7',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
-             'ip_address': '1.2.2.7'
+             'ip_address': '1.2.2.7',
+             'pxe_deploy_kernel': 'deploy-kernel-uuid',
+             'pxe_deploy_ramdisk': 'deploy-ramdisk-uuid',
          },
          'properties': {
              'cpus': '8',
@@ -299,7 +313,9 @@ def data(TEST):
              'ipmi_address': '8.8.8.8',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
-             'ip_address': '1.2.2.8'
+             'ip_address': '1.2.2.8',
+             'pxe_deploy_kernel': 'deploy-kernel-uuid',
+             'pxe_deploy_ramdisk': 'deploy-ramdisk-uuid',
          },
          'properties': {
              'cpus': '8',
@@ -324,7 +340,9 @@ def data(TEST):
              'ipmi_address': '9.9.9.9',
              'ipmi_username': 'admin',
              'ipmi_password': 'password',
-             'ip_address': '1.2.2.9'
+             'ip_address': '1.2.2.9',
+             'pxe_deploy_kernel': 'deploy-kernel-uuid',
+             'pxe_deploy_ramdisk': 'deploy-ramdisk-uuid',
          },
          'properties': {
              'cpus': '16',

@@ -19,6 +19,7 @@ from ceilometerclient.v2 import client as ceilometer_client
 from django.core import urlresolvers
 from horizon import exceptions as horizon_exceptions
 from mock import patch, call, ANY  # noqa
+from novaclient import exceptions as nova_exceptions
 from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui import api
@@ -38,6 +39,10 @@ TEST_DATA = utils.TestDataContainer()
 node_data.data(TEST_DATA)
 heat_data.data(TEST_DATA)
 tuskar_data.data(TEST_DATA)
+
+
+def _raise_nova_client_exception(*args, **kwargs):
+    raise nova_exceptions.ClientException("Boom!")
 
 
 class NodesTests(test.BaseAdminViewTests):
@@ -127,13 +132,17 @@ class NodesTests(test.BaseAdminViewTests):
         self._test_index_tab_list_exception('maintenance')
 
     def test_register_get(self):
-        res = self.client.get(REGISTER_URL)
+        with patch('openstack_dashboard.api.glance.image_list_detailed',
+                   return_value=([], False)) as mock:
+            res = self.client.get(REGISTER_URL)
+            self.assertEqual(mock.call_count, 2)
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/register.html')
 
     def test_register_post(self):
         node = TEST_DATA.ironicclient_nodes.first
         nodes = self._all_mocked_nodes()
+        images = self.glanceclient_images.list()
         data = {
             'register_nodes-TOTAL_FORMS': 2,
             'register_nodes-INITIAL_FORMS': 1,
@@ -148,6 +157,8 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-0-cpus': '1',
             'register_nodes-0-memory_mb': '2',
             'register_nodes-0-local_gb': '3',
+            'register_nodes-0-deployment_kernel': images[6].id,
+            'register_nodes-0-deployment_ramdisk': images[7].id,
 
             'register_nodes-1-driver': 'pxe_ipmitool',
             'register_nodes-1-ipmi_address': '127.0.0.2',
@@ -156,12 +167,18 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-1-cpus': '4',
             'register_nodes-1-memory_mb': '5',
             'register_nodes-1-local_gb': '6',
+            'register_nodes-1-deployment_kernel': images[6].id,
+            'register_nodes-1-deployment_ramdisk': images[7].id,
         }
-        with patch('tuskar_ui.api.node.Node', **{
-            'spec_set': ['create', 'get_all_mac_addresses'],
-            'create.return_value': node,
-            'get_all_mac_addresses.return_value': set(nodes),
-        }) as Node:
+        with contextlib.nested(
+            patch('tuskar_ui.api.node.Node', **{
+                'spec_set': ['create', 'get_all_mac_addresses'],
+                'create.return_value': node,
+                'get_all_mac_addresses.return_value': set(nodes),
+            }),
+            patch('openstack_dashboard.api.glance.image_list_detailed',
+                  return_value=[images, False, False]),
+        ) as (Node, mock_glance_images):
             res = self.client.post(REGISTER_URL, data)
             self.assertNoFormErrors(res)
             self.assertRedirectsNoFollow(res, INDEX_URL)
@@ -177,6 +194,8 @@ class NodesTests(test.BaseAdminViewTests):
                     ipmi_username=u'username',
                     ipmi_password=u'password',
                     driver='pxe_ipmitool',
+                    deployment_kernel=images[6].id,
+                    deployment_ramdisk=images[7].id,
                 ),
                 call(
                     ANY,
@@ -189,11 +208,14 @@ class NodesTests(test.BaseAdminViewTests):
                     ipmi_username=None,
                     ipmi_password=None,
                     driver='pxe_ipmitool',
+                    deployment_kernel=images[6].id,
+                    deployment_ramdisk=images[7].id,
                 ),
             ])
 
     def test_register_post_exception(self):
         nodes = self._all_mocked_nodes()
+        images = self.glanceclient_images.list()
         data = {
             'register_nodes-TOTAL_FORMS': 2,
             'register_nodes-INITIAL_FORMS': 1,
@@ -208,6 +230,8 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-0-cpus': '1',
             'register_nodes-0-memory_mb': '2',
             'register_nodes-0-local_gb': '3',
+            'register_nodes-0-deployment_kernel': images[6].id,
+            'register_nodes-0-deployment_ramdisk': images[7].id,
 
             'register_nodes-1-driver': 'pxe_ipmitool',
             'register_nodes-1-ipmi_address': '127.0.0.2',
@@ -216,12 +240,18 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-1-cpus': '4',
             'register_nodes-1-memory_mb': '5',
             'register_nodes-1-local_gb': '6',
+            'register_nodes-1-deployment_kernel': images[6].id,
+            'register_nodes-1-deployment_ramdisk': images[7].id,
         }
-        with patch('tuskar_ui.api.node.Node', **{
-            'spec_set': ['create', 'get_all_mac_addresses'],
-            'create.side_effect': self.exceptions.tuskar,
-            'get_all_mac_addresses.return_value': set(nodes),
-        }) as Node:
+        with contextlib.nested(
+            patch('tuskar_ui.api.node.Node', **{
+                'spec_set': ['create', 'get_all_mac_addresses'],
+                'create.side_effect': self.exceptions.tuskar,
+                'get_all_mac_addresses.return_value': set(nodes),
+            }),
+            patch('openstack_dashboard.api.glance.image_list_detailed',
+                  return_value=[images, False, False]),
+        ) as (Node, mock_glance_images):
             res = self.client.post(REGISTER_URL, data)
             self.assertEqual(res.status_code, 200)
             self.assertListEqual(Node.create.call_args_list, [
@@ -236,6 +266,8 @@ class NodesTests(test.BaseAdminViewTests):
                     ipmi_username=u'username',
                     ipmi_password=u'password',
                     driver='pxe_ipmitool',
+                    deployment_kernel=images[6].id,
+                    deployment_ramdisk=images[7].id,
                 ),
                 call(
                     ANY,
@@ -248,6 +280,8 @@ class NodesTests(test.BaseAdminViewTests):
                     ipmi_username=None,
                     ipmi_password=None,
                     driver='pxe_ipmitool',
+                    deployment_kernel=images[6].id,
+                    deployment_ramdisk=images[7].id,
                 ),
             ])
         self.assertTemplateUsed(
@@ -255,6 +289,7 @@ class NodesTests(test.BaseAdminViewTests):
 
     def test_node_detail(self):
         node = api.node.Node(self.ironicclient_nodes.list()[0])
+        image = self.glanceclient_images.first()
 
         with contextlib.nested(
             patch('tuskar_ui.api.node.Node', **{
@@ -266,7 +301,9 @@ class NodesTests(test.BaseAdminViewTests):
                 'get_by_node.side_effect': lambda *args, **kwargs: {}[None],
                 # Raises LookupError
             }),
-        ) as (mock_node, mock_heat):
+            patch('openstack_dashboard.api.glance.image_get',
+                  return_value=image),
+        ) as (mock_node, mock_heat, mock_glance):
             res = self.client.get(
                 urlresolvers.reverse(DETAIL_VIEW, args=(node.uuid,))
             )
@@ -421,6 +458,8 @@ class NodesTests(test.BaseAdminViewTests):
             'ipmi_address': '127.0.0.1',
             'ipmi_username': 'root',
             'ipmi_password': 'P@55W0rd',
+            'deployment_kernel': '7',
+            'deployment_ramdisk': '8',
         }
         ret = forms.get_driver_info_dict(data)
         self.assertEqual(ret, {
@@ -428,12 +467,16 @@ class NodesTests(test.BaseAdminViewTests):
             'ipmi_address': '127.0.0.1',
             'ipmi_username': 'root',
             'ipmi_password': 'P@55W0rd',
+            'deployment_kernel': '7',
+            'deployment_ramdisk': '8',
         })
         data = {
             'driver': 'pxe_ssh',
             'ssh_address': '127.0.0.1',
             'ssh_username': 'root',
             'ssh_key_contents': 'P@55W0rd',
+            'deployment_kernel': '7',
+            'deployment_ramdisk': '8',
         }
         ret = forms.get_driver_info_dict(data)
         self.assertEqual(ret, {
@@ -441,6 +484,8 @@ class NodesTests(test.BaseAdminViewTests):
             'ssh_address': '127.0.0.1',
             'ssh_username': 'root',
             'ssh_key_contents': 'P@55W0rd',
+            'deployment_kernel': '7',
+            'deployment_ramdisk': '8',
         })
 
     def test_create_node(self):
@@ -454,6 +499,8 @@ class NodesTests(test.BaseAdminViewTests):
             'ipmi_username': 'username',
             'ipmi_password': 'password',
             'driver': 'pxe_ipmitool',
+            'deployment_kernel': '7',
+            'deployment_ramdisk': '8',
         }
         with patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['create', 'set_maintenance', 'discover'],
@@ -472,5 +519,7 @@ class NodesTests(test.BaseAdminViewTests):
                     ipmi_username=u'username',
                     ipmi_password=u'password',
                     driver='pxe_ipmitool',
+                    deployment_kernel='7',
+                    deployment_ramdisk='8',
                 ),
             ])
