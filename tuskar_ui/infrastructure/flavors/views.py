@@ -92,14 +92,6 @@ class DetailView(horizon.tables.DataTableView):
             kwargs.get('flavor_id'),
             _error_redirect=self.error_redirect
         )
-        context['kernel_image'] = api.node.image_get(
-            self.request,
-            context['flavor'].kernel_image_id
-        )
-        context['ramdisk_image'] = api.node.image_get(
-            self.request,
-            context['flavor'].ramdisk_image_id
-        )
         return context
 
     def get_data(self):

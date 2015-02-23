@@ -23,6 +23,9 @@ from tuskar_ui import api
 import tuskar_ui.forms
 
 
+DEFAULT_KERNEL_IMAGE_NAME = 'bm-deploy-kernel'
+DEFAULT_RAMDISK_IMAGE_NAME = 'bm-deploy-ramdisk'
+
 CPU_ARCH_CHOICES = [
     ('', _("unspecified")),
     ('amd64', _("amd64")),
@@ -50,6 +53,10 @@ def get_driver_info_dict(data):
             ssh_username=data['ssh_username'],
             ssh_key_contents=data['ssh_key_contents'],
         )
+    driver_dict.update(
+        deployment_kernel=data['deployment_kernel'],
+        deployment_ramdisk=data['deployment_ramdisk'],
+    )
     return driver_dict
 
 
@@ -203,6 +210,20 @@ class NodeForm(django.forms.Form):
         widget=tuskar_ui.forms.NumberInput(
             attrs={'placeholder': _('unspecified')}),
     )
+    deployment_kernel = django.forms.ChoiceField(
+        label=_("Kernel"),
+        required=False,
+        choices=[],
+        widget=django.forms.Select(
+            attrs={'placeholder': DEFAULT_KERNEL_IMAGE_NAME}),
+    )
+    deployment_ramdisk = django.forms.ChoiceField(
+        label=_("Ramdisk"),
+        required=False,
+        choices=[],
+        widget=django.forms.Select(
+            attrs={'placeholder': DEFAULT_RAMDISK_IMAGE_NAME}),
+    )
 
     def get_name(self):
         try:
@@ -244,6 +265,19 @@ class NodeForm(django.forms.Form):
 
 
 class BaseNodeFormset(tuskar_ui.forms.SelfHandlingFormset):
+    def __init__(self, *args, **kwargs):
+        self.kernel_images = kwargs.pop('kernel_images')
+        self.ramdisk_images = kwargs.pop('ramdisk_images')
+        super(BaseNodeFormset, self).__init__(*args, **kwargs)
+
+    def add_fields(self, form, index):
+        deployment_kernel_choices = [(kernel.id, kernel.name)
+                                     for kernel in self.kernel_images]
+        deployment_ramdisk_choices = [(ramdisk.id, ramdisk.name)
+                                      for ramdisk in self.ramdisk_images]
+        form.fields['deployment_kernel'].choices = deployment_kernel_choices
+        form.fields['deployment_ramdisk'].choices = deployment_ramdisk_choices
+
     def clean(self):
         all_macs = api.node.Node.get_all_mac_addresses(self.request)
         bad_macs = set()

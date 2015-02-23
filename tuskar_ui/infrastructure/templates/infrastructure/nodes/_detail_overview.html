@@ -85,6 +85,14 @@
       <dd>{{ node.instance_uuid|default:"&mdash;" }}</dd>
     </dl>
 
+    <h3>{% trans "Deployment Images" %}</h3>
+    <dl class="dl-horizontal dl-horizontal-left">
+        <dt>{% trans "Kernel" %}</dt>
+        <dd>{{ kernel_image.name|default:"&mdash;" }}</dd>
+        <dt>{% trans "Ramdisk" %}</dt>
+        <dd>{{ ramdisk_image.name|default:"&mdash;" }}</dd>
+    </dl>
+
   </div>
   <div class="col-lg-6 col-xs-12">
     <h3>{% trans "Performance & Metrics" %}</h3>

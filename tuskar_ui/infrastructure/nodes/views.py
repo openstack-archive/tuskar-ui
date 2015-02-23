@@ -19,16 +19,47 @@ import django.forms
 import django.http
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import base
+from horizon import exceptions
 from horizon import forms as horizon_forms
 from horizon import tabs as horizon_tabs
 from horizon.utils import memoized
+from openstack_dashboard.api import glance
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.nodes import forms
-from tuskar_ui.infrastructure.nodes import tables
 from tuskar_ui.infrastructure.nodes import tabs
 import tuskar_ui.infrastructure.views as infrastructure_views
 from tuskar_ui.utils import metering as metering_utils
+from tuskar_ui.utils import utils
+
+
+def get_kernel_images(request):
+    try:
+        kernel_images = glance.image_list_detailed(
+            request,
+            )[0]
+        kernel_images = [image for image in kernel_images
+                         if utils.check_image_type(image, 'deploy kernel')]
+    except Exception:
+        exceptions.handle(request,
+                          _('Unable to retrieve kernel image list.'))
+        kernel_images = []
+    return kernel_images
+
+
+def get_ramdisk_images(request):
+    try:
+        ramdisk_images = glance.image_list_detailed(
+            request,
+            )[0]
+        ramdisk_images = [image for image in ramdisk_images
+                          if utils.check_image_type(
+                              image, 'deploy ramdisk')]
+    except Exception:
+        exceptions.handle(request,
+                          _('Unable to retrieve ramdisk image list.'))
+        ramdisk_images = []
+    return ramdisk_images
 
 
 class IndexView(infrastructure_views.ItemCountMixin,
@@ -78,7 +109,9 @@ class RegisterView(horizon_forms.ModalFormView):
             formset = forms.RegisterNodeFormset(
                 self.request.POST,
                 prefix=self.form_prefix,
-                request=self.request
+                request=self.request,
+                kernel_images=get_kernel_images(self.request),
+                ramdisk_images=get_ramdisk_images(self.request)
             )
             if formset.is_valid():
                 initial += formset.cleaned_data
@@ -86,7 +119,9 @@ class RegisterView(horizon_forms.ModalFormView):
                 None,
                 initial=initial,
                 prefix=self.form_prefix,
-                request=self.request
+                request=self.request,
+                kernel_images=get_kernel_images(self.request),
+                ramdisk_images=get_ramdisk_images(self.request)
             )
             formset.extra = 0
             return formset
@@ -94,7 +129,9 @@ class RegisterView(horizon_forms.ModalFormView):
             self.request.POST or None,
             initial=initial,
             prefix=self.form_prefix,
-            request=self.request
+            request=self.request,
+            kernel_images=get_kernel_images(self.request),
+            ramdisk_images=get_ramdisk_images(self.request)
         )
 
     def get_context_data(self, **kwargs):
@@ -106,21 +143,6 @@ class RegisterView(horizon_forms.ModalFormView):
 class DetailView(horizon_tabs.TabView):
     tab_group_class = tabs.NodeDetailTabs
     template_name = 'infrastructure/nodes/detail.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(DetailView, self).get_context_data(**kwargs)
-        node = self.get_data()
-
-        if node.maintenance:
-            table = tables.MaintenanceNodesTable(self.request)
-        else:
-            table = tables.ProvisionedNodesTable(self.request)
-
-        context['node'] = node
-        context['title'] = _("Node: %(uuid)s") % {'uuid': node.uuid}
-        context['url'] = self.get_redirect_url()
-        context['actions'] = table.render_row_actions(node)
-        return context
 
     @memoized.memoized_method
     def get_data(self):

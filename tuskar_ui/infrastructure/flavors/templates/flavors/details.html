@@ -21,15 +21,6 @@
         <dd>{{ flavor.disk_bytes|filesizeformat|default:"&mdash;" }}</dd>
     </dl>
   </div>
-  <div class="col-md-4">
-    <h4>{% trans "Deploy Images" %}</h4>
-    <dl class="dl-horizontal dl-horizontal-left">
-        <dt>{% trans "Kernel" %}</dt>
-        <dd>{{ kernel_image.name|default:"&mdash;" }}</dd>
-        <dt>{% trans "Ramdisk" %}</dt>
-        <dd>{{ ramdisk_image.name|default:"&mdash;" }}</dd>
-    </dl>
-  </div>
 </div>
 <div class="row">
   <div class="col-xs-12">
