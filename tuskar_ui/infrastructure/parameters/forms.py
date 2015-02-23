@@ -70,7 +70,7 @@ def parameter_fields(request, prefix=None, read_only=False):
             required=False,
             widget=widget,
             label=tuskar_ui.forms.label_with_tooltip(
-                utils.de_camel_case(p.stripped_name),
+                p.label or utils.de_camel_case(p.stripped_name),
                 p.description,
             ),
             initial=p.value,
