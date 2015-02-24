@@ -54,28 +54,44 @@ def parameter_fields(request, prefix=None, read_only=False):
     for p in parameters:
         if prefix and not p.name.startswith(prefix):
             continue
+        kwargs = {}
         if read_only:
             if p.hidden:
-                widget = tuskar_ui.forms.StaticTextPasswordWidget
+                kwargs['widget'] = tuskar_ui.forms.StaticTextPasswordWidget
             else:
-                widget = tuskar_ui.forms.StaticTextWidget
+                kwargs['widget'] = tuskar_ui.forms.StaticTextWidget
+            Field = django.forms.CharField
         else:
             if p.hidden:
-                widget = django.forms.PasswordInput(render_value=True)
-            elif 'Certificate' in p.name:
-                widget = django.forms.Textarea
+                Field = django.forms.CharField
+                kwargs['widget'] = \
+                    django.forms.PasswordInput(render_value=True)
+            elif p.type == 'number':
+                Field = django.forms.IntegerField
+            elif p.type == 'boolean':
+                Field = django.forms.BooleanField
+            elif (p.type == 'string' and
+                    p.constraints['allowed_values']['definition']):
+                Field = django.forms.ChoiceField
+                kwargs['choices'] = \
+                    p.constraints['allowed_values']['definition']
             else:
-                widget = None
-        fields[p.name] = django.forms.CharField(
-            required=False,
-            widget=widget,
-            label=tuskar_ui.forms.label_with_tooltip(
-                p.label or utils.de_camel_case(p.stripped_name),
-                p.description,
-            ),
-            initial=p.value,
-        )
+                if (p.type in ['json', 'comma_delimited_list'] or
+                        'Certificate' in p.name):
+                    kwargs['widget'] = django.forms.Textarea
+                Field = django.forms.CharField
+
+        fields[p.name] = Field(required=False,
+                               label=_parameter_label(p),
+                               initial=p.value,
+                               **kwargs)
     return fields
+
+
+def _parameter_label(parameter):
+    return tuskar_ui.forms.label_with_tooltip(
+        parameter.label or utils.de_camel_case(parameter.stripped_name),
+        parameter.description)
 
 
 class ServiceConfig(horizon.forms.SelfHandlingForm):
