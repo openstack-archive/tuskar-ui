@@ -474,11 +474,25 @@ class Role(base.APIResourceWrapper):
 
 class Parameter(base.APIDictWrapper):
 
-    _attrs = ['name', 'value', 'default', 'description', 'hidden', 'label']
+    _attrs = ['name', 'value', 'default', 'description', 'hidden', 'label',
+              'type', 'constraints']
 
     def __init__(self, apidict, plan=None):
         super(Parameter, self).__init__(apidict)
         self._plan = plan
+
+    # TODO(jtomasek) Remove when API supports parameter type
+    @property
+    def type(self):
+        return 'string'
+
+    # TODO(jtomasek) Remove when API supports parameter constraints
+    @property
+    def constraints(self):
+        return {'length': {'definition': None, 'description': None},
+                'range': {'definition': None, 'description': None},
+                'allowed_values': {'definition': [], 'description': None},
+                'allowed_pattern': {'definition': None, 'description': None}}
 
     @property
     def stripped_name(self):

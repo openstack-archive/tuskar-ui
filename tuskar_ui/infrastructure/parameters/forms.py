@@ -59,23 +59,52 @@ def parameter_fields(request, prefix=None, read_only=False):
                 widget = tuskar_ui.forms.StaticTextPasswordWidget
             else:
                 widget = tuskar_ui.forms.StaticTextWidget
+            fields[p.name] = django.forms.CharField(required=False,
+                                                    widget=widget,
+                                                    label=_parameter_label(p),
+                                                    initial=p.value)
         else:
             if p.hidden:
-                widget = django.forms.PasswordInput(render_value=True)
-            elif 'Certificate' in p.name:
-                widget = django.forms.Textarea
+                fields[p.name] = django.forms.CharField(
+                    required=False,
+                    widget=django.forms.PasswordInput(render_value=True),
+                    label=_parameter_label(p),
+                    initial=p.value)
+            elif p.type == 'number':
+                fields[p.name] = django.forms.IntegerField(
+                    required=False,
+                    label=_parameter_label(p),
+                    initial=p.value)
+            elif p.type == 'boolean':
+                fields[p.name] = django.forms.BooleanField(
+                    required=False,
+                    label=_parameter_label(p),
+                    initial=p.value)
+            elif (p.type == 'string' and
+                    p.constraints['allowed_values']['definition']):
+                fields[p.name] = django.forms.ChoiceField(
+                    required=False,
+                    label=_parameter_label(p),
+                    initial=p.value,
+                    choices=p.constraints['allowed_values']['definition'])
             else:
-                widget = None
-        fields[p.name] = django.forms.CharField(
-            required=False,
-            widget=widget,
-            label=tuskar_ui.forms.label_with_tooltip(
-                p.label or utils.de_camel_case(p.stripped_name),
-                p.description,
-            ),
-            initial=p.value,
-        )
+                if (p.type in ['json', 'comma_delimited_list'] or
+                        'Certificate' in p.name):
+                    widget = django.forms.Textarea
+                else:
+                    widget = None
+                fields[p.name] = django.forms.CharField(
+                    required=False,
+                    widget=widget,
+                    label=_parameter_label(p),
+                    initial=p.value)
     return fields
+
+
+def _parameter_label(parameter):
+    return tuskar_ui.forms.label_with_tooltip(
+        parameter.label or utils.de_camel_case(parameter.stripped_name),
+        parameter.description)
 
 
 class ServiceConfig(horizon.forms.SelfHandlingForm):
