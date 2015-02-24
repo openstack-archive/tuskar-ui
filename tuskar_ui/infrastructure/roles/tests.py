@@ -159,5 +159,5 @@ class RolesTest(test.BaseAdminViewTests):
             self.assertEqual(len(mock_patch.call_args_list), 1)
             args = mock_patch.call_args_list[0][0]
             self.assertEqual(args[1], plan.id)
-            self.assertEqual(args[2], {'Controller-1::Flavor': u'flavor-1',
-                                       'Controller-1::Image': u'2'})
+            self.assertEqual(args[2]['Controller-1::Flavor'],  u'flavor-1')
+            self.assertEqual(args[2]['Controller-1::Image'],  u'2')
