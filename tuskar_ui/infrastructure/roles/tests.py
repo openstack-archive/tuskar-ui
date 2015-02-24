@@ -134,8 +134,11 @@ class RolesTest(test.BaseAdminViewTests):
         images = self.glanceclient_images.list()
 
         data = {
+            'name': 'controller',
+            'description': 'The controller node role.',
             'flavor': self.novaclient_flavors.first().name,
             'image': self.glanceclient_images.first().id,
+            'nodes': '0',
         }
 
         with contextlib.nested(
