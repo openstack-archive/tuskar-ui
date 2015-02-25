@@ -14,7 +14,6 @@
 
 import logging
 
-from django.core.urlresolvers import reverse_lazy
 import django.forms
 from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
@@ -34,96 +33,79 @@ import tuskar_ui.infrastructure.flavors.utils as flavors_utils
 
 MATCHING_DEPLOYMENT_MODE = flavors_utils.matching_deployment_mode()
 LOG = logging.getLogger(__name__)
+MESSAGE_ICONS = {
+    'ok': 'fa-check-square-o text-success',
+    'pending': 'fa-square-o text-info',
+    'error': 'fa-exclamation-circle text-danger',
+    'warning': 'fa-exclamation-triangle text-warning',
+    None: 'fa-exclamation-triangle text-warning',
+}
 
 
 def validate_plan(request, plan):
     """Validates the plan and returns a list of dicts describing the issues."""
     messages = []
-    try:
-        controller_role = plan.get_role_by_name("controller")
-    except KeyError:
-        messages.append({
-            'text': _(u"No controller role."),
-            'is_critical': True,
-        })
-    else:
-        if plan.get_role_node_count(controller_role) not in (1, 3):
-            messages.append({
-                'text': _(u"You should have either 1 or 3 controller nodes."),
-                'is_critical': True,
-            })
-    try:
-        compute_role = plan.get_role_by_name("compute")
-    except KeyError:
-        messages.append({
-            'text': _(u"No compute role."),
-            'is_critical': True,
-        })
-    else:
-        if plan.get_role_node_count(compute_role) < 1:
-            messages.append({
-                'text': _(u"You need at least 1 compute node."),
-                'is_critical': True,
-            })
     requested_nodes = 0
-    previous_snmp_password = None
     for role in plan.role_list:
         node_count = plan.get_role_node_count(role)
-        if node_count and role.image(plan) is None:
-            messages.append({
-                'text': _(u"Role {0} has no image.").format(role.name),
-                'is_critical': True,
-                'link_url': reverse_lazy('horizon:infrastructure:roles:index'),
-                'link_label': _(u"Associate this role with an image."),
-            })
-        if node_count and role.flavor(plan) is None:
-            messages.append({
-                'text': _(u"Role {0} has no flavor.").format(role.name),
-                'is_critical': False,
-                'link_url': reverse_lazy('horizon:infrastructure:roles:index'),
-                'link_label': _(u"Associate this role with a flavor."),
-            })
         requested_nodes += node_count
-        snmp_password = plan.parameter_value(
-            role.parameter_prefix + 'SnmpdReadonlyUserPassword')
-        if (not snmp_password or
-                previous_snmp_password and
-                previous_snmp_password != snmp_password):
-            messages.append({
-                'text': _(
-                    u"Set your SNMP password for role {0}.").format(role.name),
-                'is_critical': True,
-                'link_url': reverse_lazy(
-                    'horizon:infrastructure:parameters:index'),
-                'link_label': _(u"Configure."),
-            })
-        previous_snmp_password = snmp_password
     available_flavors = len(api.flavor.Flavor.list(request))
     if available_flavors == 0:
         messages.append({
-            'text': _(u"You have no flavors defined."),
+            'text': _(u"Define Flavors."),
             'is_critical': True,
-            'link_url': reverse_lazy('horizon:infrastructure:flavors:index'),
-            'link_label': _(u"Define flavors."),
+            'status': 'pending',
+        })
+    else:
+        messages.append({
+            'text': _(u"Define Flavors."),
+            'status': 'ok',
         })
     available_nodes = len(api.node.Node.list(request, associated=False,
                                              maintenance=False))
     if available_nodes == 0:
-            messages.append({
-                'text': _(u"You have no nodes available."),
-                'is_critical': True,
-                'link_url': reverse_lazy('horizon:infrastructure:nodes:index'),
-                'link_label': _(u"Register nodes."),
-            })
+        messages.append({
+            'text': _(u"Register Nodes."),
+            'is_critical': True,
+            'status': 'pending',
+        })
     elif requested_nodes > available_nodes:
+        messages.append({
+            'text': _(u"Not enough registered nodes for this plan. "
+                      u"You need {0} more.").format(
+                          requested_nodes - available_nodes),
+            'is_critical': True,
+            'status': 'error',
+        })
+    else:
+        messages.append({
+            'text': _(u"Register Nodes."),
+            'status': 'ok',
+        })
+    previous_snmp_password = None
+    for role in plan.role_list:
+        node_count = plan.get_role_node_count(role)
+        snmp_password = plan.parameter_value(
+            role.parameter_prefix + 'SnmpdReadonlyUserPassword')
+        if node_count and (
+            role.image(plan) is None or
+            role.flavor(plan) is None or
+            (not snmp_password or
+                previous_snmp_password and
+                previous_snmp_password != snmp_password)
+        ):
             messages.append({
-                'text': _(u"Not enough registered nodes for this plan. "
-                          u"You need {0} more.").format(
-                              requested_nodes - available_nodes),
+                'text': _(u"Configure Roles."),
                 'is_critical': True,
-                'link_url': reverse_lazy('horizon:infrastructure:nodes:index'),
-                'link_label': _(u"Register more nodes."),
+                'status': 'pending',
             })
+            break
+        previous_snmp_password = snmp_password
+    else:
+        messages.append({
+            'text': _(u"Configure Roles."),
+            'status': 'ok',
+        })
     if not MATCHING_DEPLOYMENT_MODE:
         # All roles have to have the same flavor.
         default_flavor_name = api.flavor.Flavor.list(request)[0].name
@@ -134,7 +116,69 @@ def validate_plan(request, plan):
                         role.name,
                     ),
                     'is_critical': False,
+                    'statis': 'error',
                 })
+    roles_assigned = True
+    messages.append({
+        'text': _(u"Assign roles."),
+        'status': lambda: 'ok' if roles_assigned else 'pending',
+    })
+    try:
+        controller_role = plan.get_role_by_name("controller")
+    except KeyError:
+        messages.append({
+            'text': _(u"Controller Role Needed."),
+            'is_critical': True,
+            'status': 'error',
+            'indent': 1,
+        })
+        roles_assigned = False
+    else:
+        if plan.get_role_node_count(controller_role) not in (1, 3):
+            messages.append({
+                'text': _(u"1 or 3 Controllers Needed."),
+                'is_critical': True,
+                'status': 'pending',
+                'indent': 1,
+            })
+            roles_assigned = False
+        else:
+            messages.append({
+                'text': _(u"1 or 3 Controllers Needed."),
+                'status': 'ok',
+                'indent': 1,
+            })
+
+    try:
+        compute_role = plan.get_role_by_name("compute")
+    except KeyError:
+        messages.append({
+            'text': _(u"Compute Role Needed."),
+            'is_critical': True,
+            'status': 'error',
+            'indent': 1,
+        })
+        roles_assigned = False
+    else:
+        if plan.get_role_node_count(compute_role) < 1:
+            messages.append({
+                'text': _(u"1 Compute Needed."),
+                'is_critical': True,
+                'status': 'pending',
+                'indent': 1,
+            })
+            roles_assigned = False
+        else:
+            messages.append({
+                'text': _(u"1 Compute Needed."),
+                'status': 'ok',
+                'indent': 1,
+            })
+    for message in messages:
+        status = message.get('status')
+        if callable(status):
+            message['status'] = status = status()
+        message['classes'] = MESSAGE_ICONS.get(status, MESSAGE_ICONS[None])
     return messages
 
 

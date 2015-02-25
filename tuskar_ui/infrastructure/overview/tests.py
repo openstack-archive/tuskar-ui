@@ -342,22 +342,38 @@ class OverviewTests(test.BaseAdminViewTests):
             patch('tuskar_ui.api.flavor.Flavor.list', return_value=[])
         ):
             ret = forms.validate_plan(None, plan)
+        for m in ret:
+            m['text'] = unicode(m['text'])
         self.assertEqual(ret, [
             {
                 'is_critical': True,
-                'text': u'No controller role.',
+                'text': u'Define Flavors.',
+                'status': 'pending',
+                'classes': 'fa-square-o text-info',
             }, {
                 'is_critical': True,
-                'text': u'No compute role.',
+                'text': u'Register Nodes.',
+                'status': 'pending',
+                'classes': 'fa-square-o text-info',
+            }, {
+                'status': 'ok',
+                'text': u'Configure Roles.',
+                'classes': 'fa-check-square-o text-success',
+            }, {
+                'status': 'pending',
+                'text': u'Assign roles.',
+                'classes': 'fa-square-o text-info',
             }, {
                 'is_critical': True,
-                'link_label': u'Define flavors.',
-                'link_url': '/infrastructure/flavors/',
-                'text': u'You have no flavors defined.',
+                'text': u'Controller Role Needed.',
+                'status': 'error',
+                'indent': 1,
+                'classes': 'fa-exclamation-circle text-danger',
             }, {
                 'is_critical': True,
-                'link_label': u'Register nodes.',
-                'link_url': '/infrastructure/nodes/',
-                'text': u'You have no nodes available.',
+                'text': u'Compute Role Needed.',
+                'status': 'error',
+                'indent': 1,
+                'classes': 'fa-exclamation-circle text-danger',
             },
         ])

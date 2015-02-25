@@ -66,6 +66,7 @@ tuskar.edit_plan = (function () {
             module.title_template.render(data));
         $('div.deployment-box ul').replaceWith(
             module.message_template.render(data));
+        $('div.deployment-box a#collapse-steps').text(data.steps_message);
     };
 
     horizon.addInitFunction(module.init);
