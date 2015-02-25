@@ -30,6 +30,12 @@ from tuskar_ui.infrastructure import views
 INDEX_URL = 'horizon:infrastructure:overview:index'
 
 
+def _steps_message(messages):
+    total_steps = len(messages)
+    completed_steps = len([m for m in messages if not m.get('is_critical')])
+    return _("{0} of {1} Steps Completed").format(completed_steps, total_steps)
+
+
 def _get_role_data(plan, stack, form, role):
     """Gathers data about a single deployment role.
 
@@ -217,6 +223,7 @@ class IndexView(horizon.forms.ModalFormView, views.StackMixin):
             context['plan_messages'] = messages
             context['plan_invalid'] = any(message.get('is_critical')
                                           for message in messages)
+            context['steps_message'] = _steps_message(messages)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -243,15 +250,15 @@ class IndexView(horizon.forms.ModalFormView, views.StackMixin):
             messages.extend({
                 'text': repr(error),
             } for field in form.fields for error in field.errors)
-
         # We need to unlazify all the lazy urls and translations.
         return http.HttpResponse(json.dumps({
             'plan_invalid': any(m.get('is_critical') for m in messages),
+            'steps_message': _steps_message(messages),
             'messages': [{
                 'text': unicode(m.get('text', '')),
                 'is_critical': m.get('is_critical', False),
-                'link_url': unicode(m.get('link_url', '')),
-                'link_label': unicode(m.get('link_label', '')),
+                'indent': m.get('indent', 0),
+                'classes': m['classes'],
             } for m in messages],
         }), mimetype='application/json')
 
