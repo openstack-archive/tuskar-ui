@@ -10,18 +10,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import logging
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
+from ironic_discoverd import client as discoverd_client
 from ironicclient import client as ironic_client
 from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from openstack_dashboard.api import nova
-import requests
 
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
@@ -53,6 +52,7 @@ DELETING_STATE = 'deleting'
 FREE_STATE = 'free'
 
 
+IRONIC_DISCOVERD_URL = getattr(settings, 'IRONIC_DISCOVERD_URL', None)
 LOG = logging.getLogger(__name__)
 
 
@@ -231,12 +231,11 @@ class IronicNode(base.APIResourceWrapper):
         :param uuids: IDs of IronicNodes
         :type  uuids: list of str
         """
-        url = getattr(settings, 'IRONIC_DISCOVERD_URL', None)
-        if url:
-            headers = {'content-type': 'application/json',
-                       'x-auth-token': request.user.token.id}
-            requests.post(url + "/v1/discover",
-                          data=json.dumps(uuids), headers=headers)
+        if not IRONIC_DISCOVERD_URL:
+            return
+        for uuid in uuids:
+            discoverd_client.introspect(uuid, IRONIC_DISCOVERD_URL,
+                                        request.user.token.id)
 
     @classmethod
     def set_maintenance(cls, request, uuid, maintenance):
