@@ -311,12 +311,15 @@ class IronicNode(base.APIResourceWrapper):
     @cached_property
     def state(self):
         if self.maintenance:
-            if self.extra.get('on_discovery', None) == 'true':
-                return DISCOVERING_STATE
-            elif self.extra.get('newly_discovered', None) == 'true':
-                return DISCOVERED_STATE
-            elif self.extra.get('discovery_failed', None) == 'true':
+            status = discoverd_client.get_status(self.uuid,
+                                                 IRONIC_DISCOVERD_URL,
+                                                 self._request.user.token.id)
+            if status['error']:
                 return DISCOVERY_FAILED_STATE
+            elif status['finished']:
+                return DISCOVERED_STATE
+            else:
+                return DISCOVERING_STATE
             return MAINTENANCE_STATE
         else:
             if self.provision_state in PROVISION_STATE_FREE:
