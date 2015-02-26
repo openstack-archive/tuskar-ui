@@ -125,6 +125,7 @@ class AdvancedEditServiceConfig(ServiceConfig):
 
     def handle(self, request, data):
         plan = api.tuskar.Plan.get_the_plan(self.request)
+        data = self._sync_common_params_across_roles(plan, data)
 
         try:
             plan.patch(request, plan.uuid, data)
@@ -139,6 +140,16 @@ class AdvancedEditServiceConfig(ServiceConfig):
                 request,
                 _("Service configuration updated."))
             return True
+
+    @staticmethod
+    def _sync_common_params_across_roles(plan, parameters_dict):
+        for (p_key, p_value) in parameters_dict.iteritems():
+            for role in plan.role_list:
+                role_parameter_key = (role.parameter_prefix +
+                                      api.tuskar.strip_prefix(p_key))
+                if role_parameter_key in parameters_dict:
+                    parameters_dict[role_parameter_key] = p_value
+        return parameters_dict
 
 
 class SimpleEditServiceConfig(horizon.forms.SelfHandlingForm):
