@@ -18,8 +18,8 @@ import json
 from ceilometerclient.v2 import client as ceilometer_client
 from django.core import urlresolvers
 from horizon import exceptions as horizon_exceptions
-from mock import patch, call, ANY  # noqa
 from novaclient import exceptions as nova_exceptions
+import mock
 from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui import api
@@ -63,23 +63,24 @@ class NodesTests(test.BaseAdminViewTests):
         return self.ceilometerclient
 
     def test_index_get(self):
-        with patch('tuskar_ui.api.node.Node', **{
+        with mock.patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['list'],
             'list.return_value': [],
-        }) as mock:
+        }) as mocked:
             res = self.client.get(INDEX_URL)
-            self.assertEqual(mock.list.call_count, 3)
+            self.assertEqual(mocked.list.call_count, 3)
 
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/index.html')
         self.assertTemplateUsed(res, 'infrastructure/nodes/_overview.html')
 
     def _all_mocked_nodes(self):
-        return [api.node.Node(api.node.IronicNode(node))
+        request = mock.MagicMock()
+        return [api.node.Node(api.node.IronicNode(node, request))
                 for node in self.ironicclient_nodes.list()]
 
     def _test_index_tab(self, tab_name, nodes):
-        with patch('tuskar_ui.api.node.Node', **{
+        with mock.patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['list'],
             'list.return_value': nodes,
         }) as Node:
@@ -110,12 +111,12 @@ class NodesTests(test.BaseAdminViewTests):
         self._test_index_tab('maintenance', nodes)
 
     def _test_index_tab_list_exception(self, tab_name):
-        with patch('tuskar_ui.api.node.Node', **{
+        with mock.patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['list'],
             'list.side_effect': self._raise_tuskar_exception,
-        }) as mock:
+        }) as mocked:
             res = self.client.get(INDEX_URL + '?tab=nodes__' + tab_name)
-            self.assertEqual(mock.list.call_count, 2)
+            self.assertEqual(mocked.list.call_count, 2)
 
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
@@ -132,10 +133,10 @@ class NodesTests(test.BaseAdminViewTests):
         self._test_index_tab_list_exception('maintenance')
 
     def test_register_get(self):
-        with patch('openstack_dashboard.api.glance.image_list_detailed',
-                   return_value=([], False)) as mock:
+        with mock.patch('openstack_dashboard.api.glance.image_list_detailed',
+                        return_value=([], False)) as mocked:
             res = self.client.get(REGISTER_URL)
-            self.assertEqual(mock.call_count, 2)
+            self.assertEqual(mocked.call_count, 2)
         self.assertTemplateUsed(
             res, 'infrastructure/nodes/register.html')
 
@@ -170,21 +171,20 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-1-deployment_kernel': images[6].id,
             'register_nodes-1-deployment_ramdisk': images[7].id,
         }
-        with contextlib.nested(
-            patch('tuskar_ui.api.node.Node', **{
-                'spec_set': ['create', 'get_all_mac_addresses'],
-                'create.return_value': node,
-                'get_all_mac_addresses.return_value': set(nodes),
-            }),
-            patch('openstack_dashboard.api.glance.image_list_detailed',
-                  return_value=[images, False, False]),
-        ) as (Node, mock_glance_images):
+        with mock.patch('tuskar_ui.api.node.Node', **{
+            'spec_set': ['create', 'get_all_mac_addresses'],
+            'create.return_value': node,
+            'get_all_mac_addresses.return_value': set(nodes),
+        }) as Node, mock.patch(
+            'openstack_dashboard.api.glance.image_list_detailed',
+            return_value=[images, False, False]
+        ):
             res = self.client.post(REGISTER_URL, data)
             self.assertNoFormErrors(res)
             self.assertRedirectsNoFollow(res, INDEX_URL)
             self.assertListEqual(Node.create.call_args_list, [
-                call(
-                    ANY,
+                mock.call(
+                    mock.ANY,
                     ipmi_address=u'127.0.0.1',
                     cpu_arch='x86',
                     cpus=1,
@@ -197,8 +197,8 @@ class NodesTests(test.BaseAdminViewTests):
                     deployment_kernel=images[6].id,
                     deployment_ramdisk=images[7].id,
                 ),
-                call(
-                    ANY,
+                mock.call(
+                    mock.ANY,
                     ipmi_address=u'127.0.0.2',
                     cpu_arch='x86',
                     cpus=4,
@@ -243,20 +243,19 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-1-deployment_kernel': images[6].id,
             'register_nodes-1-deployment_ramdisk': images[7].id,
         }
-        with contextlib.nested(
-            patch('tuskar_ui.api.node.Node', **{
-                'spec_set': ['create', 'get_all_mac_addresses'],
-                'create.side_effect': self.exceptions.tuskar,
-                'get_all_mac_addresses.return_value': set(nodes),
-            }),
-            patch('openstack_dashboard.api.glance.image_list_detailed',
-                  return_value=[images, False, False]),
-        ) as (Node, mock_glance_images):
+        with mock.patch('tuskar_ui.api.node.Node', **{
+            'spec_set': ['create', 'get_all_mac_addresses'],
+            'create.side_effect': self.exceptions.tuskar,
+            'get_all_mac_addresses.return_value': set(nodes),
+        }) as Node, mock.patch(
+            'openstack_dashboard.api.glance.image_list_detailed',
+            return_value=[images, False, False]
+        ):
             res = self.client.post(REGISTER_URL, data)
             self.assertEqual(res.status_code, 200)
             self.assertListEqual(Node.create.call_args_list, [
-                call(
-                    ANY,
+                mock.call(
+                    mock.ANY,
                     ipmi_address=u'127.0.0.1',
                     cpu_arch='x86',
                     cpus=1,
@@ -269,8 +268,8 @@ class NodesTests(test.BaseAdminViewTests):
                     deployment_kernel=images[6].id,
                     deployment_ramdisk=images[7].id,
                 ),
-                call(
-                    ANY,
+                mock.call(
+                    mock.ANY,
                     ipmi_address=u'127.0.0.2',
                     cpu_arch='x86',
                     cpus=4,
@@ -292,17 +291,19 @@ class NodesTests(test.BaseAdminViewTests):
         image = self.glanceclient_images.first()
 
         with contextlib.nested(
-            patch('tuskar_ui.api.node.Node', **{
+            mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['get'],
                 'get.return_value': node,
             }),
-            patch('tuskar_ui.api.heat.Resource', **{
+            mock.patch('tuskar_ui.api.heat.Resource', **{
                 'spec_set': ['get_by_node'],
                 'get_by_node.side_effect': lambda *args, **kwargs: {}[None],
                 # Raises LookupError
             }),
-            patch('openstack_dashboard.api.glance.image_get',
-                  return_value=image),
+            mock.patch(
+                'openstack_dashboard.api.glance.image_get',
+                return_value=image,
+            ),
         ) as (mock_node, mock_heat, mock_glance):
             res = self.client.get(
                 urlresolvers.reverse(DETAIL_VIEW, args=(node.uuid,))
@@ -313,14 +314,14 @@ class NodesTests(test.BaseAdminViewTests):
         self.assertEqual(res.context['node'], node)
 
     def test_node_detail_exception(self):
-        with patch('tuskar_ui.api.node.Node', **{
+        with mock.patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['get'],
             'get.side_effect': self._raise_tuskar_exception,
-        }) as mock:
+        }) as mocked:
             res = self.client.get(
                 urlresolvers.reverse(DETAIL_VIEW, args=('no-such-node',))
             )
-            self.assertEqual(mock.get.call_count, 1)
+            self.assertEqual(mocked.get.call_count, 1)
 
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
@@ -336,29 +337,29 @@ class NodesTests(test.BaseAdminViewTests):
             node.uuid)}
 
         with contextlib.nested(
-            patch('tuskar_ui.api.node.NodeClient', **{
+            mock.patch('tuskar_ui.api.node.NodeClient', **{
                 'spec_set': ['ironic_enabled'],
                 'ironic_enabled.return_value': True,
             }),
-            patch('tuskar_ui.api.node.Node', **{
+            mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list', 'set_power_state'],
                 'list.return_value': all_nodes,
                 'set_power_state.return_value': node,
             }),
-            patch('tuskar_ui.api.tuskar.Role', **{
+            mock.patch('tuskar_ui.api.tuskar.Role', **{
                 'spec_set': ['list', 'name'],
                 'list.return_value': roles,
             }),
-            patch('tuskar_ui.api.node.nova', **{
+            mock.patch('tuskar_ui.api.node.nova', **{
                 'spec_set': ['server_get', 'server_list'],
                 'server_get.return_value': instance,
                 'server_list.return_value': ([instance], False),
             }),
-            patch('tuskar_ui.api.node.glance', **{
+            mock.patch('tuskar_ui.api.node.glance', **{
                 'spec_set': ['image_get'],
                 'image_get.return_value': image,
             }),
-            patch('tuskar_ui.api.heat.Resource', **{
+            mock.patch('tuskar_ui.api.heat.Resource', **{
                 'spec_set': ['get_by_node', 'list_all_resources'],
                 'get_by_node.side_effect': (
                     self._raise_horizon_exception_not_found),
@@ -384,29 +385,29 @@ class NodesTests(test.BaseAdminViewTests):
             node.uuid)}
 
         with contextlib.nested(
-            patch('tuskar_ui.api.node.NodeClient', **{
+            mock.patch('tuskar_ui.api.node.NodeClient', **{
                 'spec_set': ['ironic_enabled'],
                 'ironic_enabled.return_value': True,
             }),
-            patch('tuskar_ui.api.node.Node', **{
+            mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list', 'set_power_state'],
                 'list.return_value': all_nodes,
                 'set_power_state.return_value': node,
             }),
-            patch('tuskar_ui.api.tuskar.Role', **{
+            mock.patch('tuskar_ui.api.tuskar.Role', **{
                 'spec_set': ['list', 'name'],
                 'list.return_value': roles,
             }),
-            patch('tuskar_ui.api.node.nova', **{
+            mock.patch('tuskar_ui.api.node.nova', **{
                 'spec_set': ['server_get', 'server_list'],
                 'server_get.return_value': instance,
                 'server_list.return_value': ([instance], False),
             }),
-            patch('tuskar_ui.api.node.glance', **{
+            mock.patch('tuskar_ui.api.node.glance', **{
                 'spec_set': ['image_get'],
                 'image_get.return_value': image,
             }),
-            patch('tuskar_ui.api.heat.Resource', **{
+            mock.patch('tuskar_ui.api.heat.Resource', **{
                 'spec_set': ['get_by_node', 'list_all_resources'],
                 'get_by_node.side_effect': (
                     self._raise_horizon_exception_not_found),
@@ -431,17 +432,17 @@ class NodesTests(test.BaseAdminViewTests):
         self.mox.ReplayAll()
 
         with contextlib.nested(
-            patch('tuskar_ui.api.node.Node', **{
+            mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['get'],
                 'get.return_value': node,
             }),
-            patch('tuskar_ui.api.node.nova', **{
+            mock.patch('tuskar_ui.api.node.nova', **{
                 'spec_set': ['servers', 'server_get', 'server_list'],
                 'servers.return_value': [instance],
                 'server_list.return_value': ([instance], None),
             }),
-            patch('tuskar_ui.utils.metering.query_data',
-                  return_value=[]),
+            mock.patch('tuskar_ui.utils.metering.query_data',
+                       return_value=[]),
         ):
             url = urlresolvers.reverse(PERFORMANCE_VIEW, args=(node.uuid,))
             url += '?meter=cpu&date_options=7'
@@ -502,14 +503,14 @@ class NodesTests(test.BaseAdminViewTests):
             'deployment_kernel': '7',
             'deployment_ramdisk': '8',
         }
-        with patch('tuskar_ui.api.node.Node', **{
+        with mock.patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['create', 'set_maintenance', 'discover'],
             'create.return_value': None,
         }) as Node:
             forms.create_node(None, data)
             self.assertListEqual(Node.create.call_args_list, [
-                call(
-                    ANY,
+                mock.call(
+                    mock.ANY,
                     ipmi_address=u'127.0.0.1',
                     cpu_arch='x86',
                     cpus=1,
