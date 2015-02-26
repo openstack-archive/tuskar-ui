@@ -21,6 +21,7 @@ from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from openstack_dashboard.api import nova
+import requests
 
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
@@ -311,13 +312,22 @@ class IronicNode(base.APIResourceWrapper):
     @cached_property
     def state(self):
         if self.maintenance:
-            if self.extra.get('on_discovery', None) == 'true':
-                return DISCOVERING_STATE
-            elif self.extra.get('newly_discovered', None) == 'true':
-                return DISCOVERED_STATE
-            elif self.extra.get('discovery_failed', None) == 'true':
+            try:
+                status = discoverd_client.get_status(
+                    uuid=self.uuid,
+                    base_url=IRONIC_DISCOVERD_URL,
+                    auth_token=self._request.user.token.id,
+                )
+            except requests.HTTPError as e:
+                if getattr(e.response, 'status_code', None) == 404:
+                    return MAINTENANCE_STATE
+                raise
+            if status['error']:
                 return DISCOVERY_FAILED_STATE
-            return MAINTENANCE_STATE
+            elif status['finished']:
+                return DISCOVERED_STATE
+            else:
+                return DISCOVERING_STATE
         else:
             if self.provision_state in PROVISION_STATE_FREE:
                 return FREE_STATE
