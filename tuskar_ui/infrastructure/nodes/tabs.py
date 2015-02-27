@@ -306,10 +306,11 @@ class DetailOverviewTab(tabs.Tab):
         else:
             context['role'] = resource.role
             context['stack'] = resource.stack
+
         if node.instance_uuid:
             if api_base.is_service_enabled(self.request, 'metering'):
                 # Meter configuration in the following format:
-                # (meter label, url part, barchart (True/False))
+                # (meter label, url part, y_max)
                 context['meter_conf'] = (
                     (_('System Load'),
                      metering_utils.url_part('hardware.cpu.load.1min', False),
@@ -322,11 +323,24 @@ class DetailOverviewTab(tabs.Tab):
                      metering_utils.url_part('hardware.memory.swap.util',
                                              True),
                      '100'),
-                    (_('Disk I/O '),
+                    (_('Current'),
+                     metering_utils.url_part('hardware.ipmi.current', False),
+                     None),
+                    (_('Network IO'),
+                     metering_utils.url_part('network-io', False),
+                     None),
+                    (_('Disk IO'),
                      metering_utils.url_part('disk-io', False),
                      None),
-                    (_('Network I/O '),
-                     metering_utils.url_part('network-io', False),
+                    (_('Temperature'),
+                     metering_utils.url_part('hardware.ipmi.temperature',
+                                             False),
+                     None),
+                    (_('Fan Speed'),
+                     metering_utils.url_part('hardware.ipmi.fan', False),
+                     None),
+                    (_('Voltage'),
+                     metering_utils.url_part('hardware.ipmi.voltage', False),
                      None),
                 )
         return context

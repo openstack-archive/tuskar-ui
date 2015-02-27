@@ -404,7 +404,7 @@ class NodesTests(test.BaseAdminViewTests):
                 'server_list.return_value': ([instance], None),
             }),
             patch('tuskar_ui.utils.metering.query_data',
-                  return_value=([], 'unit')),
+                  return_value=[]),
         ):
             url = urlresolvers.reverse(PERFORMANCE_VIEW, args=(node.uuid,))
             url += '?meter=cpu&date_options=7'

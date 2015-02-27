@@ -156,8 +156,8 @@ class PerformanceView(base.TemplateView):
             instance_uuid = None
 
         json_output = metering_utils.get_nodes_stats(
-            request, instance_uuid, meter, date_options=date_options,
-            date_from=date_from, date_to=date_to,
+            request, node_uuid, instance_uuid, meter,
+            date_options=date_options, date_from=date_from, date_to=date_to,
             stats_attr=stats_attr, barchart=barchart)
 
         return django.http.HttpResponse(

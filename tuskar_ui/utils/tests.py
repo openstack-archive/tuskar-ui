@@ -95,7 +95,7 @@ class MeteringTests(helpers.TestCase):
         ):
             ret = metering.query_data(request, from_date, to_date,
                                       'all', 'foo.bar')
-        self.assertEqual(ret, ('plonk', u'µD'))
+        self.assertEqual(ret, 'plonk')
 
     def test_url_part(self):
         ret = metering.url_part('foo_bar_baz', True)
@@ -192,7 +192,7 @@ class MeteringTests(helpers.TestCase):
             return_value='',
         ) as create_json_output, mock.patch(
             'tuskar_ui.utils.metering.query_data',
-            return_value=([], u'µD'),
+            return_value=[],
         ), mock.patch(
             'openstack_dashboard.utils.metering.series_for_meter',
             return_value=[],
@@ -200,8 +200,8 @@ class MeteringTests(helpers.TestCase):
             'openstack_dashboard.utils.metering.calc_date_args',
             return_value=('from date', 'to date'),
         ):
-            ret = metering.get_nodes_stats(request, 'abc', 'foo.bar')
+            ret = metering.get_nodes_stats(request, 'abc', 'def', 'foo.bar')
         self.assertEqual(ret, '')
         self.assertEqual(create_json_output.call_args_list, [
-            mock.call([], None, u'µD', 'from date', 'to date')
+            mock.call([], None, '', 'from date', 'to date')
         ])

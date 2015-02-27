@@ -88,13 +88,6 @@ def query_data(request,
 
     # TODO(lsmola) replace this by logic implemented in I1 in bugs
     # 1226479 and 1226482, this is just a quick fix for RC1
-    try:
-        meter_list = [m for m in ceilometer.meter_list(request)
-                      if m.name == meter]
-        unit = meter_list[0].unit
-    except Exception:
-        unit = ""
-
     ceilometer_usage = ceilometer.CeilometerUsage(request)
     try:
         if group_by:
@@ -109,7 +102,7 @@ def query_data(request,
         resources = []
         exceptions.handle(request,
                           _('Unable to retrieve statistics.'))
-    return resources, unit
+    return resources
 
 
 def url_part(meter_name, barchart):
@@ -168,28 +161,51 @@ def create_json_output(series, barchart, unit, date_from, date_to):
     return json_output
 
 
-def get_nodes_stats(request, uuid, meter, date_options=None, date_from=None,
-                    date_to=None, stats_attr=None, barchart=None,
-                    group_by=None):
-
-    unit = ''
+def get_nodes_stats(request, node_uuid, instance_uuid, meter,
+                    date_options=None, date_from=None, date_to=None,
+                    stats_attr=None, barchart=None, group_by=None):
     series = []
 
-    if uuid:
-        if group_by == "image_id":
-            query = {}
-            image_query = [{"field": "metadata.%s" % group_by,
-                            "op": "eq",
-                            "value": uuid}]
-            query[uuid] = image_query
+    try:
+        meter_list = [m for m in ceilometer.meter_list(request)
+                      if m.name == meter]
+        unit = meter_list[0].unit
+    except Exception:
+        meter_list = []
+        unit = ''
+
+    if instance_uuid:
+        if 'ipmi' in meter:
+            # For IPMI metrics, a resource ID is made of node UUID concatenated
+            # with the metric description. E.g:
+            # 1dcf1896-f581-4027-9efa-973eef3380d2-fan_2a_tach_(0x42)
+            resource_ids = [m.resource_id for m in meter_list
+                            if m.resource_id.startswith(node_uuid)]
+            queries = [
+                [{'field': 'resource_id',
+                  'op': 'eq',
+                  'value': resource_id}]
+                for resource_id in resource_ids
+            ]
         else:
-            query = [{'field': 'resource_id',
-                      'op': 'eq',
-                      'value': uuid}]
+            # For SNMP metrics, a resource ID matches exactly the UUID of the
+            # associated instance
+            if group_by == "image_id":
+                query = {}
+                image_query = [{"field": "metadata.%s" % group_by,
+                                "op": "eq",
+                                "value": instance_uuid}]
+                query[instance_uuid] = image_query
+            else:
+                query = [{'field': 'resource_id',
+                          'op': 'eq',
+                          'value': instance_uuid}]
+            queries = [query]
     else:
         # query will be aggregated across all resources
         group_by = "all"
         query = {'all': []}
+        queries = [query]
 
     # Disk and Network I/O: data from 2 meters in one chart
     if meter == 'disk-io':
@@ -212,16 +228,19 @@ def get_nodes_stats(request, uuid, meter, date_options=None, date_from=None,
 
     for meter_id, meter_name in meters:
         label = unicode(LABELS.get(meter_id, meter_name))
-        resources, unit = query_data(
-            request=request,
-            date_from=date_from,
-            date_to=date_to,
-            group_by=group_by,
-            meter=meter_id,
-            query=query)
-        s = metering.series_for_meter(request, resources, group_by, meter_id,
-                                      meter_name, stats_attr, unit, label)
-        series += s
+
+        for query in queries:
+            resources = query_data(
+                request=request,
+                date_from=date_from,
+                date_to=date_to,
+                group_by=group_by,
+                meter=meter_id,
+                query=query)
+            s = metering.series_for_meter(request, resources, group_by,
+                                          meter_id, meter_name, stats_attr,
+                                          unit, label)
+            series += s
 
     series = metering.normalize_series_by_unit(series)
 
