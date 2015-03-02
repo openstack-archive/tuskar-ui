@@ -42,6 +42,42 @@ MESSAGE_ICONS = {
 }
 
 
+def validate_roles(request, plan):
+    """Validates the roles in plan and returns dict describing the issues"""
+    for role in plan.role_list:
+        if not role.is_valid_for_deployment(plan):
+            message = {
+                'text': _(u"Configure Roles."),
+                'is_critical': True,
+                'status': 'pending',
+            }
+            break
+    else:
+        message = {
+            'text': _(u"Configure Roles."),
+            'status': 'ok',
+        }
+    return message
+
+
+def validate_global_parameters(request, plan):
+    pending_required_global_params = list(api.tuskar.Parameter.pending_parameters(
+            api.tuskar.Parameter.required_parameters(
+                api.tuskar.Parameter.global_parameters(plan.parameter_list()))))
+    if pending_required_global_params:
+        message = {
+            'text': _(u"Global Service Configuration."),
+            'is_critical': True,
+            'status': 'pending',
+        }
+    else:
+        message = {
+            'text': _(u"Global Service Configuration."),
+            'status': 'ok',
+        }
+    return message
+
+
 def validate_plan(request, plan):
     """Validates the plan and returns a list of dicts describing the issues."""
     messages = []
@@ -82,30 +118,8 @@ def validate_plan(request, plan):
             'text': _(u"Register Nodes."),
             'status': 'ok',
         })
-    previous_snmp_password = None
-    for role in plan.role_list:
-        node_count = plan.get_role_node_count(role)
-        snmp_password = plan.parameter_value(
-            role.parameter_prefix + 'SnmpdReadonlyUserPassword')
-        if node_count and (
-            role.image(plan) is None or
-            role.flavor(plan) is None or
-            (not snmp_password or
-                previous_snmp_password and
-                previous_snmp_password != snmp_password)
-        ):
-            messages.append({
-                'text': _(u"Configure Roles."),
-                'is_critical': True,
-                'status': 'pending',
-            })
-            break
-        previous_snmp_password = snmp_password
-    else:
-        messages.append({
-            'text': _(u"Configure Roles."),
-            'status': 'ok',
-        })
+    messages.append(validate_roles(request, plan))
+    messages.append(validate_global_parameters(request, plan))
     if not MATCHING_DEPLOYMENT_MODE:
         # All roles have to have the same flavor.
         default_flavor_name = api.flavor.Flavor.list(request)[0].name
