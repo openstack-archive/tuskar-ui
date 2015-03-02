@@ -85,6 +85,7 @@ def parameter_fields(request, prefix=None, read_only=False):
                                label=_parameter_label(p),
                                initial=p.value,
                                **kwargs)
+        # fields[p.name].css_classes.append("required")
     return fields
 
 
