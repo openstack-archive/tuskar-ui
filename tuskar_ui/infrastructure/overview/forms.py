@@ -42,6 +42,37 @@ MESSAGE_ICONS = {
 }
 
 
+def validate_roles(request, plan):
+    """Validates the roles in plan and returns dict describing the issues"""
+    previous_snmp_password = None
+    for role in plan.role_list:
+        node_count = plan.get_role_node_count(role)
+        snmp_password = plan.parameter_value(
+            role.parameter_prefix + 'SnmpdReadonlyUserPassword')
+        pending_params = plan.pending_required_parameters_list(role)
+        if node_count and (
+            role.image(plan) is None or
+            role.flavor(plan) is None or
+            pending_params or
+            (not snmp_password or
+                previous_snmp_password and
+                previous_snmp_password != snmp_password)
+        ):
+            message = {
+                'text': _(u"Configure Roles."),
+                'is_critical': True,
+                'status': 'pending',
+            }
+            break
+        previous_snmp_password = snmp_password
+    else:
+        message = {
+            'text': _(u"Configure Roles."),
+            'status': 'ok',
+        }
+    return message
+
+
 def validate_plan(request, plan):
     """Validates the plan and returns a list of dicts describing the issues."""
     messages = []
@@ -82,30 +113,14 @@ def validate_plan(request, plan):
             'text': _(u"Register Nodes."),
             'status': 'ok',
         })
-    previous_snmp_password = None
-    for role in plan.role_list:
-        node_count = plan.get_role_node_count(role)
-        snmp_password = plan.parameter_value(
-            role.parameter_prefix + 'SnmpdReadonlyUserPassword')
-        if node_count and (
-            role.image(plan) is None or
-            role.flavor(plan) is None or
-            (not snmp_password or
-                previous_snmp_password and
-                previous_snmp_password != snmp_password)
-        ):
-            messages.append({
-                'text': _(u"Configure Roles."),
-                'is_critical': True,
-                'status': 'pending',
-            })
-            break
-        previous_snmp_password = snmp_password
-    else:
-        messages.append({
-            'text': _(u"Configure Roles."),
-            'status': 'ok',
-        })
+
+
+
+    messages.append(validate_roles(request, plan))
+
+
+
+
     if not MATCHING_DEPLOYMENT_MODE:
         # All roles have to have the same flavor.
         default_flavor_name = api.flavor.Flavor.list(request)[0].name

@@ -248,7 +248,7 @@ class Plan(base.APIResourceWrapper):
         del template_dict[ENVIRONMENT_NAME]
         return template_dict
 
-    def parameter_list(self, include_key_parameters=True):
+    def parameter_list(self, include_key_parameters=True, role=None):
         params = self.parameters
         if not include_key_parameters:
             key_params = []
@@ -258,6 +258,14 @@ class Plan(base.APIResourceWrapper):
                                    role.flavor_parameter_name])
             params = [p for p in params if p['name'] not in key_params]
         return [Parameter(p, plan=self) for p in params]
+
+    def pending_required_parameters_list(self, role=None):
+        """Returns list of required parameters that aren't defined yet"""
+        if role:
+            parameters = role.parameter_list(self)
+        else:
+            parameters = plan.parameter_list()
+        return [p for p in parameters if p.default is None]
 
     def parameter(self, param_name):
         for parameter in self.parameters:
@@ -466,6 +474,9 @@ class Role(base.APIResourceWrapper):
             self.flavor_parameter_name)
         if flavor_name:
             return flavor.Flavor.get_by_name(self._request, flavor_name)
+
+    def parameter_list(self, plan):
+        return [p for p in plan.parameter_list() if self == p.role]
 
     @property
     def id(self):
