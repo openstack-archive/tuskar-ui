@@ -467,6 +467,19 @@ class Role(base.APIResourceWrapper):
         if flavor_name:
             return flavor.Flavor.get_by_name(self._request, flavor_name)
 
+    def parameter_list(self, plan):
+        return [p for p in plan.parameter_list() if self == p.role]
+
+    def is_valid_for_deployment(self, plan):
+        node_count = plan.get_role_node_count(self)
+        pending_required_params = Parameter.pending_parameters(
+            Parameter.required_parameters(self.parameter_list(plan)))
+        return not (node_count and (
+            self.image(plan) is None or
+            self.flavor(plan) is None or
+            pending_required_params
+        ))
+
     @property
     def id(self):
         return self.uuid
@@ -508,3 +521,21 @@ class Parameter(base.APIDictWrapper):
             for role in self.plan.role_list:
                 if self.name.startswith(role.parameter_prefix):
                     return role
+
+    def is_required(self):
+        """Boolean: True if parameter is required, False otherwise."""
+        return self.default is None or 'password' in self.stripped_name.lower()
+
+    @staticmethod
+    def required_parameters(parameters):
+        """Yields parameters which are required."""
+        for parameter in parameters:
+            if parameter.is_required():
+                yield parameter
+
+    @staticmethod
+    def pending_parameters(parameters):
+        """Yields parameters which don't have value set."""
+        for parameter in parameters:
+            if not parameter.value:
+                yield parameter
