@@ -145,30 +145,35 @@ class TuskarAPITests(test.APITestCase):
                 'hidden': True,
                 'name': 'Controller-1::KeystoneCACertificate',
                 'value': 'unset',
+                'default': '',
                 'label': 'Keystone CA CertificateAdmin'},
              'Controller-1::SnmpdReadonlyUserPassword': {
                 'description': 'Snmpd password',
                 'hidden': True,
                 'name': 'Controller-1::SnmpdReadonlyUserPassword',
                 'value': '',
+                'default': '',
                 'label': 'Snmpd password'},
              'Controller-1::AdminPassword': {
                 'description': 'Admin password',
                 'hidden': True,
                 'name': 'Controller-1::AdminPassword',
                 'value': 'unset',
+                'default': '',
                 'label': 'Admin Password'},
              'Controller-1::AdminToken': {
                 'description': 'Admin Token',
                 'hidden': True,
                 'name': 'Controller-1::AdminToken',
                 'value': '',
+                'default': '',
                 'label': 'Admin Token'},
              'Compute-1::SnmpdReadonlyUserPassword': {
                 'description': 'Snmpd password',
                 'hidden': True,
                 'name': 'Compute-1::SnmpdReadonlyUserPassword',
                 'value': 'unset',
+                'default': '',
                 'label': 'Snmpd password'}})
 
         mock_parameter_list.assert_called_once_with()
@@ -188,24 +193,28 @@ class TuskarAPITests(test.APITestCase):
                 'hidden': True,
                 'name': 'Compute-1::SnmpdReadonlyUserPassword',
                 'value': 'unset',
+                'default': '',
                 'label': 'Snmpd password'},
              'KeystoneCACertificate': {
                 'description': 'Keystone CA CertificateAdmin',
                 'hidden': True,
                 'name': 'Controller-1::KeystoneCACertificate',
                 'value': 'unset',
+                'default': '',
                 'label': 'Keystone CA CertificateAdmin'},
              'AdminToken': {
                 'description': 'Admin Token',
                 'hidden': True,
                 'name': 'Controller-1::AdminToken',
                 'value': '',
+                'default': '',
                 'label': 'Admin Token'},
              'AdminPassword': {
                 'description': 'Admin password',
                 'hidden': True,
                 'name': 'Controller-1::AdminPassword',
                 'value': 'unset',
+                'default': '',
                 'label': 'Admin Password'}})
 
         mock_parameter_list.assert_called_once_with()
@@ -261,21 +270,26 @@ class TuskarAPITests(test.APITestCase):
                 'hidden': True,
                 'name': 'Compute-1::SnmpdReadonlyUserPassword',
                 'value': 'unset',
+                'default': '',
                 'label': 'Snmpd password'},
             'KeystoneCACertificate': {
                 'description': 'Keystone CA CertificateAdmin',
                 'hidden': True, 'name':
                 'Controller-1::KeystoneCACertificate',
                 'value': 'unset',
+                'default': '',
                 'label': 'Keystone CA CertificateAdmin'},
             'AdminToken': {
                 'description': 'Admin Token',
                 'hidden': True,
                 'name': 'Controller-1::AdminToken',
-                'value': '', 'label': 'Admin Token'},
+                'value': '',
+                'default': '',
+                'label': 'Admin Token'},
             'AdminPassword': {
                 'description': 'Admin password',
                 'hidden': True,
                 'name': 'Controller-1::AdminPassword',
                 'value': 'unset',
+                'default': '',
                 'label': 'Admin Password'}})

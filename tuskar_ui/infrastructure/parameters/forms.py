@@ -81,7 +81,7 @@ def parameter_fields(request, prefix=None, read_only=False):
                     kwargs['widget'] = django.forms.Textarea
                 Field = django.forms.CharField
 
-        fields[p.name] = Field(required=False,
+        fields[p.name] = Field(required=p.default is None,
                                label=_parameter_label(p),
                                initial=p.value,
                                **kwargs)
