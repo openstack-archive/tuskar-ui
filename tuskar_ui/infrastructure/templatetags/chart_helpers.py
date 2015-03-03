@@ -53,3 +53,17 @@ def all_used_instances(obj):
         all_used_instances_info.append(info)
 
     return json.dumps(all_used_instances_info)
+
+
+@register.filter()
+def ellipsis(s, n):
+    """Shorten a long string.
+
+    :param s: string to shorten
+    :param n: number of charto keep on both sides
+    :return: shotened string
+    """
+    n = int(n)
+    if len(s) <= 2 * n:
+        return s
+    return s[:n]+'...'+s[-n:]

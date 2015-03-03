@@ -3,7 +3,7 @@
 
 {% if meter_conf %}
   <div class="nodes">
-    <div id="ceilometer-stats" class="clearfix">
+    <div id="ceilometer-stats">
       <form class="form-inline performance_charts" id="linechart_general_form">
         <div class="pull-right">
           <div class="form-group">
@@ -81,7 +81,7 @@
 
   <div id="node-charts" class="nodes row">
     {% for meter_label, url_part, y_max in meter_conf %}
-      <div class="col-lg-{{col_size}}">
+      <div class="col-xs-{{col_size}}">
         {% include "infrastructure/_performance_chart.html" with label=meter_label y_max=y_max url=node_perf_url|add:"?"|add:url_part only %}
       </div>
     {% endfor %}
