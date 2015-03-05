@@ -332,8 +332,55 @@ class NodesTests(test.BaseAdminViewTests):
             res = self.client.post(INDEX_URL + '?tab=nodes__all', data)
             self.assertNoFormErrors(res)
             self.assertEqual(mock_node.set_power_state.call_count, 1)
-            self.assertRedirectsNoFollow(res,
-                                         INDEX_URL + '?tab=nodes__all')
+            self.assertRedirectsNoFollow(res, INDEX_URL + '?tab=nodes__all')
+
+    def test_node_set_power_on_empty(self):
+        all_nodes = [api.node.Node(api.node.IronicNode(node))
+                     for node in self.ironicclient_nodes.list()]
+        node = all_nodes[6]
+        roles = [api.tuskar.Role(r)
+                 for r in TEST_DATA.tuskarclient_roles.list()]
+        instance = TEST_DATA.novaclient_servers.first()
+        image = TEST_DATA.glanceclient_images.first()
+        data = {
+            'action': 'all_nodes_table__set_power_state_on',
+            'object_ids': '',
+        }
+
+        with contextlib.nested(
+            patch('tuskar_ui.api.node.NodeClient', **{
+                'spec_set': ['ironic_enabled'],
+                'ironic_enabled.return_value': True,
+            }),
+            patch('tuskar_ui.api.node.Node', **{
+                'spec_set': ['list', 'set_power_state'],
+                'list.return_value': all_nodes,
+                'set_power_state.return_value': node,
+            }),
+            patch('tuskar_ui.api.tuskar.Role', **{
+                'spec_set': ['list', 'name'],
+                'list.return_value': roles,
+            }),
+            patch('tuskar_ui.api.node.nova', **{
+                'spec_set': ['server_get', 'server_list'],
+                'server_get.return_value': instance,
+                'server_list.return_value': ([instance], False),
+            }),
+            patch('tuskar_ui.api.node.glance', **{
+                'spec_set': ['image_get'],
+                'image_get.return_value': image,
+            }),
+            patch('tuskar_ui.api.heat.Resource', **{
+                'spec_set': ['get_by_node', 'list_all_resources'],
+                'get_by_node.side_effect': (
+                    self._raise_horizon_exception_not_found),
+                'list_all_resources.return_value': [],
+            }),
+        ) as (mock_node_client, mock_node, mock_role, mock_nova, mock_glance,
+              mock_resource):
+            res = self.client.post(INDEX_URL + '?tab=nodes__all', data)
+        self.assertEqual(mock_node.set_power_state.call_count, 0)
+        self.assertRedirectsNoFollow(res, INDEX_URL)
 
     def test_node_set_power_off(self):
         all_nodes = [api.node.Node(api.node.IronicNode(node))
