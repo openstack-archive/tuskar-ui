@@ -14,6 +14,7 @@
 
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
+from horizon import messages
 from horizon import tables
 from horizon.utils import memoized
 
@@ -39,6 +40,9 @@ class DeleteNode(tables.BatchAction):
         return getattr(obj, 'instance_uuid', None) is None
 
     def action(self, request, obj_id):
+        if obj_id is None:
+            messages.error(request, _("Select some nodes to delete."))
+            return
         api.node.Node.delete(request, obj_id)
 
 
@@ -58,6 +62,9 @@ class ActivateNode(tables.BatchAction):
                 obj.cpu_arch)
 
     def action(self, request, obj_id):
+        if obj_id is None:
+            messages.error(request, _("Select some nodes to activate."))
+            return
         api.node.Node.set_maintenance(request, obj_id, False)
         api.node.Node.set_power_state(request, obj_id, 'off')
 
@@ -79,9 +86,10 @@ class SetPowerStateOn(tables.BatchAction):
         return False
 
     def action(self, request, obj_id):
-        api.node.Node.set_power_state(request,
-                                      obj_id,
-                                      'on')
+        if obj_id is None:
+            messages.error(request, _("Select some nodes to power on."))
+            return
+        api.node.Node.set_power_state(request, obj_id, 'on')
 
 
 class SetPowerStateOff(tables.BatchAction):
@@ -101,9 +109,10 @@ class SetPowerStateOff(tables.BatchAction):
                 and getattr(obj, 'instance_uuid', None) is None)
 
     def action(self, request, obj_id):
-        api.node.Node.set_power_state(request,
-                                      obj_id,
-                                      'off')
+        if obj_id is None:
+            messages.error(request, _("Select some nodes to power off."))
+            return
+        api.node.Node.set_power_state(request, obj_id, 'off')
 
 
 class NodeFilterAction(tables.FilterAction):
