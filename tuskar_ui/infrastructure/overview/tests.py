@@ -59,6 +59,7 @@ def _mock_plan(**kwargs):
             'get_role_node_count',
             'list_generated_parameters',
             'make_generated_parameters',
+            'parameter_list',
         ],
         'create.side_effect': lambda *args, **kwargs: plan,
         'delete.return_value': None,
@@ -68,6 +69,7 @@ def _mock_plan(**kwargs):
         'uuid': 'plan-1',
         'patch.side_effect': lambda *args, **kwargs: plan,
         'role_list': [],
+        'parameter_list.return_value': [],
         'parameter_value.return_value': None,
         'get_role_by_name.side_effect': KeyError,
         'get_role_node_count.return_value': 0,
@@ -358,6 +360,10 @@ class OverviewTests(test.BaseAdminViewTests):
             }, {
                 'status': 'ok',
                 'text': u'Configure Roles.',
+                'classes': 'fa-check-square-o text-success',
+            }, {
+                'status': 'ok',
+                'text': u'Global Service Configuration.',
                 'classes': 'fa-check-square-o text-success',
             }, {
                 'status': 'pending',
