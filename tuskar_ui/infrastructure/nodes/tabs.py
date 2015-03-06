@@ -142,6 +142,18 @@ class OverviewTab(tabs.Tab):
                  '100'),
             )
 
+        # TODO(akrivoka): Ajaxize these calls so that they don't hold up the
+        # whole page load
+        context['top_5'] = {
+            'fan': metering_utils.get_top_5(request, 'hardware.ipmi.fan'),
+            'voltage': metering_utils.get_top_5(
+                request, 'hardware.ipmi.voltage'),
+            'temperature': metering_utils.get_top_5(
+                request, 'hardware.ipmi.temperature'),
+            'current': metering_utils.get_top_5(
+                request, 'hardware.ipmi.current'),
+        }
+
         return context
 
 

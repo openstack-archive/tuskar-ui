@@ -60,6 +60,10 @@ LABELS = {
     'hardware.network.ip.outgoing.datagrams': _("IP out requests"),
     'hardware.network.ip.incoming.datagrams': _("IP in requests"),
     'hardware.memory.swap.util': _("Swap utilization"),
+    'hardware.ipmi.fan': _("Fan Speed"),
+    'hardware.ipmi.voltage': _("Votage"),
+    'hardware.ipmi.temperature': _("Temperature"),
+    'hardware.ipmi.current': _("Current")
 }
 
 
@@ -116,6 +120,18 @@ def get_meter_name(meter):
     return meter.replace('.', '_')
 
 
+def get_meter_list_and_unit(request, meter):
+    try:
+        meter_list = [m for m in ceilometer.meter_list(request)
+                      if m.name == meter]
+        unit = meter_list[0].unit
+    except Exception:
+        meter_list = []
+        unit = ''
+
+    return meter_list, unit
+
+
 def get_meters(meters):
     return [(m, get_meter_name(m)) for m in meters]
 
@@ -165,14 +181,7 @@ def get_nodes_stats(request, node_uuid, instance_uuid, meter,
                     date_options=None, date_from=None, date_to=None,
                     stats_attr=None, barchart=None, group_by=None):
     series = []
-
-    try:
-        meter_list = [m for m in ceilometer.meter_list(request)
-                      if m.name == meter]
-        unit = meter_list[0].unit
-    except Exception:
-        meter_list = []
-        unit = ''
+    meter_list, unit = get_meter_list_and_unit(request, meter)
 
     if instance_uuid:
         if 'ipmi' in meter:
@@ -252,3 +261,34 @@ def get_nodes_stats(request, node_uuid, instance_uuid, meter,
         date_to)
 
     return json_output
+
+
+def get_top_5(request, meter):
+    ceilometer_usage = ceilometer.CeilometerUsage(request)
+    meter_list, unit = get_meter_list_and_unit(request, meter)
+    top_5 = {'unit': unit, 'label': LABELS.get(meter, meter)}
+    data = []
+
+    for m in meter_list:
+        query = [{'field': 'resource_id', 'op': 'eq', 'value': m.resource_id}]
+        resource = ceilometer_usage.resources_with_statistics(query, [m.name],
+                                                              period=600)[0]
+        node_uuid = resource.metadata['node']
+        old_value, value = resource.get_meter(get_meter_name(m.name))[-2:]
+        old_value, value = old_value.max, value.max
+
+        if value > old_value:
+            direction = 'up'
+        elif value < old_value:
+            direction = 'down'
+        else:
+            direction = None
+
+        data.append({
+            'node_uuid': node_uuid,
+            'value': value,
+            'direction': direction
+        })
+
+    top_5['data'] = sorted(data, key=lambda d: d['value'], reverse=True)[:5]
+    return top_5

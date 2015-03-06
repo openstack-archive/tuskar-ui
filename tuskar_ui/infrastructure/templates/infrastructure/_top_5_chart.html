@@ -1,0 +1,29 @@
+{% load i18n %}
+{% load chart_helpers %}
+
+<h4>
+  {% trans 'Top 5 Nodes' %} ({{ top_5.label }}):
+</h4>
+{% if top_5.data %}
+<table width="100%">
+  {% for d in top_5.data %}
+  <tr>
+    <td>
+      <a href="{% url 'horizon:infrastructure:nodes:detail' d.node_uuid %}">
+        {{ d.node_uuid|truncatechars:6 }}
+      </a>
+    </td>
+    <td>
+      {{ d.value}} {{ top_5.unit }}
+    </td>
+    <td>
+      {%if d.direction %}
+      <i class="fa fa-arrow-{{d.direction}}"></i>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+{% trans 'No data available.' %}
+{% endif %}
