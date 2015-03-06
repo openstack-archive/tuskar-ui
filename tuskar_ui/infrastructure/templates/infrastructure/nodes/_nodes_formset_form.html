@@ -27,6 +27,11 @@
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.memory_mb extra_text=_('MB') %}
       {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.local_gb extra_text=_('GB') %}
     </div>
+    <div class="param-section">
+      <h5>{% trans "Deployment Images" %}</h5>
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.deployment_kernel %}
+      {% include 'infrastructure/nodes/_nodes_formset_field.html' with field=form.deployment_ramdisk %}
+    </div>
   </fieldset></div>
 </div>
 

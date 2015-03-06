@@ -307,6 +307,15 @@ class DetailOverviewTab(tabs.Tab):
             context['role'] = resource.role
             context['stack'] = resource.stack
 
+        context['kernel_image'] = api.node.image_get(
+            request,
+            node.driver_info['pxe_deploy_kernel']
+        )
+        context['ramdisk_image'] = api.node.image_get(
+            request,
+            node.driver_info['pxe_deploy_ramdisk']
+        )
+
         if node.instance_uuid:
             if api_base.is_service_enabled(self.request, 'metering'):
                 # Meter configuration in the following format:
