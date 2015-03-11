@@ -14,6 +14,7 @@
 
 import logging
 
+from django.conf import settings
 import django.forms
 from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
@@ -30,7 +31,6 @@ import tuskar_ui.api.tuskar
 import tuskar_ui.forms
 import tuskar_ui.infrastructure.flavors.utils as flavors_utils
 
-
 MATCHING_DEPLOYMENT_MODE = flavors_utils.matching_deployment_mode()
 LOG = logging.getLogger(__name__)
 MESSAGE_ICONS = {
@@ -40,6 +40,7 @@ MESSAGE_ICONS = {
     'warning': 'fa-exclamation-triangle text-warning',
     None: 'fa-exclamation-triangle text-warning',
 }
+WEBROOT = getattr(settings, 'WEBROOT', '/')
 
 
 def validate_roles(request, plan):
@@ -389,7 +390,10 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
                     controller_role.parameter_prefix + 'SwiftPassword'),
                 'path': '/v1/AUTH_%(tenant_id)s',
                 'admin_path': '/v1'},
-            "horizon": {'port': ''}}
+            "horizon": {
+                'port': '80',
+                'path': WEBROOT,
+                'admin_path': '%sadmin' % WEBROOT}}
 
     def build_neutron_setup(self, data):
         # TODO(lsmola) this is default devtest params, this should probably

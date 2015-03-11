@@ -283,7 +283,10 @@ class OverviewTests(test.BaseAdminViewTests):
              'heat': {'password': None},
              'ceilometer': {'password': None},
              'ec2': {'password': None},
-             'horizon': {'port': ''},
+             "horizon": {
+                'port': '80',
+                'path': '/',
+                'admin_path': '/admin'},
              'cinder': {'password': None},
              'glance': {'password': None},
              'swift': {'password': None,
