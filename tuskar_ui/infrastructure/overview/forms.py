@@ -14,6 +14,7 @@
 
 import logging
 
+from django.conf import settings
 import django.forms
 from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
@@ -359,6 +360,12 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
         label=_("External CIDR"), initial="172.17.0.0/16")
 
     def build_endpoints(self, plan, controller_role):
+        webroot = getattr(settings, 'WEBROOT', '/')
+        if webroot.endswith('/'):
+            horizon_admin_path = '%sadmin' % webroot
+        else:
+            horizon_admin_path = '%s/admin' % webroot
+
         return {
             "ceilometer": {
                 "password": plan.parameter_value(
@@ -389,7 +396,10 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
                     controller_role.parameter_prefix + 'SwiftPassword'),
                 'path': '/v1/AUTH_%(tenant_id)s',
                 'admin_path': '/v1'},
-            "horizon": {'port': ''}}
+            "horizon": {
+                'port': '80',
+                'path': webroot,
+                'admin_path': horizon_admin_path}}
 
     def build_neutron_setup(self, data):
         # TODO(lsmola) this is default devtest params, this should probably
