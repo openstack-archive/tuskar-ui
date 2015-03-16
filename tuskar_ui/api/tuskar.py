@@ -474,11 +474,11 @@ class Role(base.APIResourceWrapper):
         node_count = plan.get_role_node_count(self)
         pending_required_params = list(Parameter.pending_parameters(
             Parameter.required_parameters(self.parameter_list(plan))))
-        return not (node_count and (
+        return not (
             self.image(plan) is None or
-            self.flavor(plan) is None or
+            (node_count and self.flavor(plan) is None) or
             pending_required_params
-        ))
+        )
 
     @property
     def id(self):
