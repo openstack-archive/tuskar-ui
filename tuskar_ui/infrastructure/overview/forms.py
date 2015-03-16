@@ -46,7 +46,10 @@ WEBROOT = getattr(settings, 'WEBROOT', '/')
 def validate_roles(request, plan):
     """Validates the roles in plan and returns dict describing the issues"""
     for role in plan.role_list:
-        if not role.is_valid_for_deployment(plan):
+        if (
+            plan.get_role_node_count(role) and
+            not role.is_valid_for_deployment(plan)
+        ):
             message = {
                 'text': _(u"Configure Roles."),
                 'is_critical': True,
