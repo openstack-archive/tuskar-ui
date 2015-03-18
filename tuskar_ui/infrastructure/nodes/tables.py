@@ -34,10 +34,8 @@ class DeleteNode(tables.BatchAction):
             # this is necessary because table actions use this function
             # with obj=None
             return True
-        if api.node.NodeClient.ironic_enabled(request):
-            return (getattr(obj, 'instance_uuid', None) is None and
-                    obj.power_state not in api.node.POWER_ON_STATES)
-        return getattr(obj, 'instance_uuid', None) is None
+        return (getattr(obj, 'instance_uuid', None) is None and
+                obj.power_state not in api.node.POWER_ON_STATES)
 
     def action(self, request, obj_id):
         if obj_id is None:
@@ -81,9 +79,7 @@ class SetPowerStateOn(tables.BatchAction):
             # this is necessary because table actions use this function
             # with obj=None
             return True
-        if api.node.NodeClient.ironic_enabled(request):
-            return obj.power_state not in api.node.POWER_ON_STATES
-        return False
+        return obj.power_state not in api.node.POWER_ON_STATES
 
     def action(self, request, obj_id):
         if obj_id is None:
@@ -104,9 +100,10 @@ class SetPowerStateOff(tables.BatchAction):
             # this is necessary because table actions use this function
             # with obj=None
             return True
-        return (api.node.NodeClient.ironic_enabled(request)
-                and obj.power_state in api.node.POWER_ON_STATES
-                and getattr(obj, 'instance_uuid', None) is None)
+        return (
+            obj.power_state in api.node.POWER_ON_STATES and
+            getattr(obj, 'instance_uuid', None) is None
+        )
 
     def action(self, request, obj_id):
         if obj_id is None:

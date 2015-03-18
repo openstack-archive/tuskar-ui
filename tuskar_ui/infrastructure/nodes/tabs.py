@@ -373,11 +373,6 @@ class NodeTabs(tabs.TabGroup):
     sticky = True
     template_name = "horizon/common/_items_count_tab_group.html"
 
-    def __init__(self, request, **kwargs):
-        if api.node.NodeClient.ironic_enabled(request):
-            self.tabs = self.tabs + (MaintenanceTab,)
-        super(NodeTabs, self).__init__(request, **kwargs)
-
 
 class NodeDetailTabs(tabs.TabGroup):
     slug = "node_details"

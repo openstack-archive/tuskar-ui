@@ -12,106 +12,10 @@
 
 from ironicclient.v1 import node
 from ironicclient.v1 import port
-from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.test.test_data import utils as test_data_utils
 
 
 def data(TEST):
-
-    # BareMetalNode
-    TEST.baremetalclient_nodes = test_data_utils.TestDataContainer()
-    bm_node_1 = baremetal.BareMetalNode(
-        baremetal.BareMetalNodeManager(None),
-        {'id': '1',
-         'uuid': 'd0ace338-a702-426a-b344-394ce861e070',
-         'ipmi_address': '1.1.1.1',
-         'ipmi_username': 'admin',
-         'ipmi_password': 'password',
-         'ip_address': '192.0.2.36',
-         'instance_uuid': 'aa',
-         "service_host": "undercloud",
-         "cpus": 1,
-         "memory_mb": 4096,
-         "local_gb": 20,
-         'task_state': 'active',
-         "pm_address": '1.1.1.1',
-         "pm_user": 'test1',
-         "interfaces": [{"address": "52:54:00:90:38:01"},
-                        {"address": "52:54:00:90:38:02"}],
-         })
-    bm_node_2 = baremetal.BareMetalNode(
-        baremetal.BareMetalNodeManager(None),
-        {'id': '2',
-         'uuid': 'bd70e5e7-52e6-40d6-b862-c7f7ea1f262e',
-         'instance_uuid': 'bb',
-         "service_host": "undercloud",
-         "cpus": 1,
-         "memory_mb": 4096,
-         "local_gb": 20,
-         'task_state': 'active',
-         "pm_address": None,
-         "pm_user": None,
-         "interfaces": [{"address": "52:54:00:90:38:01"}],
-         })
-    bm_node_3 = baremetal.BareMetalNode(
-        baremetal.BareMetalNodeManager(None),
-        {'id': '3',
-         'uuid': '74981-2cfa-4e15-be96-3f0ec5635115',
-         'instance_uuid': 'cc',
-         "service_host": "undercloud",
-         "cpus": 1,
-         "memory_mb": 4096,
-         "local_gb": 20,
-         'task_state': 'reboot',
-         "pm_address": None,
-         "pm_user": None,
-         "interfaces": [{"address": "52:54:00:90:38:01"}],
-         })
-    bm_node_4 = baremetal.BareMetalNode(
-        baremetal.BareMetalNodeManager(None),
-        {'id': '4',
-         'uuid': 'f5c1df48-dcbe-4eb5-bd44-9eef2cb9139a',
-         'instance_uuid': 'cc',
-         "service_host": "undercloud",
-         "cpus": 1,
-         "memory_mb": 4096,
-         "local_gb": 20,
-         'task_state': 'active',
-         "pm_address": None,
-         "pm_user": None,
-         "interfaces": [{"address": "52:54:00:90:38:01"}],
-         })
-    bm_node_5 = baremetal.BareMetalNode(
-        baremetal.BareMetalNodeManager(None),
-        {'id': '5',
-         'uuid': 'c8998d40-2ff6-4233-8535-b44a825b20c3',
-         'instance_uuid': 'dd',
-         "service_host": "undercloud",
-         "cpus": 1,
-         "memory_mb": 4096,
-         "local_gb": 20,
-         'task_state': 'error',
-         "pm_address": None,
-         "pm_user": None,
-         "interfaces": [{"address": "52:54:00:90:38:01"}],
-         })
-    bm_node_6 = baremetal.BareMetalNode(
-        baremetal.BareMetalNodeManager(None),
-        {'id': '6',
-         'uuid': 'cfd5a2cf-f21c-4044-a604-acb855478e44',
-         'instance_uuid': None,
-         "service_host": "undercloud",
-         "cpus": 1,
-         "memory_mb": 4096,
-         "local_gb": 20,
-         'task_state': None,
-         "pm_address": None,
-         "pm_user": None,
-         "interfaces": [{"address": "52:54:00:90:38:01"}],
-         })
-    TEST.baremetalclient_nodes.add(
-        bm_node_1, bm_node_2, bm_node_3, bm_node_4, bm_node_5, bm_node_6)
-
     # IronicNode
     TEST.ironicclient_nodes = test_data_utils.TestDataContainer()
     node_1 = node.Node(
