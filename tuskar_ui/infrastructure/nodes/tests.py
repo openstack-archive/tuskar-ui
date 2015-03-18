@@ -337,10 +337,6 @@ class NodesTests(test.BaseAdminViewTests):
             node.uuid)}
 
         with contextlib.nested(
-            mock.patch('tuskar_ui.api.node.NodeClient', **{
-                'spec_set': ['ironic_enabled'],
-                'ironic_enabled.return_value': True,
-            }),
             mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list', 'set_power_state'],
                 'list.return_value': all_nodes,
@@ -386,10 +382,6 @@ class NodesTests(test.BaseAdminViewTests):
         }
 
         with contextlib.nested(
-            mock.patch('tuskar_ui.api.node.NodeClient', **{
-                'spec_set': ['ironic_enabled'],
-                'ironic_enabled.return_value': True,
-            }),
             mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list', 'set_power_state'],
                 'list.return_value': all_nodes,
@@ -432,10 +424,6 @@ class NodesTests(test.BaseAdminViewTests):
             node.uuid)}
 
         with contextlib.nested(
-            mock.patch('tuskar_ui.api.node.NodeClient', **{
-                'spec_set': ['ironic_enabled'],
-                'ironic_enabled.return_value': True,
-            }),
             mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list', 'set_power_state'],
                 'list.return_value': all_nodes,
