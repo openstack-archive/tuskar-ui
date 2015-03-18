@@ -17,7 +17,6 @@ from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
 from ironic_discoverd import client as discoverd_client
 from ironicclient import client as ironic_client
-from novaclient.v1_1.contrib import baremetal
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from openstack_dashboard.api import nova
@@ -55,11 +54,6 @@ FREE_STATE = 'free'
 
 IRONIC_DISCOVERD_URL = getattr(settings, 'IRONIC_DISCOVERD_URL', None)
 LOG = logging.getLogger(__name__)
-
-
-def baremetalclient(request):
-    nc = nova.novaclient(request)
-    return baremetal.BareMetalNodeManager(nc)
 
 
 def ironicclient(request):
@@ -351,210 +345,6 @@ class IronicNode(base.APIResourceWrapper):
         return None
 
 
-class BareMetalNode(base.APIResourceWrapper):
-    _attrs = ('id', 'uuid', 'instance_uuid', 'memory_mb', 'cpus', 'local_gb',
-              'task_state', 'pm_user', 'pm_address', 'interfaces')
-
-    @classmethod
-    def create(cls, request, ipmi_address, cpu_arch, cpus, memory_mb,
-               local_gb, mac_addresses, ipmi_username=None, ipmi_password=None,
-               ssh_address=None, ssh_username=None, ssh_key_contents=None,
-               deployment_kernel=None, deployment_ramdisk=None,
-               driver=None):
-        """Create a Nova BareMetalNode."""
-        node = baremetalclient(request).create(
-            service_host='undercloud',
-            cpus=cpus,
-            memory_mb=memory_mb,
-            local_gb=local_gb,
-            prov_mac_address=mac_addresses,
-            pm_address=ipmi_address,
-            pm_user=ipmi_username,
-            pm_password=ipmi_password)
-        return cls(node)
-
-    @classmethod
-    def get(cls, request, uuid):
-        """Return the BareMetalNode that matches the ID
-
-        :param request: request object
-        :type  request: django.http.HttpRequest
-
-        :param uuid: ID of BareMetalNode to be retrieved
-        :type  uuid: str
-
-        :return: matching BareMetalNode, or None if no BareMetalNode matches
-                 the ID
-        :rtype:  tuskar_ui.api.node.BareMetalNode
-        """
-        node = baremetalclient(request).find(uuid=uuid)
-        return cls(node)
-
-    @classmethod
-    def get_by_instance_uuid(cls, request, instance_uuid):
-        """Return the BareMetalNode associated with the instance ID
-
-        :param request: request object
-        :type  request: django.http.HttpRequest
-
-        :param instance_uuid: ID of Instance that is deployed on the
-                              BareMetalNode to be retrieved
-        :type  instance_uuid: str
-
-        :return: matching BareMetalNode
-        :rtype:  tuskar_ui.api.node.BareMetalNode
-
-        :raises: ironicclient.exc.HTTPNotFound if there is no BareMetalNode
-                 with the matching instance UUID
-        """
-        nodes = baremetalclient(request).list()
-        node = next((n for n in nodes if instance_uuid == n.instance_uuid),
-                    None)
-        return cls(node)
-
-    @classmethod
-    def list(cls, request, associated=None):
-        """Return a list of BareMetalNodes
-
-        :param request: request object
-        :type  request: django.http.HttpRequest
-
-        :param associated: should we also retrieve all BareMetalNodes, only
-                           those associated with an Instance, or only those not
-                           associated with an Instance?
-        :type  associated: bool
-
-        :return: list of BareMetalNodes, or an empty list if there are none
-        :rtype:  list of tuskar_ui.api.node.BareMetalNode
-        """
-        nodes = baremetalclient(request).list()
-        if associated is not None:
-            if associated:
-                nodes = [node for node in nodes
-                         if node.instance_uuid is not None]
-            else:
-                nodes = [node for node in nodes
-                         if node.instance_uuid is None]
-        return [cls(node) for node in nodes]
-
-    @classmethod
-    def delete(cls, request, uuid):
-        """Remove the BareMetalNode if it exists; otherwise, do nothing.
-
-        :param request: request object
-        :type  request: django.http.HttpRequest
-
-        :param uuid: ID of BareMetalNode to be removed
-        :type  uuid: str
-        """
-        return baremetalclient(request).delete(uuid)
-
-    @classmethod
-    def discover(cls, request, uuids):
-        raise NotImplementedError(
-            "discover is not defined for Nova BareMetal nodes")
-
-    @classmethod
-    def set_maintenance(cls, request, uuid, maintenance):
-        raise NotImplementedError(
-            "set_maintenance is not defined for Nova BareMetal nodes")
-
-    @classmethod
-    def set_power_state(cls, request, uuid, power_state):
-        raise NotImplementedError(
-            "set_power_state is not defined for Nova BareMetal nodes")
-
-    @cached_property
-    def power_state(self):
-        """Return a power state of this BareMetalNode
-
-        :return: power state of this node
-        :rtype:  str
-        """
-        task_state_dict = {
-            'initializing': 'initializing',
-            'active': 'on',
-            'reboot': 'rebooting',
-            'building': 'building',
-            'deploying': 'deploying',
-            'prepared': 'prepared',
-            'deleting': 'deleting',
-            'deploy failed': 'deploy failed',
-            'deploy complete': 'deploy complete',
-            'deleted': 'deleted',
-            'error': 'error',
-        }
-        return task_state_dict.get(self.task_state, 'off')
-
-    @cached_property
-    def state(self):
-        return self.power_state
-
-    @cached_property
-    def target_power_state(self):
-        return None
-
-    @cached_property
-    def driver(self):
-        """Return driver for this BareMetalNode."""
-        return "IPMI + PXE"
-
-    @cached_property
-    def driver_info(self):
-        """Return driver_info for this BareMetalNode
-
-        :return: return pm_address property of this BareMetalNode
-        :rtype:  dict of str
-        """
-        try:
-            ip_address = (self.instance._apiresource.addresses['ctlplane'][0]
-                          ['addr'])
-        except Exception:
-            LOG.error("Couldn't obtain IP address")
-            ip_address = None
-
-        return {
-            'ipmi_username': self.pm_user,
-            'ipmi_address': self.pm_address,
-            'ip_address': ip_address
-        }
-
-    @cached_property
-    def addresses(self):
-        """Return a list of port addresses associated with this BareMetalNode
-
-        :return: list of port addresses associated with this BareMetalNode, or
-                 an empty list if no addresses are associated with
-                 this BareMetalNode
-        :rtype:  list of str
-        """
-        return [interface["address"] for interface in
-                self.interfaces]
-
-    @cached_property
-    def extra(self):
-        """Ironic compatibility parameter."""
-        return {}
-
-    @cached_property
-    def provision_state(self):
-        """Ironic compatibility parameter."""
-        return None
-
-
-class NodeClient(object):
-
-    def __init__(self, request):
-        if self.ironic_enabled(request):
-            self.node_class = IronicNode
-        else:
-            self.node_class = BareMetalNode
-
-    @classmethod
-    def ironic_enabled(cls, request):
-        return base.is_service_enabled(request, 'baremetal')
-
-
 class Node(base.APIResourceWrapper):
     _attrs = ('id', 'uuid', 'instance_uuid', 'driver', 'driver_info', 'state',
               'power_state', 'target_power_state', 'addresses', 'maintenance',
@@ -565,7 +355,7 @@ class Node(base.APIResourceWrapper):
         """Initialize a Node
 
         :param apiresource: apiresource we want to wrap
-        :type  apiresource: novaclient.v1_1.contrib.baremetal.BareMetalNode
+        :type  apiresource: IronicNode
 
         :param request: request
         :type  request: django.core.handlers.wsgi.WSGIRequest
@@ -587,7 +377,7 @@ class Node(base.APIResourceWrapper):
                ipmi_username=None, ipmi_password=None, ssh_address=None,
                ssh_username=None, ssh_key_contents=None,
                deployment_kernel=None, deployment_ramdisk=None, driver=None):
-        return cls(NodeClient(request).node_class.create(
+        return cls(IronicNode.create(
             request, ipmi_address, cpu_arch, cpus, memory_mb, local_gb,
             mac_addresses, ipmi_username=ipmi_username,
             ipmi_password=ipmi_password, ssh_address=ssh_address,
@@ -599,7 +389,7 @@ class Node(base.APIResourceWrapper):
     @classmethod
     @handle_errors(_("Unable to retrieve node"))
     def get(cls, request, uuid):
-        node = NodeClient(request).node_class.get(request, uuid)
+        node = IronicNode.get(request, uuid)
         if node.instance_uuid is not None:
             server = nova.server_get(request, node.instance_uuid)
         else:
@@ -609,7 +399,7 @@ class Node(base.APIResourceWrapper):
     @classmethod
     @handle_errors(_("Unable to retrieve node"))
     def get_by_instance_uuid(cls, request, instance_uuid):
-        node = NodeClient(request).node_class.get_by_instance_uuid(
+        node = IronicNode.get_by_instance_uuid(
             request, instance_uuid)
         server = nova.server_get(request, instance_uuid)
         return cls(node, instance=server, request=request)
@@ -617,13 +407,9 @@ class Node(base.APIResourceWrapper):
     @classmethod
     @handle_errors(_("Unable to retrieve nodes"), [])
     def list(cls, request, associated=None, maintenance=None):
-        if NodeClient.ironic_enabled(request):
-            nodes = NodeClient(request).node_class.list(
-                request, associated=associated,
-                maintenance=maintenance)
-        else:
-            nodes = NodeClient(request).node_class.list(
-                request, associated=associated)
+        nodes = IronicNode.list(
+            request, associated=associated,
+            maintenance=maintenance)
 
         if associated is None or associated:
             servers = nova.server_list(request)[0]
@@ -639,21 +425,21 @@ class Node(base.APIResourceWrapper):
 
     @classmethod
     def delete(cls, request, uuid):
-        NodeClient(request).node_class.delete(request, uuid)
+        IronicNode.delete(request, uuid)
 
     @classmethod
     def discover(cls, request, uuids):
-        return NodeClient(request).node_class.discover(request, uuids)
+        return IronicNode.discover(request, uuids)
 
     @classmethod
     def set_maintenance(cls, request, uuid, maintenance):
-        node = NodeClient(request).node_class.set_maintenance(
+        node = IronicNode.set_maintenance(
             request, uuid, maintenance)
         return cls(node)
 
     @classmethod
     def set_power_state(cls, request, uuid, power_state):
-        node = NodeClient(request).node_class.set_power_state(
+        node = IronicNode.set_power_state(
             request, uuid, power_state)
         return cls(node)
 

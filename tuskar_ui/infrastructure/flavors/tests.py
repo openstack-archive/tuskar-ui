@@ -71,6 +71,7 @@ class FlavorsTest(test.BaseAdminViewTests):
                  for role in self.tuskarclient_roles.list()]
 
         with contextlib.nested(
+                patch('tuskar_ui.api.node.ironicclient'),
                 patch('tuskar_ui.api.tuskar.Plan.list',
                       return_value=plans),
                 patch('tuskar_ui.api.tuskar.Role.list',
@@ -79,18 +80,20 @@ class FlavorsTest(test.BaseAdminViewTests):
                       return_value=TEST_DATA.novaclient_flavors.list()),
                 patch('openstack_dashboard.api.nova.server_list',
                       return_value=([], False)),
-        ) as (plans_mock, roles_mock, flavors_mock, servers_mock):
+        ) as (ironic_mock, plans_mock, roles_mock, flavors_mock, servers_mock):
             res = self.client.get(INDEX_URL)
             self.assertEqual(plans_mock.call_count, 1)
             self.assertEqual(roles_mock.call_count, 4)
             self.assertEqual(flavors_mock.call_count, 3)
-            self.assertEqual(servers_mock.call_count, 1)
+            self.assertEqual(servers_mock.call_count, 2)
 
         self.assertTemplateUsed(res, 'infrastructure/flavors/index.html')
 
     def test_index_recoverable_failure(self):
-        with patch('openstack_dashboard.api.nova.flavor_list',
-                   side_effect=_raise_nova_client_exception) as flavor_list:
+        with patch(
+            'openstack_dashboard.api.nova.flavor_list',
+            side_effect=_raise_nova_client_exception
+        ) as flavor_list, patch('tuskar_ui.api.node.ironicclient'):
             res = self.client.get(INDEX_URL)
             self.assertEqual(flavor_list.call_count, 2)
         self.assertEqual(

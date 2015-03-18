@@ -337,10 +337,6 @@ class NodesTests(test.BaseAdminViewTests):
             node.uuid)}
 
         with contextlib.nested(
-            mock.patch('tuskar_ui.api.node.NodeClient', **{
-                'spec_set': ['ironic_enabled'],
-                'ironic_enabled.return_value': True,
-            }),
             mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list', 'set_power_state'],
                 'list.return_value': all_nodes,
@@ -365,8 +361,7 @@ class NodesTests(test.BaseAdminViewTests):
                     self._raise_horizon_exception_not_found),
                 'list_all_resources.return_value': [],
             }),
-        ) as (mock_node_client, mock_node, mock_role, mock_nova, mock_glance,
-              mock_resource):
+        ) as (mock_node, mock_role, mock_nova, mock_glance, mock_resource):
             res = self.client.post(INDEX_URL + '?tab=nodes__all', data)
             self.assertNoFormErrors(res)
             self.assertEqual(mock_node.set_power_state.call_count, 1)
@@ -386,10 +381,6 @@ class NodesTests(test.BaseAdminViewTests):
         }
 
         with contextlib.nested(
-            mock.patch('tuskar_ui.api.node.NodeClient', **{
-                'spec_set': ['ironic_enabled'],
-                'ironic_enabled.return_value': True,
-            }),
             mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list', 'set_power_state'],
                 'list.return_value': all_nodes,
@@ -414,8 +405,7 @@ class NodesTests(test.BaseAdminViewTests):
                     self._raise_horizon_exception_not_found),
                 'list_all_resources.return_value': [],
             }),
-        ) as (mock_node_client, mock_node, mock_role, mock_nova, mock_glance,
-              mock_resource):
+        ) as (mock_node, mock_role, mock_nova, mock_glance, mock_resource):
             res = self.client.post(INDEX_URL + '?tab=nodes__all', data)
         self.assertEqual(mock_node.set_power_state.call_count, 0)
         self.assertRedirectsNoFollow(res, INDEX_URL)
@@ -432,10 +422,6 @@ class NodesTests(test.BaseAdminViewTests):
             node.uuid)}
 
         with contextlib.nested(
-            mock.patch('tuskar_ui.api.node.NodeClient', **{
-                'spec_set': ['ironic_enabled'],
-                'ironic_enabled.return_value': True,
-            }),
             mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list', 'set_power_state'],
                 'list.return_value': all_nodes,
@@ -460,8 +446,7 @@ class NodesTests(test.BaseAdminViewTests):
                     self._raise_horizon_exception_not_found),
                 'list_all_resources.return_value': [],
             }),
-        ) as (mock_node_client, mock_node, mock_role, mock_nova, mock_glance,
-              mock_resource):
+        ) as (mock_node, mock_role, mock_nova, mock_glance, mock_resource):
             res = self.client.post(INDEX_URL + '?tab=nodes__all', data)
             self.assertNoFormErrors(res)
             self.assertEqual(mock_node.set_power_state.call_count, 1)
