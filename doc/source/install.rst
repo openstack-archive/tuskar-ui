@@ -24,15 +24,9 @@ Installation prerequisites are:
    machine as Tuskar UI, but it must be network accessible.
 
 You may find
-`the Tuskar install guide <https://github.com/openstack/tuskar/blob/master/doc/source/INSTALL.rst>`_
+`the Tuskar install guide <https://github.com/openstack/tuskar/blob/master/doc/source/install.rst>`_
 helpful.
 
-For baremetal provisioning, you will want a Nova Baremetal driver
-installed and registered in the Keystone services catalog. (You can
-`read more about setting up Nova Baremetal here <https://wiki.openstack.org/wiki/Baremetal>`_.)
-
-If you are using Devstack to run OpenStack, you can use
-:doc:`Devstack Baremetal configuration <devstack_baremetal>`.
 
 Installing the packages
 -----------------------
