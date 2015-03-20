@@ -54,18 +54,17 @@ def parameter_fields(request, prefix=None, read_only=False):
     for p in parameters:
         if prefix and not p.name.startswith(prefix):
             continue
-        kwargs = {}
+        Field = django.forms.CharField
+        field_kwargs = {}
+        widget = None
         if read_only:
             if p.hidden:
-                kwargs['widget'] = tuskar_ui.forms.StaticTextPasswordWidget
+                widget = tuskar_ui.forms.StaticTextPasswordWidget
             else:
-                kwargs['widget'] = tuskar_ui.forms.StaticTextWidget
-            Field = django.forms.CharField
+                widget = tuskar_ui.forms.StaticTextWidget
         else:
             if p.hidden:
-                Field = django.forms.CharField
-                kwargs['widget'] = (
-                    django.forms.PasswordInput(render_value=True))
+                widget = django.forms.PasswordInput(render_value=True)
             elif p.type == 'number':
                 Field = django.forms.IntegerField
             elif p.type == 'boolean':
@@ -73,18 +72,20 @@ def parameter_fields(request, prefix=None, read_only=False):
             elif (p.type == 'string' and
                     p.constraints['allowed_values']['definition']):
                 Field = django.forms.ChoiceField
-                kwargs['choices'] = (
+                field_kwargs['choices'] = (
                     p.constraints['allowed_values']['definition'])
-            else:
-                if (p.type in ['json', 'comma_delimited_list'] or
-                        'Certificate' in p.name):
-                    kwargs['widget'] = django.forms.Textarea
-                Field = django.forms.CharField
-
-        fields[p.name] = Field(required=False,
-                               label=_parameter_label(p),
-                               initial=p.value,
-                               **kwargs)
+            elif (p.type in ['json', 'comma_delimited_list'] or
+                  'Certificate' in p.name):
+                widget = django.forms.Textarea
+            if p.is_required():
+                field_kwargs['help_text'] = _("Required for deployment.")
+        fields[p.name] = Field(
+            required=False,
+            label=_parameter_label(p),
+            initial=p.value,
+            widget=widget,
+            **field_kwargs
+        )
     return fields
 
 
