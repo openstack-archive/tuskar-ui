@@ -524,7 +524,7 @@ class Parameter(base.APIDictWrapper):
 
     def is_required(self):
         """Boolean: True if parameter is required, False otherwise."""
-        return self.default is None or 'password' in self.stripped_name.lower()
+        return self.default is None
 
     @staticmethod
     def required_parameters(parameters):
