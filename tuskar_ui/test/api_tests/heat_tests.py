@@ -92,7 +92,7 @@ class HeatAPITests(test.APITestCase):
                        return_value=resources):
                 with patch('openstack_dashboard.api.nova.server_list',
                            return_value=(instances, None)):
-                    with patch('novaclient.v1_1.contrib.baremetal.'
+                    with patch('novaclient.v2.contrib.baremetal.'
                                'BareMetalNodeManager.list',
                                return_value=nodes):
                         ret_val = stack.resources()

@@ -15,7 +15,7 @@ from __future__ import absolute_import
 
 import mock
 
-from novaclient.v1_1 import servers
+from novaclient.v2 import servers
 
 from tuskar_ui import api
 import tuskar_ui.api.node

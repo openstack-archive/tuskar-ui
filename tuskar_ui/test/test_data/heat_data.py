@@ -14,7 +14,7 @@ from glanceclient.v1 import images
 from heatclient.v1 import events
 from heatclient.v1 import resources
 from heatclient.v1 import stacks
-from novaclient.v1_1 import servers
+from novaclient.v2 import servers
 from openstack_dashboard.test.test_data import utils as test_data_utils
 
 

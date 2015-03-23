@@ -30,7 +30,7 @@ class Flavor(object):
         """Construct by wrapping Nova flavor
 
         :param flavor: Nova flavor
-        :type  flavor: novaclient.v1_1.flavors.Flavor
+        :type  flavor: novaclient.v2.flavors.Flavor
         """
         self._flavor = flavor
 

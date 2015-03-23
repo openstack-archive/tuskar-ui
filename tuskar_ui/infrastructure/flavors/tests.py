@@ -17,7 +17,7 @@ import contextlib
 from django.core import urlresolvers
 from mock import patch, call  # noqa
 from novaclient import exceptions as nova_exceptions
-from novaclient.v1_1 import servers
+from novaclient.v2 import servers
 from openstack_dashboard.test.test_data import utils
 
 from tuskar_ui import api
