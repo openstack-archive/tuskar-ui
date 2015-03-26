@@ -317,22 +317,19 @@ class UploadNodeForm(forms.SelfHandlingForm):
                                _("Unable to parse the CSV file."))
                 return []
 
-            if driver == 'pxe_ssh':
-                node = dict(
-                    ssh_address=row[1],
-                    ssh_username=row[2],
-                    ssh_key_contents=row[3],
-                    mac_addresses=row[4],
-                    driver=driver,
-                )
-                data.append(node)
-            elif driver == 'pxe_ipmitool':
-                node = dict(
-                    ipmi_address=row[1],
-                    ipmi_username=row[2],
-                    ipmi_password=row[3],
-                    driver=driver,
-                )
+            if driver in ('pxe_ssh', 'pxe_ipmitool'):
+                node_keys = ('mac_addresses', 'cpu_arch', 'cpus', 'memory_mb',
+                             'local_gb')
+
+                if driver == 'pxe_ssh':
+                    driver_keys = (driver, 'ssh_address', 'ssh_username',
+                                   'ssh_key_contents')
+                elif driver == 'pxe_ipmitool':
+                    driver_keys = (driver, 'ipmi_address', 'ipmi_username',
+                                   'ipmi_password')
+
+                node = dict(izip(driver_keys+node_keys, row))
+
                 data.append(node)
             else:
                 messages.error(self.request,
