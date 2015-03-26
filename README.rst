@@ -24,6 +24,14 @@ Installation Guide
 
 Use the `Installation Guide <http://tuskar-ui.readthedocs.org/en/latest/install.html>`_ to install Tuskar UI.
 
+Nodes List File
+---------------
+
+There is possibility to upload CSV file with given list of nodes.
+This file is formatted as::
+
+    driver,address,username,password/ssh key,mac addresses,cpu architecture,number of CPUs,available memory,available storage
+
 License
 -------
 
