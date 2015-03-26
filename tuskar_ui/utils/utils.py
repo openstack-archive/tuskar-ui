@@ -11,7 +11,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import csv
+from itertools import izip
 import re
+
+from django.utils.translation import ugettext_lazy as _
 
 CAMEL_RE = re.compile(r'([A-Z][a-z]+|[A-Z]+(?=[A-Z\s]|$))')
 
@@ -92,3 +96,41 @@ def safe_int_cast(value):
         return int(value)
     except (TypeError, ValueError):
         return 0
+
+
+def parse_csv_file(csv_file):
+    """Parses given CSV file.
+
+    If there is no error, it returns list of dicts. When something went wrong,
+    list is empty, but warning contains appropriate information about
+    possible problems.
+    """
+
+    parsed_data = []
+
+    for row in csv.reader(csv_file):
+        try:
+            driver = row[0].strip()
+        except IndexError:
+            raise ValueError(_("Unable to parse the CSV file."))
+
+        if driver in ('pxe_ssh', 'pxe_ipmitool'):
+            node_keys = (
+                'mac_addresses', 'cpu_arch', 'cpus', 'memory_mb', 'local_gb')
+
+            if driver == 'pxe_ssh':
+                driver_keys = (
+                    driver, 'ssh_address', 'ssh_username', 'ssh_key_contents')
+
+            elif driver == 'pxe_ipmitool':
+                driver_keys = (
+                    driver, 'ipmi_address', 'ipmi_username', 'ipmi_password')
+
+            node = dict(izip(driver_keys+node_keys, row))
+
+            parsed_data.append(node)
+
+        else:
+            raise ValueError(_("Unknown driver: %s.") % driver)
+
+    return parsed_data
