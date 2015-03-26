@@ -8,6 +8,7 @@ Contents:
 
    README
    install
+   user_guide
    HACKING
 
 Indices and tables

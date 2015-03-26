@@ -11,8 +11,6 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import csv
-
 import django.forms
 from django.utils.translation import ugettext_lazy as _
 from horizon import exceptions
@@ -21,6 +19,7 @@ from horizon import messages
 
 from tuskar_ui import api
 import tuskar_ui.forms
+from tuskar_ui.utils import utils
 
 
 DEFAULT_KERNEL_IMAGE_NAME = 'bm-deploy-kernel'
@@ -307,38 +306,13 @@ class UploadNodeForm(forms.SelfHandlingForm):
         return True
 
     def get_data(self):
-        data = []
+        try:
+            output = utils.parse_csv_file(self.cleaned_data['csv_file'])
+        except ValueError as e:
+            messages.error(self.request, e.message)
+            output = []
 
-        for row in csv.reader(self.cleaned_data['csv_file']):
-            try:
-                driver = row[0].strip()
-            except IndexError:
-                messages.error(self.request,
-                               _("Unable to parse the CSV file."))
-                return []
-
-            if driver == 'pxe_ssh':
-                node = dict(
-                    ssh_address=row[1],
-                    ssh_username=row[2],
-                    ssh_key_contents=row[3],
-                    mac_addresses=row[4],
-                    driver=driver,
-                )
-                data.append(node)
-            elif driver == 'pxe_ipmitool':
-                node = dict(
-                    ipmi_address=row[1],
-                    ipmi_username=row[2],
-                    ipmi_password=row[3],
-                    driver=driver,
-                )
-                data.append(node)
-            else:
-                messages.error(self.request,
-                               _("Unknown driver: %s.") % driver)
-                return []
-        return data
+        return output
 
 
 RegisterNodeFormset = django.forms.formsets.formset_factory(
