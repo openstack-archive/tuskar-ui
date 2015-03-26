@@ -77,6 +77,93 @@ class UtilsTests(helpers.TestCase):
         ret = utils.safe_int_cast(object())
         self.assertEqual(ret, 0)
 
+    def test_parse_correct_csv_file(self):
+        correct_file = [
+            'pxe_ipmitool,ipmi_address,ipmi_username,ipmi_password,'
+            'mac_addresses,cpu_arch,cpus,memory_mb,local_gb',
+            'pxe_ipmitool,,,,MAC_ADDRESS,,CPUS,,LOCAL_GB',
+            'pxe_ssh,ssh_address,ssh_username,ssh_key_contents,mac_addresses'
+            ',cpu_arch,cpus,memory_mb,local_gb',
+            'pxe_ssh,SSH,USER,KEY',
+            'pxe_ssh,SSH,USER,,,CPU_ARCH',
+        ]
+
+        correct_data, no_warning = utils.parse_csv_file(correct_file)
+
+        self.assertSequenceEqual(
+            correct_data, [
+                {
+                    'pxe_ipmitool': 'pxe_ipmitool',
+                    'ipmi_address': 'ipmi_address',
+                    'ipmi_username': 'ipmi_username',
+                    'ipmi_password': 'ipmi_password',
+                    'mac_addresses': 'mac_addresses',
+                    'cpu_arch': 'cpu_arch',
+                    'cpus': 'cpus',
+                    'memory_mb': 'memory_mb',
+                    'local_gb': 'local_gb',
+                }, {
+                    'pxe_ipmitool': 'pxe_ipmitool',
+                    'ipmi_address': '',
+                    'ipmi_username': '',
+                    'ipmi_password': '',
+                    'mac_addresses': 'MAC_ADDRESS',
+                    'cpu_arch': '',
+                    'cpus': 'CPUS',
+                    'memory_mb': '',
+                    'local_gb': 'LOCAL_GB',
+                }, {
+                    'pxe_ssh': 'pxe_ssh',
+                    'ssh_address': 'ssh_address',
+                    'ssh_username': 'ssh_username',
+                    'ssh_key_contents': 'ssh_key_contents',
+                    'mac_addresses': 'mac_addresses',
+                    'cpu_arch': 'cpu_arch',
+                    'cpus': 'cpus',
+                    'memory_mb': 'memory_mb',
+                    'local_gb': 'local_gb',
+                },
+                {
+                    'pxe_ssh': 'pxe_ssh',
+                    'ssh_address': 'SSH',
+                    'ssh_username': 'USER',
+                    'ssh_key_contents': 'KEY',
+                },
+                {
+                    'pxe_ssh': 'pxe_ssh',
+                    'ssh_address': 'SSH',
+                    'ssh_username': 'USER',
+                    'ssh_key_contents': '',
+                    'mac_addresses': '',
+                    'cpu_arch': 'CPU_ARCH',
+                },
+            ]
+        )
+        self.assertIsNone(no_warning)
+
+    def test_parse_csv_file_wrong(self):
+        no_csv_file = [
+            '',
+            'File with first empty line -- it\'s not a CSV file.',
+        ]
+
+        no_csv_data, wrong_warning = utils.parse_csv_file(no_csv_file)
+
+        self.assertEqual(wrong_warning, _("Unable to parse the CSV file."))
+        self.assertEqual(no_csv_data, [])
+
+    def test_parse_wrong_driver_file(self):
+        wrong_driver_file = [
+            'wrong_driver,ssh_address,ssh_user',
+        ]
+
+        wrong_driver_data, driver_warning = utils.parse_csv_file(
+            wrong_driver_file)
+
+        self.assertEqual(wrong_driver_data, [])
+        self.assertEqual(driver_warning,
+                         _("Unknown driver: %s.") % 'wrong_driver')
+
 
 class MeteringTests(helpers.TestCase):
     def test_query_data(self):
