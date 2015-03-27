@@ -102,6 +102,12 @@ class MultiMACField(forms.fields.Field):
             for mac in SEPARATOR_RE.split(value):
                 if mac:
                     macs.append(normalize_MAC(mac))
+
+            if len(macs) != len(set(macs)):
+                raise forms.ValidationError(
+                    _("Duplicated MAC addresses")
+                )
+
             return ' '.join(macs)
         except ValueError:
             raise forms.ValidationError(
