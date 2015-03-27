@@ -57,3 +57,13 @@ class MultiMACFieldTests(test.TestCase):
             "DE:AD:BE:EF:CA:FC DE:AD:BE:EF:CA:FD DE:AD:BE:EF:CA:FE "
             "DE:AD:BE:EF:CA:FF",
         )
+
+    def test_duplicated(self):
+        field = forms.MultiMACField(required=False)
+        with self.assertRaises(forms.forms.ValidationError) as raised:
+                field.clean("DE:AD:BE:EF:CA:FC DE:AD:BE:EF:CA:FC")
+
+        self.assertEqual(
+            unicode(raised.exception.messages[0]),
+            unicode(_("Duplicated MAC addresses.")),
+        )

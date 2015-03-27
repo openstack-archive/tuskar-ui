@@ -97,15 +97,22 @@ class MultiMACField(forms.fields.Field):
 
     def clean(self, value):
         value = super(MultiMACField, self).clean(value)
-        try:
-            macs = []
-            for mac in SEPARATOR_RE.split(value):
-                if mac:
-                    macs.append(normalize_MAC(mac))
-            return ' '.join(macs)
-        except ValueError:
-            raise forms.ValidationError(
-                _(u'%r is not a valid MAC address.') % mac)
+
+        macs = []
+        for mac in SEPARATOR_RE.split(value):
+            if mac:
+                try:
+                    normalized_mac = normalize_MAC(mac)
+                except ValueError:
+                    raise forms.ValidationError(
+                        _(u'%r is not a valid MAC address.') % mac)
+                else:
+                    macs.append(normalized_mac)
+
+        if len(macs) != len(set(macs)):
+            raise forms.ValidationError(_("Duplicated MAC addresses."))
+
+        return ' '.join(macs)
 
 
 class NetworkField(forms.fields.Field):
