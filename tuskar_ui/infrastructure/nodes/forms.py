@@ -285,10 +285,16 @@ class BaseNodeFormset(tuskar_ui.forms.SelfHandlingFormset):
                 raise django.forms.ValidationError(
                     _("Please provide node data for all nodes."))
 
-            new_macs = form.cleaned_data.get('mac_addresses')
-            if not new_macs:
+            mac_addresses = form.cleaned_data.get('mac_addresses')
+            if not mac_addresses:
                 continue
-            new_macs = set(new_macs.split())
+
+            list_macs = mac_addresses.split()
+            new_macs = set(list_macs)
+
+            if len(list_macs) != len(new_macs):
+                raise django.forms.ValidationError(
+                    bad_macs_error % ", ".join(new_macs))
 
             # Prevent submitting duplicated MAC addresses
             # or MAC addresses of existing nodes
