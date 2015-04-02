@@ -76,7 +76,7 @@ class NodesTests(test.BaseAdminViewTests):
 
     def _all_mocked_nodes(self):
         request = mock.MagicMock()
-        return [api.node.Node(api.node.IronicNode(node, request))
+        return [api.node.Node(api.node.Node(node, request))
                 for node in self.ironicclient_nodes.list()]
 
     def _test_index_tab(self, tab_name, nodes):
@@ -326,7 +326,7 @@ class NodesTests(test.BaseAdminViewTests):
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
     def test_node_set_power_on(self):
-        all_nodes = [api.node.Node(api.node.IronicNode(node))
+        all_nodes = [api.node.Node(api.node.Node(node))
                      for node in self.ironicclient_nodes.list()]
         node = all_nodes[6]
         roles = [api.tuskar.Role(r)
@@ -337,10 +337,6 @@ class NodesTests(test.BaseAdminViewTests):
             node.uuid)}
 
         with contextlib.nested(
-            mock.patch('tuskar_ui.api.node.NodeClient', **{
-                'spec_set': ['ironic_enabled'],
-                'ironic_enabled.return_value': True,
-            }),
             mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list', 'set_power_state'],
                 'list.return_value': all_nodes,
@@ -365,15 +361,14 @@ class NodesTests(test.BaseAdminViewTests):
                     self._raise_horizon_exception_not_found),
                 'list_all_resources.return_value': [],
             }),
-        ) as (mock_node_client, mock_node, mock_role, mock_nova, mock_glance,
-              mock_resource):
+        ) as (mock_node, mock_role, mock_nova, mock_glance, mock_resource):
             res = self.client.post(INDEX_URL + '?tab=nodes__all', data)
             self.assertNoFormErrors(res)
             self.assertEqual(mock_node.set_power_state.call_count, 1)
             self.assertRedirectsNoFollow(res, INDEX_URL + '?tab=nodes__all')
 
     def test_node_set_power_on_empty(self):
-        all_nodes = [api.node.Node(api.node.IronicNode(node))
+        all_nodes = [api.node.Node(api.node.Node(node))
                      for node in self.ironicclient_nodes.list()]
         node = all_nodes[6]
         roles = [api.tuskar.Role(r)
@@ -386,10 +381,6 @@ class NodesTests(test.BaseAdminViewTests):
         }
 
         with contextlib.nested(
-            mock.patch('tuskar_ui.api.node.NodeClient', **{
-                'spec_set': ['ironic_enabled'],
-                'ironic_enabled.return_value': True,
-            }),
             mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list', 'set_power_state'],
                 'list.return_value': all_nodes,
@@ -414,14 +405,13 @@ class NodesTests(test.BaseAdminViewTests):
                     self._raise_horizon_exception_not_found),
                 'list_all_resources.return_value': [],
             }),
-        ) as (mock_node_client, mock_node, mock_role, mock_nova, mock_glance,
-              mock_resource):
+        ) as (mock_node, mock_role, mock_nova, mock_glance, mock_resource):
             res = self.client.post(INDEX_URL + '?tab=nodes__all', data)
         self.assertEqual(mock_node.set_power_state.call_count, 0)
         self.assertRedirectsNoFollow(res, INDEX_URL)
 
     def test_node_set_power_off(self):
-        all_nodes = [api.node.Node(api.node.IronicNode(node))
+        all_nodes = [api.node.Node(api.node.Node(node))
                      for node in self.ironicclient_nodes.list()]
         node = all_nodes[8]
         roles = [api.tuskar.Role(r)
@@ -432,10 +422,6 @@ class NodesTests(test.BaseAdminViewTests):
             node.uuid)}
 
         with contextlib.nested(
-            mock.patch('tuskar_ui.api.node.NodeClient', **{
-                'spec_set': ['ironic_enabled'],
-                'ironic_enabled.return_value': True,
-            }),
             mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['list', 'set_power_state'],
                 'list.return_value': all_nodes,
@@ -460,8 +446,7 @@ class NodesTests(test.BaseAdminViewTests):
                     self._raise_horizon_exception_not_found),
                 'list_all_resources.return_value': [],
             }),
-        ) as (mock_node_client, mock_node, mock_role, mock_nova, mock_glance,
-              mock_resource):
+        ) as (mock_node, mock_role, mock_nova, mock_glance, mock_resource):
             res = self.client.post(INDEX_URL + '?tab=nodes__all', data)
             self.assertNoFormErrors(res)
             self.assertEqual(mock_node.set_power_state.call_count, 1)

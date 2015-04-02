@@ -17,9 +17,9 @@ from django.utils import unittest
 from heatclient.v1 import events
 import mock
 from mock import patch  # noqa
-from novaclient.v1_1 import servers
 
 from tuskar_ui import api
+import tuskar_ui.api.heat  # noqa
 from tuskar_ui.test import helpers as test
 
 
@@ -132,23 +132,3 @@ class HeatAPITests(test.APITestCase):
             self.assertEqual(['http://192.0.2.23:/admin'],
                              stack.dashboard_urls)
             self.assertEqual(client_get.call_count, 1)
-
-    def test_resource_node_no_ironic(self):
-        resource = self.heatclient_resources.first()
-        nodes = self.baremetalclient_nodes.list()
-        instance = self.novaclient_servers.first()
-
-        with patch('openstack_dashboard.api.base.is_service_enabled',
-                   return_value=False):
-            with patch('openstack_dashboard.api.nova.server_get',
-                       return_value=instance):
-                with patch('novaclient.v1_1.contrib.baremetal.'
-                           'BareMetalNodeManager.list',
-                           return_value=nodes):
-                    with patch('openstack_dashboard.api.nova.server_list',
-                               return_value=([instance], False)):
-                        ret_val = api.heat.Resource(
-                            resource, request=object()).node
-                        ret_instance = ret_val.instance
-        self.assertIsInstance(ret_val, api.node.Node)
-        self.assertIsInstance(ret_instance, servers.Server)
