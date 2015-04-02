@@ -10,7 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from novaclient.v1_1 import flavors
+from novaclient.v2 import flavors
 from openstack_dashboard.test.test_data import utils as test_data_utils
 
 
