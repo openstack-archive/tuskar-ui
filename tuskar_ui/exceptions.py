@@ -11,9 +11,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from ironicclient import exceptions as ironic_exceptions
 from openstack_dashboard import exceptions
 from tuskarclient.openstack.common.apiclient import exceptions as tuskarclient
 
 NOT_FOUND = exceptions.NOT_FOUND
-RECOVERABLE = exceptions.RECOVERABLE + (tuskarclient.ClientException,)
+RECOVERABLE = exceptions.RECOVERABLE + (
+    ironic_exceptions.Conflict, tuskarclient.ClientException,
+)
 UNAUTHORIZED = exceptions.UNAUTHORIZED
