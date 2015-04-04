@@ -18,6 +18,7 @@ import json
 from ceilometerclient.v2 import client as ceilometer_client
 from django.core import urlresolvers
 from horizon import exceptions as horizon_exceptions
+from ironicclient import exceptions as ironic_exceptions
 import mock
 from novaclient import exceptions as nova_exceptions
 from openstack_dashboard.test.test_data import utils
@@ -53,6 +54,9 @@ class NodesTests(test.BaseAdminViewTests):
     @handle_errors("Error!", [])
     def _raise_horizon_exception_not_found(self, request, *args, **kwargs):
         raise horizon_exceptions.NotFound
+
+    def _raise_ironic_exception(self, request, *args, **kwargs):
+        raise ironic_exceptions.Conflict
 
     def stub_ceilometerclient(self):
         if not hasattr(self, "ceilometerclient"):
@@ -556,3 +560,32 @@ class NodesTests(test.BaseAdminViewTests):
                     deployment_ramdisk='8',
                 ),
             ])
+
+    def test_delete_deployed_on_servers(self):
+        all_nodes = [api.node.IronicNode(node)
+                     for node in self.ironicclient_nodes.list()]
+        node = all_nodes[6]
+        data = {'action': 'all_nodes_table__delete',
+                'object_ids': [node.uuid]}
+
+        with contextlib.nested(
+            mock.patch('tuskar_ui.api.node.NodeClient', **{
+                'spec_set': [
+                    'ironic_enabled',
+                    'node_class',
+                    'node_class.list',
+                    'node_class.delete',
+                ],
+                'new_callable': mock.Mock,
+                'ironic_enabled.return_value': True,
+                'node_class.list.return_value': [node],
+                'node_class.delete.side_effect': self._raise_ironic_exception,
+            }),
+            mock.patch('openstack_dashboard.api.nova.server_list',
+                return_value=([], False)),
+        ):
+            res = self.client.post(INDEX_URL, data)
+            import pdb; pdb.set_trace()
+            self.assertMessageCount(error=1, warning=0)
+            self.assertNoFormErrors(res)
+            self.assertRedirectsNoFollow(res, INDEX_URL)
