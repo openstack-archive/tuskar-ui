@@ -57,3 +57,12 @@ class MultiMACFieldTests(test.TestCase):
             "DE:AD:BE:EF:CA:FC DE:AD:BE:EF:CA:FD DE:AD:BE:EF:CA:FE "
             "DE:AD:BE:EF:CA:FF",
         )
+
+    def test_duplicated(self):
+        field = forms.MultiMACField(required=False)
+        cleaned = field.clean("DE:AD:BE:EF:CA:FC DE:AD:BE:EF:CA:FC")
+
+        self.assertEqual(
+            cleaned,
+            "DE:AD:BE:EF:CA:FC",
+        )
