@@ -229,7 +229,7 @@ class Node(base.APIResourceWrapper):
                 server = servers_dict.get(n.instance_uuid, None)
                 nodes_with_instance.append(cls(n, instance=server,
                                                request=request))
-            return nodes_with_instance
+            return [cls.get(request, node.uuid) for node in nodes_with_instance]
         return [cls.get(request, node.uuid) for node in nodes]
 
     @classmethod
