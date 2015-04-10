@@ -97,9 +97,15 @@ class NodeAPITests(test.APITestCase):
         node = self.ironicclient_nodes.first()
         nodes = self.ironicclient_nodes.list()
 
-        with mock_ironicclient(node=node, nodes=nodes), mock.patch(
+        with mock_ironicclient(
+                node=node,
+                nodes=nodes
+        ), mock.patch(
             'openstack_dashboard.api.nova.server_list',
             return_value=(instances, None),
+        ), mock.patch(
+            'openstack_dashboard.api.nova.server_get',
+            return_value=instances[0],
         ):
             ret_val = api.node.Node.list(self.request)
 
