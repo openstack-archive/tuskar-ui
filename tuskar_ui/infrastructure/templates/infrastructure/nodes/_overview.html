@@ -88,11 +88,15 @@
     </div>
   </div>
   <div>
+    {% if nodes_provisioned_count or nodes_provisioning_count %}
     {% url 'horizon:infrastructure:nodes:nodes_performance' as node_perf_url %}
     {% include "infrastructure/_performance_chart_box.html" with meter_conf=meter_conf node_perf_url=node_perf_url col_size=2 %}
+    {% endif %}
   </div>
 </div>
+{% if nodes_provisioned_count or nodes_provisioning_count %}
 {% include "infrastructure/_top_5_box.html" %}
+{% endif %}
 {% if nodes_on_discovery_count or nodes_discovered_count or nodes_discovery_failed_count %}
 <h3>{% trans "Nodes Discovery" %}</h3>
 <hr>

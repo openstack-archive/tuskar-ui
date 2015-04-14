@@ -99,4 +99,5 @@ class DetailView(horizon.tables.DataTableView):
         plan = api.tuskar.Plan.get_the_plan(self.request)
 
         return [role for role in api.tuskar.Role.list(self.request)
-                if role.flavor(plan).id == flavor_id]
+                if role.flavor(plan)
+                and role.flavor(plan).id == flavor_id]

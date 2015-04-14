@@ -195,7 +195,7 @@ class FlavorsTest(test.BaseAdminViewTests):
             self.assertEqual(get_mock.call_count, 1)
             self.assertEqual(plan_mock.call_count, 2)
             self.assertEqual(roles_mock.call_count, 1)
-            self.assertEqual(role_flavor_mock.call_count, 4)
+            self.assertEqual(role_flavor_mock.call_count, 8)
         self.assertTemplateUsed(res, 'infrastructure/flavors/details.html')
 
     def test_details(self):
@@ -224,7 +224,7 @@ class FlavorsTest(test.BaseAdminViewTests):
             self.assertEqual(flavor_mock.call_count, 1)
             self.assertEqual(plan_mock.call_count, 2)
             self.assertEqual(roles_mock.call_count, 1)
-            self.assertEqual(role_flavor_mock.call_count, 4)
+            self.assertEqual(role_flavor_mock.call_count, 8)
             self.assertEqual(stack_mock.call_count, 1)
             self.assertEqual(count_mock.call_count, 4)
         self.assertTemplateUsed(res, 'infrastructure/flavors/details.html')
