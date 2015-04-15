@@ -30,9 +30,9 @@ class SimpleServiceConfigView(horizon.forms.ModalFormView):
 
     def get_initial(self):
         plan = api.tuskar.Plan.get_the_plan(self.request)
-        compute_prefix = plan.get_role_by_name('compute').parameter_prefix
+        compute_prefix = plan.get_role_by_name('Compute').parameter_prefix
         controller_prefix = plan.get_role_by_name(
-            'controller').parameter_prefix
+            'Controller').parameter_prefix
 
         cinder_iscsi_helper = plan.parameter_value(
             controller_prefix + 'CinderISCSIHelper')
