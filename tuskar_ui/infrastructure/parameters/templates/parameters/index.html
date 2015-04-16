@@ -18,6 +18,7 @@
           <li><a href="#compute" role="tab" data-toggle="tab">{% trans "Compute" %}</a></li>
           <li><a href="#block-storage" role="tab" data-toggle="tab">{% trans "Block Storage" %}</a></li>
           <li><a href="#object-storage" role="tab" data-toggle="tab">{% trans "Object Storage" %}</a></li>
+          <li><a href="#ceph-storage" role="tab" data-toggle="tab">{% trans "Ceph Storage" %}</a></li>
         </ul>
       </div>
       <div class="col-md-10">
@@ -44,6 +45,11 @@
           </div>
           <div class="tab-pane" id="object-storage">
             {% for field in form.object_storage_fieldset %}
+              {% include 'horizon/common/_horizontal_field.html' with field=field %}
+            {% endfor %}
+          </div>
+          <div class="tab-pane" id="ceph-storage">
+            {% for field in form.ceph_storage_fieldset %}
               {% include 'horizon/common/_horizontal_field.html' with field=field %}
             {% endfor %}
           </div>

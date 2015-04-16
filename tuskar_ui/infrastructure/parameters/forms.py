@@ -103,16 +103,19 @@ class ServiceConfig(horizon.forms.SelfHandlingForm):
         return tuskar_ui.forms.fieldset(self, prefix='^(?!.*::)')
 
     def controller_fieldset(self):
-        return tuskar_ui.forms.fieldset(self, prefix='controller-1')
+        return tuskar_ui.forms.fieldset(self, prefix='Controller-1')
 
     def compute_fieldset(self):
-        return tuskar_ui.forms.fieldset(self, prefix='compute-1')
+        return tuskar_ui.forms.fieldset(self, prefix='Compute-1')
 
     def block_storage_fieldset(self):
-        return tuskar_ui.forms.fieldset(self, prefix='cinder-storage-1')
+        return tuskar_ui.forms.fieldset(self, prefix='Cinder-Storage-1')
 
     def object_storage_fieldset(self):
-        return tuskar_ui.forms.fieldset(self, prefix='swift-storage-1')
+        return tuskar_ui.forms.fieldset(self, prefix='Swift-Storage-1')
+
+    def ceph_storage_fieldset(self):
+        return tuskar_ui.forms.fieldset(self, prefix='Ceph-Storage-1')
 
     def handle():
         pass
