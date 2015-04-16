@@ -213,7 +213,7 @@ class IndexView(horizon.forms.ModalFormView, views.StackMixin):
                 if not stack.is_failed:
                     context['show_last_events'] = False
                 context['progress'] = 100
-                controller_role = plan.get_role_by_name("controller")
+                controller_role = plan.get_role_by_name("Controller")
                 context['admin_password'] = plan.parameter_value(
                     controller_role.parameter_prefix + 'AdminPassword')
 

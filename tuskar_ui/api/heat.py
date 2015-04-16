@@ -361,7 +361,7 @@ class Stack(base.APIResourceWrapper):
             return overcloud_keystoneclient(
                 self._request,
                 self.keystone_auth_url,
-                self.plan.parameter_value('controller-1::AdminPassword'))
+                self.plan.parameter_value('Controller-1::AdminPassword'))
         except Exception:
             LOG.debug('Unable to connect to overcloud keystone.')
             return None

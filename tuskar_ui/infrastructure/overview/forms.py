@@ -144,7 +144,7 @@ def validate_plan(request, plan):
         'status': lambda: 'ok' if roles_assigned else 'pending',
     })
     try:
-        controller_role = plan.get_role_by_name("controller")
+        controller_role = plan.get_role_by_name("Controller")
     except KeyError:
         messages.append({
             'text': _(u"Controller Role Needed."),
@@ -170,7 +170,7 @@ def validate_plan(request, plan):
             })
 
     try:
-        compute_role = plan.get_role_by_name("compute")
+        compute_role = plan.get_role_by_name("Compute")
     except KeyError:
         messages.append({
             'text': _(u"Compute Role Needed."),
@@ -214,8 +214,8 @@ class EditPlan(horizon.forms.SelfHandlingForm):
             field = django.forms.IntegerField(
                 label=role.name,
                 widget=tuskar_ui.forms.NumberPickerInput(attrs={
-                    'min': 1 if role.name in ('controller', 'compute') else 0,
-                    'step': 2 if role.name == 'controller' else 1,
+                    'min': 1 if role.name in ('Controller', 'Compute') else 0,
+                    'step': 2 if role.name == 'Controller' else 1,
                 }),
                 initial=plan.get_role_node_count(role),
                 required=False
@@ -233,9 +233,9 @@ class EditPlan(horizon.forms.SelfHandlingForm):
         # parameter which enables Neutron L3 HA when the number of
         # Controllers is > 1
         try:
-            controller_role = self.plan.get_role_by_name('controller')
+            controller_role = self.plan.get_role_by_name('Controller')
         except Exception as e:
-            LOG.warning('Unable to find role: %s', 'controller')
+            LOG.warning('Unable to find role: %s', 'Controller')
         else:
             if parameters[controller_role.node_count_parameter_name] > 1:
                 l3ha_param = controller_role.parameter_prefix + 'NeutronL3HA'
@@ -418,7 +418,7 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
     def handle(self, request, data):
         try:
             plan = api.tuskar.Plan.get_the_plan(request)
-            controller_role = plan.get_role_by_name("controller")
+            controller_role = plan.get_role_by_name("Controller")
             stack = api.heat.Stack.get_by_plan(self.request, plan)
 
             admin_token = plan.parameter_value(
