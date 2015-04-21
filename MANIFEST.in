@@ -1,7 +1,7 @@
 recursive-include bin *.js
 recursive-include doc *.py *.rst *.css *.js *.html *.conf *.jpg *.gif *.png *.css_t
 recursive-include tools *.py *.sh
-recursive-include tuskar_ui *.py *.html *.js *.less *.mo *.po *.example *.eot *.svg *.ttf *.woff *.png *.ico *.wsgi *.gif *.csv *.template
+recursive-include tuskar_ui *.py *.html *.js *.scss *.mo *.po *.example *.eot *.svg *.ttf *.woff *.png *.ico *.wsgi *.gif *.csv *.template
 
 include AUTHORS
 include ChangeLog
@@ -11,7 +11,6 @@ include manage.py
 include README.rst
 include run_tests.sh
 include tox.ini
-include bin/less/lessc
 include doc/Makefile
 include doc/source/_templates/.placeholder
 include requirements.txt
