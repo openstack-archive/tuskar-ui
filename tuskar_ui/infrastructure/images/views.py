@@ -89,6 +89,7 @@ class UpdateView(views.UpdateView):
     template_name = 'infrastructure/images/update.html'
     form_class = forms.UpdateImageForm
     success_url = reverse_lazy('horizon:infrastructure:images:index')
+    submit_url = "horizon:infrastructure:images:update"
     submit_label = _("Update Image")
 
     @memoized.memoized_method
