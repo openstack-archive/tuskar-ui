@@ -135,7 +135,7 @@ horizon.d3_single_bar_chart = {
     self.auto_scale = function () {
       var max_scale = 0;
       $(self.auto_scale_selector()).each(function() {
-        var scale = parseInt($(this).data('single-bar-used'));
+        var scale = parseInt($(this).data('single-bar-used'), 10);
         if (scale > max_scale)
           max_scale = scale;
       });
