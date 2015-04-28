@@ -22,8 +22,8 @@ from openstack_dashboard.dashboards.project.images.images import forms
 from tuskar_ui import api
 from tuskar_ui.test import helpers as test
 
-INDEX_URL = urlresolvers.reverse(
-    'horizon:infrastructure:images:index')
+INDEX_URL = urlresolvers.reverse('horizon:infrastructure:images:index')
+CREATE_URL = 'horizon:infrastructure:images:create'
 UPDATE_URL = 'horizon:infrastructure:images:update'
 
 
@@ -47,6 +47,45 @@ class ImagesTest(test.BaseAdminViewTests):
             res = self.client.get(INDEX_URL)
 
         self.assertTemplateUsed(res, 'infrastructure/images/index.html')
+
+    def test_create_get(self):
+        res = self.client.get(urlresolvers.reverse(CREATE_URL))
+        self.assertTemplateUsed(res, 'infrastructure/images/create.html')
+
+    def test_create_post(self):
+        image = self.images.list()[0]
+        data = {
+            'name': 'Fedora',
+            'description': 'Login with admin/admin',
+            'source_type': 'url',
+            'image_url': 'http://www.test.com/test.iso',
+            'disk_format': 'qcow2',
+            'architecture': 'x86-64',
+            'minimum_disk': 15,
+            'minimum_ram': 512,
+            'is_public': True,
+            'protected': False}
+
+        forms.IMAGE_FORMAT_CHOICES = [('qcow2', 'qcow2')]
+
+        with contextlib.nested(
+            patch('openstack_dashboard.api.glance.image_create',
+                  return_value=image),) as (mocked_create,):
+
+            res = self.client.post(
+                urlresolvers.reverse(CREATE_URL), data)
+
+        self.assertNoFormErrors(res)
+        self.assertEqual(res.status_code, 302)
+        self.assertRedirectsNoFollow(res, INDEX_URL)
+
+        mocked_create.assert_called_once_with(
+            mock.ANY, name='Fedora', container_format='bare',
+            min_ram=512, disk_format='qcow2', protected=False,
+            is_public=True, min_disk=15,
+            location='http://www.test.com/test.iso',
+            properties={'description': 'Login with admin/admin',
+                        'architecture': 'x86-64'})
 
     def test_update_get(self):
         image = self.images.list()[0]

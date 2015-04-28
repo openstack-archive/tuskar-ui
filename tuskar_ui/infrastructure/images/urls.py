@@ -19,6 +19,7 @@ from tuskar_ui.infrastructure.images import views
 urlpatterns = urls.patterns(
     '',
     urls.url(r'^$', views.IndexView.as_view(), name='index'),
+    urls.url(r'^create/$', views.CreateView.as_view(), name='create'),
     urls.url(r'^(?P<image_id>[^/]+)/update/$',
              views.UpdateView.as_view(), name='update'),
 )
