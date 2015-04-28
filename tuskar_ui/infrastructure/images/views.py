@@ -85,6 +85,13 @@ class IndexView(infrastructure_views.ItemCountMixin,
         return filters
 
 
+class CreateView(views.CreateView):
+    submit_url = "horizon:infrastructure:images:create"
+    template_name = 'infrastructure/images/create.html'
+    success_url = reverse_lazy("horizon:infrastructure:images:index")
+    page_title = _("Create An Image")
+
+
 class UpdateView(views.UpdateView):
     template_name = 'infrastructure/images/update.html'
     form_class = forms.UpdateImageForm
