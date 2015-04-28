@@ -8,14 +8,7 @@
 {% block modal_id %}update_image_modal{% endblock %}
 {% block modal-header %}{% trans "Update Image" %}{% endblock %}
 
-{% block modal-body %}
-<div class="left">
-    <fieldset>
-    {% include "horizon/common/_form_fields.html" %}
-    </fieldset>
-</div>
-<div class="right">
-    <h3>{% trans "Description" %}:</h3>
-    <p>{% trans "Modify different properties of an image." %}</p>
-</div>
+{% block modal-body-right %}
+<h3>{% trans "Description" %}:</h3>
+<p>{% trans "Modify different properties of an image." %}</p>
 {% endblock %}

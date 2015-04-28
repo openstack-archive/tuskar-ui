@@ -27,6 +27,10 @@ class DeleteImage(project_tables.DeleteImage):
             return True
 
 
+class CreateImage(project_tables.CreateImage):
+    url = "horizon:infrastructure:images:create"
+
+
 class UpdateRow(tables.Row):
     ajax = True
 
@@ -65,7 +69,6 @@ class ImagesTable(tables.DataTable):
         name = "images"
         row_class = UpdateRow
         verbose_name = _("Provisioning Images")
-        table_actions = (DeleteImage,
-                         ImageFilterAction)
+        table_actions = (CreateImage, DeleteImage, ImageFilterAction)
         row_actions = (EditImage, DeleteImage)
         template = "horizon/common/_enhanced_data_table.html"
