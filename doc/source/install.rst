@@ -60,6 +60,7 @@ Begin by cloning the Horizon and Tuskar UI repositories:
 ::
 
     git clone git://github.com/openstack/horizon.git
+    git clone git://github.com/openstack/python-tuskarclient.git
     git clone git://github.com/openstack/tuskar-ui.git
 
 Go into ``horizon`` and install a virtual environment for your setup::
@@ -91,7 +92,7 @@ editor. You will want to customize several settings:
 
 Install Tuskar UI with all dependencies in your virtual environment::
 
-    tools/with_venv.sh pip install -r ../tuskar-ui/requirements.txt
+    tools/with_venv.sh pip install -e ../python-tuskarclient/
     tools/with_venv.sh pip install -e ../tuskar-ui/
 
 And enable it in Horizon::
