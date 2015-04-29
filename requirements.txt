@@ -3,7 +3,7 @@
 # process, which may cause wedges in the gate later.
 pbr>=0.6,!=0.7,<1.0
 # Horizon Core Requirements
-Django>=1.4.2,<1.7
+Django>=1.4.2,<1.8
 django_compressor>=1.4
 django_openstack_auth>=1.1.7,!=1.1.8
 eventlet>=0.16.1
