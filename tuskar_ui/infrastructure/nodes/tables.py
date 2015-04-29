@@ -136,7 +136,7 @@ def _get_role_link(role_id):
 
 
 def get_role_link(datum):
-    return _get_role_link(datum.role_id)
+    return _get_role_link(getattr(datum, 'role_id', None))
 
 
 def get_power_state_with_transition(node):

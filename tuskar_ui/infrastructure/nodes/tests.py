@@ -292,12 +292,18 @@ class NodesTests(test.BaseAdminViewTests):
 
     def test_node_detail(self):
         node = api.node.Node(self.ironicclient_nodes.list()[0])
+
+        def get_node(request, uuid, **kwargs):
+            node._request = request
+            node.addresses = []
+            return node
+
         image = self.glanceclient_images.first()
 
         with contextlib.nested(
             mock.patch('tuskar_ui.api.node.Node', **{
                 'spec_set': ['get'],
-                'get.return_value': node,
+                'get.side_effect': get_node,
             }),
             mock.patch('tuskar_ui.api.heat.Resource', **{
                 'spec_set': ['get_by_node'],
@@ -308,7 +314,11 @@ class NodesTests(test.BaseAdminViewTests):
                 'openstack_dashboard.api.glance.image_get',
                 return_value=image,
             ),
-        ) as (mock_node, mock_heat, mock_glance):
+            mock.patch(
+                'openstack_dashboard.api.nova.server_list',
+                return_value=([], False),
+            ),
+        ) as (mock_node, mock_heat, mock_glance, mock_nova):
             res = self.client.get(
                 urlresolvers.reverse(DETAIL_VIEW, args=(node.uuid,))
             )
