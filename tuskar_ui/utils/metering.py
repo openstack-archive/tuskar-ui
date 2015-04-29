@@ -61,7 +61,7 @@ LABELS = {
     'hardware.network.ip.incoming.datagrams': _("IP in requests"),
     'hardware.memory.swap.util': _("Swap utilization"),
     'hardware.ipmi.fan': _("Fan Speed"),
-    'hardware.ipmi.voltage': _("Votage"),
+    'hardware.ipmi.voltage': _("Voltage"),
     'hardware.ipmi.temperature': _("Temperature"),
     'hardware.ipmi.current': _("Current")
 }
