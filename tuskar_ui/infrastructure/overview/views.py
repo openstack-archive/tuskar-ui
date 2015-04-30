@@ -142,7 +142,7 @@ class IndexView(horizon.forms.ModalFormView, views.StackMixin):
             data = self.get_data(request, {})
             return http.HttpResponse(
                 json.dumps(self.get_progress_update(request, data)),
-                mimetype='application/json',
+                content_type='application/json',
             )
         return super(IndexView, self).get(request, *args, **kwargs)
 
@@ -260,7 +260,7 @@ class IndexView(horizon.forms.ModalFormView, views.StackMixin):
                 'indent': m.get('indent', 0),
                 'classes': m['classes'],
             } for m in messages],
-        }), mimetype='application/json')
+        }), content_type='application/json')
 
 
 class DeployConfirmationView(horizon.forms.ModalFormView, views.StackMixin):
