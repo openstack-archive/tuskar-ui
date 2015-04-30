@@ -341,10 +341,7 @@ class UndeployOvercloud(horizon.forms.SelfHandlingForm):
 
 
 class PostDeployInit(horizon.forms.SelfHandlingForm):
-    # TODO(lsmola) put here signed user email, has to be done dynamically
-    # in init
-    admin_email = horizon.forms.CharField(
-        label=_("Admin Email"), initial="example@example.org")
+    admin_email = horizon.forms.CharField(label=_("Admin Email"))
     public_host = horizon.forms.CharField(
         label=_("Public Host"), initial="", required=False)
     region = horizon.forms.CharField(

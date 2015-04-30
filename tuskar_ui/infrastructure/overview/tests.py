@@ -230,6 +230,7 @@ class OverviewTests(test.BaseAdminViewTests):
                   return_value=stack),
         ):
             res = self.client.get(POST_DEPLOY_INIT_URL)
+        self.assertEqual(res.context['form']['admin_email'].value(), '')
         self.assertTemplateUsed(
             res, 'infrastructure/overview/post_deploy_init.html')
 

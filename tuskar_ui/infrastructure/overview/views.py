@@ -318,6 +318,7 @@ class PostDeployInitView(horizon.forms.ModalFormView, views.StackMixin):
     def get_initial(self, **kwargs):
         initial = super(PostDeployInitView, self).get_initial(**kwargs)
         initial['stack_id'] = self.get_stack().id
+        initial['admin_email'] = getattr(self.request.user, 'email', '')
         return initial
 
 
