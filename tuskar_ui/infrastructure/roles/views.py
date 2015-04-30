@@ -184,4 +184,4 @@ class PerformanceView(base.TemplateView, views.RoleMixin, views.StackMixin):
                 barchart=barchart, group_by='image_id')
 
         return http.HttpResponse(json.dumps(json_output),
-                                 mimetype='application/json')
+                                 content_type='application/json')
