@@ -69,16 +69,17 @@ def parameter_fields(request, prefix=None, read_only=False):
         else:
             if p.hidden:
                 widget = django.forms.PasswordInput(render_value=True)
-            elif p.type == 'number':
+            elif p.parameter_type == 'number':
                 Field = django.forms.IntegerField
-            elif p.type == 'boolean':
+            elif p.parameter_type == 'boolean':
                 Field = django.forms.BooleanField
-            elif (p.type == 'string' and
-                    p.constraints['allowed_values']['definition']):
+            elif (p.parameter_type == 'string' and
+                    p.get_constraint_by_type('allowed_values')):
                 Field = django.forms.ChoiceField
-                field_kwargs['choices'] = (
-                    p.constraints['allowed_values']['definition'])
-            elif (p.type in ['json', 'comma_delimited_list'] or
+                field_kwargs['choices'] = [
+                    (choice, choice) for choice in
+                    p.get_constraint_by_type('allowed_values')['definition']]
+            elif (p.parameter_type in ['json', 'comma_delimited_list'] or
                   'Certificate' in p.name):
                 widget = django.forms.Textarea
 

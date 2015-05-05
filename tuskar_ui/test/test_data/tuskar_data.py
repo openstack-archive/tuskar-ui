@@ -55,6 +55,8 @@ def data(TEST):
             'hidden': False,
             'default': '',
             'value': 1,
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Compute-1::count',
             'label': 'Compute Node Count',
@@ -62,6 +64,8 @@ def data(TEST):
             'hidden': False,
             'default': '',
             'value': 42,
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Block Storage-1::count',
             'label': 'Block Sorage Node Count',
@@ -69,6 +73,8 @@ def data(TEST):
             'hidden': False,
             'default': '',
             'value': 5,
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Controller-1::Flavor',
             'label': 'Controller Flavor',
@@ -76,6 +82,8 @@ def data(TEST):
             'hidden': False,
             'default': '',
             'value': 'flavor-1',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Compute-1::Flavor',
             'label': 'Compute Flavor',
@@ -83,6 +91,8 @@ def data(TEST):
             'hidden': False,
             'default': '',
             'value': 'flavor-1',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Block Storage-1::Flavor',
             'label': 'Block Storage Flavor',
@@ -90,6 +100,8 @@ def data(TEST):
             'hidden': False,
             'default': '',
             'value': 'flavor-2',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Controller-1::Image',
             'label': 'Controller Image ID',
@@ -97,6 +109,8 @@ def data(TEST):
             'hidden': False,
             'default': '',
             'value': '2',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Compute-1::Image',
             'label': 'Compute Image ID',
@@ -104,6 +118,8 @@ def data(TEST):
             'hidden': False,
             'default': '',
             'value': '1',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Block Storage-1::Image',
             'label': 'Block Storage Image ID',
@@ -111,6 +127,8 @@ def data(TEST):
             'hidden': False,
             'default': '',
             'value': '4',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Controller-1::KeystoneCACertificate',
             'label': 'Keystone CA CertificateAdmin',
@@ -118,6 +136,8 @@ def data(TEST):
             'hidden': True,
             'default': '',
             'value': 'unset',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Controller-1::AdminPassword',
             'label': 'Admin Password',
@@ -125,6 +145,8 @@ def data(TEST):
             'hidden': True,
             'default': '',
             'value': 'unset',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Controller-1::AdminToken',
             'label': 'Admin Token',
@@ -132,6 +154,8 @@ def data(TEST):
             'hidden': True,
             'default': '',
             'value': '',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Controller-1::SnmpdReadonlyUserPassword',
             'label': 'Snmpd password',
@@ -139,6 +163,8 @@ def data(TEST):
             'hidden': True,
             'default': '',
             'value': '',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Compute-1::SnmpdReadonlyUserPassword',
             'label': 'Snmpd password',
@@ -146,6 +172,8 @@ def data(TEST):
             'hidden': True,
             'default': '',
             'value': 'unset',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Controller-1::ExtraConfig',
             'label': 'Extra Config',
@@ -153,6 +181,8 @@ def data(TEST):
             'hidden': False,
             'default': '',
             'value': '{}',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Compute-1::ExtraConfig',
             'label': 'Extra Config',
@@ -160,6 +190,8 @@ def data(TEST):
             'hidden': False,
             'default': '',
             'value': '{}',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Block Storage-1::ExtraConfig',
             'label': 'Extra Config',
@@ -167,6 +199,8 @@ def data(TEST):
             'hidden': False,
             'default': '',
             'value': '{}',
+            'parameter_type': 'string',
+            'constraints': [],
         }, {
             'name': 'Object Storage-1::ExtraConfig',
             'label': 'Extra Config',
@@ -174,6 +208,8 @@ def data(TEST):
             'hidden': False,
             'default': '',
             'value': '{}',
+            'parameter_type': 'string',
+            'constraints': [],
         }],
     })
     TEST.tuskarclient_plans.add(plan_1)
