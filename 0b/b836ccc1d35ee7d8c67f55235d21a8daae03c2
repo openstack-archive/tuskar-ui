@@ -1,0 +1,9 @@
+Code-Review+2: Ana Krivokapic <akrivoka@redhat.com>
+Code-Review+2: Rob Cresswell <rcresswe@cisco.com>
+Workflow+1: Rob Cresswell <rcresswe@cisco.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 11 May 2015 19:20:47 +0000
+Reviewed-on: https://review.openstack.org/181954
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
