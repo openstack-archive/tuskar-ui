@@ -7,7 +7,7 @@ hacking==0.10.1
 http://tarballs.openstack.org/horizon/horizon-master.tar.gz#egg=horizon
 http://tarballs.openstack.org/python-tuskarclient/python-tuskarclient-master.tar.gz#egg=python-tuskarclient
 coverage>=3.6
-django-nose
+django-nose>=1.2
 mock>=1.0
 mox>=0.5.3
 nodeenv>=0.9.4 # BSD License
