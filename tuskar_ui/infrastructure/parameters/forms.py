@@ -225,17 +225,19 @@ class SimpleEditServiceConfig(horizon.forms.SelfHandlingForm):
         # Set the same parameter and value in all roles.
         for role in plan.role_list:
             key = role.parameter_prefix + param_name
-            params[key] = param_value
+            if key in [parameter.name
+                       for parameter in role.parameter_list(plan)]:
+                params[key] = param_value
 
         return params
 
     def handle(self, request, data):
         plan = api.tuskar.Plan.get_the_plan(self.request)
-        compute_prefix = plan.get_role_by_name('compute').parameter_prefix
+        compute_prefix = plan.get_role_by_name('Compute').parameter_prefix
         controller_prefix = plan.get_role_by_name(
-            'controller').parameter_prefix
+            'Controller').parameter_prefix
         cinder_prefix = plan.get_role_by_name(
-            'cinder-storage').parameter_prefix
+            'Cinder-Storage').parameter_prefix
 
         virt_type = data.get('virt_type')
         neutron_public_interface = data.get('neutron_public_interface')
@@ -257,6 +259,7 @@ class SimpleEditServiceConfig(horizon.forms.SelfHandlingForm):
             compute_prefix + 'NtpServer':
                 ntp_server,
         }
+
         parameters.update(self._load_additional_parameters(
             plan, data,
             'snmp_password', 'SnmpdReadonlyUserPassword'))
