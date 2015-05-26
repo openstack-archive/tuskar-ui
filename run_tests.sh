@@ -2,13 +2,6 @@
 
 set -o errexit
 
-# ---------------UPDATE ME-------------------------------#
-# Increment me any time the environment should be rebuilt.
-# This includes dependency changes, directory renames, etc.
-# Simple integer sequence: 1, 2, 3...
-environment_version=47
-#--------------------------------------------------------#
-
 function usage {
   echo "Usage: $0 [OPTION]..."
   echo "Run Horizon's test suite(s)"
@@ -22,17 +15,26 @@ function usage {
   echo "                           environment. Useful when dependencies have"
   echo "                           been added."
   echo "  -m, --manage             Run a Django management command."
-  echo "  --makemessages           Update all translation files."
+  echo "  --makemessages           Create/Update English translation files."
   echo "  --compilemessages        Compile all translation files."
+  echo "  --check-only             Do not update translation files (--makemessages only)."
+  echo "  --pseudo                 Pseudo translate a language."
   echo "  -p, --pep8               Just run pep8"
+  echo "  -8, --pep8-changed [<basecommit>]"
+  echo "                           Just run PEP8 and HACKING compliance check"
+  echo "                           on files changed since HEAD~1 (or <basecommit>)"
+  echo "  -P, --no-pep8            Don't run pep8 by default"
   echo "  -t, --tabs               Check for tab characters in files."
   echo "  -y, --pylint             Just run pylint"
   echo "  -j, --jshint             Just run jshint"
+  echo "  -s, --jscs               Just run jscs"
   echo "  -q, --quiet              Run non-interactively. (Relatively) quiet."
   echo "                           Implies -V if -N is not set."
   echo "  --only-selenium          Run only the Selenium unit tests"
   echo "  --with-selenium          Run unit tests including Selenium tests"
   echo "  --selenium-headless      Run Selenium tests headless"
+  echo "  --integration            Run the integration tests (requires a running "
+  echo "                           OpenStack environment)"
   echo "  --runserver              Run the Django development server for"
   echo "                           openstack_dashboard in the virtual"
   echo "                           environment."
@@ -51,8 +53,9 @@ function usage {
 
 # DEFAULTS FOR RUN_TESTS.SH
 #
-root=`pwd`
+root=`pwd -P`
 venv=$root/.venv
+venv_env_version=$venv/environments
 with_venv=tools/with_venv.sh
 included_dirs="tuskar_ui"
 
@@ -62,9 +65,12 @@ command_wrapper=""
 destroy=0
 force=0
 just_pep8=0
+just_pep8_changed=0
+no_pep8=0
 just_pylint=0
 just_docs=0
 just_tabs=0
+just_jscs=0
 just_jshint=0
 never_venv=0
 quiet=0
@@ -73,14 +79,15 @@ runserver=0
 only_selenium=0
 with_selenium=0
 selenium_headless=0
+integration=0
 testopts=""
 testargs=""
 with_coverage=0
 makemessages=0
 compilemessages=0
+check_only=0
+pseudo=0
 manage=0
-
-COVERAGE_CMD="python -m coverage.__main__"
 
 # Jenkins sets a "JOB_NAME" variable, if it's not set, we'll make it "default"
 [ "$JOB_NAME" ] || JOB_NAME="default"
@@ -97,8 +104,11 @@ function process_option {
     -V|--virtual-env) always_venv=1; never_venv=0;;
     -N|--no-virtual-env) always_venv=0; never_venv=1;;
     -p|--pep8) just_pep8=1;;
+    -8|--pep8-changed) just_pep8_changed=1;;
+    -P|--no-pep8) no_pep8=1;;
     -y|--pylint) just_pylint=1;;
     -j|--jshint) just_jshint=1;;
+    -s|--jscs) just_jscs=1;;
     -f|--force) force=1;;
     -t|--tabs) just_tabs=1;;
     -q|--quiet) quiet=1;;
@@ -106,9 +116,12 @@ function process_option {
     -m|--manage) manage=1;;
     --makemessages) makemessages=1;;
     --compilemessages) compilemessages=1;;
+    --check-only) check_only=1;;
+    --pseudo) pseudo=1;;
     --only-selenium) only_selenium=1;;
     --with-selenium) with_selenium=1;;
     --selenium-headless) selenium_headless=1;;
+    --integration) integration=1;;
     --docs) just_docs=1;;
     --runserver) runserver=1;;
     --backup-environment) backup_env=1;;
@@ -148,9 +161,46 @@ function run_jshint {
   jshint tuskar_ui/infrastructure/static/infrastructure
 }
 
+function run_jscs {
+  echo "Running jscs ..."
+  if [ "`which jscs`" == '' ] ; then
+    echo "jscs is not present; please install, e.g. sudo npm install jscs -g"
+  else
+    jscs tuskar_ui/infrastructure/static/infrastructure/js \
+         tuskar_ui/infrastructure/static/infrastructure/tests
+  fi
+}
+
+function warn_on_flake8_without_venv {
+  set +o errexit
+  ${command_wrapper} python -c "import hacking" 2>/dev/null
+  no_hacking=$?
+  set -o errexit
+  if [ $never_venv -eq 1 -a $no_hacking -eq 1 ]; then
+      echo "**WARNING**:" >&2
+      echo "OpenStack hacking is not installed on your host. Its detection will be missed." >&2
+      echo "Please install or use virtual env if you need OpenStack hacking detection." >&2
+  fi
+}
+
 function run_pep8 {
   echo "Running flake8 ..."
+  warn_on_flake8_without_venv
   DJANGO_SETTINGS_MODULE=tuskar_ui.test.settings ${command_wrapper} flake8 $included_dirs
+}
+
+function run_pep8_changed {
+    # NOTE(gilliard) We want use flake8 to check the entirety of every file that has
+    # a change in it. Unfortunately the --filenames argument to flake8 only accepts
+    # file *names* and there are no files named (eg) "nova/compute/manager.py".  The
+    # --diff argument behaves surprisingly as well, because although you feed it a
+    # diff, it actually checks the file on disk anyway.
+    local base_commit=${testargs:-HEAD~1}
+    files=$(git diff --name-only $base_commit | tr '\n' ' ')
+    echo "Running flake8 on ${files}"
+    warn_on_flake8_without_venv
+    diff -u --from-file /dev/null ${files} | DJANGO_SETTINGS_MODULE=openstack_dashboard.test.settings ${command_wrapper} flake8 --diff
+    exit
 }
 
 function run_sphinx {
@@ -181,21 +231,20 @@ function destroy_venv {
   echo "Removing virtualenv..."
   rm -rf $venv
   echo "Virtualenv removed."
-  rm -f .environment_version
-  echo "Environment cleaned."
 }
 
 function environment_check {
   echo "Checking environment."
-  if [ -f .environment_version ]; then
-    ENV_VERS=`cat .environment_version`
-    if [ $ENV_VERS -eq $environment_version ]; then
-      if [ -e ${venv} ]; then
-        # If the environment exists and is up-to-date then set our variables
-        command_wrapper="${root}/${with_venv}"
-        echo "Environment is up to date."
-        return 0
-      fi
+  if [ -f $venv_env_version ]; then
+    set +o errexit
+    cat requirements.txt test-requirements.txt | cmp $venv_env_version - > /dev/null
+    local env_check_result=$?
+    set -o errexit
+    if [ $env_check_result -eq 0 ]; then
+      # If the environment exists and is up-to-date then set our variables
+      command_wrapper="${root}/${with_venv}"
+      echo "Environment is up to date."
+      return 0
     fi
   fi
 
@@ -260,7 +309,6 @@ function restore_environment {
     fi
 
     cp -r /tmp/.horizon_environment/$JOB_NAME/.venv ./ || true
-    cp -r /tmp/.horizon_environment/$JOB_NAME/.environment_version ./ || true
 
     echo "Environment restored successfully."
   fi
@@ -280,7 +328,7 @@ function install_venv {
   # Make sure it worked and record the environment version
   sanity_check
   chmod -R 754 $venv
-  echo $environment_version > .environment_version
+  cat requirements.txt test-requirements.txt > $venv_env_version
 }
 
 function run_tests {
@@ -291,6 +339,10 @@ function run_tests {
   elif [ $only_selenium -eq 1 ]; then
     export WITH_SELENIUM=1
     export SKIP_UNITTESTS=1
+  fi
+
+  if [ $with_selenium -eq 0 -a $integration -eq 0 ]; then
+      testopts="$testopts --exclude-dir=tuskar_ui/test/integration_tests"
   fi
 
   if [ $selenium_headless -eq 1 ]; then
@@ -315,16 +367,19 @@ function run_tests_all {
   if [ "$NOSE_WITH_HTML_OUTPUT" = '1' ]; then
     export NOSE_HTML_OUT_FILE='tuskar_ui_nose_results.html'
   fi
-  ${command_wrapper} ${COVERAGE_CMD} erase
-  ${command_wrapper} ${COVERAGE_CMD} run -p $root/manage.py test tuskar_ui --settings=tuskar_ui.test.settings $testopts
+  if [ $with_coverage -eq 1 ]; then
+    ${command_wrapper} python -m coverage.__main__ erase
+    coverage_run="python -m coverage.__main__ run -p"
+  fi
+  ${command_wrapper} ${coverage_run} $root/manage.py test tuskar_ui --settings=tuskar_ui.test.settings $testopts
   # get results of the Horizon tests
   TUSKAR_UI_RESULT=$?
 
   if [ $with_coverage -eq 1 ]; then
     echo "Generating coverage reports"
-    ${command_wrapper} ${COVERAGE_CMD} combine
-    ${command_wrapper} ${COVERAGE_CMD} xml -i --omit='/usr*,setup.py,*egg*,.venv/*'
-    ${command_wrapper} ${COVERAGE_CMD} html -i --omit='/usr*,setup.py,*egg*,.venv/*' -d reports
+    ${command_wrapper} python -m coverage.__main__ combine
+    ${command_wrapper} python -m coverage.__main__ xml -i --include="tuskar_ui/*" --omit='/usr*,setup.py,*egg*,.venv/*'
+    ${command_wrapper} python -m coverage.__main__ html -i --include="tuskar_ui/*" --omit='/usr*,setup.py,*egg*,.venv/*' -d reports
   fi
   # Remove the leftover coverage files from the -p flag earlier.
   rm -f .coverage.*
@@ -341,7 +396,23 @@ function run_tests_all {
   else
     echo "Tests failed."
   fi
-  exit $(($TUSKAR_UI_RESULT))
+  exit $TEST_RESULT
+}
+
+function run_integration_tests {
+  export INTEGRATION_TESTS=1
+
+  if [ $selenium_headless -eq 1 ]; then
+    export SELENIUM_HEADLESS=1
+  fi
+
+  echo "Running Tuskar-UI integration tests..."
+  if [ -z "$testargs" ]; then
+      ${command_wrapper} nosetests tuskar_ui/test/integration_tests/tests
+  else
+      ${command_wrapper} nosetests $testargs
+  fi
+  exit 0
 }
 
 function run_makemessages {
@@ -441,9 +512,26 @@ if [ $just_pep8 -eq 1 ]; then
     exit $?
 fi
 
+if [ $just_pep8_changed -eq 1 ]; then
+    run_pep8_changed
+    exit $?
+fi
+
 # Pylint
 if [ $just_pylint -eq 1 ]; then
     run_pylint
+    exit $?
+fi
+
+# Jshint
+if [ $just_jshint -eq 1 ]; then
+    run_jshint
+    exit $?
+fi
+
+# Jscs
+if [ $just_jscs -eq 1 ]; then
+    run_jscs
     exit $?
 fi
 
@@ -453,11 +541,6 @@ if [ $just_tabs -eq 1 ]; then
     exit $?
 fi
 
-# Jshint
-if [ $just_jshint -eq 1 ]; then
-    run_jshint
-    exit $?
-fi
 
 # Django development server
 if [ $runserver -eq 1 ]; then
