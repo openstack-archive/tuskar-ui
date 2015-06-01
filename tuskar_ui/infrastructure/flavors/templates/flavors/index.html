@@ -9,23 +9,15 @@
 
 {% block main %}
 {% if suggested_flavors_count %}
-<table id="suggested-flavors-header" class="table">
-  <thead>
-  <tr data-toggle="collapse" href="#suggested-flavors">
-    <th class="col-xs-11">
-      <a href="#suggested-flavors">{{ suggested_flavors_count }}&times; Suggested Flavor</a>
-    </th>
-    <th class="col-xs-1">
-      <a class="pull-right" href="#suggested-flavors">
-        <span class="caret"></span>
-      </a>
-    </th>
-  </tr>
-  </thead>
-</table>
-
-<div id="suggested-flavors" class="panel-collapse collapse">
-  {{ suggested_flavors_table.render }}
+<div class="panel panel-default">
+  <div class="panel-heading" data-toggle="collapse" href="#suggestedFlavors">
+    <a href="#suggestedFlavors">{{ suggested_flavors_count }}&times; Suggested Flavor</a>
+  </div>
+  <div class="panel-collapse collapse" id="suggestedFlavors">
+    <div class="panel-body">
+      {{ suggested_flavors_table.render }}
+    </div>
+  </div>
 </div>
 {% endif %}
 
