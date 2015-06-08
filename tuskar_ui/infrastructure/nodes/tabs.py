@@ -319,14 +319,13 @@ class DetailOverviewTab(tabs.Tab):
             context['role'] = resource.role
             context['stack'] = resource.stack
 
-        context['kernel_image'] = api.node.image_get(
-            request,
-            node.driver_info['pxe_deploy_kernel']
-        )
-        context['ramdisk_image'] = api.node.image_get(
-            request,
-            node.driver_info['pxe_deploy_ramdisk']
-        )
+        kernel_id = node.driver_info.get('pxe_deploy_kernel')
+        if kernel_id:
+            context['kernel_image'] = api.node.image_get(request, kernel_id)
+
+        ramdisk_id = node.driver_info.get('pxe_deploy_ramdisk')
+        if ramdisk_id:
+            context['ramdisk_image'] = api.node.image_get(request, ramdisk_id)
 
         if node.instance_uuid:
             if api_base.is_service_enabled(self.request, 'metering'):
