@@ -1,4 +1,5 @@
-# -*- coding: utf8 -*-
+
++# -*- coding: utf8 -*-
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -11,6 +12,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import os
+
 from django.core.urlresolvers import reverse_lazy
 import django.forms
 from django.utils.translation import ugettext_lazy as _
@@ -100,6 +103,41 @@ class UpdateRoleInfoAction(workflows.Action):
         }
 
 
+class UpdateRoleNetworkConfigAction(workflows.Action):
+    class Meta(object):
+        name = _("Network Configuration")
+        slug = 'update_role_network'
+        help_text = _("Edit the role's network configuration.")
+
+    # TODO (rbrady) Figure out how to constrain the files needed to the specific role depending on the upstream network
+    # configuration patch to tripleo-heat-templates
+    tht_root_path = "/usr/share/openstack-tripleo-heat-templates"
+    network_files = {
+        "overcloud_resource_registry": "overcloud-resource-registry-puppet.yaml",
+    }
+
+    def __init__(self, request, context, *args, **kwargs):
+        super(UpdateRoleNetworkConfigAction, self).__init__(request, context, *args,
+                                                   **kwargs)
+        for filelabel, filepath in self.network_files.iteritems():
+            try:
+                with open(os.path.join(self.tht_root_path, filepath), 'r') as thtfile:
+                    self.fields[filelabel] = forms.CharField(
+                        label=_(filelabel.replace('_',' ').title()),
+                        widget=django.forms.Textarea(attrs={'ng-file-edit': 'file'})
+                    )
+                    self.fields[filelabel].initial = ''.join(thtfile.readlines())
+            except IOError:
+                pass
+
+    def handle(self, request, context):
+        # context contains the role_id
+        for field, field_value in self.cleaned_data:
+            with open(os.path.join(self.tht_root_path, self.network_files['field']), 'w') as target_file:
+                target_file.write(field_value)
+        return None
+
+
 class UpdateRoleConfigAction(workflows.Action):
     class Meta(object):
         name = _("Service Configuration")
@@ -133,6 +171,13 @@ class UpdateRoleConfig(workflows.Step):
     template_name = 'infrastructure/roles/config.html'
 
 
+class UpdateRoleNetwork(workflows.Step):
+    action_class = UpdateRoleNetworkConfigAction
+    depends_on = ("role_id", "name")
+    contributes = ("topology",)
+    template_name = 'infrastructure/roles/network.html'
+
+
 class UpdateRole(workflows.Workflow):
     slug = "update_role"
     finalize_button_name = _("Save")
@@ -141,6 +186,7 @@ class UpdateRole(workflows.Workflow):
     index_url = "horizon:infrastructure:roles:index"
     default_steps = (
         UpdateRoleInfo,
+        UpdateRoleNetwork,
         UpdateRoleConfig,
     )
     success_url = reverse_lazy(
