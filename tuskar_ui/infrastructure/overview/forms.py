@@ -283,6 +283,10 @@ class ScaleOut(EditPlan):
 
 
 class DeployOvercloud(horizon.forms.SelfHandlingForm):
+    network_isolation = horizon.forms.BooleanField(
+        label=_("Enable Network Isolation"),
+        required=False)
+
     def handle(self, request, data):
         try:
             plan = api.tuskar.Plan.get_the_plan(request)
@@ -292,6 +296,18 @@ class DeployOvercloud(horizon.forms.SelfHandlingForm):
                                       _("Unable to deploy overcloud."))
             return False
 
+        # If network isolation selected, read environment file data
+        # and add to plan
+        env_temp = '/usr/share/openstack-tripleo-heat-templates/environments'
+        try:
+            if self.cleaned_data['network_isolation']:
+                with open(env_temp, 'r') as env_file:
+                    env_contents = ''.join(env_file.readlines())
+                    # TODO: figure out the right way to patch the plan.environment
+         except Exception as e:
+            LOG.exception(e)
+            pass
+        
         # Auto-generate missing passwords and certificates
         if plan.list_generated_parameters():
             generated_params = plan.make_generated_parameters()
