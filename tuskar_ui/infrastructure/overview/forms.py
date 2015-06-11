@@ -262,8 +262,7 @@ class ScaleOut(EditPlan):
         plan = self.plan
         try:
             stack = api.heat.Stack.get_by_plan(self.request, plan)
-            stack.update(request, plan.name, plan.master_template,
-                         plan.environment, plan.provider_resource_templates)
+            stack.update(request, plan.name, plan.templates)
         except Exception as e:
             LOG.exception(e)
             if hasattr(e, 'error'):
@@ -305,11 +304,7 @@ class DeployOvercloud(horizon.forms.SelfHandlingForm):
         try:
             stack = api.heat.Stack.get_by_plan(self.request, plan)
             if not stack:
-                api.heat.Stack.create(request,
-                                      plan.name,
-                                      plan.master_template,
-                                      plan.environment,
-                                      plan.provider_resource_templates)
+                api.heat.Stack.create(request, plan.name, plan.templates)
         except Exception as e:
             LOG.exception(e)
             horizon.exceptions.handle(

@@ -11,11 +11,14 @@
 #    under the License.
 
 import logging
+import os
+import tempfile
 import urlparse
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-import heatclient
+from heatclient.common import template_utils
+from heatclient.exc import HTTPNotFound
 from horizon.utils import memoized
 from openstack_dashboard.api import base
 from openstack_dashboard.api import heat
@@ -70,6 +73,57 @@ def overcloud_keystoneclient(request, endpoint, password):
     return conn
 
 
+def _save_templates(templates):
+    """Saves templates into tmpdir on server
+
+    This should go away and get replaced by libutils.save_templates from
+    tripleo-common https://github.com/openstack/tripleo-common/
+    """
+    output_dir = tempfile.mkdtemp()
+
+    for template_name, template_content in templates.items():
+
+        # It's possible to organize the role templates and their dependent
+        # files into directories, in which case the template_name will carry
+        # the directory information. If that's the case, first create the
+        # directory structure (if it hasn't already been created by another
+        # file in the templates list).
+        template_dir = os.path.dirname(template_name)
+        output_template_dir = os.path.join(output_dir, template_dir)
+        if template_dir and not os.path.exists(output_template_dir):
+            os.makedirs(output_template_dir)
+
+        filename = os.path.join(output_dir, template_name)
+        with open(filename, 'w+') as template_file:
+            template_file.write(template_content)
+    return output_dir
+
+
+def _process_templates(templates):
+    """Process templates
+
+    Due to bug in heat api
+    https://bugzilla.redhat.com/show_bug.cgi?id=1212740, we need to
+    save the templates in tmpdir, reprocess them with template_utils
+    from heatclient and then we can use them in creating/updating stack.
+
+    This should be replaced by the same code that is in tripleo-common and
+    eventually it will not be needed at all.
+    """
+
+    tpl_dir = _save_templates(templates)
+
+    tpl_files, template = template_utils.get_template_contents(
+        template_file=os.path.join(tpl_dir, tuskar.MASTER_TEMPLATE_NAME))
+    env_files, env = (
+        template_utils.process_multiple_environments_and_files(
+            env_paths=[os.path.join(tpl_dir, tuskar.ENVIRONMENT_NAME)]))
+
+    files = dict(list(tpl_files.items()) + list(env_files.items()))
+
+    return template, env, files
+
+
 class Stack(base.APIResourceWrapper):
     _attrs = ('id', 'stack_name', 'outputs', 'stack_status', 'parameters')
 
@@ -78,25 +132,27 @@ class Stack(base.APIResourceWrapper):
         self._request = request
 
     @classmethod
-    def create(cls, request, stack_name, template, environment,
-               provider_resource_templates):
+    def create(cls, request, stack_name, templates):
+        template, environment, files = _process_templates(templates)
+
         fields = {
             'stack_name': stack_name,
             'template': template,
             'environment': environment,
-            'files': provider_resource_templates,
-            'password': getattr(settings, 'UNDERCLOUD_ADMIN_PASSWORD', None),
+            'files': files,
         }
-        stack = heat.stack_create(request, **fields)
+        password = getattr(settings, 'UNDERCLOUD_ADMIN_PASSWORD', None)
+        stack = heat.stack_create(request, password, **fields)
         return cls(stack, request=request)
 
-    def update(self, request, stack_name, template, environment,
-               provider_resource_templates):
+    def update(self, request, stack_name, templates):
+        template, environment, files = _process_templates(templates)
+
         fields = {
             'stack_name': stack_name,
             'template': template,
             'environment': environment,
-            'files': provider_resource_templates,
+            'files': files,
         }
         password = getattr(settings, 'UNDERCLOUD_ADMIN_PASSWORD', None)
         heat.stack_update(request, self.id, password, **fields)
@@ -199,7 +255,7 @@ class Stack(base.APIResourceWrapper):
                                             "role": role}
                                            for resource in nova_resources])
 
-            except heatclient.exc.HTTPNotFound:
+            except HTTPNotFound:
                 pass
 
         if not with_joins:
