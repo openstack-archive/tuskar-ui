@@ -31,19 +31,14 @@ from tuskar_ui.infrastructure.nodes import tables
 from tuskar_ui.infrastructure.nodes import tabs
 import tuskar_ui.infrastructure.views as infrastructure_views
 from tuskar_ui.utils import metering as metering_utils
-from tuskar_ui.utils import utils
 
 
 def get_kernel_images(request):
     try:
         kernel_images = glance.image_list_detailed(
-            request,
-            )[0]
-        kernel_images = [image for image in kernel_images
-                         if utils.check_image_type(image, 'deploy kernel')]
+            request, filters={'disk_format': 'aki'})[0]
     except Exception:
-        exceptions.handle(request,
-                          _('Unable to retrieve kernel image list.'))
+        exceptions.handle(request, _('Unable to retrieve kernel image list.'))
         kernel_images = []
     return kernel_images
 
@@ -51,14 +46,9 @@ def get_kernel_images(request):
 def get_ramdisk_images(request):
     try:
         ramdisk_images = glance.image_list_detailed(
-            request,
-            )[0]
-        ramdisk_images = [image for image in ramdisk_images
-                          if utils.check_image_type(
-                              image, 'deploy ramdisk')]
+            request, filters={'disk_format': 'ari'})[0]
     except Exception:
-        exceptions.handle(request,
-                          _('Unable to retrieve ramdisk image list.'))
+        exceptions.handle(request, _('Unable to retrieve ramdisk image list.'))
         ramdisk_images = []
     return ramdisk_images
 
