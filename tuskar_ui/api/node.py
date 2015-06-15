@@ -128,11 +128,11 @@ class Node(base.APIResourceWrapper):
                 'ipmi_password': ipmi_password
             }
         driver_info.update(
-            pxe_deploy_kernel=deployment_kernel,
-            pxe_deploy_ramdisk=deployment_ramdisk
+            deploy_kernel=deployment_kernel,
+            deploy_ramdisk=deployment_ramdisk
         )
 
-        properties = {}
+        properties = {'capabilities': 'boot_option:local', }
         if cpus:
             properties.update(cpus=cpus)
         if memory_mb:

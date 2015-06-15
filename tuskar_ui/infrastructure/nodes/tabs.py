@@ -319,11 +319,11 @@ class DetailOverviewTab(tabs.Tab):
             context['role'] = resource.role
             context['stack'] = resource.stack
 
-        kernel_id = node.driver_info.get('pxe_deploy_kernel')
+        kernel_id = node.driver_info.get('deploy_kernel')
         if kernel_id:
             context['kernel_image'] = api.node.image_get(request, kernel_id)
 
-        ramdisk_id = node.driver_info.get('pxe_deploy_ramdisk')
+        ramdisk_id = node.driver_info.get('deploy_ramdisk')
         if ramdisk_id:
             context['ramdisk_image'] = api.node.image_get(request, ramdisk_id)
 
