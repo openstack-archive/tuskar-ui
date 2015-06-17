@@ -366,12 +366,17 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
         label=_("Float Allocation End"), initial="10.255.255.254")
     float_cidr = horizon.forms.CharField(
         label=_("Float CIDR"), initial="10.0.0.0/8")
+    overcloud_nameserver = horizon.forms.CharField(
+        label=_("Overcloud Nameserver"), initial="8.8.8.8")
     external_allocation_start = horizon.forms.CharField(
         label=_("External Allocation Start"), initial="172.17.0.45")
     external_allocation_end = horizon.forms.CharField(
         label=_("External Allocation End"), initial="172.17.0.64")
     external_cidr = horizon.forms.CharField(
         label=_("External CIDR"), initial="172.17.0.0/16")
+    bm_network_gateway = horizon.forms.CharField(
+        label=_("Network Gateway"), initial="192.0.2.1")
+
 
     def build_endpoints(self, plan, controller_role):
         return {
@@ -414,16 +419,18 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
         # go from Tuskar parameters in the future.
         return {
             "float": {
+                "cidr": data['float_cidr'],
                 "name": "default-net",
+                "nameserver": data['overcloud_nameserver'],
                 "allocation_start": data['float_allocation_start'],
-                "allocation_end": data['float_allocation_end'],
-                "cidr": data['float_cidr']
+                "allocation_end": data['float_allocation_end']
             },
             "external": {
                 "name": "ext-net",
                 "allocation_start": data['external_allocation_start'],
                 "allocation_end": data['external_allocation_end'],
-                "cidr": data['external_cidr']
+                "cidr": data['external_cidr'],
+                "gateway": data['bm_network_gateway']
             }}
 
     def handle(self, request, data):
