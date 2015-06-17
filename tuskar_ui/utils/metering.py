@@ -177,13 +177,13 @@ def create_json_output(series, barchart, unit, date_from, date_to):
     return json_output
 
 
-def get_nodes_stats(request, node_uuid, instance_uuid, meter,
+def get_nodes_stats(request, node_uuid, instance_uuid, image_uuid, meter,
                     date_options=None, date_from=None, date_to=None,
                     stats_attr=None, barchart=None, group_by=None):
     series = []
     meter_list, unit = get_meter_list_and_unit(request, meter)
 
-    if instance_uuid:
+    if instance_uuid or image_uuid:
         if 'ipmi' in meter:
             # For IPMI metrics, a resource ID is made of node UUID concatenated
             # with the metric description. E.g:
@@ -203,7 +203,7 @@ def get_nodes_stats(request, node_uuid, instance_uuid, meter,
                 query = {}
                 image_query = [{"field": "metadata.%s" % group_by,
                                 "op": "eq",
-                                "value": instance_uuid}]
+                                "value": image_uuid}]
                 query[instance_uuid] = image_query
             else:
                 query = [{'field': 'resource_id',

@@ -287,7 +287,9 @@ class MeteringTests(helpers.TestCase):
             'openstack_dashboard.utils.metering.calc_date_args',
             return_value=('from date', 'to date'),
         ):
-            ret = metering.get_nodes_stats(request, 'abc', 'def', 'foo.bar')
+            ret = metering.get_nodes_stats(
+                request, node_uuid='abc', instance_uuid='def', image_uuid=None,
+                meter='foo.bar')
         self.assertEqual(ret, '')
         self.assertEqual(create_json_output.call_args_list, [
             mock.call([], None, '', 'from date', 'to date')

@@ -185,7 +185,7 @@ class PerformanceView(base.TemplateView):
             instance_uuid = None
 
         json_output = metering_utils.get_nodes_stats(
-            request, node_uuid, instance_uuid, meter,
+            request, node_uuid, instance_uuid, image_uuid=None, meter=meter,
             date_options=date_options, date_from=date_from, date_to=date_to,
             stats_attr=stats_attr, barchart=barchart)
 

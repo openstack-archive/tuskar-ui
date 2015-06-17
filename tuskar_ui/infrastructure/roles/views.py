@@ -179,7 +179,8 @@ class PerformanceView(base.TemplateView, views.RoleMixin, views.StackMixin):
             json_output = None
         else:
             json_output = metering_utils.get_nodes_stats(
-                request, image_uuid, meter, date_options=date_options,
+                request, node_uuid=None, instance_uuid=None,
+                image_uuid=image_uuid, meter=meter, date_options=date_options,
                 date_from=date_from, date_to=date_to, stats_attr=stats_attr,
                 barchart=barchart, group_by='image_id')
 
