@@ -32,7 +32,7 @@ ERROR_STATES = set(['deploy failed', 'error'])
 POWER_ON_STATES = set(['on', 'power on'])
 
 # provision_states of ironic aggregated to reasonable groups
-PROVISION_STATE_FREE = ['deleted', None]
+PROVISION_STATE_FREE = ['available', 'deleted', None]
 PROVISION_STATE_PROVISIONED = ['active']
 PROVISION_STATE_PROVISIONING = [
     'deploying', 'wait call-back', 'rebuild', 'deploy complete']
@@ -44,7 +44,7 @@ PROVISION_STATE_ERROR = ['error', 'deploy failed']
 DISCOVERING_STATE = 'discovering'
 DISCOVERED_STATE = 'discovered'
 DISCOVERY_FAILED_STATE = 'discovery failed'
-MAINTENANCE_STATE = 'maintenance'
+MAINTENANCE_STATE = 'manageable'
 PROVISIONED_STATE = 'provisioned'
 PROVISIONING_FAILED_STATE = 'provisioning failed'
 PROVISIONING_STATE = 'provisioning'
