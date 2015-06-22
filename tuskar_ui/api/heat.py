@@ -236,7 +236,7 @@ class Stack(base.APIResourceWrapper):
         # A provider resource is deployed as a nested stack, so we have to
         # drill down and retrieve those that match a tuskar role
         for role in roles:
-            resource_group_name = role.provider_resource_group_name
+            resource_group_name = role.name
             try:
                 resource_group = heat.resource_get(self._request,
                                                    self.id,

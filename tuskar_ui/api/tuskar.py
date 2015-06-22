@@ -433,10 +433,6 @@ class Role(base.APIResourceWrapper):
         return "Tuskar::{0}-{1}".format(self.name, self.version)
 
     @property
-    def provider_resource_group_name(self):
-        return "{0}-{1}-servers".format(self.name, self.version)
-
-    @property
     def parameter_prefix(self):
         return "{0}-{1}::".format(self.name, self.version)
 
