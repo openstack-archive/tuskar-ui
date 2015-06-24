@@ -248,7 +248,9 @@ class OverviewTests(test.BaseAdminViewTests):
             'float_cidr': '10.0.0.0/8',
             'external_allocation_start': '192.0.2.45',
             'external_allocation_end': '192.0.2.64',
-            'external_cidr': '192.0.2.0/24'
+            'external_cidr': '192.0.2.0/24',
+            "overcloud_nameserver": '8.8.8.8',
+            "bm_network_gateway": '192.0.2.1'
         }
 
         with contextlib.nested(
@@ -304,12 +306,14 @@ class OverviewTests(test.BaseAdminViewTests):
                 {'cidr': '10.0.0.0/8',
                  'allocation_start': '10.0.0.2',
                  'name': 'default-net',
-                 'allocation_end': '10.255.255.254'},
+                 'allocation_end': '10.255.255.254',
+                 'nameserver': '8.8.8.8'},
              'external':
                 {'cidr': '192.0.2.0/24',
                  'allocation_start': '192.0.2.45',
                  'name': 'ext-net',
-                 'allocation_end': '192.0.2.64'}},
+                 'allocation_end': '192.0.2.64',
+                 'gateway': '192.0.2.1'}},
             keystone_client='keystone_client',
             neutron_client='neutron_client')
         mock_get_keystone_client.assert_called_once_with(
