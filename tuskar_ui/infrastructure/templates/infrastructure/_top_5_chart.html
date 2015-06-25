@@ -9,7 +9,7 @@
   {% for d in top_5.data %}
   <tr>
     <td>
-      <a href="{% url 'horizon:infrastructure:nodes:detail' d.node_uuid %}">
+      <a href="{% url 'horizon:infrastructure:nodes:node_detail' d.node_uuid %}">
         {{ d.node_uuid|truncatechars:6 }}
       </a>
     </td>
