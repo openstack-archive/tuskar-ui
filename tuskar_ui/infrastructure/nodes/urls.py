@@ -25,7 +25,7 @@ urlpatterns = urls.patterns(
     urls.url(r'^nodes_performance/$',
              views.PerformanceView.as_view(), name='nodes_performance'),
     urls.url(r'^(?P<node_uuid>[^/]+)/$', views.DetailView.as_view(),
-             name='detail'),
+             name='node_detail'),
     urls.url(r'^(?P<node_uuid>[^/]+)/performance/$',
              views.PerformanceView.as_view(), name='performance'),
 )

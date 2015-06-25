@@ -163,7 +163,7 @@ def get_state_string(node):
 
 class BaseNodesTable(tables.DataTable):
     node = tables.Column('uuid',
-                         link="horizon:infrastructure:nodes:detail",
+                         link="horizon:infrastructure:nodes:node_detail",
                          verbose_name=_("Node Name"))
     role_name = tables.Column('role_name',
                               link=get_role_link,

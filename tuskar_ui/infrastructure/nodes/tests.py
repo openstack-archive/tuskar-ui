@@ -34,7 +34,7 @@ from tuskar_ui.test.test_data import tuskar_data
 
 INDEX_URL = urlresolvers.reverse('horizon:infrastructure:nodes:index')
 REGISTER_URL = urlresolvers.reverse('horizon:infrastructure:nodes:register')
-DETAIL_VIEW = 'horizon:infrastructure:nodes:detail'
+DETAIL_VIEW = 'horizon:infrastructure:nodes:node_detail'
 PERFORMANCE_VIEW = 'horizon:infrastructure:nodes:performance'
 TEST_DATA = utils.TestDataContainer()
 node_data.data(TEST_DATA)
