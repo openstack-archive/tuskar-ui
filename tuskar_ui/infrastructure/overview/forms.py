@@ -48,18 +48,22 @@ def validate_roles(request, plan):
     """Validates the roles in plan and returns dict describing the issues"""
     for role in plan.role_list:
         if (
-            plan.get_role_node_count(role) and
+            # TODO(jtomasek): add this cond. only if Role with 0 nodes
+            # will not get deployed (Currently all roles get deployed)
+            # plan.get_role_node_count(role) and
             not role.is_valid_for_deployment(plan)
         ):
             message = {
-                'text': _(u"Configure Roles."),
+                'text': _(u"Configure and assign Roles. Make sure the Roles "
+                          "have Image and Flavor assigned and required "
+                          "parameters set."),
                 'is_critical': True,
                 'status': 'pending',
             }
             break
     else:
         message = {
-            'text': _(u"Configure Roles."),
+            'text': _(u"Configure and assign Roles."),
             'status': 'ok',
         }
     return message
@@ -125,8 +129,9 @@ def validate_plan(request, plan):
             'text': _(u"Register Nodes."),
             'status': 'ok',
         })
-    messages.append(validate_roles(request, plan))
     messages.append(validate_global_parameters(request, plan))
+    messages.append(validate_roles(request, plan))
+
     if not MATCHING_DEPLOYMENT_MODE:
         # All roles have to have the same flavor.
         default_flavor_name = api.flavor.Flavor.list(request)[0].name
@@ -139,11 +144,6 @@ def validate_plan(request, plan):
                     'is_critical': False,
                     'statis': 'error',
                 })
-    roles_assigned = True
-    messages.append({
-        'text': _(u"Assign roles."),
-        'status': lambda: 'ok' if roles_assigned else 'pending',
-    })
     try:
         controller_role = plan.get_role_by_name("Controller")
     except KeyError:
@@ -153,7 +153,6 @@ def validate_plan(request, plan):
             'status': 'error',
             'indent': 1,
         })
-        roles_assigned = False
     else:
         if plan.get_role_node_count(controller_role) not in (1, 3):
             messages.append({
@@ -162,7 +161,6 @@ def validate_plan(request, plan):
                 'status': 'pending',
                 'indent': 1,
             })
-            roles_assigned = False
         else:
             messages.append({
                 'text': _(u"1 or 3 Controllers Needed."),
@@ -179,7 +177,6 @@ def validate_plan(request, plan):
             'status': 'error',
             'indent': 1,
         })
-        roles_assigned = False
     else:
         if plan.get_role_node_count(compute_role) < 1:
             messages.append({
@@ -188,7 +185,6 @@ def validate_plan(request, plan):
                 'status': 'pending',
                 'indent': 1,
             })
-            roles_assigned = False
         else:
             messages.append({
                 'text': _(u"1 Compute Needed."),
@@ -200,6 +196,7 @@ def validate_plan(request, plan):
         if callable(status):
             message['status'] = status = status()
         message['classes'] = MESSAGE_ICONS.get(status, MESSAGE_ICONS[None])
+
     return messages
 
 

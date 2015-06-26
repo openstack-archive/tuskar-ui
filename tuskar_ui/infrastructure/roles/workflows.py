@@ -40,6 +40,7 @@ class UpdateRoleInfoAction(workflows.Action):
     )
     flavor = forms.ChoiceField(
         label=_("Flavor"),
+        required=False,
     )
     image = forms.ChoiceField(
         label=_("Image"),
