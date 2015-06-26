@@ -367,16 +367,12 @@ class OverviewTests(test.BaseAdminViewTests):
                 'classes': 'fa-square-o text-info',
             }, {
                 'status': 'ok',
-                'text': u'Configure Roles.',
-                'classes': 'fa-check-square-o text-success',
-            }, {
-                'status': 'ok',
                 'text': u'Global Service Configuration.',
                 'classes': 'fa-check-square-o text-success',
             }, {
-                'status': 'pending',
-                'text': u'Assign roles.',
-                'classes': 'fa-square-o text-info',
+                'status': 'ok',
+                'text': u'Configure and assign Roles.',
+                'classes': 'fa-check-square-o text-success',
             }, {
                 'is_critical': True,
                 'text': u'Controller Role Needed.',
