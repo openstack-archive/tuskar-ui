@@ -179,15 +179,21 @@ class PerformanceView(base.TemplateView):
         node_uuid = kwargs.get('node_uuid', None)
         if node_uuid:
             node = api.node.Node.get(request, node_uuid)
-            instance_uuid = node.instance_uuid
+            instance_uuids = [node.instance_uuid]
         else:
             # Aggregated stats for all nodes
-            instance_uuid = None
+            instance_uuids = []
 
         json_output = metering_utils.get_nodes_stats(
-            request, node_uuid, instance_uuid, image_uuid=None, meter=meter,
-            date_options=date_options, date_from=date_from, date_to=date_to,
-            stats_attr=stats_attr, barchart=barchart)
+            request=request,
+            node_uuid=node_uuid,
+            instance_uuids=instance_uuids,
+            meter=meter,
+            date_options=date_options,
+            date_from=date_from,
+            date_to=date_to,
+            stats_attr=stats_attr,
+            barchart=barchart)
 
         return django.http.HttpResponse(
             json.dumps(json_output), content_type='application/json')

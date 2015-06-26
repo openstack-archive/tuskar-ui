@@ -177,13 +177,13 @@ def create_json_output(series, barchart, unit, date_from, date_to):
     return json_output
 
 
-def get_nodes_stats(request, node_uuid, instance_uuid, image_uuid, meter,
+def get_nodes_stats(request, node_uuid, instance_uuids, meter,
                     date_options=None, date_from=None, date_to=None,
                     stats_attr=None, barchart=None, group_by=None):
     series = []
     meter_list, unit = get_meter_list_and_unit(request, meter)
 
-    if instance_uuid or image_uuid:
+    if instance_uuids:
         if 'ipmi' in meter:
             # For IPMI metrics, a resource ID is made of node UUID concatenated
             # with the metric description. E.g:
@@ -199,17 +199,12 @@ def get_nodes_stats(request, node_uuid, instance_uuid, image_uuid, meter,
         else:
             # For SNMP metrics, a resource ID matches exactly the UUID of the
             # associated instance
-            if group_by == "image_id":
-                query = {}
-                image_query = [{"field": "metadata.%s" % group_by,
-                                "op": "eq",
-                                "value": image_uuid}]
-                query[instance_uuid] = image_query
-            else:
-                query = [{'field': 'resource_id',
-                          'op': 'eq',
-                          'value': instance_uuid}]
-            queries = [query]
+            queries = [
+                [{'field': 'resource_id',
+                  'op': 'eq',
+                  'value': instance_uuid}]
+                for instance_uuid in instance_uuids
+            ]
     else:
         # query will be aggregated across all resources
         group_by = "all"

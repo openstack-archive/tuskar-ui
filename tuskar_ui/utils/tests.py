@@ -288,7 +288,9 @@ class MeteringTests(helpers.TestCase):
             return_value=('from date', 'to date'),
         ):
             ret = metering.get_nodes_stats(
-                request, node_uuid='abc', instance_uuid='def', image_uuid=None,
+                request=request,
+                node_uuid='abc',
+                instance_uuids=['def'],
                 meter='foo.bar')
         self.assertEqual(ret, '')
         self.assertEqual(create_json_output.call_args_list, [

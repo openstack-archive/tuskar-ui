@@ -168,21 +168,24 @@ class PerformanceView(base.TemplateView, views.RoleMixin, views.StackMixin):
         stats_attr = request.GET.get('stats_attr', 'avg')
         barchart = bool(request.GET.get('barchart'))
 
-        plan = api.tuskar.Plan.get_the_plan(self.request)
-        role = self.get_role(None)
-        role.image(plan)
+        role = self.get_role()
+        stack = self.get_stack()
+        instances = stack.resources(role=role, with_joins=True)
 
-        try:
-            image = role.image(plan)
-            image_uuid = image.id
-        except AttributeError:
-            json_output = None
-        else:
+        if instances:
+            instance_uuids = [i.physical_resource_id for i in instances]
             json_output = metering_utils.get_nodes_stats(
-                request, node_uuid=None, instance_uuid=None,
-                image_uuid=image_uuid, meter=meter, date_options=date_options,
-                date_from=date_from, date_to=date_to, stats_attr=stats_attr,
-                barchart=barchart, group_by='image_id')
+                request=request,
+                node_uuid=None,
+                instance_uuids=instance_uuids,
+                meter=meter,
+                date_options=date_options,
+                date_from=date_from,
+                date_to=date_to,
+                stats_attr=stats_attr,
+                barchart=barchart)
+        else:
+            json_output = None
 
         return http.HttpResponse(json.dumps(json_output),
                                  content_type='application/json')
