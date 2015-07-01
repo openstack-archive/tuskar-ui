@@ -39,6 +39,7 @@ KEYSTONE_CERTIFICATE_PARAMS = (
     'KeystoneSigningKey')
 
 
+@memoized.memoized
 def tuskarclient(request, password=None):
     api_version = "2"
     insecure = getattr(settings, 'OPENSTACK_SSL_NO_VERIFY', False)
@@ -152,6 +153,7 @@ class Plan(base.APIResourceWrapper):
         return cls(plan, request=request)
 
     @classmethod
+    @memoized.memoized
     def list(cls, request):
         """Return a list of Plans in Tuskar
 
