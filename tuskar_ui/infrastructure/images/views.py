@@ -57,7 +57,7 @@ class IndexView(infrastructure_views.ItemCountMixin,
 
         plan = tuskar_api.tuskar.Plan.get_the_plan(self.request)
         for image in images:
-            image.role = tuskar_api.tuskar.Role.get_by_image(
+            image.roles = tuskar_api.tuskar.Role.get_by_image(
                 self.request, plan, image)
 
         return images

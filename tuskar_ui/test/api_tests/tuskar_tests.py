@@ -108,8 +108,8 @@ class TuskarAPITests(test.APITestCase):
                    return_value=roles):
             ret_val = api.tuskar.Role.get_by_image(
                 self.request, plan, image)
-        self.assertIsInstance(ret_val, api.tuskar.Role)
-        self.assertEqual(ret_val.name, 'Controller')
+        self.assertIsInstance(ret_val, list)
+        self.assertEqual(len(ret_val), 3)
 
     def test_parameter_stripped_name(self):
         plan = api.tuskar.Plan(self.tuskarclient_plans.first())

@@ -48,15 +48,15 @@ class RolesTest(test.BaseAdminViewTests):
         plans = [api.tuskar.Plan(plan)
                  for plan in self.tuskarclient_plans.list()]
         flavor = self.novaclient_flavors.first()
-        image = self.glanceclient_images.first()
+        images = self.glanceclient_images.list()
 
         with contextlib.nested(
             patch('tuskar_ui.api.tuskar.Plan.list',
                   return_value=plans),
             patch('tuskar_ui.api.tuskar.Role.list',
                   return_value=roles),
-            patch('openstack_dashboard.api.glance.image_get',
-                  return_value=image),
+            patch('openstack_dashboard.api.glance.image_list_detailed',
+                  return_value=[images]),
             patch('tuskar_ui.api.flavor.Flavor.get_by_name',
                   return_value=flavor)):
             res = self.client.get(INDEX_URL)
@@ -69,7 +69,7 @@ class RolesTest(test.BaseAdminViewTests):
         plans = [api.tuskar.Plan(plan)
                  for plan in self.tuskarclient_plans.list()]
         flavor = self.novaclient_flavors.first()
-        image = self.glanceclient_images.first()
+        images = self.glanceclient_images.list()
         stack = api.heat.Stack(TEST_DATA.heatclient_stacks.first())
 
         with contextlib.nested(
@@ -83,8 +83,8 @@ class RolesTest(test.BaseAdminViewTests):
                   return_value=[]),
             patch('tuskar_ui.api.tuskar.Plan.list',
                   return_value=plans),
-            patch('openstack_dashboard.api.glance.image_get',
-                  return_value=image),
+            patch('openstack_dashboard.api.glance.image_list_detailed',
+                  return_value=[images]),
             patch('tuskar_ui.api.flavor.Flavor.get_by_name',
                   return_value=flavor)):
             res = self.client.get(DETAIL_URL)
@@ -137,7 +137,7 @@ class RolesTest(test.BaseAdminViewTests):
             'name': 'controller',
             'description': 'The controller node role.',
             'flavor': self.novaclient_flavors.first().name,
-            'image': self.glanceclient_images.first().id,
+            'image': self.glanceclient_images.first().name,
             'nodes': '0',
         }
 
@@ -163,4 +163,4 @@ class RolesTest(test.BaseAdminViewTests):
             args = mock_patch.call_args_list[0][0]
             self.assertEqual(args[1], plan.id)
             self.assertEqual(args[2]['Controller-1::Flavor'], u'flavor-1')
-            self.assertEqual(args[2]['Controller-1::Image'], u'2')
+            self.assertEqual(args[2]['Controller-1::Image'], u'overcloud-full')

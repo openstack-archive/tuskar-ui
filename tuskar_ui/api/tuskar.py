@@ -256,7 +256,7 @@ class Plan(base.APIResourceWrapper):
             key_params = []
             for role in self.role_list:
                 key_params.extend([role.node_count_parameter_name,
-                                   role.image_id_parameter_name,
+                                   role.image_parameter_name,
                                    role.flavor_parameter_name])
             params = [p for p in params if p['name'] not in key_params]
         return [Parameter(p, plan=self) for p in params]
@@ -387,9 +387,17 @@ class Role(base.APIResourceWrapper):
 
     @classmethod
     @memoized.memoized
-    def _roles_by_image_id(cls, request, plan):
-        return {plan.parameter_value(role.image_id_parameter_name): role
-                for role in Role.list(request)}
+    def _roles_by_image(cls, request, plan):
+        roles_by_image = {}
+
+        for role in Role.list(request):
+            image = plan.parameter_value(role.image_parameter_name)
+            if image in roles_by_image:
+                roles_by_image[image].append(role)
+            else:
+                roles_by_image[image] = [role]
+
+        return roles_by_image
 
     @classmethod
     @handle_errors(_("Unable to retrieve overcloud role"))
@@ -409,11 +417,11 @@ class Role(base.APIResourceWrapper):
                  Role can be found
         :rtype:  tuskar_ui.api.tuskar.Role
         """
-        roles = cls._roles_by_image_id(request, plan)
+        roles = cls._roles_by_image(request, plan)
         try:
-            return roles[image.id]
+            return roles[image.name]
         except KeyError:
-            return None
+            return []
 
     @classmethod
     @memoized.memoized
@@ -443,7 +451,7 @@ class Role(base.APIResourceWrapper):
         return self.parameter_prefix + 'count'
 
     @property
-    def image_id_parameter_name(self):
+    def image_parameter_name(self):
         return self.parameter_prefix + 'Image'
 
     @property
@@ -451,12 +459,13 @@ class Role(base.APIResourceWrapper):
         return self.parameter_prefix + 'Flavor'
 
     def image(self, plan):
-        image_id = plan.parameter_value(self.image_id_parameter_name)
-        if image_id:
+        image_name = plan.parameter_value(self.image_parameter_name)
+        if image_name:
             try:
-                return glance.image_get(self._request, image_id)
-            except glance_exceptions.HTTPNotFound:
-                LOG.error("Couldn't obtain image with id %s" % image_id)
+                return glance.image_list_detailed(
+                    self._request, filters={'name': image_name})[0][0]
+            except (glance_exceptions.HTTPNotFound, IndexError):
+                LOG.error("Couldn't obtain image with name %s" % image_name)
                 return None
 
     def flavor(self, plan):

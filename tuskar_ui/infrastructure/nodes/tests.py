@@ -162,8 +162,8 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-0-cpus': '1',
             'register_nodes-0-memory_mb': '2',
             'register_nodes-0-local_gb': '3',
-            'register_nodes-0-deployment_kernel': images[6].id,
-            'register_nodes-0-deployment_ramdisk': images[7].id,
+            'register_nodes-0-deployment_kernel': images[3].id,
+            'register_nodes-0-deployment_ramdisk': images[4].id,
 
             'register_nodes-1-driver': 'pxe_ipmitool',
             'register_nodes-1-ipmi_address': '127.0.0.2',
@@ -172,8 +172,8 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-1-cpus': '4',
             'register_nodes-1-memory_mb': '5',
             'register_nodes-1-local_gb': '6',
-            'register_nodes-1-deployment_kernel': images[6].id,
-            'register_nodes-1-deployment_ramdisk': images[7].id,
+            'register_nodes-1-deployment_kernel': images[3].id,
+            'register_nodes-1-deployment_ramdisk': images[4].id,
         }
         with mock.patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['create', 'get_all_mac_addresses'],
@@ -198,8 +198,8 @@ class NodesTests(test.BaseAdminViewTests):
                     ipmi_username=u'username',
                     ipmi_password=u'password',
                     driver='pxe_ipmitool',
-                    deployment_kernel=images[6].id,
-                    deployment_ramdisk=images[7].id,
+                    deployment_kernel=images[3].id,
+                    deployment_ramdisk=images[4].id,
                 ),
                 mock.call(
                     mock.ANY,
@@ -212,8 +212,8 @@ class NodesTests(test.BaseAdminViewTests):
                     ipmi_username=None,
                     ipmi_password=None,
                     driver='pxe_ipmitool',
-                    deployment_kernel=images[6].id,
-                    deployment_ramdisk=images[7].id,
+                    deployment_kernel=images[3].id,
+                    deployment_ramdisk=images[4].id,
                 ),
             ])
 
@@ -234,8 +234,8 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-0-cpus': '1',
             'register_nodes-0-memory_mb': '2',
             'register_nodes-0-local_gb': '3',
-            'register_nodes-0-deployment_kernel': images[6].id,
-            'register_nodes-0-deployment_ramdisk': images[7].id,
+            'register_nodes-0-deployment_kernel': images[3].id,
+            'register_nodes-0-deployment_ramdisk': images[4].id,
 
             'register_nodes-1-driver': 'pxe_ipmitool',
             'register_nodes-1-ipmi_address': '127.0.0.2',
@@ -244,8 +244,8 @@ class NodesTests(test.BaseAdminViewTests):
             'register_nodes-1-cpus': '4',
             'register_nodes-1-memory_mb': '5',
             'register_nodes-1-local_gb': '6',
-            'register_nodes-1-deployment_kernel': images[6].id,
-            'register_nodes-1-deployment_ramdisk': images[7].id,
+            'register_nodes-1-deployment_kernel': images[3].id,
+            'register_nodes-1-deployment_ramdisk': images[4].id,
         }
         with mock.patch('tuskar_ui.api.node.Node', **{
             'spec_set': ['create', 'get_all_mac_addresses'],
@@ -269,8 +269,8 @@ class NodesTests(test.BaseAdminViewTests):
                     ipmi_username=u'username',
                     ipmi_password=u'password',
                     driver='pxe_ipmitool',
-                    deployment_kernel=images[6].id,
-                    deployment_ramdisk=images[7].id,
+                    deployment_kernel=images[3].id,
+                    deployment_ramdisk=images[4].id,
                 ),
                 mock.call(
                     mock.ANY,
@@ -283,8 +283,8 @@ class NodesTests(test.BaseAdminViewTests):
                     ipmi_username=None,
                     ipmi_password=None,
                     driver='pxe_ipmitool',
-                    deployment_kernel=images[6].id,
-                    deployment_ramdisk=images[7].id,
+                    deployment_kernel=images[3].id,
+                    deployment_ramdisk=images[4].id,
                 ),
             ])
         self.assertTemplateUsed(

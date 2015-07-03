@@ -158,4 +158,4 @@ class NodeAPITests(test.APITestCase):
             return_value=([instance], False),
         ):
             ret_val = api.node.Node(node).image_name
-        self.assertEqual(ret_val, 'overcloud-control')
+        self.assertEqual(ret_val, 'overcloud-full')
