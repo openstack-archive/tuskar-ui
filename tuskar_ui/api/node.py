@@ -55,7 +55,7 @@ FREE_STATE = 'free'
 IRONIC_DISCOVERD_URL = getattr(settings, 'IRONIC_DISCOVERD_URL', None)
 LOG = logging.getLogger(__name__)
 
-
+@memoized.memoized
 def ironicclient(request):
     api_version = 1
     kwargs = {'os_auth_token': request.user.token.id,
@@ -156,6 +156,7 @@ class Node(base.APIResourceWrapper):
         return cls(node, request)
 
     @classmethod
+    @memoized.memoized
     @handle_errors(_("Unable to retrieve node"))
     def get(cls, request, uuid):
         """Return the Node that matches the ID
@@ -199,6 +200,7 @@ class Node(base.APIResourceWrapper):
         return cls(node, request, server)
 
     @classmethod
+    @memoized.memoized
     @handle_errors(_("Unable to retrieve nodes"), [])
     def list(cls, request, associated=None, maintenance=None):
         """Return a list of Nodes
@@ -302,6 +304,7 @@ class Node(base.APIResourceWrapper):
         return cls(node, request)
 
     @classmethod
+    @memoized.memoized
     def list_ports(cls, request, uuid):
         """Return a list of ports associated with this Node
 

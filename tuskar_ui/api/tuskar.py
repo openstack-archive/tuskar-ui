@@ -352,6 +352,7 @@ class Role(base.APIResourceWrapper):
         self._request = request
 
     @classmethod
+    @memoized.memoized
     @handle_errors(_("Unable to retrieve overcloud roles"), [])
     def list(cls, request):
         """Return a list of Overcloud Roles in Tuskar
@@ -367,6 +368,7 @@ class Role(base.APIResourceWrapper):
         return [cls(role, request=request) for role in roles]
 
     @classmethod
+    @memoized.memoized
     @handle_errors(_("Unable to retrieve overcloud role"))
     def get(cls, request, role_id):
         """Return the Tuskar Role that matches the ID
