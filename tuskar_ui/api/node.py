@@ -11,6 +11,7 @@
 #    under the License.
 
 import logging
+import time
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -263,6 +264,11 @@ class Node(base.APIResourceWrapper):
         for uuid in uuids:
             discoverd_client.introspect(uuid, IRONIC_DISCOVERD_URL,
                                         request.user.token.id)
+            # NOTE(dtantsur): PXE firmware on virtual machines misbehaves when
+            # a lot of nodes start DHCPing simultaneously: it ignores NACK from
+            # DHCP server, tries to get the same address, then times out. Work
+            # around it by using sleep, anyway introspection takes much longer.
+            time.sleep(5)
 
     @classmethod
     def set_maintenance(cls, request, uuid, maintenance):
