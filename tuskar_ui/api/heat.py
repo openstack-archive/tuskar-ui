@@ -34,6 +34,7 @@ from tuskar_ui.utils import utils
 LOG = logging.getLogger(__name__)
 
 
+@memoized.memoized
 def overcloud_keystoneclient(request, endpoint, password):
     """Returns a client connected to the Keystone backend.
 
