@@ -11,7 +11,9 @@ http://tarballs.openstack.org/horizon/horizon-master.tar.gz#egg=horizon
 
 
 
+
 http://tarballs.openstack.org/python-tuskarclient/python-tuskarclient-master.tar.gz#egg=python-tuskarclient
+
 
 
 
@@ -20,7 +22,8 @@ http://tarballs.openstack.org/python-tuskarclient/python-tuskarclient-master.tar
 
 coverage>=3.6
 django-nose>=1.2
-mock>=1.0
+mock>=1.1;python_version!='2.6'
+mock==1.0.1;python_version=='2.6'
 mox>=0.5.3
 mox3>=0.7.0
 nodeenv>=0.9.4 # BSD License
