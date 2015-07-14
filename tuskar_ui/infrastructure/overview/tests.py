@@ -243,14 +243,6 @@ class OverviewTests(test.BaseAdminViewTests):
             'admin_email': "example@example.org",
             'public_host': '',
             'region': 'regionOne',
-            'float_allocation_start': '10.0.0.2',
-            'float_allocation_end': '10.255.255.254',
-            'float_cidr': '10.0.0.0/8',
-            'external_allocation_start': '192.0.2.45',
-            'external_allocation_end': '192.0.2.64',
-            'external_cidr': '192.0.2.0/24',
-            "overcloud_nameserver": '8.8.8.8',
-            "bm_network_gateway": '192.0.2.1'
         }
 
         with contextlib.nested(
@@ -262,15 +254,10 @@ class OverviewTests(test.BaseAdminViewTests):
                   return_value=None),
             patch('os_cloud_config.keystone.setup_endpoints',
                   return_value=None),
-            patch('os_cloud_config.neutron.initialize_neutron',
-                  return_value=None),
             patch('os_cloud_config.utils.clients.get_keystone_client',
                   return_value='keystone_client'),
-            patch('os_cloud_config.utils.clients.get_neutron_client',
-                  return_value='neutron_client'),
         ) as (mock_plan, mock_get_by_plan, mock_initialize,
-              mock_setup_endpoints, mock_initialize_neutron,
-              mock_get_keystone_client, mock_get_neutron_client):
+              mock_setup_endpoints, mock_get_keystone_client):
             res = self.client.post(POST_DEPLOY_INIT_URL, data)
 
         self.assertNoFormErrors(res)
@@ -301,24 +288,7 @@ class OverviewTests(test.BaseAdminViewTests):
             client='keystone_client',
             region='regionOne',
             public_host='')
-        mock_initialize_neutron.assert_called_once_with(
-            {'float':
-                {'cidr': '10.0.0.0/8',
-                 'allocation_start': '10.0.0.2',
-                 'name': 'default-net',
-                 'allocation_end': '10.255.255.254',
-                 'nameserver': '8.8.8.8'},
-             'external':
-                {'cidr': '192.0.2.0/24',
-                 'allocation_start': '192.0.2.45',
-                 'name': 'ext-net',
-                 'allocation_end': '192.0.2.64',
-                 'gateway': '192.0.2.1'}},
-            keystone_client='keystone_client',
-            neutron_client='neutron_client')
         mock_get_keystone_client.assert_called_once_with(
-            'admin', None, 'admin', stack.keystone_auth_url)
-        mock_get_neutron_client.assert_called_once_with(
             'admin', None, 'admin', stack.keystone_auth_url)
 
     def test_get_role_data(self):
