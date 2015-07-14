@@ -20,9 +20,7 @@ from django.utils.translation import ugettext_lazy as _
 import horizon.exceptions
 import horizon.forms
 import horizon.messages
-from neutronclient.common import exceptions as neutron_exceptions
 from os_cloud_config import keystone as keystone_config
-from os_cloud_config import neutron as neutron_config
 from os_cloud_config.utils import clients
 
 from tuskar_ui import api
@@ -360,22 +358,6 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
         label=_("Public Host"), initial="", required=False)
     region = horizon.forms.CharField(
         label=_("Region"), initial="regionOne")
-    float_allocation_start = horizon.forms.CharField(
-        label=_("Float Allocation Start"), initial="10.0.0.2")
-    float_allocation_end = horizon.forms.CharField(
-        label=_("Float Allocation End"), initial="10.255.255.254")
-    float_cidr = horizon.forms.CharField(
-        label=_("Float CIDR"), initial="10.0.0.0/8")
-    overcloud_nameserver = horizon.forms.CharField(
-        label=_("Overcloud Nameserver"), initial="8.8.8.8")
-    external_allocation_start = horizon.forms.CharField(
-        label=_("External Allocation Start"), initial="172.17.0.45")
-    external_allocation_end = horizon.forms.CharField(
-        label=_("External Allocation End"), initial="172.17.0.64")
-    external_cidr = horizon.forms.CharField(
-        label=_("External CIDR"), initial="172.17.0.0/16")
-    bm_network_gateway = horizon.forms.CharField(
-        label=_("Network Gateway"), initial="192.0.2.1")
 
     def build_endpoints(self, plan, controller_role):
         return {
@@ -413,25 +395,6 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
                 'path': WEBROOT,
                 'admin_path': '%sadmin' % WEBROOT}}
 
-    def build_neutron_setup(self, data):
-        # TODO(lsmola) this is default devtest params, this should probably
-        # go from Tuskar parameters in the future.
-        return {
-            "float": {
-                "cidr": data['float_cidr'],
-                "name": "default-net",
-                "nameserver": data['overcloud_nameserver'],
-                "allocation_start": data['float_allocation_start'],
-                "allocation_end": data['float_allocation_end']
-            },
-            "external": {
-                "name": "ext-net",
-                "allocation_start": data['external_allocation_start'],
-                "allocation_end": data['external_allocation_end'],
-                "cidr": data['external_cidr'],
-                "gateway": data['bm_network_gateway']
-            }}
-
     def handle(self, request, data):
         try:
             plan = api.tuskar.Plan.get_the_plan(request)
@@ -457,8 +420,6 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
             # retrieve needed Overcloud clients
             keystone_client = clients.get_keystone_client(
                 auth_user, admin_password, auth_tenant, auth_url)
-            neutron_client = clients.get_neutron_client(
-                auth_user, admin_password, auth_tenant, auth_url)
 
             # do the setup endpoints
             keystone_config.setup_endpoints(
@@ -467,16 +428,6 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
                 region=data['region'],
                 os_auth_url=auth_url,
                 client=keystone_client)
-
-            # do the neutron init
-            try:
-                neutron_config.initialize_neutron(
-                    self.build_neutron_setup(data),
-                    neutron_client=neutron_client,
-                    keystone_client=keystone_client)
-            except neutron_exceptions.BadRequest as e:
-                LOG.info('Neutron has been already initialized.')
-                LOG.info(e.message)
 
         except Exception as e:
             LOG.exception(e)
