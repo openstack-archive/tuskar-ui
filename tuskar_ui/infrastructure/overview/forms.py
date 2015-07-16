@@ -13,6 +13,8 @@
 #    under the License.
 
 import logging
+import six
+import uuid
 
 from django.conf import settings
 import django.forms
@@ -28,6 +30,7 @@ import tuskar_ui.api.heat
 import tuskar_ui.api.tuskar
 import tuskar_ui.forms
 import tuskar_ui.infrastructure.flavors.utils as flavors_utils
+import tuskar_ui.utils.utils as tuskar_utils
 
 MATCHING_DEPLOYMENT_MODE = flavors_utils.matching_deployment_mode()
 LOG = logging.getLogger(__name__)
@@ -232,12 +235,54 @@ class EditPlan(horizon.forms.SelfHandlingForm):
         # Controllers is > 1
         try:
             controller_role = self.plan.get_role_by_name('Controller')
+            compute_role = self.plan.get_role_by_name('Compute')
         except Exception as e:
-            LOG.warning('Unable to find role: %s', 'Controller')
+            LOG.warning('Unable to find a required role: %s', e.message)
         else:
-            if parameters[controller_role.node_count_parameter_name] > 1:
-                l3ha_param = controller_role.parameter_prefix + 'NeutronL3HA'
-                parameters[l3ha_param] = 'True'
+            number_controllers = parameters[
+                controller_role.node_count_parameter_name]
+            if number_controllers > 1:
+                for role in [controller_role, compute_role]:
+                    l3ha_param = role.parameter_prefix + 'NeutronL3HA'
+                    parameters[l3ha_param] = 'True'
+                    l3agent_param = (role.parameter_prefix +
+                                     'NeutronAllowL3AgentFailover')
+                    parameters[l3agent_param] = 'True'
+            dhcp_agents_per_net = (number_controllers if number_controllers and
+                                   number_controllers > 3 else 3)
+            dhcp_agents_param = (controller_role.parameter_prefix +
+                                 'NeutronDhcpAgentsPerNetwork')
+            parameters[dhcp_agents_param] = dhcp_agents_per_net
+
+            try:
+                ceph_storage_role = self.plan.get_role_by_name('Ceph-Storage')
+            except Exception as e:
+                LOG.warning('Unable to find role: %s', 'Ceph-Storage')
+            else:
+                if parameters[ceph_storage_role.node_count_parameter_name] > 0:
+                    parameters.update({
+                        'CephClusterFSID': six.text_type(uuid.uuid4()),
+                        'CephMonKey': tuskar_utils.create_cephx_key(),
+                        'CephAdminKey': tuskar_utils.create_cephx_key()
+                    })
+
+                    cinder_enable_rbd_param = (controller_role.parameter_prefix
+                                               + 'CinderEnableRbdBackend')
+                    glance_backend_param = (controller_role.parameter_prefix +
+                                            'GlanceBackend')
+                    nova_enable_rbd_param = (compute_role.parameter_prefix +
+                                             'NovaEnableRbdBackend')
+                    cinder_enable_iscsi_param = (
+                        controller_role.parameter_prefix +
+                        'CinderEnableIscsiBackend')
+
+                    parameters.update({
+                        cinder_enable_rbd_param: True,
+                        glance_backend_param: 'rbd',
+                        nova_enable_rbd_param: True,
+                        cinder_enable_iscsi_param: False
+                    })
+
         try:
             self.plan = self.plan.patch(request, self.plan.uuid, parameters)
         except Exception as e:

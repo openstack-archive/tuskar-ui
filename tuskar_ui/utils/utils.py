@@ -11,9 +11,13 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import base64
 import csv
 from itertools import izip
+import os
 import re
+import struct
+import time
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -138,3 +142,11 @@ def parse_csv_file(csv_file):
             raise ValueError(_("Unknown driver: %s.") % driver)
 
     return parsed_data
+
+
+def create_cephx_key():
+    # NOTE(gfidente): Taken from
+    # https://github.com/ceph/ceph-deploy/blob/master/ceph_deploy/new.py#L21
+    key = os.urandom(16)
+    header = struct.pack("<hiih", 1, int(time.time()), 0, len(key))
+    return base64.b64encode(header + key)
