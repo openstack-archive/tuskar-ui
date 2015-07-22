@@ -429,12 +429,14 @@ class Stack(base.APIResourceWrapper):
         if not client:
             return []
 
-        services = client.services.list()
-
-        for service in services:
-            if service.name == 'horizon':
-                break
-        else:
+        try:
+            services = client.services.list()
+            for service in services:
+                if service.name == 'horizon':
+                    break
+            else:
+                return []
+        except Exception:
             return []
 
         admin_urls = [endpoint.adminurl for endpoint
