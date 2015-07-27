@@ -16,12 +16,11 @@ import time
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import memoized
-from ironic_discoverd import client as discoverd_client
+from ironic_inspector_client import client as inspector_client
 from ironicclient import client as ironic_client
 from openstack_dashboard.api import base
 from openstack_dashboard.api import glance
 from openstack_dashboard.api import nova
-import requests
 
 from tuskar_ui.cached_property import cached_property  # noqa
 from tuskar_ui.handle_errors import handle_errors  # noqa
@@ -265,8 +264,12 @@ class Node(base.APIResourceWrapper):
         if not IRONIC_DISCOVERD_URL:
             return
         for uuid in uuids:
-            discoverd_client.introspect(uuid, IRONIC_DISCOVERD_URL,
-                                        request.user.token.id)
+
+            inspector_client.introspect(
+                uuid,
+                base_url=IRONIC_DISCOVERD_URL,
+                auth_token=request.user.token.id)
+
             # NOTE(dtantsur): PXE firmware on virtual machines misbehaves when
             # a lot of nodes start DHCPing simultaneously: it ignores NACK from
             # DHCP server, tries to get the same address, then times out. Work
@@ -357,12 +360,12 @@ class Node(base.APIResourceWrapper):
             if not IRONIC_DISCOVERD_URL:
                 return MAINTENANCE_STATE
             try:
-                status = discoverd_client.get_status(
+                status = inspector_client.get_status(
                     uuid=self.uuid,
                     base_url=IRONIC_DISCOVERD_URL,
                     auth_token=self._request.user.token.id,
                 )
-            except requests.HTTPError as e:
+            except inspector_client.ClientError as e:
                 if getattr(e.response, 'status_code', None) == 404:
                     return MAINTENANCE_STATE
                 raise
