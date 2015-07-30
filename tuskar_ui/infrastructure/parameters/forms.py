@@ -136,7 +136,11 @@ class AdvancedEditServiceConfig(ServiceConfig):
 
     def handle(self, request, data):
         plan = api.tuskar.Plan.get_the_plan(self.request)
-        data = self._sync_common_params_across_roles(plan, data)
+
+        # TODO(bcrochet): Commenting this out.
+        # For advanced config, we should have a whitelist of which params
+        # must be synced across roles.
+        # data = self._sync_common_params_across_roles(plan, data)
 
         try:
             plan.patch(request, plan.uuid, data)
