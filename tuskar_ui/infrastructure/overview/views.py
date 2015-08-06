@@ -13,14 +13,18 @@
 #    under the License.
 
 import json
+import logging
+import urlparse
 
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
 from django import http
+from django import shortcuts
 import django.utils.text
 from django.utils.translation import ugettext_lazy as _
 import heatclient
 import horizon.forms
+from horizon import messages
 
 from tuskar_ui import api
 from tuskar_ui.infrastructure.overview import forms
@@ -28,6 +32,8 @@ from tuskar_ui.infrastructure import views
 
 
 INDEX_URL = 'horizon:infrastructure:overview:index'
+
+LOG = logging.getLogger(__name__)
 
 
 def _steps_message(messages):
@@ -218,6 +224,9 @@ class IndexView(horizon.forms.ModalFormView, views.StackMixin):
                     controller_role.parameter_prefix + 'AdminPassword')
 
                 context['dashboard_urls'] = stack.dashboard_urls
+                no_proxy = [urlparse.urlparse(url).hostname
+                            for url in stack.dashboard_urls]
+                context['no_proxy'] = ",".join(no_proxy)
         else:
             messages = forms.validate_plan(request, plan)
             context['plan_messages'] = messages
@@ -344,3 +353,37 @@ class ScaleOutView(horizon.forms.ModalFormView, views.StackMixin):
             'plan': plan,
         })
         return context
+
+
+def _get_openrc_credentials(request):
+    plan = api.tuskar.Plan.get_the_plan(request)
+    stack = api.heat.Stack.get_by_plan(request, plan)
+    no_proxy = [urlparse.urlparse(url).hostname
+                for url in stack.dashboard_urls]
+    controller_role = plan.get_role_by_name("Controller")
+    credentials = dict(tenant_name='admin',
+                       auth_url=stack.keystone_auth_url,
+                       admin_password=plan.parameter_value(
+                           controller_role.parameter_prefix + 'AdminPassword'),
+                       no_proxy=",".join(no_proxy))
+    return credentials
+
+
+def download_overcloudrc_file(request):
+    template = 'infrastructure/overview/overcloudrc.sh.template'
+    try:
+        context = _get_openrc_credentials(request)
+
+        response = shortcuts.render(request,
+                                    template,
+                                    context,
+                                    content_type="text/plain")
+        response['Content-Disposition'] = ('attachment; '
+                                           'filename="overcloudrc"')
+        response['Content-Length'] = str(len(response.content))
+        return response
+
+    except Exception as e:
+        LOG.exception("Exception in DownloadOvercloudrcForm.")
+        messages.error(request, _('Error Downloading RC File: %s') % e)
+        return shortcuts.redirect(request.build_absolute_uri())
