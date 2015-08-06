@@ -32,4 +32,7 @@ urlpatterns = urls.patterns(
     urls.url(r'^scale-out$',
              views.ScaleOutView.as_view(),
              name='scale_out'),
+    urls.url(r'^download-overcloudrc$',
+             views.download_overcloudrc_file,
+             name='download_overcloudrc'),
 )
