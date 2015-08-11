@@ -128,6 +128,28 @@ class NodeFilterAction(tables.FilterAction):
         return filter(comp, nodes)
 
 
+class DiscoverNode(tables.BatchAction):
+    name = "discover_nodes"
+    action_present = _("Discover")
+    action_past = _("Discovered")
+    data_type_singular = _("Node")
+    data_type_plural = _("Nodes")
+
+    def allowed(self, request, obj=None):
+        if not obj:
+            # this is necessary because table actions use this function
+            # with obj=None
+            return True
+        return obj.power_state not in api.node.POWER_ON_STATES
+
+    def action(self, request, obj_id):
+        if obj_id is None:
+            messages.error(request, _("Select some nodes to discover."))
+            return
+        api.node.Node.discover(request, obj_id)
+        # api.node.Node.set_power_state(request, obj_id, 'on')
+
+
 @memoized.memoized
 def _get_role_link(role_id):
     if role_id:
@@ -242,7 +264,7 @@ class MaintenanceNodesTable(BaseNodesTable):
         columns = ('node', 'cpus', 'memory_mb', 'local_gb', 'power_status',
                    'state')
         table_actions = (NodeFilterAction, ActivateNode, SetPowerStateOn,
-                         SetPowerStateOff, DeleteNode)
+                         SetPowerStateOff, DiscoverNode, DeleteNode)
         row_actions = (ActivateNode, SetPowerStateOn, SetPowerStateOff,
                        DeleteNode)
         template = "horizon/common/_enhanced_data_table.html"
