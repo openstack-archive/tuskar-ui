@@ -1,0 +1,1476 @@
+# Translations template for PROJECT.
+# Copyright (C) 2015 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2015-08-13 15:58+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.0\n"
+
+#: tuskar_ui/forms.py:86
+msgid "Enter a valid MAC address."
+msgstr ""
+
+#: tuskar_ui/forms.py:108
+#, python-format
+msgid "%r is not a valid MAC address."
+msgstr ""
+
+#: tuskar_ui/forms.py:123
+msgid "Enter valid IPv4 network address."
+msgstr ""
+
+#: tuskar_ui/forms.py:173
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_live.html:34
+msgid "Reveal"
+msgstr ""
+
+#: tuskar_ui/api/flavor.py:92 tuskar_ui/api/flavor.py:97
+msgid "Unable to load flavor."
+msgstr ""
+
+#: tuskar_ui/api/flavor.py:104
+msgid "Unable to retrieve flavor list."
+msgstr ""
+
+#: tuskar_ui/api/flavor.py:110
+msgid "Unable to retrieve existing servers list."
+msgstr ""
+
+#: tuskar_ui/api/heat.py:162
+msgid "Unable to retrieve heat stacks"
+msgstr ""
+
+#: tuskar_ui/api/heat.py:177 tuskar_ui/api/heat.py:189
+msgid "Unable to retrieve stack"
+msgstr ""
+
+#: tuskar_ui/api/heat.py:212
+msgid "Unable to delete Heat stack"
+msgstr ""
+
+#: tuskar_ui/api/node.py:70 tuskar_ui/infrastructure/images/views.py:107
+msgid "Unable to retrieve image."
+msgstr ""
+
+#: tuskar_ui/api/node.py:162 tuskar_ui/api/node.py:183
+msgid "Unable to retrieve node"
+msgstr ""
+
+#: tuskar_ui/api/node.py:206
+msgid "Unable to retrieve nodes"
+msgstr ""
+
+#: tuskar_ui/api/node.py:436 tuskar_ui/infrastructure/nodes/tables.py:154
+#: tuskar_ui/infrastructure/nodes/tables.py:215
+#: tuskar_ui/infrastructure/nodes/tabs.py:240
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:39
+msgid "Provisioned"
+msgstr ""
+
+#: tuskar_ui/api/node.py:437 tuskar_ui/infrastructure/nodes/tables.py:157
+#: tuskar_ui/infrastructure/nodes/tables.py:227
+#: tuskar_ui/infrastructure/nodes/tabs.py:272
+msgid "Free"
+msgstr ""
+
+#: tuskar_ui/api/tuskar.py:170
+msgid "Unable to retrieve plan"
+msgstr ""
+
+#: tuskar_ui/api/tuskar.py:356
+msgid "Unable to retrieve overcloud roles"
+msgstr ""
+
+#: tuskar_ui/api/tuskar.py:372 tuskar_ui/api/tuskar.py:397
+#: tuskar_ui/api/tuskar.py:427
+msgid "Unable to retrieve overcloud role"
+msgstr ""
+
+#: tuskar_ui/infrastructure/dashboard.py:19
+msgid "Infrastructure"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/panel.py:23
+#: tuskar_ui/infrastructure/flavors/tables.py:68
+msgid "Flavors"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:27
+#: tuskar_ui/infrastructure/flavors/views.py:37
+msgid "New Flavor"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:33
+msgid "Create"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:34
+msgid "Create Suggested Flavors"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:50
+#, python-format
+msgid "Unable to create flavor for node %r"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:57
+msgid "Edit before creating"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:67
+#: tuskar_ui/infrastructure/flavors/workflows.py:42
+#: tuskar_ui/infrastructure/roles/tables.py:43
+#: tuskar_ui/infrastructure/roles/workflows.py:42
+msgid "Flavor"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:89
+#: tuskar_ui/infrastructure/flavors/tables.py:141
+#: tuskar_ui/infrastructure/flavors/workflows.py:28
+#: tuskar_ui/infrastructure/nodes/forms.py:184
+msgid "Architecture"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:90
+#: tuskar_ui/infrastructure/flavors/tables.py:142
+#: tuskar_ui/infrastructure/flavors/workflows.py:36
+#: tuskar_ui/infrastructure/nodes/forms.py:191
+msgid "CPUs"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:92
+#: tuskar_ui/infrastructure/flavors/tables.py:144
+#: tuskar_ui/infrastructure/nodes/forms.py:198
+msgid "Memory"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:95
+#: tuskar_ui/infrastructure/flavors/tables.py:147
+msgid "Disk"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:100
+msgid "Available"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:112
+msgid "Role Name"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:120
+msgid "Not Deployed"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:126
+msgid "Instances Count"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:132
+msgid "Overcloud Roles"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/tables.py:152
+msgid "Suggested"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/workflows.py:37
+msgid "Disk GB"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/workflows.py:43
+msgid ""
+"Flavors define the sizes for RAM, disk, number of cores, and other "
+"resources. Flavors should be associated with roles when planning a "
+"deployment."
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/workflows.py:59
+#: tuskar_ui/infrastructure/flavors/workflows.py:60
+msgid "Create Flavor"
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/workflows.py:61
+#, python-format
+msgid "Created new flavor \"%s\"."
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/workflows.py:62
+#, python-format
+msgid "Unable to create flavor \"%s\"."
+msgstr ""
+
+#: tuskar_ui/infrastructure/flavors/workflows.py:77
+msgid "Unable to create flavor"
+msgstr ""
+
+#: tuskar_ui/infrastructure/history/panel.py:22
+#: tuskar_ui/infrastructure/history/tables.py:33
+msgid "Deployment Log"
+msgstr ""
+
+#: tuskar_ui/infrastructure/history/tables.py:22
+msgid "Timestamp"
+msgstr ""
+
+#: tuskar_ui/infrastructure/history/tables.py:25
+msgid "Resource Name"
+msgstr ""
+
+#: tuskar_ui/infrastructure/history/tables.py:27
+#: tuskar_ui/infrastructure/nodes/tables.py:180
+msgid "Status"
+msgstr ""
+
+#: tuskar_ui/infrastructure/history/tables.py:29
+msgid "Reason"
+msgstr ""
+
+#: tuskar_ui/infrastructure/images/panel.py:22
+#: tuskar_ui/infrastructure/images/tables.py:71
+msgid "Provisioning Images"
+msgstr ""
+
+#: tuskar_ui/infrastructure/images/tables.py:44
+msgid "Image Name ="
+msgstr ""
+
+#: tuskar_ui/infrastructure/images/tables.py:45
+msgid "Status ="
+msgstr ""
+
+#: tuskar_ui/infrastructure/images/tables.py:46
+msgid "Format ="
+msgstr ""
+
+#: tuskar_ui/infrastructure/images/tables.py:47
+msgid "Min. Size (MB)"
+msgstr ""
+
+#: tuskar_ui/infrastructure/images/tables.py:48
+msgid "Max. Size (MB)"
+msgstr ""
+
+#: tuskar_ui/infrastructure/images/tables.py:61
+msgid "Image Name"
+msgstr ""
+
+#: tuskar_ui/infrastructure/images/tables.py:63
+msgid "Format"
+msgstr ""
+
+#: tuskar_ui/infrastructure/images/tables.py:66
+#: tuskar_ui/infrastructure/nodes/tables.py:170
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:69
+msgid "Deployment Role"
+msgstr ""
+
+#: tuskar_ui/infrastructure/images/views.py:55
+msgid "Unable to retrieve image list."
+msgstr ""
+
+#: tuskar_ui/infrastructure/images/views.py:92
+msgid "Create Image"
+msgstr ""
+
+#: tuskar_ui/infrastructure/images/views.py:100
+msgid "Update Image"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:29
+#: tuskar_ui/infrastructure/nodes/forms.py:179
+#: tuskar_ui/infrastructure/nodes/forms.py:188
+#: tuskar_ui/infrastructure/nodes/forms.py:195
+#: tuskar_ui/infrastructure/nodes/forms.py:202
+#: tuskar_ui/infrastructure/nodes/forms.py:209
+msgid "unspecified"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:30
+msgid "amd64"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:31
+msgid "x86"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:32
+msgid "x86_64"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:35
+#: tuskar_ui/infrastructure/nodes/forms.py:126
+#: tuskar_ui/infrastructure/nodes/forms.py:135
+#: tuskar_ui/infrastructure/nodes/forms.py:144
+msgid "IPMI Driver"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:36
+#: tuskar_ui/infrastructure/nodes/forms.py:153
+#: tuskar_ui/infrastructure/nodes/forms.py:162
+#: tuskar_ui/infrastructure/nodes/forms.py:171
+msgid "PXE + SSH"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:80
+msgid "Unable to register node."
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:90
+msgid "Can't set maintenance mode on node {0}."
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:97
+msgid "Can't start discovery on node {0}."
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:111
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:12
+msgid "Driver"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:121
+msgid "IPMI Address"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:130
+msgid "IPMI User"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:139
+msgid "IPMI Password"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:148
+msgid "SSH Address"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:157
+msgid "SSH User"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:166
+msgid "SSH Key Contents"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:176
+msgid "NIC MAC Addresses"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:205
+msgid "Local Disk"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:212
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:90
+msgid "Kernel"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:218
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:92
+msgid "Ramdisk"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:230
+msgid "Undefined node"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:245
+msgid "This field is required"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:280
+#, python-format
+msgid "Duplicate MAC addresses submitted: %s."
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/forms.py:285
+msgid "Please provide node data for all nodes."
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/panel.py:22
+#: tuskar_ui/infrastructure/nodes/tables.py:29
+#: tuskar_ui/infrastructure/nodes/tables.py:52
+#: tuskar_ui/infrastructure/nodes/tables.py:75
+#: tuskar_ui/infrastructure/nodes/tables.py:96
+#: tuskar_ui/infrastructure/nodes/tables.py:184
+#: tuskar_ui/infrastructure/nodes/tabs.py:162
+#: tuskar_ui/infrastructure/roles/tables.py:62
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:11
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:39
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:109
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/index.html:4
+msgid "Nodes"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:26
+msgid "Delete"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:27
+msgid "Deleting"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:28
+#: tuskar_ui/infrastructure/nodes/tables.py:51
+#: tuskar_ui/infrastructure/nodes/tables.py:74
+#: tuskar_ui/infrastructure/nodes/tables.py:95
+msgid "Node"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:42
+msgid "Select some nodes to delete."
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:49
+msgid "Activate"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:50
+msgid "Activated"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:64
+msgid "Select some nodes to activate."
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:72
+msgid "Power On"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:73
+msgid "Powering On"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:86
+msgid "Select some nodes to power on."
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:93
+msgid "Power Off"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:94
+msgid "Powering Off"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:110
+msgid "Select some nodes to power off."
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:152
+msgid "Discovering"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:153
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:109
+msgid "Discovered"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:155
+msgid "Provisioning Failed"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:156
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:75
+msgid "Provisioning"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:167
+msgid "Node Name"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:172
+msgid "CPU (cores)"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:174
+msgid "Memory (MB)"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:176
+msgid "Disk (GB)"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:178
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:26
+msgid "Power Status"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:201
+#: tuskar_ui/infrastructure/nodes/tabs.py:223
+msgid "All"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tables.py:240
+#: tuskar_ui/infrastructure/nodes/tabs.py:291
+msgid "Maintenance"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tabs.py:36
+#: tuskar_ui/infrastructure/nodes/tabs.py:307
+#: tuskar_ui/infrastructure/overview/panel.py:22
+msgid "Overview"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tabs.py:132
+#: tuskar_ui/infrastructure/nodes/tabs.py:335
+#: tuskar_ui/infrastructure/roles/views.py:113
+msgid "System Load"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tabs.py:135
+#: tuskar_ui/infrastructure/nodes/tabs.py:338
+#: tuskar_ui/infrastructure/roles/views.py:116
+msgid "CPU Utilization"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tabs.py:139
+#: tuskar_ui/infrastructure/nodes/tabs.py:342
+#: tuskar_ui/infrastructure/roles/views.py:120
+msgid "Swap Utilization"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tabs.py:346 tuskar_ui/utils/metering.py:66
+msgid "Current"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tabs.py:349
+msgid "Network IO"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tabs.py:352
+msgid "Disk IO"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tabs.py:355 tuskar_ui/utils/metering.py:65
+msgid "Temperature"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tabs.py:359 tuskar_ui/utils/metering.py:63
+msgid "Fan Speed"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/tabs.py:362 tuskar_ui/utils/metering.py:64
+msgid "Voltage"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/views.py:41
+msgid "Unable to retrieve kernel image list."
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/views.py:51
+msgid "Unable to retrieve ramdisk image list."
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/views.py:64
+#: tuskar_ui/infrastructure/nodes/views.py:86
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_register.html:8
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/register.html:3
+msgid "Register Nodes"
+msgstr ""
+
+#: tuskar_ui/infrastructure/nodes/views.py:149
+#, python-format
+msgid "Node: %(uuid)s"
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:55
+#: tuskar_ui/infrastructure/overview/forms.py:62
+msgid "Configure Roles."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:76
+#: tuskar_ui/infrastructure/overview/forms.py:82
+msgid "Global Service Configuration."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:98
+#: tuskar_ui/infrastructure/overview/forms.py:104
+msgid "Define Flavors."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:111
+#: tuskar_ui/infrastructure/overview/forms.py:125
+msgid "Register Nodes."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:117
+msgid "Not enough registered nodes for this plan. You need {0} more."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:136
+msgid "Role {0} doesn't use default flavor."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:144
+msgid "Assign roles."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:151
+msgid "Controller Role Needed."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:160
+#: tuskar_ui/infrastructure/overview/forms.py:168
+msgid "1 or 3 Controllers Needed."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:177
+msgid "Compute Role Needed."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:186
+#: tuskar_ui/infrastructure/overview/forms.py:194
+msgid "1 Compute Needed."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:289
+msgid "Unable to update the plan."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:314
+#: tuskar_ui/infrastructure/overview/forms.py:373
+msgid "Unable to deploy overcloud. Reason: {0}"
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:322
+#: tuskar_ui/infrastructure/overview/forms.py:377
+msgid "Deployment in progress."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:329
+msgid "Enable Network Isolation"
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:338
+msgid "Unable to deploy overcloud."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:392
+msgid "Unable to undeploy overcloud."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:395
+msgid "Undeployment in progress."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:401
+msgid "Admin Email"
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:403
+msgid "Public Host"
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:405
+msgid "Region"
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:480
+msgid "Unable to initialize Overcloud."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/forms.py:483
+msgid "Overcloud has been initialized."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/views.py:42
+msgid "{0} of {1} Steps Completed"
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/views.py:182
+msgid "Last failed events"
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/views.py:185
+msgid "Last event"
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/views.py:254
+msgid "Error saving the plan."
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/views.py:279
+msgid "Deploy"
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/views.py:297
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_base.html:19
+msgid "Undeploy"
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/views.py:317
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_initialize.html:19
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/post_deploy_init.html:3
+msgid "Initialize"
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/views.py:338
+msgid "Deploy Changes"
+msgstr ""
+
+#: tuskar_ui/infrastructure/overview/views.py:389
+#, python-format
+msgid "Error Downloading RC File: %s"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:34
+msgid "Baremetal (kvm)"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:35
+msgid "Virtualized (qemu)"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:39
+msgid "Baremetal (em2)"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:40
+msgid "Virtualized (eth0)"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:44
+msgid "tgtadm"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:45
+msgid "lioadm"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:150
+#: tuskar_ui/infrastructure/parameters/forms.py:279
+msgid "Unable to update the service configuration."
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:156
+#: tuskar_ui/infrastructure/parameters/forms.py:285
+msgid "Service configuration updated."
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:172
+msgid "Deployment Type"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:175
+msgid ""
+"If you are testing OpenStack in a virtual machine, you must configure "
+"Compute to use qemu without KVM and hardware virtualization."
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:179
+msgid "Public Interface"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:182
+msgid ""
+"What interface to bridge onto br-ex for network nodes. If you are testing"
+" OpenStack in a virtual machineyou must configure interface to eth0."
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:186
+msgid "SNMP Password"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:188
+msgid ""
+"The user password for SNMPd with readonly rights running on all Overcloud"
+" nodes"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:192
+msgid "Cloud name"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:195
+msgid "The DNS name of this cloud. E.g. ci-overcloud.tripleo.org"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:198
+msgid "Cinder ISCSI helper"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:201
+msgid "The iSCSI helper to use with cinder."
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:203
+msgid "NTP server"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:206
+msgid "Address of the NTP server. If blank, public NTP servers will be used."
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:209
+msgid "Extra Config"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/forms.py:222
+#, python-format
+msgid "%(err_msg)s"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/panel.py:22
+#: tuskar_ui/infrastructure/roles/workflows.py:105
+msgid "Service Configuration"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/views.py:28
+#: tuskar_ui/infrastructure/parameters/views.py:98
+msgid "Save Configuration"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/views.py:76
+msgid "Advanced Configuration"
+msgstr ""
+
+#: tuskar_ui/infrastructure/parameters/views.py:83
+msgid "Simplified Configuration"
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/panel.py:22
+#: tuskar_ui/infrastructure/roles/tables.py:52
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/role_nodes_edit.html:5
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/role_nodes_status.html:5
+msgid "Deployment Roles"
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/tables.py:24
+msgid "Edit Role"
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/tables.py:41
+msgid "Role"
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/tables.py:45
+#: tuskar_ui/infrastructure/roles/workflows.py:45
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:82
+msgid "Image"
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/views.py:54
+#: tuskar_ui/infrastructure/roles/views.py:58
+#: tuskar_ui/infrastructure/roles/workflows.py:74
+#: tuskar_ui/infrastructure/roles/workflows.py:82
+msgid "Unknown"
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/workflows.py:32
+msgid "Name"
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/workflows.py:37
+msgid "Description"
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/workflows.py:48
+msgid "Number of Nodes"
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/workflows.py:54
+msgid "Overall Settings"
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/workflows.py:56
+msgid "Edit the role details."
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/workflows.py:66
+msgid "{0} nodes available"
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/workflows.py:87
+msgid "There are only {0} nodes available for the selected flavor."
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/workflows.py:107
+msgid "Edit the role's services configuration."
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/workflows.py:138
+msgid "Save"
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/workflows.py:139
+#, python-format
+msgid "Modified role \"%s\"."
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/workflows.py:140
+#, python-format
+msgid "Unable to modify role \"%s\"."
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/workflows.py:152
+#, python-format
+msgid "Edit Role \"%s\""
+msgstr ""
+
+#: tuskar_ui/infrastructure/roles/workflows.py:169
+msgid "Unable to retrieve role details."
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/formset_table/_table.html:35
+msgid "Add a row"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/horizon/common/_data_table_table_actions.html:51
+msgid "More Actions"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/horizon/common/_data_table_table_actions.html:53
+msgid "Actions"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_performance_chart_box.html:16
+msgid "Last hour"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_performance_chart_box.html:17
+msgid "Last 6 hours"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_performance_chart_box.html:18
+msgid "Last 12 hours"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_performance_chart_box.html:19
+msgid "Last day"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_performance_chart_box.html:20
+msgid "Last week"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_performance_chart_box.html:21
+msgid "Month to date"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_performance_chart_box.html:22
+msgid "Last 15 days"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_performance_chart_box.html:23
+msgid "Last 30 days"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_performance_chart_box.html:24
+msgid "Last year"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_performance_chart_box.html:25
+msgid "Other"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_performance_chart_box.html:31
+msgid "From"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_performance_chart_box.html:41
+msgid "To"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_performance_chart_box.html:67
+msgid "Metering service is not enabled."
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_top_5_chart.html:5
+msgid "Top 5 Nodes"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/_top_5_chart.html:28
+msgid "No data available."
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_auto_discover_csv.html:9
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_upload.html:6
+msgid "Upload Nodes"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_auto_discover_csv.html:19
+msgid "Upload"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_auto_discover_csv.html:22
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_upload.html:7
+msgid "Cancel"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:8
+msgid "Inventory"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:10
+msgid "Node UUID"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:40
+msgid "Network Cards"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:47
+#, python-format
+msgid ""
+"\n"
+"            %(addresses_length)s interface\n"
+"            "
+msgid_plural ""
+"\n"
+"            %(addresses_length)s interfaces\n"
+"          "
+msgstr[0] ""
+msgstr[1] ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:58
+msgid "Registered HW"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:61
+msgid "CPU"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:62
+msgid "RAM (MB)"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:63
+msgid "HDD (GB)"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:67
+msgid "Deployment"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:84
+msgid "Instance UUID"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:88
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_nodes_formset_form.html:31
+msgid "Deployment Images"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_detail_overview.html:98
+msgid "Performance & Metrics"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_nodes_formset_form.html:8
+msgid "Node Detail"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_nodes_formset_form.html:10
+msgid "Power Management"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_nodes_formset_form.html:20
+msgid "Networking"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_nodes_formset_form.html:24
+msgid "Hardware"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_nodes_formset_form.html:26
+msgid "'units'"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_nodes_formset_form.html:27
+msgid "'MB'"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_nodes_formset_form.html:28
+msgid "'GB'"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:6
+msgid "Hardware Inventory"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:15
+msgid "CPU cores"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:16
+msgid "GB of memory"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:17
+msgid "GB of storage"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:21
+msgid "Nodes Status"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:32
+msgid "Provisioned nodes"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:49
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:66
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:83
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:121
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:138
+#, python-format
+msgid ""
+"\n"
+"          %(counter)s node\n"
+"          "
+msgid_plural ""
+"\n"
+"          %(counter)s nodes\n"
+"          "
+msgstr[0] ""
+msgstr[1] ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:55
+msgid ""
+"\n"
+"        is being provisioned\n"
+"        "
+msgid_plural ""
+"\n"
+"        are being provisioned\n"
+"        "
+msgstr[0] ""
+msgstr[1] ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:72
+msgid ""
+"\n"
+"        is being deleted\n"
+"        "
+msgid_plural ""
+"\n"
+"        are being deleted\n"
+"        "
+msgstr[0] ""
+msgstr[1] ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:85
+msgid "failed"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:101
+msgid "Nodes Discovery"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:111
+msgid "waiting for activation"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:127
+msgid ""
+"\n"
+"        is being discovered\n"
+"        "
+msgid_plural ""
+"\n"
+"        are being discovered\n"
+"        "
+msgstr[0] ""
+msgstr[1] ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/_overview.html:140
+msgid "discovery failed"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/detail.html:3
+msgid "Node Details"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/index.html:7
+msgid "'Nodes'"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/nodes/register.html:6
+msgid "\"Register Nodes\""
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/_deploy_confirmation.html:9
+msgid "Deployment Confirmation"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/_deploy_confirmation.html:13
+msgid "You are about deploy your overcloud."
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/_deploy_confirmation.html:36
+msgid "This operation cannot be undone."
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/_deploy_confirmation.html:37
+msgid "Are you sure you want to deploy changes?"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/_post_deploy_init.html:9
+msgid "Initialize Overcloud"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/_post_deploy_init.html:18
+msgid ""
+"Your OpenStack cloud nodes are deployed. They need to be initialized "
+"before your cloud will be live."
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/_scale_out.html:10
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/scale_out.html:3
+msgid "Scale-out Deployment"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/_undeploy_confirmation.html:9
+msgid "Undeployment Confirmation"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/_undeploy_confirmation.html:13
+msgid "You are about undeploy your overcloud"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/_undeploy_confirmation.html:15
+msgid "This operation cannot be undone. Are you sure you want to do that?"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deploy_confirmation.html:3
+msgid "Deploy overcloud"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deploy_confirmation.html:6
+msgid "\"Deploy overcloud\""
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_failed.html:10
+msgid "Undeploying failed"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_failed.html:12
+msgid "Deployment failed"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_failed.html:14
+msgid "Failure"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_initialize.html:8
+msgid "Initialization Needed"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_initialize.html:11
+msgid ""
+"Your OpenStack cloud is successfully deployed. Before using the cloud you"
+" must now initialize it."
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_live.html:11
+msgid "Deployment is live"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_live.html:16
+msgid "Access Information"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_live.html:21
+msgid "Horizon URL:"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_live.html:26
+msgid "User name:"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_live.html:30
+msgid "Password"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_live.html:55
+msgid "Scale-out"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_live.html:66
+msgid "Overcloudrc Information"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_live.html:66
+msgid "Show"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_live.html:101
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_live.html:107
+msgid "Download"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_plan.html:12
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_plan.html:38
+msgid "Deployment Checklist"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_plan.html:30
+msgid "Verify and Deploy"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_plan.html:37
+msgid "Validating the Plan..."
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_progress.html:11
+msgid "Undeploying..."
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_progress.html:13
+msgid "Deploying..."
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_progress.html:15
+msgid "Updating..."
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_progress.html:29
+msgid "Complete"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/deployment_progress.html:43
+msgid "Stop"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/index.html:5
+msgid "My OpenStack Deployment"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/index.html:8
+msgid "'My OpenStack Deployment'"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/post_deploy_init.html:6
+msgid "\"Initialize Overcloud\""
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/role_nodes_edit.html:36
+msgid "Save changes"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/scale_out.html:6
+msgid "\"Scale-out Deployment\""
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/undeploy_confirmation.html:3
+msgid "Undeploy overcloud"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templates/infrastructure/overview/undeploy_confirmation.html:6
+msgid "\"Undeploy overcloud\""
+msgstr ""
+
+#: tuskar_ui/infrastructure/templatetags/icon_helpers.py:21
+#: tuskar_ui/infrastructure/templatetags/icon_helpers.py:30
+msgid "powered on"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templatetags/icon_helpers.py:22
+msgid "waiting"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templatetags/icon_helpers.py:23
+msgid "deploying"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templatetags/icon_helpers.py:24
+msgid "deployment failed"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templatetags/icon_helpers.py:25
+msgid "deployment complete"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templatetags/icon_helpers.py:26
+msgid "deleting"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templatetags/icon_helpers.py:27
+msgid "deleted"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templatetags/icon_helpers.py:28
+msgid "error"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templatetags/icon_helpers.py:29
+msgid "rebuilding"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templatetags/icon_helpers.py:31
+msgid "powered off"
+msgstr ""
+
+#: tuskar_ui/infrastructure/templatetags/icon_helpers.py:32
+msgid "rebooting"
+msgstr ""
+
+#: tuskar_ui/test/settings.py:71
+msgid "Password must be between 8 and 18 characters."
+msgstr ""
+
+#: tuskar_ui/test/test_forms.py:33
+msgid "This field is required."
+msgstr ""
+
+#: tuskar_ui/test/test_forms.py:41
+msgid "'de.ad:be.ef:ca.fe' is not a valid MAC address."
+msgstr ""
+
+#: tuskar_ui/utils/metering.py:56
+msgid "CPU load 1 min average"
+msgstr ""
+
+#: tuskar_ui/utils/metering.py:57
+msgid "CPU utilization"
+msgstr ""
+
+#: tuskar_ui/utils/metering.py:58
+msgid "IO raw sent"
+msgstr ""
+
+#: tuskar_ui/utils/metering.py:59
+msgid "IO raw received"
+msgstr ""
+
+#: tuskar_ui/utils/metering.py:60
+msgid "IP out requests"
+msgstr ""
+
+#: tuskar_ui/utils/metering.py:61
+msgid "IP in requests"
+msgstr ""
+
+#: tuskar_ui/utils/metering.py:62
+msgid "Swap utilization"
+msgstr ""
+
+#: tuskar_ui/utils/metering.py:108
+msgid "Unable to retrieve statistics."
+msgstr ""
+
+#: tuskar_ui/utils/metering.py:145
+#, python-format
+msgid "Average %(average)s %(unit)s<br> From: %(first_date)s, to: %(last_date)s"
+msgstr ""
+
+#: tuskar_ui/utils/tests.py:154 tuskar_ui/utils/utils.py:119
+msgid "Unable to parse the CSV file."
+msgstr ""
+
+#: tuskar_ui/utils/tests.py:165 tuskar_ui/utils/utils.py:142
+#, python-format
+msgid "Unknown driver: %s."
+msgstr ""
+

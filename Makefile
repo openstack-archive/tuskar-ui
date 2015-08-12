@@ -22,3 +22,7 @@ clean:
 	$(PYTHON) setup.py clean
 	rm -rf build/ MANIFEST
 	find . -name '*.pyc' -delete
+
+extractmsg:
+	pybabel extract -F babel.cfg -o tuskar_ui/infrastructure/locale/django.pot .
+
