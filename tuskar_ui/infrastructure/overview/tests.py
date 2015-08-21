@@ -278,6 +278,7 @@ class OverviewTests(test.BaseAdminViewTests):
                 'path': '/',
                 'admin_path': '/admin'},
              'cinder': {'password': None},
+             'cinderv2': {'password': None},
              'glance': {'password': None},
              'swift': {'password': None,
                        'path': '/v1/AUTH_%(tenant_id)s',

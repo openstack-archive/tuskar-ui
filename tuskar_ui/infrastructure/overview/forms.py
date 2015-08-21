@@ -412,6 +412,9 @@ class PostDeployInit(horizon.forms.SelfHandlingForm):
             "cinder": {
                 "password": plan.parameter_value(
                     controller_role.parameter_prefix + 'CinderPassword')},
+            "cinderv2": {
+                "password": plan.parameter_value(
+                    controller_role.parameter_prefix + 'CinderPassword')},
             "ec2": {
                 "password": plan.parameter_value(
                     controller_role.parameter_prefix + 'GlancePassword')},
