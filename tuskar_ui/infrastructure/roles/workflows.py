@@ -78,7 +78,7 @@ class UpdateRoleInfoAction(workflows.Action):
         images = [image for image in images
                   if tuskar_utils.check_image_type(image,
                                                    'overcloud provisioning')]
-        choices = [(i.id, i.name) for i in images]
+        choices = [(i.name, i.name) for i in images]
         return [('', _('Unknown'))] + choices
 
     def clean_nodes(self):
@@ -170,7 +170,7 @@ class UpdateRole(workflows.Workflow):
                 redirect=reverse_lazy(self.index_url))
 
         parameters = data['parameters']
-        parameters[role.image_id_parameter_name] = data['image']
+        parameters[role.image_parameter_name] = data['image']
         parameters[role.node_count_parameter_name] = data['nodes']
         if utils.matching_deployment_mode():
             parameters[role.flavor_parameter_name] = data['flavor']

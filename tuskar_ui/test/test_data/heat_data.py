@@ -202,8 +202,8 @@ def data(TEST):
     TEST.glanceclient_images = test_data_utils.TestDataContainer()
     image_1 = images.Image(
         images.ImageManager(None),
-        {'id': '2',
-         'name': 'overcloud-control',
+        {'id': '1',
+         'name': 'overcloud-full',
          'is_public': True,
          'protected': False,
          'properties': {
@@ -211,66 +211,38 @@ def data(TEST):
          }})
     image_2 = images.Image(
         images.ImageManager(None),
-        {'id': '1',
-         'name': 'overcloud-compute',
-         'is_public': True,
-         'protected': False,
-         'properties': {
-             'type': 'overcloud provisioning'
-         }})
-    image_3 = images.Image(
-        images.ImageManager(None),
-        {'id': '3',
-         'name': 'Object Storage Image',
-         'is_public': True,
-         'protected': False,
-         'properties': {
-             'type': 'overcloud provisioning'
-         }})
-    image_4 = images.Image(
-        images.ImageManager(None),
-        {'id': '4',
-         'name': 'Block Storage Image',
-         'is_public': True,
-         'protected': False,
-         'properties': {
-             'type': 'overcloud provisioning'
-         }})
-    image_5 = images.Image(
-        images.ImageManager(None),
-        {'id': '5',
+        {'id': '2',
          'name': 'Discovery Ramdisk',
          'is_public': True,
          'protected': False,
          'properties': {
              'type': 'discovery ramdisk'
          }})
-    image_6 = images.Image(
+    image_3 = images.Image(
         images.ImageManager(None),
-        {'id': '6',
+        {'id': '3',
          'name': 'Discovery Kernel',
          'is_public': True,
          'protected': False,
          'properties': {
              'type': 'discovery kernel'
          }})
-    image_7 = images.Image(
+    image_4 = images.Image(
         images.ImageManager(None),
-        {'id': '7',
+        {'id': '4',
          'name': 'Baremetal Deployment Kernel',
          'is_public': True,
          'protected': False,
          'properties': {
              'type': 'deploy kernel'
          }})
-    image_8 = images.Image(
+    image_5 = images.Image(
         images.ImageManager(None),
-        {'id': '8',
+        {'id': '5',
          'name': 'Baremetal Deployment Ramdisk',
          'is_public': True,
          'protected': False,
          'properties': {
              'type': 'deploy ramdisk'
          }})
-    TEST.glanceclient_images.add(image_1, image_2, image_3, image_4,
-                                 image_5, image_6, image_7, image_8)
+    TEST.glanceclient_images.add(image_1, image_2, image_3, image_4, image_5)

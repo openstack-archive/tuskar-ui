@@ -29,7 +29,6 @@ def data(TEST):
         'template': '',
         'created_at': '2014-05-27T21:11:09Z',
         'modified_at': '2014-05-30T21:11:09Z',
-        'uuid': '1234567890',
         'roles': [
             {
                 'uuid': 'role-1',
@@ -108,7 +107,7 @@ def data(TEST):
             'description': 'Controller image ID',
             'hidden': False,
             'default': '',
-            'value': '2',
+            'value': 'overcloud-full',
             'parameter_type': 'string',
             'constraints': [],
         }, {
@@ -117,7 +116,7 @@ def data(TEST):
             'description': 'Compute image ID',
             'hidden': False,
             'default': '',
-            'value': '1',
+            'value': 'overcloud-full',
             'parameter_type': 'string',
             'constraints': [],
         }, {
@@ -126,7 +125,7 @@ def data(TEST):
             'description': 'Block storage image ID',
             'hidden': False,
             'default': '',
-            'value': '4',
+            'value': 'overcloud-full',
             'parameter_type': 'string',
             'constraints': [],
         }, {

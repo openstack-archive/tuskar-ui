@@ -143,7 +143,7 @@ class UpdateView(workflows.WorkflowView, views.StackMixin, views.RoleMixin):
         role_flavor = '' if role_flavor is None else role_flavor.name
 
         role_image = role.image(plan)
-        role_image = '' if role_image is None else role_image.id
+        role_image = '' if role_image is None else role_image.name
 
         free_nodes = len(api.node.Node.list(self.request, associated=False,
                                             maintenance=False))

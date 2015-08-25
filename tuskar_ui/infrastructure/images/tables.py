@@ -61,9 +61,9 @@ class ImagesTable(tables.DataTable):
                          verbose_name=_("Image Name"))
     disk_format = tables.Column('disk_format',
                                 verbose_name=_("Format"))
-    role = tables.Column(lambda image:
-                         image.role.name if image.role else '-',
-                         verbose_name=_("Deployment Role"))
+    roles = tables.Column(lambda image:
+                          ', '.join([r.name for r in image.roles]),
+                          verbose_name=_("Deployment Roles"))
 
     class Meta(object):
         name = "images"
