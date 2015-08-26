@@ -31,13 +31,8 @@ LOG = logging.getLogger(__name__)
 
 
 VIRT_TYPE_CHOICES = [
-    ('kvm', _("Baremetal (kvm)")),
     ('qemu', _("Virtualized (qemu)")),
-]
-
-NEUTRON_PUBLIC_INTERFACE_CHOICES = [
-    ('em2', _("Baremetal (em2)")),
-    ('eth0', _("Virtualized (eth0)")),
+    ('kvm', _("Baremetal (kvm)")),
 ]
 
 CINDER_ISCSI_HELPER_CHOICES = [
@@ -175,10 +170,10 @@ class SimpleEditServiceConfig(horizon.forms.SelfHandlingForm):
         help_text=_('If you are testing OpenStack in a virtual machine, '
                     'you must configure Compute to use qemu without KVM '
                     'and hardware virtualization.'))
-    neutron_public_interface = django.forms.ChoiceField(
+    neutron_public_interface = django.forms.CharField(
         label=_("Public Interface"),
-        choices=NEUTRON_PUBLIC_INTERFACE_CHOICES,
         required=True,
+        initial='eth0',
         help_text=_('What interface to bridge onto br-ex for network nodes. '
                     'If you are testing OpenStack in a virtual machine'
                     'you must configure interface to eth0.'))
