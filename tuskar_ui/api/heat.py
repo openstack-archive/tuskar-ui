@@ -141,6 +141,7 @@ class Stack(base.APIResourceWrapper):
             'template': template,
             'environment': environment,
             'files': files,
+            'timeout_mins': 240,
         }
         password = getattr(settings, 'UNDERCLOUD_ADMIN_PASSWORD', None)
         stack = heat.stack_create(request, password, **fields)
