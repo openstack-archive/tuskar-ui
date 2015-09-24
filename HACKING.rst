@@ -33,7 +33,7 @@ Using ``tox``:
 
     This is the easiest way to run tests. When run, tox installs dependencies,
     prepares the virtual python environment, then runs test commands. The gate
-    tests in gerrit usually also use tox to run tests. For avaliable tox
+    tests in gerrit usually also use tox to run tests. For available tox
     environments, see ``tox.ini``.
 
 By running ``run_tests.sh``:
