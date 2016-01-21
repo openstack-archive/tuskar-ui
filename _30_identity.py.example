@@ -1,2 +1,0 @@
-DASHBOARD = 'identity'
-DISABLED = True
