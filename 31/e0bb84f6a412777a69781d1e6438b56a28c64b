@@ -1,0 +1,10 @@
+Code-Review+1: Derek Higgins <derekh@redhat.com>
+Code-Review+2: Timur Sufiev <tsufiev@mirantis.com>
+Code-Review+2: Matthias Runge <mrunge@redhat.com>
+Workflow+1: Matthias Runge <mrunge@redhat.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 22 Jan 2016 13:30:29 +0000
+Reviewed-on: https://review.openstack.org/270854
+Project: openstack/tuskar-ui
+Branch: refs/heads/master
